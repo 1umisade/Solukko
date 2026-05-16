@@ -1460,30 +1460,62 @@ function loadDecks() {
   const list = document.getElementById('deck-list');
   list.innerHTML = '';
 
-  // Collect top-level TYKRY decks
-  const seen = new Set();
+  // Debug: log what we loaded
+  console.log('allCards count:', allCards.length);
+  if (allCards.length) {
+    const sample = [...new Set(allCards.map(c => c.deckName))].slice(0, 10);
+    console.log('Deck names found:', sample);
+  }
+
+  if (!allCards.length) {
+    list.innerHTML = `
+      <div style="text-align:center;font-family:'JetBrains Mono',monospace;
+                  font-size:0.85rem;color:#9b8f80;padding:3rem;line-height:2;">
+        Ei kortteja löytynyt pakasta.<br>
+        <small>Avaa selaimen konsoli (F12) virheen tarkistamiseksi.</small>
+      </div>`;
+    show('deck-screen');
+    return;
+  }
+
+  // Auto-detect deck hierarchy:
+  // If cards live in "Root::Course::Sub", we display "Course" level decks.
+  // Works regardless of what the root folder is called.
+  const seen  = new Set();
   const decks = [];
 
+  // Find the common root prefix (e.g. "TYKRY") — pick the most frequent top-level name
+  const rootCounts = {};
+  allCards.forEach(c => {
+    const top = (c.deckName || '').split('::')[0];
+    rootCounts[top] = (rootCounts[top] || 0) + 1;
+  });
+  const root = Object.entries(rootCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+  console.log('Detected root deck:', root);
+
   allCards.forEach(card => {
-    const dn = card.deckName || '';
-    if (!dn.startsWith('TYKRY::')) return;
-    const parts    = dn.replace('TYKRY::', '');
-    const topLevel = parts.split('::')[0];
-    const fullDeck = 'TYKRY::' + topLevel;
+    const dn    = card.deckName || '';
+    const parts = dn.split('::');
+
+    // Second level = the "course" card (e.g. TYKRY::Kasvibiokemia (BIOM1013))
+    // Fall back to root level if no sub-decks exist
+    const courseSegment = parts.length >= 2 ? parts[1] : parts[0];
+    const fullDeck      = parts.length >= 2 ? parts[0] + '::' + parts[1] : parts[0];
+
     if (seen.has(fullDeck)) return;
     seen.add(fullDeck);
 
-    const bracketMatch = topLevel.match(/\((.*?)\)/);
+    const bracketMatch = courseSegment.match(/\((.*?)\)/);
     const courseCode   = bracketMatch ? bracketMatch[1] : '';
-    const cleanName    = topLevel
+    const cleanName    = courseSegment
       .replace(/\s*\(https?:\/\/[^)]*\)\s*/g, '')
       .replace(/\s*\(.*?\)\s*/, '')
       .trim();
 
     let bgVideo = 'default.mp4';
-    if (cleanName.includes('Kasvibiokemia'))         bgVideo = 'kasvibio.mp4';
-    if (cleanName.includes('Molekyylibiologia'))      bgVideo = 'DNApolymerase.mp4';
-    if (cleanName.includes('Immunologia'))            bgVideo = 'Mitosis in an animal cell Under the Microscope.mp4';
+    if (cleanName.includes('Kasvibiokemia'))    bgVideo = 'kasvibio.mp4';
+    if (cleanName.includes('Molekyylibiologia')) bgVideo = 'DNApolymerase.mp4';
+    if (cleanName.includes('Immunologia'))       bgVideo = 'Mitosis in an animal cell Under the Microscope.mp4';
 
     decks.push({ deck: fullDeck, cleanName, courseCode, bgVideo });
   });
@@ -1537,9 +1569,10 @@ async function startDeck(deckName) {
   renderReviewDeckCard(deckName);
 
   // Filter cards belonging to this deck (including sub-decks)
-  const cards = allCards.filter(c =>
-    c.deckName === deckName || c.deckName.startsWith(deckName + '::')
-  );
+  const cards = allCards.filter(c => {
+    const dn = c.deckName || '';
+    return dn === deckName || dn.startsWith(deckName + '::');
+  });
 
   if (!cards.length) {
     alert('Tässä pakassa ei ole kortteja.');
