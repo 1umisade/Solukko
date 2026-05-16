@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style id="card-css"></style>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background: #f5f0e8;
+  color: #1a1612;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(2.5rem + 150px) 1rem 2.5rem;
+}
+
+#conn-error {
+  background: #fff3f3;
+  border: 1px solid #f5c6c6;
+  border-radius: 8px;
+  padding: 1.2rem 1.6rem;
+  max-width: 460px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  display: none;
+}
+
+#conn-error strong { color: #c0392b; }
+
+#conn-error code {
+  font-family: 'JetBrains Mono', monospace;
+  background: #f9e8e8;
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+#deck-screen {
+  width: 100%;
+  min-height: 70vh;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.deck-list {
+  display: flex;
+  flex-direction: row;
+  gap: 60px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.deck-btn {
+  position: relative;
+  min-width: 260px;
+  height: 360px;
+  padding: 20px;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  border: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  cursor: pointer;
+  font-family: 'Lora', serif;
+  text-align: left;
+  color: white;
+  background: #111;
+  box-shadow: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.deck-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(255,255,255,0.2);
+}
+
+.deck-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.deck-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05));
+  z-index: 1;
+  pointer-events: none;
+}
+
+
+
+
+
+
+.toilet-switch input {
+  display: none;
+}
+
+
+.toilet-slider::before {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  left: 3px;
+  top: 3px;
+  background: #fffef9;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: transform 0.25s ease;
+}
+
+.toilet-switch input:checked + .toilet-slider {
+  background: #27ae60;
+}
+
+.toilet-switch input:checked + .toilet-slider::before {
+  transform: translateX(26px);
+}
+
+body.dark-mode .toilet-toggle-wrap {
+  background: #3a312b;
+  color: #eadfce;
+  border-color: #8b7a68;
+}
+
+.top-right-controls {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  gap: 12px;
+  z-index: 99999;
+}
+
+
+.settings-menu {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 99999;
+  transform: scale(calc(1 / var(--page-zoom, 1)));
+  transform-origin: top right;
+}
+
+.gear-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d4cec4;
+  border-radius: 16px;
+  background: #fffef9;
+  color: #56533c;
+  font-size: 1.35rem;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+}
+
+.settings-dropdown {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.settings-menu.open .settings-dropdown {
+  display: flex;
+}
+
+body.dark-mode .gear-btn {
+  background: #3a312b;
+  color: #f5f0e8;
+  border-color: #6d5f52;
+}
+
+.iphone-toggle-wrap {
+  width: 230px;
+
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+
+  color: #6b6055;
+  background: #fffef9;
+
+  border: 1px solid #d4cec4;
+  border-radius: 999px;
+
+  padding: 0.45rem 0.7rem;
+
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+  cursor: pointer;
+}
+
+.iphone-toggle-wrap input {
+  display: none;
+}
+
+.iphone-toggle {
+  width: 51px;
+  height: 31px;
+  background: #e9e5dd;
+  border-radius: 999px;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+  transition: background 0.25s ease;
+}
+
+.iphone-toggle::before {
+  content: "";
+  position: absolute;
+  width: 27px;
+  height: 27px;
+  left: 2px;
+  top: 2px;
+  background: #fffef9;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.28);
+  transition: transform 0.25s ease;
+}
+
+.iphone-toggle-wrap input:checked + .iphone-toggle {
+  background: #34c759;
+}
+
+.iphone-toggle-wrap input:checked + .iphone-toggle::before {
+  transform: translateX(20px);
+}
+
+body.dark-mode .iphone-toggle-wrap {
+  background: #3a312b;
+  color: #eadfce;
+  border-color: #6d5f52;
+}
+
+
+
+
+body.dark-mode .mode-toggle-top {
+  background: #3a312b;
+  color: #eadfce;
+  border-color: #8b7a68;
+}
+
+
+
+.deck-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+
+#card-screen {
+  position: relative;
+}
+
+:root {
+  --side-card-gap: 50px;
+}
+
+#review-deck-card {
+  position: absolute;
+  right: calc(100% + var(--side-card-gap));
+  left: auto;
+  top: 48px;
+
+  width: var(--deck-card-width, 260px);
+  height: 360px;
+}
+
+
+
+
+
+
+
+.site-brand-card {
+  perspective: 1200px;
+}
+
+
+
+
+
+
+
+
+#review-deck-card .deck-btn {
+  transform: none;
+  pointer-events: auto;
+}
+
+#review-deck-card .deck-btn:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+
+#card-screen {
+  width: 100%;
+  max-width: 760px;
+  min-width: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+#card-screen {
+  margin-top: 120px;
+}
+
+.top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-btn {
+  background: none;
+  border: 1px solid #d4cec4;
+  border-radius: 6px;
+  padding: 0.35rem 0.9rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #6b6055;
+  cursor: pointer;
+}
+
+.remaining,
+.deck-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #6b6055;
+}
+
+.flashcard {
+  width: 100%;
+  min-height: 260px;
+  background: #fffef9;
+  border: 1px solid #d4cec4;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07);
+  padding: 2.2rem 2rem;
+  cursor: pointer;
+  overflow-x: auto;
+}
+
+.card-content {
+  font-size: 1.2rem;
+  line-height: 1.75;
+  color: #1a1612;
+  width: 100%;
+  text-align: left;
+}
+
+
+.io-card-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.io-card-image {
+  width: 100%;
+}
+
+.answer-section {
+  margin-top: 1.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid #d4cec4;
+  width: 100%;
+  display: none;
+}
+
+
+
+
+body.dark-mode {
+  background: #2b211b;
+  color: #eadfce;
+}
+
+body.dark-mode .flashcard,
+body.dark-mode #card-comment,
+body.dark-mode .group-card,
+body.dark-mode .add-group-btn {
+  background: #3a312b;
+  color: #eadfce;
+  border-color: #6d5f52;
+}
+
+body.dark-mode .card-content {
+  color: #eadfce;
+}
+
+body.dark-mode .back-btn,
+body.dark-mode .remaining,
+body.dark-mode .deck-name,
+body.dark-mode .comment-status,
+body.dark-mode .mode-toggle {
+  color: #cbbda8;
+  border-color: #6d5f52;
+}
+
+body.dark-mode .show-btn {
+  background: #eadfce;
+  color: #2b211b;
+}
+
+.comment-box {
+  position: absolute;
+  left: calc(100% + var(--side-card-gap));
+  top: 48px;
+
+  width: var(--deck-card-width, 260px);
+  height: 64px;
+
+  border: 1px solid #d4cec4;
+  border-radius: 16px;
+  background: #fffef9;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+
+  overflow: hidden;
+  cursor: pointer;
+
+  transition:
+    height 0.35s ease,
+    border-radius 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.comment-box::before {
+  content: "💬  Jätä kommentti ja osallistu arvontaan";
+
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 1rem;
+
+  color: #56533c;
+  font-family: 'Lora', serif;
+  font-size: 0.92rem;
+  line-height: 1.25;
+  text-align: center;
+
+  transition: opacity 0.2s ease;
+}
+
+.comment-box.open {
+  height: 520px;
+  border-radius: 16px;
+  cursor: default;
+}
+
+.comment-box.open::before {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#card-comment {
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+  pointer-events: none;
+
+  resize: none;
+  overflow: hidden;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+  color: #1a1612;
+
+  padding: 1.2rem;
+
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  line-height: 1.5;
+
+  transition: opacity 0.2s ease 0.15s;
+}
+
+.comment-box.open #card-comment {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+body.dark-mode .overview-toggle-btn {
+  background: #3a312b;
+  color: #eadfce;
+  border-color: #6d5f52;
+}
+
+body.dark-mode .theme-toggle-btn {
+  background: #3a312b;
+  color: #eadfce;
+  border-color: #8b7a68;
+}
+
+body.dark-mode .answer-section {
+  border-top-color: #6d5f52;
+}
+
+body.dark-mode .cloze-blank {
+  background: #5a5148;
+}
+
+body.dark-mode .cloze-answer,
+body.dark-mode .cloze-answer-line {
+  background: #35523a;
+  color: #c9f0d0;
+}
+
+.moodle-link {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+}
+
+.moodle-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.btn-row {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.show-btn {
+  width: 100%;
+  background: #1a1612;
+  color: #f5f0e8;
+  border: none;
+  border-radius: 8px;
+  padding: 0.9rem;
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+
+.cloze-blank {
+  display: inline-block;
+  background: #e8e4db;
+  border-radius: 4px;
+  padding: 0 0.4em;
+  color: transparent;
+  min-width: 3em;
+}
+
+
+
+
+
+.site-brand {
+  position: absolute;
+  top: 0;
+  left: 50%;
+
+  width: calc(560px * 0.8);
+  height: calc(320px * 0.8);
+
+  perspective: 1200px;
+
+  transform:
+    translate(
+      calc(-50% + var(--vv-left, 0px)),
+      calc(var(--vv-top, 0px) + 18px)
+    )
+    scale(calc(1 / var(--page-zoom, 1)));
+
+  transform-origin: top left;
+  z-index: 99999;
+}
+
+.site-brand-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transform-style: preserve-3d;
+  transition: transform 0.55s ease;
+}
+
+.site-brand.flipped .site-brand-inner {
+  transform: rotateY(180deg);
+}
+
+.brand-front,
+.brand-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 1px solid #d4cec4;
+  border-radius: 16px;
+  background: #fffef9;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+}
+
+.brand-front {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.brand-back {
+  transform: rotateY(180deg);
+  padding: 1.5rem;
+  color: #56533c;
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  line-height: 1.45;
+  text-align: left;
+  overflow: hidden;
+}
+
+
+
+
+
+.site-brand img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+}
+
+.site-brand span {
+  font-family: "EB Garamond", Garamond, serif;
+  font-size: 4rem;
+  font-weight: 600;
+  color: #56533c;
+  letter-spacing: -0.03em;
+}
+
+
+
+.site-brand img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.site-brand span {
+  font-family: "EB Garamond", Garamond, serif;
+  font-size: 5rem;
+  font-weight: 600;
+  color: #56533c;
+  letter-spacing: -0.03em;
+}
+
+body.dark-mode .site-brand span {
+  color: #fff2cb;
+}
+
+.site-brand img.logo-clicked {
+  animation: logoClickPop 0.34s ease;
+}
+
+@keyframes logoClickPop {
+  0% { transform: scale(1) rotate(0deg); }
+  35% { transform: scale(0.94) rotate(-2deg); }
+  70% { transform: scale(1.05) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.cloze-answer,
+.cloze-answer-line {
+  background: #d4edda;
+  color: #1a5e2a;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 0 0.35em;
+}
+
+
+.grade-btn {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+}
+
+.btn-wrong { background: #c0392b; }
+.btn-right { background: #27ae60; }
+
+:root {
+  --side-card-gap: 50px;
+}
+
+#review-deck-card {
+  position: absolute;
+  right: calc(100% + var(--side-card-gap));
+  left: auto;
+  top: 48px;
+  width: var(--deck-card-width, 260px);
+  height: 360px;
+}
+
+
+
+
+
+
+
+
+
+
+
+.subdeck-video-link {
+  display: block;
+  text-decoration: none;
+}
+
+.subdeck-video-link:hover {
+  text-decoration: underline;
+}
+
+.mode-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #6b6055;
+}
+
+.switch input { display: none; }
+
+
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  left: 3px;
+  top: 3px;
+  background: #fffef9;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: transform 0.25s ease;
+}
+
+.switch input:checked + .slider { background: #27ae60; }
+.switch input:checked + .slider::before { transform: translateX(26px); }
+
+.group-tools {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.add-group-btn {
+  border: 1px solid #d4cec4;
+  border-radius: 8px;
+  background: #fffef9;
+  color: #1a1612;
+  padding: 0.6rem 0.9rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.io-card-image {
+  position: relative;
+  width: 100%;
+  display: inline-block;
+}
+
+.io-card-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.io-card-image svg,
+.io-card-image .io-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.group-scoreboard {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.group-scoreboard.disabled { display: none; }
+
+
+
+
+#card-overview-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 1rem;
+}
+
+.overview-section {
+  width: 100%;
+}
+
+.overview-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #6b6055;
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #d4cec4;
+}
+
+.overview-section-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+
+body.dark-mode .overview-section-title {
+  color: #cbbda8;
+  border-bottom-color: #6d5f52;
+}
+
+.overview-card {
+  background: #fffef9;
+  border: 1px solid #d4cec4;
+  border-radius: 10px;
+  padding: 0.9rem;
+  height: 90px;
+font-size: 0.68rem;
+line-height: 1.25;
+  overflow: hidden;
+  display: -webkit-box;
+-webkit-line-clamp: 4;
+-webkit-box-orient: vertical;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.overview-card.active {
+  border: 2px solid #27ae60;
+}
+
+.overview-card.known {
+  background: #e6f4ea;
+  border-color: #8bc79a;
+}
+
+.overview-card.unknown {
+  background: #f8e4e1;
+  border-color: #d99a91;
+}
+
+body.dark-mode .overview-card {
+  background: #3a312b;
+  color: #eadfce;
+  border-color: #6d5f52;
+}
+
+body.dark-mode .overview-card.known {
+  background: #294333;
+  border-color: #5f9f70;
+}
+
+body.dark-mode .overview-card.unknown {
+  background: #4a2b29;
+  border-color: #a9635d;
+}
+
+.flashcard {
+  position: relative;
+}
+
+.card-stars {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: #d4a017;
+  letter-spacing: 0.08em;
+  cursor: help;
+}
+
+.card-stars:empty {
+  display: none;
+}
+
+.card-stars:empty {
+  display: none;
+}
+
+.group-card {
+  background: #fffef9;
+  border: 1px solid #d4cec4;
+  border-radius: 10px;
+  padding: 0.8rem;
+  position: relative;
+  overflow: hidden;
+  min-height: 190px;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.group-card.selected {
+  border: 3px solid #27ae60;
+  box-shadow: 0 0 0 4px rgba(39,174,96,0.22), 0 6px 18px rgba(0,0,0,0.16);
+  background: #f2fff7;
+}
+
+.group-card.selected .group-name { color: #1a7f3c; }
+
+.group-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1612;
+  margin-bottom: 0.6rem;
+  user-select: none;
+}
+
+.group-money {
+  position: absolute;
+  bottom: 6px;
+  left: 10px;
+  font-family: "Trebuchet MS", "Arial Black", sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #8a5b00;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 2px 3px rgba(0,0,0,0.18);
+  line-height: 1;
+}
+
+.coin-tower {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  width: 54px;
+  min-height: 70px;
+}
+
+.coin {
+  position: absolute;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff6b0 0%, #f5d96b 18%, #d8a21e 55%, #9a6b00 100%);
+  border: 3px solid #8a5b00;
+  box-shadow: inset 0 2px 3px rgba(255,255,255,0.7), inset 0 -3px 4px rgba(0,0,0,0.24), 0 4px 7px rgba(0,0,0,0.25);
+  transform: translateX(-50%) perspective(160px) rotateX(62deg);
+}
+
+.coin::before,
+.flying-coin::before {
+  content: "10";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: rgba(90,50,0,0.85);
+}
+
+.flying-coin {
+  position: fixed;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 30% 30%, #fff1b8 0%, #d8a74a 30%, #b97816 70%, #7a4d08 100%);
+  border: 3px solid #9b630e;
+}
+
+.group-card.coin-winner .coin-tower { animation: towerBounce 0.38s ease-out; }
+.group-card.coin-winner .group-money { animation: moneyBounce 0.38s ease-out; }
+
+@keyframes towerBounce {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-14px) scale(1.08); }
+  65% { transform: translateY(3px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes moneyBounce {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.28); }
+  65% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+#loading {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  color: #9b8f80;
+  display: none;
+  animation: pulse 1.2s ease infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+</style>
+</head>
+<body>
+
+<div class="site-brand site-brand-card" id="site-brand" onclick="clickLogoHome()">
+  <div class="site-brand-inner">
+    <div class="brand-front">
+      <img src="solukkologo22.png" alt="Solukko logo">
+      <span>Solukko</span>
+    </div>
+<div class="brand-back">
+  Solukko.com on biotieteilijöiden oppimissivusto, jossa kurssit voi opiskella valmiiden kysymyskorttien avulla. <br><br>
+
+  • Käyttö täysin ilmaista<br>
+  • Ei kirjautumista<br>
+  • Kysymyksiin merkitty tenttitodennäköisyys<br>
+  • Palkintoja sisällöntuottajille<br>
+</div>
+  </div>
+</div>
+
+<div class="settings-menu" id="settings-menu">
+  <button class="gear-btn" onclick="toggleSettingsMenu()">⚙</button>
+
+  <div class="settings-dropdown">
+    <label class="iphone-toggle-wrap">
+      <input id="mode-toggle-input" type="checkbox" onchange="toggleGroupModeFromSwitch()">
+      <span class="iphone-toggle"></span>
+      <span>Näytä joukkueet</span>
+    </label>
+
+<label class="iphone-toggle-wrap">
+  <input id="overview-toggle-input" type="checkbox" onchange="toggleOverviewGridFromSwitch()">
+  <span class="iphone-toggle"></span>
+  <span>Näytä kortit</span>
+</label>
+
+    <label class="iphone-toggle-wrap">
+      <input id="dark-toggle-input" type="checkbox" onchange="toggleDarkModeFromSwitch()">
+      <span class="iphone-toggle"></span>
+      <span>Tummatila</span>
+    </label>
+  </div>
+</div>
+
+<div id="loading">ladataan…</div>
+
+<div id="conn-error">
+  <strong>AnkiConnectiin ei saatu yhteyttä.</strong><br><br>
+  Varmista, että Anki on auki ja <a href="https://ankiweb.net/shared/info/2055492159" target="_blank">AnkiConnect</a> on asennettu.<br><br>
+  Lisää <code>"*"</code> kohtaan <code>webCorsOriginList</code>:<br>
+  <code>Tools → Add-ons → AnkiConnect → Config</code>
+</div>
+
+<div id="deck-screen">
+  <div class="deck-list" id="deck-list"></div>
+</div>
+
+<div id="card-screen">
+  <div class="top-bar">
+    <button class="back-btn" id="back-btn" style="display:none">← kurssit</button>
+    <span class="deck-name" id="deck-name" style="display:none"></span>
+    <span class="remaining" id="remaining"></span>
+  </div>
+
+ <div id="review-deck-card"></div>
+
+  <div class="flashcard" id="flashcard" onclick="showAnswer()">
+    <div class="card-stars" id="card-stars"></div>
+    <div class="card-content" id="question-content"></div>
+    <div class="answer-section" id="answer-section">
+      <div class="card-content" id="answer-content"></div>
+    </div>
+  </div>
+
+  <div class="btn-row" id="show-row">
+    <button class="show-btn" onclick="showAnswer()">Näytä vastaus</button>
+  </div>
+
+<div class="btn-row" id="grade-row" style="display:none">
+  <button class="grade-btn btn-wrong" onclick="gradeCard(false)">Palataan asiaan... 🥀 </button>
+  <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
+</div>
+
+<div id="card-overview-grid"></div>
+
+<div class="comment-box">
+  <textarea
+    id="card-comment"
+    placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.
+     &#10; Kommentissasi voit esim. &#10; • Parantaa kortin tietoja &#10; • Pyytää uutta korttia &#10; • Ilmoittaa bugista sivustolla &#10;&#10;Maksamme myös 5 € palkkion luvallisista luentotallenteista. Lupa pitää pyytää aina luennoitsijalta."
+  ></textarea>
+
+  <div class="comment-status" id="comment-status"></div>
+</div>
+
+
+
+  <div class="group-tools">
+    <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
+  </div>
+
+  <div class="group-scoreboard" id="group-scoreboard"></div>
+  
+</div>
+
+<script>
+
+let overviewGridVisible = JSON.parse(localStorage.getItem('anki-overview-visible') || 'true');
+
+
+let darkMode = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
+
+function applyDarkMode() {
+  document.body.classList.toggle('dark-mode', darkMode);
+
+  const toggle = document.getElementById('dark-toggle-input');
+  if (toggle) toggle.checked = darkMode;
+}
+
+function toggleDarkMode() {
+  darkMode = !darkMode;
+  localStorage.setItem('anki-dark-mode', JSON.stringify(darkMode));
+  applyDarkMode();
+}
+
+
+function toggleDarkModeFromSwitch() {
+  darkMode = document.getElementById('dark-toggle-input').checked;
+  localStorage.setItem('anki-dark-mode', JSON.stringify(darkMode));
+  applyDarkMode();
+}
+
+
+function toggleSettingsMenu() {
+  const menu = document.getElementById('settings-menu');
+  if (menu) menu.classList.toggle('open');
+}
+
+
+function updatePageZoomScale() {
+  const vv = window.visualViewport;
+
+  const zoom = vv ? vv.scale : 1;
+  const left = vv ? vv.offsetLeft : 0;
+  const top = vv ? vv.offsetTop : 0;
+
+  document.documentElement.style.setProperty('--page-zoom', zoom);
+  document.documentElement.style.setProperty('--vv-left', left + 'px');
+  document.documentElement.style.setProperty('--vv-top', top + 'px');
+}
+
+window.addEventListener('resize', updatePageZoomScale);
+window.addEventListener('scroll', updatePageZoomScale);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updatePageZoomScale);
+  window.visualViewport.addEventListener('scroll', updatePageZoomScale);
+}
+
+updatePageZoomScale();
+
+
+
+
+let audioCtx = null;
+
+function playCashSound() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+
+  [880, 1175, 1568].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0, now + i * 0.06);
+    gain.gain.linearRampToValueAtTime(0.18, now + i * 0.06 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.12);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now + i * 0.06);
+    osc.stop(now + i * 0.06 + 0.13);
+  });
+}
+
+
+const commentBoxWrap = document.querySelector('.comment-box');
+
+commentBoxWrap.addEventListener('click', () => {
+  commentBoxWrap.classList.add('open');
+  document.getElementById('card-comment').focus();
+});
+
+document.addEventListener('click', (e) => {
+  const commentBox = document.querySelector('.comment-box');
+
+  if (!commentBox.contains(e.target)) {
+    commentBox.classList.remove('open');
+  }
+});
+
+function playLogoClickSound() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(420, now);
+  osc.frequency.exponentialRampToValueAtTime(760, now + 0.08);
+
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.linearRampToValueAtTime(0.18, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.17);
+}
+
+function clickLogoHome() {
+  const brand = document.getElementById('site-brand');
+  const logo = document.querySelector('.site-brand img');
+
+  if (document.getElementById('card-screen').style.display === 'flex') {
+    if (brand) brand.classList.remove('flipped');
+    playLogoClickSound();
+    showDecks();
+    return;
+  }
+
+  if (brand) {
+    brand.classList.toggle('flipped');
+  }
+
+  if (logo) {
+    logo.classList.remove('logo-clicked');
+    void logo.offsetWidth;
+    logo.classList.add('logo-clicked');
+  }
+
+  playLogoClickSound();
+}
+
+const AC = 'http://localhost:8765';
+
+async function invoke(action, params = {}) {
+  const res = await fetch(AC, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, version: 6, params })
+  });
+
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.result;
+}
+
+
+let deckGroups = [];
+let selectedGroup = null;
+let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
+  { name: 'A', score: 0 },
+  { name: 'B', score: 0 },
+  { name: 'C', score: 0 }
+]));
+
+let groupMode = JSON.parse(localStorage.getItem('anki-group-mode') || 'false');
+let queue = [];
+let reviewCards = [];
+let currentOverviewIndex = 0;
+let cardGrades = {};
+let currentCard = null;
+let currentDeck = '';
+let coinAnimating = false;
+
+function saveGroups() {
+  localStorage.setItem('anki-groups', JSON.stringify(groups));
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+async function init() {
+  show('loading');
+
+  try {
+    await invoke('version');
+    await loadDecks();
+  } catch {
+    show('conn-error');
+  }
+
+  hide('loading');
+}
+
+async function loadDecks() {
+  const names = await invoke('deckNames');
+  const list = document.getElementById('deck-list');
+  list.innerHTML = '';
+
+  await document.fonts.ready;
+
+const decks = names
+  .filter(deck => deck.startsWith('TYKRY::') && !deck.replace('TYKRY::', '').includes('::'))
+  .map(deck => {
+      const shortName = deck.replace('TYKRY::', '');
+
+      const bracketMatch = shortName.match(/\((.*?)\)/);
+      const courseCode = bracketMatch ? bracketMatch[1] : '';
+
+const cleanName = shortName
+  .replace(/\s*\(https?:\/\/[^)]*\)\s*/g, '')
+  .replace(/\s*\(.*?\)\s*/, '')
+  .trim();
+
+      let bgVideo = 'default.mp4';
+
+      if (cleanName.includes('Kasvibiokemia')) bgVideo = 'kasvibio.mp4';
+      if (cleanName.includes('Molekyylibiologia Teoria')) bgVideo = 'DNApolymerase.mp4';
+      if (cleanName.includes('Immunologia Teoria')) bgVideo = 'Mitosis in an animal cell Under the Microscope.mp4';
+
+      return { deck, cleanName, courseCode, bgVideo };
+    });
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.font = '700 22px Lora, Georgia, serif';
+
+  let widestTitle = 0;
+
+  decks.forEach(item => {
+    widestTitle = Math.max(widestTitle, ctx.measureText(item.cleanName).width);
+  });
+
+  const finalCardWidth = Math.ceil(Math.max(260, widestTitle + 42));
+  document.documentElement.style.setProperty('--deck-card-width', finalCardWidth + 'px');
+
+  decks.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'deck-btn';
+    btn.style.width = finalCardWidth + 'px';
+
+    btn.innerHTML = `
+      <video class="deck-video" muted loop playsinline preload="metadata">
+        <source src="${item.bgVideo}" type="video/mp4">
+      </video>
+
+      <div style="position:relative;z-index:2">
+        <div class="deck-title">${item.cleanName}</div>
+        <div style="font-size:14px;opacity:0.82;font-weight:400;">
+          ${item.courseCode}
+        </div>
+      </div>
+    `;
+
+    const video = btn.querySelector('.deck-video');
+
+    btn.addEventListener('mouseenter', () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      video.pause();
+      video.currentTime = 0;
+    });
+
+    video.addEventListener('error', () => {
+      console.log('Video failed:', item.bgVideo);
+    });
+
+    btn.onclick = () => startDeck(item.deck);
+
+    list.appendChild(btn);
+  });
+
+  hide('card-screen');
+  show('deck-screen');
+}
+
+async function startDeck(deckName) {
+  show('loading');
+  hide('deck-screen');
+
+  currentDeck = deckName;
+  document.getElementById('deck-name').textContent = deckName;
+
+  renderReviewDeckCard(deckName);
+
+  try {
+    const ids = await invoke('findCards', {
+      query: `deck:"${deckName}"`
+    });
+
+    if (!ids.length) {
+      alert('Tässä pakassa ei ole kortteja.');
+      show('deck-screen');
+      hide('loading');
+      return;
+    }
+
+const infos = await invoke('cardsInfo', { cards: ids });
+
+const noteIds = [...new Set(infos.map(card => card.note).filter(Boolean))];
+const noteInfos = await invoke('notesInfo', { notes: noteIds });
+
+const tagsByNote = {};
+noteInfos.forEach(note => {
+  tagsByNote[note.noteId] = note.tags || [];
+});
+
+infos.forEach(card => {
+  card.tags = tagsByNote[card.note] || [];
+});
+
+reviewCards = infos;
+queue = infos.slice();
+
+    deckGroups = buildDeckGroups(reviewCards, deckName);
+
+    currentOverviewIndex = 0;
+    cardGrades = {};
+
+    show('card-screen');
+    nextCard();
+
+  } catch (e) {
+    alert('Virhe: ' + e.message);
+    show('deck-screen');
+  }
+
+  hide('loading');
+}
+
+async function fixImages(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  const imgs = tmp.querySelectorAll('img');
+
+  await Promise.all([...imgs].map(async img => {
+    const src = img.getAttribute('src');
+
+    if (!src || src.startsWith('data:') || src.startsWith('http')) return;
+
+    try {
+      const b64 = await invoke('retrieveMediaFile', { filename: decodeURIComponent(src) });
+
+      if (b64) {
+        const ext = src.split('.').pop().toLowerCase().split('?')[0];
+        const mime = {
+          png:'image/png',
+          jpg:'image/jpeg',
+          jpeg:'image/jpeg',
+          gif:'image/gif',
+          svg:'image/svg+xml',
+          webp:'image/webp'
+        }[ext] || 'image/jpeg';
+
+        img.src = `data:${mime};base64,${b64}`;
+      }
+    } catch {}
+  }));
+
+  return tmp.innerHTML;
+}
+
+function extractBody(html) {
+  const styles = [];
+
+  const stripped = html
+    .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (_, css) => {
+      styles.push(css);
+      return '';
+    })
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .trim();
+
+  return {
+    body: stripped,
+    css: styles.join('\n')
+  };
+}
+
+
+function renderReviewDeckCard(deckName) {
+  const box = document.getElementById('review-deck-card');
+  if (!box) return;
+
+const shortName = deckName.replace('TYKRY::', '');
+
+const moodleMatch = shortName.match(/\((https?:\/\/.*?)\)/);
+
+const moodleLink = moodleMatch
+  ? moodleMatch[1]
+  : '#';
+
+const cleanName = shortName
+  .replace(/\s*\(https?:\/\/[^)]*\)\s*/g, '')
+  .replace(/\s*\(.*?\)\s*/, '')
+  .trim();
+
+const courseCode = cleanName.match(/\((.*?)\)/)?.[1] || '';
+
+  let bgVideo = 'default.mp4';
+
+  if (cleanName.includes('Kasvibiokemia')) bgVideo = 'kasvibio.mp4';
+  if (cleanName.includes('Molekyylibiologia Teoria')) bgVideo = 'DNApolymerase.mp4';
+  if (cleanName.includes('Immunologia Teoria')) bgVideo = 'Mitosis in an animal cell Under the Microscope.mp4';
+
+box.innerHTML = `
+  <button class="deck-btn" style="width:var(--deck-card-width, 260px)">
+    <video class="deck-video" muted loop playsinline preload="metadata">
+      <source src="${bgVideo}" type="video/mp4">
+    </video>
+
+    <a href="${moodleLink}" target="_blank" onclick="event.stopPropagation()" class="moodle-link">
+      <img src="moodlelogo.png" alt="Moodle" class="moodle-placeholder">
+    </a>
+
+    <div style="position:relative;z-index:2">
+      <div class="deck-title">${cleanName}</div>
+      <div style="font-size:14px;opacity:0.82;font-weight:400;">
+        ${courseCode}
+      </div>
+    </div>
+  </button>
+`;
+
+const btn = box.querySelector('.deck-btn');
+const video = box.querySelector('video');
+
+if (btn && video) {
+  btn.addEventListener('mouseenter', () => {
+    video.currentTime = 0;
+    video.play().catch(() => {});
+  });
+
+  btn.addEventListener('mouseleave', () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+}
+}
+
+
+function splitAnswerHtml(html) {
+  const m = html.match(/<hr[^>]*id\s*=\s*["']?answer["']?[^>]*>/i);
+
+  if (!m) return { front: html, back: html };
+
+  return {
+    front: html.slice(0, m.index).trim(),
+    back: html.slice(m.index + m[0].length).trim()
+  };
+}
+
+function looksLikeOnlyExtra(html) {
+  return (
+    /Information/i.test(html) &&
+    !/cloze/i.test(html) &&
+    !/<img/i.test(html) &&
+    !/<svg/i.test(html) &&
+    !/io-overlay|io-original|image-occlusion/i.test(html)
+  );
+}
+
+async function nextCard() {
+  if (!queue.length) {
+    currentCard = null;
+document.getElementById('card-stars').textContent = '';
+
+document.getElementById('question-content').innerHTML = `
+  <div style="
+    width:100%;
+    min-height:220px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:2.4rem;
+    font-weight:700;
+    color:#6b6055;
+    text-align:center;
+  ">
+    ✓ Valmista tuli
+  </div>
+`;
+
+    document.getElementById('answer-content').innerHTML = '';
+    document.getElementById('answer-section').style.display = 'none';
+    document.getElementById('show-row').style.display = 'none';
+    document.getElementById('grade-row').style.display = 'none';
+
+    return;
+  }
+
+currentCard = queue.shift();
+currentOverviewIndex = reviewCards.indexOf(currentCard);
+
+  const q = extractBody(currentCard.question || '');
+  const aFull = extractBody(currentCard.answer || '');
+  const split = splitAnswerHtml(aFull.body);
+
+  const model =
+    (currentCard.modelName ||
+     currentCard.model ||
+     currentCard.noteType ||
+     '').toLowerCase();
+
+  const isSpecial =
+    model.includes('cloze') ||
+    model.includes('image') ||
+    model.includes('occlusion') ||
+    /class\s*=\s*["']?cloze/i.test(q.body + aFull.body) ||
+    /io-overlay|io-original|image-occlusion|Toggle Masks/i.test(q.body + aFull.body);
+
+  currentCard._isSpecial = isSpecial;
+
+  const isImageOcclusion =
+    model.includes('image occlusion') ||
+    model.includes('occlusion') ||
+    /io-overlay|io-original|image-occlusion|Toggle Masks/i.test(q.body + aFull.body);
+
+  let frontRaw = q.body;
+
+  if (isImageOcclusion) {
+  const ioImage = getField(currentCard, ['Image', 'image']);
+  const ioQuestionMask = getField(currentCard, ['Question Mask', 'QuestionMask', 'question mask']);
+  const ioHeader = getField(currentCard, ['Header', 'header']);
+
+frontRaw = `
+  ${ioHeader ? `<div>${ioHeader}</div>` : ''}
+  <div class="io-card-image">
+    ${ioImage || ''}
+    <div class="io-overlay">${ioQuestionMask || ''}</div>
+  </div>
+`;
+}
+
+  const enhancedText = getField(currentCard, [
+    'Content',
+    'content',
+    'Text',
+    'text',
+    'Front',
+    'front',
+    'Question',
+    'question'
+  ]);
+
+  const enhancedExtra = getField(currentCard, [
+    'Extra',
+    'extra',
+    'Back Extra',
+    'Information',
+    'info'
+  ]);
+
+
+
+const isEnhancedCloze =
+    !isImageOcclusion &&
+    (
+      model.includes('enhanced cloze') ||
+      enhancedText.includes('{{c')
+    );
+
+  if (isEnhancedCloze) {
+    currentCard._isSpecial = true;
+
+    frontRaw = renderClozeText(enhancedText, false);
+
+    currentCard._enhancedAnswer =
+      renderClozeText(enhancedText, true) +
+      (enhancedExtra ? `<hr><div class="extra">${enhancedExtra}</div>` : '');
+  } else {
+    currentCard._enhancedAnswer = null;
+  }
+
+  if (
+    !frontRaw.trim() ||
+    looksLikeOnlyExtra(frontRaw) ||
+    frontRaw.trim().startsWith('<hr')
+  ) {
+    frontRaw = split.front;
+  }
+
+  const answerRaw = currentCard._enhancedAnswer
+    ? currentCard._enhancedAnswer
+    : (isImageOcclusion ? aFull.body : (isSpecial ? aFull.body : split.back));
+
+  document.getElementById('card-css').textContent =
+    (currentCard.css || '') + '\n' + q.css + '\n' + aFull.css;
+
+  const [qHtml, aHtml] = await Promise.all([
+    fixImages(frontRaw),
+    fixImages(answerRaw)
+  ]);
+
+  currentCard._qHtml = qHtml;
+  currentCard._aHtml = aHtml;
+
+  document.getElementById('question-content').innerHTML = currentCard._qHtml;
+  document.getElementById('answer-content').innerHTML = currentCard._aHtml;
+
+  loadCommentForCard();
+  renderCardStars();
+
+  document.getElementById('answer-section').style.display = 'none';
+  document.getElementById('show-row').style.display = 'flex';
+  document.getElementById('grade-row').style.display = 'none';
+
+  selectedGroup = null;
+  updateGroupUI();
+  renderCardOverview();
+}
+
+async function nextCardFromCurrent() {
+  if (!currentCard) return;
+
+  const q = extractBody(currentCard.question || '');
+  const aFull = extractBody(currentCard.answer || '');
+  const split = splitAnswerHtml(aFull.body);
+
+  const model =
+    (currentCard.modelName ||
+     currentCard.model ||
+     currentCard.noteType ||
+     '').toLowerCase();
+
+  const isSpecial =
+    model.includes('cloze') ||
+    model.includes('image') ||
+    model.includes('occlusion') ||
+    /class\s*=\s*["']?cloze/i.test(q.body + aFull.body) ||
+    /io-overlay|io-original|image-occlusion|Toggle Masks/i.test(q.body + aFull.body);
+
+  currentCard._isSpecial = isSpecial;
+
+const isImageOcclusion =
+  model.includes('image occlusion') ||
+  model.includes('occlusion') ||
+  /io-overlay|io-original|image-occlusion|Toggle Masks/i.test(q.body + aFull.body);
+
+let frontRaw = q.body;
+
+if (isImageOcclusion) {
+  const ioImage = getField(currentCard, ['Image', 'image']);
+  const ioQuestionMask = getField(currentCard, ['Question Mask', 'QuestionMask', 'question mask']);
+  const ioHeader = getField(currentCard, ['Header', 'header']);
+
+  frontRaw = `
+    ${ioHeader ? `<div>${ioHeader}</div>` : ''}
+    <div class="io-card-image">
+      ${ioImage || ''}
+      <div class="io-overlay">${ioQuestionMask || ''}</div>
+    </div>
+  `;
+}
+
+  const enhancedText = getField(currentCard, [
+    'Content',
+    'content',
+    'Text',
+    'text',
+    'Front',
+    'front',
+    'Question',
+    'question'
+  ]);
+
+  const enhancedExtra = getField(currentCard, [
+    'Extra',
+    'extra',
+    'Back Extra',
+    'Information',
+    'info'
+  ]);
+
+
+
+
+const isEnhancedCloze =
+    !isImageOcclusion &&
+    (
+      model.includes('enhanced cloze') ||
+      enhancedText.includes('{{c')
+    );
+
+  if (isEnhancedCloze) {
+    currentCard._isSpecial = true;
+    frontRaw = renderClozeText(enhancedText, false);
+    currentCard._enhancedAnswer =
+      renderClozeText(enhancedText, true) +
+      (enhancedExtra ? `<hr><div class="extra">${enhancedExtra}</div>` : '');
+  } else {
+    currentCard._enhancedAnswer = null;
+  }
+
+  if (
+    !frontRaw.trim() ||
+    looksLikeOnlyExtra(frontRaw) ||
+    frontRaw.trim().startsWith('<hr')
+  ) {
+    frontRaw = split.front;
+  }
+
+  const answerRaw = currentCard._enhancedAnswer
+    ? currentCard._enhancedAnswer
+    : (isImageOcclusion ? aFull.body : (isSpecial ? aFull.body : split.back));
+
+  document.getElementById('card-css').textContent =
+    (currentCard.css || '') + '\n' + q.css + '\n' + aFull.css;
+
+  const [qHtml, aHtml] = await Promise.all([
+    fixImages(frontRaw),
+    fixImages(answerRaw)
+  ]);
+
+  currentCard._qHtml = qHtml;
+  currentCard._aHtml = aHtml;
+
+  document.getElementById('question-content').innerHTML = currentCard._qHtml;
+  document.getElementById('answer-content').innerHTML = currentCard._aHtml;
+
+  loadCommentForCard();
+  renderCardStars();
+
+  document.getElementById('answer-section').style.display = 'none';
+  document.getElementById('show-row').style.display = 'flex';
+  document.getElementById('grade-row').style.display = 'none';
+
+  selectedGroup = null;
+  updateGroupUI();
+  renderCardOverview();
+}
+
+function commentKey(card) {
+  return `anki-card-comment-${card.cardId || card.note || card.noteId}`;
+}
+
+function loadCommentForCard() {
+  const box = document.getElementById('card-comment');
+  const status = document.getElementById('comment-status');
+
+  box.value = localStorage.getItem(commentKey(currentCard)) || '';
+
+  status.textContent = '';
+}
+
+function saveCommentForCard() {
+  if (!currentCard) return;
+  localStorage.setItem(commentKey(currentCard), document.getElementById('card-comment').value);
+}
+
+function getField(card, names) {
+  for (const name of names) {
+    if (card.fields && card.fields[name]) return card.fields[name].value || '';
+  }
+
+  return '';
+}
+
+function renderCardStars() {
+  const box = document.getElementById('card-stars');
+  if (!box || !currentCard) return;
+
+  const tags = currentCard.tags || [];
+  const stars = tags.join(' ').match(/★/g);
+  const count = stars ? stars.length : 0;
+
+  box.textContent = count ? '★'.repeat(count) : '';
+
+  if (count >= 3) {
+    box.title = 'Luultavasti tentissä';
+  } else if (count === 2) {
+    box.title = 'Ehkä tentissä';
+  } else if (count === 1) {
+    box.title = 'Tuskin tentissä';
+  } else {
+    box.removeAttribute('title');
+  }
+}
+
+function renderClozeText(text, showAnswers) {
+  let hasBullets = /^\s*•/m.test(text);
+
+  let html = text.replace(
+    /\{\{c\d+::([\s\S]*?)(?:::([\s\S]*?))?\}\}/g,
+    (_, answer, hint) => {
+      const answerHasLines = /\r?\n/.test(answer) || /^\s*•/m.test(answer);
+
+      if (!showAnswers) return `<span class="cloze-blank">${hint || '[...]'}</span>`;
+
+      if (answerHasLines) {
+        return answer
+          .split(/\r?\n/)
+          .map(line => line.trim())
+          .filter(Boolean)
+          .map(line => `<div class="cloze-answer-line">${line}</div>`)
+          .join('');
+      }
+
+      return `<span class="cloze-answer">${answer}</span>`;
+    }
+  );
+
+  if (hasBullets) {
+    return html
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => `<div class="enhanced-line">${line}</div>`)
+      .join('');
+  }
+
+  return `<div class="enhanced-line">${html.replace(/\s*\r?\n\s*/g, ' ')}</div>`;
+}
+
+
+
+function getSubdeckName(card, parentDeck) {
+  const deck = card.deckName || card.deck || '';
+
+  if (deck === parentDeck) {
+    return {
+      name: 'Pääpakka',
+      link: null
+    };
+  }
+
+  if (!deck.startsWith(parentDeck + '::')) {
+    return {
+      name: 'Pääpakka',
+      link: null
+    };
+  }
+
+  const raw = deck.replace(parentDeck + '::', '').split('::')[0];
+
+  const videoMatch = raw.match(/\((https?:\/\/.*?)\)/);
+
+  const link = videoMatch
+    ? videoMatch[1]
+    : null;
+
+  const clean = raw
+    .replace(/\s*\(https?:\/\/.*?\)\s*/, '')
+    .trim();
+
+  return {
+    name: clean,
+    link
+  };
+}
+
+function naturalSubdeckSort(a, b) {
+  if (a.name === 'Lajittelematon') return 1;
+  if (b.name === 'Lajittelematon') return -1;
+
+  return a.name.localeCompare(b.name, 'fi', {
+    numeric: true,
+    sensitivity: 'base'
+  });
+}
+
+function naturalSubdeckSort(a, b) {
+  if (a.name === 'Pääpakka') return -1;
+  if (b.name === 'Pääpakka') return 1;
+
+  return a.name.localeCompare(b.name, 'fi', {
+    numeric: true,
+    sensitivity: 'base'
+  });
+}
+
+function buildDeckGroups(cards, parentDeck) {
+  const groups = [];
+
+  cards.forEach(card => {
+    const groupInfo = getSubdeckName(card, parentDeck);
+const groupName = groupInfo.name;
+    let group = groups.find(g => g.name === groupName);
+
+    if (!group) {
+      group = {
+  name: groupName,
+  link: groupInfo.link,
+  cards: []
+};
+      groups.push(group);
+    }
+
+    group.cards.push(card);
+  });
+
+  groups.sort(naturalSubdeckSort);
+
+
+
+  return groups;
+}
+
+function renderCardOverview() {
+  const grid = document.getElementById('card-overview-grid');
+  if (!grid) return;
+
+  grid.innerHTML = deckGroups.map(group => {
+    const cardsHtml = group.cards.map(card => {
+      const index = reviewCards.indexOf(card);
+
+      const q =
+        getField(card, ['Front', 'front', 'Question', 'question', 'Text', 'text', 'Content', 'content']) ||
+        extractBody(card.question || '').body;
+
+      let text = q
+        .replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g, '$1')
+        .replace(/Information Deck\s*:.*?(?=[A-ZÅÄÖa-zåäö0-9])/i, '')
+        .replace(/TYKRY::[^\s]+/g, '')
+        .replace(/\([^)]*\)/g, '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      text = text.slice(0, 70);
+
+      return `
+        <div class="overview-card ${index === currentOverviewIndex ? 'active' : ''} ${cardGrades[card.cardId] || ''}" onclick="jumpToOverviewCard(${index})">
+          ${text || '(tyhjä kortti)'}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="overview-section">
+${
+  group.link
+    ? `
+      <a
+        class="overview-section-title subdeck-video-link"
+        href="${group.link}"
+        target="_blank"
+      >
+        ${group.name}
+      </a>
+    `
+    : `
+      <div class="overview-section-title">
+        ${group.name}
+      </div>
+    `
+}
+        <div class="overview-section-grid">
+          ${cardsHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function jumpToOverviewCard(index) {
+  currentOverviewIndex = index;
+  currentCard = reviewCards[index];
+
+  queue = reviewCards.slice(index + 1);
+
+  nextCardFromCurrent();
+}
+
+function toggleOverviewGridFromSwitch() {
+  overviewGridVisible = document.getElementById('overview-toggle-input').checked;
+
+  localStorage.setItem(
+    'anki-overview-visible',
+    JSON.stringify(overviewGridVisible)
+  );
+
+  updateOverviewVisibility();
+}
+
+function updateOverviewVisibility() {
+  const grid = document.getElementById('card-overview-grid');
+  const toggle = document.getElementById('overview-toggle-input');
+
+  if (toggle) toggle.checked = overviewGridVisible;
+  if (grid) grid.style.display = overviewGridVisible ? 'flex' : 'none';
+}
+
+function updateOverviewVisibility() {
+  const grid = document.getElementById('card-overview-grid');
+
+  if (!grid) return;
+
+  grid.style.display = overviewGridVisible ? 'flex' : 'none';
+}
+
+
+function updateGroupUI() {
+  const board = document.getElementById('group-scoreboard');
+  document.getElementById('mode-toggle-input').checked = groupMode;
+
+const addBtn = document.querySelector('.group-tools');
+
+if (groupMode) {
+  board.classList.remove('disabled');
+
+  if (addBtn) addBtn.style.display = 'flex';
+
+} else {
+  board.classList.add('disabled');
+  selectedGroup = null;
+
+  if (addBtn) addBtn.style.display = 'none';
+}
+
+  board.innerHTML = '';
+
+  groups.forEach((group, index) => {
+    const card = document.createElement('div');
+    card.className = 'group-card' + (groupMode && selectedGroup === index ? ' selected' : '');
+    card.onclick = () => selectGroup(index);
+
+    const name = document.createElement('div');
+    name.className = 'group-name';
+    name.textContent = group.name;
+    name.ondblclick = (e) => {
+      e.stopPropagation();
+      renameGroup(index);
+    };
+
+    const tower = document.createElement('div');
+    tower.className = 'coin-tower';
+    tower.id = `coin-tower-${index}`;
+    tower.style.minHeight = Math.max(70, group.score * 8 + 28) + 'px';
+
+    for (let c = 0; c < group.score; c++) {
+      const coin = document.createElement('div');
+      coin.className = 'coin';
+      coin.style.bottom = (c * 8) + 'px';
+      tower.appendChild(coin);
+    }
+
+    const money = document.createElement('div');
+    money.className = 'group-money';
+    money.textContent = `${(group.score * 0.10).toFixed(2)} €`;
+
+    card.appendChild(name);
+    card.appendChild(tower);
+    card.appendChild(money);
+    board.appendChild(card);
+  });
+}
+
+function toggleGroupModeFromSwitch() {
+  groupMode = document.getElementById('mode-toggle-input').checked;
+  localStorage.setItem('anki-group-mode', JSON.stringify(groupMode));
+  updateGroupUI();
+}
+
+function selectGroup(index) {
+  if (!groupMode) return;
+  selectedGroup = index;
+  updateGroupUI();
+}
+
+function renameGroup(index) {
+  const newName = prompt('Anna ryhmälle uusi nimi:', groups[index].name);
+
+  if (!newName || !newName.trim()) return;
+
+  groups[index].name = newName.trim();
+  saveGroups();
+  updateGroupUI();
+}
+
+function addGroup() {
+  const nextName = String.fromCharCode(65 + groups.length);
+  groups.push({ name: nextName, score: 0 });
+  saveGroups();
+  updateGroupUI();
+}
+
+function bounceWinningGroup(index) {
+  const card = document.querySelectorAll('.group-card')[index];
+  if (!card) return;
+
+  card.classList.remove('coin-winner');
+  void card.offsetWidth;
+  card.classList.add('coin-winner');
+
+  setTimeout(() => {
+    card.classList.remove('coin-winner');
+  }, 420);
+}
+
+function animateCoinToGroup(groupIndex, callback) {
+  const rightBtn = document.getElementById('right-btn');
+  const tower = document.getElementById(`coin-tower-${groupIndex}`);
+
+  if (!rightBtn || !tower) {
+    callback();
+    return;
+  }
+
+  const start = rightBtn.getBoundingClientRect();
+  const end = tower.getBoundingClientRect();
+
+  const coin = document.createElement('div');
+  coin.className = 'flying-coin';
+
+  const startX = start.left + start.width / 2 - 23;
+  const startY = start.top + start.height / 2 - 9;
+  const endX = end.left + end.width / 2 - 23;
+  const endY = end.bottom - 18 - (groups[groupIndex].score * 8);
+
+  coin.style.left = startX + 'px';
+  coin.style.top = startY + 'px';
+
+  document.body.appendChild(coin);
+
+  const dx = endX - startX;
+  const dy = endY - startY;
+
+  const animation = coin.animate([
+    { transform: 'translate(0, 0) rotateX(0deg) rotateY(0deg) scale(1)', offset: 0 },
+    { transform: `translate(${dx * 0.45}px, ${dy - 90}px) rotateX(180deg) rotateY(240deg) scale(1.25)`, offset: 0.55 },
+    { transform: `translate(${dx}px, ${dy}px) rotateX(360deg) rotateY(720deg) scale(1)`, offset: 1 }
+  ], {
+    duration: 650,
+    easing: 'cubic-bezier(.2,.8,.2,1)'
+  });
+
+  animation.onfinish = () => {
+    coin.remove();
+    playCashSound();
+    callback();
+  };
+}
+
+function showAnswer() {
+  if (!currentCard) return;
+
+  if (currentCard._isSpecial) {
+    document.getElementById('question-content').innerHTML = currentCard._aHtml;
+    document.getElementById('answer-section').style.display = 'none';
+  } else {
+    document.getElementById('answer-section').style.display = 'block';
+  }
+
+  document.getElementById('show-row').style.display = 'none';
+  document.getElementById('grade-row').style.display = 'flex';
+}
+
+function gradeCard(correct) {
+  if (coinAnimating) return;
+  if (currentCard) {
+  cardGrades[currentCard.cardId] = correct ? 'known' : 'unknown';
+  renderCardOverview();
+}
+
+  if (correct && groupMode) {
+    if (selectedGroup === null) {
+      alert('Valitse ensin ryhmä, joka vastasi oikein.');
+      return;
+    }
+
+    const winningGroup = selectedGroup;
+    coinAnimating = true;
+
+    animateCoinToGroup(winningGroup, () => {
+      groups[winningGroup].score += 1;
+      saveGroups();
+
+      updateGroupUI();
+      bounceWinningGroup(winningGroup);
+
+      setTimeout(() => {
+        coinAnimating = false;
+        selectedGroup = null;
+        updateGroupUI();
+        nextCard();
+      }, 450);
+    });
+
+    return;
+  }
+
+  if (!correct) {
+    const pos = Math.min(10, queue.length);
+    queue.splice(pos, 0, currentCard);
+  }
+
+  selectedGroup = null;
+  updateGroupUI();
+  nextCard();
+}
+
+document.getElementById('back-btn').onclick = showDecks;
+document.addEventListener('click', e => {
+  if (
+    e.target.closest('.group-card') ||
+    e.target.closest('.overview-card') ||
+    e.target.closest('.flashcard') ||
+    e.target.closest('.grade-btn') ||
+    e.target.closest('.show-btn') ||
+    e.target.closest('.iphone-toggle-wrap') ||
+    e.target.closest('.gear-btn')
+  ) {
+    return;
+  }
+
+  selectedGroup = null;
+  updateGroupUI();
+});
+
+function showDecks() {
+  groups.forEach(g => g.score = 0);
+  selectedGroup = null;
+  document.getElementById('site-brand')?.classList.remove('flipped');
+  saveGroups();
+  updateGroupUI();
+
+  hide('card-screen');
+  loadDecks();
+}
+
+document.addEventListener('keydown', e => {
+  const gradeVisible = document.getElementById('grade-row').style.display !== 'none';
+  const showVisible = document.getElementById('show-row').style.display !== 'none';
+
+  if (e.code === 'Space' && showVisible) {
+    e.preventDefault();
+    showAnswer();
+  }
+
+  if (gradeVisible) {
+    if (e.key === 'ArrowLeft' || e.key === '1') gradeCard(false);
+    if (e.key === 'ArrowRight' || e.key === '2') gradeCard(true);
+  }
+});
+
+const commentBox = document.getElementById('card-comment');
+
+commentBox.addEventListener('input', () => {
+  saveCommentForCard();
+});
+
+function show(id) {
+  const el = document.getElementById(id);
+
+  if (id === 'card-screen') {
+    el.style.display = 'flex';
+  } else if (id === 'deck-screen') {
+    el.style.display = 'flex';
+  } else {
+    el.style.display = 'block';
+  }
+}
+
+function hide(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+applyDarkMode();
+updateGroupUI();
+updateOverviewVisibility();
+init();
+</script>
+</body>
+</html>
