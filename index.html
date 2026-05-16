@@ -361,6 +361,8 @@ async function init(){
     const d = document.getElementById('conn-error');
     d.style.display = 'block';
     d.innerHTML = '<strong>Virhe ladattaessa kortteja.</strong><br><br>' + e.message;
+    hide('loading');
+    return;
   }
   hide('loading');
 }
@@ -442,6 +444,18 @@ async function loadDecks(){
     const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0];
     if(!seen.has(top)){ seen.add(top); names.push(top); }
   });
+
+  // Debug: show what decks were found
+  if(names.length === 0){
+    const d = document.getElementById('conn-error');
+    d.style.display = 'block';
+    const allDeckNames = [...new Set(allCards.map(c=>c.deckName).filter(Boolean))].slice(0,10);
+    d.innerHTML =
+      `<strong>Kortteja löytyi (${allCards.length} kpl) mutta ei TYKRY-pakkoja.</strong><br><br>` +
+      `Löydetyt pakannimet:<br><code>${allDeckNames.join('<br>') || '(ei yhtään)'}</code><br><br>` +
+      `Varmista että pakkaasi vie nimellä <code>TYKRY</code> ja alikansiot alkavat <code>TYKRY::</code>-etuliitteellä.`;
+    return;
+  }
 
   const list=document.getElementById('deck-list');
   list.innerHTML='';
