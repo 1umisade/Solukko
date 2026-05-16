@@ -13,8 +13,8 @@
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + 150px) 1rem 2.5rem; }
-#conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; margin-top: 200px; }
+body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + 290px) 1rem 2.5rem; }
+#conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; }
 #conn-error strong { color: #c0392b; }
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
 #deck-screen { width: 100%; min-height: 70vh; display: none; justify-content: center; align-items: center; }
@@ -37,7 +37,7 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 .iphone-toggle-wrap input:checked + .iphone-toggle::before { transform: translateX(20px); }
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 :root { --side-card-gap: 50px; }
-#card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 120px; }
+#card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 0; }
 #review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 48px; width: var(--deck-card-width, 260px); height: 360px; }
 #review-deck-card .deck-btn:hover { transform: none; box-shadow: none; }
 .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; }
