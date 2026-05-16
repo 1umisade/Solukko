@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fzstd@0.1.1/umd/fzstd.js"></script>
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1106,24 +1105,15 @@ async function loadApkg(buffer) {
 
   const zip = await JSZip.loadAsync(buffer);
 
-  // Helper: detect and decompress zstd (magic bytes 28 b5 2f fd)
-  function maybeDecompress(bytes) {
-    if (bytes[0] === 0x28 && bytes[1] === 0xb5 && bytes[2] === 0x2f && bytes[3] === 0xfd) {
-      return fzstd.decompress(bytes);
-    }
-    return bytes;
-  }
-
   // ---- 1. Media ----
   setProgress(20, 'Ladataan kuvia…');
   mediaBlobs = {};
 
   const mediaFile = zip.file('media');
   if (mediaFile) {
-    const mediaRaw  = await mediaFile.async('uint8array');
-    const mediaText = new TextDecoder().decode(maybeDecompress(mediaRaw));
+    const mediaJson = await mediaFile.async('string');
     let mediaMap = {};
-    try { mediaMap = JSON.parse(mediaText); } catch {}
+    try { mediaMap = JSON.parse(mediaJson); } catch {}
 
     const entries = Object.entries(mediaMap);
     let done = 0;
@@ -1141,23 +1131,15 @@ async function loadApkg(buffer) {
   // ---- 2. SQLite database ----
   setProgress(46, 'Luetaan tietokantaa…');
 
-  let dbBytes = null;
-
-  // Priority: anki21b (newest, zstd) → anki21 → anki2
-  for (const name of ['collection.anki21b', 'collection.anki21', 'collection.anki2']) {
-    const f = zip.file(name);
-    if (!f) continue;
-    const raw = await f.async('uint8array');
-    dbBytes = maybeDecompress(raw);
-    console.log('Using database file:', name, '→ decompressed size:', dbBytes.length);
-    break;
-  }
-
-  if (!dbBytes) {
-    alert('Virhe: .apkg-tiedostossa ei ole tietokantaa. Kokeile viedä pakka uudelleen Ankista.');
+  // Try anki2 first, then anki21
+  const dbFile = zip.file('collection.anki2') || zip.file('collection.anki21');
+  if (!dbFile) {
+    alert('Virhe: .apkg-tiedostossa ei ole tietokantaa. Varmista, että viet pakan oikein Ankista.');
     showFilePicker();
     return;
   }
+
+  const dbBuffer = await dbFile.async('arraybuffer');
 
   setProgress(55, 'Käynnistetään sql.js…');
   const SQL = await initSqlJs({
@@ -1165,14 +1147,14 @@ async function loadApkg(buffer) {
   });
 
   setProgress(65, 'Rakennetaan kortit…');
-  const db = new SQL.Database(dbBytes);
+  const db = new SQL.Database(new Uint8Array(dbBuffer));
 
   allCards = buildCardsFromDb(db);
   db.close();
 
-  console.log('Built cards:', allCards.length);
-
   setProgress(95, 'Valmis!');
+
+  // Hide file picker, show decks
   hide('file-picker');
   loadDecks();
 }
@@ -1369,7 +1351,7 @@ function buildCardsFromDb(db) {
       // Deck names from col JSON (may be empty in new format — handled below)
       const dks = JSON.parse(decksJson || '{}');
       Object.values(dks).forEach(d => {
-        if (d && d.id) deckNames[String(d.id)] = (d.name || '').replace(/\x1f/g, '::');
+        if (d && d.id) deckNames[String(d.id)] = d.name;
       });
     }
   } catch {}
@@ -1385,7 +1367,7 @@ function buildCardsFromDb(db) {
   if (Object.keys(deckNames).length === 0) {
     try {
       const rows = db.exec('SELECT id, name FROM decks');
-      if (rows.length) rows[0].values.forEach(([id, name]) => { deckNames[String(id)] = (name || '').replace(/\x1f/g, '::'); });
+      if (rows.length) rows[0].values.forEach(([id, name]) => { deckNames[String(id)] = name; });
     } catch {}
   }
 
