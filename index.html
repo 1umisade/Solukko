@@ -184,6 +184,11 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
       <span class="iphone-toggle"></span>
       <span>Tummatila</span>
     </label>
+    <label class="iphone-toggle-wrap">
+      <input id="dev-toggle-input" type="checkbox" onchange="toggleDevModeFromSwitch()">
+      <span class="iphone-toggle"></span>
+      <span>Kehittäjätila</span>
+    </label>
   </div>
 </div>
 
@@ -252,7 +257,29 @@ let allDeckNames = [];  // all deck names from DB, including empty ones
 let mediaMap  = {};   // filename → data:URL  (populated from .apkg media)
 
 let overviewGridVisible = JSON.parse(localStorage.getItem('anki-overview-visible') || 'true');
-let darkMode  = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
+let darkMode = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
+let devMode = JSON.parse(localStorage.getItem('anki-dev-mode') || 'false');
+
+function applyDevMode(){
+  const t=document.getElementById('dev-toggle-input');
+  if(t) t.checked=devMode;
+}
+function toggleDevModeFromSwitch(){
+  const t=document.getElementById('dev-toggle-input');
+  if(t.checked){
+    const pw=prompt('Anna kehittäjätilan salasana:');
+    if(pw==='kuortane'){
+      devMode=true;
+      localStorage.setItem('anki-dev-mode',JSON.stringify(true));
+    } else {
+      alert('Väärä salasana.');
+      t.checked=false;
+    }
+  } else {
+    devMode=false;
+    localStorage.setItem('anki-dev-mode',JSON.stringify(false));
+  }
+}
 let deckGroups = [], selectedGroup = null;
 let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
   {name:'A',score:0},{name:'B',score:0},{name:'C',score:0}
@@ -261,7 +288,12 @@ let groupMode = JSON.parse(localStorage.getItem('anki-group-mode') || 'false');
 let queue=[], reviewCards=[], currentOverviewIndex=0, cardGrades={};
 let currentCard=null, currentDeck='', coinAnimating=false;
 
-// ── Dark mode ─────────────────────────────────────────────────────────────────
+// ── User identity (for comment ownership) ────────────────────────────────────
+function getUserId(){
+  let uid = localStorage.getItem('solukko-uid');
+  if(!uid){ uid = Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('solukko-uid',uid); }
+  return uid;
+}
 function applyDarkMode(){
   document.body.classList.toggle('dark-mode', darkMode);
   const t=document.getElementById('dark-toggle-input'); if(t) t.checked=darkMode;
@@ -721,8 +753,15 @@ function loadFirestoreComments(){
         const d=doc.data();
         const el=document.createElement('div');
         el.className='comment-item';
-        const time=d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString('fi-FI') : '';
-        el.innerHTML=`<div>${d.text}</div><div class="comment-item-time">${time}</div>`;
+        el.dataset.docId=doc.id;
+        const isOwn = d.userId && d.userId===getUserId();
+        const canEdit = isOwn || devMode;
+        const canDelete = devMode;
+        const btns = `
+          ${canEdit ? `<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>` : ''}
+          ${canDelete ? `<button onclick="deleteComment('${doc.id}')" style="float:right;background:none;border:none;color:#c0392b;cursor:pointer;font-size:0.85rem;padding:0;">🗑</button>` : ''}
+        `;
+        el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span></div>`;
         feed.appendChild(el);
       });
     }).catch(err=>{
@@ -740,6 +779,7 @@ function submitComment(e){
     text,
     cardId: String(currentCard?.cardId||currentCard?.noteId||''),
     deck: currentDeck||'',
+    userId: getUserId(),
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   }).then(()=>setTimeout(loadFirestoreComments, 500)).catch(()=>{});
 
@@ -753,6 +793,41 @@ function submitComment(e){
   // Clear textarea and collapse box
   document.getElementById('card-comment').value='';
   document.querySelector('.comment-box').classList.remove('open');
+}
+
+function editComment(docId, btn){
+  const item = btn.closest('.comment-item');
+  const wrap = item.querySelector('.comment-text-wrap');
+  const currentText = item.querySelector('.comment-text').textContent;
+
+  // Replace with inline editor
+  wrap.innerHTML=`
+    <textarea style="width:100%;font-family:'Lora',serif;font-size:0.82rem;border:1px solid #d4cec4;border-radius:8px;padding:0.5rem;resize:vertical;min-height:60px;background:#fffef9;color:#1a1612;">${currentText}</textarea>
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <button onclick="saveEditComment('${docId}',this)" style="background:#27ae60;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Tallenna</button>
+      <button onclick="cancelEditComment('${docId}','${currentText.replace(/'/g,"\\'")}',this)" style="background:none;border:1px solid #d4cec4;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Peruuta</button>
+    </div>`;
+}
+
+function saveEditComment(docId, btn){
+  const textarea = btn.closest('.comment-text-wrap').querySelector('textarea');
+  const newText = textarea.value.trim();
+  if(!newText) return;
+  db.collection('comments').doc(docId).update({text: newText})
+    .then(()=>loadFirestoreComments())
+    .catch(err=>alert('Virhe: '+err.message));
+}
+
+function cancelEditComment(docId, originalText, btn){
+  loadFirestoreComments();
+}
+
+function deleteComment(docId){
+  if(!devMode) return;
+  if(!confirm('Poistetaanko kommentti?')) return;
+  db.collection('comments').doc(docId).delete()
+    .then(()=>loadFirestoreComments())
+    .catch(err=>alert('Virhe: '+err.message));
 }
 
 function renderCardStars(){
@@ -920,7 +995,7 @@ document.getElementById('card-comment').addEventListener('input',()=>saveComment
 function show(id){ const el=document.getElementById(id); el.style.display=(id==='card-screen'||id==='deck-screen')?'flex':'block'; }
 function hide(id){ document.getElementById(id).style.display='none'; }
 
-applyDarkMode(); updateGroupUI(); updateOverviewVisibility(); init();
+applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); init();
 </script>
 </body>
 </html>
