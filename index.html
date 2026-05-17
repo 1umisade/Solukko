@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
-
+ 
 <!-- ▼ Parse .apkg directly in browser — no conversion needed -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
-
+ 
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -122,7 +122,7 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 </style>
 </head>
 <body>
-
+ 
 <div class="site-brand site-brand-card" id="site-brand" onclick="clickLogoHome()">
   <div class="site-brand-inner">
     <div class="brand-front">
@@ -138,7 +138,7 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     </div>
   </div>
 </div>
-
+ 
 <div class="settings-menu" id="settings-menu">
   <button class="gear-btn" onclick="toggleSettingsMenu()">⚙</button>
   <div class="settings-dropdown">
@@ -159,23 +159,23 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     </label>
   </div>
 </div>
-
+ 
 <div id="loading">ladataan…</div>
 <div id="conn-error"></div>
-
+ 
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
 </div>
-
+ 
 <div id="card-screen">
   <div class="top-bar">
     <button class="back-btn" id="back-btn" style="display:none">← kurssit</button>
     <span class="deck-name" id="deck-name" style="display:none"></span>
     <span class="remaining" id="remaining"></span>
   </div>
-
+ 
   <div id="review-deck-card"></div>
-
+ 
   <div class="flashcard" id="flashcard" onclick="showAnswer()">
     <div class="card-stars" id="card-stars"></div>
     <div class="card-content" id="question-content"></div>
@@ -183,42 +183,42 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
       <div class="card-content" id="answer-content"></div>
     </div>
   </div>
-
+ 
   <div class="btn-row" id="show-row">
     <button class="show-btn" onclick="showAnswer()">Näytä vastaus</button>
   </div>
-
+ 
   <div class="btn-row" id="grade-row" style="display:none">
     <button class="grade-btn btn-wrong" onclick="gradeCard(false)">Palataan asiaan... 🥀</button>
     <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
   </div>
-
+ 
   <div id="card-overview-grid"></div>
-
+ 
   <div class="comment-box">
     <textarea id="card-comment"
       placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla&#10;&#10;Maksamme myös 5 € palkkion luvallisista luentotallenteista."></textarea>
     <div class="comment-status" id="comment-status"></div>
   </div>
-
+ 
   <div class="group-tools">
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
   </div>
   <div class="group-scoreboard" id="group-scoreboard"></div>
 </div>
-
+ 
 <script>
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  CONFIGURE: rename your .apkg file to match this, or change  ║
 // ║  this constant to match your filename.                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 const APKG_FILE = 'TYKRY.apkg';
-
+ 
 // ── App state ─────────────────────────────────────────────────────────────────
 let allCards  = [];
 let allDeckNames = [];  // all deck names from DB, including empty ones
 let mediaMap  = {};   // filename → data:URL  (populated from .apkg media)
-
+ 
 let overviewGridVisible = JSON.parse(localStorage.getItem('anki-overview-visible') || 'true');
 let darkMode  = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
 let deckGroups = [], selectedGroup = null;
@@ -228,7 +228,7 @@ let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
 let groupMode = JSON.parse(localStorage.getItem('anki-group-mode') || 'false');
 let queue=[], reviewCards=[], currentOverviewIndex=0, cardGrades={};
 let currentCard=null, currentDeck='', coinAnimating=false;
-
+ 
 // ── Dark mode ─────────────────────────────────────────────────────────────────
 function applyDarkMode(){
   document.body.classList.toggle('dark-mode', darkMode);
@@ -239,7 +239,7 @@ function toggleDarkModeFromSwitch(){
   localStorage.setItem('anki-dark-mode',JSON.stringify(darkMode)); applyDarkMode();
 }
 function toggleSettingsMenu(){ document.getElementById('settings-menu')?.classList.toggle('open'); }
-
+ 
 // ── Viewport zoom ─────────────────────────────────────────────────────────────
 function updatePageZoomScale(){
   const vv=window.visualViewport;
@@ -252,7 +252,7 @@ if(window.visualViewport){
   ['resize','scroll'].forEach(e=>window.visualViewport.addEventListener(e,updatePageZoomScale));
 }
 updatePageZoomScale();
-
+ 
 // ── Audio ─────────────────────────────────────────────────────────────────────
 let audioCtx=null;
 function playCashSound(){
@@ -279,12 +279,12 @@ function playLogoClickSound(){
   osc.connect(gain); gain.connect(audioCtx.destination);
   osc.start(now); osc.stop(now+.17);
 }
-
+ 
 // ── Comment box ───────────────────────────────────────────────────────────────
 const commentBoxWrap=document.querySelector('.comment-box');
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
 document.addEventListener('click',e=>{ if(!document.querySelector('.comment-box').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
-
+ 
 // ── Logo ──────────────────────────────────────────────────────────────────────
 function clickLogoHome(){
   const brand=document.getElementById('site-brand'),logo=document.querySelector('.site-brand img');
@@ -292,7 +292,7 @@ function clickLogoHome(){
   if(logo){ logo.classList.remove('logo-clicked'); void logo.offsetWidth; logo.classList.add('logo-clicked'); }
   playLogoClickSound();
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  CORE: load .apkg directly from the repo                                     ║
 // ║  Uses JSZip (unzip) + sql.js (read SQLite) — both from CDN                   ║
@@ -302,7 +302,7 @@ function clickLogoHome(){
 // ║  ✓ Check "Support older Anki versions"  ← IMPORTANT                          ║
 // ║  ✓ Include media                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
-
+ 
 async function init(){
   show('loading');
   try {
@@ -310,15 +310,15 @@ async function init(){
     const SQL = await initSqlJs({
       locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
     });
-
+ 
     // 2. Fetch the .apkg from the repo
     const res = await fetch('./' + APKG_FILE);
     if (!res.ok) throw new Error(APKG_FILE + ' not found (' + res.status + ')');
     const buf = await res.arrayBuffer();
-
+ 
     // 3. Unzip it
     const zip = await JSZip.loadAsync(buf);
-
+ 
     // 4. Load media index → build filename → data:URL map
     const mediaFile = zip.file('media');
     if (mediaFile) {
@@ -338,21 +338,21 @@ async function init(){
         }));
       }
     }
-
+ 
     // 5. Open SQLite — try .anki21 first (standard export), then .anki2 fallback
     const dbFile = zip.file('collection.anki21') || zip.file('collection.anki2');
     if (!dbFile) throw new Error('Ei löydy collection.anki21 eikä collection.anki2 tiedostoa.');
     const dbBuf = await dbFile.async('arraybuffer');
     const db    = new SQL.Database(new Uint8Array(dbBuf));
-
+ 
     // 6. Parse all cards from the DB
     allCards = parseAnkiDB(db);
     allDeckNames = Object.values(JSON.parse(db.exec('SELECT decks FROM col')[0].values[0][0]))
       .map(d => d.name).filter(Boolean);
     db.close();
-
+ 
     await loadDecks();
-
+ 
   } catch(e) {
     const d = document.getElementById('conn-error');
     d.style.display = 'block';
@@ -362,31 +362,31 @@ async function init(){
   }
   hide('loading');
 }
-
+ 
 // ── Parse Anki SQLite (old schema: col table has decks/models as JSON blobs) ──
 function parseAnkiDB(db) {
   // Read deck map and model map from col table
   const colRows = db.exec('SELECT decks, models FROM col');
   if (!colRows.length) return [];
-
+ 
   const decksJson  = colRows[0].values[0][0];
   const modelsJson = colRows[0].values[0][1];
   const decksData  = JSON.parse(decksJson);
   const modelsData = JSON.parse(modelsJson);
-
+ 
   // deck id → full name (already uses :: as separator in old format)
   const deckMap = {};
   Object.values(decksData).forEach(d => {
     if (d.id != null && d.name) deckMap[String(d.id)] = d.name;
   });
-
+ 
   // model id → field names and model name
   const modelFields = {}, modelNames = {};
   Object.entries(modelsData).forEach(([mid, m]) => {
     modelNames[mid]  = m.name || '';
     modelFields[mid] = (m.flds || []).map(f => f.name);
   });
-
+ 
   // Notes
   const noteRows = db.exec('SELECT id, mid, flds, tags FROM notes');
   const notes = {};
@@ -404,7 +404,7 @@ function parseAnkiDB(db) {
       };
     });
   }
-
+ 
   // Cards
   const cardRows = db.exec('SELECT id, nid, did, ord, due, type, queue FROM cards');
   const cards = [];
@@ -430,18 +430,18 @@ function parseAnkiDB(db) {
   }
   return cards;
 }
-
+ 
 // ── LOAD DECKS from parsed allCards ──────────────────────────────────────────
 async function loadDecks(){
   const seen=new Set(), names=[];
-
+ 
   // First add decks from the DB deck list (catches empty decks too)
   allDeckNames.forEach(d=>{
     if(!d.startsWith('TYKRY::')) return;
     const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0];
     if(!seen.has(top)){ seen.add(top); names.push(top); }
   });
-
+ 
   // Also sweep cards in case DB deck list missed anything
   allCards.forEach(card=>{
     const d=card.deckName||'';
@@ -449,7 +449,7 @@ async function loadDecks(){
     const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0];
     if(!seen.has(top)){ seen.add(top); names.push(top); }
   });
-
+ 
   // Debug: show what decks were found
   if(names.length === 0){
     const d = document.getElementById('conn-error');
@@ -461,15 +461,15 @@ async function loadDecks(){
       `Varmista että pakkaasi vie nimellä <code>TYKRY</code> ja alikansiot alkavat <code>TYKRY::</code>-etuliitteellä.`;
     return;
   }
-
+ 
   const list=document.getElementById('deck-list');
   list.innerHTML='';
   await document.fonts.ready;
-
+ 
   const canvas=document.createElement('canvas');
   const ctx2=canvas.getContext('2d');
   ctx2.font='700 22px Lora, Georgia, serif';
-
+ 
   const decks=names.map(deck=>{
     const shortName=deck.replace('TYKRY::','');
     const courseCode=(shortName.match(/\(([^h][^t][^t][^p].*?)\)/)||[])[1]||'';
@@ -480,12 +480,12 @@ async function loadDecks(){
     if(cleanName.includes('Immunologia'))       bgVideo='Mitosis in an animal cell Under the Microscope.mp4';
     return {deck,cleanName,courseCode,bgVideo};
   });
-
+ 
   let widestTitle=0;
   decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.max(260,widestTitle+42));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
-
+ 
   decks.forEach(item=>{
     const btn=document.createElement('button');
     btn.className='deck-btn'; btn.style.width=finalCardWidth+'px';
@@ -505,7 +505,7 @@ async function loadDecks(){
   });
   hide('card-screen'); show('deck-screen');
 }
-
+ 
 // ── START DECK ────────────────────────────────────────────────────────────────
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
@@ -520,7 +520,7 @@ async function startDeck(deckName){
   currentOverviewIndex=0; cardGrades={};
   show('card-screen'); nextCard(); hide('loading');
 }
-
+ 
 // ── FIX IMAGES: replace src with data:URL from mediaMap ──────────────────────
 async function fixImages(html){
   // Replace any <img src="filename"> with the preloaded data URL
@@ -530,10 +530,10 @@ async function fixImages(html){
     return mediaMap[filename] ? `${pre}${mediaMap[filename]}${post}` : match;
   });
 }
-
+ 
 // ── Card rendering helpers ────────────────────────────────────────────────────
 function saveGroups(){ localStorage.setItem('anki-groups',JSON.stringify(groups)); }
-
+ 
 function extractBody(html){
   const styles=[];
   const stripped=html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi,(_,css)=>{ styles.push(css); return ''; })
@@ -563,7 +563,7 @@ function renderClozeText(text,showAnswers){
   if(hasBullets) return html.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>`<div class="enhanced-line">${l}</div>`).join('');
   return `<div class="enhanced-line">${html.replace(/\s*\r?\n\s*/g,' ')}</div>`;
 }
-
+ 
 function renderReviewDeckCard(deckName){
   const box=document.getElementById('review-deck-card'); if(!box) return;
   const shortName=deckName.replace('TYKRY::','');
@@ -593,7 +593,7 @@ function renderReviewDeckCard(deckName){
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
   }
 }
-
+ 
 async function renderCurrentCard(){
   const card=currentCard;
   const q=extractBody(card.question||'');
@@ -634,7 +634,7 @@ async function renderCurrentCard(){
   document.getElementById('grade-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
 }
-
+ 
 async function nextCard(){
   if(!queue.length){
     currentCard=null;
@@ -649,11 +649,11 @@ async function nextCard(){
   await renderCurrentCard();
 }
 async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard(); }
-
+ 
 function commentKey(c){ return `anki-card-comment-${c.cardId||c.noteId}`; }
 function loadCommentForCard(){ document.getElementById('card-comment').value=localStorage.getItem(commentKey(currentCard))||''; document.getElementById('comment-status').textContent=''; }
 function saveCommentForCard(){ if(currentCard) localStorage.setItem(commentKey(currentCard),document.getElementById('card-comment').value); }
-
+ 
 function renderCardStars(){
   const box=document.getElementById('card-stars'); if(!box||!currentCard) return;
   const count=(currentCard.tags||[]).join(' ').match(/★/g)?.length||0;
@@ -663,7 +663,7 @@ function renderCardStars(){
   else if(count===1) box.title='Tuskin tentissä';
   else box.removeAttribute('title');
 }
-
+ 
 function getSubdeckName(card,parentDeck){
   const deck=card.deckName||'';
   if(deck===parentDeck||!deck.startsWith(parentDeck+'::')) return {name:'Pääpakka',link:null};
@@ -685,7 +685,7 @@ function buildDeckGroups(cards,parentDeck){
   });
   grps.sort(naturalSubdeckSort); return grps;
 }
-
+ 
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
   grid.innerHTML=deckGroups.map(group=>{
@@ -704,7 +704,7 @@ function renderCardOverview(){
 function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); nextCardFromCurrent(); }
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input').checked; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); const t=document.getElementById('overview-toggle-input'); if(t) t.checked=overviewGridVisible; if(grid) grid.style.display=overviewGridVisible?'flex':'none'; }
-
+ 
 function updateGroupUI(){
   const board=document.getElementById('group-scoreboard'),addBtn=document.querySelector('.group-tools');
   document.getElementById('mode-toggle-input').checked=groupMode;
@@ -746,7 +746,7 @@ function animateCoinToGroup(groupIndex,callback){
   ],{duration:650,easing:'cubic-bezier(.2,.8,.2,1)'});
   anim.onfinish=()=>{ coin.remove(); playCashSound(); callback(); };
 }
-
+ 
 function showAnswer(){
   if(!currentCard) return;
   if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
@@ -766,7 +766,7 @@ function gradeCard(correct){
   if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
   selectedGroup=null; updateGroupUI(); nextCard();
 }
-
+ 
 document.getElementById('back-btn').onclick=showDecks;
 document.addEventListener('click',e=>{
   if(e.target.closest('.group-card')||e.target.closest('.overview-card')||e.target.closest('.flashcard')||
@@ -786,11 +786,15 @@ document.addEventListener('keydown',e=>{
   if(gv){ if(e.key==='ArrowLeft'||e.key==='1') gradeCard(false); if(e.key==='ArrowRight'||e.key==='2') gradeCard(true); }
 });
 document.getElementById('card-comment').addEventListener('input',()=>saveCommentForCard());
-
+ 
 function show(id){ const el=document.getElementById(id); el.style.display=(id==='card-screen'||id==='deck-screen')?'flex':'block'; }
 function hide(id){ document.getElementById(id).style.display='none'; }
+    
+
+
 
 applyDarkMode(); updateGroupUI(); updateOverviewVisibility(); init();
 </script>
 </body>
 </html>
+ 
