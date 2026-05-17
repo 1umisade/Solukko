@@ -226,7 +226,7 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     <div class="comment-box" id="comment-box">
       <textarea id="card-comment"
         placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla&#10;&#10;Maksamme myös 5 € palkkion luvallisista luentotallenteista."></textarea>
-      <button class="comment-submit-btn" onclick="submitComment()">✓</button>
+      <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
       <div class="comment-status" id="comment-status"></div>
     </div>
     <div class="comment-display" id="comment-display"></div>
@@ -690,10 +690,8 @@ async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard();
 
 function commentKey(c){ return `anki-card-comment-${c.cardId||c.noteId}`; }
 function loadCommentForCard(){
-  const saved=localStorage.getItem(commentKey(currentCard))||'';
-  document.getElementById('card-comment').value=saved;
+  document.getElementById('card-comment').value='';
   document.getElementById('comment-status').textContent='';
-  showCommentDisplay(saved);
   loadFirestoreComments();
 }
 function saveCommentForCard(){ if(currentCard) localStorage.setItem(commentKey(currentCard),document.getElementById('card-comment').value); }
@@ -724,12 +722,10 @@ function loadFirestoreComments(){
     }).catch(()=>{});
 }
 
-function submitComment(){
+function submitComment(e){
+  if(e) e.stopPropagation();
   const text=document.getElementById('card-comment').value.trim();
   if(!text) return;
-  saveCommentForCard();
-  document.querySelector('.comment-box').classList.remove('open');
-  showCommentDisplay(text);
 
   // Save to Firestore
   db.collection('comments').add({
@@ -745,6 +741,10 @@ function submitComment(){
   formData.append('entry.1676323203', String(currentCard?.cardId||currentCard?.noteId||''));
   formData.append('entry.1452183303', currentDeck||'');
   fetch('https://docs.google.com/forms/d/1a1eLAkk_gj1tK6rlXHAI5Ar0czBCqdWEG9CqKz8zg2w/formResponse',{method:'POST',mode:'no-cors',body:formData});
+
+  // Clear textarea and collapse box
+  document.getElementById('card-comment').value='';
+  document.querySelector('.comment-box').classList.remove('open');
 }
 
 function renderCardStars(){
