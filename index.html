@@ -148,7 +148,7 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 @media (max-width: 760px) {
   #review-deck-card { display: none; }
-  .comment-area { position: static; width: 100%; margin-top: 1rem; }
+  .comment-area { position: static; width: 100%; margin-top: 0.5rem; }
   #card-screen { margin-top: 20px; }
 }
 </style>
@@ -214,7 +214,7 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 
   <div id="review-deck-card"></div>
 
-  <div class="flashcard" id="flashcard" onclick="showAnswer()">
+  <div class="flashcard" id="flashcard">
     <div class="card-stars" id="card-stars"></div>
     <div class="card-content" id="question-content"></div>
     <div class="answer-section" id="answer-section">
@@ -231,8 +231,6 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
   </div>
 
-  <div id="card-overview-grid"></div>
-
   <div class="comment-area">
     <div class="comment-box" id="comment-box">
       <textarea id="card-comment"
@@ -243,6 +241,8 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     <div class="comment-display" id="comment-display"></div>
     <div class="comment-feed" id="comment-feed"></div>
   </div>
+
+  <div id="card-overview-grid"></div>
 
   <div class="group-tools">
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
@@ -285,6 +285,7 @@ function toggleDevModeFromSwitch(){
     devMode=false;
     localStorage.setItem('anki-dev-mode',JSON.stringify(false));
   }
+  if(currentCard) loadFirestoreComments();
 }
 let deckGroups = [], selectedGroup = null;
 let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
@@ -571,6 +572,8 @@ async function loadDecks(){
     const video=btn.querySelector('.deck-video');
     btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); });
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
+    btn.addEventListener('touchstart',()=>{ video.currentTime=0; video.play().catch(()=>{}); },{passive:true});
+    btn.addEventListener('touchend',()=>{ setTimeout(()=>{ video.pause(); video.currentTime=0; },2000); },{passive:true});
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
   });
@@ -590,6 +593,7 @@ async function startDeck(deckName){
   deckGroups=buildDeckGroups(reviewCards,deckName);
   currentOverviewIndex=0; cardGrades={};
   show('card-screen'); nextCard(); hide('loading');
+  document.getElementById('site-brand').style.display='none';
 }
 
 // ── FIX IMAGES: replace src with data:URL from mediaMap ──────────────────────
@@ -990,18 +994,13 @@ document.addEventListener('click',e=>{
 });
 function showDecks(){
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
+  document.getElementById('site-brand').style.display='';
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
   const grid=document.getElementById('card-overview-grid');
   if(grid) grid.dataset.deckName='';
   saveGroups(); updateGroupUI(); hide('card-screen'); loadDecks();
 }
-document.addEventListener('keydown',e=>{
-  const gv=document.getElementById('grade-row').style.display!=='none';
-  const sv=document.getElementById('show-row').style.display!=='none';
-  if(e.code==='Space'&&sv){ e.preventDefault(); showAnswer(); }
-  if(gv){ if(e.key==='ArrowLeft'||e.key==='1') gradeCard(false); if(e.key==='ArrowRight'||e.key==='2') gradeCard(true); }
-});
 document.getElementById('card-comment').addEventListener('input',()=>saveCommentForCard());
 
 function show(id){ const el=document.getElementById(id); el.style.display=(id==='card-screen'||id==='deck-screen')?'flex':'block'; }
