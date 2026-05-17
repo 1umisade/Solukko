@@ -28,7 +28,8 @@ const db = firebase.firestore();
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + 140px) 1rem 2.5rem; }
+html, body { overflow-x: hidden; }
+body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + min(140px, 40vw)) 1rem 2.5rem; }
 #conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; }
 #conn-error strong { color: #c0392b; }
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
@@ -96,14 +97,14 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
 .btn-wrong { background: #c0392b; }
 .btn-right { background: #27ae60; }
-.site-brand { position: absolute; top: 0; left: 50%; width: calc(560px * 0.8); height: calc(320px * 0.8); perspective: 1200px; transform: translate(calc(-50% + var(--vv-left, 0px)), calc(var(--vv-top, 0px) + 18px)) scale(calc(1 / var(--page-zoom, 1))); transform-origin: top left; z-index: 99999; cursor: pointer; }
+.site-brand { position: absolute; top: 0; left: 50%; width: min(calc(560px * 0.8), 90vw); height: min(calc(320px * 0.8), calc(90vw * 320 / 560)); perspective: 1200px; transform: translate(calc(-50% + var(--vv-left, 0px)), calc(var(--vv-top, 0px) + 18px)) scale(calc(1 / var(--page-zoom, 1))); transform-origin: top left; z-index: 99999; cursor: pointer; }
 .site-brand-inner { position: relative; width: 100%; height: 100%; will-change: transform; transform-style: preserve-3d; transition: transform 0.55s ease; }
 .site-brand.flipped .site-brand-inner { transform: rotateY(180deg); }
 .brand-front, .brand-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 4px 18px rgba(0,0,0,0.12); }
 .brand-front { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .brand-back { transform: rotateY(180deg); padding: 1.5rem; color: #56533c; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.45; text-align: left; overflow: hidden; }
-.site-brand img { width: 120px; height: 120px; object-fit: contain; }
-.brand-front span { font-family: "EB Garamond", Garamond, serif; font-size: 5rem; font-weight: 600; color: #56533c; letter-spacing: -0.03em; }
+.site-brand img { width: min(120px, 20vw); height: min(120px, 20vw); object-fit: contain; }
+.brand-front span { font-family: "EB Garamond", Garamond, serif; font-size: min(5rem, 15vw); font-weight: 600; color: #56533c; letter-spacing: -0.03em; }
 body.dark-mode .brand-front span { color: #fff2cb; }
 .site-brand img.logo-clicked { animation: logoClickPop 0.34s ease; }
 @keyframes logoClickPop { 0%{transform:scale(1) rotate(0deg)} 35%{transform:scale(0.94) rotate(-2deg)} 70%{transform:scale(1.05) rotate(1deg)} 100%{transform:scale(1) rotate(0deg)} }
@@ -145,6 +146,11 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 @keyframes moneyBounce { 0%{transform:scale(1)} 35%{transform:scale(1.28)} 65%{transform:scale(0.96)} 100%{transform:scale(1)} }
 #loading { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #9b8f80; display: none; animation: pulse 1.2s ease infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@media (max-width: 760px) {
+  #review-deck-card { display: none; }
+  .comment-area { position: static; width: 100%; margin-top: 1rem; }
+  #card-screen { margin-top: 20px; }
+}
 </style>
 </head>
 <body>
@@ -287,6 +293,7 @@ let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
 let groupMode = JSON.parse(localStorage.getItem('anki-group-mode') || 'false');
 let queue=[], reviewCards=[], currentOverviewIndex=0, cardGrades={};
 let currentCard=null, currentDeck='', coinAnimating=false;
+let commentsUnsubscribe=null;
 
 // ── User identity (for comment ownership) ────────────────────────────────────
 function getUserId(){
@@ -737,13 +744,17 @@ function showCommentDisplay(text){
 function loadFirestoreComments(){
   const feed=document.getElementById('comment-feed');
   if(!feed||!currentCard) return;
-  feed.innerHTML='<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#a09080;padding:4px;">ladataan kommentit…</div>';
+
+  // Unsubscribe previous listener
+  if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
+
+  feed.innerHTML='';
   const cardId=String(currentCard.cardId||currentCard.noteId||'');
-  db.collection('comments').where('cardId','==',cardId)
-    .get().then(snap=>{
+
+  commentsUnsubscribe = db.collection('comments').where('cardId','==',cardId)
+    .onSnapshot(snap=>{
       feed.innerHTML='';
       if(snap.empty) return;
-      // sort by timestamp client-side (no compound index needed)
       const docs=[...snap.docs].sort((a,b)=>{
         const ta=a.data().timestamp?.toMillis?.()|| 0;
         const tb=b.data().timestamp?.toMillis?.()|| 0;
@@ -754,17 +765,17 @@ function loadFirestoreComments(){
         const el=document.createElement('div');
         el.className='comment-item';
         el.dataset.docId=doc.id;
-        const isOwn = d.userId && d.userId===getUserId();
-        const canEdit = isOwn || devMode;
-        const canDelete = devMode;
-        const btns = `
-          ${canEdit ? `<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>` : ''}
-          ${canDelete ? `<button onclick="deleteComment('${doc.id}')" style="float:right;background:none;border:none;color:#c0392b;cursor:pointer;font-size:0.85rem;padding:0;">🗑</button>` : ''}
+        const isOwn=d.userId&&d.userId===getUserId();
+        const canEdit=isOwn||devMode;
+        const canDelete=devMode;
+        const btns=`
+          ${canEdit?`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:''}
+          ${canDelete?`<button onclick="deleteComment('${doc.id}')" style="float:right;background:none;border:none;color:#c0392b;cursor:pointer;font-size:0.85rem;padding:0;">🗑</button>`:''}
         `;
         el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span></div>`;
         feed.appendChild(el);
       });
-    }).catch(err=>{
+    }, err=>{
       feed.innerHTML=`<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#c0392b;padding:4px;">Virhe: ${err.message}</div>`;
     });
 }
@@ -978,6 +989,7 @@ document.addEventListener('click',e=>{
   selectedGroup=null; updateGroupUI();
 });
 function showDecks(){
+  if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
   const grid=document.getElementById('card-overview-grid');
