@@ -28,7 +28,7 @@ const db = firebase.firestore();
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + min(140px, 40vw)) 1rem 2.5rem; }
+body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; }
 #conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; }
 #conn-error strong { color: #c0392b; }
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
@@ -80,6 +80,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .comment-box.open::before { opacity: 0; pointer-events: none; }
 .comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #27ae60; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
+.comment-box.open .comment-img-btn { display: flex; align-items: center; justify-content: center; }
 .comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
 .comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
@@ -95,7 +96,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
 .btn-wrong { background: #c0392b; }
 .btn-right { background: #27ae60; }
-.site-brand { position: absolute; top: 0; left: 50%; width: min(calc(560px * 0.8), 90vw); height: min(calc(320px * 0.8), calc(90vw * 320 / 560)); perspective: 1200px; transform: translate(calc(-50% + var(--vv-left, 0px)), calc(var(--vv-top, 0px) + 18px)) scale(calc(1 / var(--page-zoom, 1))); transform-origin: top left; z-index: 9999; cursor: pointer; }
+.site-brand { width: min(calc(560px * 0.8), 90vw); height: min(calc(320px * 0.8), calc(90vw * 320 / 560)); perspective: 1200px; z-index: 9999; cursor: pointer; margin: 0 auto; }
 .site-brand-inner { position: relative; width: 100%; height: 100%; will-change: transform; transform-style: preserve-3d; transition: transform 0.55s ease; }
 .site-brand.flipped .site-brand-inner { transform: rotateY(180deg); }
 .brand-front, .brand-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 4px 18px rgba(0,0,0,0.12); }
@@ -142,19 +143,39 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .group-card.coin-winner .group-money { animation: moneyBounce 0.38s ease-out; }
 @keyframes towerBounce { 0%{transform:translateY(0) scale(1)} 35%{transform:translateY(-14px) scale(1.08)} 65%{transform:translateY(3px) scale(0.98)} 100%{transform:translateY(0) scale(1)} }
 @keyframes moneyBounce { 0%{transform:scale(1)} 35%{transform:scale(1.28)} 65%{transform:scale(0.96)} 100%{transform:scale(1)} }
-#loading { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #9b8f80; display: none; animation: pulse 1.2s ease infinite; }
+@keyframes cardSlideOutLeft { from{transform:translateX(0);opacity:1} to{transform:translateX(-50px);opacity:0} }
+@keyframes cardSlideInRight { from{transform:translateX(50px);opacity:0} to{transform:translateX(0);opacity:1} }
+@keyframes cardSlideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(50px);opacity:0} }
+@keyframes cardSlideInLeft { from{transform:translateX(-50px);opacity:0} to{transform:translateX(0);opacity:1} }
+.card-out-left { animation: cardSlideOutLeft 0.18s ease forwards; pointer-events:none; }
+.card-in-right { animation: cardSlideInRight 0.18s ease forwards; }
+.card-out-right { animation: cardSlideOutRight 0.18s ease forwards; pointer-events:none; }
+.card-in-left { animation: cardSlideInLeft 0.18s ease forwards; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-body.reviewing { padding-top: 1.5rem; }
+body.reviewing { padding-top: 0; }
 @media (max-width: 600px) {
   #review-deck-card { display: none; }
   .comment-area { position: static; width: 100%; margin-top: 0; }
-  #deck-screen { padding-top: calc(18px + min(256px, 90vw * 4 / 7) * 1.2); align-items: center; }
   .deck-list { flex-direction: column; gap: calc(min(256px, 90vw * 4 / 7) / 5); align-items: center; }
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
 }
 </style>
 </head>
 <body>
+
+<!-- Global top bar - scrolls with page, no fixed/absolute -->
+<div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
+  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.1rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);display:none;align-items:center;justify-content:center;">←</button>
+  <div style="flex:1"></div>
+  <div id="gear-btn-wrap" style="position:relative;display:none;">
+    <button onclick="toggleSettingsMenu()" style="width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);">⚙</button>
+    <div id="settings-dropdown-inline" style="position:absolute;top:58px;right:0;display:none;flex-direction:column;gap:10px;align-items:flex-end;z-index:9999;">
+      <label class="iphone-toggle-wrap"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Joukkupeli</span></label>
+      <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
+      <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
+    </div>
+  </div>
+</div>
 
 <div class="site-brand site-brand-card" id="site-brand" onclick="clickLogoHome()">
   <div class="site-brand-inner">
@@ -163,12 +184,11 @@ body.reviewing { padding-top: 1.5rem; }
       <span>Solukko</span>
     </div>
     <div class="brand-back">
-      Solukko.com on biotieteilijöiden oppimissivusto, jossa kurssit voi opiskella valmiiden kysymyskorttien avulla.<br>
-      • Käyttö täysin ilmaista<br>
+      Tenttipäivä lähenee? Solukko.comissa voit opiskella biokemian yliopistokurssit valmiiden kysymyskorttien avulla. <br><br>
+      • Käyttö ilmaista<br>
       • Ei kirjautumista<br>
-      • Kysymyksiin merkitty tenttitodennäköisyys<br>
+      • Tärkeät tenttikysymykset merkitty<br>
       • Palkintoja sisällöntuottajille<br>
-      • Enemmän opiskelua, vähemmän säätämistä - Solukossa opiskelet jo yhdellä painalluksella!
     </div>
   </div>
 </div>
@@ -183,19 +203,23 @@ body.reviewing { padding-top: 1.5rem; }
 
 <div id="card-screen">
   <div class="top-bar">
-    <button id="back-arrow-inline" onclick="showDecks()" style="width:42px;height:42px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1rem;color:#56533c;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;padding:0;font-family:'Lora',Georgia,serif;flex-shrink:0;"><span style="margin-top:-3px;">←</span></button>
-    <span class="remaining" id="remaining" style="flex:1;text-align:center;"></span>
-    <button class="gear-btn-inline" onclick="toggleSettingsMenu()" style="width:42px;height:42px;border:1px solid #d4cec4;border-radius:50%;background:#fffef9;color:#56533c;font-size:1.35rem;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);flex-shrink:0;position:relative;">⚙
-      <div class="settings-dropdown" id="settings-dropdown-inline" style="position:absolute;top:52px;right:0;display:none;flex-direction:column;gap:10px;align-items:flex-end;z-index:9999;">
-        <label class="iphone-toggle-wrap"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Näytä joukkueet</span></label>
-        <label class="iphone-toggle-wrap"><input id="overview-toggle-input2" type="checkbox" onchange="toggleOverviewGridFromSwitch()"><span class="iphone-toggle"></span><span>Näytä kortit</span></label>
-        <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
-        <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
-      </div>
-    </button>
+    <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
   </div>
 
   <div id="review-deck-card"></div>
+
+  <div class="comment-area">
+    <div class="comment-box" id="comment-box">
+      <textarea id="card-comment"
+        placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla"></textarea>
+      <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
+      <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
+      <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
+      <div class="comment-status" id="comment-status"></div>
+    </div>
+    <div class="comment-display" id="comment-display"></div>
+    <div class="comment-feed" id="comment-feed"></div>
+  </div>
 
   <div class="flashcard" id="flashcard">
     <div class="card-stars" id="card-stars"></div>
@@ -214,17 +238,6 @@ body.reviewing { padding-top: 1.5rem; }
     <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
   </div>
 
-  <div class="comment-area">
-    <div class="comment-box" id="comment-box">
-      <textarea id="card-comment"
-        placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla"></textarea>
-      <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
-      <div class="comment-status" id="comment-status"></div>
-    </div>
-    <div class="comment-display" id="comment-display"></div>
-    <div class="comment-feed" id="comment-feed"></div>
-  </div>
-
   <div id="card-overview-grid"></div>
 
   <div class="group-tools">
@@ -233,8 +246,8 @@ body.reviewing { padding-top: 1.5rem; }
   <div class="group-scoreboard" id="group-scoreboard"></div>
 </div>
 
+<input type="file" id="comment-img-input" accept="image/*" style="display:none" onchange="handleCommentImage(this)">
 <script>
-// ╔══════════════════════════════════════════════════════════════╗
 // ║  CONFIGURE: rename your .apkg file to match this, or change  ║
 // ║  this constant to match your filename.                        ║
 // ╚══════════════════════════════════════════════════════════════╝
@@ -273,7 +286,7 @@ let deckGroups = [], selectedGroup = null;
 let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
   {name:'A',score:0},{name:'B',score:0},{name:'C',score:0}
 ]));
-let groupMode = JSON.parse(localStorage.getItem('anki-group-mode') || 'false');
+let groupMode = false;
 let queue=[], reviewCards=[], currentOverviewIndex=0, cardGrades={};
 let currentCard=null, currentDeck='', coinAnimating=false;
 let commentsUnsubscribe=null;
@@ -576,10 +589,14 @@ async function startDeck(deckName){
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   reviewCards=infos; queue=infos.slice();
   deckGroups=buildDeckGroups(reviewCards,deckName);
-  currentOverviewIndex=0; cardGrades={};
+  currentOverviewIndex=0;
+  const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
+  cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
+  if(window.innerWidth <= 600) setTimeout(()=>document.getElementById('flashcard')?.scrollIntoView({behavior:'instant', block:'start'}), 50);
   document.getElementById('site-brand').style.display='none';
-  
+  document.getElementById('back-btn-fixed').style.display='flex';
+  document.getElementById('gear-btn-wrap').style.display='block';
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
 }
@@ -699,7 +716,12 @@ async function renderCurrentCard(){
   document.getElementById('show-row').style.display='flex';
   document.getElementById('grade-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
-  document.getElementById('flashcard').scrollIntoView({behavior:'instant', block:'start'});
+  if(window.innerWidth <= 600) document.getElementById('flashcard').scrollIntoView({behavior:'instant', block:'start'});
+  const fc=document.getElementById('flashcard');
+  fc.classList.remove('card-in-right','card-in-left');
+  void fc.offsetWidth;
+  fc.classList.add('card-in-right');
+  
   // Align side panels with flashcard top
   const ft = document.getElementById('flashcard').offsetTop;
   document.getElementById('review-deck-card').style.top = ft + 'px';
@@ -760,14 +782,13 @@ function loadFirestoreComments(){
         const el=document.createElement('div');
         el.className='comment-item';
         el.dataset.docId=doc.id;
-        const isOwn=d.userId&&d.userId===getUserId();
-        const canEdit=isOwn||devMode;
-        const canDelete=devMode;
+        const isOwn = d.userId && d.userId===getUserId();
+        const canEdit = isOwn || devMode;
         const btns=`
           ${canEdit?`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:''}
-          ${canDelete?`<button onclick="deleteComment('${doc.id}')" style="float:right;background:none;border:none;color:#c0392b;cursor:pointer;font-size:0.85rem;padding:0;">🗑</button>`:''}
         `;
-        el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span></div>`;
+        const imgHtml = d.imageData ? `<img src="${d.imageData}" style="max-width:100%;border-radius:8px;margin-top:6px;display:block;">` : '';
+        el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div>`;
         feed.appendChild(el);
       });
     }, err=>{
@@ -775,29 +796,64 @@ function loadFirestoreComments(){
     });
 }
 
+// ── Comment image handling ────────────────────────────────────────────────────
+let pendingCommentImage = null;
+
+function handleCommentImage(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxW = 800;
+      const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingCommentImage = canvas.toDataURL('image/jpeg', 0.7);
+      const preview = document.getElementById('comment-img-preview');
+      preview.style.display = 'block';
+      preview.innerHTML = `<img src="${pendingCommentImage}" style="max-width:100%;border-radius:8px;margin-top:4px;"><button onclick="clearCommentImage()" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:0.8rem;">✕ poista kuva</button>`;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function clearCommentImage(){
+  pendingCommentImage = null;
+  const preview = document.getElementById('comment-img-preview');
+  if(preview){ preview.style.display='none'; preview.innerHTML=''; }
+}
+
 function submitComment(e){
   if(e) e.stopPropagation();
-  const text=document.getElementById('card-comment').value.trim();
-  if(!text) return;
+  const text = document.getElementById('card-comment').value.trim();
+  if(!text && !pendingCommentImage) return;
 
-  // Save to Firestore
-  db.collection('comments').add({
-    text,
+  const payload = {
+    text: text||'',
     cardId: String(currentCard?.cardId||currentCard?.noteId||''),
     deck: currentDeck||'',
     userId: getUserId(),
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>setTimeout(loadFirestoreComments, 500)).catch(()=>{});
+  };
+  if(pendingCommentImage) payload.imageData = pendingCommentImage;
 
-  // Also POST to Google Forms as backup
-  const formData=new FormData();
-  formData.append('entry.1785235392', text);
+  db.collection('comments').add(payload)
+    .then(()=>setTimeout(loadFirestoreComments, 500)).catch(()=>{});
+
+  const formData = new FormData();
+  formData.append('entry.1785235392', text||'[kuva]');
   formData.append('entry.1676323203', String(currentCard?.cardId||currentCard?.noteId||''));
   formData.append('entry.1452183303', currentDeck||'');
   fetch('https://docs.google.com/forms/d/1a1eLAkk_gj1tK6rlXHAI5Ar0czBCqdWEG9CqKz8zg2w/formResponse',{method:'POST',mode:'no-cors',body:formData});
 
-  // Clear textarea and collapse box
-  document.getElementById('card-comment').value='';
+  document.getElementById('card-comment').value = '';
+  clearCommentImage();
   document.querySelector('.comment-box').classList.remove('open');
 }
 
@@ -809,9 +865,10 @@ function editComment(docId, btn){
   // Replace with inline editor
   wrap.innerHTML=`
     <textarea style="width:100%;font-family:'Lora',serif;font-size:0.82rem;border:1px solid #d4cec4;border-radius:8px;padding:0.5rem;resize:vertical;min-height:60px;background:#fffef9;color:#1a1612;">${currentText}</textarea>
-    <div style="display:flex;gap:6px;margin-top:6px;">
+    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
       <button onclick="saveEditComment('${docId}',this)" style="background:#27ae60;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Tallenna</button>
-      <button onclick="cancelEditComment('${docId}','${currentText.replace(/'/g,"\\'")}',this)" style="background:none;border:1px solid #d4cec4;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Peruuta</button>
+      <button onclick="cancelEditComment(this)" style="background:none;border:1px solid #d4cec4;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Peruuta</button>
+      <button onclick="deleteComment('${docId}')" style="background:#c0392b;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;margin-left:auto;">Poista</button>
     </div>`;
 }
 
@@ -824,12 +881,11 @@ function saveEditComment(docId, btn){
     .catch(err=>alert('Virhe: '+err.message));
 }
 
-function cancelEditComment(docId, originalText, btn){
+function cancelEditComment(btn){
   loadFirestoreComments();
 }
 
 function deleteComment(docId){
-  if(!devMode) return;
   if(!confirm('Poistetaanko kommentti?')) return;
   db.collection('comments').doc(docId).delete()
     .then(()=>loadFirestoreComments())
@@ -912,11 +968,12 @@ function renderCardOverview(){
 }
 function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); nextCardFromCurrent(); }
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2').checked; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
-function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); const t=document.getElementById('overview-toggle-input2'); if(t) t.checked=overviewGridVisible; if(grid) grid.style.display=overviewGridVisible?'flex':'none'; }
+function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
 
 function updateGroupUI(){
   const board=document.getElementById('group-scoreboard'),addBtn=document.querySelector('.group-tools');
-  document.getElementById('mode-toggle-input2').checked=groupMode;
+  const mt=document.getElementById('mode-toggle-input2'); if(mt) mt.checked=groupMode;
+  if(!board) return;
   if(groupMode){ board.classList.remove('disabled'); if(addBtn) addBtn.style.display='flex'; }
   else{ board.classList.add('disabled'); selectedGroup=null; if(addBtn) addBtn.style.display='none'; }
   board.innerHTML='';
@@ -965,15 +1022,24 @@ function showAnswer(){
 }
 function gradeCard(correct){
   if(coinAnimating) return;
-  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); }
-  if(correct&&groupMode){
-    if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
-    const wg=selectedGroup; coinAnimating=true;
-    animateCoinToGroup(wg,()=>{ groups[wg].score+=1; saveGroups(); updateGroupUI(); bounceWinningGroup(wg); setTimeout(()=>{ coinAnimating=false; selectedGroup=null; updateGroupUI(); nextCard(); },450); });
-    return;
-  }
-  if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
-  selectedGroup=null; updateGroupUI(); nextCard();
+  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); localStorage.setItem('solukko-grades-'+currentDeck, JSON.stringify(cardGrades)); }
+
+  // Slide out
+  const fc=document.getElementById('flashcard');
+  fc.classList.add(correct?'card-out-left':'card-out-right');
+
+  const doNext=()=>{
+    fc.classList.remove('card-out-left','card-out-right');
+    if(correct&&groupMode){
+      if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
+      const wg=selectedGroup; coinAnimating=true;
+      animateCoinToGroup(wg,()=>{ groups[wg].score+=1; saveGroups(); updateGroupUI(); bounceWinningGroup(wg); setTimeout(()=>{ coinAnimating=false; selectedGroup=null; updateGroupUI(); nextCard(); },450); });
+      return;
+    }
+    if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
+    selectedGroup=null; updateGroupUI(); nextCard();
+  };
+  setTimeout(doNext, 0);
 }
 
 
@@ -986,7 +1052,8 @@ document.addEventListener('click',e=>{
 function showDecks(){
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   document.getElementById('site-brand').style.display='';
-  
+  document.getElementById('back-btn-fixed').style.display='none';
+  document.getElementById('gear-btn-wrap').style.display='none';
   document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
@@ -1007,5 +1074,6 @@ window.addEventListener('popstate', e => {
 
 applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); init();
 </script>
+
 </body>
 </html>
