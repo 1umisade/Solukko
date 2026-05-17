@@ -53,7 +53,7 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 .iphone-toggle-wrap input:checked + .iphone-toggle::before { transform: translateX(20px); }
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 :root { --side-card-gap: 50px; }
-#card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 120px; }
+#card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 30px; }
 #review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 0; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; align-items: center; gap: 16px; }
 #review-deck-card .deck-btn:hover { transform: none; box-shadow: none; }
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
@@ -146,10 +146,10 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 @keyframes moneyBounce { 0%{transform:scale(1)} 35%{transform:scale(1.28)} 65%{transform:scale(0.96)} 100%{transform:scale(1)} }
 #loading { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #9b8f80; display: none; animation: pulse 1.2s ease infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-@media (max-width: 760px) {
+body.reviewing { padding-top: 1.5rem; }
+@media (max-width: 600px) {
   #review-deck-card { display: none; }
-  .comment-area { position: static; width: 100%; margin-top: 0.5rem; }
-  #card-screen { margin-top: 20px; }
+  .comment-area { position: static; width: 100%; margin-top: 0; }
 }
 </style>
 </head>
@@ -170,6 +170,10 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
       • Enemmän opiskelua, vähemmän säätämistä - Solukossa opiskelet jo yhdellä painalluksella!
     </div>
   </div>
+</div>
+
+<div id="back-arrow" style="display:none;position:fixed;top:18px;left:18px;z-index:99999;transform:scale(calc(1/var(--page-zoom,1)));transform-origin:top left;">
+  <button onclick="showDecks()" style="width:42px;height:42px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1rem;color:#56533c;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);padding:0;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Lora',Georgia,serif;"><span style="margin-top:-3px;">←</span></button>
 </div>
 
 <div class="settings-menu" id="settings-menu">
@@ -222,15 +226,6 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     </div>
   </div>
 
-  <div class="btn-row" id="show-row">
-    <button class="show-btn" onclick="showAnswer()">Näytä vastaus</button>
-  </div>
-
-  <div class="btn-row" id="grade-row" style="display:none">
-    <button class="grade-btn btn-wrong" onclick="gradeCard(false)">Palataan asiaan... 🥀</button>
-    <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
-  </div>
-
   <div class="comment-area">
     <div class="comment-box" id="comment-box">
       <textarea id="card-comment"
@@ -240,6 +235,15 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     </div>
     <div class="comment-display" id="comment-display"></div>
     <div class="comment-feed" id="comment-feed"></div>
+  </div>
+
+  <div class="btn-row" id="show-row">
+    <button class="show-btn" onclick="showAnswer()">Näytä vastaus</button>
+  </div>
+
+  <div class="btn-row" id="grade-row" style="display:none">
+    <button class="grade-btn btn-wrong" onclick="gradeCard(false)">Palataan asiaan... 🥀</button>
+    <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
   </div>
 
   <div id="card-overview-grid"></div>
@@ -594,6 +598,8 @@ async function startDeck(deckName){
   currentOverviewIndex=0; cardGrades={};
   show('card-screen'); nextCard(); hide('loading');
   document.getElementById('site-brand').style.display='none';
+  document.getElementById('back-arrow').style.display='block';
+  document.body.classList.add('reviewing');
 }
 
 // ── FIX IMAGES: replace src with data:URL from mediaMap ──────────────────────
@@ -653,9 +659,6 @@ function renderReviewDeckCard(deckName){
   if(cleanName.includes('Molekyylibiologia')) bgVideo='DNApolymerase.mp4';
   if(cleanName.includes('Immunologia'))       bgVideo='Mitosis in an animal cell Under the Microscope.mp4';
   box.innerHTML=`
-    <div style="width:100%;display:flex;justify-content:flex-start;margin-bottom:4px;">
-      <button onclick="showDecks()" style="width:42px;height:42px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1rem;color:#56533c;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);padding:0;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Lora',Georgia,serif;"><span style="margin-top:-3px;">←</span></button>
-    </div>
     <button class="deck-btn" style="width:var(--deck-card-width,260px)">
       <video class="deck-video" muted loop playsinline preload="metadata"><source src="${bgVideo}" type="video/mp4"></video>
       <div style="position:relative;z-index:2">
@@ -714,6 +717,7 @@ async function renderCurrentCard(){
   document.getElementById('show-row').style.display='flex';
   document.getElementById('grade-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
+  document.getElementById('flashcard').scrollIntoView({behavior:'instant', block:'start'});
 }
 
 async function nextCard(){
@@ -995,6 +999,8 @@ document.addEventListener('click',e=>{
 function showDecks(){
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   document.getElementById('site-brand').style.display='';
+  document.getElementById('back-arrow').style.display='none';
+  document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
   const grid=document.getElementById('card-overview-grid');
