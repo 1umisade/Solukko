@@ -341,13 +341,9 @@ async function init(){
       }
     }
 
-    // 5. Open SQLite — needs "Support older Anki versions" export option
-    const dbFile = zip.file('collection.anki2');
-    if (!dbFile) throw new Error(
-      'collection.anki2 not found.<br><br>' +
-      'Export from Anki with:<br>' +
-      '<code>File → Export → ✓ Support older Anki versions</code>'
-    );
+    // 5. Open SQLite — try .anki21 first (standard export), then .anki2 fallback
+    const dbFile = zip.file('collection.anki21') || zip.file('collection.anki2');
+    if (!dbFile) throw new Error('Ei löydy collection.anki21 eikä collection.anki2 tiedostoa.');
     const dbBuf = await dbFile.async('arraybuffer');
     const db    = new SQL.Database(new Uint8Array(dbBuf));
 
