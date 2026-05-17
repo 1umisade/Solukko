@@ -39,7 +39,6 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
 .deck-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; }
-.settings-menu { position: absolute; top: 18px; right: 18px; z-index: 99999; }
 .gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 50%; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
 .settings-dropdown { position: absolute; top: 52px; right: 0; display: none; flex-direction: column; gap: 10px; align-items: flex-end; }
 .settings-menu.open .settings-dropdown { display: flex; }
@@ -58,7 +57,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
-.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; }
+.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; scroll-margin-top: 70px; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
 .answer-section .card-content { text-align: left; }
@@ -75,9 +74,9 @@ body.dark-mode .answer-section { border-top-color: #6d5f52; }
 body.dark-mode .cloze-blank { background: #5a5148; }
 body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #35523a; color: #c9f0d0; }
 .comment-area { position: absolute; left: calc(100% + var(--side-card-gap)); top: 52px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; gap: 8px; }
-.comment-box { position: relative; width: 100%; height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: height 0.35s ease; }
+.comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.35s ease; }
 .comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; }
-.comment-box.open { height: auto; overflow: visible; cursor: default; padding-bottom: 52px; }
+.comment-box.open { max-height: 350px; overflow: visible; cursor: default; padding-bottom: 52px; }
 .comment-box.open::before { opacity: 0; pointer-events: none; }
 .comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #27ae60; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
@@ -96,7 +95,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
 .btn-wrong { background: #c0392b; }
 .btn-right { background: #27ae60; }
-.site-brand { position: absolute; top: 0; left: 50%; width: min(calc(560px * 0.8), 90vw); height: min(calc(320px * 0.8), calc(90vw * 320 / 560)); perspective: 1200px; transform: translate(calc(-50% + var(--vv-left, 0px)), calc(var(--vv-top, 0px) + 18px)) scale(calc(1 / var(--page-zoom, 1))); transform-origin: top left; z-index: 99999; cursor: pointer; }
+.site-brand { position: absolute; top: 0; left: 50%; width: min(calc(560px * 0.8), 90vw); height: min(calc(320px * 0.8), calc(90vw * 320 / 560)); perspective: 1200px; transform: translate(calc(-50% + var(--vv-left, 0px)), calc(var(--vv-top, 0px) + 18px)) scale(calc(1 / var(--page-zoom, 1))); transform-origin: top left; z-index: 9999; cursor: pointer; }
 .site-brand-inner { position: relative; width: 100%; height: 100%; will-change: transform; transform-style: preserve-3d; transition: transform 0.55s ease; }
 .site-brand.flipped .site-brand-inner { transform: rotateY(180deg); }
 .brand-front, .brand-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 4px 18px rgba(0,0,0,0.12); }
@@ -149,7 +148,7 @@ body.reviewing { padding-top: 1.5rem; }
 @media (max-width: 600px) {
   #review-deck-card { display: none; }
   .comment-area { position: static; width: 100%; margin-top: 0; }
-  #deck-screen { padding-top: calc(40vw + 1rem); align-items: center; }
+  #deck-screen { padding-top: calc(18px + min(256px, 90vw * 4 / 7) * 1.2); align-items: center; }
   .deck-list { flex-direction: column; gap: calc(min(256px, 90vw * 4 / 7) / 5); align-items: center; }
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
 }
@@ -174,35 +173,6 @@ body.reviewing { padding-top: 1.5rem; }
   </div>
 </div>
 
-<div id="back-arrow" style="display:none;position:absolute;top:18px;left:18px;z-index:99999;">
-  <button onclick="showDecks()" style="width:42px;height:42px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1rem;color:#56533c;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);padding:0;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Lora',Georgia,serif;"><span style="margin-top:-3px;">←</span></button>
-</div>
-
-<div class="settings-menu" id="settings-menu">
-  <button class="gear-btn" onclick="toggleSettingsMenu()">⚙</button>
-  <div class="settings-dropdown">
-    <label class="iphone-toggle-wrap">
-      <input id="mode-toggle-input" type="checkbox" onchange="toggleGroupModeFromSwitch()">
-      <span class="iphone-toggle"></span>
-      <span>Näytä joukkueet</span>
-    </label>
-    <label class="iphone-toggle-wrap">
-      <input id="overview-toggle-input" type="checkbox" onchange="toggleOverviewGridFromSwitch()">
-      <span class="iphone-toggle"></span>
-      <span>Näytä kortit</span>
-    </label>
-    <label class="iphone-toggle-wrap">
-      <input id="dark-toggle-input" type="checkbox" onchange="toggleDarkModeFromSwitch()">
-      <span class="iphone-toggle"></span>
-      <span>Tummatila</span>
-    </label>
-    <label class="iphone-toggle-wrap">
-      <input id="dev-toggle-input" type="checkbox" onchange="toggleDevModeFromSwitch()">
-      <span class="iphone-toggle"></span>
-      <span>Kehittäjätila</span>
-    </label>
-  </div>
-</div>
 
 <div id="loading">ladataan…</div>
 <div id="conn-error"></div>
@@ -213,9 +183,16 @@ body.reviewing { padding-top: 1.5rem; }
 
 <div id="card-screen">
   <div class="top-bar">
-    <button class="back-btn" id="back-btn" style="display:none">←</button>
-    <span class="deck-name" id="deck-name" style="display:none"></span>
-    <span class="remaining" id="remaining"></span>
+    <button id="back-arrow-inline" onclick="showDecks()" style="width:42px;height:42px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1rem;color:#56533c;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;padding:0;font-family:'Lora',Georgia,serif;flex-shrink:0;"><span style="margin-top:-3px;">←</span></button>
+    <span class="remaining" id="remaining" style="flex:1;text-align:center;"></span>
+    <button class="gear-btn-inline" onclick="toggleSettingsMenu()" style="width:42px;height:42px;border:1px solid #d4cec4;border-radius:50%;background:#fffef9;color:#56533c;font-size:1.35rem;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);flex-shrink:0;position:relative;">⚙
+      <div class="settings-dropdown" id="settings-dropdown-inline" style="position:absolute;top:52px;right:0;display:none;flex-direction:column;gap:10px;align-items:flex-end;z-index:9999;">
+        <label class="iphone-toggle-wrap"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Näytä joukkueet</span></label>
+        <label class="iphone-toggle-wrap"><input id="overview-toggle-input2" type="checkbox" onchange="toggleOverviewGridFromSwitch()"><span class="iphone-toggle"></span><span>Näytä kortit</span></label>
+        <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
+        <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
+      </div>
+    </button>
   </div>
 
   <div id="review-deck-card"></div>
@@ -273,19 +250,18 @@ let darkMode = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
 let devMode = JSON.parse(localStorage.getItem('anki-dev-mode') || 'false');
 
 function applyDevMode(){
-  const t=document.getElementById('dev-toggle-input');
-  if(t) t.checked=devMode;
+  ['dev-toggle-input2','dev-toggle-input2'].forEach(id=>{ const t=document.getElementById(id); if(t) t.checked=devMode; });
 }
 function toggleDevModeFromSwitch(){
-  const t=document.getElementById('dev-toggle-input');
-  if(t.checked){
+  const t=document.getElementById('dev-toggle-input2')||document.getElementById('dev-toggle-input2');
+  if(t&&t.checked){
     const pw=prompt('Anna kehittäjätilan salasana:');
     if(pw==='kuortane'){
       devMode=true;
       localStorage.setItem('anki-dev-mode',JSON.stringify(true));
     } else {
       alert('Väärä salasana.');
-      t.checked=false;
+      if(t) t.checked=false;
     }
   } else {
     devMode=false;
@@ -310,13 +286,16 @@ function getUserId(){
 }
 function applyDarkMode(){
   document.body.classList.toggle('dark-mode', darkMode);
-  const t=document.getElementById('dark-toggle-input'); if(t) t.checked=darkMode;
+  const t=document.getElementById('dark-toggle-input2'); if(t) t.checked=darkMode;
 }
 function toggleDarkModeFromSwitch(){
-  darkMode=document.getElementById('dark-toggle-input').checked;
+  darkMode=document.getElementById('dark-toggle-input2').checked;
   localStorage.setItem('anki-dark-mode',JSON.stringify(darkMode)); applyDarkMode();
 }
-function toggleSettingsMenu(){ document.getElementById('settings-menu')?.classList.toggle('open'); }
+function toggleSettingsMenu(){
+  const d=document.getElementById('settings-dropdown-inline');
+  if(d) d.style.display=d.style.display==='flex'?'none':'flex';
+}
 
 // ── Viewport zoom ─────────────────────────────────────────────────────────────
 function updatePageZoomScale(){
@@ -590,7 +569,7 @@ async function loadDecks(){
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
-  document.getElementById('back-btn').style.display='none';
+  
   // deck name intentionally hidden
   renderReviewDeckCard(deckName);
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
@@ -600,7 +579,7 @@ async function startDeck(deckName){
   currentOverviewIndex=0; cardGrades={};
   show('card-screen'); nextCard(); hide('loading');
   document.getElementById('site-brand').style.display='none';
-  document.getElementById('back-arrow').style.display='block';
+  
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
 }
@@ -932,12 +911,12 @@ function renderCardOverview(){
   }).join('');
 }
 function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); nextCardFromCurrent(); }
-function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input').checked; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
-function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); const t=document.getElementById('overview-toggle-input'); if(t) t.checked=overviewGridVisible; if(grid) grid.style.display=overviewGridVisible?'flex':'none'; }
+function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2').checked; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
+function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); const t=document.getElementById('overview-toggle-input2'); if(t) t.checked=overviewGridVisible; if(grid) grid.style.display=overviewGridVisible?'flex':'none'; }
 
 function updateGroupUI(){
   const board=document.getElementById('group-scoreboard'),addBtn=document.querySelector('.group-tools');
-  document.getElementById('mode-toggle-input').checked=groupMode;
+  document.getElementById('mode-toggle-input2').checked=groupMode;
   if(groupMode){ board.classList.remove('disabled'); if(addBtn) addBtn.style.display='flex'; }
   else{ board.classList.add('disabled'); selectedGroup=null; if(addBtn) addBtn.style.display='none'; }
   board.innerHTML='';
@@ -954,7 +933,7 @@ function updateGroupUI(){
     card.appendChild(name); card.appendChild(tower); card.appendChild(money); board.appendChild(card);
   });
 }
-function toggleGroupModeFromSwitch(){ groupMode=document.getElementById('mode-toggle-input').checked; localStorage.setItem('anki-group-mode',JSON.stringify(groupMode)); updateGroupUI(); }
+function toggleGroupModeFromSwitch(){ groupMode=document.getElementById('mode-toggle-input2').checked; localStorage.setItem('anki-group-mode',JSON.stringify(groupMode)); updateGroupUI(); }
 function selectGroup(index){ if(!groupMode) return; selectedGroup=index; updateGroupUI(); }
 function renameGroup(index){ const n=prompt('Anna ryhmälle uusi nimi:',groups[index].name); if(!n||!n.trim()) return; groups[index].name=n.trim(); saveGroups(); updateGroupUI(); }
 function addGroup(){ groups.push({name:String.fromCharCode(65+groups.length),score:0}); saveGroups(); updateGroupUI(); }
@@ -997,7 +976,7 @@ function gradeCard(correct){
   selectedGroup=null; updateGroupUI(); nextCard();
 }
 
-document.getElementById('back-btn').onclick=showDecks;
+
 document.addEventListener('click',e=>{
   if(e.target.closest('.group-card')||e.target.closest('.overview-card')||e.target.closest('.flashcard')||
      e.target.closest('.grade-btn')||e.target.closest('.show-btn')||e.target.closest('.iphone-toggle-wrap')||
@@ -1007,7 +986,7 @@ document.addEventListener('click',e=>{
 function showDecks(){
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   document.getElementById('site-brand').style.display='';
-  document.getElementById('back-arrow').style.display='none';
+  
   document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
@@ -1020,16 +999,6 @@ document.getElementById('card-comment').addEventListener('input',()=>saveComment
 function show(id){ const el=document.getElementById(id); el.style.display=(id==='card-screen'||id==='deck-screen')?'flex':'block'; }
 function hide(id){ document.getElementById(id).style.display='none'; }
 
-// ── Keep gear + arrow pinned to viewport top regardless of CSS issues ─────────
-function pinTopUI(){
-  const y = window.scrollY || window.pageYOffset || 0;
-  const gear = document.getElementById('settings-menu');
-  const arrow = document.getElementById('back-arrow');
-  if(gear)  gear.style.top  = (18 + y) + 'px';
-  if(arrow) arrow.style.top = (18 + y) + 'px';
-}
-window.addEventListener('scroll', pinTopUI, {passive: true});
-window.addEventListener('resize', pinTopUI, {passive: true});
 window.addEventListener('popstate', e => {
   if (document.getElementById('card-screen').style.display === 'flex') {
     showDecks();
