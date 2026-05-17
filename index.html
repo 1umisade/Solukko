@@ -705,13 +705,19 @@ function showCommentDisplay(text){
 function loadFirestoreComments(){
   const feed=document.getElementById('comment-feed');
   if(!feed||!currentCard) return;
-  feed.innerHTML='';
+  feed.innerHTML='<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#a09080;padding:4px;">ladataan kommentit…</div>';
   const cardId=String(currentCard.cardId||currentCard.noteId||'');
   db.collection('comments').where('cardId','==',cardId)
-    .orderBy('timestamp','desc').limit(20)
     .get().then(snap=>{
       feed.innerHTML='';
-      snap.forEach(doc=>{
+      if(snap.empty) return;
+      // sort by timestamp client-side (no compound index needed)
+      const docs=[...snap.docs].sort((a,b)=>{
+        const ta=a.data().timestamp?.toMillis?.()|| 0;
+        const tb=b.data().timestamp?.toMillis?.()|| 0;
+        return tb-ta;
+      });
+      docs.forEach(doc=>{
         const d=doc.data();
         const el=document.createElement('div');
         el.className='comment-item';
@@ -719,7 +725,9 @@ function loadFirestoreComments(){
         el.innerHTML=`<div>${d.text}</div><div class="comment-item-time">${time}</div>`;
         feed.appendChild(el);
       });
-    }).catch(()=>{});
+    }).catch(err=>{
+      feed.innerHTML=`<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#c0392b;padding:4px;">Virhe: ${err.message}</div>`;
+    });
 }
 
 function submitComment(e){
@@ -733,7 +741,7 @@ function submitComment(e){
     cardId: String(currentCard?.cardId||currentCard?.noteId||''),
     deck: currentDeck||'',
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>loadFirestoreComments()).catch(()=>{});
+  }).then(()=>setTimeout(loadFirestoreComments, 500)).catch(()=>{});
 
   // Also POST to Google Forms as backup
   const formData=new FormData();
