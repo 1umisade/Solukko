@@ -57,7 +57,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
-.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; scroll-margin-top: 70px; }
+.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; scroll-margin-top: 8px; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
 .answer-section .card-content { text-align: left; }
@@ -245,7 +245,7 @@ let allCards  = [];
 let allDeckNames = [];  // all deck names from DB, including empty ones
 let mediaMap  = {};   // filename → data:URL  (populated from .apkg media)
 
-let overviewGridVisible = JSON.parse(localStorage.getItem('anki-overview-visible') || 'true');
+let overviewGridVisible = true;
 let darkMode = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
 let devMode = JSON.parse(localStorage.getItem('anki-dev-mode') || 'false');
 
