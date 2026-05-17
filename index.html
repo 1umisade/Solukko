@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
- 
+
 <!-- ▼ Parse .apkg directly in browser — no conversion needed -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
- 
+
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,7 +25,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
 .deck-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; }
 .settings-menu { position: fixed; top: 18px; right: 18px; z-index: 99999; transform: scale(calc(1 / var(--page-zoom, 1))); transform-origin: top right; }
-.gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
+.gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 50%; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
 .settings-dropdown { position: absolute; top: 52px; right: 0; display: none; flex-direction: column; gap: 10px; align-items: flex-end; }
 .settings-menu.open .settings-dropdown { display: flex; }
 body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6d5f52; }
@@ -38,13 +38,14 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 :root { --side-card-gap: 50px; }
 #card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 120px; }
-#review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 48px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+#review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 0; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; align-items: center; gap: 16px; }
 #review-deck-card .deck-btn:hover { transform: none; box-shadow: none; }
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
-.back-btn { position: absolute; right: calc(100% + var(--side-card-gap)); top: 8px; background: none; border: 1px solid #d4cec4; border-radius: 6px; padding: 0.35rem 0.9rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #6b6055; cursor: pointer; }
+.back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 .flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; }
-.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: left; }
+.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
+.card-content.left-align { text-align: left; }
 .io-card-image { position: relative; width: 100%; display: inline-block; }
 .io-card-image img { max-width: 100%; height: auto; display: block; }
 .io-card-image svg, .io-card-image .io-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -57,10 +58,14 @@ body.dark-mode .show-btn { background: #eadfce; color: #2b211b; }
 body.dark-mode .answer-section { border-top-color: #6d5f52; }
 body.dark-mode .cloze-blank { background: #5a5148; }
 body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #35523a; color: #c9f0d0; }
-.comment-box { position: absolute; left: calc(100% + var(--side-card-gap)); top: 48px; width: var(--deck-card-width, 260px); height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: height 0.35s ease; }
-.comment-box::before { content: "💬  Jätä kommentti ja osallistu arvontaan"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; }
+.comment-area { position: absolute; left: calc(100% + var(--side-card-gap)); top: 52px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; gap: 8px; }
+.comment-box { position: relative; width: 100%; height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: height 0.35s ease; }
+.comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; }
 .comment-box.open { height: 520px; cursor: default; }
 .comment-box.open::before { opacity: 0; pointer-events: none; }
+.comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #27ae60; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
+.comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
 #card-comment { width: 100%; height: 100%; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }
 .comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
@@ -72,7 +77,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
 .btn-wrong { background: #c0392b; }
 .btn-right { background: #27ae60; }
-.site-brand { position: absolute; top: 0; left: 50%; width: calc(560px * 0.8); height: calc(320px * 0.8); perspective: 1200px; transform: translate(calc(-50% + var(--vv-left, 0px)), calc(var(--vv-top, 0px) + 18px)) scale(calc(1 / var(--page-zoom, 1))); transform-origin: top left; z-index: 99999; }
+.site-brand { position: absolute; top: 0; left: 50%; width: calc(560px * 0.8); height: calc(320px * 0.8); perspective: 1200px; transform: translate(calc(-50% + var(--vv-left, 0px)), calc(var(--vv-top, 0px) + 18px)) scale(calc(1 / var(--page-zoom, 1))); transform-origin: top left; z-index: 99999; cursor: pointer; }
 .site-brand-inner { position: relative; width: 100%; height: 100%; will-change: transform; transform-style: preserve-3d; transition: transform 0.55s ease; }
 .site-brand.flipped .site-brand-inner { transform: rotateY(180deg); }
 .brand-front, .brand-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 4px 18px rgba(0,0,0,0.12); }
@@ -94,7 +99,9 @@ body.dark-mode .site-brand span { color: #fff2cb; }
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
 .overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
-.overview-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; height: 90px; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.overview-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; height: 90px; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; }
+.subdeck-video-embed { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; margin: 0.5rem 0; background: #000; }
+.subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
 .overview-card.active  { border: 2px solid #27ae60; }
 .overview-card.known   { background: #e6f4ea; border-color: #8bc79a; }
 .overview-card.unknown { background: #f8e4e1; border-color: #d99a91; }
@@ -122,7 +129,7 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 </style>
 </head>
 <body>
- 
+
 <div class="site-brand site-brand-card" id="site-brand" onclick="clickLogoHome()">
   <div class="site-brand-inner">
     <div class="brand-front">
@@ -135,10 +142,11 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
       • Ei kirjautumista<br>
       • Kysymyksiin merkitty tenttitodennäköisyys<br>
       • Palkintoja sisällöntuottajille<br>
+      • Enemmän opiskelua, vähemmän säätämistä - Solukossa opiskelet jo yhdellä painalluksella!
     </div>
   </div>
 </div>
- 
+
 <div class="settings-menu" id="settings-menu">
   <button class="gear-btn" onclick="toggleSettingsMenu()">⚙</button>
   <div class="settings-dropdown">
@@ -159,23 +167,23 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
     </label>
   </div>
 </div>
- 
+
 <div id="loading">ladataan…</div>
 <div id="conn-error"></div>
- 
+
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
 </div>
- 
+
 <div id="card-screen">
   <div class="top-bar">
-    <button class="back-btn" id="back-btn" style="display:none">← kurssit</button>
+    <button class="back-btn" id="back-btn" style="display:none">←</button>
     <span class="deck-name" id="deck-name" style="display:none"></span>
     <span class="remaining" id="remaining"></span>
   </div>
- 
+
   <div id="review-deck-card"></div>
- 
+
   <div class="flashcard" id="flashcard" onclick="showAnswer()">
     <div class="card-stars" id="card-stars"></div>
     <div class="card-content" id="question-content"></div>
@@ -183,42 +191,46 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
       <div class="card-content" id="answer-content"></div>
     </div>
   </div>
- 
+
   <div class="btn-row" id="show-row">
     <button class="show-btn" onclick="showAnswer()">Näytä vastaus</button>
   </div>
- 
+
   <div class="btn-row" id="grade-row" style="display:none">
     <button class="grade-btn btn-wrong" onclick="gradeCard(false)">Palataan asiaan... 🥀</button>
     <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
   </div>
- 
+
   <div id="card-overview-grid"></div>
- 
-  <div class="comment-box">
-    <textarea id="card-comment"
-      placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla&#10;&#10;Maksamme myös 5 € palkkion luvallisista luentotallenteista."></textarea>
-    <div class="comment-status" id="comment-status"></div>
+
+  <div class="comment-area">
+    <div class="comment-box" id="comment-box">
+      <textarea id="card-comment"
+        placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla&#10;&#10;Maksamme myös 5 € palkkion luvallisista luentotallenteista."></textarea>
+      <button class="comment-submit-btn" onclick="submitComment()">✓</button>
+      <div class="comment-status" id="comment-status"></div>
+    </div>
+    <div class="comment-display" id="comment-display"></div>
   </div>
- 
+
   <div class="group-tools">
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
   </div>
   <div class="group-scoreboard" id="group-scoreboard"></div>
 </div>
- 
+
 <script>
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  CONFIGURE: rename your .apkg file to match this, or change  ║
 // ║  this constant to match your filename.                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 const APKG_FILE = 'TYKRY.apkg';
- 
+
 // ── App state ─────────────────────────────────────────────────────────────────
 let allCards  = [];
 let allDeckNames = [];  // all deck names from DB, including empty ones
 let mediaMap  = {};   // filename → data:URL  (populated from .apkg media)
- 
+
 let overviewGridVisible = JSON.parse(localStorage.getItem('anki-overview-visible') || 'true');
 let darkMode  = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
 let deckGroups = [], selectedGroup = null;
@@ -228,7 +240,7 @@ let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
 let groupMode = JSON.parse(localStorage.getItem('anki-group-mode') || 'false');
 let queue=[], reviewCards=[], currentOverviewIndex=0, cardGrades={};
 let currentCard=null, currentDeck='', coinAnimating=false;
- 
+
 // ── Dark mode ─────────────────────────────────────────────────────────────────
 function applyDarkMode(){
   document.body.classList.toggle('dark-mode', darkMode);
@@ -239,7 +251,7 @@ function toggleDarkModeFromSwitch(){
   localStorage.setItem('anki-dark-mode',JSON.stringify(darkMode)); applyDarkMode();
 }
 function toggleSettingsMenu(){ document.getElementById('settings-menu')?.classList.toggle('open'); }
- 
+
 // ── Viewport zoom ─────────────────────────────────────────────────────────────
 function updatePageZoomScale(){
   const vv=window.visualViewport;
@@ -252,7 +264,7 @@ if(window.visualViewport){
   ['resize','scroll'].forEach(e=>window.visualViewport.addEventListener(e,updatePageZoomScale));
 }
 updatePageZoomScale();
- 
+
 // ── Audio ─────────────────────────────────────────────────────────────────────
 let audioCtx=null;
 function playCashSound(){
@@ -279,12 +291,12 @@ function playLogoClickSound(){
   osc.connect(gain); gain.connect(audioCtx.destination);
   osc.start(now); osc.stop(now+.17);
 }
- 
+
 // ── Comment box ───────────────────────────────────────────────────────────────
 const commentBoxWrap=document.querySelector('.comment-box');
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
-document.addEventListener('click',e=>{ if(!document.querySelector('.comment-box').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
- 
+document.addEventListener('click',e=>{ if(!document.querySelector('.comment-area').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
+
 // ── Logo ──────────────────────────────────────────────────────────────────────
 function clickLogoHome(){
   const brand=document.getElementById('site-brand'),logo=document.querySelector('.site-brand img');
@@ -292,7 +304,7 @@ function clickLogoHome(){
   if(logo){ logo.classList.remove('logo-clicked'); void logo.offsetWidth; logo.classList.add('logo-clicked'); }
   playLogoClickSound();
 }
- 
+
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  CORE: load .apkg directly from the repo                                     ║
 // ║  Uses JSZip (unzip) + sql.js (read SQLite) — both from CDN                   ║
@@ -302,7 +314,7 @@ function clickLogoHome(){
 // ║  ✓ Check "Support older Anki versions"  ← IMPORTANT                          ║
 // ║  ✓ Include media                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
- 
+
 async function init(){
   show('loading');
   try {
@@ -310,15 +322,15 @@ async function init(){
     const SQL = await initSqlJs({
       locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
     });
- 
+
     // 2. Fetch the .apkg from the repo
     const res = await fetch('./' + APKG_FILE);
     if (!res.ok) throw new Error(APKG_FILE + ' not found (' + res.status + ')');
     const buf = await res.arrayBuffer();
- 
+
     // 3. Unzip it
     const zip = await JSZip.loadAsync(buf);
- 
+
     // 4. Load media index → build filename → data:URL map
     const mediaFile = zip.file('media');
     if (mediaFile) {
@@ -338,21 +350,21 @@ async function init(){
         }));
       }
     }
- 
+
     // 5. Open SQLite — try .anki21 first (standard export), then .anki2 fallback
     const dbFile = zip.file('collection.anki21') || zip.file('collection.anki2');
     if (!dbFile) throw new Error('Ei löydy collection.anki21 eikä collection.anki2 tiedostoa.');
     const dbBuf = await dbFile.async('arraybuffer');
     const db    = new SQL.Database(new Uint8Array(dbBuf));
- 
+
     // 6. Parse all cards from the DB
     allCards = parseAnkiDB(db);
     allDeckNames = Object.values(JSON.parse(db.exec('SELECT decks FROM col')[0].values[0][0]))
       .map(d => d.name).filter(Boolean);
     db.close();
- 
+
     await loadDecks();
- 
+
   } catch(e) {
     const d = document.getElementById('conn-error');
     d.style.display = 'block';
@@ -362,31 +374,31 @@ async function init(){
   }
   hide('loading');
 }
- 
+
 // ── Parse Anki SQLite (old schema: col table has decks/models as JSON blobs) ──
 function parseAnkiDB(db) {
   // Read deck map and model map from col table
   const colRows = db.exec('SELECT decks, models FROM col');
   if (!colRows.length) return [];
- 
+
   const decksJson  = colRows[0].values[0][0];
   const modelsJson = colRows[0].values[0][1];
   const decksData  = JSON.parse(decksJson);
   const modelsData = JSON.parse(modelsJson);
- 
+
   // deck id → full name (already uses :: as separator in old format)
   const deckMap = {};
   Object.values(decksData).forEach(d => {
     if (d.id != null && d.name) deckMap[String(d.id)] = d.name;
   });
- 
+
   // model id → field names and model name
   const modelFields = {}, modelNames = {};
   Object.entries(modelsData).forEach(([mid, m]) => {
     modelNames[mid]  = m.name || '';
     modelFields[mid] = (m.flds || []).map(f => f.name);
   });
- 
+
   // Notes
   const noteRows = db.exec('SELECT id, mid, flds, tags FROM notes');
   const notes = {};
@@ -404,7 +416,7 @@ function parseAnkiDB(db) {
       };
     });
   }
- 
+
   // Cards
   const cardRows = db.exec('SELECT id, nid, did, ord, due, type, queue FROM cards');
   const cards = [];
@@ -430,18 +442,18 @@ function parseAnkiDB(db) {
   }
   return cards;
 }
- 
+
 // ── LOAD DECKS from parsed allCards ──────────────────────────────────────────
 async function loadDecks(){
   const seen=new Set(), names=[];
- 
+
   // First add decks from the DB deck list (catches empty decks too)
   allDeckNames.forEach(d=>{
     if(!d.startsWith('TYKRY::')) return;
     const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0];
     if(!seen.has(top)){ seen.add(top); names.push(top); }
   });
- 
+
   // Also sweep cards in case DB deck list missed anything
   allCards.forEach(card=>{
     const d=card.deckName||'';
@@ -449,7 +461,7 @@ async function loadDecks(){
     const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0];
     if(!seen.has(top)){ seen.add(top); names.push(top); }
   });
- 
+
   // Debug: show what decks were found
   if(names.length === 0){
     const d = document.getElementById('conn-error');
@@ -461,15 +473,15 @@ async function loadDecks(){
       `Varmista että pakkaasi vie nimellä <code>TYKRY</code> ja alikansiot alkavat <code>TYKRY::</code>-etuliitteellä.`;
     return;
   }
- 
+
   const list=document.getElementById('deck-list');
   list.innerHTML='';
   await document.fonts.ready;
- 
+
   const canvas=document.createElement('canvas');
   const ctx2=canvas.getContext('2d');
   ctx2.font='700 22px Lora, Georgia, serif';
- 
+
   const decks=names.map(deck=>{
     const shortName=deck.replace('TYKRY::','');
     const courseCode=(shortName.match(/\(([^h][^t][^t][^p].*?)\)/)||[])[1]||'';
@@ -480,12 +492,12 @@ async function loadDecks(){
     if(cleanName.includes('Immunologia'))       bgVideo='Mitosis in an animal cell Under the Microscope.mp4';
     return {deck,cleanName,courseCode,bgVideo};
   });
- 
+
   let widestTitle=0;
   decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.max(260,widestTitle+42));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
- 
+
   decks.forEach(item=>{
     const btn=document.createElement('button');
     btn.className='deck-btn'; btn.style.width=finalCardWidth+'px';
@@ -505,12 +517,12 @@ async function loadDecks(){
   });
   hide('card-screen'); show('deck-screen');
 }
- 
+
 // ── START DECK ────────────────────────────────────────────────────────────────
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
-  document.getElementById('back-btn').style.display='inline-block';
+  document.getElementById('back-btn').style.display='none';
   // deck name intentionally hidden
   renderReviewDeckCard(deckName);
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
@@ -520,7 +532,7 @@ async function startDeck(deckName){
   currentOverviewIndex=0; cardGrades={};
   show('card-screen'); nextCard(); hide('loading');
 }
- 
+
 // ── FIX IMAGES: replace src with data:URL from mediaMap ──────────────────────
 async function fixImages(html){
   // Replace any <img src="filename"> with the preloaded data URL
@@ -530,10 +542,10 @@ async function fixImages(html){
     return mediaMap[filename] ? `${pre}${mediaMap[filename]}${post}` : match;
   });
 }
- 
+
 // ── Card rendering helpers ────────────────────────────────────────────────────
 function saveGroups(){ localStorage.setItem('anki-groups',JSON.stringify(groups)); }
- 
+
 function extractBody(html){
   const styles=[];
   const stripped=html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi,(_,css)=>{ styles.push(css); return ''; })
@@ -563,19 +575,24 @@ function renderClozeText(text,showAnswers){
   if(hasBullets) return html.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>`<div class="enhanced-line">${l}</div>`).join('');
   return `<div class="enhanced-line">${html.replace(/\s*\r?\n\s*/g,' ')}</div>`;
 }
- 
+
 function renderReviewDeckCard(deckName){
   const box=document.getElementById('review-deck-card'); if(!box) return;
   const shortName=deckName.replace('TYKRY::','');
   const moodleMatch=shortName.match(/\((https?:\/\/.*?)\)/);
   const moodleLink=moodleMatch?moodleMatch[1]:'#';
-  const cleanName=shortName.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'').replace(/\s*\(.*?\)\s*/,'').trim();
-  const courseCode=(cleanName.match(/\((.*?)\)/)||[])[1]||'';
+  const withoutUrl=shortName.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'');
+  const courseCodeMatch=withoutUrl.match(/\(([^)]+)\)/);
+  const courseCode=courseCodeMatch?courseCodeMatch[1]:'';
+  const cleanName=withoutUrl.replace(/\s*\(.*?\)\s*/,'').trim();
   let bgVideo='default.mp4';
   if(cleanName.includes('Kasvibiokemia'))     bgVideo='kasvibio.mp4';
   if(cleanName.includes('Molekyylibiologia')) bgVideo='DNApolymerase.mp4';
   if(cleanName.includes('Immunologia'))       bgVideo='Mitosis in an animal cell Under the Microscope.mp4';
   box.innerHTML=`
+    <div style="width:100%;display:flex;justify-content:flex-start;margin-bottom:4px;">
+      <button onclick="showDecks()" style="width:42px;height:42px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1rem;color:#56533c;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);padding:0;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Lora',Georgia,serif;"><span style="margin-top:-3px;">←</span></button>
+    </div>
     <button class="deck-btn" style="width:var(--deck-card-width,260px)">
       <video class="deck-video" muted loop playsinline preload="metadata"><source src="${bgVideo}" type="video/mp4"></video>
       <div style="position:relative;z-index:2">
@@ -593,7 +610,7 @@ function renderReviewDeckCard(deckName){
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
   }
 }
- 
+
 async function renderCurrentCard(){
   const card=currentCard;
   const q=extractBody(card.question||'');
@@ -627,6 +644,7 @@ async function renderCurrentCard(){
   const [qHtml,aHtml]=await Promise.all([fixImages(frontRaw),fixImages(answerRaw)]);
   card._qHtml=qHtml; card._aHtml=aHtml;
   document.getElementById('question-content').innerHTML=qHtml;
+  document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
   loadCommentForCard(); renderCardStars();
   document.getElementById('answer-section').style.display='none';
@@ -634,7 +652,7 @@ async function renderCurrentCard(){
   document.getElementById('grade-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
 }
- 
+
 async function nextCard(){
   if(!queue.length){
     currentCard=null;
@@ -649,11 +667,28 @@ async function nextCard(){
   await renderCurrentCard();
 }
 async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard(); }
- 
+
 function commentKey(c){ return `anki-card-comment-${c.cardId||c.noteId}`; }
-function loadCommentForCard(){ document.getElementById('card-comment').value=localStorage.getItem(commentKey(currentCard))||''; document.getElementById('comment-status').textContent=''; }
+function loadCommentForCard(){
+  const saved=localStorage.getItem(commentKey(currentCard))||'';
+  document.getElementById('card-comment').value=saved;
+  document.getElementById('comment-status').textContent='';
+  showCommentDisplay(saved);
+}
 function saveCommentForCard(){ if(currentCard) localStorage.setItem(commentKey(currentCard),document.getElementById('card-comment').value); }
- 
+function showCommentDisplay(text){
+  const d=document.getElementById('comment-display');
+  if(!d) return;
+  if(text){ d.textContent=text; d.style.display='block'; }
+  else { d.style.display='none'; }
+}
+function submitComment(){
+  const text=document.getElementById('card-comment').value.trim();
+  saveCommentForCard();
+  document.querySelector('.comment-box').classList.remove('open');
+  showCommentDisplay(text);
+}
+
 function renderCardStars(){
   const box=document.getElementById('card-stars'); if(!box||!currentCard) return;
   const count=(currentCard.tags||[]).join(' ').match(/★/g)?.length||0;
@@ -663,7 +698,7 @@ function renderCardStars(){
   else if(count===1) box.title='Tuskin tentissä';
   else box.removeAttribute('title');
 }
- 
+
 function getSubdeckName(card,parentDeck){
   const deck=card.deckName||'';
   if(deck===parentDeck||!deck.startsWith(parentDeck+'::')) return {name:'Pääpakka',link:null};
@@ -685,18 +720,45 @@ function buildDeckGroups(cards,parentDeck){
   });
   grps.sort(naturalSubdeckSort); return grps;
 }
- 
+
+function getYouTubeEmbedUrl(url){
+  const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m?`https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1`:null;
+}
+
+function makeVideoEmbed(embedUrl){
+  return `<div style="width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;margin:0.5rem 0;"><iframe src="${embedUrl}" style="width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe></div>`;
+}
+
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
+
+  // If already built for this deck, just update active/known/unknown states
+  if(grid.dataset.deckName === currentDeck){
+    deckGroups.forEach(group=>{
+      group.cards.forEach(card=>{
+        const index=reviewCards.indexOf(card);
+        const el=grid.querySelector(`[data-card-index="${index}"]`);
+        if(el) el.className=`overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}`.trim();
+      });
+    });
+    return;
+  }
+
+  // Full rebuild (new deck or first load)
+  grid.dataset.deckName=currentDeck;
   grid.innerHTML=deckGroups.map(group=>{
+    const embedUrl=group.link?getYouTubeEmbedUrl(group.link):null;
+    const videoHtml=embedUrl?makeVideoEmbed(embedUrl):'';
     const cardsHtml=group.cards.map(card=>{
       const index=reviewCards.indexOf(card);
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
-      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}</div>`;
+      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}</div>`;
     }).join('');
     return `<div class="overview-section">
-      ${group.link?`<a class="overview-section-title subdeck-video-link" href="${group.link}" target="_blank">${group.name}</a>`:`<div class="overview-section-title">${group.name}</div>`}
+      <div class="overview-section-title">${group.name}</div>
+      ${videoHtml}
       <div class="overview-section-grid">${cardsHtml}</div>
     </div>`;
   }).join('');
@@ -704,7 +766,7 @@ function renderCardOverview(){
 function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); nextCardFromCurrent(); }
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input').checked; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); const t=document.getElementById('overview-toggle-input'); if(t) t.checked=overviewGridVisible; if(grid) grid.style.display=overviewGridVisible?'flex':'none'; }
- 
+
 function updateGroupUI(){
   const board=document.getElementById('group-scoreboard'),addBtn=document.querySelector('.group-tools');
   document.getElementById('mode-toggle-input').checked=groupMode;
@@ -746,7 +808,7 @@ function animateCoinToGroup(groupIndex,callback){
   ],{duration:650,easing:'cubic-bezier(.2,.8,.2,1)'});
   anim.onfinish=()=>{ coin.remove(); playCashSound(); callback(); };
 }
- 
+
 function showAnswer(){
   if(!currentCard) return;
   if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
@@ -766,7 +828,7 @@ function gradeCard(correct){
   if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
   selectedGroup=null; updateGroupUI(); nextCard();
 }
- 
+
 document.getElementById('back-btn').onclick=showDecks;
 document.addEventListener('click',e=>{
   if(e.target.closest('.group-card')||e.target.closest('.overview-card')||e.target.closest('.flashcard')||
@@ -777,6 +839,8 @@ document.addEventListener('click',e=>{
 function showDecks(){
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
+  const grid=document.getElementById('card-overview-grid');
+  if(grid) grid.dataset.deckName='';
   saveGroups(); updateGroupUI(); hide('card-screen'); loadDecks();
 }
 document.addEventListener('keydown',e=>{
@@ -786,15 +850,11 @@ document.addEventListener('keydown',e=>{
   if(gv){ if(e.key==='ArrowLeft'||e.key==='1') gradeCard(false); if(e.key==='ArrowRight'||e.key==='2') gradeCard(true); }
 });
 document.getElementById('card-comment').addEventListener('input',()=>saveCommentForCard());
- 
+
 function show(id){ const el=document.getElementById(id); el.style.display=(id==='card-screen'||id==='deck-screen')?'flex':'block'; }
 function hide(id){ document.getElementById(id).style.display='none'; }
-    
-
-
 
 applyDarkMode(); updateGroupUI(); updateOverviewVisibility(); init();
 </script>
 </body>
 </html>
- 
