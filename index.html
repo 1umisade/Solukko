@@ -28,7 +28,6 @@ const db = firebase.firestore();
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { overflow-x: hidden; }
 body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + min(140px, 40vw)) 1rem 2.5rem; }
 #conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; }
 #conn-error strong { color: #c0392b; }
@@ -40,7 +39,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
 .deck-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; }
-.settings-menu { position: fixed; top: 18px; right: 18px; z-index: 99999; transform: scale(calc(1 / var(--page-zoom, 1))); transform-origin: top right; }
+.settings-menu { position: fixed; top: 18px; right: 18px; z-index: 99999; }
 .gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 50%; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
 .settings-dropdown { position: absolute; top: 52px; right: 0; display: none; flex-direction: column; gap: 10px; align-items: flex-end; }
 .settings-menu.open .settings-dropdown { display: flex; }
@@ -54,7 +53,7 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 :root { --side-card-gap: 50px; }
 #card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 30px; }
-#review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 0; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; align-items: center; gap: 16px; }
+#review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 52px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; align-items: center; gap: 16px; }
 #review-deck-card .deck-btn:hover { transform: none; box-shadow: none; }
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
@@ -78,7 +77,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .comment-area { position: absolute; left: calc(100% + var(--side-card-gap)); top: 52px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; gap: 8px; }
 .comment-box { position: relative; width: 100%; height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: height 0.35s ease; }
 .comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; }
-.comment-box.open { height: 520px; cursor: default; }
+.comment-box.open { height: auto; overflow: visible; cursor: default; padding-bottom: 52px; }
 .comment-box.open::before { opacity: 0; pointer-events: none; }
 .comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #27ae60; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
@@ -86,7 +85,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 .comment-item-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #a09080; margin-top: 4px; }
-#card-comment { width: 100%; height: 100%; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }
+#card-comment { width: 100%; height: 210px; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }
 .comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
@@ -150,6 +149,7 @@ body.reviewing { padding-top: 1.5rem; }
 @media (max-width: 600px) {
   #review-deck-card { display: none; }
   .comment-area { position: static; width: 100%; margin-top: 0; }
+  #deck-screen { padding-top: calc(40vw + 1rem); }
 }
 </style>
 </head>
@@ -172,7 +172,7 @@ body.reviewing { padding-top: 1.5rem; }
   </div>
 </div>
 
-<div id="back-arrow" style="display:none;position:fixed;top:18px;left:18px;z-index:99999;transform:scale(calc(1/var(--page-zoom,1)));transform-origin:top left;">
+<div id="back-arrow" style="display:none;position:fixed;top:18px;left:18px;z-index:99999;">
   <button onclick="showDecks()" style="width:42px;height:42px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1rem;color:#56533c;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.12);padding:0;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Lora',Georgia,serif;"><span style="margin-top:-3px;">←</span></button>
 </div>
 
@@ -226,17 +226,6 @@ body.reviewing { padding-top: 1.5rem; }
     </div>
   </div>
 
-  <div class="comment-area">
-    <div class="comment-box" id="comment-box">
-      <textarea id="card-comment"
-        placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla&#10;&#10;Maksamme myös 5 € palkkion luvallisista luentotallenteista."></textarea>
-      <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
-      <div class="comment-status" id="comment-status"></div>
-    </div>
-    <div class="comment-display" id="comment-display"></div>
-    <div class="comment-feed" id="comment-feed"></div>
-  </div>
-
   <div class="btn-row" id="show-row">
     <button class="show-btn" onclick="showAnswer()">Näytä vastaus</button>
   </div>
@@ -244,6 +233,17 @@ body.reviewing { padding-top: 1.5rem; }
   <div class="btn-row" id="grade-row" style="display:none">
     <button class="grade-btn btn-wrong" onclick="gradeCard(false)">Palataan asiaan... 🥀</button>
     <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
+  </div>
+
+  <div class="comment-area">
+    <div class="comment-box" id="comment-box">
+      <textarea id="card-comment"
+        placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla"></textarea>
+      <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
+      <div class="comment-status" id="comment-status"></div>
+    </div>
+    <div class="comment-display" id="comment-display"></div>
+    <div class="comment-feed" id="comment-feed"></div>
   </div>
 
   <div id="card-overview-grid"></div>
@@ -600,6 +600,7 @@ async function startDeck(deckName){
   document.getElementById('site-brand').style.display='none';
   document.getElementById('back-arrow').style.display='block';
   document.body.classList.add('reviewing');
+  history.pushState({reviewing: true}, '');
 }
 
 // ── FIX IMAGES: replace src with data:URL from mediaMap ──────────────────────
@@ -718,6 +719,11 @@ async function renderCurrentCard(){
   document.getElementById('grade-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   document.getElementById('flashcard').scrollIntoView({behavior:'instant', block:'start'});
+  // Align side panels with flashcard top
+  const ft = document.getElementById('flashcard').offsetTop;
+  document.getElementById('review-deck-card').style.top = ft + 'px';
+  const ca = document.querySelector('.comment-area');
+  if(ca) ca.style.top = ft + 'px';
 }
 
 async function nextCard(){
@@ -1011,6 +1017,13 @@ document.getElementById('card-comment').addEventListener('input',()=>saveComment
 
 function show(id){ const el=document.getElementById(id); el.style.display=(id==='card-screen'||id==='deck-screen')?'flex':'block'; }
 function hide(id){ document.getElementById(id).style.display='none'; }
+
+// ── Android back button support ───────────────────────────────────────────────
+window.addEventListener('popstate', e => {
+  if (document.getElementById('card-screen').style.display === 'flex') {
+    showDecks();
+  }
+});
 
 applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); init();
 </script>
