@@ -13,7 +13,7 @@
 <style id="card-css"></style>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + 290px) 1rem 2.5rem; }
+body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: calc(2.5rem + 140px) 1rem 2.5rem; }
 #conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; }
 #conn-error strong { color: #c0392b; }
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
@@ -38,10 +38,10 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 :root { --side-card-gap: 50px; }
 #card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 0; }
-#review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 48px; width: var(--deck-card-width, 260px); height: 360px; }
+#review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 48px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; align-items: center; gap: 10px; }
 #review-deck-card .deck-btn:hover { transform: none; box-shadow: none; }
-.top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; }
-.back-btn { background: none; border: 1px solid #d4cec4; border-radius: 6px; padding: 0.35rem 0.9rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #6b6055; cursor: pointer; }
+.top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
+.back-btn { position: absolute; right: calc(100% + var(--side-card-gap)); top: 8px; background: none; border: 1px solid #d4cec4; border-radius: 6px; padding: 0.35rem 0.9rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #6b6055; cursor: pointer; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 .flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: left; }
@@ -216,6 +216,7 @@ const APKG_FILE = 'TYKRY.apkg';
 
 // ── App state ─────────────────────────────────────────────────────────────────
 let allCards  = [];
+let allDeckNames = [];  // all deck names from DB, including empty ones
 let mediaMap  = {};   // filename → data:URL  (populated from .apkg media)
 
 let overviewGridVisible = JSON.parse(localStorage.getItem('anki-overview-visible') || 'true');
@@ -287,9 +288,6 @@ document.addEventListener('click',e=>{ if(!document.querySelector('.comment-box'
 // ── Logo ──────────────────────────────────────────────────────────────────────
 function clickLogoHome(){
   const brand=document.getElementById('site-brand'),logo=document.querySelector('.site-brand img');
-  if(document.getElementById('card-screen').style.display==='flex'){
-    brand?.classList.remove('flipped'); playLogoClickSound(); showDecks(); return;
-  }
   brand?.classList.toggle('flipped');
   if(logo){ logo.classList.remove('logo-clicked'); void logo.offsetWidth; logo.classList.add('logo-clicked'); }
   playLogoClickSound();
@@ -349,6 +347,8 @@ async function init(){
 
     // 6. Parse all cards from the DB
     allCards = parseAnkiDB(db);
+    allDeckNames = Object.values(JSON.parse(db.exec('SELECT decks FROM col')[0].values[0][0]))
+      .map(d => d.name).filter(Boolean);
     db.close();
 
     await loadDecks();
@@ -434,6 +434,15 @@ function parseAnkiDB(db) {
 // ── LOAD DECKS from parsed allCards ──────────────────────────────────────────
 async function loadDecks(){
   const seen=new Set(), names=[];
+
+  // First add decks from the DB deck list (catches empty decks too)
+  allDeckNames.forEach(d=>{
+    if(!d.startsWith('TYKRY::')) return;
+    const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0];
+    if(!seen.has(top)){ seen.add(top); names.push(top); }
+  });
+
+  // Also sweep cards in case DB deck list missed anything
   allCards.forEach(card=>{
     const d=card.deckName||'';
     if(!d.startsWith('TYKRY::')) return;
@@ -501,9 +510,8 @@ async function loadDecks(){
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
-  document.getElementById('deck-name').textContent=deckName;
   document.getElementById('back-btn').style.display='inline-block';
-  document.getElementById('deck-name').style.display='inline-block';
+  // deck name intentionally hidden
   renderReviewDeckCard(deckName);
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
@@ -570,14 +578,15 @@ function renderReviewDeckCard(deckName){
   box.innerHTML=`
     <button class="deck-btn" style="width:var(--deck-card-width,260px)">
       <video class="deck-video" muted loop playsinline preload="metadata"><source src="${bgVideo}" type="video/mp4"></video>
-      <a href="${moodleLink}" target="_blank" onclick="event.stopPropagation()" class="moodle-link">
-        <img src="moodlelogo.png" alt="Moodle" class="moodle-placeholder">
-      </a>
       <div style="position:relative;z-index:2">
         <div class="deck-title">${cleanName}</div>
         <div style="font-size:14px;opacity:0.82;font-weight:400;">${courseCode}</div>
       </div>
-    </button>`;
+    </button>
+    <a href="${moodleLink}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.5rem 0.8rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;width:100%;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:5px;">
+      Avaa Moodlessa
+    </a>`;
   const btn=box.querySelector('.deck-btn'),video=box.querySelector('video');
   if(btn&&video){
     btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); });
