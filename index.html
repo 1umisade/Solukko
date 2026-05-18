@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="solukkologo22.png">
+<title>Solukko</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
 
@@ -160,7 +162,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   .comment-area { position: static; width: 100%; margin-top: 0; }
   .deck-list { flex-direction: column; gap: calc(min(256px, 90vw * 4 / 7) / 5); align-items: center; }
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
-  .comment-area { order: 10; position: static; width: 100%; margin-top: 0; }
+  .comment-area { position: static; width: 100%; margin-top: 0; }
 }
 </style>
 </head>
@@ -176,7 +178,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
       <label class="iphone-toggle-wrap" id="tietovisa-label" style="display:none;"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Tietovisa</span></label>
       <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
       <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
-      <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 10:10</div>
+      <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 13:45</div>
     </div>
   </div>
 </div>
@@ -582,13 +584,13 @@ async function loadDecks(){
 
   let widestTitle=0;
   decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
-  const finalCardWidth=Math.ceil(Math.max(260,widestTitle+42));
+  const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
 
 let _playingDeckVideo = null;
   decks.forEach(item=>{
     const btn=document.createElement('button');
-    btn.className='deck-btn'; btn.style.width=finalCardWidth+'px';
+    btn.className='deck-btn';
     btn.innerHTML=`
       <video class="deck-video" muted loop playsinline preload="metadata">
         <source src="${item.bgVideo}" type="video/mp4">
@@ -1088,13 +1090,13 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     el.onclick=()=>{ awardMoney(d.word); renderBuzzerDisplay(null,null); };
     el.oncontextmenu=(e)=>{ e.preventDefault(); penaltyMoney(d.word); renderBuzzerDisplay(null,null); return false; };
 
-    const posText=`<span style="opacity:0.85;font-size:1.6rem;font-weight:900;flex-shrink:0;">${i+1}.</span>`;
+    const posText=`<span style="opacity:0.85;font-size:0.8rem;font-weight:900;flex-shrink:0;">${i+1}.</span>`;
     const moneyDoc=_lastMoneyDocs.find(md=>md.id===d.word);
     const money=moneyDoc?(moneyDoc.data().money||0):0;
     const alreadyAwarded=_awardedThisRound.has(d.word);
-    const moneySpan=`<span style="margin-left:auto;font-size:1.6rem;font-weight:900;opacity:${alreadyAwarded?1:0.65};flex-shrink:0;">${money.toFixed(2)} €</span>`;
+    const moneySpan=`<span style="margin-left:auto;font-size:0.8rem;font-weight:900;opacity:${alreadyAwarded?1:0.65};flex-shrink:0;color:#ffd700;">${money.toFixed(2)} €</span>`;
 
-    el.innerHTML=`${posText}<span style="font-size:1.6rem;font-weight:700;flex:1;">${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${moneySpan}`;
+    el.innerHTML=`${posText}<span style="font-size:0.8rem;font-weight:700;flex:1;">${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.6rem;">(sinä)</span>':''}${moneySpan}`;
     display.appendChild(el);
   });
 }
