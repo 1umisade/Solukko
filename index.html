@@ -184,11 +184,12 @@ body.reviewing { padding-top: 0; }
       <span>Solukko</span>
     </div>
     <div class="brand-back">
-      Tenttipäivä lähenee? Solukko.comissa voit opiskella biokemian yliopistokurssit valmiiden kysymyskorttien avulla. <br><br>
-      • Käyttö ilmaista<br>
+      Solukko.com on biotieteilijöiden oppimissivusto, jossa kurssit voi opiskella valmiiden kysymyskorttien avulla.<br>
+      • Käyttö täysin ilmaista<br>
       • Ei kirjautumista<br>
-      • Tärkeät tenttikysymykset merkitty<br>
+      • Kysymyksiin merkitty tenttitodennäköisyys<br>
       • Palkintoja sisällöntuottajille<br>
+      • Enemmän opiskelua, vähemmän säätämistä - Solukossa opiskelet jo yhdellä painalluksella!
     </div>
   </div>
 </div>
@@ -217,6 +218,7 @@ body.reviewing { padding-top: 0; }
       <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
       <div class="comment-status" id="comment-status"></div>
     </div>
+    <div id="buzzer-display" style="display:none;flex-direction:column;gap:6px;"></div>
     <div class="comment-display" id="comment-display"></div>
     <div class="comment-feed" id="comment-feed"></div>
   </div>
@@ -230,7 +232,7 @@ body.reviewing { padding-top: 0; }
   </div>
 
   <div class="btn-row" id="show-row">
-    <button class="show-btn" onclick="showAnswer()">Näytä vastaus</button>
+    <button class="show-btn" id="show-btn" onclick="handleShowButton()">Näytä vastaus</button>
   </div>
 
   <div class="btn-row" id="grade-row" style="display:none">
@@ -711,7 +713,14 @@ async function renderCurrentCard(){
   document.getElementById('question-content').innerHTML=qHtml;
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
-  loadCommentForCard(); renderCardStars();
+  loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
+  // Dev mode: broadcast current card so joukkupeli players can buzz correctly
+  if(devMode && currentCard){
+    db.collection('gamestate').doc('current').set({
+      cardId: String(currentCard.cardId||currentCard.noteId||''),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
   document.getElementById('answer-section').style.display='none';
   document.getElementById('show-row').style.display='flex';
   document.getElementById('grade-row').style.display='none';
@@ -796,7 +805,167 @@ function loadFirestoreComments(){
     });
 }
 
-// ── Comment image handling ────────────────────────────────────────────────────
+// ── Joukkupeli buzzer system ──────────────────────────────────────────────────
+let buzzerUnsubscribe = null;
+let gamestateUnsubscribe = null;
+let joukkueetUnsubscribe = null;
+let currentGameCardId = null;
+
+function getTeamName(){
+  return localStorage.getItem('solukko-team-name') || 'Joukkue';
+}
+
+function showJoukkupeliOverlay(){
+  const overlay = document.getElementById('joukkupeli-overlay');
+  const nameEl = document.getElementById('team-name-display');
+  if(overlay) overlay.style.display = 'flex';
+  if(nameEl) nameEl.textContent = getTeamName();
+  resetVastaaBtn();
+  listenToGameState();
+}
+
+function hideJoukkupeliOverlay(){
+  const overlay = document.getElementById('joukkupeli-overlay');
+  if(overlay) overlay.style.display = 'none';
+  if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
+}
+
+function exitJoukkupeli(){
+  groupMode = false;
+  const cb = document.getElementById('mode-toggle-input2');
+  if(cb) cb.checked = false;
+  localStorage.setItem('anki-group-mode', JSON.stringify(false));
+  hideJoukkupeliOverlay();
+  updateGroupUI(); updateShowBtn(); loadBuzzers();
+}
+
+function resetVastaaBtn(){
+  const btn = document.getElementById('vastaa-btn');
+  const status = document.getElementById('joukkupeli-status');
+  if(btn){ btn.disabled=false; btn.style.background='#c0392b'; btn.textContent='Vastaa'; }
+  if(status) status.textContent='';
+}
+
+function listenToGameState(){
+  if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
+  gamestateUnsubscribe = db.collection('gamestate').doc('current')
+    .onSnapshot(doc=>{
+      if(!doc.exists) return;
+      const newCardId = doc.data().cardId;
+      if(newCardId !== currentGameCardId){
+        currentGameCardId = newCardId;
+        resetVastaaBtn(); // reset button when dev switches card
+      }
+    });
+}
+
+function handleShowButton(){ showAnswer(); }
+function updateShowBtn(){
+  const btn = document.getElementById('show-btn');
+  if(btn){ btn.textContent='Näytä vastaus'; btn.style.background=''; }
+}
+
+function buzzIn(){
+  const btn = document.getElementById('vastaa-btn');
+  const status = document.getElementById('joukkupeli-status');
+  const cardId = currentGameCardId;
+  if(!cardId){ if(status) status.textContent='Ei aktiivista korttia'; return; }
+  if(btn) btn.disabled=true;
+  if(status) status.textContent='Lähetetään...';
+  db.collection('buzzers').add({
+    cardId,
+    word: getTeamName(),
+    userId: getUserId(),
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    if(btn){ btn.style.background='#888'; btn.textContent='Vastattu!'; }
+    if(status) status.textContent='';
+  }).catch(()=>{
+    if(btn){ btn.disabled=false; }
+    if(status) status.textContent='Virhe, yritä uudelleen';
+  });
+}
+
+function awardMoney(teamName){
+  db.collection('joukkueet').doc(teamName).set({
+    teamName,
+    money: firebase.firestore.FieldValue.increment(0.10)
+  },{merge:true}).catch(err=>alert('Virhe: '+err.message));
+}
+
+function loadBuzzers(){
+  if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
+  if(joukkueetUnsubscribe){ joukkueetUnsubscribe(); joukkueetUnsubscribe=null; }
+  const display = document.getElementById('buzzer-display');
+  if(!display||!currentCard) return;
+  display.innerHTML=''; display.style.display='none';
+
+  const cardId = String(currentCard.cardId||currentCard.noteId||'');
+
+  // Listen to buzzers for this card
+  buzzerUnsubscribe = db.collection('buzzers').where('cardId','==',cardId)
+    .onSnapshot(snap=>{
+      renderBuzzerDisplay(snap.docs);
+    });
+
+  // Listen to money leaderboard
+  joukkueetUnsubscribe = db.collection('joukkueet')
+    .onSnapshot(snap=>{
+      renderBuzzerDisplay(null, snap.docs);
+    });
+}
+
+let _lastBuzzerDocs = [];
+let _lastMoneyDocs = [];
+
+function renderBuzzerDisplay(buzzerDocs, moneyDocs){
+  if(buzzerDocs !== null) _lastBuzzerDocs = buzzerDocs;
+  if(moneyDocs !== null) _lastMoneyDocs = moneyDocs;
+
+  const display = document.getElementById('buzzer-display');
+  if(!display) return;
+  display.innerHTML='';
+
+  const sorted=[..._lastBuzzerDocs].sort((a,b)=>(a.data().timestamp?.toMillis?.()||0)-(b.data().timestamp?.toMillis?.()||0));
+
+  if(sorted.length===0 && _lastMoneyDocs.length===0){
+    display.style.display='none'; return;
+  }
+  display.style.display='flex';
+
+  // Update joukkupeli overlay status
+  if(groupMode){
+    const myBuzz=sorted.find(d=>d.data().userId===getUserId());
+    const myPos=myBuzz?sorted.indexOf(myBuzz)+1:null;
+    const status=document.getElementById('joukkupeli-status');
+    if(status&&myPos) status.textContent=myPos===1?'🔔 Ensimmäinen!':'Sijalla '+myPos;
+  }
+
+  // Buzzers
+  sorted.forEach((doc,i)=>{
+    const d=doc.data(); const isFirst=i===0;
+    const el=document.createElement('div');
+    el.style.cssText=`background:${isFirst?'#c0392b':'#fffef9'};color:${isFirst?'white':'#56533c'};border:1px solid ${isFirst?'#c0392b':'#d4cec4'};border-radius:12px;padding:0.55rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:${isFirst?700:400};display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);`;
+    const awardBtn=devMode?`<button onclick="awardMoney('${d.word.replace(/'/g,"\\'")}');this.textContent='✓';this.disabled=true;" style="margin-left:auto;background:#27ae60;color:white;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.7rem;">🏆 +10snt</button>`:'';
+    el.innerHTML=`<span>${isFirst?'🔔':i+1+'.'}</span><span>${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${awardBtn}`;
+    display.appendChild(el);
+  });
+
+  // Money leaderboard
+  if(_lastMoneyDocs.length>0){
+    const divider=document.createElement('div');
+    divider.style.cssText='font-family:JetBrains Mono,monospace;font-size:0.68rem;color:#a09080;padding:4px 0 2px;border-top:1px solid #d4cec4;margin-top:4px;';
+    divider.textContent='Pisteet';
+    display.appendChild(divider);
+    [..._lastMoneyDocs].sort((a,b)=>b.data().money-a.data().money).forEach(doc=>{
+      const d=doc.data();
+      const el=document.createElement('div');
+      el.style.cssText='background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.45rem 1rem;font-family:JetBrains Mono,monospace;font-size:0.78rem;display:flex;justify-content:space-between;color:#56533c;';
+      el.innerHTML=`<span>${d.teamName}</span><span style="font-weight:700;">${(d.money||0).toFixed(2)} €</span>`;
+      display.appendChild(el);
+    });
+  }
+}
 let pendingCommentImage = null;
 
 function handleCommentImage(input){
@@ -990,7 +1159,19 @@ function updateGroupUI(){
     card.appendChild(name); card.appendChild(tower); card.appendChild(money); board.appendChild(card);
   });
 }
-function toggleGroupModeFromSwitch(){ groupMode=document.getElementById('mode-toggle-input2').checked; localStorage.setItem('anki-group-mode',JSON.stringify(groupMode)); updateGroupUI(); }
+function toggleGroupModeFromSwitch(){
+  groupMode=document.getElementById('mode-toggle-input2').checked;
+  if(groupMode){
+    const name=prompt('Anna joukkueellesi nimi:');
+    if(!name||!name.trim()){ groupMode=false; document.getElementById('mode-toggle-input2').checked=false; return; }
+    localStorage.setItem('solukko-team-name', name.trim());
+    showJoukkupeliOverlay();
+  } else {
+    hideJoukkupeliOverlay();
+  }
+  localStorage.setItem('anki-group-mode',JSON.stringify(groupMode));
+  updateGroupUI(); updateShowBtn(); loadBuzzers();
+}
 function selectGroup(index){ if(!groupMode) return; selectedGroup=index; updateGroupUI(); }
 function renameGroup(index){ const n=prompt('Anna ryhmälle uusi nimi:',groups[index].name); if(!n||!n.trim()) return; groups[index].name=n.trim(); saveGroups(); updateGroupUI(); }
 function addGroup(){ groups.push({name:String.fromCharCode(65+groups.length),score:0}); saveGroups(); updateGroupUI(); }
@@ -1039,7 +1220,7 @@ function gradeCard(correct){
     if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
     selectedGroup=null; updateGroupUI(); nextCard();
   };
-  setTimeout(doNext, 0);
+  setTimeout(doNext, 180);
 }
 
 
@@ -1051,6 +1232,10 @@ document.addEventListener('click',e=>{
 });
 function showDecks(){
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
+  if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
+  if(joukkueetUnsubscribe){ joukkueetUnsubscribe(); joukkueetUnsubscribe=null; }
+  if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
+  _lastBuzzerDocs=[]; _lastMoneyDocs=[];
   document.getElementById('site-brand').style.display='';
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
@@ -1074,6 +1259,13 @@ window.addEventListener('popstate', e => {
 
 applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); init();
 </script>
+<!-- Joukkupeli full-screen overlay -->
+<div id="joukkupeli-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f0e8;z-index:88888;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;">
+  <div id="team-name-display" style="font-family:'EB Garamond',Garamond,serif;font-size:min(3.5rem,12vw);font-weight:600;color:#56533c;text-align:center;letter-spacing:-0.02em;"></div>
+  <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.1s,box-shadow 0.1s;active:scale(0.97);">Vastaa</button>
+  <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
+  <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu joukkupelistä</button>
+</div>
 
 </body>
 </html>
