@@ -175,6 +175,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
       <label class="iphone-toggle-wrap" id="tietovisa-label" style="display:none;"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Tietovisa</span></label>
       <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
       <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
+      <div style="width:230px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#a09080;text-align:center;padding:0.3rem 0.7rem;">🕐 Päivitetty: 2026-05-18 10:01 UTC</div>
     </div>
   </div>
 </div>
@@ -624,7 +625,7 @@ async function startDeck(deckName){
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
-  if(window.innerWidth <= 600) setTimeout(()=>document.getElementById('flashcard')?.scrollIntoView({behavior:'instant', block:'start'}), 150);
+  if(window.innerWidth <= 600) setTimeout(()=>{ const fc=document.getElementById('flashcard'); if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }}, 200);
   document.getElementById('site-brand').style.display='none';
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='block';
@@ -757,7 +758,7 @@ async function renderCurrentCard(){
   document.getElementById('show-row').style.display='flex';
   document.getElementById('grade-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
-  if(window.innerWidth <= 600) document.getElementById('flashcard').scrollIntoView({behavior:'instant', block:'start'});
+  if(window.innerWidth <= 600){ const fc=document.getElementById('flashcard'); if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }}
   const fc=document.getElementById('flashcard');
   fc.classList.remove('card-in-right','card-in-left');
   void fc.offsetWidth;
