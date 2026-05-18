@@ -152,7 +152,8 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .card-out-right { animation: cardSlideOutRight 0.18s ease forwards; pointer-events:none; }
 .card-in-left { animation: cardSlideInLeft 0.18s ease forwards; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-body.reviewing { padding-top: 0; }
+body.joukkupeli-active { overflow: hidden; }
+body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointer-events: none; }
 @media (max-width: 600px) {
   #review-deck-card { display: none; }
   .comment-area { position: static; width: 100%; margin-top: 0; }
@@ -875,6 +876,7 @@ function showJoukkupeliOverlay(){
   const nameEl = document.getElementById('team-name-display');
   if(overlay) overlay.style.display = 'flex';
   if(nameEl) nameEl.textContent = getUserWord();
+  document.body.classList.add('joukkupeli-active');
   resetVastaaBtn();
   listenToGameState();
 }
@@ -882,6 +884,7 @@ function showJoukkupeliOverlay(){
 function hideJoukkupeliOverlay(){
   const overlay = document.getElementById('joukkupeli-overlay');
   if(overlay) overlay.style.display = 'none';
+  document.body.classList.remove('joukkupeli-active');
   if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
 }
 
@@ -905,16 +908,22 @@ function listenToGameState(){
   if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
   gamestateUnsubscribe = db.collection('gamestate').doc('current')
     .onSnapshot(doc=>{
-      if(!doc.exists) return;
-      const data = doc.data();
-      if(data.mode === 'ended'){
-        exitJoukkupeli(); // dev ended the session → return to normal
+      const indicator = document.getElementById('dev-active-indicator');
+      if(!doc.exists){
+        if(indicator) indicator.textContent='⏳ Odota kehittäjää...';
+        if(indicator) indicator.style.color='#aaa';
         return;
       }
+      const data = doc.data();
+      if(data.mode === 'ended'){
+        exitJoukkupeli();
+        return;
+      }
+      if(indicator){ indicator.textContent='🟢 Kehittäjä aktiivinen'; indicator.style.color='#27ae60'; }
       const newCardId = data.cardId;
       if(newCardId && newCardId !== currentGameCardId){
         currentGameCardId = newCardId;
-        resetVastaaBtn(); // new card → reset button
+        resetVastaaBtn();
       }
     });
 }
@@ -974,21 +983,28 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   if(moneyDocs!==null) _lastMoneyDocs=moneyDocs;
   const display=document.getElementById('buzzer-display');
   if(!display) return;
-  display.innerHTML='';
+
+  // Update joukkupeli overlay position status (for all joukkupeli users)
   const sorted=[..._lastBuzzerDocs].sort((a,b)=>(a.data().timestamp?.toMillis?.()||0)-(b.data().timestamp?.toMillis?.()||0));
-  if(!sorted.length&&!_lastMoneyDocs.length){ display.style.display='none'; return; }
-  display.style.display='flex';
   if(groupMode){
     const myBuzz=sorted.find(d=>d.data().userId===getUserId());
     const myPos=myBuzz?sorted.indexOf(myBuzz)+1:null;
     const status=document.getElementById('joukkupeli-status');
     if(status&&myPos) status.textContent=myPos===1?'🔔 Ensimmäinen!':'Sijalla '+myPos;
   }
+
+  // Only kehittäjätila sees the leaderboard panel
+  if(!devMode){ display.style.display='none'; display.innerHTML=''; return; }
+
+  display.innerHTML='';
+  if(!sorted.length&&!_lastMoneyDocs.length){ display.style.display='none'; return; }
+  display.style.display='flex';
+
   sorted.forEach((doc,i)=>{
     const d=doc.data(); const isFirst=i===0;
     const el=document.createElement('div');
     el.style.cssText=`background:${isFirst?'#c0392b':'#fffef9'};color:${isFirst?'white':'#56533c'};border:1px solid ${isFirst?'#c0392b':'#d4cec4'};border-radius:12px;padding:0.55rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:${isFirst?700:400};display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);`;
-    const awardBtn=devMode?`<button onclick="awardMoney('${d.word.replace(/'/g,"\\'")}');this.textContent='✓';this.disabled=true;" style="margin-left:auto;background:#27ae60;color:white;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.7rem;">🏆 +10snt</button>`:'';
+    const awardBtn=`<button onclick="awardMoney('${d.word.replace(/'/g,"\\'")}');this.textContent='✓';this.disabled=true;" style="margin-left:auto;background:#27ae60;color:white;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.7rem;">🏆 +10snt</button>`;
     el.innerHTML=`<span>${isFirst?'🔔':i+1+'.'}</span><span>${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${awardBtn}`;
     display.appendChild(el);
   });
@@ -1296,6 +1312,7 @@ applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); in
 </script>
 <!-- Joukkupeli full-screen overlay -->
 <div id="joukkupeli-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f0e8;z-index:88888;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;">
+  <div id="dev-active-indicator" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#888;letter-spacing:0.02em;">⏳ Odota kehittäjää...</div>
   <div id="team-name-display" style="font-family:'EB Garamond',Garamond,serif;font-size:min(3.5rem,12vw);font-weight:600;color:#56533c;text-align:center;letter-spacing:-0.02em;"></div>
   <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">Vastaa</button>
   <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
