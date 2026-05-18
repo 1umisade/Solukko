@@ -869,6 +869,7 @@ async function endGameSession(){
 
 // ── Clear buzzers when dev switches card ──────────────────────────────────────
 async function clearBuzzers(){
+  _awardedThisRound.clear();
   const snap = await db.collection('buzzers').get().catch(()=>({docs:[]}));
   if(!snap.docs.length) return;
   const batch = db.batch();
@@ -884,6 +885,14 @@ function showJoukkupeliOverlay(){
   document.body.classList.add('joukkupeli-active');
   resetVastaaBtn();
   listenToGameState();
+  // Listen to own money
+  db.collection('joukkueet').doc(getUserWord())
+    .onSnapshot(doc=>{
+      const el=document.getElementById('player-money');
+      if(!el) return;
+      const money = doc.exists ? (doc.data().money||0) : 0;
+      el.textContent = money > 0 ? `${money.toFixed(2)} € 🏆` : '';
+    });
 }
 
 function hideJoukkupeliOverlay(){
@@ -964,6 +973,8 @@ function buzzIn(){
 }
 
 function awardMoney(word){
+  if(_awardedThisRound.has(word)) return;
+  _awardedThisRound.add(word);
   db.collection('joukkueet').doc(word).set({
     teamName: word,
     money: firebase.firestore.FieldValue.increment(0.10)
@@ -983,7 +994,7 @@ function loadBuzzers(){
     .onSnapshot(snap=>{ renderBuzzerDisplay(null, snap.docs); });
 }
 
-let _lastBuzzerDocs=[], _lastMoneyDocs=[];
+let _lastBuzzerDocs=[], _lastMoneyDocs=[], _awardedThisRound=new Set();
 function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   if(buzzerDocs!==null) _lastBuzzerDocs=buzzerDocs;
   if(moneyDocs!==null) _lastMoneyDocs=moneyDocs;
@@ -1010,7 +1021,10 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     const d=doc.data(); const isFirst=i===0;
     const el=document.createElement('div');
     el.style.cssText=`background:${isFirst?'#c0392b':'#fffef9'};color:${isFirst?'white':'#56533c'};border:1px solid ${isFirst?'#c0392b':'#d4cec4'};border-radius:12px;padding:0.55rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:${isFirst?700:400};display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);`;
-    const awardBtn=`<button onclick="awardMoney('${d.word.replace(/'/g,"\\'")}');this.textContent='✓';this.disabled=true;" style="margin-left:auto;background:#27ae60;color:white;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.7rem;">🏆 +10snt</button>`;
+    const alreadyAwarded = _awardedThisRound.has(d.word);
+    const awardBtn=alreadyAwarded
+      ? `<span style="margin-left:auto;color:#27ae60;font-size:0.75rem;">✓ annettu</span>`
+      : `<button onclick="awardMoney('${d.word.replace(/'/g,"\\'")}');renderBuzzerDisplay(null,null);" style="margin-left:auto;background:#27ae60;color:white;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.7rem;">🏆 +10snt</button>`;
     el.innerHTML=`<span>${isFirst?'🔔':i+1+'.'}</span><span>${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${awardBtn}`;
     display.appendChild(el);
   });
@@ -1322,6 +1336,7 @@ applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); in
   <div id="team-name-display" style="font-family:'EB Garamond',Garamond,serif;font-size:min(3.5rem,12vw);font-weight:600;color:#56533c;text-align:center;letter-spacing:-0.02em;"></div>
   <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">Vastaa</button>
   <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
+  <div id="player-money" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:#8a5b00;text-align:center;"></div>
   <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu joukkupelistä</button>
 </div>
 
