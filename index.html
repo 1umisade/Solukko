@@ -1,14 +1,52 @@
 <!DOCTYPE html>
 <html lang="fi">
+<!-- ============================================================
+  SOLUKKO — Anki-pohjainen kertaussivusto biokemian opiskelijoille
+  Turun Yliopisto / TYKRY
+
+  ARKKITEHTUURI LYHYESTI:
+  ─────────────────────────────────────────────────────────────
+  1. Ladataan TYKRY.apkg (ZIP-tiedosto) suoraan selaimessa
+  2. JSZip purkaa zipin, sql.js lukee sisällä olevan SQLite-kannan
+  3. Kortit parsitaan muistiin (allCards[])
+  4. Käyttäjä valitsee pakan → kortit esitetään flash-card-tyylillä
+  5. Firebase Firestore tallentaa kommentit ja Tietovisa-pelidata
+  ─────────────────────────────────────────────────────────────
+
+  TÄRKEIMMÄT GLOBAALIT MUUTTUJAT:
+    allCards[]         - kaikki kortit parsittuna .apkg-tiedostosta
+    reviewCards[]      - nykyisen pakan kortit järjestyksessä
+    queue[]            - jäljellä olevat kortit tässä sessiossa
+    currentCard        - juuri nyt näytöllä oleva kortti
+    currentDeck        - nykyisen pakan nimi (esim. "TYKRY::Immunologia")
+    cardGrades{}       - { cardId: 'known'|'unknown' } — tallennetaan localStorageen
+    deckGroups[]       - pakan kortit jaettuna alidekeihin
+    groupMode          - onko Tietovisa-tila päällä (boolean)
+    devMode            - onko kehittäjätila päällä (boolean)
+    darkMode           - onko tummatila päällä (boolean)
+    mediaMap{}         - { tiedostonimi: "data:image/...;base64,..." }
+
+============================================================ -->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="solukkologo22.png">
 <title>Solukko</title>
+
+<!-- ── Fontit Google Fontsista ──────────────────────────────── -->
+<!-- Lora = leipäteksti, JetBrains Mono = UI-tekstit/koodit    -->
+<!-- EB Garamond = logo-teksti                                  -->
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
 
-<!-- Firebase -->
+<!-- ══════════════════════════════════════════════════════════
+     FIREBASE — tietokanta kommenteille ja Tietovisa-datalle
+     Käytetyt kokoelmat (Firestore collections):
+       • comments    — käyttäjien jättämät kortti-kommentit
+       • gamestate   — Tietovisa: aktiivinen kortti, kehittäjä-omistajuus
+       • buzzers     — Tietovisa: pelaajien buzz-in-kirjaukset
+       • joukkueet   — Tietovisa: tiimien rahasaldo
+     ══════════════════════════════════════════════════════════ -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
@@ -20,31 +58,78 @@ firebase.initializeApp({
   messagingSenderId: "143174538900",
   appId: "1:143174538900:web:b55db7c61ce724827a4681"
 });
+/* "db" käytössä kaikkialla koodissa Firebase-kutsuihin */
 const db = firebase.firestore();
 </script>
 
-<!-- ▼ Parse .apkg directly in browser — no conversion needed -->
+<!-- ══════════════════════════════════════════════════════════
+     KIRJASTOT: .apkg-tiedoston purkaminen suoraan selaimessa
+       • JSZip   — purkaa .apkg-zipin (collection.anki21 + mediakuvat)
+       • sql.js  — ajaa SQLite-WASM:in, lukee Anki-tietokannan
+     ══════════════════════════════════════════════════════════ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
 
+<!-- Tähän <style>-tagiin injektoidaan korttikohtainen CSS ajon aikana
+     (ks. document.getElementById('card-css').textContent = ...) -->
 <style id="card-css"></style>
+
+<!-- ══════════════════════════════════════════════════════════
+     CSS — KAIKKI TYYLIMÄÄRITTELYT
+     Järjestetty loogisiin ryhmiin:
+       1. Reset & body
+       2. Virheviesti-palkki
+       3. Pakkavalinnanäyttö (deck-screen)
+       4. Gear-nappi & asetukset-dropdown
+       5. iOS-tyylinen toggle-kytkin
+       6. Korttiruutu (card-screen) & flashcard
+       7. Image Occlusion -kortit
+       8. Vastaus- & arviointipainikkeet
+       9. Tummatila (dark mode)
+      10. Kommenttilaatikko
+      11. Solukko-logo (3D-kääntyväkortti)
+      12. Korttien yleiskatsausruudukko (overview grid)
+      13. Tietovisa-ryhmäkortit & kolikkoanimaatio
+      14. Korttianimaatiot (liuku sisään/ulos)
+      15. Tietovisa-peitto-overlay (joukkupeli-overlay)
+      16. Responsiivisuus (mobiili ≤600px)
+     ══════════════════════════════════════════════════════════ -->
 <style>
+
+/* ── 1. RESET & BODY ─────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; }
+
+/* ── 2. VIRHEVIESTI-PALKKI ───────────────────────────────── */
+/* Näytetään jos .apkg-tiedostoa ei löydy tai se on viallinen */
 #conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; }
 #conn-error strong { color: #c0392b; }
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
-#deck-screen { width: 100%; min-height: 70vh; display: none; justify-content: center; align-items: center; }
+
+/* ── 3. PAKKAVALINNANÄYTTÖ ───────────────────────────────── */
+/* #deck-screen: koko lista pakkakorteista etusivulla          */
+#deck-screen { width: 100%; display: none; justify-content: center; align-items: flex-start; padding-top: 1.5rem; }
 .deck-list { display: flex; flex-direction: column; gap: 24px; flex-wrap: nowrap; justify-content: center; align-items: center; }
+
+/* Yksittäinen pakkakortti — video-taustainen nappi           */
 .deck-btn { position: relative; min-width: 0; width: min(448px, 90vw); height: min(256px, calc(90vw * 4 / 7)); padding: 20px; border-radius: 16px; overflow: hidden; text-decoration: none; border: 1px solid #333; display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer; font-family: 'Lora', serif; text-align: left; color: white; background: #111; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .deck-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
+
+/* Taustaa pyörivä video pakkakortin sisällä                  */
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
+
+/* Tummennus-gradientti videon päälle — teksti erottuu        */
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
 .deck-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; }
+
+/* ── 4. GEAR-NAPPI (⚙) & ASETUKSET-DROPDOWN ────────────── */
 .gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 50%; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
 .settings-dropdown { position: absolute; top: 52px; right: 0; display: none; flex-direction: column; gap: 10px; align-items: flex-end; }
 .settings-menu.open .settings-dropdown { display: flex; }
 body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6d5f52; }
+
+/* ── 5. iOS-TYYLINEN TOGGLE-KYTKIN ──────────────────────── */
+/* Käytetään tummatilan, kehittäjätilan ja tietovisan kytkemiseen */
 .iphone-toggle-wrap { width: 155px; display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; background: #fffef9; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.45rem 0.7rem; box-shadow: 0 3px 12px rgba(0,0,0,0.12); cursor: pointer; }
 .iphone-toggle-wrap input { display: none; }
 .iphone-toggle { width: 51px; height: 31px; background: #e9e5dd; border-radius: 999px; position: relative; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: background 0.25s ease; }
@@ -52,98 +137,187 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 .iphone-toggle-wrap input:checked + .iphone-toggle { background: #34c759; }
 .iphone-toggle-wrap input:checked + .iphone-toggle::before { transform: translateX(20px); }
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+
+/* ── 6. KORTTIRUUTU & FLASHCARD ─────────────────────────── */
+/* CSS-muuttuja sivukorttien välille (overview ja kommenttilaatikko) */
 :root { --side-card-gap: 50px; }
+
+/* #card-screen: koko korttiruudun wrapper                    */
 #card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 30px; }
+
+/* Vasemmalla näkyvä pieni pakkakortti kertauksen aikana      */
 #review-deck-card { position: absolute; right: calc(100% + var(--side-card-gap)); left: auto; top: 52px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; align-items: center; gap: 16px; }
 #review-deck-card .deck-btn:hover { transform: none; box-shadow: none; }
+
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
+
+/* Korttien laskuri ja pakan nimi yläpalkissa                 */
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
+
+/* Itse flashcard-kortti — klikkaamalla näytetään vastaus     */
 .flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; scroll-margin-top: 8px; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
 .answer-section .card-content { text-align: left; }
+
+/* ── 7. IMAGE OCCLUSION -KORTIT ─────────────────────────── */
+/* Anki Image Occlusion: kuva + SVG-maski piilotettujen alueiden päällä */
 .io-card-image { position: relative; width: 100%; display: inline-block; }
 .io-card-image img { max-width: 100%; height: auto; display: block; }
 .io-overlay { position: absolute; inset: 0; pointer-events: none; }
 .io-overlay svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* Vastausosa on piilotettu kunnes käyttäjä klikkaa "Tarkista" */
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
+
+/* ── 9. TUMMATILA (dark mode) ───────────────────────────── */
+/* Kaikki dark-mode-tyylit on koottu yhteen paikkaan         */
 body.dark-mode { background: #2b211b; color: #eadfce; }
 body.dark-mode .flashcard, body.dark-mode #card-comment, body.dark-mode .group-card, body.dark-mode .add-group-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .card-content { color: #eadfce; }
 body.dark-mode .back-btn, body.dark-mode .remaining, body.dark-mode .deck-name, body.dark-mode .comment-status { color: #cbbda8; border-color: #6d5f52; }
 body.dark-mode .show-btn { background: #eadfce; color: #2b211b; }
 body.dark-mode .answer-section { border-top-color: #6d5f52; }
+/* Cloze-kortit tummatilassa */
 body.dark-mode .cloze-blank { background: #5a5148; }
 body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #35523a; color: #c9f0d0; }
+
+/* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
+/* Oikealla sijaitseva kommenttilaatikko (avautuu klikkauksella) */
 .comment-area { position: absolute; left: calc(100% + var(--side-card-gap)); top: 52px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; gap: 8px; }
+
+/* Suljettu tila: näyttää "Jätä kommentti"-tekstin          */
 .comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.35s ease; }
 .comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; }
+
+/* Avattu tila: näyttää tekstilaatikon ja lähetys-napin      */
 .comment-box.open { max-height: 350px; overflow: visible; cursor: default; padding-bottom: 52px; }
 .comment-box.open::before { opacity: 0; pointer-events: none; }
 .comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #27ae60; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
 .comment-box.open .comment-img-btn { display: flex; align-items: center; justify-content: center; }
+
+/* Aiemmin lähetettyjen kommenttien näyttäminen              */
 .comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
 .comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+/* Yksittäinen Firestore-kommentti                           */
 .comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 .comment-item-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #a09080; margin-top: 4px; }
+
+/* Textarea kommenttilaatikossa — näkymätön kunnes .open      */
 #card-comment { width: 100%; height: 210px; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }
 .comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
+
+/* Moodle-logo-linkki kortin vasemmassa yläkulmassa          */
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+
+/* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
 .btn-row { display: flex; gap: 1rem; width: 100%; }
+
+/* "Tarkista"-nappi — näytetään ennen vastausta              */
 .show-btn { width: 100%; background: #56533c; color: #f5f0e8; border: none; border-radius: 8px; padding: 0.9rem; font-family: 'Lora', serif; font-size: 1rem; cursor: pointer; }
+
+/* Cloze-kortit: piilotetut ja paljastetut aukot             */
 .cloze-blank { display: inline-block; background: #e8e4db; border-radius: 4px; padding: 0 0.4em; color: transparent; min-width: 3em; }
 .cloze-answer, .cloze-answer-line { background: #d4edda; color: #1a5e2a; font-weight: 600; border-radius: 4px; padding: 0 0.35em; }
+
+/* Arviointipainikkeet ("Tiesin" / "Palataan asiaan")        */
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
 .btn-wrong { background: #c0392b; }
 .btn-right { background: #27ae60; }
+
+/* ── 11. SOLUKKO-LOGO (3D-KÄÄNTYVÄ KORTTI) ─────────────── */
+/* Klikkaamalla logo kääntyy ja näyttää "tietoa sivustosta"  */
 .site-brand { width: min(calc(560px * 0.8), 90vw); height: min(calc(320px * 0.8), calc(90vw * 320 / 560)); perspective: 1200px; z-index: 9999; cursor: pointer; margin: 0 auto; }
 .site-brand-inner { position: relative; width: 100%; height: 100%; will-change: transform; transform-style: preserve-3d; transition: transform 0.55s ease; }
 .site-brand.flipped .site-brand-inner { transform: rotateY(180deg); }
+
+/* Kortin etuosa: logo + teksti                              */
 .brand-front, .brand-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 4px 18px rgba(0,0,0,0.12); }
 .brand-front { display: flex; align-items: center; justify-content: center; gap: 12px; }
+
+/* Kortin takaosa: kuvaus sivustosta                        */
 .brand-back { transform: rotateY(180deg); padding: 1.5rem; color: #56533c; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.45; text-align: left; overflow: hidden; }
 .site-brand img { width: min(120px, 20vw); height: min(120px, 20vw); object-fit: contain; }
 .brand-front span { font-family: "EB Garamond", Garamond, serif; font-size: min(5rem, 15vw); font-weight: 600; color: #56533c; letter-spacing: -0.03em; }
 body.dark-mode .brand-front span { color: #fff2cb; }
+
+/* Pieni pomppuanimaatio logokuvaaan klikkauksesta           */
 .site-brand img.logo-clicked { animation: logoClickPop 0.34s ease; }
 @keyframes logoClickPop { 0%{transform:scale(1) rotate(0deg)} 35%{transform:scale(0.94) rotate(-2deg)} 70%{transform:scale(1.05) rotate(1deg)} 100%{transform:scale(1) rotate(0deg)} }
+
+/* YouTube-linkit alidekkiremppien alla                       */
 .subdeck-video-link { display: block; text-decoration: none; }
 .subdeck-video-link:hover { text-decoration: underline; }
+
+/* Nämä näkyvät vain Tietovisa-tilassa — piilotettu muuten   */
 .group-tools { display: none !important; }
 .group-scoreboard { display: none !important; }
+
+/* ── 12. KORTTIEN YLEISKATSAUSRUUDUKKO (OVERVIEW GRID) ─── */
+/* Näyttää kaikki pakan kortit pienenä ruudukkona            */
 #card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 1.1rem; margin-top: 1rem; }
 .overview-section { width: 100%; }
+
+/* Alidekkin nimi (otsikko ruudukon yläpuolella)             */
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
 .overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
+
+/* Yksittäinen pieni kortti ruudukossa                       */
 .overview-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; height: 90px; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; }
+
+/* YouTube-upotus alidekkin yläpuolella                      */
 .subdeck-video-embed { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; margin: 0.5rem 0; background: #000; }
 .subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
-.overview-card.active  { border: 2px solid #27ae60; }
-.overview-card.known   { background: #e6f4ea; border-color: #8bc79a; }
-.overview-card.unknown { background: #f8e4e1; border-color: #d99a91; }
+
+/* Yleiskatsauskorttien tilatyylit:                          */
+.overview-card.active  { border: 2px solid #27ae60; }          /* nykyinen kortti */
+.overview-card.known   { background: #e6f4ea; border-color: #8bc79a; }   /* tiedetty */
+.overview-card.unknown { background: #f8e4e1; border-color: #d99a91; }   /* ei tiedetty */
 body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .overview-card.known   { background: #294333; border-color: #5f9f70; }
 body.dark-mode .overview-card.unknown { background: #4a2b29; border-color: #a9635d; }
+
+/* Tähtisymboli — tenttitodennäköisyys (1–3 tähteä)         */
 .card-stars { position: absolute; right: 1rem; bottom: 0.8rem; font-size: 1.4rem; line-height: 1; color: #d4a017; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
+
+/* ── 13. TIETOVISA-RYHMÄKORTIT & KOLIKKOANIMAATIO ──────── */
+/* Tietovisa-tilan pisteseuranta — jokainen ryhmä on oma korttinsa */
 .group-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.8rem; position: relative; overflow: hidden; min-height: 190px; cursor: pointer; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
 body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
+
+/* Valittu ryhmä (vastasi oikein) on korostettu vihreällä    */
 .group-card.selected { border: 3px solid #27ae60; box-shadow: 0 0 0 4px rgba(39,174,96,0.22), 0 6px 18px rgba(0,0,0,0.16); background: #f2fff7; }
 .group-card.selected .group-name { color: #1a7f3c; }
 .group-name { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 600; color: #1a1612; margin-bottom: 0.6rem; user-select: none; }
+
+/* Rahatilin näyttö ryhmäkortin kulmassa                     */
 .group-money { position: absolute; bottom: 6px; left: 10px; font-family: "Trebuchet MS","Arial Black",sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: -0.04em; color: #8a5b00; text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 2px 3px rgba(0,0,0,0.18); line-height: 1; }
+
+/* Kolikkopino — jokainen kolikko on yksi .coin-elementti    */
 .coin-tower { position: absolute; right: 14px; bottom: 10px; width: 54px; min-height: 70px; }
 .coin { position: absolute; left: 50%; width: 42px; height: 42px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff6b0 0%, #f5d96b 18%, #d8a21e 55%, #9a6b00 100%); border: 3px solid #8a5b00; box-shadow: inset 0 2px 3px rgba(255,255,255,0.7), inset 0 -3px 4px rgba(0,0,0,0.24), 0 4px 7px rgba(0,0,0,0.25); transform: translateX(-50%) perspective(160px) rotateX(62deg); }
+
+/* "10" teksti kolikoissa (CSS ::before pseudo-elementillä)  */
 .coin::before, .flying-coin::before { content: "10"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: rgba(90,50,0,0.85); }
+
+/* Lentävä kolikko animaatiossa (pisteiden myöntäminen)      */
 .flying-coin { position: fixed; z-index: 9999; width: 48px; height: 48px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle at 30% 30%, #fff1b8 0%, #d8a74a 30%, #b97816 70%, #7a4d08 100%); border: 3px solid #9b630e; }
+
+/* Voittavan ryhmäkortin pomppuanimaatio                     */
 .group-card.coin-winner .coin-tower  { animation: towerBounce 0.38s ease-out; }
 .group-card.coin-winner .group-money { animation: moneyBounce 0.38s ease-out; }
 @keyframes towerBounce { 0%{transform:translateY(0) scale(1)} 35%{transform:translateY(-14px) scale(1.08)} 65%{transform:translateY(3px) scale(0.98)} 100%{transform:translateY(0) scale(1)} }
 @keyframes moneyBounce { 0%{transform:scale(1)} 35%{transform:scale(1.28)} 65%{transform:scale(0.96)} 100%{transform:scale(1)} }
+
+/* ── 14. KORTTIANIMAATIOT (LIUKU SISÄÄN/ULOS) ───────────── */
+/* "Tiesin" → kortti liukuu vasemmalle, seuraava tulee oikealta */
+/* "Ei tiedetty" → kortti liukuu oikealle, seuraava tulee vasemmalta */
 @keyframes cardSlideOutLeft { from{transform:translateX(0);opacity:1} to{transform:translateX(-50px);opacity:0} }
 @keyframes cardSlideInRight { from{transform:translateX(50px);opacity:0} to{transform:translateX(0);opacity:1} }
 @keyframes cardSlideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(50px);opacity:0} }
@@ -152,14 +326,26 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .card-in-right { animation: cardSlideInRight 0.18s ease forwards; }
 .card-out-right { animation: cardSlideOutRight 0.18s ease forwards; pointer-events:none; }
 .card-in-left { animation: cardSlideInLeft 0.18s ease forwards; }
+
+/* Vilkutusanimaatio (pulse) — käytetään odotustilassa        */
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── 15. TIETOVISA-OVERLAY ──────────────────────────────── */
+/* Kun Tietovisa on päällä, koko sivu peitetään overlay:lla  */
 body.joukkupeli-active { overflow: hidden; }
 body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointer-events: none; }
+
+/* Asetukset-dropdown animoitu avautuminen (max-height-trikki) */
 #settings-dropdown-inline { overflow: hidden; max-height: 0; transition: max-height 0.35s ease; display: flex !important; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: none; opacity: 0; transition: max-height 0.35s ease, opacity 0.25s ease; }
 #settings-dropdown-inline.open { max-height: 300px; pointer-events: auto; opacity: 1; }
+
+/* ── 16. RESPONSIIVISUUS (MOBIILI ≤600px) ───────────────── */
 @media (max-width: 600px) {
+  /* Piilota pakkavalinnanäytön sivupalkki mobiilissa         */
   #review-deck-card { display: none; }
+  /* Kommenttilaatikko siirtyy absolute → static (ruudun alle) */
   .comment-area { position: static; width: 100%; margin-top: 0; }
+  /* Pakkakorttilista pystysuoraan                           */
   .deck-list { flex-direction: column; gap: calc(min(256px, 90vw * 4 / 7) / 5); align-items: center; }
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
   .comment-area { position: static; width: 100%; margin-top: 0; }
@@ -168,108 +354,295 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 </head>
 <body>
 
-<!-- Global top bar - scrolls with page, no fixed/absolute -->
+<!-- ══════════════════════════════════════════════════════════
+     YLÄPALKKI (GLOBAL TOP BAR)
+     Sisältää: ← takaisin-nappi (vasemmalla) + ⚙ asetukset (oikealla)
+     Molemmat on piilotettu etusivulla, näkyvät vain kertaustilassa.
+     ══════════════════════════════════════════════════════════ -->
 <div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
+
+  <!-- ← Takaisin pakkavalintaan (piilotettu etusivulla) -->
   <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
+
+  <!-- Väli logon ja gear-napin välissä -->
   <div style="flex:1"></div>
+
+  <!-- ⚙ Asetukset-nappi + sen alla avautuva dropdown       -->
   <div id="gear-btn-wrap" style="position:relative;display:none;">
     <button onclick="toggleSettingsMenu()" style="width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);">⚙</button>
+
+    <!-- Dropdown: togglet Tietovisa / Tummatila / Kehittäjätila + kellonaika -->
     <div id="settings-dropdown-inline" style="position:absolute;top:58px;right:0;z-index:9999;">
+
+      <!-- Tietovisa-toggle: piilotettu kunnes kehittäjä on kirjautunut -->
       <label class="iphone-toggle-wrap" id="tietovisa-label" style="display:none;"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Tietovisa</span></label>
+
+      <!-- Tummatila-toggle -->
       <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
+
+      <!-- Kehittäjätila-toggle: vaatii salasanan -->
       <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
+
+      <!-- Staattinen kellonaika-display (viimeisin deploy-aika) -->
       <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 13:45</div>
     </div>
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     SOLUKKO-LOGO (3D-KÄÄNTYVÄ KORTTI)
+     Klikatessa kääntyy ympäri ja näyttää kuvauksen sivustosta.
+     Piilotetaan kun käyttäjä siirtyy kertaustilaan.
+     ══════════════════════════════════════════════════════════ -->
 <div class="site-brand site-brand-card" id="site-brand" onclick="clickLogoHome()">
   <div class="site-brand-inner">
+
+    <!-- Etuosa: logo + "Solukko"-teksti -->
     <div class="brand-front">
       <img src="solukkologo22.png" alt="Solukko logo">
       <span>Solukko</span>
     </div>
+
+    <!-- Takaosa: kuvaus sivustosta (näkyy käännettyä) -->
     <div class="brand-back">
-      Solukko.com on biotieteilijöiden oppimissivusto, jossa kurssit voi opiskella valmiiden kysymyskorttien avulla.<br>
-      • Käyttö täysin ilmaista<br>
+      Pidä aivosolusi tenttikunnossa!<br>
+      Solukko.com on biokemian opiskelijoille suunnattu oppimissivusto, 
+      jossa yliopistokurssit voi opiskella valmiiden kysymyskorttien avulla.<br>
       • Ei kirjautumista<br>
-      • Kysymyksiin merkitty tenttitodennäköisyys<br>
+      • Käyttö aina ilmaista<br>
       • Palkintoja sisällöntuottajille<br>
-      • Enemmän opiskelua, vähemmän säätämistä - Solukossa opiskelet jo yhdellä painalluksella!
+      • Kysymyksiin merkitty tenttitodennäköisyys<br>
     </div>
   </div>
 </div>
 
 
+<!-- ── Latausindikaattori (näytetään .apkg-latauksen aikana) -->
 <div id="loading">ladataan…</div>
+
+<!-- ── Virheviesti (piilotettu, näytetään vain virhetilanteessa) -->
 <div id="conn-error"></div>
 
+<!-- ══════════════════════════════════════════════════════════
+     PAKKAVALINNANÄYTTÖ (#deck-screen)
+     Näytetään etusivulla — lista kaikista TYKRY-pakoista.
+     Jokainen pakka on video-taustainen .deck-btn-nappi.
+     Renderöidään dynaamisesti: ks. loadDecks() ja init()
+     ══════════════════════════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     KORTTIRUUTU (#card-screen)
+     Näytetään kun pakka on valittu. Sisältää:
+       • Yläpalkki (jäljellä olevien korttien laskuri)
+       • #review-deck-card  — pienen pakkakortti vasemmalla (desktop)
+       • .comment-area      — kommenttilaatikko oikealla (desktop) / alla (mobiili)
+       • .flashcard         — itse kortti (kysymys + vastaus)
+       • #show-row          — "Tarkista"-nappi
+       • #grade-row         — "Tiesin" / "Palataan asiaan"-napit
+       • #card-overview-grid — yleiskatsausruudukko kaikkiin kortteihin
+     ══════════════════════════════════════════════════════════ -->
 <div id="card-screen">
+
+  <!-- Korttilaskuri: esim. "Kortti 3 / 24" -->
   <div class="top-bar">
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
   </div>
 
+  <!-- Pienen pakkakortti kertauksen vasemmalla puolella (vain desktop) -->
+  <!-- Renderöidään dynaamisesti: ks. renderReviewDeckCard()           -->
   <div id="review-deck-card"></div>
 
+  <!-- KOMMENTTILAATIKKO (oikealla / mobiilissa alla)
+       Suljettu = "Jätä kommentti" -teksti
+       Auki = textarea + lähetysnappi + Firestore-kommentit alla -->
   <div class="comment-area">
+
+    <!-- Kommenttilomake (avautuu klikkauksesta) -->
     <div class="comment-box" id="comment-box">
       <textarea id="card-comment"
         placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla"></textarea>
+      <!-- Vihreä lähetysnappi (✓) -->
       <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
+      <!-- Kuvaliite-nappi (📷) — piilotettu, avautuu .open-tilassa -->
       <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
+      <!-- Esikatselukuva liitteelle -->
       <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
+      <!-- Lähetyksen tilaviesti ("Lähetetty!" tms.) -->
       <div class="comment-status" id="comment-status"></div>
     </div>
+
+    <!-- Tietovisa-buzzerien listaus (vain kehittäjätilassa näkyvä) -->
     <div id="buzzer-display" style="display:none;flex-direction:column;gap:6px;"></div>
+
+    <!-- Aiempien Firestore-kommenttien näyttöalue -->
     <div class="comment-display" id="comment-display"></div>
     <div class="comment-feed" id="comment-feed"></div>
   </div>
 
+  <!-- FLASHCARD — itse kortti
+       Kysymys näkyy aina.
+       Vastaus (.answer-section) on piilotettu kunnes "Tarkista" klikataan.
+       Cloze-tyypissä koko HTML korvataan vastauksessa (ks. showAnswer).
+       .card-stars = tenttitodennäköisyys tähtinä (★★★ = luultavasti tentissä). -->
   <div class="flashcard" id="flashcard">
     <div class="card-stars" id="card-stars"></div>
     <div class="card-content" id="question-content"></div>
+
+    <!-- Vastaus paljastetaan "Tarkista"-napin jälkeen -->
     <div class="answer-section" id="answer-section">
       <div class="card-content" id="answer-content"></div>
     </div>
   </div>
 
+  <!-- "Tarkista"-nappi — näytetään ennen vastausta.
+       Painettaessa kutsuu handleShowButton() → showAnswer() -->
   <div class="btn-row" id="show-row">
     <button class="show-btn" id="show-btn" onclick="handleShowButton()">Tarkista</button>
   </div>
 
+  <!-- Arviointirivin napit — näytetään vastauksen jälkeen.
+       "Palataan asiaan" → kortti lisätään takaisin jonoon (kohta 10)
+       "Tiesin!" → kortti merkitään tiedetyksi, poistetaan jonosta -->
   <div class="btn-row" id="grade-row" style="display:none">
     <button class="grade-btn btn-wrong" onclick="gradeCard(false)">Palataan asiaan... 🥀</button>
     <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
   </div>
 
+  <!-- YLEISKATSAUSRUUDUKKO — kaikki pakan kortit pienenä ruudukkona
+       Renderöidään dynaamisesti: ks. renderCardOverview()
+       Klikkaamalla pientä korttia hypätään suoraan siihen (jumpToOverviewCard) -->
   <div id="card-overview-grid"></div>
 
+  <!-- Tietovisa: ryhmien lisääminen (piilotettu oletuksena) -->
   <div class="group-tools">
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
   </div>
+
+  <!-- Tietovisa: ryhmäpistelauta (piilotettu oletuksena) -->
   <div class="group-scoreboard" id="group-scoreboard"></div>
 </div>
 
+<!-- Piilotettu file input kuvaliitteen lisäämiseen kommenttiin -->
 <input type="file" id="comment-img-input" accept="image/*" style="display:none" onchange="handleCommentImage(this)">
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT — KAIKKI LOGIIKKA
+     ─────────────────────────────────────────────────────────
+     OSIOT (etsimiseen):
+       ① KONFIGURAATIO & SOVELLUKSEN TILA
+       ② KÄYTTÄJÄN IDENTITEETTI
+       ③ TUMMATILA & KEHITTÄJÄTILA
+       ④ VIEWPORT-ZOOM
+       ⑤ ÄÄNIEFEKTIT
+       ⑥ KOMMENTTILAATIKON UI-KÄSITTELIJÄT
+       ⑦ LOGO-ANIMAATIO
+       ⑧ .APKG-LATAUS & SQLITE-PARSINTA (YDINLOGIIKKA)
+       ⑨ PAKKOJEN LATAAMINEN JA RENDERÖINTI
+       ⑩ KORTIN RENDERÖINTI & APUFUNKTIOT
+       ⑪ KOMMENTIT: TALLENNUS JA FIRESTORE
+       ⑫ TIETOVISA (JOUKKUPELI) — BUZZER-SYSTEEMI
+       ⑬ KORTTIARVIOINTI (GRADING) & NAVIGOINTI
+       ⑭ YLEISKATSAUSRUUDUKKO (OVERVIEW GRID)
+       ⑮ RYHMÄT & TIETOVISA-PISTEET
+       ⑯ UTILITY-FUNKTIOT (show/hide/popstate)
+     ══════════════════════════════════════════════════════════ -->
 <script>
-// ║  CONFIGURE: rename your .apkg file to match this, or change  ║
-// ║  this constant to match your filename.                        ║
-// ╚══════════════════════════════════════════════════════════════╝
+
+// ════════════════════════════════════════════════════════════
+// ① KONFIGURAATIO & SOVELLUKSEN TILA
+//    Muuta APKG_FILE jos haluat käyttää eri pakkaa.
+//    Kaikki globaalit muuttujat alustetaan tässä.
+// ════════════════════════════════════════════════════════════
+
+// ─── Pakkatiedoston nimi (täsmättävä serverillä olevaan tiedostoon) ───
 const APKG_FILE = 'TYKRY.apkg';
 
-// ── App state ─────────────────────────────────────────────────────────────────
-let allCards  = [];
-let allDeckNames = [];  // all deck names from DB, including empty ones
-let mediaMap  = {};   // filename → data:URL  (populated from .apkg media)
+// ─── Korttidata (täytetään init():ssa) ───────────────────────────────
+let allCards  = [];          // kaikki parsitut kortit (kaikista TYKRY-pakoista)
+let allDeckNames = [];       // kaikki pakkojen nimet tietokannasta (myös tyhjät)
+let mediaMap  = {};          // { "kuva.png": "data:image/png;base64,..." }
 
+// ─── UI-tila ──────────────────────────────────────────────────────────
 let overviewGridVisible = true;
 let darkMode = JSON.parse(localStorage.getItem('anki-dark-mode') || 'false');
-let devMode = JSON.parse(localStorage.getItem('anki-dev-mode') || 'false');
+let devMode  = JSON.parse(localStorage.getItem('anki-dev-mode')  || 'false');
 
+// ─── Tietovisa-tila ───────────────────────────────────────────────────
+let deckGroups = [];         // pakan alidekkit ryhmiteltynä (ks. buildDeckGroups)
+let selectedGroup = null;    // valitun ryhmän indeksi (null = ei valittu)
+let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
+  {name:'A',score:0},{name:'B',score:0},{name:'C',score:0}
+]));
+let groupMode = false;       // onko Tietovisa-tila päällä
+
+// ─── Kertaussessio ────────────────────────────────────────────────────
+let queue=[];                // kertausjono: kortit jotka vielä tulevat
+let reviewCards=[];          // kaikki nykyisen pakan kortit järjestyksessä
+let currentOverviewIndex=0;  // yleiskatsausruudukon aktiivikortin indeksi
+let cardGrades={};           // { cardId: 'known' | 'unknown' }
+let currentCard=null;        // juuri nyt näytöllä oleva kortti
+let currentDeck='';          // nykyisen pakan nimi
+let coinAnimating=false;     // estetään moninkertaista klikkausta kolikkoanimaation aikana
+
+// ─── Firestore-kuuntelijat (unsubscribe-funktiot talteen siivoomista varten) ─
+let commentsUnsubscribe=null;
+
+
+// ════════════════════════════════════════════════════════════
+// ② KÄYTTÄJÄN IDENTITEETTI
+//    Anonyymi UUID tallennetaan localStorageen.
+//    Käytetään kommenttien omistajuuteen (ei vaadi kirjautumista).
+// ════════════════════════════════════════════════════════════
+
+function getUserId(){
+  let uid = localStorage.getItem('solukko-uid');
+  if(!uid){
+    // Luodaan kertaluonteinen tunnistekoodi tämän selaimen istunnolle
+    uid = Math.random().toString(36).slice(2)+Date.now().toString(36);
+    localStorage.setItem('solukko-uid',uid);
+  }
+  return uid;
+}
+
+
+// ════════════════════════════════════════════════════════════
+// ③ TUMMATILA & ASETUKSET
+//    Tummatila: tallennetaan localStorageen, palauu sivun päivityksen jälkeen.
+//    Kehittäjätila: suojattu SHA-256-salasanalla.
+//    Asetukset-dropdown: avautuu/sulkeutuu clickin perusteella.
+// ════════════════════════════════════════════════════════════
+
+// ─── Tummatila ────────────────────────────────────────────────────────
+function applyDarkMode(){
+  document.body.classList.toggle('dark-mode', darkMode);
+  const t=document.getElementById('dark-toggle-input2'); if(t) t.checked=darkMode;
+}
+function toggleDarkModeFromSwitch(){
+  darkMode=document.getElementById('dark-toggle-input2').checked;
+  localStorage.setItem('anki-dark-mode',JSON.stringify(darkMode)); applyDarkMode();
+}
+
+// ─── Asetukset-dropdown (avaa/sulkee gear-napin alta) ─────────────────
+function toggleSettingsMenu(){
+  const d=document.getElementById('settings-dropdown-inline');
+  if(d) d.classList.toggle('open');
+}
+// Sulje dropdown klikkaamalla muualle
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('gear-btn-wrap');
+  if(wrap&&!wrap.contains(e.target)){
+    const d=document.getElementById('settings-dropdown-inline');
+    if(d) d.classList.remove('open');
+  }
+});
+
+// ─── Kehittäjätila ────────────────────────────────────────────────────
+// Kehittäjätilan saa päälle vain oikealla salasanalla (SHA-256 tarkistettu).
+// Kehittäjätila on pakollinen Tietovisan hostaamista varten.
+// Vain yksi kehittäjä voi olla kerrallaan (Firestore devOwner -asiakirja).
 function applyDevMode(){
   ['dev-toggle-input2','dev-toggle-input2'].forEach(id=>{ const t=document.getElementById(id); if(t) t.checked=devMode; });
 }
@@ -277,10 +650,16 @@ function toggleDevModeFromSwitch(){
   const t=document.getElementById('dev-toggle-input2');
   if(t&&t.checked){
     const pw=prompt('Anna kehittäjätilan salasana:');
-    if(pw==='kuortane'){
+    if(!pw){ if(t) t.checked=false; return; }
+    // Tarkistetaan salasana SHA-256-hashilla (ei lähetetä palvelimelle)
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw))
+      .then(buf=>{
+        const hash=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+        if(hash==='5d4da5b963892e66c2e856c5ea7df4dc76183d999d4ec8ded89b9f7e50635335'){
       devMode=true;
       localStorage.setItem('anki-dev-mode',JSON.stringify(true));
-      // Claim dev ownership — kicks out any other dev
+      // Ilmoitetaan Firestoreen: tämä käyttäjä on nyt kehittäjä
+      // (potkii pois muun mahdollisen kehittäjän)
       db.collection('gamestate').doc('devOwner').set({
         userId: getUserId(),
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -290,54 +669,27 @@ function toggleDevModeFromSwitch(){
         cardId: currentCard ? String(currentCard.cardId||currentCard.noteId||'') : null,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).catch(()=>{});
-    } else {
-      alert('Väärä salasana.');
-      if(t) t.checked=false;
-    }
+        } else {
+          alert('Väärä salasana.');
+          if(t) t.checked=false;
+        }
+      });
   } else {
     devMode=false;
     localStorage.setItem('anki-dev-mode',JSON.stringify(false));
     db.collection('gamestate').doc('devOwner').delete().catch(()=>{});
-    endGameSession(); // signal all joukkupeli users and clear data
+    endGameSession(); // ilmoitetaan kaikille Tietovisa-pelaajille pelin päättymisestä
   }
   if(currentCard) loadFirestoreComments();
 }
-let deckGroups = [], selectedGroup = null;
-let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
-  {name:'A',score:0},{name:'B',score:0},{name:'C',score:0}
-]));
-let groupMode = false;
-let queue=[], reviewCards=[], currentOverviewIndex=0, cardGrades={};
-let currentCard=null, currentDeck='', coinAnimating=false;
-let commentsUnsubscribe=null;
 
-// ── User identity (for comment ownership) ────────────────────────────────────
-function getUserId(){
-  let uid = localStorage.getItem('solukko-uid');
-  if(!uid){ uid = Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('solukko-uid',uid); }
-  return uid;
-}
-function applyDarkMode(){
-  document.body.classList.toggle('dark-mode', darkMode);
-  const t=document.getElementById('dark-toggle-input2'); if(t) t.checked=darkMode;
-}
-function toggleDarkModeFromSwitch(){
-  darkMode=document.getElementById('dark-toggle-input2').checked;
-  localStorage.setItem('anki-dark-mode',JSON.stringify(darkMode)); applyDarkMode();
-}
-function toggleSettingsMenu(){
-  const d=document.getElementById('settings-dropdown-inline');
-  if(d) d.classList.toggle('open');
-}
-document.addEventListener('click',e=>{
-  const wrap=document.getElementById('gear-btn-wrap');
-  if(wrap&&!wrap.contains(e.target)){
-    const d=document.getElementById('settings-dropdown-inline');
-    if(d) d.classList.remove('open');
-  }
-});
 
-// ── Viewport zoom ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+// ④ VIEWPORT-ZOOM
+//    Tallentaa CSS-muuttujiksi nykyisen zoom-tason ja visual viewport -offsetin.
+//    Tarvitaan mobiilikäytön näppäimistö-/suurennustilanteissa.
+// ════════════════════════════════════════════════════════════
+
 function updatePageZoomScale(){
   const vv=window.visualViewport;
   document.documentElement.style.setProperty('--page-zoom', vv?vv.scale:1);
@@ -350,8 +702,17 @@ if(window.visualViewport){
 }
 updatePageZoomScale();
 
-// ── Audio ─────────────────────────────────────────────────────────────────────
+
+// ════════════════════════════════════════════════════════════
+// ⑤ ÄÄNIEFEKTIT
+//    playCashSound()   — kolikkoanimaation käyntiääni (Web Audio API)
+//    playAwardSound()  — Tietovisa-pistesaanto (MP3)
+//    playLogoClickSound() — logon klikkauksesta lyhyt "plink"
+// ════════════════════════════════════════════════════════════
+
 let audioCtx=null;
+
+// Kolme lyhyttä siniäänisävelystä päällekkäin (C-E-G kolmisointi)
 function playCashSound(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   const now=audioCtx.currentTime;
@@ -365,10 +726,14 @@ function playCashSound(){
     osc.start(now+i*.06); osc.stop(now+i*.06+.13);
   });
 }
+
+// MP3-tiedostosta (Money.mp3) — soitetaan kun kehittäjä antaa pisteitä
 function playAwardSound(){
   const audio = new Audio('Money.mp3');
   audio.play().catch(()=>{});
 }
+
+// Lyhyt "plink"-ääni logon klikkauksesta (taajuus nousee 420→760 Hz)
 function playLogoClickSound(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   const now=audioCtx.currentTime;
@@ -381,12 +746,25 @@ function playLogoClickSound(){
   osc.start(now); osc.stop(now+.17);
 }
 
-// ── Comment box ───────────────────────────────────────────────────────────────
+
+// ════════════════════════════════════════════════════════════
+// ⑥ KOMMENTTILAATIKON UI-KÄSITTELIJÄT
+//    Kommenttilaatikko avautuu klikkauksesta, sulkeutuu ulkopuolisesta klikkauksesta.
+// ════════════════════════════════════════════════════════════
+
+// Avaa kommenttilaatikko klikkauksesta ja fokusoi textarea
 const commentBoxWrap=document.querySelector('.comment-box');
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
+
+// Sulje kommenttilaatikko klikkaamalla muualle (comment-area:n ulkopuolelle)
 document.addEventListener('click',e=>{ if(!document.querySelector('.comment-area').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
 
-// ── Logo ──────────────────────────────────────────────────────────────────────
+
+// ════════════════════════════════════════════════════════════
+// ⑦ LOGO-ANIMAATIO
+//    Klikatessa: 3D-kääntyminen + logo-pop-animaatio + ääni.
+// ════════════════════════════════════════════════════════════
+
 function clickLogoHome(){
   const brand=document.getElementById('site-brand'),logo=document.querySelector('.site-brand img');
   brand?.classList.toggle('flipped');
@@ -394,33 +772,45 @@ function clickLogoHome(){
   playLogoClickSound();
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  CORE: load .apkg directly from the repo                                     ║
-// ║  Uses JSZip (unzip) + sql.js (read SQLite) — both from CDN                   ║
-// ║                                                                               ║
-// ║  Export from Anki:                                                            ║
-// ║  File → Export → Format: Anki Deck Package (.apkg)                           ║
-// ║  ✓ Check "Support older Anki versions"  ← IMPORTANT                          ║
-// ║  ✓ Include media                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+// ════════════════════════════════════════════════════════════
+// ⑧ .APKG-LATAUS & SQLITE-PARSINTA (YDINLOGIIKKA)
+//
+//    PROSESSI:
+//    ─────────────────────────────────────────────────────────
+//    1. Alustetaan sql.js (SQLite WASM)
+//    2. Haetaan TYKRY.apkg fetch():lla
+//    3. JSZip purkaa zipin
+//    4. Mediakuvat (PNG, JPG, GIF jne.) muunnetaan base64 data-URL:iksi → mediaMap{}
+//    5. collection.anki21 (tai .anki2) avataan SQLite-kantana
+//    6. parseAnkiDB() lukee kortit, muistiinpanot ja pakkojen nimet
+//    7. loadDecks() rakentaa etusivun pakkalistan
+//    ─────────────────────────────────────────────────────────
+//
+//    ANKI-TIETOKANNAN RAKENNE (vanhan formaatin mukainen):
+//      col   — yksi rivi: sisältää decks (JSON) ja models (JSON)
+//      notes — yksi rivi per muistiinpano (mid=model-id, flds=kentät \x1f-erotettu)
+//      cards — yksi rivi per kortti (nid=note-id, did=deck-id)
+// ════════════════════════════════════════════════════════════
 
 async function init(){
   show('loading');
   try {
-    // 1. Init sql.js (WASM SQLite)
+    // ── Vaihe 1: Alustetaan sql.js (WASM-SQLite, ladataan CDN:ltä) ──
     const SQL = await initSqlJs({
       locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
     });
 
-    // 2. Fetch the .apkg from the repo
+    // ── Vaihe 2: Haetaan .apkg-tiedosto serveriltä ──────────────────
     const res = await fetch('./' + APKG_FILE);
     if (!res.ok) throw new Error(APKG_FILE + ' not found (' + res.status + ')');
     const buf = await res.arrayBuffer();
 
-    // 3. Unzip it
+    // ── Vaihe 3: Puretaan ZIP (JSZip) ───────────────────────────────
     const zip = await JSZip.loadAsync(buf);
 
-    // 4. Load media index → build filename → data:URL map
+    // ── Vaihe 4: Ladataan mediakuvat base64-muotoon ──────────────────
+    // "media"-tiedosto on JSON-hakemisto: { "0": "kuva.png", "1": "logo.svg", ... }
     const mediaFile = zip.file('media');
     if (mediaFile) {
       let mediaJson;
@@ -428,6 +818,7 @@ async function init(){
       if (mediaJson) {
         let mediaIndex = {};
         try { mediaIndex = JSON.parse(mediaJson); } catch(e) {}
+        // Jokainen mediakuva muunnetaan base64 data-URL:iksi ja tallennetaan mediaMap:iin
         await Promise.all(Object.entries(mediaIndex).map(async ([num, name]) => {
           const f = zip.file(num);
           if (!f) return;
@@ -440,21 +831,25 @@ async function init(){
       }
     }
 
-    // 5. Open SQLite — try .anki21 first (standard export), then .anki2 fallback
+    // ── Vaihe 5: Avataan SQLite-tietokanta ──────────────────────────
+    // Kokeillaan ensin .anki21 (uudempi), sitten .anki2 (vanhempi formaatti)
     const dbFile = zip.file('collection.anki21') || zip.file('collection.anki2');
     if (!dbFile) throw new Error('Ei löydy collection.anki21 eikä collection.anki2 tiedostoa.');
     const dbBuf = await dbFile.async('arraybuffer');
     const db    = new SQL.Database(new Uint8Array(dbBuf));
 
-    // 6. Parse all cards from the DB
+    // ── Vaihe 6: Parsitaan kortit ────────────────────────────────────
     allCards = parseAnkiDB(db);
+    // Tallennetaan myös kaikki pakkojen nimet (myös tyhjät paket)
     allDeckNames = Object.values(JSON.parse(db.exec('SELECT decks FROM col')[0].values[0][0]))
       .map(d => d.name).filter(Boolean);
     db.close();
 
+    // ── Vaihe 7: Rakennetaan pakkalista ─────────────────────────────
     await loadDecks();
 
   } catch(e) {
+    // Näytetään virheviesti jos jokin yllä epäonnistuu
     const d = document.getElementById('conn-error');
     d.style.display = 'block';
     d.innerHTML = '<strong>Virhe ladattaessa kortteja.</strong><br><br>' + e.message;
@@ -464,9 +859,12 @@ async function init(){
   hide('loading');
 }
 
-// ── Parse Anki SQLite (old schema: col table has decks/models as JSON blobs) ──
+// ─── Anki SQLite -kannan parsinta ────────────────────────────────────
+// Lukee col-, notes- ja cards-taulut, palauttaa taulukon korttiobjekteja.
+// Jokainen korttiobjekti sisältää: cardId, noteId, deckName, modelName,
+//   fields{}, tags[], question, answer, due, type, queue, ord
 function parseAnkiDB(db) {
-  // Read deck map and model map from col table
+  // Luetaan pakkahakemisto ja mallit col-taulusta
   const colRows = db.exec('SELECT decks, models FROM col');
   if (!colRows.length) return [];
 
@@ -475,20 +873,22 @@ function parseAnkiDB(db) {
   const decksData  = JSON.parse(decksJson);
   const modelsData = JSON.parse(modelsJson);
 
-  // deck id → full name (already uses :: as separator in old format)
+  // deck id → pakan koko nimi (TYKRY::Aineenvaihdunta jne.)
   const deckMap = {};
   Object.values(decksData).forEach(d => {
     if (d.id != null && d.name) deckMap[String(d.id)] = d.name;
   });
 
-  // model id → field names and model name
+  // model id → kenttien nimet + mallin nimi
+  // (Anki-mallit määräävät mikä kenttä on "kysymys" ja mikä "vastaus")
   const modelFields = {}, modelNames = {};
   Object.entries(modelsData).forEach(([mid, m]) => {
     modelNames[mid]  = m.name || '';
     modelFields[mid] = (m.flds || []).map(f => f.name);
   });
 
-  // Notes
+  // Luetaan kaikki muistiinpanot (notes) — jokainen note = yksi tietoalkio
+  // flds-sarake sisältää kenttien arvot \x1f-merkillä eroteltuna
   const noteRows = db.exec('SELECT id, mid, flds, tags FROM notes');
   const notes = {};
   if (noteRows.length) {
@@ -506,7 +906,8 @@ function parseAnkiDB(db) {
     });
   }
 
-  // Cards
+  // Luetaan kaikki kortit (cards) — jokainen kortti viittaa yhteen noteen
+  // Yhdestä notesta voi olla useita kortteja (esim. eteen/taaksepäin)
   const cardRows = db.exec('SELECT id, nid, did, ord, due, type, queue FROM cards');
   const cards = [];
   if (cardRows.length) {
@@ -514,6 +915,7 @@ function parseAnkiDB(db) {
       const note = notes[noteId];
       if (!note) return;
       const deckName = deckMap[String(did)] || String(did);
+      // Yritetään arvailla mikä kenttä on "kysymys" ja mikä "vastaus" nimen perusteella
       const fnames   = Object.keys(note.fields);
       const frontF   = fnames.find(f => ['front','question','text','content'].includes(f.toLowerCase())) || fnames[0] || '';
       const backF    = fnames.find(f => ['back','answer','extra'].includes(f.toLowerCase()))             || fnames[1] || '';
@@ -532,18 +934,27 @@ function parseAnkiDB(db) {
   return cards;
 }
 
-// ── LOAD DECKS from parsed allCards ──────────────────────────────────────────
+
+// ════════════════════════════════════════════════════════════
+// ⑨ PAKKOJEN LATAAMINEN JA RENDERÖINTI
+//    loadDecks()        — rakentaa etusivun pakkalistan
+//    startDeck()        — siirtyy kertaustilaan valitussa pakassa
+//    renderReviewDeckCard() — pieni pakkakortti kertauksen vasemmalla puolella
+// ════════════════════════════════════════════════════════════
+
+// ─── Etusivun pakkalistan rakentaminen ───────────────────────────────
+// Kerää uniikit TYKRY-pakkaotsikot, renderöi video-napit.
 async function loadDecks(){
   const seen=new Set(), names=[];
 
-  // First add decks from the DB deck list (catches empty decks too)
+  // Lisätään ensin tietokannan pakkalista (saa myös tyhjät paket mukaan)
   allDeckNames.forEach(d=>{
     if(!d.startsWith('TYKRY::')) return;
     const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0];
     if(!seen.has(top)){ seen.add(top); names.push(top); }
   });
 
-  // Also sweep cards in case DB deck list missed anything
+  // Käydään myös kortit läpi varmuuden vuoksi
   allCards.forEach(card=>{
     const d=card.deckName||'';
     if(!d.startsWith('TYKRY::')) return;
@@ -551,7 +962,7 @@ async function loadDecks(){
     if(!seen.has(top)){ seen.add(top); names.push(top); }
   });
 
-  // Debug: show what decks were found
+  // Jos ei löydy yhtään TYKRY-pakkaa, näytetään debug-virheilmoitus
   if(names.length === 0){
     const d = document.getElementById('conn-error');
     d.style.display = 'block';
@@ -567,14 +978,18 @@ async function loadDecks(){
   list.innerHTML='';
   await document.fonts.ready;
 
+  // Mitataan pisimmän pakannimen leveys Canvas-API:lla
+  // → asetetaan pakkakortin minimileveys (--deck-card-width)
   const canvas=document.createElement('canvas');
   const ctx2=canvas.getContext('2d');
   ctx2.font='700 22px Lora, Georgia, serif';
 
+  // Kerätään pakkadata: nimi, kurssikoodi, taustovideo
   const decks=names.map(deck=>{
     const shortName=deck.replace('TYKRY::','');
     const courseCode=(shortName.match(/\(([^h][^t][^t][^p].*?)\)/)||[])[1]||'';
     const cleanName=shortName.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'').replace(/\s*\(.*?\)\s*/,'').trim();
+    // Kukin pakka saa aihetta vastaavan taustavideon
     let bgVideo='default.mp4';
     if(cleanName.includes('Kasvibiokemia'))     bgVideo='kasvibio.mp4';
     if(cleanName.includes('Molekyylibiologia')) bgVideo='DNApolymerase.mp4';
@@ -582,12 +997,16 @@ async function loadDecks(){
     return {deck,cleanName,courseCode,bgVideo};
   });
 
+  // Lasketaan levein pakkakortti → CSS-muuttuja
   let widestTitle=0;
   decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
 
+  // Yksi kerrallaan mobiilissa soitettava video (estää useita yhtäaikaisia autoplay-soittoja)
 let _playingDeckVideo = null;
+
+  // Luodaan nappi jokaiselle pakalle
   decks.forEach(item=>{
     const btn=document.createElement('button');
     btn.className='deck-btn';
@@ -600,8 +1019,10 @@ let _playingDeckVideo = null;
         <div style="font-size:14px;opacity:0.82;font-weight:400;">${item.courseCode}</div>
       </div>`;
     const video=btn.querySelector('.deck-video');
+    // Desktop: video käynnistyy hover-tilassa
     btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); });
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
+    // Mobiili: video käynnistyy kosketuksesta (vain yksi kerrallaan)
     btn.addEventListener('touchstart',()=>{
       if(_playingDeckVideo && _playingDeckVideo!==video){ _playingDeckVideo.pause(); _playingDeckVideo.currentTime=0; }
       _playingDeckVideo=video; video.currentTime=0; video.play().catch(()=>{});
@@ -611,7 +1032,10 @@ let _playingDeckVideo = null;
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
   });
+
   hide('card-screen');
+
+  // Palauta tallennettu sessio (jos käyttäjä päivitti sivun kesken kertauksen)
   const savedDeck=sessionStorage.getItem('solukko-savedDeck');
   const savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck && names.includes(savedDeck)){
@@ -622,23 +1046,35 @@ let _playingDeckVideo = null;
   show('deck-screen');
 }
 
-// ── START DECK ────────────────────────────────────────────────────────────────
+// ─── Aloita kertaus valitussa pakassa ────────────────────────────────
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
   
   // deck name intentionally hidden
   renderReviewDeckCard(deckName);
+
+  // Haetaan kaikki tähän pakkaan kuuluvat kortit (myös alidekeistä)
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
-  reviewCards=infos; queue=infos.slice();
+
+  reviewCards=infos;
+  queue=infos.slice(); // kopio — kortteja poistetaan jonosta kertauksen edetessä
+
   deckGroups=buildDeckGroups(reviewCards,deckName);
   currentOverviewIndex=0;
+
+  // Ladataan aiemmin tallennetut arvosanat (known/unknown) tästä pakasta
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
+
   show('card-screen'); nextCard(); hide('loading');
   sessionStorage.setItem('solukko-savedDeck', deckName);
+
+  // Mobiilissa: scrollataan kortin kohdalle heti pakan avauduttua
   if(window.innerWidth <= 600) setTimeout(()=>{ const fc=document.getElementById('flashcard'); if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }}, 200);
+
+  // Päivitetään UI: piilotetaan logo, näytetään ← takaisin-nappi
   document.getElementById('site-brand').style.display='none';
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='block';
@@ -646,7 +1082,19 @@ async function startDeck(deckName){
   history.pushState({reviewing: true}, '');
 }
 
-// ── FIX IMAGES: replace src with data:URL from mediaMap ──────────────────────
+
+// ════════════════════════════════════════════════════════════
+// ⑩ KORTIN RENDERÖINTI & APUFUNKTIOT
+//    fixImages()        — korvaa img-tagien src mediaMap:ista (base64)
+//    extractBody()      — poimii HTML-body + kokoaa tyylimääritykset
+//    splitAnswerHtml()  — jakaa Anki-HTML:n kysymys/vastaus-osiin <hr id="answer">:sta
+//    renderClozeText()  — piilottaa/paljastaa {{c1::vastaus}}-aukot
+//    renderCurrentCard() — pääfunktio: rakentaa koko kortin DOM:iin
+//    renderReviewDeckCard() — kertauksen vasemmalla puolella näkyvä pieni pakkakortti
+//    nextCard()         — ottaa seuraavan kortin jonosta
+// ════════════════════════════════════════════════════════════
+
+// ─── Korvaa kuvien src-attribuutit base64 data-URL:eilla ─────────────
 async function fixImages(html){
   // Replace any <img src="filename"> with the preloaded data URL
   return html.replace(/(<img[^>]+src\s*=\s*["'])([^"']+)(["'])/gi, (match,pre,src,post)=>{
@@ -656,27 +1104,38 @@ async function fixImages(html){
   });
 }
 
-// ── Card rendering helpers ────────────────────────────────────────────────────
+// ─── Ryhmien tallentaminen localStorageen ─────────────────────────────
 function saveGroups(){ localStorage.setItem('anki-groups',JSON.stringify(groups)); }
 
+// ─── Poimii HTML-bodyn, erottaa <style>-tagit ────────────────────────
 function extractBody(html){
   const styles=[];
   const stripped=html.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi,(_,css)=>{ styles.push(css); return ''; })
     .replace(/<script[\s\S]*?<\/script>/gi,'').trim();
   return {body:stripped,css:styles.join('\n')};
 }
+
+// ─── Jakaa Anki-HTML:n etu- ja takaosaan <hr id="answer">-kohdasta ───
 function splitAnswerHtml(html){
   const m=html.match(/<hr[^>]*id\s*=\s*["']?answer["']?[^>]*>/i);
   if(!m) return {front:html,back:html};
   return {front:html.slice(0,m.index).trim(),back:html.slice(m.index+m[0].length).trim()};
 }
+
+// ─── Tunnistaa onko HTML vain "Extra"-kenttää (ei varsinainen kysymys) ─
 function looksLikeOnlyExtra(html){
   return /Information/i.test(html)&&!/cloze/i.test(html)&&!/<img/i.test(html)&&!/<svg/i.test(html)&&!/io-overlay|io-original|image-occlusion/i.test(html);
 }
+
+// ─── Hakee kortin kenttäarvon useita mahdollisia kenttänimiä kokeilemalla ─
 function getField(card,names){
   for(const n of names) if(card.fields&&card.fields[n]) return card.fields[n].value||'';
   return '';
 }
+
+// ─── Renderöi cloze-teksti: piilottaa tai paljastaa {{c1::vastaus}}-aukot ─
+// showAnswers=false → piilotettu aukko (harmaa)
+// showAnswers=true  → vihreä vastauskorostus
 function renderClozeText(text,showAnswers){
   let hasBullets=/^\s*•/m.test(text);
   let html=text.replace(/\{\{c\d+::([\s\S]*?)(?:::([\s\S]*?))?\}\}/g,(_,answer,hint)=>{
@@ -689,6 +1148,7 @@ function renderClozeText(text,showAnswers){
   return `<div class="enhanced-line">${html.replace(/\s*\r?\n\s*/g,' ')}</div>`;
 }
 
+// ─── Renderöi pieni pakkakortti kertauksen vasemmalle puolelle ────────
 function renderReviewDeckCard(deckName){
   const box=document.getElementById('review-deck-card'); if(!box) return;
   const shortName=deckName.replace('TYKRY::','');
@@ -698,6 +1158,7 @@ function renderReviewDeckCard(deckName){
   const courseCodeMatch=withoutUrl.match(/\(([^)]+)\)/);
   const courseCode=courseCodeMatch?courseCodeMatch[1]:'';
   const cleanName=withoutUrl.replace(/\s*\(.*?\)\s*/,'').trim();
+  // Taustovideo valitaan pakan nimen perusteella
   let bgVideo='default.mp4';
   if(cleanName.includes('Kasvibiokemia'))     bgVideo='kasvibio.mp4';
   if(cleanName.includes('Molekyylibiologia')) bgVideo='DNApolymerase.mp4';
@@ -721,18 +1182,28 @@ function renderReviewDeckCard(deckName){
   }
 }
 
+// ─── Pääfunktio: renderöi currentCard DOM:iin ─────────────────────────
+// Tunnistaa korttitatyypin (tavallinen/cloze/image occlusion/enhanced cloze)
+// ja rakentaa question- ja answer-HTML:n sen mukaisesti.
 async function renderCurrentCard(){
   const card=currentCard;
+
+  // Parsitaan HTML-rakenne irti Anki-muodosta
   const q=extractBody(card.question||'');
   const aFull=extractBody(card.answer||'');
   const split=splitAnswerHtml(aFull.body);
+
+  // Tunnistetaan erikoistyypit mallin nimen tai HTML-sisällön perusteella
   const model=(card.modelName||'').toLowerCase();
   const isSpecial=model.includes('cloze')||model.includes('image')||model.includes('occlusion')
     ||/class\s*=\s*["']?cloze/i.test(q.body+aFull.body)
     ||/io-overlay|io-original|image-occlusion|Toggle Masks/i.test(q.body+aFull.body);
   card._isSpecial=isSpecial;
+
   const isImageOcclusion=model.includes('image occlusion')||model.includes('occlusion')
     ||/io-overlay|io-original|image-occlusion|Toggle Masks/i.test(q.body+aFull.body);
+
+  // Image Occlusion: rakennetaan kuva + SVG-maski etuosasta
   let frontRaw=q.body;
   if(isImageOcclusion){
     const ioImage=getField(card,['Image','image']);
@@ -740,6 +1211,8 @@ async function renderCurrentCard(){
     const ioHeader=getField(card,['Header','header']);
     frontRaw=`${ioHeader?`<div>${ioHeader}</div>`:''}<div class="io-card-image">${ioImage||''}<div class="io-overlay">${ioQMask||''}</div></div>`;
   }
+
+  // Enhanced Cloze: käytetään renderClozeText()-funktiota
   const enhancedText=getField(card,['Content','content','Text','text','Front','front','Question','question']);
   const enhancedExtra=getField(card,['Extra','extra','Back Extra','Information','info']);
   const isEnhancedCloze=!isImageOcclusion&&(model.includes('enhanced cloze')||enhancedText.includes('{{c'));
@@ -748,17 +1221,34 @@ async function renderCurrentCard(){
     frontRaw=renderClozeText(enhancedText,false);
     card._enhancedAnswer=renderClozeText(enhancedText,true)+(enhancedExtra?`<hr><div class="extra">${enhancedExtra}</div>`:'');
   } else { card._enhancedAnswer=null; }
+
+  // Varmistetaan ettei etupuolella näy vain "Extra"-kenttä tai tyhjyys
   if(!frontRaw.trim()||looksLikeOnlyExtra(frontRaw)||frontRaw.trim().startsWith('<hr')) frontRaw=split.front;
+
   const answerRaw=card._enhancedAnswer?card._enhancedAnswer:(isImageOcclusion?aFull.body:(isSpecial?aFull.body:split.back));
+
+  // Injektoidaan korttikohtainen CSS (Anki-malli voi sisältää omaa CSS:ää)
   document.getElementById('card-css').textContent=(card.css||'')+'\n'+q.css+'\n'+aFull.css;
+
+  // Korvataan mediakuvien src-attribuutit base64-versioilla
   const [qHtml,aHtml]=await Promise.all([fixImages(frontRaw),fixImages(answerRaw)]);
   card._qHtml=qHtml; card._aHtml=aHtml;
+
+  // Päivitetään DOM
   document.getElementById('question-content').innerHTML=qHtml;
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
-  loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
+
+  // Ladataan sivukohtaiset tiedot
+  loadCommentForCard();    // kommentit Firestoresta
+  renderCardStars();       // tenttitodennäköisyystähdet
+  loadBuzzers();           // Tietovisa-buzzerit
+  updateShowBtn();         // "Tarkista"-napin tila
+
+  // Tallennetaan sessio sivun päivitystä varten
   sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
-  // Dev mode: broadcast current card so joukkupeli players can buzz correctly
+
+  // Dev mode: lähetetään nykyinen korttiId Firestoreen, jotta pelaajat buzzaavat oikean kortin
   if(devMode && currentCard){
     const cardId = String(currentCard.cardId||currentCard.noteId||'');
     clearBuzzers().then(()=>{
@@ -768,25 +1258,34 @@ async function renderCurrentCard(){
       });
     });
   }
+
+  // Palautetaan napit alkutilaan (piilotetaan vastaus ja arviointiriivi)
   document.getElementById('answer-section').style.display='none';
   document.getElementById('show-row').style.display='flex';
   document.getElementById('grade-row').style.display='none';
+
   selectedGroup=null; updateGroupUI(); renderCardOverview();
+
+  // Mobiilissa scrollataan kortin kohdalle
   if(window.innerWidth <= 600){ const fc=document.getElementById('flashcard'); if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }}
+
+  // Sisääntuloanimaatio
   const fc=document.getElementById('flashcard');
   fc.classList.remove('card-in-right','card-in-left');
   void fc.offsetWidth;
   fc.classList.add('card-in-right');
   
-  // Align side panels with flashcard top
+  // Tasataan sivupaneelien yläreuna kortin yläreunaan
   const ft = document.getElementById('flashcard').offsetTop;
   document.getElementById('review-deck-card').style.top = ft + 'px';
   const ca = document.querySelector('.comment-area');
   if(ca) ca.style.top = ft + 'px';
 }
 
+// ─── Siirtyy seuraavaan korttiin jonossa ──────────────────────────────
 async function nextCard(){
   if(!queue.length){
+    // Jono tyhjä — kaikki kortit käyty läpi
     currentCard=null;
     document.getElementById('card-stars').textContent='';
     document.getElementById('question-content').innerHTML='<div style="width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:#6b6055;text-align:center;">✓ Valmista tuli</div>';
@@ -798,20 +1297,38 @@ async function nextCard(){
   currentOverviewIndex=reviewCards.indexOf(currentCard);
   await renderCurrentCard();
 }
+
+// Uudelleenrenderöi nykyinen kortti (käytetään yleiskatsaushypyn jälkeen)
 async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard(); }
 
+
+// ════════════════════════════════════════════════════════════
+// ⑪ KOMMENTIT: TALLENNUS JA FIRESTORE
+//    submitComment()       — lähettää kommentin Firestoreen + Google Formsiin
+//    loadFirestoreComments() — kuuntelee reaaliaikaisesti kortin kommentteja
+//    editComment()         — inline-muokkaus (oma kommentti tai devMode)
+//    handleCommentImage()  — pakkaa kuvan base64:ksi ennen lähetystä
+// ════════════════════════════════════════════════════════════
+
+// ─── Tunnisteavain localStorageen (ei enää käytetty aktiivisesti) ─────
 function commentKey(c){ return `anki-card-comment-${c.cardId||c.noteId}`; }
+
+// ─── Alustaa kommenttiosio uutta korttia varten ──────────────────────
 function loadCommentForCard(){
   document.getElementById('card-comment').value='';
   document.getElementById('comment-status').textContent='';
   loadFirestoreComments();
-  // Re-anchor scroll after comments render on mobile
+  // Mobiilissa: uudelleenscrollaa kortin kohdalle kommenttien latauksen jälkeen
   if(window.innerWidth<=600) setTimeout(()=>{
     const fc=document.getElementById('flashcard');
     if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }
   }, 600);
 }
+
+// ─── Tallentaa kommenttitekstin localStorageen kirjoittaessa ──────────
 function saveCommentForCard(){ if(currentCard) localStorage.setItem(commentKey(currentCard),document.getElementById('card-comment').value); }
+
+// ─── Näyttää yhden kommentin (vanhempi, ei enää käytössä) ─────────────
 function showCommentDisplay(text){
   const d=document.getElementById('comment-display');
   if(!d) return;
@@ -819,11 +1336,13 @@ function showCommentDisplay(text){
   else { d.style.display='none'; }
 }
 
+// ─── Kuuntelee reaaliaikaisesti nykyisen kortin kommentteja Firestoresta ─
+// Käyttää onSnapshot() → päivittyy automaattisesti uusia kommentteja lisättäessä
 function loadFirestoreComments(){
   const feed=document.getElementById('comment-feed');
   if(!feed||!currentCard) return;
 
-  // Unsubscribe previous listener
+  // Lopetetaan edellinen kuuntelija ennen uuden käynnistämistä
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
 
   feed.innerHTML='';
@@ -833,6 +1352,7 @@ function loadFirestoreComments(){
     .onSnapshot(snap=>{
       feed.innerHTML='';
       if(snap.empty) return;
+      // Järjestetään uusimmat ensin
       const docs=[...snap.docs].sort((a,b)=>{
         const ta=a.data().timestamp?.toMillis?.()|| 0;
         const tb=b.data().timestamp?.toMillis?.()|| 0;
@@ -843,6 +1363,7 @@ function loadFirestoreComments(){
         const el=document.createElement('div');
         el.className='comment-item';
         el.dataset.docId=doc.id;
+        // Muokkausnappi näkyy oman kommentin kirjoittajalle tai kehittäjälle
         const isOwn = d.userId && d.userId===getUserId();
         const canEdit = isOwn || devMode;
         const btns=`
@@ -857,7 +1378,28 @@ function loadFirestoreComments(){
     });
 }
 
-// ── Joukkupeli buzzer system ──────────────────────────────────────────────────
+
+// ════════════════════════════════════════════════════════════
+// ⑫ TIETOVISA (JOUKKUPELI) — BUZZER-SYSTEEMI
+//
+//    TOIMINTA:
+//    ─────────────────────────────────────────────────────────
+//    1. Kehittäjä kytkee kehittäjätilan päälle → Tietovisa-toggle ilmestyy
+//    2. Pelaajat siirtyvät Tietovisa-tilaan → näkevät oman "sanan" (esim. ATP)
+//    3. Kun pelaaja tietää vastauksen, painaa Vastaa-nappia → buzz kirjataan Firestoreen
+//    4. Kehittäjä näkee järjestyslistan → antaa pisteitä (oikea = +0.10 €)
+//    5. Virhevastauksesta vähennetään pisteitä (penaltyMoney)
+//    ─────────────────────────────────────────────────────────
+//
+//    FIRESTORE-KOKOELMAT:
+//      gamestate/current   — aktiivinen korttiId + kehittäjätila
+//      gamestate/devOwner  — nykyisen kehittäjän userId
+//      buzzers             — { cardId, word, userId, timestamp }
+//      joukkueet           — { teamName, money }
+// ════════════════════════════════════════════════════════════
+
+// ─── Biokemia-sanalista pelaajien tunnisteiden generointiin ───────────
+// Jokainen pelaaja saa satunnaisen biokemiatermin "nimimerkikseen"
 const BIOKEMIA_WORDS = [
   'ATP','NAD','FAD','CoA','GTP','cAMP','AMP','NADH','FADH2',
   'Aktiini','Myosiini','Tubuliini','Kollageen','Hemoglobiini','Myoglobiini',
@@ -872,11 +1414,13 @@ const BIOKEMIA_WORDS = [
   'Tryptofaani','Histidiini','Lysiini','Arginiini','Asparagiini','Glutamiini'
 ];
 
+// ─── Firestore-kuuntelijoiden unsubscribe-funktiot ────────────────────
 let buzzerUnsubscribe = null;
 let gamestateUnsubscribe = null;
 let joukkueetUnsubscribe = null;
-let currentGameCardId = null;
+let currentGameCardId = null;  // kortin ID jota Tietovisa-istunnossa pelataan
 
+// ─── Pelaajan pysyvä satunnainen "sana" (tallennetaan localStorageen) ─
 function getUserWord(){
   let w = localStorage.getItem('solukko-word');
   if(!w){
@@ -886,14 +1430,14 @@ function getUserWord(){
   return w;
 }
 
-// ── Delete all joukkupeli data (called when dev turns off kehittäjätila) ──────
+// ─── Poistaa kaiken Tietovisa-datan Firestoresta (kehittäjätilan sammuessa) ─
 async function endGameSession(){
-  // Clear DOM immediately
+  // Siivotaan DOM välittömästi
   _lastBuzzerDocs=[]; _lastMoneyDocs=[];
   const display=document.getElementById("buzzer-display");
   if(display){ display.innerHTML=""; display.style.display="none"; }
 
-  // Signal joukkupeli players to exit
+  // Signataan pelaajille pelin päättymisestä, sitten poistetaan data
   const signalAndDelete = async () => {
     try{ await db.collection("gamestate").doc("current").set({mode:"ended",timestamp:firebase.firestore.FieldValue.serverTimestamp()}); } catch(e){}
     await new Promise(r=>setTimeout(r,800));
@@ -910,7 +1454,7 @@ async function endGameSession(){
   signalAndDelete();
 }
 
-// ── Clear buzzers when dev switches card ──────────────────────────────────────
+// ─── Tyhjentää buzzerit kortin vaihtuessa ────────────────────────────
 async function clearBuzzers(){
   _awardedThisRound.clear();
   const snap = await db.collection('buzzers').get().catch(()=>({docs:[]}));
@@ -920,6 +1464,7 @@ async function clearBuzzers(){
   await batch.commit().catch(()=>{});
 }
 
+// ─── Näyttää Tietovisa-fullscreen-overlayn pelaajalle ────────────────
 function showJoukkupeliOverlay(){
   const overlay = document.getElementById('joukkupeli-overlay');
   const nameEl = document.getElementById('team-name-display');
@@ -928,7 +1473,7 @@ function showJoukkupeliOverlay(){
   document.body.classList.add('joukkupeli-active');
   resetVastaaBtn();
   listenToGameState();
-  // Listen to own money and play sound on award
+  // Kuunnellaan omia pisteitä — soitetaan ääni kun pisteet kasvavat
   let _myPrevMoney = -1;
   db.collection('joukkueet').doc(getUserWord())
     .onSnapshot(doc=>{
@@ -940,6 +1485,7 @@ function showJoukkupeliOverlay(){
     });
 }
 
+// ─── Piilottaa Tietovisa-overlayn ─────────────────────────────────────
 function hideJoukkupeliOverlay(){
   const overlay = document.getElementById('joukkupeli-overlay');
   if(overlay) overlay.style.display = 'none';
@@ -947,6 +1493,7 @@ function hideJoukkupeliOverlay(){
   if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
 }
 
+// ─── Poistu Tietovisa-tilasta kokonaan ───────────────────────────────
 function exitJoukkupeli(){
   groupMode = false;
   const cb = document.getElementById('mode-toggle-input2');
@@ -956,6 +1503,7 @@ function exitJoukkupeli(){
   updateGroupUI(); updateShowBtn(); loadBuzzers();
 }
 
+// ─── Palauttaa Vastaa-napin alkutilaan (seuraavaa korttia varten) ─────
 function resetVastaaBtn(){
   const btn = document.getElementById('vastaa-btn');
   const status = document.getElementById('joukkupeli-status');
@@ -963,6 +1511,8 @@ function resetVastaaBtn(){
   if(status) status.textContent='';
 }
 
+// ─── Kuuntelee Firestore-gamestate-muutoksia ──────────────────────────
+// Kun kehittäjä vaihtaa korttia, korttiId päivittyy ja resetoidaan Vastaa-nappi
 function listenToGameState(){
   if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
   gamestateUnsubscribe = db.collection('gamestate').doc('current')
@@ -975,25 +1525,30 @@ function listenToGameState(){
       }
       const data = doc.data();
       if(data.mode === 'ended'){
+        // Kehittäjä sammutti pelin → poistu automaattisesti
         exitJoukkupeli();
         return;
       }
-      // Dev is active
+      // Kehittäjä on aktiivinen
       if(indicator){ indicator.textContent='🟢 Kehittäjä aktiivinen'; indicator.style.color='#27ae60'; }
       const newCardId = data.cardId;
       if(newCardId && newCardId !== currentGameCardId){
         currentGameCardId = newCardId;
-        resetVastaaBtn();
+        resetVastaaBtn();  // uusi kortti = Vastaa-nappi aktiiviseksi
       }
     });
 }
 
+// ─── Napin käsittelijä: "Tarkista" → näytä vastaus ───────────────────
 function handleShowButton(){ showAnswer(); }
+
+// ─── Päivittää "Tarkista"-napin tekstin ──────────────────────────────
 function updateShowBtn(){
   const btn = document.getElementById('show-btn');
   if(btn){ btn.textContent='Tarkista'; btn.style.background=''; }
 }
 
+// ─── Pelaaja painaa Vastaa-nappia → kirjataan buzz Firestoreen ────────
 function buzzIn(){
   const btn = document.getElementById('vastaa-btn');
   const status = document.getElementById('joukkupeli-status');
@@ -1017,6 +1572,8 @@ function buzzIn(){
   });
 }
 
+// ─── Kehittäjä antaa pisteitä (vasen klikkaus buzzer-listassa) ────────
+// +0.10 € sille joka klikkasi — _awardedThisRound estää tuplauspalkinnon
 function awardMoney(word){
   if(_awardedThisRound.has(word)) return;
   _awardedThisRound.add(word);
@@ -1026,6 +1583,7 @@ function awardMoney(word){
   },{merge:true}).catch(err=>alert('Virhe: '+err.message));
 }
 
+// ─── Lataa ja kuuntelee buzzereita nykyiselle kortille ────────────────
 function loadBuzzers(){
   if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
   if(joukkueetUnsubscribe){ joukkueetUnsubscribe(); joukkueetUnsubscribe=null; }
@@ -1033,12 +1591,16 @@ function loadBuzzers(){
   if(!display||!currentCard) return;
   display.innerHTML=''; display.style.display='none';
   const cardId = String(currentCard.cardId||currentCard.noteId||'');
+  // Kuunnellaan buzzereita tämän kortin osalta
   buzzerUnsubscribe = db.collection('buzzers').where('cardId','==',cardId)
     .onSnapshot(snap=>{ renderBuzzerDisplay(snap.docs, null); });
+  // Kuunnellaan kaikkien tiimien rahoja (pisteseuranta)
   joukkueetUnsubscribe = db.collection('joukkueet')
     .onSnapshot(snap=>{ renderBuzzerDisplay(null, snap.docs); });
 }
 
+// ─── Rankaisee väärästä vastauksesta (-0.10 €) ───────────────────────
+// Siirtää 0.10 € satunnaiselle muulle buzzeriksi ilmoittautuneelle
 function penaltyMoney(fromWord){
   if(!devMode) return;
   const others = _lastBuzzerDocs.map(d=>d.data().word).filter(w=>w!==fromWord);
@@ -1053,6 +1615,8 @@ function penaltyMoney(fromWord){
   }
 }
 
+// ─── Renderöi buzzer-lista kehittäjälle (piilotettu pelaajilta) ───────
+// Vasemmalla klikatessa → +0.10 €, oikealla klikatessa → -0.10 €
 let _lastBuzzerDocs=[], _lastMoneyDocs=[], _awardedThisRound=new Set();
 function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   if(buzzerDocs!==null) _lastBuzzerDocs=buzzerDocs;
@@ -1060,8 +1624,10 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   const display=document.getElementById('buzzer-display');
   if(!display) return;
 
+  // Järjestetään buzzerit aikajärjestyksessä (ensimmäinen = nopein)
   const sorted=[..._lastBuzzerDocs].sort((a,b)=>(a.data().timestamp?.toMillis?.()||0)-(b.data().timestamp?.toMillis?.()||0));
 
+  // Pelaajatilassa: näytetään oma sijoitus (ei muiden nimiä)
   if(groupMode){
     const myBuzz=sorted.find(d=>d.data().userId===getUserId());
     const myPos=myBuzz?sorted.indexOf(myBuzz)+1:null;
@@ -1072,6 +1638,7 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     else if(btn&&myPos&&myPos>1){ btn.textContent='Vastattu!'; btn.style.fontSize=''; }
   }
 
+  // Kehittäjätilassa näytetään koko lista
   if(!devMode){ display.style.display='none'; display.innerHTML=''; return; }
 
   display.innerHTML='';
@@ -1081,6 +1648,7 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   sorted.forEach((doc,i)=>{
     const d=doc.data();
     const n=sorted.length;
+    // Väritys: ensimmäinen (nopein) on tummempi vihreä, myöhemmät vaaleammat
     const lightness=28+(i/Math.max(n-1,1))*16;
     const bg=`hsl(140,48%,${lightness}%)`;
 
@@ -1100,6 +1668,8 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     display.appendChild(el);
   });
 }
+
+// ─── Kommenttikuvan käsittely (pakkaa JPEG 800px leveäksi) ────────────
 let pendingCommentImage = null;
 
 function handleCommentImage(input){
@@ -1126,12 +1696,17 @@ function handleCommentImage(input){
   input.value = '';
 }
 
+// ─── Poistaa kuvaliitteen ennen lähetystä ────────────────────────────
 function clearCommentImage(){
   pendingCommentImage = null;
   const preview = document.getElementById('comment-img-preview');
   if(preview){ preview.style.display='none'; preview.innerHTML=''; }
 }
 
+// ─── Lähettää kommentin Firestoreen ja Google Formsiin ───────────────
+// Kommentti menee kahteen paikkaan:
+//   1. Firestore → näkyy muille käyttäjille reaaliajassa
+//   2. Google Forms → arkistoitu sivuston ylläpidon seurantaan
 function submitComment(e){
   if(e) e.stopPropagation();
   const text = document.getElementById('card-comment').value.trim();
@@ -1146,26 +1721,30 @@ function submitComment(e){
   };
   if(pendingCommentImage) payload.imageData = pendingCommentImage;
 
+  // Tallennetaan Firestoreen
   db.collection('comments').add(payload)
     .then(()=>setTimeout(loadFirestoreComments, 500)).catch(()=>{});
 
+  // Lähetetään myös Google Formsiin (no-cors, ei vaadi vastausta)
   const formData = new FormData();
   formData.append('entry.1785235392', text||'[kuva]');
   formData.append('entry.1676323203', String(currentCard?.cardId||currentCard?.noteId||''));
   formData.append('entry.1452183303', currentDeck||'');
   fetch('https://docs.google.com/forms/d/1a1eLAkk_gj1tK6rlXHAI5Ar0czBCqdWEG9CqKz8zg2w/formResponse',{method:'POST',mode:'no-cors',body:formData});
 
+  // Tyhjennetään lomake ja suljetaan kommenttilaatikko
   document.getElementById('card-comment').value = '';
   clearCommentImage();
   document.querySelector('.comment-box').classList.remove('open');
 }
 
+// ─── Inline-muokkaus: korvaa kommenttiteksti textarea:lla ────────────
 function editComment(docId, btn){
   const item = btn.closest('.comment-item');
   const wrap = item.querySelector('.comment-text-wrap');
   const currentText = item.querySelector('.comment-text').textContent;
 
-  // Replace with inline editor
+  // Korvataan kommentti inline-editorilla
   wrap.innerHTML=`
     <textarea style="width:100%;font-family:'Lora',serif;font-size:0.82rem;border:1px solid #d4cec4;border-radius:8px;padding:0.5rem;resize:vertical;min-height:60px;background:#fffef9;color:#1a1612;">${currentText}</textarea>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
@@ -1175,6 +1754,7 @@ function editComment(docId, btn){
     </div>`;
 }
 
+// ─── Tallentaa muokatun kommentin Firestoreen ────────────────────────
 function saveEditComment(docId, btn){
   const textarea = btn.closest('.comment-text-wrap').querySelector('textarea');
   const newText = textarea.value.trim();
@@ -1184,10 +1764,12 @@ function saveEditComment(docId, btn){
     .catch(err=>alert('Virhe: '+err.message));
 }
 
+// ─── Peruuttaa inline-muokkauksen (uudelleenlataa kommentit) ─────────
 function cancelEditComment(btn){
   loadFirestoreComments();
 }
 
+// ─── Poistaa kommentin Firestoresta ──────────────────────────────────
 function deleteComment(docId){
   if(!confirm('Poistetaanko kommentti?')) return;
   db.collection('comments').doc(docId).delete()
@@ -1195,6 +1777,16 @@ function deleteComment(docId){
     .catch(err=>alert('Virhe: '+err.message));
 }
 
+
+// ════════════════════════════════════════════════════════════
+// ⑬ KORTTIARVIOINTI (GRADING) & NAVIGOINTI
+//    showAnswer()  — paljastaa vastauksen
+//    gradeCard()   — arvioi kortin (true=tiedetty, false=ei tiedetty)
+//    renderCardStars() — näyttää tenttitodennäköisyystähdet
+// ════════════════════════════════════════════════════════════
+
+// ─── Renderöi tenttitodennäköisyystähdet (★-tagit kortissa) ──────────
+// Tähdet lasketaan tagsista: "★" = 1 tähti, "★★" = 2 tähteä jne.
 function renderCardStars(){
   const box=document.getElementById('card-stars'); if(!box||!currentCard) return;
   const count=(currentCard.tags||[]).join(' ').match(/★/g)?.length||0;
@@ -1205,6 +1797,55 @@ function renderCardStars(){
   else box.removeAttribute('title');
 }
 
+// ─── Paljastaa vastauksen ("Tarkista"-napin jälkeen) ─────────────────
+// Cloze-tyypeissä koko question-sisältö korvataan vastauksella
+function showAnswer(){
+  if(!currentCard) return;
+  if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
+  else { document.getElementById('answer-section').style.display='block'; }
+  document.getElementById('show-row').style.display='none';
+  document.getElementById('grade-row').style.display='flex';
+}
+
+// ─── Arvioi kortti: tiedetty (true) tai ei tiedetty (false) ──────────
+// correct=true  → kortti poistetaan jonosta, animaatio vasemmalle
+// correct=false → kortti lisätään takaisin jonoon kohtaan 10, animaatio oikealle
+function gradeCard(correct){
+  if(coinAnimating) return;  // estetään kaksoisklikkaukset kolikkoanimaation aikana
+
+  // Tallennetaan arvosana yleiskatsausruudukkoa ja persistointia varten
+  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); localStorage.setItem('solukko-grades-'+currentDeck, JSON.stringify(cardGrades)); }
+
+  // Aloitetaan ulosliukuanimaatio
+  const fc=document.getElementById('flashcard');
+  fc.classList.add(correct?'card-out-left':'card-out-right');
+
+  const doNext=()=>{
+    fc.classList.remove('card-out-left','card-out-right');
+    // Tietovisa-tila: kolikkoanimaatio ennen seuraavaa korttia
+    if(correct&&groupMode){
+      if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
+      const wg=selectedGroup; coinAnimating=true;
+      animateCoinToGroup(wg,()=>{ groups[wg].score+=1; saveGroups(); updateGroupUI(); bounceWinningGroup(wg); setTimeout(()=>{ coinAnimating=false; selectedGroup=null; updateGroupUI(); nextCard(); },450); });
+      return;
+    }
+    // Tavallinen tila: väärä vastaus → lisätään kortti takaisin jonoon
+    if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
+    selectedGroup=null; updateGroupUI(); nextCard();
+  };
+  setTimeout(doNext, 180);  // 180ms = animaation kesto
+}
+
+
+// ════════════════════════════════════════════════════════════
+// ⑭ YLEISKATSAUSRUUDUKKO (OVERVIEW GRID)
+//    renderCardOverview()   — rakentaa / päivittää korttien ruudukon
+//    jumpToOverviewCard()   — hyppää suoraan tiettyyn korttiin
+//    buildDeckGroups()      — ryhmittelee kortit alidekkeittäin
+//    getYouTubeEmbedUrl()   — muuntaa YouTube-URL:n embed-muotoon
+// ════════════════════════════════════════════════════════════
+
+// ─── Tunnistaa alidekkin nimen ja mahdollisen YouTube-linkin ─────────
 function getSubdeckName(card,parentDeck){
   const deck=card.deckName||'';
   if(deck===parentDeck||!deck.startsWith(parentDeck+'::')) return {name:'Pääpakka',link:null};
@@ -1212,10 +1853,14 @@ function getSubdeckName(card,parentDeck){
   const vm=raw.match(/\((https?:\/\/.*?)\)/);
   return {name:raw.replace(/\s*\(https?:\/\/.*?\)\s*/,'').trim(),link:vm?vm[1]:null};
 }
+
+// ─── Järjestää alideckit luonnolliseen järjestykseen (numerot oikein) ─
 function naturalSubdeckSort(a,b){
   if(a.name==='Pääpakka') return -1; if(b.name==='Pääpakka') return 1;
   return a.name.localeCompare(b.name,'fi',{numeric:true,sensitivity:'base'});
 }
+
+// ─── Ryhmittelee kortit alidekkeittäin ───────────────────────────────
 function buildDeckGroups(cards,parentDeck){
   const grps=[];
   cards.forEach(card=>{
@@ -1227,11 +1872,14 @@ function buildDeckGroups(cards,parentDeck){
   grps.sort(naturalSubdeckSort); return grps;
 }
 
+// ─── Muuntaa YouTube-URL:n iframe embed -muotoon ─────────────────────
 function getYouTubeEmbedUrl(url){
   const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return m?`https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1`:null;
 }
 
+// ─── Rakentaa YouTube-iframe-upotuksen HTML:n ─────────────────────────
+// Sisältää "katso luento"-placeholder, joka poistetaan klikkauksen jälkeen
 function makeVideoEmbed(embedUrl){
   return `<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);">
     <iframe src="${embedUrl}" style="width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe>
@@ -1242,10 +1890,13 @@ function makeVideoEmbed(embedUrl){
   </div>`;
 }
 
+// ─── Rakentaa / päivittää yleiskatsausruudukon ───────────────────────
+// Ensimmäisellä kerralla rakennetaan koko ruudukko.
+// Myöhemmillä kutsuilla päivitetään vain active/known/unknown-luokat.
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
 
-  // If already built for this deck, just update active/known/unknown states
+  // Jos sama pakka on jo renderöity, päivitetään vain tilaluokat (nopea polku)
   if(grid.dataset.deckName === currentDeck){
     deckGroups.forEach(group=>{
       group.cards.forEach(card=>{
@@ -1257,13 +1908,14 @@ function renderCardOverview(){
     return;
   }
 
-  // Full rebuild (new deck or first load)
+  // Täydellinen uudelleenrakennus (uusi pakka tai ensimmäinen lataus)
   grid.dataset.deckName=currentDeck;
   grid.innerHTML=deckGroups.map(group=>{
     const embedUrl=group.link?getYouTubeEmbedUrl(group.link):null;
     const videoHtml=embedUrl?makeVideoEmbed(embedUrl):'';
     const cardsHtml=group.cards.map(card=>{
       const index=reviewCards.indexOf(card);
+      // Näytetään kortin alkuteksti (poistetaan cloze-syntaksi ja HTML-tagit)
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}</div>`;
@@ -1275,10 +1927,23 @@ function renderCardOverview(){
     </div>`;
   }).join('');
 }
+
+// ─── Hyppää suoraan tiettyyn korttiin yleiskatsauksesta ──────────────
 function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); nextCardFromCurrent(); }
+
+// ─── Hallitsee yleiskatsausruudukon näkyvyyttä ───────────────────────
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2').checked; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
 
+
+// ════════════════════════════════════════════════════════════
+// ⑮ RYHMÄT & TIETOVISA-PISTEET
+//    updateGroupUI()      — renderöi pisteseurannan
+//    selectGroup()        — valitsee ryhmän "oikea vastaus"-klikkausta varten
+//    animateCoinToGroup() — animoi lentävä kolikko voittavalle ryhmälle
+// ════════════════════════════════════════════════════════════
+
+// ─── Renderöi kaikki ryhmäkortit pisteseurantaan ─────────────────────
 function updateGroupUI(){
   const board=document.getElementById('group-scoreboard'),addBtn=document.querySelector('.group-tools');
   const mt=document.getElementById('mode-toggle-input2'); if(mt) mt.checked=groupMode;
@@ -1291,28 +1956,43 @@ function updateGroupUI(){
     card.className='group-card'+(groupMode&&selectedGroup===index?' selected':'');
     card.onclick=()=>selectGroup(index);
     const name=document.createElement('div'); name.className='group-name'; name.textContent=group.name;
+    // Kaksoisklikkaus vaihtaa ryhmän nimen
     name.ondblclick=e=>{ e.stopPropagation(); renameGroup(index); };
     const tower=document.createElement('div'); tower.className='coin-tower'; tower.id=`coin-tower-${index}`;
     tower.style.minHeight=Math.max(70,group.score*8+28)+'px';
+    // Luodaan niin monta kolikko-elementtiä kuin on pisteitä
     for(let c=0;c<group.score;c++){ const coin=document.createElement('div'); coin.className='coin'; coin.style.bottom=(c*8)+'px'; tower.appendChild(coin); }
     const money=document.createElement('div'); money.className='group-money'; money.textContent=`${(group.score*.10).toFixed(2)} €`;
     card.appendChild(name); card.appendChild(tower); card.appendChild(money); board.appendChild(card);
   });
 }
+
+// ─── Tietovisa-toggle kytkimestä ─────────────────────────────────────
 function toggleGroupModeFromSwitch(){
   groupMode=document.getElementById('mode-toggle-input2').checked;
   if(groupMode){
-    showJoukkupeliOverlay();
+    showJoukkupeliOverlay();  // avataan fullscreen-overlay pelaajalle
   } else {
     hideJoukkupeliOverlay();
   }
   localStorage.setItem('anki-group-mode',JSON.stringify(groupMode));
   updateGroupUI(); updateShowBtn(); loadBuzzers();
 }
+
+// ─── Valitsee ryhmän (kehittäjätilassa — "tämä ryhmä vastasi oikein") ─
 function selectGroup(index){ if(!groupMode) return; selectedGroup=index; updateGroupUI(); }
+
+// ─── Nimeää ryhmän uudelleen (kaksoisklikkaus ryhmän nimeen) ─────────
 function renameGroup(index){ const n=prompt('Anna ryhmälle uusi nimi:',groups[index].name); if(!n||!n.trim()) return; groups[index].name=n.trim(); saveGroups(); updateGroupUI(); }
+
+// ─── Lisää uuden ryhmän ──────────────────────────────────────────────
 function addGroup(){ groups.push({name:String.fromCharCode(65+groups.length),score:0}); saveGroups(); updateGroupUI(); }
+
+// ─── Pomputtaa voittavan ryhmäkortin ─────────────────────────────────
 function bounceWinningGroup(index){ const c=document.querySelectorAll('.group-card')[index]; if(!c) return; c.classList.remove('coin-winner'); void c.offsetWidth; c.classList.add('coin-winner'); setTimeout(()=>c.classList.remove('coin-winner'),420); }
+
+// ─── Animoi koliikon lentäminen "Tiesin!"-napista ryhmäkortille ───────
+// Käyttää Web Animations API:a monimutkaisen 3D-lentokaaren tekemiseen
 function animateCoinToGroup(groupIndex,callback){
   const rightBtn=document.getElementById('right-btn'),tower=document.getElementById(`coin-tower-${groupIndex}`);
   if(!rightBtn||!tower){ callback(); return; }
@@ -1323,6 +2003,7 @@ function animateCoinToGroup(groupIndex,callback){
   coin.style.left=sx+'px'; coin.style.top=sy+'px';
   document.body.appendChild(coin);
   const dx=ex-sx,dy=ey-sy;
+  // Kaarimainen lentopolku: ylös → kaari → alas pinoon
   const anim=coin.animate([
     {transform:'translate(0,0) rotateX(0deg) rotateY(0deg) scale(1)',offset:0},
     {transform:`translate(${dx*.45}px,${dy-90}px) rotateX(180deg) rotateY(240deg) scale(1.25)`,offset:.55},
@@ -1331,81 +2012,82 @@ function animateCoinToGroup(groupIndex,callback){
   anim.onfinish=()=>{ coin.remove(); playCashSound(); callback(); };
 }
 
-function showAnswer(){
-  if(!currentCard) return;
-  if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
-  else { document.getElementById('answer-section').style.display='block'; }
-  document.getElementById('show-row').style.display='none';
-  document.getElementById('grade-row').style.display='flex';
-}
-function gradeCard(correct){
-  if(coinAnimating) return;
-  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); localStorage.setItem('solukko-grades-'+currentDeck, JSON.stringify(cardGrades)); }
-
-  // Slide out
-  const fc=document.getElementById('flashcard');
-  fc.classList.add(correct?'card-out-left':'card-out-right');
-
-  const doNext=()=>{
-    fc.classList.remove('card-out-left','card-out-right');
-    if(correct&&groupMode){
-      if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
-      const wg=selectedGroup; coinAnimating=true;
-      animateCoinToGroup(wg,()=>{ groups[wg].score+=1; saveGroups(); updateGroupUI(); bounceWinningGroup(wg); setTimeout(()=>{ coinAnimating=false; selectedGroup=null; updateGroupUI(); nextCard(); },450); });
-      return;
-    }
-    if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
-    selectedGroup=null; updateGroupUI(); nextCard();
-  };
-  setTimeout(doNext, 180);
-}
-
-
+// ─── Sulkee ryhmävalinnan klikkaamalla muualle ────────────────────────
 document.addEventListener('click',e=>{
   if(e.target.closest('.group-card')||e.target.closest('.overview-card')||e.target.closest('.flashcard')||
      e.target.closest('.grade-btn')||e.target.closest('.show-btn')||e.target.closest('.iphone-toggle-wrap')||
      e.target.closest('.gear-btn')) return;
   selectedGroup=null; updateGroupUI();
 });
+
+
+// ════════════════════════════════════════════════════════════
+// ⑯ UTILITY-FUNKTIOT
+//    show(id) / hide(id) — näyttää/piilottaa elementin id:llä
+//    showDecks()         — palaa etusivulle (siivoo sessiodata)
+//    popstate-handler    — selain ← -nappi palaa etusivulle
+// ════════════════════════════════════════════════════════════
+
+// ─── Palaa etusivulle (pakkavalintaan) ───────────────────────────────
+// Siivoaa kaikki aktiiviset Firestore-kuuntelijat
 function showDecks(){
   sessionStorage.removeItem('solukko-savedDeck');
   sessionStorage.removeItem('solukko-savedCardIdx');
+  // Suljetaan kaikki Firestore-kuuntelijat
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
   if(joukkueetUnsubscribe){ joukkueetUnsubscribe(); joukkueetUnsubscribe=null; }
   if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
   _lastBuzzerDocs=[]; _lastMoneyDocs=[];
+  // Palautetaan logo ja piilotetaan kertausnavigaatio
   document.getElementById('site-brand').style.display='';
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
   document.body.classList.remove('reviewing');
+  // Nollataan pisteet
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
+  // Nollataan overview-ruudukon tila niin se rakennetaan uudestaan
   const grid=document.getElementById('card-overview-grid');
   if(grid) grid.dataset.deckName='';
   saveGroups(); updateGroupUI(); hide('card-screen'); loadDecks();
 }
+
+// ─── Tallentaa kommenttiteksti kirjoittaessa ──────────────────────────
 document.getElementById('card-comment').addEventListener('input',()=>saveCommentForCard());
 
+// ─── Näyttää / piilottaa elementin id:n perusteella ──────────────────
 function show(id){ const el=document.getElementById(id); el.style.display=(id==='card-screen'||id==='deck-screen')?'flex':'block'; }
 function hide(id){ document.getElementById(id).style.display='none'; }
 
+// ─── Selaimen ← takaisin-nappi ────────────────────────────────────────
 window.addEventListener('popstate', e => {
   if (document.getElementById('card-screen').style.display === 'flex') {
     showDecks();
   }
 });
 
-applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility();
 
-// ── Listen for dev ownership changes (single dev enforcement + tietovisa visibility) ──
+// ════════════════════════════════════════════════════════════
+// ALUSTUS — suoritetaan sivun latautuessa
+// ════════════════════════════════════════════════════════════
+
+// Sovelletaan tallennetut asetukset heti (ennen init():n async-kutsuja)
+applyDarkMode();
+applyDevMode();
+updateGroupUI();
+updateOverviewVisibility();
+
+// ─── Kuunnellaan kehittäjä-omistajuuden muutoksia Firestoresta ───────
+// Tietovisa-toggle näytetään kaikille kun kehittäjä on aktiivinen.
+// Jos joku muu ottaa kehittäjätilan, kirjaudutaan ulos.
 db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   const tietovisaLabel = document.getElementById('tietovisa-label');
   if(doc.exists){
     const ownerId = doc.data().userId;
-    // Show tietovisa toggle for everyone when a dev is active
+    // Kehittäjä on aktiivinen — näytetään Tietovisa-toggle kaikille
     if(tietovisaLabel) tietovisaLabel.style.display='';
-    // If I'm dev but someone else claimed ownership, kick me out
+    // Jos olen kehittäjä mutta joku muu varasti omistajuuden → poistun kehittäjätilasta
     if(devMode && ownerId !== getUserId()){
       devMode=false;
       localStorage.setItem('anki-dev-mode',JSON.stringify(false));
@@ -1413,20 +2095,39 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
       if(currentCard) loadFirestoreComments();
     }
   } else {
-    // No dev active — hide tietovisa toggle
+    // Ei kehittäjää — piilotetaan Tietovisa-toggle
     if(tietovisaLabel) tietovisaLabel.style.display='none';
   }
 });
 
+// ─── Käynnistetään sovellus ───────────────────────────────────────────
 init();
 </script>
-<!-- Joukkupeli full-screen overlay -->
+
+<!-- ══════════════════════════════════════════════════════════
+     TIETOVISA-OVERLAY (#joukkupeli-overlay)
+     Täyttää koko ruudun kun Tietovisa on päällä.
+     Pelaaja näkee oman "sanansa" ja ison Vastaa-napin.
+     Kehittäjä näkee buzzer-listan omalla näytöllään (card-screen).
+     ══════════════════════════════════════════════════════════ -->
 <div id="joukkupeli-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f0e8;z-index:88888;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;">
+
+  <!-- Indikaattori: onko kehittäjä aktiivinen -->
   <div id="dev-active-indicator" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#888;letter-spacing:0.02em;">⏳ Odota kehittäjää...</div>
+
+  <!-- Pelaajan sana (esim. "Hemoglobiini") — satunnainen biokemiatermi -->
   <div id="team-name-display" style="font-family:'EB Garamond',Garamond,serif;font-size:min(3.5rem,12vw);font-weight:600;color:#56533c;text-align:center;letter-spacing:-0.02em;"></div>
+
+  <!-- ISO PUNAINEN VASTAA-NAPPI — päätarkoitus tälle overlaylle -->
   <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">Vastaa</button>
+
+  <!-- Statusviesti (esim. "Sijalla 2") -->
   <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
+
+  <!-- Pelaajan oma pistesaldo (näkyy kun pisteitä on saatu) -->
   <div id="player-money" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:#8a5b00;text-align:center;"></div>
+
+  <!-- Poistu tietovisasta -nappi -->
   <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu tietovisasta</button>
 </div>
 
