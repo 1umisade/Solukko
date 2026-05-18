@@ -43,7 +43,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .settings-dropdown { position: absolute; top: 52px; right: 0; display: none; flex-direction: column; gap: 10px; align-items: flex-end; }
 .settings-menu.open .settings-dropdown { display: flex; }
 body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6d5f52; }
-.iphone-toggle-wrap { width: 230px; display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; background: #fffef9; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.45rem 0.7rem; box-shadow: 0 3px 12px rgba(0,0,0,0.12); cursor: pointer; }
+.iphone-toggle-wrap { width: 155px; display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; background: #fffef9; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.45rem 0.7rem; box-shadow: 0 3px 12px rgba(0,0,0,0.12); cursor: pointer; }
 .iphone-toggle-wrap input { display: none; }
 .iphone-toggle { width: 51px; height: 31px; background: #e9e5dd; border-radius: 999px; position: relative; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: background 0.25s ease; }
 .iphone-toggle::before { content: ""; position: absolute; width: 27px; height: 27px; left: 2px; top: 2px; background: #fffef9; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.28); transition: transform 0.25s ease; }
@@ -167,7 +167,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
 <!-- Global top bar - scrolls with page, no fixed/absolute -->
 <div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
-  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">←</button>
+  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-3px;display:inline-block;">←</span></button>
   <div style="flex:1"></div>
   <div id="gear-btn-wrap" style="position:relative;display:none;">
     <button onclick="toggleSettingsMenu()" style="width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);">⚙</button>
@@ -175,7 +175,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
       <label class="iphone-toggle-wrap" id="tietovisa-label" style="display:none;"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Tietovisa</span></label>
       <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
       <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
-      <div style="width:230px;display:flex;justify-content:center;align-items:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 10:10</div>
+      <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 10:10</div>
     </div>
   </div>
 </div>
@@ -607,7 +607,15 @@ let _playingDeckVideo = null;
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
   });
-  hide('card-screen'); show('deck-screen');
+  hide('card-screen');
+  const savedDeck=sessionStorage.getItem('solukko-savedDeck');
+  const savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
+  if(savedDeck && names.includes(savedDeck)){
+    await startDeck(savedDeck);
+    if(savedIdx>0 && reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); }
+    return;
+  }
+  show('deck-screen');
 }
 
 // ── START DECK ────────────────────────────────────────────────────────────────
@@ -625,6 +633,7 @@ async function startDeck(deckName){
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
+  sessionStorage.setItem('solukko-savedDeck', deckName);
   if(window.innerWidth <= 600) setTimeout(()=>{ const fc=document.getElementById('flashcard'); if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }}, 200);
   document.getElementById('site-brand').style.display='none';
   document.getElementById('back-btn-fixed').style.display='flex';
@@ -744,6 +753,7 @@ async function renderCurrentCard(){
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
+  sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
   // Dev mode: broadcast current card so joukkupeli players can buzz correctly
   if(devMode && currentCard){
     const cardId = String(currentCard.cardId||currentCard.noteId||'');
@@ -791,6 +801,11 @@ function loadCommentForCard(){
   document.getElementById('card-comment').value='';
   document.getElementById('comment-status').textContent='';
   loadFirestoreComments();
+  // Re-anchor scroll after comments render on mobile
+  if(window.innerWidth<=600) setTimeout(()=>{
+    const fc=document.getElementById('flashcard');
+    if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }
+  }, 600);
 }
 function saveCommentForCard(){ if(currentCard) localStorage.setItem(commentKey(currentCard),document.getElementById('card-comment').value); }
 function showCommentDisplay(text){
@@ -1349,6 +1364,8 @@ document.addEventListener('click',e=>{
   selectedGroup=null; updateGroupUI();
 });
 function showDecks(){
+  sessionStorage.removeItem('solukko-savedDeck');
+  sessionStorage.removeItem('solukko-savedCardIdx');
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
   if(joukkueetUnsubscribe){ joukkueetUnsubscribe(); joukkueetUnsubscribe=null; }
