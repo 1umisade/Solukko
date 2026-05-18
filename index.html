@@ -268,7 +268,7 @@ function applyDevMode(){
   ['dev-toggle-input2','dev-toggle-input2'].forEach(id=>{ const t=document.getElementById(id); if(t) t.checked=devMode; });
 }
 function toggleDevModeFromSwitch(){
-  const t=document.getElementById('dev-toggle-input2')||document.getElementById('dev-toggle-input2');
+  const t=document.getElementById('dev-toggle-input2');
   if(t&&t.checked){
     const pw=prompt('Anna kehittäjätilan salasana:');
     if(pw==='kuortane'){
@@ -281,6 +281,7 @@ function toggleDevModeFromSwitch(){
   } else {
     devMode=false;
     localStorage.setItem('anki-dev-mode',JSON.stringify(false));
+    endGameSession(); // signal all joukkupeli users and clear data
   }
   if(currentCard) loadFirestoreComments();
 }
@@ -716,9 +717,12 @@ async function renderCurrentCard(){
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
   // Dev mode: broadcast current card so joukkupeli players can buzz correctly
   if(devMode && currentCard){
-    db.collection('gamestate').doc('current').set({
-      cardId: String(currentCard.cardId||currentCard.noteId||''),
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    const cardId = String(currentCard.cardId||currentCard.noteId||'');
+    clearBuzzers().then(()=>{
+      db.collection('gamestate').doc('current').set({
+        cardId,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
     });
   }
   document.getElementById('answer-section').style.display='none';
@@ -806,20 +810,71 @@ function loadFirestoreComments(){
 }
 
 // ── Joukkupeli buzzer system ──────────────────────────────────────────────────
+const BIOKEMIA_WORDS = [
+  'ATP','NAD','FAD','CoA','GTP','cAMP','AMP','NADH','FADH2',
+  'Aktiini','Myosiini','Tubuliini','Kollageen','Hemoglobiini','Myoglobiini',
+  'Insuliini','Glukagon','Adrenaliini','Kortisoli','Testosteroni','Estrogeeni',
+  'Ribosomi','Mitoosi','Meioosi','Mitokondrio','Kloroplasti','Sentrioli',
+  'Entsyymi','Substraatti','Inhibiittori','Kofaktori','Koentsyymi',
+  'Aminohappo','Peptidi','Proteiini','Lipidi','Fosfolipidi','Triglyseridi',
+  'Nukleotidi','Nukleosidi','Puriini','Pyrimidiini','Glykolyysi','Glukoneogeneesi',
+  'Katalaasi','Peroksidaasi','Lipaasi','Proteaasi','Kinase','Fosfataasi',
+  'Ubikitiini','Ferritiini','Transferriini','Albumiini','Fibriini','Trombiini',
+  'Seriini','Treoniini','Kysteiini','Metioniini','Proliini','Fenyylialaniini',
+  'Tryptofaani','Histidiini','Lysiini','Arginiini','Asparagiini','Glutamiini'
+];
+
 let buzzerUnsubscribe = null;
 let gamestateUnsubscribe = null;
 let joukkueetUnsubscribe = null;
 let currentGameCardId = null;
 
-function getTeamName(){
-  return localStorage.getItem('solukko-team-name') || 'Joukkue';
+function getUserWord(){
+  let w = localStorage.getItem('solukko-word');
+  if(!w){
+    w = BIOKEMIA_WORDS[Math.floor(Math.random()*BIOKEMIA_WORDS.length)];
+    localStorage.setItem('solukko-word', w);
+  }
+  return w;
+}
+
+// ── Delete all joukkupeli data (called when dev turns off kehittäjätila) ──────
+async function endGameSession(){
+  // 1. Signal all joukkupeli players to exit
+  await db.collection('gamestate').doc('current').set({
+    mode: 'ended',
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(()=>{});
+
+  // 2. Wait briefly so signal propagates, then delete all data
+  setTimeout(async ()=>{
+    const deleteCollection = async (colName) => {
+      const snap = await db.collection(colName).get().catch(()=>({docs:[]}));
+      if(!snap.docs.length) return;
+      const batch = db.batch();
+      snap.docs.forEach(d=>batch.delete(d.ref));
+      await batch.commit().catch(()=>{});
+    };
+    await deleteCollection('buzzers');
+    await deleteCollection('joukkueet');
+    await db.collection('gamestate').doc('current').delete().catch(()=>{});
+  }, 1200);
+}
+
+// ── Clear buzzers when dev switches card ──────────────────────────────────────
+async function clearBuzzers(){
+  const snap = await db.collection('buzzers').get().catch(()=>({docs:[]}));
+  if(!snap.docs.length) return;
+  const batch = db.batch();
+  snap.docs.forEach(d=>batch.delete(d.ref));
+  await batch.commit().catch(()=>{});
 }
 
 function showJoukkupeliOverlay(){
   const overlay = document.getElementById('joukkupeli-overlay');
   const nameEl = document.getElementById('team-name-display');
   if(overlay) overlay.style.display = 'flex';
-  if(nameEl) nameEl.textContent = getTeamName();
+  if(nameEl) nameEl.textContent = getUserWord();
   resetVastaaBtn();
   listenToGameState();
 }
@@ -842,7 +897,7 @@ function exitJoukkupeli(){
 function resetVastaaBtn(){
   const btn = document.getElementById('vastaa-btn');
   const status = document.getElementById('joukkupeli-status');
-  if(btn){ btn.disabled=false; btn.style.background='#c0392b'; btn.textContent='Vastaa'; }
+  if(btn){ btn.disabled=false; btn.style.background='#c0392b'; btn.textContent='Vastaa'; btn.style.transform=''; }
   if(status) status.textContent='';
 }
 
@@ -851,10 +906,15 @@ function listenToGameState(){
   gamestateUnsubscribe = db.collection('gamestate').doc('current')
     .onSnapshot(doc=>{
       if(!doc.exists) return;
-      const newCardId = doc.data().cardId;
-      if(newCardId !== currentGameCardId){
+      const data = doc.data();
+      if(data.mode === 'ended'){
+        exitJoukkupeli(); // dev ended the session → return to normal
+        return;
+      }
+      const newCardId = data.cardId;
+      if(newCardId && newCardId !== currentGameCardId){
         currentGameCardId = newCardId;
-        resetVastaaBtn(); // reset button when dev switches card
+        resetVastaaBtn(); // new card → reset button
       }
     });
 }
@@ -869,26 +929,28 @@ function buzzIn(){
   const btn = document.getElementById('vastaa-btn');
   const status = document.getElementById('joukkupeli-status');
   const cardId = currentGameCardId;
-  if(!cardId){ if(status) status.textContent='Ei aktiivista korttia'; return; }
+  if(!cardId){
+    if(status){ status.textContent='Odota kysymystä...'; setTimeout(()=>{ if(status) status.textContent=''; },2000); }
+    return;
+  }
   if(btn) btn.disabled=true;
-  if(status) status.textContent='Lähetetään...';
   db.collection('buzzers').add({
     cardId,
-    word: getTeamName(),
+    word: getUserWord(),
     userId: getUserId(),
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   }).then(()=>{
     if(btn){ btn.style.background='#888'; btn.textContent='Vastattu!'; }
     if(status) status.textContent='';
   }).catch(()=>{
-    if(btn){ btn.disabled=false; }
-    if(status) status.textContent='Virhe, yritä uudelleen';
+    if(btn) btn.disabled=false;
+    if(status){ status.textContent='Virhe, yritä uudelleen'; setTimeout(()=>{ if(status) status.textContent=''; },2000); }
   });
 }
 
-function awardMoney(teamName){
-  db.collection('joukkueet').doc(teamName).set({
-    teamName,
+function awardMoney(word){
+  db.collection('joukkueet').doc(word).set({
+    teamName: word,
     money: firebase.firestore.FieldValue.increment(0.10)
   },{merge:true}).catch(err=>alert('Virhe: '+err.message));
 }
@@ -899,49 +961,29 @@ function loadBuzzers(){
   const display = document.getElementById('buzzer-display');
   if(!display||!currentCard) return;
   display.innerHTML=''; display.style.display='none';
-
   const cardId = String(currentCard.cardId||currentCard.noteId||'');
-
-  // Listen to buzzers for this card
   buzzerUnsubscribe = db.collection('buzzers').where('cardId','==',cardId)
-    .onSnapshot(snap=>{
-      renderBuzzerDisplay(snap.docs);
-    });
-
-  // Listen to money leaderboard
+    .onSnapshot(snap=>{ renderBuzzerDisplay(snap.docs, null); });
   joukkueetUnsubscribe = db.collection('joukkueet')
-    .onSnapshot(snap=>{
-      renderBuzzerDisplay(null, snap.docs);
-    });
+    .onSnapshot(snap=>{ renderBuzzerDisplay(null, snap.docs); });
 }
 
-let _lastBuzzerDocs = [];
-let _lastMoneyDocs = [];
-
+let _lastBuzzerDocs=[], _lastMoneyDocs=[];
 function renderBuzzerDisplay(buzzerDocs, moneyDocs){
-  if(buzzerDocs !== null) _lastBuzzerDocs = buzzerDocs;
-  if(moneyDocs !== null) _lastMoneyDocs = moneyDocs;
-
-  const display = document.getElementById('buzzer-display');
+  if(buzzerDocs!==null) _lastBuzzerDocs=buzzerDocs;
+  if(moneyDocs!==null) _lastMoneyDocs=moneyDocs;
+  const display=document.getElementById('buzzer-display');
   if(!display) return;
   display.innerHTML='';
-
   const sorted=[..._lastBuzzerDocs].sort((a,b)=>(a.data().timestamp?.toMillis?.()||0)-(b.data().timestamp?.toMillis?.()||0));
-
-  if(sorted.length===0 && _lastMoneyDocs.length===0){
-    display.style.display='none'; return;
-  }
+  if(!sorted.length&&!_lastMoneyDocs.length){ display.style.display='none'; return; }
   display.style.display='flex';
-
-  // Update joukkupeli overlay status
   if(groupMode){
     const myBuzz=sorted.find(d=>d.data().userId===getUserId());
     const myPos=myBuzz?sorted.indexOf(myBuzz)+1:null;
     const status=document.getElementById('joukkupeli-status');
     if(status&&myPos) status.textContent=myPos===1?'🔔 Ensimmäinen!':'Sijalla '+myPos;
   }
-
-  // Buzzers
   sorted.forEach((doc,i)=>{
     const d=doc.data(); const isFirst=i===0;
     const el=document.createElement('div');
@@ -950,16 +992,12 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     el.innerHTML=`<span>${isFirst?'🔔':i+1+'.'}</span><span>${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${awardBtn}`;
     display.appendChild(el);
   });
-
-  // Money leaderboard
-  if(_lastMoneyDocs.length>0){
-    const divider=document.createElement('div');
-    divider.style.cssText='font-family:JetBrains Mono,monospace;font-size:0.68rem;color:#a09080;padding:4px 0 2px;border-top:1px solid #d4cec4;margin-top:4px;';
-    divider.textContent='Pisteet';
-    display.appendChild(divider);
+  if(_lastMoneyDocs.length){
+    const div=document.createElement('div');
+    div.style.cssText='font-family:JetBrains Mono,monospace;font-size:0.68rem;color:#a09080;padding:4px 0 2px;border-top:1px solid #d4cec4;margin-top:4px;';
+    div.textContent='Pisteet'; display.appendChild(div);
     [..._lastMoneyDocs].sort((a,b)=>b.data().money-a.data().money).forEach(doc=>{
-      const d=doc.data();
-      const el=document.createElement('div');
+      const d=doc.data(); const el=document.createElement('div');
       el.style.cssText='background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.45rem 1rem;font-family:JetBrains Mono,monospace;font-size:0.78rem;display:flex;justify-content:space-between;color:#56533c;';
       el.innerHTML=`<span>${d.teamName}</span><span style="font-weight:700;">${(d.money||0).toFixed(2)} €</span>`;
       display.appendChild(el);
@@ -1162,9 +1200,6 @@ function updateGroupUI(){
 function toggleGroupModeFromSwitch(){
   groupMode=document.getElementById('mode-toggle-input2').checked;
   if(groupMode){
-    const name=prompt('Anna joukkueellesi nimi:');
-    if(!name||!name.trim()){ groupMode=false; document.getElementById('mode-toggle-input2').checked=false; return; }
-    localStorage.setItem('solukko-team-name', name.trim());
     showJoukkupeliOverlay();
   } else {
     hideJoukkupeliOverlay();
@@ -1262,7 +1297,7 @@ applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); in
 <!-- Joukkupeli full-screen overlay -->
 <div id="joukkupeli-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f0e8;z-index:88888;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;">
   <div id="team-name-display" style="font-family:'EB Garamond',Garamond,serif;font-size:min(3.5rem,12vw);font-weight:600;color:#56533c;text-align:center;letter-spacing:-0.02em;"></div>
-  <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.1s,box-shadow 0.1s;active:scale(0.97);">Vastaa</button>
+  <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">Vastaa</button>
   <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
   <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu joukkupelistä</button>
 </div>
