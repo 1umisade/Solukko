@@ -33,8 +33,8 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 #conn-error strong { color: #c0392b; }
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
 #deck-screen { width: 100%; min-height: 70vh; display: none; justify-content: center; align-items: center; }
-.deck-list { display: flex; flex-direction: row; gap: 60px; flex-wrap: wrap; justify-content: center; align-items: center; }
-.deck-btn { position: relative; min-width: 260px; height: 360px; padding: 20px; border-radius: 16px; overflow: hidden; text-decoration: none; border: 1px solid #333; display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer; font-family: 'Lora', serif; text-align: left; color: white; background: #111; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.deck-list { display: flex; flex-direction: column; gap: 24px; flex-wrap: nowrap; justify-content: center; align-items: center; }
+.deck-btn { position: relative; min-width: 0; width: min(448px, 90vw); height: min(256px, calc(90vw * 4 / 7)); padding: 20px; border-radius: 16px; overflow: hidden; text-decoration: none; border: 1px solid #333; display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer; font-family: 'Lora', serif; text-align: left; color: white; background: #111; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .deck-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
@@ -160,6 +160,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   .comment-area { position: static; width: 100%; margin-top: 0; }
   .deck-list { flex-direction: column; gap: calc(min(256px, 90vw * 4 / 7) / 5); align-items: center; }
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
+  .comment-area { order: 10; position: static; width: 100%; margin-top: 0; }
 }
 </style>
 </head>
@@ -167,7 +168,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
 <!-- Global top bar - scrolls with page, no fixed/absolute -->
 <div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
-  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-3px;display:inline-block;">←</span></button>
+  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
   <div style="flex:1"></div>
   <div id="gear-btn-wrap" style="position:relative;display:none;">
     <button onclick="toggleSettingsMenu()" style="width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);">⚙</button>
@@ -603,7 +604,8 @@ let _playingDeckVideo = null;
       if(_playingDeckVideo && _playingDeckVideo!==video){ _playingDeckVideo.pause(); _playingDeckVideo.currentTime=0; }
       _playingDeckVideo=video; video.currentTime=0; video.play().catch(()=>{});
     },{passive:true});
-    btn.addEventListener('touchend',()=>{ setTimeout(()=>{ video.pause(); video.currentTime=0; if(_playingDeckVideo===video) _playingDeckVideo=null; },1500); },{passive:true});
+    btn.addEventListener('touchend',()=>{ video.pause(); video.currentTime=0; _playingDeckVideo=null; },{passive:true});
+    btn.addEventListener('touchcancel',()=>{ video.pause(); video.currentTime=0; _playingDeckVideo=null; },{passive:true});
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
   });
@@ -1229,11 +1231,11 @@ function getYouTubeEmbedUrl(url){
 }
 
 function makeVideoEmbed(embedUrl){
-  return `<div style="width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;margin:0.5rem 0;position:relative;">
+  return `<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);">
     <iframe src="${embedUrl}" style="width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe>
-    <div onclick="this.previousElementSibling.src=this.previousElementSibling.src+'&autoplay=1';this.style.display='none';" style="position:absolute;inset:0;background:#f5f0e8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.8rem;">
-      <span style="font-family:'EB Garamond',Garamond,serif;font-size:min(2rem,7vw);font-weight:600;color:#56533c;letter-spacing:-0.02em;">Katso luento</span>
-      <span style="font-size:2.5rem;line-height:1;">▶</span>
+    <div onclick="this.previousElementSibling.src=this.previousElementSibling.src+'&autoplay=1';this.style.display='none';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.8rem;border-radius:16px;">
+      <span style="font-family:'EB Garamond',Garamond,serif;font-size:min(2.2rem,7vw);font-weight:600;color:#56533c;letter-spacing:-0.02em;">Katso luento</span>
+      <span style="font-size:2.2rem;line-height:1;color:#56533c;">▶</span>
     </div>
   </div>`;
 }
@@ -1265,8 +1267,8 @@ function renderCardOverview(){
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}</div>`;
     }).join('');
     return `<div class="overview-section">
-      <div class="overview-section-title">${group.name}</div>
       ${videoHtml}
+      <div class="overview-section-title">${group.name}</div>
       <div class="overview-section-grid">${cardsHtml}</div>
     </div>`;
   }).join('');
