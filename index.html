@@ -346,29 +346,14 @@ function playCashSound(){
     osc.start(now+i*.06); osc.stop(now+i*.06+.13);
   });
 }
+
+
 function playAwardSound(){
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  const now=audioCtx.currentTime;
-  // "Cha" — mechanical thud + noise burst
-  const bufSize=Math.floor(audioCtx.sampleRate*0.06);
-  const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
-  const data=buf.getChannelData(0);
-  for(let i=0;i<bufSize;i++) data[i]=(Math.random()*2-1)*Math.pow(1-i/bufSize,2);
-  const noise=audioCtx.createBufferSource(); noise.buffer=buf;
-  const ng=audioCtx.createGain(); ng.gain.setValueAtTime(0.35,now); ng.gain.exponentialRampToValueAtTime(0.001,now+0.07);
-  noise.connect(ng); ng.connect(audioCtx.destination); noise.start(now);
-  const thud=audioCtx.createOscillator(); const tg=audioCtx.createGain();
-  thud.frequency.setValueAtTime(180,now); thud.frequency.exponentialRampToValueAtTime(55,now+0.1);
-  tg.gain.setValueAtTime(0.5,now); tg.gain.exponentialRampToValueAtTime(0.001,now+0.13);
-  thud.connect(tg); tg.connect(audioCtx.destination); thud.start(now); thud.stop(now+0.14);
-  // "Ching" — bright bell ring
-  [[1400,0.28],[2800,0.12],[4200,0.05]].forEach(([freq,vol])=>{
-    const b=audioCtx.createOscillator(),bg=audioCtx.createGain();
-    b.type='sine'; b.frequency.value=freq;
-    bg.gain.setValueAtTime(0,now+0.07); bg.gain.linearRampToValueAtTime(vol,now+0.09);
-    bg.gain.exponentialRampToValueAtTime(0.001,now+0.9);
-    b.connect(bg); bg.connect(audioCtx.destination); b.start(now+0.07); b.stop(now+0.95);
-  });
+  const audio = new Audio('Money.mp3');
+  audio.play().catch(()=>{});
+
+
+
 }
 function playLogoClickSound(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
