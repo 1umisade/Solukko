@@ -63,7 +63,8 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .answer-section .card-content { text-align: left; }
 .io-card-image { position: relative; width: 100%; display: inline-block; }
 .io-card-image img { max-width: 100%; height: auto; display: block; }
-.io-card-image svg, .io-card-image .io-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.io-overlay { position: absolute; inset: 0; pointer-events: none; }
+.io-overlay svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 body.dark-mode { background: #2b211b; color: #eadfce; }
 body.dark-mode .flashcard, body.dark-mode #card-comment, body.dark-mode .group-card, body.dark-mode .add-group-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
@@ -90,7 +91,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
 .btn-row { display: flex; gap: 1rem; width: 100%; }
-.show-btn { width: 100%; background: #1a1612; color: #f5f0e8; border: none; border-radius: 8px; padding: 0.9rem; font-family: 'Lora', serif; font-size: 1rem; cursor: pointer; }
+.show-btn { width: 100%; background: #56533c; color: #f5f0e8; border: none; border-radius: 8px; padding: 0.9rem; font-family: 'Lora', serif; font-size: 1rem; cursor: pointer; }
 .cloze-blank { display: inline-block; background: #e8e4db; border-radius: 4px; padding: 0 0.4em; color: transparent; min-width: 3em; }
 .cloze-answer, .cloze-answer-line { background: #d4edda; color: #1a5e2a; font-weight: 600; border-radius: 4px; padding: 0 0.35em; }
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
@@ -152,6 +153,8 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 body.joukkupeli-active { overflow: hidden; }
 body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointer-events: none; }
+#settings-dropdown-inline { overflow: hidden; max-height: 0; transition: max-height 0.35s ease; display: flex !important; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: none; opacity: 0; transition: max-height 0.35s ease, opacity 0.25s ease; }
+#settings-dropdown-inline.open { max-height: 300px; pointer-events: auto; opacity: 1; }
 @media (max-width: 600px) {
   #review-deck-card { display: none; }
   .comment-area { position: static; width: 100%; margin-top: 0; }
@@ -164,12 +167,12 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
 <!-- Global top bar - scrolls with page, no fixed/absolute -->
 <div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
-  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.1rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);display:none;align-items:center;justify-content:center;">←</button>
+  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">←</button>
   <div style="flex:1"></div>
   <div id="gear-btn-wrap" style="position:relative;display:none;">
     <button onclick="toggleSettingsMenu()" style="width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);">⚙</button>
-    <div id="settings-dropdown-inline" style="position:absolute;top:58px;right:0;display:none;flex-direction:column;gap:10px;align-items:flex-end;z-index:9999;">
-      <label class="iphone-toggle-wrap"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Joukkupeli</span></label>
+    <div id="settings-dropdown-inline" style="position:absolute;top:58px;right:0;z-index:9999;">
+      <label class="iphone-toggle-wrap" id="tietovisa-label" style="display:none;"><input id="mode-toggle-input2" type="checkbox" onchange="toggleGroupModeFromSwitch()"><span class="iphone-toggle"></span><span>Tietovisa</span></label>
       <label class="iphone-toggle-wrap"><input id="dark-toggle-input2" type="checkbox" onchange="toggleDarkModeFromSwitch()"><span class="iphone-toggle"></span><span>Tummatila</span></label>
       <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
     </div>
@@ -231,7 +234,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   </div>
 
   <div class="btn-row" id="show-row">
-    <button class="show-btn" id="show-btn" onclick="handleShowButton()">Näytä vastaus</button>
+    <button class="show-btn" id="show-btn" onclick="handleShowButton()">Tarkista</button>
   </div>
 
   <div class="btn-row" id="grade-row" style="display:none">
@@ -273,7 +276,11 @@ function toggleDevModeFromSwitch(){
     if(pw==='kuortane'){
       devMode=true;
       localStorage.setItem('anki-dev-mode',JSON.stringify(true));
-      // Signal joukkupeli players that dev is now active
+      // Claim dev ownership — kicks out any other dev
+      db.collection('gamestate').doc('devOwner').set({
+        userId: getUserId(),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(()=>{});
       db.collection('gamestate').doc('current').set({
         active: true,
         cardId: currentCard ? String(currentCard.cardId||currentCard.noteId||'') : null,
@@ -286,6 +293,7 @@ function toggleDevModeFromSwitch(){
   } else {
     devMode=false;
     localStorage.setItem('anki-dev-mode',JSON.stringify(false));
+    db.collection('gamestate').doc('devOwner').delete().catch(()=>{});
     endGameSession(); // signal all joukkupeli users and clear data
   }
   if(currentCard) loadFirestoreComments();
@@ -315,8 +323,15 @@ function toggleDarkModeFromSwitch(){
 }
 function toggleSettingsMenu(){
   const d=document.getElementById('settings-dropdown-inline');
-  if(d) d.style.display=d.style.display==='flex'?'none':'flex';
+  if(d) d.classList.toggle('open');
 }
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('gear-btn-wrap');
+  if(wrap&&!wrap.contains(e.target)){
+    const d=document.getElementById('settings-dropdown-inline');
+    if(d) d.classList.remove('open');
+  }
+});
 
 // ── Viewport zoom ─────────────────────────────────────────────────────────────
 function updatePageZoomScale(){
@@ -568,6 +583,7 @@ async function loadDecks(){
   const finalCardWidth=Math.ceil(Math.max(260,widestTitle+42));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
 
+let _playingDeckVideo = null;
   decks.forEach(item=>{
     const btn=document.createElement('button');
     btn.className='deck-btn'; btn.style.width=finalCardWidth+'px';
@@ -582,8 +598,11 @@ async function loadDecks(){
     const video=btn.querySelector('.deck-video');
     btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); });
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
-    btn.addEventListener('touchstart',()=>{ video.currentTime=0; video.play().catch(()=>{}); },{passive:true});
-    btn.addEventListener('touchend',()=>{ setTimeout(()=>{ video.pause(); video.currentTime=0; },2000); },{passive:true});
+    btn.addEventListener('touchstart',()=>{
+      if(_playingDeckVideo && _playingDeckVideo!==video){ _playingDeckVideo.pause(); _playingDeckVideo.currentTime=0; }
+      _playingDeckVideo=video; video.currentTime=0; video.play().catch(()=>{});
+    },{passive:true});
+    btn.addEventListener('touchend',()=>{ setTimeout(()=>{ video.pause(); video.currentTime=0; if(_playingDeckVideo===video) _playingDeckVideo=null; },1500); },{passive:true});
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
   });
@@ -605,7 +624,7 @@ async function startDeck(deckName){
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
-  if(window.innerWidth <= 600) setTimeout(()=>document.getElementById('flashcard')?.scrollIntoView({behavior:'instant', block:'start'}), 50);
+  if(window.innerWidth <= 600) setTimeout(()=>document.getElementById('flashcard')?.scrollIntoView({behavior:'instant', block:'start'}), 150);
   document.getElementById('site-brand').style.display='none';
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='block';
@@ -952,7 +971,7 @@ function listenToGameState(){
 function handleShowButton(){ showAnswer(); }
 function updateShowBtn(){
   const btn = document.getElementById('show-btn');
-  if(btn){ btn.textContent='Näytä vastaus'; btn.style.background=''; }
+  if(btn){ btn.textContent='Tarkista'; btn.style.background=''; }
 }
 
 function buzzIn(){
@@ -1051,7 +1070,7 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     el.onclick=()=>{ awardMoney(d.word); renderBuzzerDisplay(null,null); };
     el.oncontextmenu=(e)=>{ e.preventDefault(); penaltyMoney(d.word); renderBuzzerDisplay(null,null); return false; };
 
-    const posText=`<span style="opacity:0.8;font-size:0.72rem;flex-shrink:0;">${i+1}.sija</span>`;
+    const posText=`<span style="opacity:0.85;font-size:1.6rem;font-weight:900;flex-shrink:0;">${i+1}.</span>`;
     const moneyDoc=_lastMoneyDocs.find(md=>md.id===d.word);
     const money=moneyDoc?(moneyDoc.data().money||0):0;
     const alreadyAwarded=_awardedThisRound.has(d.word);
@@ -1194,7 +1213,13 @@ function getYouTubeEmbedUrl(url){
 }
 
 function makeVideoEmbed(embedUrl){
-  return `<div style="width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;margin:0.5rem 0;"><iframe src="${embedUrl}" style="width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe></div>`;
+  return `<div style="width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;margin:0.5rem 0;position:relative;">
+    <iframe src="${embedUrl}" style="width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe>
+    <div onclick="this.previousElementSibling.src=this.previousElementSibling.src+'&autoplay=1';this.style.display='none';" style="position:absolute;inset:0;background:#f5f0e8;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.8rem;">
+      <span style="font-family:'EB Garamond',Garamond,serif;font-size:min(2rem,7vw);font-weight:600;color:#56533c;letter-spacing:-0.02em;">Katso luento</span>
+      <span style="font-size:2.5rem;line-height:1;">▶</span>
+    </div>
+  </div>`;
 }
 
 function renderCardOverview(){
@@ -1349,7 +1374,29 @@ window.addEventListener('popstate', e => {
   }
 });
 
-applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); init();
+applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility();
+
+// ── Listen for dev ownership changes (single dev enforcement + tietovisa visibility) ──
+db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
+  const tietovisaLabel = document.getElementById('tietovisa-label');
+  if(doc.exists){
+    const ownerId = doc.data().userId;
+    // Show tietovisa toggle for everyone when a dev is active
+    if(tietovisaLabel) tietovisaLabel.style.display='';
+    // If I'm dev but someone else claimed ownership, kick me out
+    if(devMode && ownerId !== getUserId()){
+      devMode=false;
+      localStorage.setItem('anki-dev-mode',JSON.stringify(false));
+      applyDevMode();
+      if(currentCard) loadFirestoreComments();
+    }
+  } else {
+    // No dev active — hide tietovisa toggle
+    if(tietovisaLabel) tietovisaLabel.style.display='none';
+  }
+});
+
+init();
 </script>
 <!-- Joukkupeli full-screen overlay -->
 <div id="joukkupeli-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f0e8;z-index:88888;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;">
@@ -1358,7 +1405,7 @@ applyDarkMode(); applyDevMode(); updateGroupUI(); updateOverviewVisibility(); in
   <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">Vastaa</button>
   <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
   <div id="player-money" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:#8a5b00;text-align:center;"></div>
-  <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu joukkupelistä</button>
+  <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu tietovisasta</button>
 </div>
 
 </body>
