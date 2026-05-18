@@ -109,10 +109,8 @@ body.dark-mode .brand-front span { color: #fff2cb; }
 @keyframes logoClickPop { 0%{transform:scale(1) rotate(0deg)} 35%{transform:scale(0.94) rotate(-2deg)} 70%{transform:scale(1.05) rotate(1deg)} 100%{transform:scale(1) rotate(0deg)} }
 .subdeck-video-link { display: block; text-decoration: none; }
 .subdeck-video-link:hover { text-decoration: underline; }
-.group-tools { width: 100%; display: flex; justify-content: flex-end; }
-.add-group-btn { border: 1px solid #d4cec4; border-radius: 8px; background: #fffef9; color: #1a1612; padding: 0.6rem 0.9rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; cursor: pointer; }
-.group-scoreboard { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; align-items: start; }
-.group-scoreboard.disabled { display: none; }
+.group-tools { display: none !important; }
+.group-scoreboard { display: none !important; }
 #card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 1.1rem; margin-top: 1rem; }
 .overview-section { width: 100%; }
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
@@ -275,6 +273,12 @@ function toggleDevModeFromSwitch(){
     if(pw==='kuortane'){
       devMode=true;
       localStorage.setItem('anki-dev-mode',JSON.stringify(true));
+      // Signal joukkupeli players that dev is now active
+      db.collection('gamestate').doc('current').set({
+        active: true,
+        cardId: currentCard ? String(currentCard.cardId||currentCard.noteId||'') : null,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(()=>{});
     } else {
       alert('Väärä salasana.');
       if(t) t.checked=false;
@@ -919,6 +923,7 @@ function listenToGameState(){
         exitJoukkupeli();
         return;
       }
+      // Dev is active
       if(indicator){ indicator.textContent='🟢 Kehittäjä aktiivinen'; indicator.style.color='#27ae60'; }
       const newCardId = data.cardId;
       if(newCardId && newCardId !== currentGameCardId){
