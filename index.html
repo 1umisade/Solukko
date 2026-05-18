@@ -845,25 +845,26 @@ function getUserWord(){
 
 // ── Delete all joukkupeli data (called when dev turns off kehittäjätila) ──────
 async function endGameSession(){
-  // 1. Signal all joukkupeli players to exit
-  await db.collection('gamestate').doc('current').set({
-    mode: 'ended',
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).catch(()=>{});
+  // Clear DOM immediately
+  _lastBuzzerDocs=[]; _lastMoneyDocs=[];
+  const display=document.getElementById("buzzer-display");
+  if(display){ display.innerHTML=""; display.style.display="none"; }
 
-  // 2. Wait briefly so signal propagates, then delete all data
-  setTimeout(async ()=>{
-    const deleteCollection = async (colName) => {
-      const snap = await db.collection(colName).get().catch(()=>({docs:[]}));
-      if(!snap.docs.length) return;
-      const batch = db.batch();
-      snap.docs.forEach(d=>batch.delete(d.ref));
-      await batch.commit().catch(()=>{});
+  // Signal joukkupeli players to exit
+  const signalAndDelete = async () => {
+    try{ await db.collection("gamestate").doc("current").set({mode:"ended",timestamp:firebase.firestore.FieldValue.serverTimestamp()}); } catch(e){}
+    await new Promise(r=>setTimeout(r,800));
+    const del = async (col) => {
+      try{
+        const snap=await db.collection(col).get();
+        if(snap.empty) return;
+        const b=db.batch(); snap.docs.forEach(d=>b.delete(d.ref)); await b.commit();
+      }catch(e){ console.error("delete",col,"failed - check Firestore rules:",e.message); }
     };
-    await deleteCollection('buzzers');
-    await deleteCollection('joukkueet');
-    await db.collection('gamestate').doc('current').delete().catch(()=>{});
-  }, 1200);
+    await del("buzzers"); await del("joukkueet");
+    try{ await db.collection("gamestate").doc("current").delete(); }catch(e){}
+  };
+  signalAndDelete();
 }
 
 // ── Clear buzzers when dev switches card ──────────────────────────────────────
