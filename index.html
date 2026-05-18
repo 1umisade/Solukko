@@ -346,14 +346,9 @@ function playCashSound(){
     osc.start(now+i*.06); osc.stop(now+i*.06+.13);
   });
 }
-
-
 function playAwardSound(){
   const audio = new Audio('Money.mp3');
   audio.play().catch(()=>{});
-
-
-
 }
 function playLogoClickSound(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
@@ -1032,7 +1027,10 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     const myBuzz=sorted.find(d=>d.data().userId===getUserId());
     const myPos=myBuzz?sorted.indexOf(myBuzz)+1:null;
     const status=document.getElementById('joukkupeli-status');
-    if(status&&myPos) status.textContent=myPos===1?'🔔 Ensimmäinen!':'Sijalla '+myPos;
+    const btn=document.getElementById('vastaa-btn');
+    if(status&&myPos) status.textContent=myPos===1?'':'Sijalla '+myPos;
+    if(btn&&myPos===1){ btn.textContent='🔔'; btn.style.fontSize='min(6rem,20vw)'; }
+    else if(btn&&myPos&&myPos>1){ btn.textContent='Vastattu!'; btn.style.fontSize=''; }
   }
 
   if(!devMode){ display.style.display='none'; display.innerHTML=''; return; }
@@ -1044,26 +1042,22 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   sorted.forEach((doc,i)=>{
     const d=doc.data();
     const n=sorted.length;
-    const lightness=30+(i/Math.max(n-1,1))*38;
-    const bg=`hsl(140,45%,${lightness}%)`;
-    const textColor=lightness<52?'white':'#1a5e2a';
+    const lightness=28+(i/Math.max(n-1,1))*16;
+    const bg=`hsl(140,48%,${lightness}%)`;
 
     const el=document.createElement('div');
-    el.style.cssText=`background:${bg};color:${textColor};border:none;border-radius:12px;padding:0.55rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:${i===0?700:500};display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;user-select:none;`;
-    el.title='Vasen klikkaus: ota 10snt pois';
+    el.style.cssText=`background:${bg};color:white;border:none;border-radius:12px;padding:0.6rem 1rem;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;user-select:none;`;
+    el.title='Vasen klikkaus: anna +10snt | Oikea klikkaus: ota 10snt pois';
     el.onclick=()=>{ awardMoney(d.word); renderBuzzerDisplay(null,null); };
     el.oncontextmenu=(e)=>{ e.preventDefault(); penaltyMoney(d.word); renderBuzzerDisplay(null,null); return false; };
 
-    const posIcon = i===0
-      ? `<span style="font-size:1.6rem;line-height:1;">🔔</span>`
-      : `<span style="opacity:0.85;">${i+1}.sija</span>`;
-
+    const posText=`<span style="opacity:0.8;font-size:0.72rem;flex-shrink:0;">${i+1}.sija</span>`;
     const moneyDoc=_lastMoneyDocs.find(md=>md.id===d.word);
     const money=moneyDoc?(moneyDoc.data().money||0):0;
     const alreadyAwarded=_awardedThisRound.has(d.word);
-    const moneySpan=`<span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:900;color:${textColor};opacity:${alreadyAwarded?1:0.65};cursor:pointer;">${money.toFixed(2)} €</span>`;
+    const moneySpan=`<span style="margin-left:auto;font-size:1.6rem;font-weight:900;opacity:${alreadyAwarded?1:0.65};flex-shrink:0;">${money.toFixed(2)} €</span>`;
 
-    el.innerHTML=`${posIcon}<span>${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${moneySpan}`;
+    el.innerHTML=`${posText}<span style="font-size:1.6rem;font-weight:700;flex:1;">${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${moneySpan}`;
     display.appendChild(el);
   });
 }
