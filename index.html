@@ -346,6 +346,30 @@ function playCashSound(){
     osc.start(now+i*.06); osc.stop(now+i*.06+.13);
   });
 }
+function playAwardSound(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  const now=audioCtx.currentTime;
+  // "Cha" — mechanical thud + noise burst
+  const bufSize=Math.floor(audioCtx.sampleRate*0.06);
+  const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
+  const data=buf.getChannelData(0);
+  for(let i=0;i<bufSize;i++) data[i]=(Math.random()*2-1)*Math.pow(1-i/bufSize,2);
+  const noise=audioCtx.createBufferSource(); noise.buffer=buf;
+  const ng=audioCtx.createGain(); ng.gain.setValueAtTime(0.35,now); ng.gain.exponentialRampToValueAtTime(0.001,now+0.07);
+  noise.connect(ng); ng.connect(audioCtx.destination); noise.start(now);
+  const thud=audioCtx.createOscillator(); const tg=audioCtx.createGain();
+  thud.frequency.setValueAtTime(180,now); thud.frequency.exponentialRampToValueAtTime(55,now+0.1);
+  tg.gain.setValueAtTime(0.5,now); tg.gain.exponentialRampToValueAtTime(0.001,now+0.13);
+  thud.connect(tg); tg.connect(audioCtx.destination); thud.start(now); thud.stop(now+0.14);
+  // "Ching" — bright bell ring
+  [[1400,0.28],[2800,0.12],[4200,0.05]].forEach(([freq,vol])=>{
+    const b=audioCtx.createOscillator(),bg=audioCtx.createGain();
+    b.type='sine'; b.frequency.value=freq;
+    bg.gain.setValueAtTime(0,now+0.07); bg.gain.linearRampToValueAtTime(vol,now+0.09);
+    bg.gain.exponentialRampToValueAtTime(0.001,now+0.9);
+    b.connect(bg); bg.connect(audioCtx.destination); b.start(now+0.07); b.stop(now+0.95);
+  });
+}
 function playLogoClickSound(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   const now=audioCtx.currentTime;
@@ -885,13 +909,15 @@ function showJoukkupeliOverlay(){
   document.body.classList.add('joukkupeli-active');
   resetVastaaBtn();
   listenToGameState();
-  // Listen to own money
+  // Listen to own money and play sound on award
+  let _myPrevMoney = -1;
   db.collection('joukkueet').doc(getUserWord())
     .onSnapshot(doc=>{
       const el=document.getElementById('player-money');
-      if(!el) return;
       const money = doc.exists ? (doc.data().money||0) : 0;
-      el.textContent = money > 0 ? `${money.toFixed(2)} € 🏆` : '';
+      if(_myPrevMoney >= 0 && money > _myPrevMoney) playAwardSound();
+      _myPrevMoney = money;
+      if(el) el.textContent = money > 0 ? `${money.toFixed(2)} € 🏆` : '';
     });
 }
 
@@ -994,6 +1020,20 @@ function loadBuzzers(){
     .onSnapshot(snap=>{ renderBuzzerDisplay(null, snap.docs); });
 }
 
+function penaltyMoney(fromWord){
+  if(!devMode) return;
+  const others = _lastBuzzerDocs.map(d=>d.data().word).filter(w=>w!==fromWord);
+  db.collection('joukkueet').doc(fromWord).set({
+    teamName: fromWord, money: firebase.firestore.FieldValue.increment(-0.10)
+  },{merge:true});
+  if(others.length){
+    const recipient = others[Math.floor(Math.random()*others.length)];
+    db.collection('joukkueet').doc(recipient).set({
+      teamName: recipient, money: firebase.firestore.FieldValue.increment(0.10)
+    },{merge:true});
+  }
+}
+
 let _lastBuzzerDocs=[], _lastMoneyDocs=[], _awardedThisRound=new Set();
 function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   if(buzzerDocs!==null) _lastBuzzerDocs=buzzerDocs;
@@ -1001,8 +1041,8 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   const display=document.getElementById('buzzer-display');
   if(!display) return;
 
-  // Update joukkupeli overlay position status (for all joukkupeli users)
   const sorted=[..._lastBuzzerDocs].sort((a,b)=>(a.data().timestamp?.toMillis?.()||0)-(b.data().timestamp?.toMillis?.()||0));
+
   if(groupMode){
     const myBuzz=sorted.find(d=>d.data().userId===getUserId());
     const myPos=myBuzz?sorted.indexOf(myBuzz)+1:null;
@@ -1010,7 +1050,6 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     if(status&&myPos) status.textContent=myPos===1?'🔔 Ensimmäinen!':'Sijalla '+myPos;
   }
 
-  // Only kehittäjätila sees the leaderboard panel
   if(!devMode){ display.style.display='none'; display.innerHTML=''; return; }
 
   display.innerHTML='';
@@ -1018,17 +1057,30 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
   display.style.display='flex';
 
   sorted.forEach((doc,i)=>{
-    const d=doc.data(); const isFirst=i===0;
+    const d=doc.data();
+    const n=sorted.length;
+    const lightness=30+(i/Math.max(n-1,1))*38;
+    const bg=`hsl(140,45%,${lightness}%)`;
+    const textColor=lightness<52?'white':'#1a5e2a';
+
     const el=document.createElement('div');
-    el.style.cssText=`background:${isFirst?'#c0392b':'#fffef9'};color:${isFirst?'white':'#56533c'};border:1px solid ${isFirst?'#c0392b':'#d4cec4'};border-radius:12px;padding:0.55rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:${isFirst?700:400};display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);`;
-    const moneyDoc = _lastMoneyDocs.find(md=>md.id===d.word);
-    const currentMoney = moneyDoc ? (moneyDoc.data().money||0) : 0;
-    const alreadyAwarded = _awardedThisRound.has(d.word);
-    const moneyBtn = `<button onclick="awardMoney('${d.word.replace(/'/g,"\\'")}');renderBuzzerDisplay(null,null);" style="margin-left:auto;background:none;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:900;color:${alreadyAwarded?(isFirst?'rgba(255,255,255,0.9)':'#27ae60'):(isFirst?'rgba(255,255,255,0.7)':'#c0392b')};padding:0 4px;">${currentMoney.toFixed(2)} €</button>`;
-    el.innerHTML=`<span>${isFirst?'🔔':i+1+'.'}</span><span>${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${moneyBtn}`;
+    el.style.cssText=`background:${bg};color:${textColor};border:none;border-radius:12px;padding:0.55rem 1rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:${i===0?700:500};display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;user-select:none;`;
+    el.title='Vasen klikkaus: ota 10snt pois';
+    el.onclick=()=>{ awardMoney(d.word); renderBuzzerDisplay(null,null); };
+    el.oncontextmenu=(e)=>{ e.preventDefault(); penaltyMoney(d.word); renderBuzzerDisplay(null,null); return false; };
+
+    const posIcon = i===0
+      ? `<span style="font-size:1.6rem;line-height:1;">🔔</span>`
+      : `<span style="opacity:0.85;">${i+1}.sija</span>`;
+
+    const moneyDoc=_lastMoneyDocs.find(md=>md.id===d.word);
+    const money=moneyDoc?(moneyDoc.data().money||0):0;
+    const alreadyAwarded=_awardedThisRound.has(d.word);
+    const moneySpan=`<span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:900;color:${textColor};opacity:${alreadyAwarded?1:0.65};cursor:pointer;">${money.toFixed(2)} €</span>`;
+
+    el.innerHTML=`${posIcon}<span>${d.word}</span>${d.userId===getUserId()?'<span style="opacity:0.55;font-size:0.68rem;">(sinä)</span>':''}${moneySpan}`;
     display.appendChild(el);
   });
-  // No separate Pisteet section - money shown inline above
 }
 let pendingCommentImage = null;
 
