@@ -346,7 +346,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   /* Kommenttilaatikko siirtyy absolute → static (ruudun alle) */
   .comment-area { position: static; width: 100%; margin-top: 0; }
   /* Pakkakorttilista pystysuoraan                           */
-  .deck-list { flex-direction: column; gap: calc(min(256px, 90vw * 4 / 7) / 5); align-items: center; }
+  .deck-list { flex-direction: column; gap: 24px; align-items: center; }
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
   .comment-area { position: static; width: 100%; margin-top: 0; }
 }
@@ -360,6 +360,9 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
      Molemmat on piilotettu etusivulla, näkyvät vain kertaustilassa.
      ══════════════════════════════════════════════════════════ -->
 <div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
+
+  <!-- ← Takaisin etusivulle (piilotettu etusivulla, näkyy kertaustilassa) -->
+  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
   <!-- Väli logon ja gear-napin välissä -->
   <div style="flex:1"></div>
@@ -1013,7 +1016,7 @@ let _playingDeckVideo = null;
     const btn=document.createElement('button');
     btn.className='deck-btn';
     btn.innerHTML=`
-      <video class="deck-video" muted loop playsinline preload="metadata">
+      <video class="deck-video" muted loop playsinline preload="auto">
         <source src="${item.bgVideo}" type="video/mp4">
       </video>
       <div style="position:relative;z-index:2">
@@ -1024,16 +1027,22 @@ let _playingDeckVideo = null;
     // Desktop: video käynnistyy hover-tilassa
     btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); });
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
-    // Mobiili: video käynnistyy kosketuksesta (vain yksi kerrallaan)
+    // Mobiili (portrait): video käynnistyy kosketuksesta eikä pysähdy — poistuu vain navigoimalla
     btn.addEventListener('touchstart',()=>{
       if(_playingDeckVideo && _playingDeckVideo!==video){ _playingDeckVideo.pause(); _playingDeckVideo.currentTime=0; }
       _playingDeckVideo=video; video.currentTime=0; video.play().catch(()=>{});
     },{passive:true});
-    btn.addEventListener('touchend',()=>{ video.pause(); video.currentTime=0; _playingDeckVideo=null; },{passive:true});
-    btn.addEventListener('touchcancel',()=>{ video.pause(); video.currentTime=0; _playingDeckVideo=null; },{passive:true});
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
   });
+
+  // Muotokuvatilassa (portrait) yritetään käynnistää kaikki videot heti
+  // Selaimet sallivat muted+playsinline autoplayn ilman käyttäjän elettä
+  if(window.matchMedia('(orientation: portrait)').matches){
+    setTimeout(()=>{
+      document.querySelectorAll('#deck-list .deck-video').forEach(v=>v.play().catch(()=>{}));
+    }, 150);
+  }
 
   hide('card-screen');
 
@@ -1078,6 +1087,7 @@ async function startDeck(deckName){
 
   // Päivitetään UI: piilotetaan logo, näytetään ← takaisin-nappi
   document.getElementById('site-brand').style.display='none';
+  document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='block';
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
@@ -2292,6 +2302,7 @@ function showDecks(){
   _lastBuzzerDocs=[]; _lastMoneyDocs=[];
   // Palautetaan logo ja piilotetaan kertausnavigaatio
   document.getElementById('site-brand').style.display='';
+  document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
   document.body.classList.remove('reviewing');
   // Nollataan pisteet
