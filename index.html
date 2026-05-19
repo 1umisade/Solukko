@@ -381,7 +381,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
       <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
 
       <!-- Staattinen kellonaika-display (viimeisin deploy-aika) -->
-      <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 13:45</div>
+      <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 13:45</div>
     </div>
   </div>
 </div>
@@ -1171,7 +1171,7 @@ function renderReviewDeckCard(deckName){
         <div style="font-size:14px;opacity:0.82;font-weight:400;">${courseCode}</div>
       </div>
     </button>
-    <a href="${moodleLink}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.5rem 0.8rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;width:100%;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <a href="${moodleLink}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.5rem 0.8rem;font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;color:#56533c;width:100%;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
       <img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:5px;">
       Tarkista tenttiajankohdat Moodlesta
     </a>`;
@@ -1653,7 +1653,7 @@ function renderBuzzerDisplay(buzzerDocs, moneyDocs){
     const bg=`hsl(140,48%,${lightness}%)`;
 
     const el=document.createElement('div');
-    el.style.cssText=`background:${bg};color:white;border:none;border-radius:12px;padding:0.6rem 1rem;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;user-select:none;`;
+    el.style.cssText=`background:${bg};color:white;border:none;border-radius:12px;padding:0.6rem 1rem;font-family:\'JetBrains Mono\',monospace;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;user-select:none;`;
     el.title='Vasen klikkaus: anna +10snt | Oikea klikkaus: ota 10snt pois';
     el.onclick=()=>{ awardMoney(d.word); renderBuzzerDisplay(null,null); };
     el.oncontextmenu=(e)=>{ e.preventDefault(); penaltyMoney(d.word); renderBuzzerDisplay(null,null); return false; };
@@ -2125,15 +2125,15 @@ function renderPresenceList(users){
   if(!devMode){ el.style.display='none'; return; }
   el.style.display = 'flex';
   if(!users.length){
-    el.innerHTML = '<span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#b0a898;">Ei aktiivisia käyttäjiä</span>';
+    el.innerHTML = '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#b0a898;">Ei aktiivisia käyttäjiä</span>';
     return;
   }
   el.innerHTML =
-    '<span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt (' + users.length + ')</span>'
+    '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt (' + users.length + ')</span>'
     + '<div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'
     + users.map(w =>
         '<span style="background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.22rem 0.75rem;'
-        + 'font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#56533c;">' + w + '</span>'
+        + 'font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#56533c;">' + w + '</span>'
       ).join('')
     + '</div>';
 }
@@ -2316,7 +2316,7 @@ init();
 <div id="joukkupeli-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f0e8;z-index:88888;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;">
 
   <!-- Indikaattori: onko kehittäjä aktiivinen -->
-  <div id="dev-active-indicator" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#888;letter-spacing:0.02em;">⏳ Odota kehittäjää...</div>
+  <div id="dev-active-indicator" style="font-family:\'JetBrains Mono\',monospace;font-size:0.8rem;color:#888;letter-spacing:0.02em;">⏳ Odota kehittäjää...</div>
 
   <!-- Pelaajan sana (esim. "Hemoglobiini") — satunnainen biokemiatermi -->
   <div id="team-name-display" style="font-family:'EB Garamond',Garamond,serif;font-size:min(3.5rem,12vw);font-weight:600;color:#56533c;text-align:center;letter-spacing:-0.02em;"></div>
@@ -2325,13 +2325,13 @@ init();
   <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">Vastaa</button>
 
   <!-- Statusviesti (esim. "Sijalla 2") -->
-  <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
+  <div id="joukkupeli-status" style="font-family:\'JetBrains Mono\',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
 
   <!-- Pelaajan oma pistesaldo (näkyy kun pisteitä on saatu) -->
-  <div id="player-money" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:#8a5b00;text-align:center;"></div>
+  <div id="player-money" style="font-family:\'JetBrains Mono\',monospace;font-size:1.1rem;font-weight:700;color:#8a5b00;text-align:center;"></div>
 
   <!-- Poistu tietovisasta -nappi -->
-  <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu tietovisasta</button>
+  <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:\'JetBrains Mono\',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu tietovisasta</button>
 </div>
 
 </body>
