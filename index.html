@@ -2093,44 +2093,93 @@ function initPresence(){
   const uid = getUserId();
   const word = getUserWord();
   const ref = db.collection('presence').doc(uid);
-  // Kirjoitetaan oma läsnäolo heti
-  ref.set({ userId: uid, word, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
-  // Päivitetään minuutin välein
+
+  // Track last interaction locally — written to Firestore with each heartbeat
+  let lastInteractionTime = Date.now();
+  ['mousedown','keydown','touchstart','click'].forEach(ev =>
+    window.addEventListener(ev, ()=>{ lastInteractionTime = Date.now(); }, { passive:true, capture:true })
+  );
+
+  // Write presence immediately when tab opens
+  ref.set({ userId:uid, word, lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+
+  // Heartbeat every 30s — updates lastSeen (tab-open signal) and lastInteraction
   setInterval(()=>{
-    ref.set({ userId: uid, word, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
-  }, 60000);
-  // Poistetaan läsnäolo kun sivu suljetaan
-  window.addEventListener('beforeunload', ()=>{ ref.delete().catch(()=>{}); });
-  // Kuunnellaan kaikkien läsnäoloa
+    ref.set({ userId:uid, word, lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(lastInteractionTime) }, { merge:true }).catch(()=>{});
+  }, 30000);
+
+  // Delete presence immediately when tab closes (keepalive ensures the request completes)
+  const deletePresenceUrl = 'https://firestore.googleapis.com/v1/projects/solukko/databases/(default)/documents/presence/'
+    + uid + '?key=AIzaSyAeWTSjX8-M_-Xs780nnC_0o9d1YmYroGo';
+  window.addEventListener('pagehide', ()=>{
+    fetch(deletePresenceUrl, { method:'DELETE', keepalive:true }).catch(()=>{});
+  });
+
   listenToPresence();
 }
 
+// ─── Kuuntelee läsnäolodokumentteja — näyttää kaikki joiden välilehti on auki ─
 function listenToPresence(){
   db.collection('presence').onSnapshot(snap=>{
     const now = Date.now();
     const users = [];
     snap.forEach(doc=>{
       const d = doc.data();
+      // lastSeen alle 90s sitten = välilehti auki (30s heartbeat + buffer)
       const lastSeen = d.lastSeen?.toMillis?.() || 0;
-      if(now - lastSeen < 5 * 60 * 1000) users.push(d.word || d.userId);
+      if(now - lastSeen < 90000){
+        users.push({
+          word: d.word || d.userId,
+          userId: d.userId,
+          lastInteraction: d.lastInteraction?.toMillis?.() || 0
+        });
+      }
     });
     renderPresenceList(users);
   }, ()=>{});
 }
 
+// ─── Renderöi läsnäololista — kaikille näkyy nimet, devMoodessa myös viimeisin aktiivisuus ─
 function renderPresenceList(users){
   const el = document.getElementById('presence-list');
   if(!el) return;
-  // Kaikki käyttäjät näkevät listan — ei devMode-rajoitusta
   el.style.display = 'flex';
-  if(!users.length) return;
+  if(!users.length){ el.innerHTML = ''; return; }
+
+  const myUid = getUserId();
+  const now = Date.now();
+
+  // Muuntaa millisekunnit ihmisluettavaksi ajaksi devMooden näyttöä varten
+  const relTime = (ms) => {
+    if(!ms) return '?';
+    const s = Math.floor((now - ms) / 1000);
+    if(s < 15)  return 'juuri äsken';
+    if(s < 60)  return s + 's sitten';
+    const m = Math.floor(s / 60);
+    if(m < 60)  return m + ' min sitten';
+    return Math.floor(m / 60) + 'h sitten';
+  };
+
   el.innerHTML =
     '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt (' + users.length + ')</span>'
     + '<div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'
-    + users.map(w =>
-        '<span style="background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.22rem 0.75rem;'
-        + 'font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#56533c;">' + w + '</span>'
-      ).join('')
+    + users.map(u => {
+        const isMe = u.userId === myUid;
+        // Korostus omalle käyttäjälle — vihreä reuna + "(sinä)"-merkintä
+        const border = isMe ? '#27ae60' : '#d4cec4';
+        const color  = isMe ? '#1a7f3c' : '#56533c';
+        const meTag  = isMe
+          ? '<span style="opacity:0.55;font-size:0.62rem;margin-left:3px;">(sinä)</span>'
+          : '';
+        // Kehittäjälle: viimeisin aktiivisuusaika ei-omille käyttäjille
+        const devTag = devMode && !isMe
+          ? '<span style="opacity:0.45;font-size:0.55rem;margin-left:4px;">' + relTime(u.lastInteraction) + '</span>'
+          : '';
+        return '<span style="background:#fffef9;border:1px solid ' + border + ';border-radius:999px;'
+             + 'padding:0.22rem 0.75rem;font-family:\'JetBrains Mono\',monospace;'
+             + 'font-size:0.68rem;color:' + color + ';display:inline-flex;align-items:center;">'
+             + u.word + meTag + devTag + '</span>';
+      }).join('')
     + '</div>';
 }
 
