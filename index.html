@@ -429,7 +429,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
   <!-- Paikalla olevien käyttäjien lista — näytetään vain kehittäjälle -->
-  <div id="presence-list" style="width:min(448px,90vw);display:none;flex-direction:column;align-items:center;gap:0.6rem;padding-bottom:1rem;"></div>
+  <div id="presence-list" style="width:min(448px,90vw);display:flex;flex-direction:column;align-items:center;gap:0.6rem;padding-bottom:1rem;"></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -2121,13 +2121,9 @@ function listenToPresence(){
 function renderPresenceList(users){
   const el = document.getElementById('presence-list');
   if(!el) return;
-  // Läsnäololista näkyy vain kehittäjälle
-  if(!devMode){ el.style.display='none'; return; }
+  // Kaikki käyttäjät näkevät listan — ei devMode-rajoitusta
   el.style.display = 'flex';
-  if(!users.length){
-    el.innerHTML = '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#b0a898;">Ei aktiivisia käyttäjiä</span>';
-    return;
-  }
+  if(!users.length) return;
   el.innerHTML =
     '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt (' + users.length + ')</span>'
     + '<div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'
