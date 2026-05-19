@@ -393,12 +393,13 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
 /* ── 16. RESPONSIIVISUUS (MOBIILI ≤600px) ───────────────── */
 @media (max-width: 600px), (orientation: portrait) {
-  /* Kommenttilaatikko siirtyy absolute → static (ruudun alle) */
-  .comment-area { position: static; width: 100%; margin-top: 0; }
-  /* Pakkakorttilista pystysuoraan                           */
+  /* Pakkakorttilista pystysuoraan */
   .deck-list { flex-direction: column; gap: 24px; align-items: center; }
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
-  .comment-area { position: static; width: 100%; margin-top: 0; }
+  /* Kommentit ja yleiskatsaus työnnetty näkymän ulkopuolelle 100svh:lla —
+     käyttäjä scrollaa ylös kommentteihin, alas yleiskatsaukseen */
+  .comment-area { position: static; width: 100%; margin-top: 100svh; }
+  #card-overview-grid { margin-top: 100svh; }
 }
 </style>
 </head>
@@ -2512,10 +2513,11 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
     startX = x; startY = y; dragDelta = 0; dragging = true; didSwipe = false; axis = null;
     fc.style.transition = 'none';
     overlay.style.transition = 'none';
-    // Position stamp: aim for viewport vertical centre on touch, card centre on mouse.
+    // Position stamp: 90px above the touch point (finger), card centre on mouse.
     // Clamp so the stamp never exceeds the card bounds regardless.
     const rect = fc.getBoundingClientRect();
-    const targetTop = isTouch ? (window.innerHeight / 2 - rect.top) : (rect.height / 2);
+    const touchYInCard = isTouch ? (y - rect.top) : (rect.height / 2);
+    const targetTop = touchYInCard - 90;
     // Clamp is applied again in setIndicator once we know the stamp's rendered height.
     stamp.dataset.targetTop = targetTop;
     stamp.dataset.cardH     = rect.height;
@@ -2548,7 +2550,11 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
     fc.style.animation = '';  // restore so next card's slide-in animation works
     clearIndicator();
     if(cardAnswerShown && Math.abs(dragDelta) >= SWIPE_THRESHOLD){
+      // Reached swipe threshold — grade the card
       gradeCard(dragDelta > 0);
+    } else if(!cardAnswerShown && Math.abs(dragDelta) > 8){
+      // Short drag without grading — show answer (same as tap)
+      showAnswer();
     }
   }
 
