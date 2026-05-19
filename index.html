@@ -403,26 +403,84 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 /* ── SANALINKIT — korttien väliset linkit ───────────────────── */
 /* Sanalikin warp-kortti — macOS genie -tyylinen animaatio */
 
-.word-link { cursor:pointer; border-bottom:1px dashed transparent; transition:border-color 0.15s; }
-.word-link:hover { border-bottom-color:#8a7d72; }
-body.dark-mode .word-link { border-bottom-color:#6d5f52; }
-body.dark-mode .word-link:hover { border-bottom-color:#eadfce; }
+
+.word-link {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.15s;
+}
+
+.word-link:hover {
+  border-bottom-color: #8a7d72;
+}
+
+body.dark-mode .word-link {
+  border-bottom-color: #6d5f52;
+}
+
+body.dark-mode .word-link:hover {
+  border-bottom-color: #eadfce;
+}
+
 #word-link-tooltip {
-  position:fixed;
-  z-index:99999;
-  max-width:420px;
-  min-width:180px;
-  background:#fffef9;
-  border:1px solid #d4cec4;
-  border-radius:12px;
-  padding:0.75rem 1rem;
-  box-shadow:0 8px 28px rgba(0,0,0,0.15);
-  font-family:'Lora',serif;
-  font-size:0.82rem;
-  line-height:1.5;
-  color:#56533c;
-  display:none;
-  pointer-events:none;
+  position: fixed;
+  z-index: 99999;
+
+  width: min(520px, calc(100vw - 24px));
+  max-width: min(520px, calc(100vw - 24px));
+  min-width: 180px;
+
+  background: #fffef9;
+  border: 1px solid #d4cec4;
+  border-radius: 12px;
+
+  padding: 0.75rem 1rem;
+
+  box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+
+  font-family: 'Lora', serif;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #56533c;
+
+  display: none;
+  pointer-events: none;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+
+  max-height: none;
+  overflow: visible;
+}
+
+body.dark-mode #word-link-tooltip {
+  background: #3a312b;
+  border-color: #6d5f52;
+  color: #eadfce;
+}
+
+#word-link-tooltip * {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#word-link-tooltip img,
+#word-link-tooltip svg,
+#word-link-tooltip video {
+  max-width: 100%;
+  max-height: 220px;
+
+  width: auto !important;
+  height: auto !important;
+
+  object-fit: contain;
+
+  display: block;
+  margin: 0.5rem auto;
+
+  border-radius: 8px;
 }
 body.dark-mode #word-link-tooltip { background:#3a312b; border-color:#6d5f52; color:#eadfce; }
 </style>
@@ -2772,11 +2830,29 @@ function applyWordLinks(element){
       getField(card, ['Back','back','Answer','answer','Extra','extra']) ||
       card.answer || '';
 
-    tip.innerHTML =
-      '<div style="font-weight:700;margin-bottom:0.35rem;">' + cleanText(front) + '</div>' +
-      '<div>' + cleanText(back) + '</div>';
+function prepareTooltipHtml(html){
+  html = String(html || '');
+
+  // Replace Anki media references with actual base64 media
+  html = html.replace(/src="([^"]+)"/gi, (m, src) => {
+    return mediaMap[src]
+      ? `src="${mediaMap[src]}"`
+      : m;
+  });
+
+  return html;
+}
+
+tip.innerHTML =
+  '<div style="font-weight:700;margin-bottom:0.6rem;">' +
+    prepareTooltipHtml(front) +
+  '</div>' +
+  '<div>' +
+    prepareTooltipHtml(back) +
+  '</div>';
 
     tip.style.display = 'block';
+    tip.style.width = 'min(520px, calc(100vw - 24px))';
 
     const r = target.getBoundingClientRect();
     const tw = tip.offsetWidth;
