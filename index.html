@@ -1083,9 +1083,9 @@ let _playingDeckVideo = null;
     btn.addEventListener('touchcancel',()=>{ video.pause(); video.currentTime=0; _playingDeckVideo=null; },{passive:true});
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
-    // Seek to 0.001s after metadata loads — forces browser to decode & paint the first frame
-    // without actually playing the video. Fixes the black-card problem on mobile.
-    video.addEventListener('loadedmetadata', ()=>{ video.currentTime = 0.001; }, { once: true });
+    // Seek to 0.5s after first frame data is ready — avoids YUV/keyframe artifacts
+    // that cause a colour tint at position 0.000–0.001 on some video codecs.
+    video.addEventListener('loadeddata', ()=>{ video.currentTime = 0.5; }, { once: true });
   });
 
   hide('card-screen');
