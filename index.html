@@ -1098,6 +1098,32 @@ let _playingDeckVideo = null;
 
   hide('card-screen');
 
+  // ── URL-parametrit: kortti avataan suoraan uudessa välilehdessä ──────
+  // Etsitään kortti suoraan allCards:ista — ei tarvita pakkan nimeä URL:issa
+  const _p = new URLSearchParams(window.location.search);
+  const _pc = _p.get('solukko-card'), _pa = _p.get('solukko-answer');
+  if(_pc){
+    const _tc = allCards.find(c=>String(c.cardId)===_pc);
+    if(_tc){
+      const _topDeck = 'TYKRY::' + _tc.deckName.replace('TYKRY::','').split('::')[0];
+      if(names.includes(_topDeck)){
+        await startDeck(_topDeck);
+        const _ci = reviewCards.findIndex(c=>String(c.cardId)===_pc);
+        if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); }
+        return;
+      }
+    }
+  }
+
+  // Palauta tallennettu sessio (jos käyttäjä päivitti sivun kesken kertauksen)
+  const savedDeck=sessionStorage.getItem('solukko-savedDeck');
+  const savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
+  if(savedDeck && names.includes(savedDeck)){
+    await startDeck(savedDeck);
+    if(savedIdx>0 && reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); }
+    return;
+  }
+
   show('deck-screen');
 }
 
@@ -2740,10 +2766,10 @@ function applyWordLinks(element){
 // ─── Avaa linkitetty kortti uudessa välilehdessä ─────────────────────
 function openWordLinkCard(idx){
   const card=reviewCards[idx]; if(!card) return;
-  const url=new URL(window.location.href);
-  url.searchParams.set('solukko-deck', currentDeck);
+  // Vain kortin ID tarvitaan — pakka etsitään automaattisesti allCards:ista
+  const url=new URL(window.location.href.split('?')[0]); // puhdas URL
   url.searchParams.set('solukko-card', String(card.cardId));
-  url.searchParams.set('solukko-answer', '1'); // näytä vastaus automaattisesti
+  url.searchParams.set('solukko-answer', '1');
   window.open(url.toString(),'_blank');
   document.getElementById('word-link-tooltip').style.display='none';
 }
