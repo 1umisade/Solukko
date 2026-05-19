@@ -289,11 +289,14 @@ body.dark-mode #settings-dropdown-inline > div:last-child { background: #3a312b 
 .site-brand img { width: min(120px, 20vw); height: min(120px, 20vw); object-fit: contain; }
 .brand-front span { font-family: "EB Garamond", Garamond, serif; font-size: min(5rem, 15vw); font-weight: 600; color: #56533c; letter-spacing: -0.03em; }
 body.dark-mode .brand-front span { color: #fff2cb; }
-body.dark-mode .brand-back > div { color: #eadfce !important; }
+body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: #eadfce !important; }
 
 /* Pieni pomppuanimaatio logokuvaaan klikkauksesta           */
 .site-brand img.logo-clicked { animation: logoClickPop 0.34s ease; }
 @keyframes logoClickPop { 0%{transform:scale(1) rotate(0deg)} 35%{transform:scale(0.94) rotate(-2deg)} 70%{transform:scale(1.05) rotate(1deg)} 100%{transform:scale(1) rotate(0deg)} }
+
+/* Solukko-logo: SVG-suodatin tekee soluista elävän näköisiä hover-tilassa */
+.site-brand img { transition: filter 0.4s ease; will-change: filter; }
 
 /* YouTube-linkit alidekkiremppien alla                       */
 .subdeck-video-link { display: block; text-decoration: none; }
@@ -402,6 +405,19 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
   /* overview margin set dynamically by scrollToCard() */
 }
+/* ── SANALINKIT — korttien väliset linkit ───────────────────── */
+.word-link { cursor:pointer; border-bottom:1px dashed #8a7d72; transition:border-color 0.15s; }
+.word-link:hover { border-bottom-color:#1a1612; }
+body.dark-mode .word-link { border-bottom-color:#6d5f52; }
+body.dark-mode .word-link:hover { border-bottom-color:#eadfce; }
+#word-link-tooltip {
+  position:fixed; z-index:99999; max-width:280px; min-width:120px;
+  background:#fffef9; border:1px solid #d4cec4; border-radius:12px;
+  padding:0.75rem 1rem; box-shadow:0 8px 28px rgba(0,0,0,0.15);
+  font-family:'Lora',serif; font-size:0.82rem; line-height:1.5;
+  color:#56533c; display:none; pointer-events:none;
+}
+body.dark-mode #word-link-tooltip { background:#3a312b; border-color:#6d5f52; color:#eadfce; }
 </style>
 </head>
 <body>
@@ -436,7 +452,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
       <label class="iphone-toggle-wrap"><input id="dev-toggle-input2" type="checkbox" onchange="toggleDevModeFromSwitch()"><span class="iphone-toggle"></span><span>Kehittäjätila</span></label>
 
       <!-- Staattinen kellonaika-display (viimeisin deploy-aika) -->
-      <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);">18.05.2026 13:45</div>
+      <div style="width:155px;display:flex;justify-content:center;align-items:center;font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;color:#6b6055;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.45rem 0.7rem;box-shadow:0 3px 12px rgba(0,0,0,0.12);" id="deploy-timestamp">ladataan...</div>
     </div>
   </div>
 </div>
@@ -457,13 +473,15 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
     <!-- Takaosa: kuvaus sivustosta (näkyy käännettyä) -->
     <div class="brand-back">
-      <div style="font-size:2rem;font-weight:700;text-align:center;margin-bottom:0.8rem;color:#56533c;line-height:1.2;">Treenaa aivosolusi tenttikuntoon!</div>
-      Solukko.com on biokemian opiskelijoille suunnattu oppimissivusto, 
-      jossa yliopistokurssit voi opiskella valmiiden kysymyskorttien avulla.<br>
-      • Ei kirjautumista<br>
-      • Käyttö aina ilmaista<br>
-      • Palkintoja sisällöntuottajille<br>
-      • Kysymyksiin merkitty tenttitodennäköisyys<br>
+      <div style="font-size:1.25rem;font-weight:700;text-align:center;margin-bottom:0.5rem;color:#56533c;line-height:1.2;">Treenaa aivosolusi tenttikuntoon!</div>
+      <div style="font-size:0.82rem;line-height:1.5;">
+        Solukko.com on biokemian opiskelijoille suunnattu oppimissivusto,
+        jossa yliopistokurssit voi opiskella valmiiden kysymyskorttien avulla.<br><br>
+        • Ei kirjautumista<br>
+        • Käyttö aina ilmaista<br>
+        • Palkintoja sisällöntuottajille<br>
+        • Kysymyksiin merkitty tenttitodennäköisyys<br>
+      </div>
     </div>
   </div>
 </div>
@@ -807,11 +825,11 @@ document.addEventListener('click',e=>{ if(!document.querySelector('.comment-area
 //    Klikatessa: 3D-kääntyminen + logo-pop-animaatio + ääni.
 // ════════════════════════════════════════════════════════════
 
+let _brandAngle = 0; // always increments — spin in one direction only
 function clickLogoHome(){
-  const brand=document.getElementById('site-brand'),logo=document.querySelector('.site-brand img');
-  brand?.classList.toggle('flipped');
-  if(logo){ logo.classList.remove('logo-clicked'); void logo.offsetWidth; logo.classList.add('logo-clicked'); }
-  playLogoClickSound();
+  _brandAngle += 180;
+  const inner = document.querySelector('.site-brand-inner');
+  if(inner) inner.style.transform = 'rotateY(' + _brandAngle + 'deg)';
 }
 
 
@@ -1080,14 +1098,6 @@ let _playingDeckVideo = null;
 
   hide('card-screen');
 
-  // Palauta tallennettu sessio (jos käyttäjä päivitti sivun kesken kertauksen)
-  const savedDeck=sessionStorage.getItem('solukko-savedDeck');
-  const savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
-  if(savedDeck && names.includes(savedDeck)){
-    await startDeck(savedDeck);
-    if(savedIdx>0 && reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); }
-    return;
-  }
   show('deck-screen');
 }
 
@@ -1104,6 +1114,7 @@ async function startDeck(deckName){
   queue=infos.slice(); // kopio — kortteja poistetaan jonosta kertauksen edetessä
 
   deckGroups=buildDeckGroups(reviewCards,deckName);
+  buildWordLinks(); // hakemisto sanalinkkejä varten
   currentOverviewIndex=0;
 
   // Ladataan aiemmin tallennetut arvosanat (known/unknown) tästä pakasta
@@ -1281,6 +1292,9 @@ async function renderCurrentCard(){
   document.getElementById('question-content').innerHTML=qHtml;
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
+  // Lisätään sanalinkit (heti, näkyvät kun vastaus paljastetaan)
+  applyWordLinks(document.getElementById('question-content'));
+  applyWordLinks(document.getElementById('answer-content'));
 
   // Ladataan sivukohtaiset tiedot
   loadCommentForCard();    // kommentit Firestoresta
@@ -1940,14 +1954,12 @@ function makeVideoEmbed(embedUrl, name){
     var safeId = name.replace(/[^a-zA-Z0-9\u00C0-\u024F\s\-]/g, '').trim();
     return '<div class="video-cover" style="width:100%;aspect-ratio:16/9;border-radius:16px;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.1rem;">'
          + '<span style="'+nameStyle+'">' + name + '</span>'
-         + '<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'
+         + '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">'
          + playBtn('#c8c0b4', '80px')
+         + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.87rem;color:#6b5f57;letter-spacing:0.02em;text-align:center;">Luentovideo ei vielä saatavilla</span>'
          + '</div>'
-         + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.45rem;">'
-         + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.58rem;color:#c8c0b4;letter-spacing:0.04em;">Luentovideo ei vielä saatavilla</span>'
-         + '<div class="kuvaaja-wrap" style="display:flex;align-items:center;gap:0.5rem;">'
+         + '<div class="kuvaaja-wrap" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">'
          + '<button class="kuvaaja-btn" data-subdeck="' + name + '" style="background:none;color:#56533c;border:1px solid #d4cec4;border-radius:999px;padding:0.4rem 1.1rem;font-family:\'Lora\',serif;font-size:0.8rem;cursor:pointer;">&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi</button>'
-         + '</div>'
          + '</div>'
          + '</div>';
   }
@@ -2573,8 +2585,19 @@ function scrollToCard(){
   document.addEventListener('mousemove', e => { if(dragging) onMove(e.clientX, e.clientY, null); });
   document.addEventListener('mouseup', onEnd);
 
-  // Napautus → näytä vastaus
-  fc.addEventListener('click', () => { if(!didSwipe) showAnswer(); didSwipe = false; });
+  // Napautus → näytä vastaus TAI seuraa sanalinkkiä
+  fc.addEventListener('click', e => {
+    const link = e.target.closest('.word-link');
+    if(link){
+      e.stopPropagation();
+      const idx = parseInt(link.dataset.cardIndex);
+      if(!isNaN(idx)) openWordLinkCard(idx);
+      didSwipe = false;
+      return;
+    }
+    if(!didSwipe) showAnswer();
+    didSwipe = false;
+  });
 
   // Näppäimistö: → tiesin, ← ei tiedetty, välilyönti/enter näytä vastaus
   document.addEventListener('keydown', e => {
@@ -2584,6 +2607,146 @@ function scrollToCard(){
     if((e.key === ' ' || e.key === 'Enter') && !cardAnswerShown && currentCard){ e.preventDefault(); showAnswer(); }
   });
 })();
+
+// ─── Näytä sivuston viimeisin päivitysaika ───────────────────────────
+// document.lastModified lukee palvelimen Last-Modified HTTP-headerin —
+// tämä päivittyy automaattisesti kun tiedosto deployataan uudelleen.
+(function(){
+  const ts = document.getElementById('deploy-timestamp');
+  if(!ts) return;
+  const d = new Date(document.lastModified);
+  if(isNaN(d.getTime())){ ts.textContent = '—'; return; }
+  const pad = n => String(n).padStart(2,'0');
+  ts.textContent = pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+})();
+
+// ════════════════════════════════════════════════════════════
+// SANALINKIT (WORD LINKS)
+//    buildWordLinks()  — rakentaa hakemiston: kortin etuteksti → kortti-indeksi
+//    applyWordLinks()  — annotoi elementin tekstisolmut klikkattaviksi
+//    Tooltip näyttää esikatselun, klikkaus avaa kortin uuteen välilehteen.
+//    URL-parametrit (?solukko-deck=...&solukko-card=...) avaavat kohdekortin
+//    automaattisesti kun uusi välilehti latautuu.
+// ════════════════════════════════════════════════════════════
+
+let _wordLinks = []; // { text, lower, cardIndex } — rakennetaan buildWordLinks():ssa
+
+function _escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+function buildWordLinks(){
+  _wordLinks = [];
+  const seen = new Set();
+  reviewCards.forEach((card, idx)=>{
+    const q = getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
+    const clean = q.replace(/<[^>]*>/g,' ').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1')
+                   .replace(/&[a-z]+;/gi,' ').replace(/\s+/g,' ').trim();
+    if(!clean || clean.length < 2) return;
+    if(clean.split(/\s+/).length > 4) return; // max 4 sanaa
+    const lower = clean.toLowerCase();
+    if(seen.has(lower)) return;
+    seen.add(lower);
+    _wordLinks.push({text:clean, lower, cardIndex:idx});
+  });
+  _wordLinks.sort((a,b)=>b.text.length - a.text.length); // pisin ensin
+}
+
+function _wrapTextNode(textNode){
+  const text = textNode.textContent;
+  const matches = [];
+  _wordLinks.forEach(link=>{
+    if(link.cardIndex === currentOverviewIndex) return;
+    const re = new RegExp('(?<![\\wäöåÄÖÅ])' + _escapeReg(link.text) + '(?![\\wäöåÄÖÅ])','gi');
+    let m;
+    while((m = re.exec(text)) !== null)
+      matches.push({start:m.index, end:m.index+m[0].length, text:m[0], cardIndex:link.cardIndex});
+  });
+  if(!matches.length) return;
+  // Lajitellaan ja poistetaan päällekkäisyydet
+  matches.sort((a,b)=>a.start-b.start||(b.end-b.start)-(a.end-a.start));
+  const filtered=[]; let lastEnd=0;
+  matches.forEach(m=>{ if(m.start>=lastEnd){ filtered.push(m); lastEnd=m.end; } });
+  // Rakennetaan DocumentFragment
+  const frag = document.createDocumentFragment();
+  let pos=0;
+  filtered.forEach(m=>{
+    if(m.start>pos) frag.appendChild(document.createTextNode(text.slice(pos,m.start)));
+    const span=document.createElement('span');
+    span.className='word-link';
+    span.dataset.cardIndex=m.cardIndex;
+    span.textContent=m.text;
+    frag.appendChild(span);
+    pos=m.end;
+  });
+  if(pos<text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+  textNode.parentNode.replaceChild(frag, textNode);
+}
+
+function applyWordLinks(element){
+  if(!_wordLinks.length||!element) return;
+  const walker=document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      let p=node.parentElement;
+      while(p&&p!==element){
+        if(p.classList&&(p.classList.contains('word-link')||p.classList.contains('cloze-blank')))
+          return NodeFilter.FILTER_REJECT;
+        p=p.parentElement;
+      }
+      return node.textContent.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodes=[];
+  let n;
+  while((n=walker.nextNode())) nodes.push(n);
+  nodes.forEach(_wrapTextNode);
+}
+
+// ─── Tooltip (desktop) ────────────────────────────────────────────────
+(function initWordLinkTooltip(){
+  const tip=document.createElement('div');
+  tip.id='word-link-tooltip';
+  document.body.appendChild(tip);
+  let hideTimer=null;
+
+  function showTip(target, idx){
+    clearTimeout(hideTimer);
+    const card=reviewCards[idx]; if(!card) return;
+    const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
+    const qc=q.replace(/<[^>]*>/g,' ').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim();
+        tip.innerHTML = [
+      '<div style="font-size:0.72rem;opacity:0.55;font-family:monospace;margin-bottom:0.3rem;">Kortti ' + (idx+1) + '</div>',
+      '<div>' + qc.slice(0,140) + (qc.length>140?'\u2026':'') + '</div>',
+      '<div style="font-size:0.68rem;opacity:0.5;margin-top:0.4rem;font-family:monospace;">klikkaa \u2192 uusi v\u00e4lilehti</div>'
+    ].join('');
+    tip.style.display='block';
+    const r=target.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight;
+    const vw=window.innerWidth, vh=window.innerHeight;
+    let l=r.left, t=r.bottom+8;
+    if(l+tw>vw-12) l=vw-tw-12;
+    if(t+th>vh-12) t=r.top-th-8;
+    tip.style.left=Math.max(8,l)+'px'; tip.style.top=Math.max(8,t)+'px';
+  }
+  function hideTip(){ hideTimer=setTimeout(()=>tip.style.display='none',150); }
+
+  document.addEventListener('mouseover',e=>{
+    const lk=e.target.closest('.word-link'); if(!lk) return;
+    const idx=parseInt(lk.dataset.cardIndex); if(isNaN(idx)) return;
+    showTip(lk,idx);
+  });
+  document.addEventListener('mouseout',e=>{
+    if(!e.target.closest('.word-link')) hideTip();
+  });
+})();
+
+// ─── Avaa linkitetty kortti uudessa välilehdessä ─────────────────────
+function openWordLinkCard(idx){
+  const card=reviewCards[idx]; if(!card) return;
+  const url=new URL(window.location.href);
+  url.searchParams.set('solukko-deck', currentDeck);
+  url.searchParams.set('solukko-card', String(card.cardId));
+  url.searchParams.set('solukko-answer', '1'); // näytä vastaus automaattisesti
+  window.open(url.toString(),'_blank');
+  document.getElementById('word-link-tooltip').style.display='none';
+}
 
 // ─── Käynnistetään sovellus ───────────────────────────────────────────
 init();
@@ -2615,6 +2778,33 @@ init();
   <!-- Poistu tietovisasta -nappi -->
   <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:\'JetBrains Mono\',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu tietovisasta</button>
 </div>
+
+<!-- SVG-suodattimet logon solukko-animaatiolle — piilotettu, käytetty CSS filter: url(#...) -->
+<svg id="logo-svg-filters" xmlns="http://www.w3.org/2000/svg"
+     style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;">
+  <defs>
+    <filter id="cell-alive" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <!-- Turbulenssi luo orgaanisen, hitaasti muuttuvan kohinakentän -->
+      <feTurbulence type="fractalNoise" baseFrequency="0.028 0.032"
+                    numOctaves="4" seed="3" result="warp">
+        <!-- Taajuus aaltoilee hitaasti → solut hengittävät -->
+        <animate attributeName="baseFrequency"
+          values="0.028 0.032;0.034 0.026;0.022 0.038;0.032 0.028;0.028 0.032"
+          dur="4s" repeatCount="indefinite"
+          calcMode="spline"
+          keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1"/>
+        <!-- Seed vaihtuu → liike ei koskaan toistu täsmälleen samanlaisena -->
+        <animate attributeName="seed"
+          values="3;9;17;6;3"
+          dur="11s" repeatCount="indefinite"
+          calcMode="discrete"/>
+      </feTurbulence>
+      <!-- Displacement siirtää pikseleitä kohinan mukaan — joka solu liikkuu eri tavalla -->
+      <feDisplacementMap in="SourceGraphic" in2="warp"
+                         scale="11" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
 
 </body>
 </html>
