@@ -340,7 +340,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 #settings-dropdown-inline.open { max-height: 300px; pointer-events: auto; opacity: 1; }
 
 /* ── 16. RESPONSIIVISUUS (MOBIILI ≤600px) ───────────────── */
-@media (max-width: 600px) {
+@media (max-width: 600px), (orientation: portrait) {
   /* Piilota pakkavalinnanäytön sivupalkki mobiilissa         */
   #review-deck-card { display: none; }
   /* Kommenttilaatikko siirtyy absolute → static (ruudun alle) */
@@ -428,8 +428,6 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
      ══════════════════════════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
-  <!-- Paikalla olevien käyttäjien lista — näytetään vain kehittäjälle -->
-  <div id="presence-list" style="width:min(448px,90vw);display:flex;flex-direction:column;align-items:center;gap:0.6rem;padding-bottom:1rem;"></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -522,6 +520,9 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
   <!-- Tietovisa: ryhmäpistelauta (piilotettu oletuksena) -->
   <div class="group-scoreboard" id="group-scoreboard"></div>
+
+  <!-- Aktiivisten käyttäjien lista — näytetään vain kehittäjälle kertaussivun alareunassa -->
+  <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;padding:1.5rem 0 0.5rem;"></div>
 </div>
 
 <!-- Piilotettu file input kuvaliitteen lisäämiseen kommenttiin -->
@@ -2143,6 +2144,8 @@ function listenToPresence(){
 function renderPresenceList(users){
   const el = document.getElementById('presence-list');
   if(!el) return;
+  // Vain kehittäjä näkee listan
+  if(!devMode){ el.style.display='none'; return; }
   el.style.display = 'flex';
   if(!users.length){ el.innerHTML = ''; return; }
 
