@@ -172,16 +172,56 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 
 /* ── 9. TUMMATILA (dark mode) ───────────────────────────── */
-/* Kaikki dark-mode-tyylit on koottu yhteen paikkaan         */
+/* Kattava tummatila: kaikki elementit tummia ruskeita, teksti valkoinen */
 body.dark-mode { background: #2b211b; color: #eadfce; }
-body.dark-mode .flashcard, body.dark-mode #card-comment, body.dark-mode .group-card, body.dark-mode .add-group-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode .card-content { color: #eadfce; }
+
+/* Kaikki valkeat/vaaleat taustat → tumma ruskea */
+body.dark-mode .flashcard,
+body.dark-mode #card-comment,
+body.dark-mode .group-card,
+body.dark-mode .add-group-btn,
+body.dark-mode .comment-box,
+body.dark-mode .comment-display,
+body.dark-mode .comment-item,
+body.dark-mode .brand-front,
+body.dark-mode .brand-back,
+body.dark-mode #back-btn-fixed,
+body.dark-mode #review-deck-card a,
+body.dark-mode .video-overlay { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+
+/* Kommenttilaatikon placeholder-teksti */
+body.dark-mode .comment-box::before { color: #9a8878; }
+
+/* Tekstit */
+body.dark-mode .card-content,
+body.dark-mode .comment-item,
+body.dark-mode .comment-display { color: #eadfce; }
 body.dark-mode .back-btn, body.dark-mode .remaining, body.dark-mode .deck-name, body.dark-mode .comment-status { color: #cbbda8; border-color: #6d5f52; }
+body.dark-mode .brand-back { color: #cbbda8; }
+
+/* Tarkista-nappi */
 body.dark-mode .show-btn { background: #eadfce; color: #2b211b; }
 body.dark-mode .answer-section { border-top-color: #6d5f52; }
-/* Cloze-kortit tummatilassa */
+
+/* Cloze-kortit */
 body.dark-mode .cloze-blank { background: #5a5148; }
 body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #35523a; color: #c9f0d0; }
+
+/* Video-overlay (alidekki-videokortit yleiskatsauksessa) */
+body.dark-mode .video-overlay { background: #3a312b !important; }
+
+/* Läsnäololista */
+body.dark-mode #presence-list span { background: #3a312b !important; border-color: #6d5f52 !important; color: #eadfce !important; }
+
+/* Kuvaaja-nappi */
+body.dark-mode .kuvaaja-btn { color: #eadfce !important; border-color: #6d5f52 !important; }
+body.dark-mode .kuvaaja-cancel { border-color: #c0392b !important; color: #c0392b !important; }
+
+/* Latausteksti */
+body.dark-mode #loading { color: #eadfce; }
+
+/* Settings dropdown timestamp pill */
+body.dark-mode #settings-dropdown-inline > div:last-child { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
 /* Oikealla sijaitseva kommenttilaatikko (avautuu klikkauksella) */
@@ -244,6 +284,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #3
 .site-brand img { width: min(120px, 20vw); height: min(120px, 20vw); object-fit: contain; }
 .brand-front span { font-family: "EB Garamond", Garamond, serif; font-size: min(5rem, 15vw); font-weight: 600; color: #56533c; letter-spacing: -0.03em; }
 body.dark-mode .brand-front span { color: #fff2cb; }
+body.dark-mode .brand-back > div { color: #eadfce !important; }
 
 /* Pieni pomppuanimaatio logokuvaaan klikkauksesta           */
 .site-brand img.logo-clicked { animation: logoClickPop 0.34s ease; }
@@ -405,7 +446,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
     <!-- Takaosa: kuvaus sivustosta (näkyy käännettyä) -->
     <div class="brand-back">
-      Pidä aivosolusi tenttikunnossa!<br>
+      <div style="font-size:2rem;font-weight:700;text-align:center;margin-bottom:0.8rem;color:#56533c;line-height:1.2;">Treenaa aivosolusi tenttikuntoon</div>
       Solukko.com on biokemian opiskelijoille suunnattu oppimissivusto, 
       jossa yliopistokurssit voi opiskella valmiiden kysymyskorttien avulla.<br>
       • Ei kirjautumista<br>
@@ -1921,7 +1962,7 @@ function makeVideoEmbed(embedUrl, name){
   // On video — overlay peittää iframen kunnes klikataan
   return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);">'
        + '<iframe src="' + embedUrl + '" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe>'
-       + '<div onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;">'
+       + '<div class="video-overlay" onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;">'
        + '<span style="'+nameStyle+'">' + name + '</span>'
        + '<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'
        + playBtn('#56533c', '80px')
