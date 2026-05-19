@@ -399,7 +399,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   /* Kommentit ja yleiskatsaus työnnetty näkymän ulkopuolelle 100svh:lla —
      käyttäjä scrollaa ylös kommentteihin, alas yleiskatsaukseen */
   .comment-area { position: static; width: 100%; margin-top: 100svh; }
-  #card-overview-grid { margin-top: 100svh; }
+  /* overview margin set dynamically by scrollToCard() */
 }
 </style>
 </head>
@@ -1125,7 +1125,7 @@ async function startDeck(deckName){
   sessionStorage.setItem('solukko-savedDeck', deckName);
 
   // Mobiilissa: scrollataan kortin kohdalle heti pakan avauduttua
-  if(window.innerWidth <= 600) setTimeout(()=>{ const fc=document.getElementById('flashcard'); if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }}, 200);
+  if(window.matchMedia('(orientation: portrait)').matches) setTimeout(scrollToCard, 200);
 
   // Päivitetään UI: piilotetaan logo, näytetään ← takaisin-nappi
   document.getElementById('site-brand').style.display='none';
@@ -1321,7 +1321,7 @@ async function renderCurrentCard(){
   selectedGroup=null; updateGroupUI(); renderCardOverview();
 
   // Mobiilissa scrollataan kortin kohdalle
-  if(window.innerWidth <= 600){ const fc=document.getElementById('flashcard'); if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }}
+  scrollToCard();
 
   // Sisääntuloanimaatio
   const fc=document.getElementById('flashcard');
@@ -1372,10 +1372,7 @@ function loadCommentForCard(){
   document.getElementById('comment-status').textContent='';
   loadFirestoreComments();
   // Mobiilissa: uudelleenscrollaa kortin kohdalle kommenttien latauksen jälkeen
-  if(window.innerWidth<=600) setTimeout(()=>{
-    const fc=document.getElementById('flashcard');
-    if(fc){ const top=fc.getBoundingClientRect().top+window.scrollY-8; window.scrollTo({top,behavior:'instant'}); }
-  }, 600);
+  if(window.matchMedia('(orientation: portrait)').matches) setTimeout(scrollToCard, 600);
 }
 
 // ─── Tallentaa kommenttitekstin localStorageen kirjoittaessa ──────────
@@ -2426,6 +2423,35 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   }
 });
 
+// ─── Keskittää kortin näkymässä ja asettaa overview-marginaalin dynaamisesti ──
+function scrollToCard(){
+  if(!window.matchMedia('(orientation: portrait)').matches) return;
+  const fc = document.getElementById('flashcard');
+  if(!fc) return;
+  const fcH = fc.offsetHeight;
+  const vpH = window.innerHeight;
+
+  // Laske scroll-kohde
+  let scrollTop;
+  if(fcH <= vpH - 32){
+    scrollTop = fc.getBoundingClientRect().top + window.scrollY - (vpH - fcH) / 2;
+  } else {
+    scrollTop = fc.getBoundingClientRect().top + window.scrollY - 8;
+  }
+  scrollTop = Math.max(0, scrollTop);
+
+  // Aseta overview-grid-marginaali niin että dekname on juuri näkymän ulkopuolella
+  const grid = document.getElementById('card-overview-grid');
+  if(grid){
+    const fcDocTop = fc.getBoundingClientRect().top + window.scrollY;
+    const viewportBottomAfterScroll = scrollTop + vpH;
+    const neededMargin = viewportBottomAfterScroll - (fcDocTop + fcH) + 24;
+    grid.style.marginTop = Math.max(16, neededMargin) + 'px';
+  }
+
+  window.scrollTo({top: scrollTop, behavior:'instant'});
+}
+
 // ════════════════════════════════════════════════════════════
 // KORTIN PYYHKIMINEN & NAPUTUS
 //    Napautetaan korttia → näytetään vastaus
@@ -2438,28 +2464,23 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   const SWIPE_THRESHOLD = 75;
   let startX = 0, dragDelta = 0, dragging = false, didSwipe = false;
 
-  // ── Kortin väritint (seuraa korttia) ────────────────────────────────
+  // ── Kortin väritint ───────────────────────────────────────────────────
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;z-index:10;transition:none;';
   fc.appendChild(overlay);
 
-  // ── Tekstitarra kortin sisällä, mutta y-akseli sidottu viewport-keskipisteeseen ─
-  // position:absolute → seuraa kortin liikettä vaakasuunnassa
-  // top lasketaan onStart():ssa → pysyy viewport-pystyakselilla
+  // ── Suorakulmainen tekstitarra (90px yläpuolella kosketuskohtaa) ────
   const stamp = document.createElement('div');
-  stamp.style.cssText = 'position:absolute;left:50%;'
-    + 'pointer-events:none;opacity:0;z-index:99999;transition:none;'
+  stamp.style.cssText = 'position:absolute;left:50%;pointer-events:none;opacity:0;z-index:99999;transition:none;'
     + 'font-family:"EB Garamond",Garamond,serif;font-weight:700;'
     + 'font-size:min(2.6rem,8vw);letter-spacing:-0.01em;padding:0.4rem 1.1rem;'
     + 'border-radius:10px;white-space:normal;text-align:center;'
     + 'max-width:75%;box-sizing:border-box;color:white;';
   fc.appendChild(stamp);
 
-  // Clamp stamp once per direction change (not every frame — avoids layout thrashing)
-  let lastStampDir = null;
+  let lastDir = null;
   function clampStamp(dir){
-    if(dir === lastStampDir) return;
-    lastStampDir = dir;
+    if(dir === lastDir) return; lastDir = dir;
     const h = stamp.offsetHeight || 60;
     const cardH = parseFloat(stamp.dataset.cardH) || fc.offsetHeight;
     const target = parseFloat(stamp.dataset.targetTop) || cardH / 2;
@@ -2468,40 +2489,29 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   }
 
   function setIndicator(delta){
-    const absD = Math.abs(delta);
-    const progress = Math.min(1, absD / SWIPE_THRESHOLD);
-    if(delta > 20){
-      overlay.style.opacity    = String(progress * 0.15);
+    if(Math.abs(delta) < 8){ clearIndicator(); return; }
+    const progress = Math.min(1, Math.abs(delta) / SWIPE_THRESHOLD);
+    overlay.style.opacity = String(progress * 0.12);
+    stamp.style.opacity = String(Math.min(0.95, progress * 1.3));
+    if(delta > 0){
       overlay.style.background = 'rgba(39,174,96,1)';
-      // box-shadow intentionally not animated (CPU repaint killer)
-      stamp.style.opacity      = String(Math.min(0.95, progress * 1.2));
-      stamp.style.background   = '#27ae60';
-      stamp.style.color        = 'white';
-      stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(-8deg)';
-      stamp.textContent        = 'Tiesin! ✓';
+      stamp.style.background = '#27ae60';
+      stamp.style.transform = 'translateX(-50%) translateY(-50%) rotate(-8deg)';
+      stamp.textContent = 'Tiesin! ✓';
       clampStamp('r');
-    } else if(delta < -20){
-      overlay.style.opacity    = String(progress * 0.15);
-      overlay.style.background = 'rgba(52,152,219,1)';
-      // box-shadow intentionally not animated (CPU repaint killer)
-      stamp.style.opacity      = String(Math.min(0.95, progress * 1.2));
-      stamp.style.background   = '#2980b9';
-      stamp.style.color        = 'white';
-      stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(8deg)';
-      stamp.textContent        = '🔄 Kysy uudestaan';
-      clampStamp('l');
     } else {
-      overlay.style.opacity    = '0';
-      overlay.style.background = 'none';
-      fc.style.boxShadow       = '';
-      stamp.style.opacity      = '0';
+      overlay.style.background = 'rgba(52,152,219,1)';
+      stamp.style.background = '#2980b9';
+      stamp.style.transform = 'translateX(-50%) translateY(-50%) rotate(8deg)';
+      stamp.textContent = '🔄 Kysy uudestaan';
+      clampStamp('l');
     }
   }
 
   function clearIndicator(){
     overlay.style.opacity = '0';
-    overlay.style.background = 'none';
     stamp.style.opacity = '0';
+    lastDir = null;
   }
 
   let startY = 0, axis = null; // 'h'=horizontal, 'v'=vertical, null=undecided
