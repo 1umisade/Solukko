@@ -98,7 +98,7 @@ const db = firebase.firestore();
 
 /* ── 1. RESET & BODY ─────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; }
+body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
 /* ── 2. VIRHEVIESTI-PALKKI ───────────────────────────────── */
 /* Näytetään jos .apkg-tiedostoa ei löydy tai se on viallinen */
@@ -203,7 +203,7 @@ body.dark-mode .answer-section { border-top-color: #6d5f52; }
 
 /* Cloze-kortit */
 body.dark-mode .cloze-blank { background: #5a5148; }
-body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #35523a; color: #c9f0d0; }
+body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: none; color: inherit; }
 
 /* Video-overlay (alidekki-videokortit yleiskatsauksessa — WITH video) */
 body.dark-mode .video-overlay { background: #3a312b !important; }
@@ -230,8 +230,8 @@ body.dark-mode #loading { color: #eadfce; }
 body.dark-mode #settings-dropdown-inline > div:last-child { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
-/* Oikealla sijaitseva kommenttilaatikko (avautuu klikkauksella) */
-.comment-area { position: absolute; left: calc(100% + var(--side-card-gap)); top: 52px; width: var(--deck-card-width, 260px); display: flex; flex-direction: column; gap: 8px; }
+/* Kommenttilaatikko — position ja koko asetetaan JS:llä (positionCommentArea) */
+.comment-area { position: absolute; display: flex; flex-direction: column; gap: 8px; }
 
 /* Kommenttilaatikko — suljettu näyttää "Jätä kommentti", auki näyttää koko placeholderin */
 .comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.4s ease; }
@@ -267,7 +267,7 @@ body.dark-mode #settings-dropdown-inline > div:last-child { background: #3a312b 
 
 /* Cloze-kortit: piilotetut ja paljastetut aukot             */
 .cloze-blank { display: inline-block; background: #e8e4db; border-radius: 4px; padding: 0 0.4em; color: transparent; min-width: 3em; }
-.cloze-answer, .cloze-answer-line { background: #d4edda; color: #1a5e2a; font-weight: 600; border-radius: 4px; padding: 0 0.35em; }
+.cloze-answer, .cloze-answer-line { background: none; color: inherit; font-weight: 700; }
 
 /* Arviointipainikkeet ("Tiesin" / "Palataan asiaan")        */
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
@@ -398,10 +398,8 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
   /* Kommentit ja yleiskatsaus työnnetty näkymän ulkopuolelle 100svh:lla —
      käyttäjä scrollaa ylös kommentteihin, alas yleiskatsaukseen */
-  /* comment-area margin-top set dynamically by scrollToCard() */
-  .comment-area { position: static; width: 100%; }
-  /* Yläpalkki pysyy näkymässä kun scrollataan ylös kommentteihin */
-  #global-topbar { position: sticky; top: 0; z-index: 1000; background: rgba(245,240,232,0.96); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); margin-bottom: 0; }
+  /* comment-area positioned by positionCommentArea() */
+
   /* overview margin set dynamically by scrollToCard() */
 }
 </style>
@@ -487,6 +485,21 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   <div class="deck-list" id="deck-list"></div>
 </div>
 
+<!-- KOMMENTTILAATIKKO — erillinen flex-elementti body-tasolla, sijoitetaan JS:llä -->
+<div class="comment-area" style="display:none">
+  <div class="comment-box" id="comment-box">
+    <textarea id="card-comment"
+      placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla"></textarea>
+    <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
+    <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
+    <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
+    <div class="comment-status" id="comment-status"></div>
+  </div>
+  <div id="buzzer-display" style="display:none;flex-direction:column;gap:6px;"></div>
+  <div class="comment-display" id="comment-display"></div>
+  <div class="comment-feed" id="comment-feed"></div>
+</div>
+
 <!-- ══════════════════════════════════════════════════════════
      KORTTIRUUTU (#card-screen)
      Näytetään kun pakka on valittu. Sisältää:
@@ -503,33 +516,6 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   <!-- Korttilaskuri: esim. "Kortti 3 / 24" -->
   <div class="top-bar">
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
-  </div>
-
-  <!-- KOMMENTTILAATIKKO (oikealla / mobiilissa alla)
-       Suljettu = "Jätä kommentti" -teksti
-       Auki = textarea + lähetysnappi + Firestore-kommentit alla -->
-  <div class="comment-area">
-
-    <!-- Kommenttilomake (avautuu klikkauksesta) -->
-    <div class="comment-box" id="comment-box">
-      <textarea id="card-comment"
-        placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla"></textarea>
-      <!-- Vihreä lähetysnappi (✓) -->
-      <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
-      <!-- Kuvaliite-nappi (📷) — piilotettu, avautuu .open-tilassa -->
-      <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
-      <!-- Esikatselukuva liitteelle -->
-      <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
-      <!-- Lähetyksen tilaviesti ("Lähetetty!" tms.) -->
-      <div class="comment-status" id="comment-status"></div>
-    </div>
-
-    <!-- Tietovisa-buzzerien listaus (vain kehittäjätilassa näkyvä) -->
-    <div id="buzzer-display" style="display:none;flex-direction:column;gap:6px;"></div>
-
-    <!-- Aiempien Firestore-kommenttien näyttöalue -->
-    <div class="comment-display" id="comment-display"></div>
-    <div class="comment-feed" id="comment-feed"></div>
   </div>
 
   <!-- FLASHCARD — itse kortti
@@ -1134,6 +1120,7 @@ async function startDeck(deckName){
   document.getElementById('site-brand').style.display='none';
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='block';
+  document.querySelector('.comment-area').style.display='flex';
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
 }
@@ -1322,6 +1309,7 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
 
   selectedGroup=null; updateGroupUI(); renderCardOverview();
+  positionCommentArea();
 
   // Mobiilissa scrollataan kortin kohdalle
   scrollToCard();
@@ -2368,6 +2356,7 @@ function showDecks(){
   document.getElementById('site-brand').style.display='';
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
+  document.querySelector('.comment-area').style.display='none';
   document.body.classList.remove('reviewing');
   // Nollataan pisteet
   groups.forEach(g=>g.score=0); selectedGroup=null;
@@ -2426,53 +2415,55 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   }
 });
 
-// ─── Keskittää kortin näkymässä ja asettaa overview-marginaalin dynaamisesti ──
+// ─── Sijoittaa kommenttilaatikon (riippumaton kortti-screenistä) ──────
+function positionCommentArea(){
+  const ca = document.querySelector('.comment-area');
+  const cs = document.getElementById('card-screen');
+  if(!ca || !cs || cs.style.display === 'none') return;
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+  if(isPortrait){
+    const csRect = cs.getBoundingClientRect();
+    ca.style.width = csRect.width + 'px';
+    ca.style.left  = (csRect.left + window.scrollX) + 'px';
+    ca.style.transform = 'none';
+  } else {
+    const csRect = cs.getBoundingClientRect();
+    const w = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--deck-card-width')) || 260;
+    ca.style.width = w + 'px';
+    ca.style.left  = (csRect.right + window.scrollX + 50) + 'px';
+    ca.style.top   = (csRect.top + window.scrollY + 52) + 'px';
+    ca.style.transform = 'none';
+  }
+}
+window.addEventListener('resize', positionCommentArea);
+
+// ─── Scrollaa kortti näkymän keskelle — kommentit juuri yläpuolella ──
 function scrollToCard(){
-  if(!window.matchMedia('(orientation: portrait)').matches) return;
+  if(!window.matchMedia('(orientation: portrait)').matches){ positionCommentArea(); return; }
   const fc = document.getElementById('flashcard');
   if(!fc) return;
-  const fcH = fc.offsetHeight;
   const vpH = window.innerHeight;
+  const fcH = fc.offsetHeight;
+  const fcDocTop = fc.getBoundingClientRect().top + window.scrollY;
 
-  // Laske scroll-kohde
-  let scrollTop;
-  if(fcH <= vpH - 32){
-    scrollTop = fc.getBoundingClientRect().top + window.scrollY - (vpH - fcH) / 2;
-  } else {
-    scrollTop = fc.getBoundingClientRect().top + window.scrollY - 8;
-  }
-  scrollTop = Math.max(0, scrollTop);
+  const scrollTop = Math.max(0, fcDocTop - (vpH - fcH) / 2);
 
-  // Overview: deckname juuri näkymän alareunan ulkopuolella
   const grid = document.getElementById('card-overview-grid');
   if(grid){
-    const fcDocTop = fc.getBoundingClientRect().top + window.scrollY;
-    const viewportBottomAfterScroll = scrollTop + vpH;
-    const neededMargin = viewportBottomAfterScroll - (fcDocTop + fcH) + 24;
+    const neededMargin = (scrollTop + vpH) - (fcDocTop + fcH) + 24;
     grid.style.marginTop = Math.max(16, neededMargin) + 'px';
   }
 
-  // Kommentit: juuri näkymän yläreunan ulkopuolella (käyttäjä scrollaa ylös nähdäkseen)
-  const commentArea = document.querySelector('.comment-area');
-  if(commentArea){
-    const cardScreen = document.getElementById('card-screen');
-    const csDocTop = cardScreen ? cardScreen.getBoundingClientRect().top + window.scrollY : 0;
-    const commentH = commentArea.offsetHeight;
-    // Kommenttialueen alareunan pitää olla 24px yläpuolella viewport-yläreunaa
-    const neededCommentMargin = scrollTop - 24 - csDocTop - commentH;
-    commentArea.style.marginTop = Math.max(0, neededCommentMargin) + 'px';
+  const ca = document.querySelector('.comment-area');
+  if(ca){
+    positionCommentArea();
+    ca.style.top = (scrollTop - 24 - ca.offsetHeight) + 'px';
   }
 
   window.scrollTo({top: scrollTop, behavior:'instant'});
 }
 
-// ════════════════════════════════════════════════════════════
-// KORTIN PYYHKIMINEN & NAPUTUS
-//    Napautetaan korttia → näytetään vastaus
-//    Pyyhitään oikealle → Tiesin! (gradeCard(true))
-//    Pyyhitään vasemmalle → Palataan asiaan (gradeCard(false))
-//    Näppäimistö: → = tiesin, ← = ei tiedetty, välilyönti = näytä vastaus
-// ════════════════════════════════════════════════════════════
+
 (function initSwipeAndTap(){
   const fc = document.getElementById('flashcard');
   const SWIPE_THRESHOLD = 75;
