@@ -1034,15 +1034,10 @@ let _playingDeckVideo = null;
     },{passive:true});
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
+    // Seek to 0.001s after metadata loads — forces browser to decode & paint the first frame
+    // without actually playing the video. Fixes the black-card problem on mobile.
+    video.addEventListener('loadedmetadata', ()=>{ video.currentTime = 0.001; }, { once: true });
   });
-
-  // Muotokuvatilassa (portrait) yritetään käynnistää kaikki videot heti
-  // Selaimet sallivat muted+playsinline autoplayn ilman käyttäjän elettä
-  if(window.matchMedia('(orientation: portrait)').matches){
-    setTimeout(()=>{
-      document.querySelectorAll('#deck-list .deck-video').forEach(v=>v.play().catch(()=>{}));
-    }, 150);
-  }
 
   hide('card-screen');
 
