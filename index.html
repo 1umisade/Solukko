@@ -230,8 +230,8 @@ body.dark-mode #loading { color: #eadfce; }
 body.dark-mode #settings-dropdown-inline > div:last-child { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
-/* Kommenttilaatikko — position ja koko asetetaan JS:llä (positionCommentArea) */
-.comment-area { position: absolute; display: flex; flex-direction: column; gap: 8px; }
+/* Kommenttilaatikko — portreetti: normaali flow; desktop: JS sijoittaa oikealle */
+.comment-area { display: flex; flex-direction: column; gap: 8px; }
 
 /* Kommenttilaatikko — suljettu näyttää "Jätä kommentti", auki näyttää koko placeholderin */
 .comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.4s ease; }
@@ -398,7 +398,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
   /* Kommentit ja yleiskatsaus työnnetty näkymän ulkopuolelle 100svh:lla —
      käyttäjä scrollaa ylös kommentteihin, alas yleiskatsaukseen */
-  /* comment-area positioned by positionCommentArea() */
+  .comment-area { position: static; width: 100%; }
 
   /* overview margin set dynamically by scrollToCard() */
 }
@@ -1311,7 +1311,7 @@ async function renderCurrentCard(){
   selectedGroup=null; updateGroupUI(); renderCardOverview();
 
   // Mobiilissa scrollataan kortin kohdalle — RAF odottaa layoutin valmistumisen
-  requestAnimationFrame(()=>requestAnimationFrame(scrollToCard));
+  requestAnimationFrame(scrollToCard);
 
   // Sisääntuloanimaatio
   const fc=document.getElementById('flashcard');
@@ -2414,56 +2414,44 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   }
 });
 
-// ─── Sijoittaa kommenttilaatikon (riippumaton kortti-screenistä) ──────
+// ─── Sijoittaa kommenttilaatikon (desktop: oikealle; portreetti: normaali flow) ──
 function positionCommentArea(){
-  const ca = document.querySelector('.comment-area');
-  const cs = document.getElementById('card-screen');
-  if(!ca || !cs || cs.style.display === 'none') return;
-  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-  if(isPortrait){
-    const csRect = cs.getBoundingClientRect();
-    ca.style.width = csRect.width + 'px';
-    ca.style.left  = (csRect.left + window.scrollX) + 'px';
-    ca.style.transform = 'none';
+  const ca=document.querySelector('.comment-area');
+  const cs=document.getElementById('card-screen');
+  if(!ca||!cs||cs.style.display==='none') return;
+  if(window.matchMedia('(orientation: portrait)').matches){
+    ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform='';
   } else {
-    const csRect = cs.getBoundingClientRect();
-    const w = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--deck-card-width')) || 260;
-    ca.style.width = w + 'px';
-    ca.style.left  = (csRect.right + window.scrollX + 50) + 'px';
-    ca.style.top   = (csRect.top + window.scrollY + 52) + 'px';
-    ca.style.transform = 'none';
+    const csRect=cs.getBoundingClientRect();
+    const w=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--deck-card-width'))||260;
+    ca.style.position='absolute'; ca.style.width=w+'px';
+    ca.style.left=(csRect.right+window.scrollX+50)+'px';
+    ca.style.top=(csRect.top+window.scrollY+52)+'px';
+    ca.style.transform='';
   }
 }
 window.addEventListener('resize', positionCommentArea);
 
-// ─── Scrollaa kortti näkymän keskelle — kommentit juuri yläpuolella ──
+// ─── Scrollaa kortti keskelle — topbar+kommentit juuri näkymän yläpuolella ──
+// card-screen.marginTop säädetään niin että:
+//   • kortti on täsmälleen näkymän pystysuuntaisessa keskessä
+//   • topbar + kommentit laskeutuvat täsmälleen 24px näkymän yläreunan yläpuolelle
+// (Sama periaate kuin yleiskatsausruudukossa: marginaali "puskee" sisällön ulos näkymästä)
 function scrollToCard(){
   if(!window.matchMedia('(orientation: portrait)').matches){ positionCommentArea(); return; }
-  const fc = document.getElementById('flashcard');
-  if(!fc) return;
-  const vpH = window.innerHeight;
-  const fcH = fc.offsetHeight;
-  const fcDocTop = fc.getBoundingClientRect().top + window.scrollY;
-
-  const scrollTop = Math.max(0, fcDocTop - (vpH - fcH) / 2);
-
-  const grid = document.getElementById('card-overview-grid');
-  if(grid){
-    const neededMargin = (scrollTop + vpH) - (fcDocTop + fcH) + 24;
-    grid.style.marginTop = Math.max(16, neededMargin) + 'px';
-  }
-
-  const ca = document.querySelector('.comment-area');
-  if(ca){
-    ca.style.visibility = 'hidden'; // hide during reposition to prevent flash
-    positionCommentArea();
-    ca.style.top = (scrollTop - 24 - ca.offsetHeight) + 'px';
-    requestAnimationFrame(()=>{ ca.style.visibility = 'visible'; });
-  }
-
-  window.scrollTo({top: scrollTop, behavior:'instant'});
+  const fc=document.getElementById('flashcard');
+  const cs=document.getElementById('card-screen');
+  if(!fc||!cs) return;
+  positionCommentArea();
+  const vpH=window.innerHeight, fcH=fc.offsetHeight;
+  const fcOffsetInCS=fc.getBoundingClientRect().top-cs.getBoundingClientRect().top;
+  cs.style.marginTop=Math.max(0,(vpH-fcH)/2-fcOffsetInCS+24)+'px';
+  const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
+  const scrollTop=Math.max(0,fcDocTop-(vpH-fcH)/2);
+  const grid=document.getElementById('card-overview-grid');
+  if(grid){ grid.style.marginTop=Math.max(16,(scrollTop+vpH)-(fcDocTop+fcH)+24)+'px'; }
+  window.scrollTo({top:scrollTop,behavior:'instant'});
 }
-
 
 (function initSwipeAndTap(){
   const fc = document.getElementById('flashcard');
