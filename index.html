@@ -2455,6 +2455,15 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
     + 'max-width:75%;box-sizing:border-box;color:white;';
   fc.appendChild(stamp);
 
+  // Clamp stamp top so it never spills outside the card vertically
+  function clampStamp(){
+    const h = stamp.offsetHeight || 60;
+    const cardH = parseFloat(stamp.dataset.cardH) || fc.offsetHeight;
+    const target = parseFloat(stamp.dataset.targetTop) || cardH / 2;
+    const margin = h / 2 + 10;
+    stamp.style.top = Math.max(margin, Math.min(cardH - margin, target)) + 'px';
+  }
+
   function setIndicator(delta){
     const absD = Math.abs(delta);
     const progress = Math.min(1, absD / SWIPE_THRESHOLD);
@@ -2467,6 +2476,7 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
       stamp.style.color        = 'white';
       stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(-8deg)';
       stamp.textContent        = 'Tiesin! ✓';
+      clampStamp();
     } else if(delta < -20){
       overlay.style.opacity    = String(progress * 0.15);
       overlay.style.background = 'rgba(52,152,219,1)';
@@ -2476,6 +2486,7 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
       stamp.style.color        = 'white';
       stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(8deg)';
       stamp.textContent        = '🔄 Kysy uudestaan';
+      clampStamp();
     } else {
       overlay.style.opacity    = '0';
       overlay.style.background = 'none';
@@ -2500,13 +2511,14 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
     startX = x; startY = y; dragDelta = 0; dragging = true; didSwipe = false; axis = null;
     fc.style.transition = 'none';
     overlay.style.transition = 'none';
-    // Mobile (touch): stamp at viewport vertical center; Desktop (mouse): stamp at card center
-    if(isTouch){
-      const rect = fc.getBoundingClientRect();
-      stamp.style.top = (window.innerHeight / 2 - rect.top) + 'px';
-    } else {
-      stamp.style.top = '50%';
-    }
+    // Position stamp: aim for viewport vertical centre on touch, card centre on mouse.
+    // Clamp so the stamp never exceeds the card bounds regardless.
+    const rect = fc.getBoundingClientRect();
+    const targetTop = isTouch ? (window.innerHeight / 2 - rect.top) : (rect.height / 2);
+    // Clamp is applied again in setIndicator once we know the stamp's rendered height.
+    stamp.dataset.targetTop = targetTop;
+    stamp.dataset.cardH     = rect.height;
+    stamp.style.top = targetTop + 'px';
   }
   function onMove(x, y, event){
     if(!dragging) return;
