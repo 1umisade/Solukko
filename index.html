@@ -398,7 +398,10 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
   /* Kommentit ja yleiskatsaus työnnetty näkymän ulkopuolelle 100svh:lla —
      käyttäjä scrollaa ylös kommentteihin, alas yleiskatsaukseen */
-  .comment-area { position: static; width: 100%; margin-top: 100svh; }
+  /* comment-area margin-top set dynamically by scrollToCard() */
+  .comment-area { position: static; width: 100%; }
+  /* Yläpalkki pysyy näkymässä kun scrollataan ylös kommentteihin */
+  #global-topbar { position: sticky; top: 0; z-index: 1000; background: rgba(245,240,232,0.96); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); margin-bottom: 0; }
   /* overview margin set dynamically by scrollToCard() */
 }
 </style>
@@ -2440,13 +2443,24 @@ function scrollToCard(){
   }
   scrollTop = Math.max(0, scrollTop);
 
-  // Aseta overview-grid-marginaali niin että dekname on juuri näkymän ulkopuolella
+  // Overview: deckname juuri näkymän alareunan ulkopuolella
   const grid = document.getElementById('card-overview-grid');
   if(grid){
     const fcDocTop = fc.getBoundingClientRect().top + window.scrollY;
     const viewportBottomAfterScroll = scrollTop + vpH;
     const neededMargin = viewportBottomAfterScroll - (fcDocTop + fcH) + 24;
     grid.style.marginTop = Math.max(16, neededMargin) + 'px';
+  }
+
+  // Kommentit: juuri näkymän yläreunan ulkopuolella (käyttäjä scrollaa ylös nähdäkseen)
+  const commentArea = document.querySelector('.comment-area');
+  if(commentArea){
+    const cardScreen = document.getElementById('card-screen');
+    const csDocTop = cardScreen ? cardScreen.getBoundingClientRect().top + window.scrollY : 0;
+    const commentH = commentArea.offsetHeight;
+    // Kommenttialueen alareunan pitää olla 24px yläpuolella viewport-yläreunaa
+    const neededCommentMargin = scrollTop - 24 - csDocTop - commentH;
+    commentArea.style.marginTop = Math.max(0, neededCommentMargin) + 'px';
   }
 
   window.scrollTo({top: scrollTop, behavior:'instant'});
