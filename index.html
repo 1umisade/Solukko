@@ -108,7 +108,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 
 /* ── 3. PAKKAVALINNANÄYTTÖ ───────────────────────────────── */
 /* #deck-screen: koko lista pakkakorteista etusivulla          */
-#deck-screen { width: 100%; display: none; justify-content: center; align-items: flex-start; padding-top: 1.5rem; }
+#deck-screen { width: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 1.5rem; gap: 2rem; }
 .deck-list { display: flex; flex-direction: column; gap: 24px; flex-wrap: nowrap; justify-content: center; align-items: center; }
 
 /* Yksittäinen pakkakortti — video-taustainen nappi           */
@@ -428,6 +428,8 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
      ══════════════════════════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
+  <!-- Paikalla olevien käyttäjien lista — näytetään vain kehittäjälle -->
+  <div id="presence-list" style="width:min(448px,90vw);display:none;flex-direction:column;align-items:center;gap:0.6rem;padding-bottom:1rem;"></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -679,6 +681,7 @@ function toggleDevModeFromSwitch(){
     endGameSession(); // ilmoitetaan kaikille Tietovisa-pelaajille pelin päättymisestä
   }
   if(currentCard) loadFirestoreComments();
+  listenToPresence(); // päivitetään läsnäololista välittömästi
 }
 
 
@@ -2026,12 +2029,15 @@ function updateKuvaajaBtnState(btn, state){
       xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); };
     }
   } else if(state==='taken'){
-    // Joku muu varasi — harmaa, ei nappeja
+    // Joku muu varasi — harmaa; devMode voi silti näyttää X-napin
     btn.innerHTML = 'Joku on ilmoittautunut kuvaamaan tämän luennon';
     btn.style.background='none'; btn.style.color='#b0a898';
     btn.style.border='1px solid #d4cec4'; btn.style.cursor='default';
     btn.onclick=null;
-    if(xBtn) xBtn.style.display='none';
+    if(xBtn){
+      if(devMode){ xBtn.style.display='flex'; xBtn.style.alignItems='center'; xBtn.style.justifyContent='center'; xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); }; }
+      else { xBtn.style.display='none'; }
+    }
   } else {
     // Vapaana — neutraali ulkoasu, ei vielä vihreä
     btn.innerHTML = '&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi';
@@ -2065,12 +2071,71 @@ function ilmoittauduKuvaajaksi(btn, name){
 function peruutaKuvaaja(name){
   const uid = getUserId();
   db.collection('kuvaajat').doc(name).get().then(doc=>{
-    // Varmistetaan että vain oma ilmoittautuminen voidaan peruuttaa
-    if(doc.exists && doc.data().userId===uid){
+    // DevMode ohittaa omistajatarkistuksen — dev voi peruuttaa kenen tahansa ilmoittautumisen
+    if(doc.exists && (doc.data().userId===uid || devMode)){
       db.collection('kuvaajat').doc(name).delete().catch(()=>{});
       // onSnapshot päivittää napin automaattisesti takaisin 'unclaimed'-tilaan
     }
   }).catch(()=>{});
+}
+
+
+// ════════════════════════════════════════════════════════════
+// KÄYTTÄJÄLÄSNÄOLO (PRESENCE)
+//    initPresence()       — kirjoittaa oman läsnäolon Firestoreen
+//    listenToPresence()   — kuuntelee kaikki aktiiviset käyttäjät
+//    renderPresenceList() — renderöi listan etusivun alaosaan (vain dev)
+//    Firestore-kokoelma: "presence" { userId, word, lastSeen }
+//    Käyttäjä "näkyy" jos lastSeen < 5 min sitten
+// ════════════════════════════════════════════════════════════
+
+function initPresence(){
+  const uid = getUserId();
+  const word = getUserWord();
+  const ref = db.collection('presence').doc(uid);
+  // Kirjoitetaan oma läsnäolo heti
+  ref.set({ userId: uid, word, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+  // Päivitetään minuutin välein
+  setInterval(()=>{
+    ref.set({ userId: uid, word, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(()=>{});
+  }, 60000);
+  // Poistetaan läsnäolo kun sivu suljetaan
+  window.addEventListener('beforeunload', ()=>{ ref.delete().catch(()=>{}); });
+  // Kuunnellaan kaikkien läsnäoloa
+  listenToPresence();
+}
+
+function listenToPresence(){
+  db.collection('presence').onSnapshot(snap=>{
+    const now = Date.now();
+    const users = [];
+    snap.forEach(doc=>{
+      const d = doc.data();
+      const lastSeen = d.lastSeen?.toMillis?.() || 0;
+      if(now - lastSeen < 5 * 60 * 1000) users.push(d.word || d.userId);
+    });
+    renderPresenceList(users);
+  }, ()=>{});
+}
+
+function renderPresenceList(users){
+  const el = document.getElementById('presence-list');
+  if(!el) return;
+  // Läsnäololista näkyy vain kehittäjälle
+  if(!devMode){ el.style.display='none'; return; }
+  el.style.display = 'flex';
+  if(!users.length){
+    el.innerHTML = '<span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#b0a898;">Ei aktiivisia käyttäjiä</span>';
+    return;
+  }
+  el.innerHTML =
+    '<span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt (' + users.length + ')</span>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'
+    + users.map(w =>
+        '<span style="background:#fffef9;border:1px solid #d4cec4;border-radius:999px;padding:0.22rem 0.75rem;'
+        + 'font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#56533c;">' + w + '</span>'
+      ).join('')
+    + '</div>';
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2214,6 +2279,7 @@ applyDarkMode();
 applyDevMode();
 updateGroupUI();
 updateOverviewVisibility();
+initPresence(); // aloitetaan käyttäjäläsnäolon seuranta
 
 // ─── Kuunnellaan kehittäjä-omistajuuden muutoksia Firestoresta ───────
 // Tietovisa-toggle näytetään kaikille kun kehittäjä on aktiivinen.
