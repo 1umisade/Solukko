@@ -1309,10 +1309,9 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
 
   selectedGroup=null; updateGroupUI(); renderCardOverview();
-  positionCommentArea();
 
-  // Mobiilissa scrollataan kortin kohdalle
-  scrollToCard();
+  // Mobiilissa scrollataan kortin kohdalle — RAF odottaa layoutin valmistumisen
+  requestAnimationFrame(()=>requestAnimationFrame(scrollToCard));
 
   // Sisääntuloanimaatio
   const fc=document.getElementById('flashcard');
@@ -2456,8 +2455,10 @@ function scrollToCard(){
 
   const ca = document.querySelector('.comment-area');
   if(ca){
+    ca.style.visibility = 'hidden'; // hide during reposition to prevent flash
     positionCommentArea();
     ca.style.top = (scrollTop - 24 - ca.offsetHeight) + 'px';
+    requestAnimationFrame(()=>{ ca.style.visibility = 'visible'; });
   }
 
   window.scrollTo({top: scrollTop, behavior:'instant'});
