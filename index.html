@@ -207,8 +207,15 @@ body.dark-mode .answer-section { border-top-color: #6d5f52; }
 body.dark-mode .cloze-blank { background: #5a5148; }
 body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: #35523a; color: #c9f0d0; }
 
-/* Video-overlay (alidekki-videokortit yleiskatsauksessa) */
+/* Video-overlay (alidekki-videokortit yleiskatsauksessa — WITH video) */
 body.dark-mode .video-overlay { background: #3a312b !important; }
+/* Video-cover (alidekki-videokortit — NO video / placeholder) */
+body.dark-mode .video-cover { background: #3a312b !important; border-color: #6d5f52 !important; }
+body.dark-mode .video-cover > span { color: #eadfce !important; }
+/* ← Takaisin-nappi */
+body.dark-mode #back-btn-fixed { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
+/* Solukko-logo-nappi (settings dropdown trigger) */
+body.dark-mode #gear-btn-wrap > button { background: #3a312b !important; border-color: #6d5f52 !important; }
 
 /* Läsnäololista */
 body.dark-mode #presence-list span { background: #3a312b !important; border-color: #6d5f52 !important; color: #eadfce !important; }
@@ -446,7 +453,7 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
     <!-- Takaosa: kuvaus sivustosta (näkyy käännettyä) -->
     <div class="brand-back">
-      <div style="font-size:2rem;font-weight:700;text-align:center;margin-bottom:0.8rem;color:#56533c;line-height:1.2;">Treenaa aivosolusi tenttikuntoon</div>
+      <div style="font-size:2rem;font-weight:700;text-align:center;margin-bottom:0.8rem;color:#56533c;line-height:1.2;">Treenaa aivosolusi tenttikuntoon!</div>
       Solukko.com on biokemian opiskelijoille suunnattu oppimissivusto, 
       jossa yliopistokurssit voi opiskella valmiiden kysymyskorttien avulla.<br>
       • Ei kirjautumista<br>
@@ -1945,7 +1952,7 @@ function makeVideoEmbed(embedUrl, name){
   if(!embedUrl){
     // Ei videota — nimi tumma, soitonnappi + tekstit harmaita, kuvaaja-nappi vihreä
     var safeId = name.replace(/[^a-zA-Z0-9\u00C0-\u024F\s\-]/g, '').trim();
-    return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.1rem;">'
+    return '<div class="video-cover" style="width:100%;aspect-ratio:16/9;border-radius:16px;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.1rem;">'
          + '<span style="'+nameStyle+'">' + name + '</span>'
          + '<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'
          + playBtn('#c8c0b4', '80px')
