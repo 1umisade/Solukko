@@ -155,7 +155,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; }
 
 /* Itse flashcard-kortti — klikkaamalla näytetään vastaus     */
-.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y; }
+.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: none; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
 .answer-section .card-content { text-align: left; }
@@ -2454,8 +2454,11 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
     + 'max-width:75%;box-sizing:border-box;color:white;';
   fc.appendChild(stamp);
 
-  // Clamp stamp top so it never spills outside the card vertically
-  function clampStamp(){
+  // Clamp stamp once per direction change (not every frame — avoids layout thrashing)
+  let lastStampDir = null;
+  function clampStamp(dir){
+    if(dir === lastStampDir) return;
+    lastStampDir = dir;
     const h = stamp.offsetHeight || 60;
     const cardH = parseFloat(stamp.dataset.cardH) || fc.offsetHeight;
     const target = parseFloat(stamp.dataset.targetTop) || cardH / 2;
@@ -2475,7 +2478,7 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
       stamp.style.color        = 'white';
       stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(-8deg)';
       stamp.textContent        = 'Tiesin! ✓';
-      clampStamp();
+      clampStamp('r');
     } else if(delta < -20){
       overlay.style.opacity    = String(progress * 0.15);
       overlay.style.background = 'rgba(52,152,219,1)';
@@ -2485,7 +2488,7 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
       stamp.style.color        = 'white';
       stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(8deg)';
       stamp.textContent        = '🔄 Kysy uudestaan';
-      clampStamp();
+      clampStamp('l');
     } else {
       overlay.style.opacity    = '0';
       overlay.style.background = 'none';
@@ -2539,7 +2542,7 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   }
   function onEnd(){
     if(!dragging) return;
-    dragging = false; axis = null;
+    dragging = false; axis = null; lastStampDir = null;
     fc.style.transition = 'transform 0.25s ease, box-shadow 0.25s ease';
     overlay.style.transition = 'opacity 0.2s ease';
     fc.style.transform = '';
