@@ -151,8 +151,11 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 /* Korttien laskuri ja pakan nimi yläpalkissa                 */
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 
+/* Kuvat flashcard-kortin sisällä eivät saa kaapata touch/drag-tapahtumia */
+.flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; }
+
 /* Itse flashcard-kortti — klikkaamalla näytetään vastaus     */
-.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; }
+.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
 .answer-section .card-content { text-align: left; }
@@ -309,7 +312,7 @@ body.dark-mode .deck-header-code  { color: #cbbda8; }
 
 /* ── 12. KORTTIEN YLEISKATSAUSRUUDUKKO (OVERVIEW GRID) ─── */
 /* Näyttää kaikki pakan kortit pienenä ruudukkona            */
-#card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 1.1rem; margin-top: 10rem; }
+#card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 1.1rem; margin-top: 12rem; }
 .overview-section { width: 100%; }
 
 /* Alidekkin nimi (otsikko ruudukon yläpuolella)             */
@@ -2447,8 +2450,8 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   stamp.style.cssText = 'position:absolute;left:50%;'
     + 'pointer-events:none;opacity:0;z-index:99999;transition:none;'
     + 'font-family:"EB Garamond",Garamond,serif;font-weight:700;'
-    + 'font-size:min(3.5rem,11vw);letter-spacing:-0.01em;padding:0.4rem 1.2rem;'
-    + 'border-radius:10px;border:5px solid;white-space:nowrap;';
+    + 'font-size:min(3.5rem,11vw);letter-spacing:-0.01em;padding:0.45rem 1.3rem;'
+    + 'border-radius:10px;white-space:nowrap;color:white;';
   fc.appendChild(stamp);
 
   function setIndicator(delta){
@@ -2459,8 +2462,8 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
       overlay.style.background = 'rgba(39,174,96,1)';
       fc.style.boxShadow       = '0 0 '+(progress*50)+'px rgba(39,174,96,'+(progress*0.7)+'), 0 8px 32px rgba(0,0,0,0.11)';
       stamp.style.opacity      = String(Math.min(0.95, progress * 1.2));
-      stamp.style.color        = '#27ae60';
-      stamp.style.borderColor  = '#27ae60';
+      stamp.style.background   = '#27ae60';
+      stamp.style.color        = 'white';
       stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(-8deg)';
       stamp.textContent        = 'Tiesin! ✓';
     } else if(delta < -20){
@@ -2468,8 +2471,8 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
       overlay.style.background = 'rgba(52,152,219,1)';
       fc.style.boxShadow       = '0 0 '+(progress*50)+'px rgba(52,152,219,'+(progress*0.7)+'), 0 8px 32px rgba(0,0,0,0.11)';
       stamp.style.opacity      = String(Math.min(0.95, progress * 1.2));
-      stamp.style.color        = '#2980b9';
-      stamp.style.borderColor  = '#2980b9';
+      stamp.style.background   = '#2980b9';
+      stamp.style.color        = 'white';
       stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(8deg)';
       stamp.textContent        = '🔄 Kysy uudestaan';
     } else {
