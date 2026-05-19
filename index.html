@@ -361,15 +361,12 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
      ══════════════════════════════════════════════════════════ -->
 <div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
 
-  <!-- ← Takaisin pakkavalintaan (piilotettu etusivulla) -->
-  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
-
   <!-- Väli logon ja gear-napin välissä -->
   <div style="flex:1"></div>
 
   <!-- ⚙ Asetukset-nappi + sen alla avautuva dropdown       -->
   <div id="gear-btn-wrap" style="position:relative;display:none;">
-    <button onclick="toggleSettingsMenu()" style="width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);">⚙</button>
+    <button onclick="toggleSettingsMenu()" style="width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;"><img src="solukkologo22.png" alt="Solukko" style="width:30px;height:30px;object-fit:contain;"></button>
 
     <!-- Dropdown: togglet Tietovisa / Tummatila / Kehittäjätila + kellonaika -->
     <div id="settings-dropdown-inline" style="position:absolute;top:58px;right:0;z-index:9999;">
@@ -589,6 +586,7 @@ let coinAnimating=false;     // estetään moninkertaista klikkausta kolikkoanim
 
 // ─── Firestore-kuuntelijat (unsubscribe-funktiot talteen siivoomista varten) ─
 let commentsUnsubscribe=null;
+let kuvaajatUnsubscribe=null;  // kuvaaja-ilmoittautumisten reaaliaikakuuntelu
 
 
 // ════════════════════════════════════════════════════════════
@@ -1076,7 +1074,6 @@ async function startDeck(deckName){
 
   // Päivitetään UI: piilotetaan logo, näytetään ← takaisin-nappi
   document.getElementById('site-brand').style.display='none';
-  document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='block';
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
@@ -1173,7 +1170,7 @@ function renderReviewDeckCard(deckName){
     </button>
     <a href="${moodleLink}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.5rem 0.8rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;width:100%;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
       <img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:5px;">
-      Avaa Moodlessa
+      Tarkista tenttiajankohdat Moodlesta
     </a>`;
   const btn=box.querySelector('.deck-btn'),video=box.querySelector('video');
   if(btn&&video){
@@ -1879,15 +1876,48 @@ function getYouTubeEmbedUrl(url){
 }
 
 // ─── Rakentaa YouTube-iframe-upotuksen HTML:n ─────────────────────────
-// Sisältää "katso luento"-placeholder, joka poistetaan klikkauksen jälkeen
-function makeVideoEmbed(embedUrl){
-  return `<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);">
-    <iframe src="${embedUrl}" style="width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe>
-    <div onclick="this.previousElementSibling.src=this.previousElementSibling.src+'&autoplay=1';this.style.display='none';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:0.8rem;border-radius:16px;">
-      <span style="font-family:'EB Garamond',Garamond,serif;font-size:min(2.2rem,7vw);font-weight:600;color:#56533c;letter-spacing:-0.02em;">Katso luento</span>
-      <span style="font-size:2.2rem;line-height:1;color:#56533c;">▶</span>
-    </div>
-  </div>`;
+// Asettelu: alidekkin nimi yläosassa, ympyröity soitonnappi keskellä.
+// Ilman videota: myös "ei saatavilla"-teksti + vihreä kuvaaja-ilmo-nappi alhaalla.
+function makeVideoEmbed(embedUrl, name){
+  // CSS-ympyrä ympärillä ▶ — tumma tai harmaa
+  var playBtn = function(color, size){
+    size = size || '72px';
+    return '<div style="width:'+size+';height:'+size+';border-radius:50%;border:3px solid '+color+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+         + '<span style="font-size:2rem;color:'+color+';margin-left:6px;">&#9654;</span>'
+         + '</div>';
+  };
+
+  // Jaettu yläosa (nimi + soitonnappi) — käytetään molemmissa haaroissa
+  var nameStyle = 'font-family:\'EB Garamond\',Garamond,serif;font-size:min(1.9rem,6vw);font-weight:600;color:#56533c;letter-spacing:-0.02em;text-align:center;';
+
+  if(!embedUrl){
+    // Ei videota — nimi tumma, soitonnappi + tekstit harmaita, kuvaaja-nappi vihreä
+    var safeId = name.replace(/[^a-zA-Z0-9\u00C0-\u024F\s\-]/g, '').trim();
+    return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.1rem;">'
+         + '<span style="'+nameStyle+'">' + name + '</span>'
+         + '<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'
+         + playBtn('#c8c0b4', '80px')
+         + '</div>'
+         + '<div style="display:flex;flex-direction:column;align-items:center;gap:0.45rem;">'
+         + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.58rem;color:#c8c0b4;letter-spacing:0.04em;">Luentovideo ei vielä saatavilla</span>'
+         + '<div class="kuvaaja-wrap" style="display:flex;align-items:center;gap:0.5rem;">'
+         + '<button class="kuvaaja-btn" data-subdeck="' + name + '" style="background:none;color:#56533c;border:1px solid #d4cec4;border-radius:999px;padding:0.4rem 1.1rem;font-family:\'Lora\',serif;font-size:0.8rem;cursor:pointer;">&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi</button>'
+         + '</div>'
+         + '</div>'
+         + '</div>';
+  }
+
+  // On video — overlay peittää iframen kunnes klikataan
+  return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);">'
+       + '<iframe src="' + embedUrl + '" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe>'
+       + '<div onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;">'
+       + '<span style="'+nameStyle+'">' + name + '</span>'
+       + '<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'
+       + playBtn('#56533c', '80px')
+       + '</div>'
+       + '<div></div>'
+       + '</div>'
+       + '</div>';
 }
 
 // ─── Rakentaa / päivittää yleiskatsausruudukon ───────────────────────
@@ -1910,9 +1940,16 @@ function renderCardOverview(){
 
   // Täydellinen uudelleenrakennus (uusi pakka tai ensimmäinen lataus)
   grid.dataset.deckName=currentDeck;
-  grid.innerHTML=deckGroups.map(group=>{
+  grid.innerHTML=deckGroups.map((group, groupIndex)=>{
+    const isFirst = groupIndex === 0;
+    // Use THIS group's own link — video is a header for its own section
     const embedUrl=group.link?getYouTubeEmbedUrl(group.link):null;
-    const videoHtml=embedUrl?makeVideoEmbed(embedUrl):'';
+    // Video graphic always shown (placeholder if no link), using this group's name
+    const videoHtml=makeVideoEmbed(embedUrl, group.name);
+    // Separator line appears BETWEEN sections (not before the very first one)
+    // Separator at END of this section (close to its own cards, spaced from next section's header)
+    const isLast = groupIndex === deckGroups.length - 1;
+    const separatorHtml=isLast?'':`<div style="width:100%;border-top:1px solid #d4cec4;margin:1.4rem 0 0;"></div>`;
     const cardsHtml=group.cards.map(card=>{
       const index=reviewCards.indexOf(card);
       // Näytetään kortin alkuteksti (poistetaan cloze-syntaksi ja HTML-tagit)
@@ -1920,12 +1957,13 @@ function renderCardOverview(){
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}</div>`;
     }).join('');
-    return `<div class="overview-section">
+    return `<div class="overview-section" style="padding-bottom:${isLast?'0':'2.5rem'}">
       ${videoHtml}
-      <div class="overview-section-title">${group.name}</div>
       <div class="overview-section-grid">${cardsHtml}</div>
+      ${separatorHtml}
     </div>`;
   }).join('');
+  listenToKuvaajat(); // käynnistetään reaaliaikakuuntelu ilmoittautumisille
 }
 
 // ─── Hyppää suoraan tiettyyn korttiin yleiskatsauksesta ──────────────
@@ -1935,6 +1973,105 @@ function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=revi
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2').checked; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
 
+
+
+// ════════════════════════════════════════════════════════════
+// KUVAAJAREKISTERI
+//    listenToKuvaajat()        — kuuntelee Firestoresta kuka on ilmoittautunut
+//    updateKuvaajaBtnState()   — päivittää napin visuaalisen tilan
+//    ilmoittauduKuvaajaksi()   — käyttäjä ilmoittautuu kuvaajaksi
+//    Firestore-kokoelma: "kuvaajat" { userId, word, timestamp }
+// ════════════════════════════════════════════════════════════
+
+// ─── Reaaliaikakuuntelu: päivittää kaikkien kuvaaja-nappien tilan ────
+function listenToKuvaajat(){
+  if(kuvaajatUnsubscribe){ kuvaajatUnsubscribe(); kuvaajatUnsubscribe=null; }
+  const uid = getUserId();
+  kuvaajatUnsubscribe = db.collection('kuvaajat').onSnapshot(snap=>{
+    const claimed = {};
+    snap.forEach(doc=>{ claimed[doc.id] = doc.data(); });
+    document.querySelectorAll('.kuvaaja-btn').forEach(btn=>{
+      const name = btn.dataset.subdeck;
+      if(claimed[name]){
+        updateKuvaajaBtnState(btn, claimed[name].userId===uid ? 'mine' : 'taken');
+      } else {
+        updateKuvaajaBtnState(btn, 'unclaimed');
+      }
+    });
+  }, ()=>{});
+}
+
+// ─── Päivittää napin tekstin ja tyylin tilan mukaan ──────────────────
+// Tilat: 'unclaimed' (neutraali), 'mine' (vihreä + X-peruutusnappi), 'taken' (harmaa)
+function updateKuvaajaBtnState(btn, state){
+  var wrap = btn.parentElement; // .kuvaaja-wrap
+  // Hae tai luo X-peruutusnappi
+  var xBtn = wrap ? wrap.querySelector('.kuvaaja-cancel') : null;
+  if(!xBtn && wrap){
+    xBtn = document.createElement('button');
+    xBtn.className = 'kuvaaja-cancel';
+    xBtn.title = 'Peruuta ilmoittautuminen';
+    xBtn.style.cssText = 'background:none;border:1px solid #c0392b;border-radius:50%;width:28px;height:28px;font-size:0.75rem;color:#c0392b;cursor:pointer;display:none;flex-shrink:0;';
+    xBtn.textContent = '✕';
+    wrap.appendChild(xBtn);
+  }
+  if(state==='mine'){
+    // Oma ilmoittautuminen — vihreä nappi + näkyvä X
+    btn.innerHTML = '✓ Olet ilmoittautunut kuvaamaan tämän luennon';
+    btn.style.background='#27ae60'; btn.style.color='white';
+    btn.style.border='1px solid #27ae60'; btn.style.cursor='default';
+    btn.onclick=null;
+    if(xBtn){
+      xBtn.style.display='flex'; xBtn.style.alignItems='center'; xBtn.style.justifyContent='center';
+      xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); };
+    }
+  } else if(state==='taken'){
+    // Joku muu varasi — harmaa, ei nappeja
+    btn.innerHTML = 'Joku on ilmoittautunut kuvaamaan tämän luennon';
+    btn.style.background='none'; btn.style.color='#b0a898';
+    btn.style.border='1px solid #d4cec4'; btn.style.cursor='default';
+    btn.onclick=null;
+    if(xBtn) xBtn.style.display='none';
+  } else {
+    // Vapaana — neutraali ulkoasu, ei vielä vihreä
+    btn.innerHTML = '&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi';
+    btn.style.background='none'; btn.style.color='#56533c';
+    btn.style.border='1px solid #d4cec4'; btn.style.cursor='pointer';
+    btn.onclick=function(){ ilmoittauduKuvaajaksi(this, this.dataset.subdeck); };
+    if(xBtn) xBtn.style.display='none';
+  }
+}
+
+// ─── Kirjaa käyttäjän ilmoittautumisen Firestoreen ───────────────────
+function ilmoittauduKuvaajaksi(btn, name){
+  const uid = getUserId();
+  db.collection('kuvaajat').doc(name).get().then(doc=>{
+    if(doc.exists){
+      // Joku muu on jo ilmoittautunut — päivitetään nappi
+      updateKuvaajaBtnState(btn, doc.data().userId===uid ? 'mine' : 'taken');
+      return;
+    }
+    // Ei vielä kuvaajaa — ilmoittaudutaan
+    db.collection('kuvaajat').doc(name).set({
+      userId: uid,
+      word: getUserWord(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(()=>{});
+    // onSnapshot päivittää napin automaattisesti
+  }).catch(()=>{});
+}
+
+// ─── Peruuttaa kuvaaja-ilmoittautumisen — poistaa Firestore-dokumentin ────
+function peruutaKuvaaja(name){
+  const uid = getUserId();
+  db.collection('kuvaajat').doc(name).get().then(doc=>{
+    // Varmistetaan että vain oma ilmoittautuminen voidaan peruuttaa
+    if(doc.exists && doc.data().userId===uid){
+      db.collection('kuvaajat').doc(name).delete().catch(()=>{});
+      // onSnapshot päivittää napin automaattisesti takaisin 'unclaimed'-tilaan
+    }
+  }).catch(()=>{});
+}
 
 // ════════════════════════════════════════════════════════════
 // ⑮ RYHMÄT & TIETOVISA-PISTEET
@@ -2035,13 +2172,13 @@ function showDecks(){
   sessionStorage.removeItem('solukko-savedCardIdx');
   // Suljetaan kaikki Firestore-kuuntelijat
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
+  if(kuvaajatUnsubscribe){ kuvaajatUnsubscribe(); kuvaajatUnsubscribe=null; }
   if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
   if(joukkueetUnsubscribe){ joukkueetUnsubscribe(); joukkueetUnsubscribe=null; }
   if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
   _lastBuzzerDocs=[]; _lastMoneyDocs=[];
   // Palautetaan logo ja piilotetaan kertausnavigaatio
   document.getElementById('site-brand').style.display='';
-  document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
   document.body.classList.remove('reviewing');
   // Nollataan pisteet
