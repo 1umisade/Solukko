@@ -152,7 +152,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 
 /* Itse flashcard-kortti — klikkaamalla näytetään vastaus     */
-.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-x: auto; scroll-margin-top: 8px; transform-origin: 50% 85%; }
+.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
 .answer-section .card-content { text-align: left; }
@@ -2435,44 +2435,48 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   const SWIPE_THRESHOLD = 75;
   let startX = 0, dragDelta = 0, dragging = false, didSwipe = false;
 
-  // ── Pyyhkäisynäkymä: värillinen overlay + tekstitarra kortin päällä ──
+  // ── Kortin väritint (seuraa korttia) ────────────────────────────────
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:absolute;inset:0;border-radius:12px;pointer-events:none;'
-    + 'display:flex;align-items:center;justify-content:center;opacity:0;z-index:10;transition:none;';
+  overlay.style.cssText = 'position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;z-index:10;transition:none;';
   fc.appendChild(overlay);
 
-  const label = document.createElement('div');
-  // Muotoilu: rotatoitu tekstitarra kuten Tinder-tyylissä
-  label.style.cssText = 'font-family:"EB Garamond",Garamond,serif;font-weight:700;'
-    + 'font-size:min(2.8rem,9vw);letter-spacing:-0.01em;padding:0.3rem 1rem;'
-    + 'border-radius:8px;border:4px solid;white-space:nowrap;';
-  overlay.appendChild(label);
+  // ── Tekstitarra kortin sisällä, mutta y-akseli sidottu viewport-keskipisteeseen ─
+  // position:absolute → seuraa kortin liikettä vaakasuunnassa
+  // top lasketaan onStart():ssa → pysyy viewport-pystyakselilla
+  const stamp = document.createElement('div');
+  stamp.style.cssText = 'position:absolute;left:50%;'
+    + 'pointer-events:none;opacity:0;z-index:99999;transition:none;'
+    + 'font-family:"EB Garamond",Garamond,serif;font-weight:700;'
+    + 'font-size:min(3.5rem,11vw);letter-spacing:-0.01em;padding:0.4rem 1.2rem;'
+    + 'border-radius:10px;border:5px solid;white-space:nowrap;';
+  fc.appendChild(stamp);
 
   function setIndicator(delta){
     const absD = Math.abs(delta);
     const progress = Math.min(1, absD / SWIPE_THRESHOLD);
     if(delta > 20){
-      // Oikealle → vihreä "Tiesin!"
-      overlay.style.opacity  = String(Math.min(0.9, progress));
-      overlay.style.background = 'rgba(39,174,96,'+(progress*0.12)+')';
-      fc.style.boxShadow    = '0 0 '+(progress*50)+'px rgba(39,174,96,'+(progress*0.7)+'), 0 8px 32px rgba(0,0,0,0.11)';
-      label.textContent     = 'Tiesin! ✓';
-      label.style.color     = '#27ae60';
-      label.style.borderColor = '#27ae60';
-      label.style.transform = 'rotate(-8deg)';
+      overlay.style.opacity    = String(progress * 0.15);
+      overlay.style.background = 'rgba(39,174,96,1)';
+      fc.style.boxShadow       = '0 0 '+(progress*50)+'px rgba(39,174,96,'+(progress*0.7)+'), 0 8px 32px rgba(0,0,0,0.11)';
+      stamp.style.opacity      = String(Math.min(0.95, progress * 1.2));
+      stamp.style.color        = '#27ae60';
+      stamp.style.borderColor  = '#27ae60';
+      stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(-8deg)';
+      stamp.textContent        = 'Tiesin! ✓';
     } else if(delta < -20){
-      // Vasemmalle → punainen "Palataan"
-      overlay.style.opacity  = String(Math.min(0.9, progress));
-      overlay.style.background = 'rgba(52,152,219,'+(progress*0.12)+')';
-      fc.style.boxShadow    = '0 0 '+(progress*50)+'px rgba(52,152,219,'+(progress*0.7)+'), 0 8px 32px rgba(0,0,0,0.11)';
-      label.textContent     = '🔄 Kysy uudestaan';
-      label.style.color     = '#2980b9';
-      label.style.borderColor = '#2980b9';
-      label.style.transform = 'rotate(8deg)';
+      overlay.style.opacity    = String(progress * 0.15);
+      overlay.style.background = 'rgba(52,152,219,1)';
+      fc.style.boxShadow       = '0 0 '+(progress*50)+'px rgba(52,152,219,'+(progress*0.7)+'), 0 8px 32px rgba(0,0,0,0.11)';
+      stamp.style.opacity      = String(Math.min(0.95, progress * 1.2));
+      stamp.style.color        = '#2980b9';
+      stamp.style.borderColor  = '#2980b9';
+      stamp.style.transform    = 'translateX(-50%) translateY(-50%) rotate(8deg)';
+      stamp.textContent        = '🔄 Kysy uudestaan';
     } else {
-      overlay.style.opacity   = '0';
+      overlay.style.opacity    = '0';
       overlay.style.background = 'none';
-      fc.style.boxShadow = '';
+      fc.style.boxShadow       = '';
+      stamp.style.opacity      = '0';
     }
   }
 
@@ -2480,18 +2484,25 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
     overlay.style.opacity = '0';
     overlay.style.background = 'none';
     fc.style.boxShadow = '';
+    stamp.style.opacity = '0';
   }
 
   let startY = 0, axis = null; // 'h'=horizontal, 'v'=vertical, null=undecided
 
-  function onStart(x, y){
-    // Remove slide-in animation classes — their 'forwards' fill locks transform,
-    // overriding any inline style we set during drag.
+  function onStart(x, y, isTouch){
+    // Remove slide-in animation classes — their 'forwards' fill locks transform
     fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right');
     fc.style.animation = 'none';
     startX = x; startY = y; dragDelta = 0; dragging = true; didSwipe = false; axis = null;
     fc.style.transition = 'none';
     overlay.style.transition = 'none';
+    // Mobile (touch): stamp at viewport vertical center; Desktop (mouse): stamp at card center
+    if(isTouch){
+      const rect = fc.getBoundingClientRect();
+      stamp.style.top = (window.innerHeight / 2 - rect.top) + 'px';
+    } else {
+      stamp.style.top = '50%';
+    }
   }
   function onMove(x, y, event){
     if(!dragging) return;
@@ -2525,13 +2536,13 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   }
 
   // Touch — touchmove MUST be non-passive to call preventDefault()
-  fc.addEventListener('touchstart',  e => onStart(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
+  fc.addEventListener('touchstart',  e => onStart(e.touches[0].clientX, e.touches[0].clientY, true), {passive:true});
   fc.addEventListener('touchmove',   e => onMove(e.touches[0].clientX, e.touches[0].clientY, e), {passive:false});
   fc.addEventListener('touchend',    onEnd, {passive:true});
   fc.addEventListener('touchcancel', onEnd, {passive:true});
 
   // Mouse drag (desktop)
-  fc.addEventListener('mousedown', e => { if(e.button!==0) return; onStart(e.clientX, e.clientY); });
+  fc.addEventListener('mousedown', e => { if(e.button!==0) return; onStart(e.clientX, e.clientY, false); });
   document.addEventListener('mousemove', e => { if(dragging) onMove(e.clientX, e.clientY, null); });
   document.addEventListener('mouseup', onEnd);
 
