@@ -1027,11 +1027,13 @@ let _playingDeckVideo = null;
     // Desktop: video käynnistyy hover-tilassa
     btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); });
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
-    // Mobiili (portrait): video käynnistyy kosketuksesta eikä pysähdy — poistuu vain navigoimalla
+    // Mobiili: video soitetaan vain kun sormi koskettaa korttia — pysähtyy heti kun nostetaan
     btn.addEventListener('touchstart',()=>{
       if(_playingDeckVideo && _playingDeckVideo!==video){ _playingDeckVideo.pause(); _playingDeckVideo.currentTime=0; }
       _playingDeckVideo=video; video.currentTime=0; video.play().catch(()=>{});
     },{passive:true});
+    btn.addEventListener('touchend',()=>{ video.pause(); video.currentTime=0; _playingDeckVideo=null; },{passive:true});
+    btn.addEventListener('touchcancel',()=>{ video.pause(); video.currentTime=0; _playingDeckVideo=null; },{passive:true});
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
     // Seek to 0.001s after metadata loads — forces browser to decode & paint the first frame
