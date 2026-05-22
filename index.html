@@ -8,6 +8,7 @@
     • Dev-tilassa näkyy ⚡ tietovisa-nappi (sphere-tyyli)
     • Deploy-aikaleima näkyy vain dev-tilassa
     • Overview-ruudukon kortit näyttävät tähtiarvioin pienillä tähdillä
+    • Dev-tilassa näkyy punainen sphere-nappi → poistuu dev-tilasta
 ============================================================ -->
 <head>
 <meta charset="UTF-8">
@@ -133,6 +134,7 @@ body.dark-mode #darkmode-btn { background: #3a312b !important; border-color: #6d
 body.dark-mode #soluvisa-sphere-btn { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
 body.dark-mode #soluvisa-sphere-btn.soluvisa-active { background: #c0392b !important; border-color: #c0392b !important; color: white !important; }
 body.dark-mode #deploy-timestamp-pill { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
 .comment-area { display: flex; flex-direction: column; gap: 8px; }
@@ -193,7 +195,6 @@ body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6
   line-height: 1;
   letter-spacing: -0.04em;
   pointer-events: none;
-  /* Prevent the star row from being clipped by -webkit-box */
   display: block;
 }
 body.dark-mode .overview-card-stars { color: #e8b84b; }
@@ -235,6 +236,25 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
 }
 body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 
+/* ── EXIT DEV MODE SPHERE BUTTON ─────────────────────────── */
+#exit-devmode-btn {
+  width: 46px;
+  height: 46px;
+  background: #fffef9;
+  border: 1px solid #d4cec4;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  padding: 0;
+  display: none;        /* shown only in dev mode */
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+#exit-devmode-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(192,57,43,0.28);
+}
 
 /* ── DEPLOY TIMESTAMP PILL ───────────────────────────────── */
 #deploy-timestamp-pill {
@@ -292,7 +312,6 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   .comment-area { position: static; width: 100%; }
 }
 
-
 /* ── SWIPE HINT OVERLAY (first card of a new deck) ──────── */
 .swipe-hint {
   position: absolute;
@@ -309,47 +328,17 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   animation: hintAppear 0.6s ease forwards;
 }
 body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
-
-@keyframes hintAppear {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.swipe-hint.dismissing {
-  animation: hintVanish 0.35s ease forwards !important;
-  pointer-events: none;
-}
-@keyframes hintVanish {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
-/* Container holds both hands stacked on top of each other */
-.swipe-hint-hands {
-  position: relative;
-  width: 120px;
-  height: 48px;
-}
+@keyframes hintAppear { from { opacity: 0; } to { opacity: 1; } }
+.swipe-hint.dismissing { animation: hintVanish 0.35s ease forwards !important; pointer-events: none; }
+@keyframes hintVanish { from { opacity: 1; } to { opacity: 0; } }
+.swipe-hint-hands { position: relative; width: 120px; height: 48px; }
 .swipe-hint-hand-r,
 .swipe-hint-hand-l {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  line-height: 1;
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.45));
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; line-height: 1; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.45));
 }
-
-/* ── Right swipe: plays 0–45% of cycle, left plays 55–100% ── */
-/* Total cycle = 3.6 s so each phase ≈ 1.6 s with 0.4 s gap  */
-.swipe-hint-hand-r {
-  animation: hintSwipeR 3.2s linear infinite;
-}
-.swipe-hint-hand-l {
-  animation: hintSwipeL 3.2s linear infinite;
-}
-
+.swipe-hint-hand-r { animation: hintSwipeR 3.2s linear infinite; }
+.swipe-hint-hand-l { animation: hintSwipeL 3.2s linear infinite; }
 @keyframes hintSwipeR {
   0%    { transform: translateX(-18px); opacity: 0; }
   8%    { transform: translateX(-14px); opacity: 1; }
@@ -358,7 +347,6 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
   47%   { transform: translateX(-18px); opacity: 0; }
   100%  { transform: translateX(-18px); opacity: 0; }
 }
-
 @keyframes hintSwipeL {
   0%    { transform: translateX(18px);  opacity: 0; }
   53%   { transform: translateX(18px);  opacity: 0; }
@@ -368,32 +356,18 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
   99.5% { transform: translateX(18px);  opacity: 0; }
   100%  { transform: translateX(18px);  opacity: 0; }
 }
-
 .swipe-hint-text {
-  color: rgba(255, 255, 255, 0.88);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  text-align: center;
-  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88); font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 0.04em; text-align: center; line-height: 1.5;
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
 /* ── STAR RATING TOOLTIP ─────────────────────────────────── */
 #star-tooltip {
-  position: fixed;
-  z-index: 99999;
-  background: rgba(22, 18, 14, 0.88);
-  color: #f5f0e8;
-  border-radius: 6px;
-  padding: 0.22rem 0.55rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.04em;
-  pointer-events: none;
-  white-space: nowrap;
-  display: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  position: fixed; z-index: 99999; background: rgba(22, 18, 14, 0.88); color: #f5f0e8;
+  border-radius: 6px; padding: 0.22rem 0.55rem; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; letter-spacing: 0.04em; pointer-events: none; white-space: nowrap;
+  display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .word-link { cursor: pointer; border-bottom: 1px dashed transparent; transition: border-color 0.15s; }
@@ -414,14 +388,29 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- ← Takaisin -->
   <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
-  <!-- 🦠 Soluvisa — visible to ALL users when a dev is active, centered between ← and ☀️ -->
+  <!-- 🦠 Soluvisa — visible to ALL users when a dev is active -->
   <button id="soluvisa-sphere-btn" onclick="toggleGroupModeFromButton()" title="Liity Soluvisa-peliin"
     style="display:none;height:46px;padding:0 1.1rem;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;white-space:nowrap;align-items:center;gap:0.35rem;transition:background 0.2s,color 0.2s,border-color 0.2s;">
     liity soluvisaan
   </button>
 
-  <!-- TOP-RIGHT: timestamp pill + sun/moon btn -->
+  <!-- TOP-RIGHT: exit-dev sphere + timestamp pill + sun/moon btn -->
   <div id="gear-btn-wrap" style="display:none;align-items:center;gap:8px;">
+
+    <!-- ● Exit dev-mode sphere — only shown in dev mode -->
+    <button id="exit-devmode-btn" onclick="exitDevMode()" title="Poistu kehittäjätilasta">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="sphere-grad" cx="38%" cy="32%" r="62%">
+            <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="40%" stop-color="#e07060"/>
+            <stop offset="100%" stop-color="#7a1a0e"/>
+          </radialGradient>
+        </defs>
+        <circle cx="11" cy="11" r="10" fill="url(#sphere-grad)"/>
+        <ellipse cx="8.5" cy="7.5" rx="2.8" ry="1.5" fill="white" opacity="0.35" transform="rotate(-30 8.5 7.5)"/>
+      </svg>
+    </button>
 
     <!-- Deploy timestamp: only shown in dev mode -->
     <div id="deploy-timestamp-pill">ladataan...</div>
@@ -434,7 +423,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
     <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt -->
     <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;">
-      <!-- SVG progress ring: radius 23, cx/cy 27, circumference ≈ 144.51 -->
       <svg id="darkmode-ring" width="54" height="54"
            style="position:absolute;top:-4px;left:-4px;pointer-events:none;overflow:visible;">
         <circle id="darkmode-ring-circle"
@@ -584,7 +572,6 @@ function getUserId(){
 function applyDarkMode(){
   document.body.classList.toggle('dark-mode', darkMode);
   const t=document.getElementById('dark-toggle-input2'); if(t) t.checked=darkMode;
-  // Update sun/moon icon
   const icon=document.getElementById('darkmode-icon');
   if(icon) icon.textContent = darkMode ? '🌙' : '☀️';
 }
@@ -597,9 +584,20 @@ function toggleDarkModeFromSwitch(){
 
 function applyDevMode(){
   const t=document.getElementById('dev-toggle-input2'); if(t) t.checked=devMode;
-  // Deploy timestamp pill: only for dev
   const dp=document.getElementById('deploy-timestamp-pill');
   if(dp) dp.style.display = devMode ? 'flex' : 'none';
+  const xb=document.getElementById('exit-devmode-btn');
+  if(xb) xb.style.display = devMode ? 'flex' : 'none';
+}
+
+function exitDevMode(){
+  devMode = false;
+  localStorage.setItem('anki-dev-mode', JSON.stringify(false));
+  db.collection('gamestate').doc('devOwner').delete().catch(()=>{});
+  endGameSession();
+  applyDevMode();
+  if(currentCard) loadFirestoreComments();
+  listenToPresence();
 }
 
 // ── Settings dropdown (kept for any legacy calls) ──────────
@@ -616,18 +614,16 @@ document.addEventListener('click',e=>{
 });
 
 
-
 // ════════════════════════════════════════════════════════════
 // SWIPE HINT — shown on first card of a freshly opened deck
 // ════════════════════════════════════════════════════════════
-let _swipeHintShown = false;   // true once dismissed this session
+let _swipeHintShown = false;
 let _swipeHintEl    = null;
-let _suppressNextAnswer = false; // set when hint is dismissed mid-gesture so the gesture doesn't also reveal the answer
+let _suppressNextAnswer = false;
 
 function showSwipeHint(){
   const fc = document.getElementById('flashcard');
   if(!fc || _swipeHintShown) return;
-  // Remove any old hint
   dismissSwipeHint(true);
   const hint = document.createElement('div');
   hint.className = 'swipe-hint';
@@ -652,18 +648,18 @@ function dismissSwipeHint(immediate){
 }
 
 
-//                   hold 5 s = dev password prompt
+// ════════════════════════════════════════════════════════════
+// DARKMODE BTN — hold 5 s = dev password prompt
 // ════════════════════════════════════════════════════════════
 function initDarkmodeBtn(){
   const btn    = document.getElementById('darkmode-btn');
   const circle = document.getElementById('darkmode-ring-circle');
   if(!btn) return;
 
-  const CIRCUMFERENCE = 144.51; // 2π × 23
+  const CIRCUMFERENCE = 144.51;
   let pressTimer    = null;
   let ringTimer     = null;
   let longFired     = false;
-  let ringAnimStart = null;
   let ringRaf       = null;
 
   function resetRing(){
@@ -677,8 +673,6 @@ function initDarkmodeBtn(){
   }
 
   function startRingAnimation(){
-    // Ring fills from empty (dashoffset = CIRCUMFERENCE) → full (dashoffset = 0)
-    // over 2 s using CSS transition, starting from top (rotate -90° is baked in HTML)
     if(!circle) return;
     circle.style.opacity          = '1';
     circle.style.transition       = 'stroke-dashoffset 2s linear';
@@ -689,10 +683,7 @@ function initDarkmodeBtn(){
     longFired = false;
     btn.classList.add('pressing');
     resetRing();
-
-    // Show ring only after 3 s; it then fills over 2 s → total 5 s
     ringTimer = setTimeout(startRingAnimation, 3000);
-
     pressTimer = setTimeout(()=>{
       longFired = true;
       btn.classList.remove('pressing');
@@ -723,7 +714,6 @@ function promptDevMode(){
     .then(buf=>{
       const hash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
       if(hash === '5d4da5b963892e66c2e856c5ea7df4dc76183d999d4ec8ded89b9f7e50635335'){
-        // Toggle dev mode
         devMode = !devMode;
         localStorage.setItem('anki-dev-mode', JSON.stringify(devMode));
         if(devMode){
@@ -749,7 +739,6 @@ function promptDevMode(){
     });
 }
 
-// Soluvisa sphere button handler
 function toggleGroupModeFromButton(){
   const cb=document.getElementById('mode-toggle-input2');
   if(cb) cb.checked = !groupMode;
@@ -931,7 +920,6 @@ async function loadDecks(){
     btn.innerHTML=`<video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div style="position:relative;z-index:2"><div class="deck-title">${item.cleanName}</div><div style="font-size:14px;opacity:0.82;font-weight:400;">${item.courseCode}</div></div>`;
     const video=btn.querySelector('.deck-video');
 
-    // ── JS cover fallback (for Safari where object-fit on <video> can fail) ──
     function fitVideo(){
       const bw=btn.offsetWidth, bh=btn.offsetHeight;
       if(!bw||!bh||!video.videoWidth) return;
@@ -944,35 +932,18 @@ async function loadDecks(){
     video.addEventListener('loadedmetadata', fitVideo, {once:true});
     video.addEventListener('loadeddata', ()=>{ fitVideo(); video.currentTime=0.5; },{once:true});
 
-    // ── Ping-pong: forward → backward → forward ──────────────────────────
     let _rafId=null, _lastTs=null, _going=false;
-
     function _stopReverse(){ if(_rafId){ cancelAnimationFrame(_rafId); _rafId=null; } _lastTs=null; }
-
     function _reverseStep(ts){
       if(_lastTs===null) _lastTs=ts;
       const elapsed=(ts-_lastTs)/1000;
-      // Throttle to ~30 fps — skip RAF ticks that arrive too quickly
       if(elapsed<0.028){ _rafId=requestAnimationFrame(_reverseStep); return; }
       _lastTs=ts;
       const newTime=video.currentTime-elapsed;
-      if(newTime<=0.02){
-        video.currentTime=0;
-        _stopReverse();
-        if(_going) video.play().catch(()=>{});
-      } else {
-        video.currentTime=Math.max(0,newTime);
-        _rafId=requestAnimationFrame(_reverseStep);
-      }
+      if(newTime<=0.02){ video.currentTime=0; _stopReverse(); if(_going) video.play().catch(()=>{}); }
+      else { video.currentTime=Math.max(0,newTime); _rafId=requestAnimationFrame(_reverseStep); }
     }
-
-    video.addEventListener('ended',()=>{
-      if(!_going) return;
-      _stopReverse();
-      _lastTs=null;
-      _rafId=requestAnimationFrame(_reverseStep);
-    });
-
+    video.addEventListener('ended',()=>{ if(!_going) return; _stopReverse(); _lastTs=null; _rafId=requestAnimationFrame(_reverseStep); });
     function _start(){ _going=true; _stopReverse(); video.currentTime=0; video.play().catch(()=>{}); }
     function _stop(){ _going=false; _stopReverse(); video.pause(); video.currentTime=0; }
 
@@ -1007,7 +978,7 @@ async function startDeck(deckName){
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
-  _swipeHintShown = false; // reset so hint shows on first card of this deck
+  _swipeHintShown = false;
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
@@ -1018,7 +989,6 @@ async function startDeck(deckName){
   document.getElementById('gear-btn-wrap').style.display='flex';
   document.querySelector('.comment-area').style.display='flex';
   document.body.classList.add('reviewing');
-  // Soluvisa visibility is controlled by the devOwner listener — re-fire it by checking Firestore
   db.collection('gamestate').doc('devOwner').get().then(doc=>{
     const ssb=document.getElementById('soluvisa-sphere-btn');
     if(ssb) ssb.style.display = doc.exists ? 'flex' : 'none';
@@ -1122,22 +1092,18 @@ async function renderCurrentCard(){
   document.getElementById('show-row').style.display='none';
   document.getElementById('grade-row').style.display='none';
   cardAnswerShown = false;
-  _suppressNextAnswer = false; // always start clean for each new card
+  _suppressNextAnswer = false;
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   requestAnimationFrame(scrollToCard);
   const fc=document.getElementById('flashcard');
-  // Hard-reset any transform/transition/animation left over from the previous
-  // drag or grade so iOS doesn't inherit stale state and produce a tilt glitch.
   fc.style.transition = 'none';
   fc.style.transform  = '';
   fc.style.animation  = 'none';
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right');
-  void fc.offsetWidth; // force reflow so the removes take effect before re-adding
+  void fc.offsetWidth;
   fc.classList.add('card-in-right');
-
-  // Show swipe hint only for the very first card of each deck visit
   if(!_swipeHintShown && currentOverviewIndex === 0){
-    setTimeout(showSwipeHint, 420); // wait for slide-in animation to finish
+    setTimeout(showSwipeHint, 420);
   }
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
@@ -1386,7 +1352,7 @@ function renderCardStars(){
   box.textContent=count?'★'.repeat(count):'';
   const meanings=['','Tuskin tentissä','Ehkä tentissä','Luultavasti tentissä'];
   box.dataset.starMeaning = count ? meanings[Math.min(count,3)] : '';
-  box.removeAttribute('title'); // use custom tooltip instead
+  box.removeAttribute('title');
 }
 
 function showAnswer(){
@@ -1402,7 +1368,6 @@ function gradeCard(correct){
   if(coinAnimating) return;
   if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
   const fc=document.getElementById('flashcard');
-  // Cancel any ongoing return-to-centre transition before starting the exit animation
   fc.style.transition = 'none';
   fc.style.transform  = '';
   void fc.offsetWidth;
@@ -1453,7 +1418,6 @@ function makeVideoEmbed(embedUrl,name){
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
 
-  // Fast path: only update state classes
   if(grid.dataset.deckName===currentDeck){
     deckGroups.forEach(group=>{
       group.cards.forEach(card=>{
@@ -1465,7 +1429,6 @@ function renderCardOverview(){
     return;
   }
 
-  // Full rebuild
   grid.dataset.deckName=currentDeck;
   var _short=currentDeck.replace('TYKRY::','');
   var _mLink=(_short.match(/\((https?:\/\/.*?)\)/)||[])[1]||'';
@@ -1475,7 +1438,6 @@ function renderCardOverview(){
   var deckHeaderHtml='<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div style="flex:1;"><div class="deck-header-name" style="font-size:1.35rem;font-weight:700;line-height:1.25;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;">'+_code+'</div>':'')+  '</div>'+(_mLink?'<a href="'+_mLink+'" target="_blank" title="Tarkista tenttiajankohdat Moodlesta" style="width:44px;height:44px;border-radius:50%;background:#fffef9;border:1px solid #d4cec4;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,0.1);flex-shrink:0;text-decoration:none;"><img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:4px;"></a>':'')+  '</div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
-    // Unsorted cards (no subdeck) get no label or video — just the card grid
     const isPaapakka = group.name === 'Pääpakka';
     const embedUrl = (!isPaapakka && group.link) ? getYouTubeEmbedUrl(group.link) : null;
     const videoHtml = isPaapakka ? '' : makeVideoEmbed(embedUrl, group.name);
@@ -1486,11 +1448,8 @@ function renderCardOverview(){
       const index=reviewCards.indexOf(card);
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
-
-      // ── Star badge ───────────────────────────────────────────
       const starCount=(card.tags||[]).join(' ').match(/★/g)?.length||0;
       const starsHtml=starCount?`<span class="overview-card-stars">${'★'.repeat(starCount)}</span>`:'';
-
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
@@ -1582,7 +1541,6 @@ function toggleGroupModeFromSwitch(){
   groupMode=document.getElementById('mode-toggle-input2').checked;
   if(groupMode){ showJoukkupeliOverlay(); } else { hideJoukkupeliOverlay(); }
   localStorage.setItem('anki-group-mode',JSON.stringify(groupMode));
-  // Sync Soluvisa sphere button appearance
   const ssb=document.getElementById('soluvisa-sphere-btn');
   if(ssb) ssb.classList.toggle('soluvisa-active',groupMode);
   updateGroupUI(); updateShowBtn(); loadBuzzers();
@@ -1665,12 +1623,11 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   function clearIndicator(){ overlay.style.opacity='0'; stamp.style.opacity='0'; lastDir=null; }
   let startY=0, axis=null;
   function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const rect=fc.getBoundingClientRect(); const touchYInCard=isTouch?(y-rect.top):(rect.height/2); const targetTop=touchYInCard-90; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=rect.height; stamp.style.top=targetTop+'px';
-    if(_swipeHintEl){ _suppressNextAnswer = true; } // this gesture dismisses the hint — don't also show the answer
-    dismissSwipeHint(); // any touch/click dismisses the hint
+    if(_swipeHintEl){ _suppressNextAnswer = true; }
+    dismissSwipeHint();
   }
   function onMove(x,y,event){ if(!dragging) return; const dx=x-startX; const dy=y-startY; if(axis===null&&(Math.abs(dx)>6||Math.abs(dy)>6)){ axis=Math.abs(dx)>=Math.abs(dy)?'h':'v'; } if(axis==='v'){ dragging=false; fc.style.transform=''; clearIndicator(); return; } if(axis==='h'&&event){ event.preventDefault(); } dragDelta=dx; if(Math.abs(dragDelta)>10) didSwipe=true; const rot=dragDelta*0.025; fc.style.transform='translateX('+(dragDelta*0.12)+'px) rotate('+rot+'deg)'; if(cardAnswerShown) setIndicator(dragDelta); }
-  function onEnd(){ if(!dragging) return; dragging=false; axis=null; lastStampDir=null; overlay.style.transition='opacity 0.2s ease'; clearIndicator(); if(cardAnswerShown&&Math.abs(dragDelta)>=SWIPE_THRESHOLD){ fc.style.transition='none'; fc.style.transform=''; fc.style.animation=''; _suppressNextAnswer=false; gradeCard(dragDelta>0); } else { fc.style.transition='transform 0.22s ease'; fc.style.transform=''; fc.style.animation=''; if(!_suppressNextAnswer&&!cardAnswerShown&&Math.abs(dragDelta)>8){ showAnswer(); } // Defer clearing so the 'click' event (which fires after pointerup) still sees the flag
-    setTimeout(()=>{ _suppressNextAnswer=false; }, 400); } }
+  function onEnd(){ if(!dragging) return; dragging=false; axis=null; lastStampDir=null; overlay.style.transition='opacity 0.2s ease'; clearIndicator(); if(cardAnswerShown&&Math.abs(dragDelta)>=SWIPE_THRESHOLD){ fc.style.transition='none'; fc.style.transform=''; fc.style.animation=''; _suppressNextAnswer=false; gradeCard(dragDelta>0); } else { fc.style.transition='transform 0.22s ease'; fc.style.transform=''; fc.style.animation=''; if(!_suppressNextAnswer&&!cardAnswerShown&&Math.abs(dragDelta)>8){ showAnswer(); } setTimeout(()=>{ _suppressNextAnswer=false; }, 400); } }
   let lastStampDir=null;
   fc.addEventListener('touchstart', e=>onStart(e.touches[0].clientX,e.touches[0].clientY,true),{passive:true});
   fc.addEventListener('touchmove',  e=>onMove(e.touches[0].clientX,e.touches[0].clientY,e),{passive:false});
@@ -1681,8 +1638,8 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   document.addEventListener('mouseup',onEnd);
   fc.addEventListener('click',e=>{
     const link=e.target.closest('.word-link');
-    if(link){ e.stopPropagation(); didSwipe=false; return; } // tooltip-only; no new window
-    if(_suppressNextAnswer){ _suppressNextAnswer=false; return; } // hint was just dismissed — don't reveal answer
+    if(link){ e.stopPropagation(); didSwipe=false; return; }
+    if(_suppressNextAnswer){ _suppressNextAnswer=false; return; }
     if(!didSwipe) showAnswer();
     didSwipe=false;
   });
@@ -1747,7 +1704,6 @@ function buildWordLinks(){
   // Pass 2: tags — each tag on a card becomes an extra link trigger for that card
   reviewCards.forEach((card,idx)=>{
     (card.tags||[]).forEach(tag=>{
-      // Skip star-rating tags and anything that's not a real word
       if(/^[★\s*]+$/.test(tag)) return;
       const clean=tag.replace(/_/g,' ').trim();
       if(!clean||clean.length<2) return;
@@ -1790,7 +1746,7 @@ function applyWordLinks(element){
 
 (function initWordLinkTooltip(){
   const tip=document.createElement('div'); tip.id='word-link-tooltip'; document.body.appendChild(tip);
-  let touchPinnedLink=null; // persists after finger lifts (touch-tap mode)
+  let touchPinnedLink=null;
 
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
 
@@ -1808,26 +1764,18 @@ function applyWordLinks(element){
     tip.style.left=Math.max(8,l)+'px'; tip.style.top=Math.max(8,t)+'px';
   }
 
-  // Desktop: hover-driven RAF loop
   function updateTip(){
     const hovered=document.querySelector('.word-link:hover');
-    if(touchPinnedLink){
-      // Touch-pinned: keep showing until tapped elsewhere
-      showTip(touchPinnedLink);
-    } else if(hovered){
-      showTip(hovered);
-    } else {
-      tip.style.display='none';
-    }
+    if(touchPinnedLink){ showTip(touchPinnedLink); }
+    else if(hovered){ showTip(hovered); }
+    else { tip.style.display='none'; }
     requestAnimationFrame(updateTip);
   }
   requestAnimationFrame(updateTip);
 
-  // Touch: tap on a word-link pins the tooltip; tap anywhere else unpins it
   document.addEventListener('touchend', e=>{
     const link=e.target.closest('.word-link');
     if(link){
-      // Toggle: tap same link again = dismiss
       if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; }
       else { touchPinnedLink=link; showTip(link); }
     } else {
@@ -1863,13 +1811,11 @@ function applyWordLinks(element){
 
   function hide(){ tip.style.display = 'none'; }
 
-  // Desktop hover
   document.addEventListener('mouseover', e => {
     const stars = e.target.closest('#card-stars');
     if(stars && stars.dataset.starMeaning) show(stars); else hide();
   });
 
-  // Touch tap on stars — toggles tooltip
   let _tipPinned = false;
   document.addEventListener('touchend', e => {
     const stars = e.target.closest('#card-stars');
@@ -1883,6 +1829,8 @@ function applyWordLinks(element){
 })();
 
 
+// ════════════════════════════════════════════════════════════
+// DEPLOY TIMESTAMP
 // ════════════════════════════════════════════════════════════
 (function(){
   const ts=document.getElementById('deploy-timestamp-pill'); if(!ts) return;
@@ -1900,12 +1848,9 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
   const inReview=document.getElementById('card-screen')?.style.display==='flex';
   if(doc.exists){
     const ownerId=doc.data().userId;
-    // Show Soluvisa button to ALL users when a dev is active and we're in review mode
     if(soluvisaBtn) soluvisaBtn.style.display = inReview ? 'flex' : 'none';
-    // If I was the dev but someone else took over, drop my dev status
     if(devMode&&ownerId!==getUserId()){ devMode=false; localStorage.setItem('anki-dev-mode',JSON.stringify(false)); applyDevMode(); if(currentCard) loadFirestoreComments(); }
   } else {
-    // No dev active — hide Soluvisa for everyone
     if(soluvisaBtn) soluvisaBtn.style.display='none';
   }
 });
@@ -1919,7 +1864,7 @@ applyDevMode();
 updateGroupUI();
 updateOverviewVisibility();
 initPresence();
-initDarkmodeBtn();   // ← sets up the sun/moon long-press behaviour
+initDarkmodeBtn();
 init();
 </script>
 
