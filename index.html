@@ -466,12 +466,13 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="brand-back">
       <div style="font-size:1.25rem;font-weight:700;text-align:center;margin-bottom:0.5rem;color:#56533c;line-height:1.2;">Treenaa aivosolusi tenttikuntoon!</div>
       <div style="font-size:0.82rem;line-height:1.5;">
-        Solukko.com on biokemian opiskelijoille suunnattu oppimissivusto,
+        Solukko.com on biokemian opiskelijoiden ylläpitämä kysymyspankki,
         jossa yliopistokurssit voi opiskella valmiiden kysymyskorttien avulla.<br><br>
         • Ei kirjautumista<br>
-        • Käyttö aina ilmaista<br>
-        • Palkintoja sisällöntuottajille<br>
+        • Ei maksuja<br>
+        • Opiskelet jo yhdellä painalluksella<br>
         • Kysymyksiin merkitty tenttitodennäköisyys<br>
+        • Palkintoja sisällöntuottajille<br>
       </div>
     </div>
   </div>
@@ -1730,6 +1731,8 @@ function _escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 function buildWordLinks(){
   _wordLinks=[];
   const seen=new Set();
+
+  // Pass 1: front-field text (existing behaviour)
   reviewCards.forEach((card,idx)=>{
     const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
     const clean=q.replace(/<[^>]*>/g,' ').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/&[a-z]+;/gi,' ').replace(/\s+/g,' ').trim();
@@ -1740,6 +1743,21 @@ function buildWordLinks(){
     seen.add(lower);
     _wordLinks.push({text:clean,lower,cardIndex:idx});
   });
+
+  // Pass 2: tags — each tag on a card becomes an extra link trigger for that card
+  reviewCards.forEach((card,idx)=>{
+    (card.tags||[]).forEach(tag=>{
+      // Skip star-rating tags and anything that's not a real word
+      if(/^[★\s*]+$/.test(tag)) return;
+      const clean=tag.replace(/_/g,' ').trim();
+      if(!clean||clean.length<2) return;
+      const lower=clean.toLowerCase();
+      if(seen.has(lower)) return;
+      seen.add(lower);
+      _wordLinks.push({text:clean,lower,cardIndex:idx});
+    });
+  });
+
   _wordLinks.sort((a,b)=>b.text.length-a.text.length);
 }
 
