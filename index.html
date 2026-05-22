@@ -1430,8 +1430,10 @@ function renderCardOverview(){
   var deckHeaderHtml='<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div style="flex:1;"><div class="deck-header-name" style="font-size:1.35rem;font-weight:700;line-height:1.25;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;">'+_code+'</div>':'')+  '</div>'+(_mLink?'<a href="'+_mLink+'" target="_blank" title="Tarkista tenttiajankohdat Moodlesta" style="width:44px;height:44px;border-radius:50%;background:#fffef9;border:1px solid #d4cec4;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,0.1);flex-shrink:0;text-decoration:none;"><img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:4px;"></a>':'')+  '</div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
-    const embedUrl=group.link?getYouTubeEmbedUrl(group.link):null;
-    const videoHtml=makeVideoEmbed(embedUrl,group.name);
+    // Unsorted cards (no subdeck) get no label or video — just the card grid
+    const isPaapakka = group.name === 'Pääpakka';
+    const embedUrl = (!isPaapakka && group.link) ? getYouTubeEmbedUrl(group.link) : null;
+    const videoHtml = isPaapakka ? '' : makeVideoEmbed(embedUrl, group.name);
     const isLast=groupIndex===deckGroups.length-1;
     const separatorHtml=isLast?'':`<div style="width:100%;border-top:1px solid #d4cec4;margin:1.4rem 0 0;"></div>`;
 
@@ -1613,7 +1615,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.appendChild(stamp);
   let lastDir=null;
   function clampStamp(dir){ if(dir===lastDir) return; lastDir=dir; const h=stamp.offsetHeight||60; const cardH=parseFloat(stamp.dataset.cardH)||fc.offsetHeight; const target=parseFloat(stamp.dataset.targetTop)||cardH/2; const margin=h/2+10; stamp.style.top=Math.max(margin,Math.min(cardH-margin,target))+'px'; }
-  function setIndicator(delta){ if(Math.abs(delta)<8){ clearIndicator(); return; } const progress=Math.min(1,Math.abs(delta)/SWIPE_THRESHOLD); stamp.style.opacity=String(Math.min(0.95,progress*1.3)); if(delta>0){ overlay.style.opacity=String(progress*0.12); overlay.style.background='rgba(39,174,96,1)'; stamp.style.background='#27ae60'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='Tiesin! ✓'; clampStamp('r'); } else { overlay.style.opacity='0'; overlay.style.background='transparent'; stamp.style.background='rgba(60,50,40,0.72)'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='🔄 Kysy uudestaan'; clampStamp('l'); } }
+  function setIndicator(delta){ if(Math.abs(delta)<8){ clearIndicator(); return; } const progress=Math.min(1,Math.abs(delta)/SWIPE_THRESHOLD); stamp.style.opacity=String(Math.min(0.95,progress*1.3)); if(delta>0){ overlay.style.opacity=String(progress*0.12); overlay.style.background='rgba(39,174,96,1)'; stamp.style.background='#27ae60'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='Tiesin! ✓'; clampStamp('r'); } else { overlay.style.opacity='0'; overlay.style.background='transparent'; stamp.style.background='#2980b9'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='🔄 Kysy uudestaan'; clampStamp('l'); } }
   function clearIndicator(){ overlay.style.opacity='0'; stamp.style.opacity='0'; lastDir=null; }
   let startY=0, axis=null;
   function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const rect=fc.getBoundingClientRect(); const touchYInCard=isTouch?(y-rect.top):(rect.height/2); const targetTop=touchYInCard-90; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=rect.height; stamp.style.top=targetTop+'px';
