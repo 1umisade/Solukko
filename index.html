@@ -401,7 +401,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- 🦠 Soluvisa — visible to ALL users when a dev is active, centered between ← and ☀️ -->
   <button id="soluvisa-sphere-btn" onclick="toggleGroupModeFromButton()" title="Liity Soluvisa-peliin"
     style="display:none;height:46px;padding:0 1.1rem;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;white-space:nowrap;align-items:center;gap:0.35rem;transition:background 0.2s,color 0.2s,border-color 0.2s;">
-    🦠 soluvisa
+    liity soluvisaan
   </button>
 
   <!-- TOP-RIGHT: timestamp pill + sun/moon btn -->
@@ -1191,7 +1191,7 @@ function exitJoukkupeli(){
 
 function resetVastaaBtn(){
   const btn=document.getElementById('vastaa-btn'), status=document.getElementById('joukkupeli-status');
-  if(btn){ btn.disabled=false; btn.style.background='#c0392b'; btn.textContent='Vastaa'; btn.style.transform=''; }
+  if(btn){ btn.disabled=false; btn.style.background='#c0392b'; btn.textContent='🔔'; btn.style.fontSize='min(5rem,18vw)'; btn.style.transform=''; }
   if(status) status.textContent='';
 }
 
@@ -1609,6 +1609,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.addEventListener('click',e=>{
     const link=e.target.closest('.word-link');
     if(link){ e.stopPropagation(); didSwipe=false; return; } // tooltip-only; no new window
+    if(_swipeHintEl) return; // hint visible — only swiping reveals the answer, not tapping
     if(!didSwipe) showAnswer();
     didSwipe=false;
   });
@@ -1793,7 +1794,7 @@ init();
 <div id="joukkupeli-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f0e8;z-index:88888;flex-direction:column;align-items:center;justify-content:center;gap:2rem;padding:2rem;">
   <div id="dev-active-indicator" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#888;letter-spacing:0.02em;">⏳ Odota kehittäjää...</div>
   <div id="team-name-display" style="font-family:'EB Garamond',Garamond,serif;font-size:min(3.5rem,12vw);font-weight:600;color:#56533c;text-align:center;letter-spacing:-0.02em;"></div>
-  <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(3.5rem,12vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">Vastaa</button>
+  <button id="vastaa-btn" onclick="buzzIn()" style="width:min(80vw,400px);height:min(45vw,220px);background:#c0392b;color:white;border:none;border-radius:28px;font-size:min(5rem,18vw);font-family:'Lora',serif;cursor:pointer;box-shadow:0 12px 40px rgba(192,57,43,0.45);transition:transform 0.08s,box-shadow 0.08s;" onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 6px 20px rgba(192,57,43,0.4)'" onmouseup="this.style.transform='';this.style.boxShadow=''" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform=''">🔔</button>
   <div id="joukkupeli-status" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#6b6055;text-align:center;min-height:1.5rem;"></div>
   <div id="player-money" style="font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:#8a5b00;text-align:center;"></div>
   <button onclick="exitJoukkupeli()" style="background:none;border:1px solid #d4cec4;border-radius:999px;padding:0.5rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#6b6055;cursor:pointer;">Poistu tietovisasta</button>
