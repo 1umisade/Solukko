@@ -130,8 +130,8 @@ body.dark-mode .deck-header-code  { color: #cbbda8; }
 
 /* ── DARK MODE: new top-bar buttons ─────────────────────── */
 body.dark-mode #darkmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
-body.dark-mode #tietovisa-sphere-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode #tietovisa-sphere-btn.tietovisa-active { background: #c0392b; border-color: #c0392b; color: white; }
+body.dark-mode #soluvisa-sphere-btn { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
+body.dark-mode #soluvisa-sphere-btn.soluvisa-active { background: #c0392b !important; border-color: #c0392b !important; color: white !important; }
 body.dark-mode #deploy-timestamp-pill { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
@@ -235,30 +235,6 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
 }
 body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 
-
-/* ── TIETOVISA SPHERE BUTTON ─────────────────────────────── */
-#tietovisa-sphere-btn {
-  height: 46px;
-  padding: 0 1.1rem;
-  background: #fffef9;
-  border: 1px solid #d4cec4;
-  border-radius: 999px;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  color: #56533c;
-  white-space: nowrap;
-  display: none;           /* shown only in dev mode */
-  align-items: center;
-  gap: 0.35rem;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-#tietovisa-sphere-btn.tietovisa-active {
-  background: #c0392b;
-  color: white;
-  border-color: #c0392b;
-}
 
 /* ── DEPLOY TIMESTAMP PILL ───────────────────────────────── */
 #deploy-timestamp-pill {
@@ -422,16 +398,17 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- ← Takaisin -->
   <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
-  <div style="flex:1"></div>
+  <!-- 🦠 Soluvisa — visible to ALL users when a dev is active, centered between ← and ☀️ -->
+  <button id="soluvisa-sphere-btn" onclick="toggleGroupModeFromButton()" title="Liity Soluvisa-peliin"
+    style="display:none;height:46px;padding:0 1.1rem;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;white-space:nowrap;align-items:center;gap:0.35rem;transition:background 0.2s,color 0.2s,border-color 0.2s;">
+    🦠 soluvisa
+  </button>
 
-  <!-- TOP-RIGHT: timestamp pill + tietovisa btn + sun/moon btn ── -->
+  <!-- TOP-RIGHT: timestamp pill + sun/moon btn -->
   <div id="gear-btn-wrap" style="display:none;align-items:center;gap:8px;">
 
     <!-- Deploy timestamp: only shown in dev mode -->
     <div id="deploy-timestamp-pill">ladataan...</div>
-
-    <!-- Tietovisa sphere button: only shown in dev mode -->
-    <button id="tietovisa-sphere-btn" onclick="toggleGroupModeFromButton()" title="Käynnistä / sammuta Tietovisa-tila">⚡ tietovisa</button>
 
     <!-- Hidden checkbox inputs kept for JS compatibility -->
     <input id="mode-toggle-input2"  type="checkbox" style="display:none" onchange="toggleGroupModeFromSwitch()">
@@ -603,10 +580,7 @@ function toggleDarkModeFromSwitch(){
 
 function applyDevMode(){
   const t=document.getElementById('dev-toggle-input2'); if(t) t.checked=devMode;
-  // Show/hide tietovisa sphere button
-  const tb=document.getElementById('tietovisa-sphere-btn');
-  if(tb) tb.style.display = devMode ? 'flex' : 'none';
-  // Show/hide deploy timestamp pill
+  // Deploy timestamp pill: only for dev
   const dp=document.getElementById('deploy-timestamp-pill');
   if(dp) dp.style.display = devMode ? 'flex' : 'none';
 }
@@ -644,7 +618,7 @@ function showSwipeHint(){
     '<div class="swipe-hint-hand-r">👉</div>' +
     '<div class="swipe-hint-hand-l">👈</div>' +
     '</div>' +
-    '<div class="swipe-hint-text">Pyyhkäise tarkistaaksesi</div>';
+    '<div class="swipe-hint-text">KERTAA PYYHKÄISEMÄLLÄ</div>';
   fc.appendChild(hint);
   _swipeHintEl = hint;
 }
@@ -757,7 +731,7 @@ function promptDevMode(){
     });
 }
 
-// Tietovisa sphere button handler
+// Soluvisa sphere button handler
 function toggleGroupModeFromButton(){
   const cb=document.getElementById('mode-toggle-input2');
   if(cb) cb.checked = !groupMode;
@@ -980,6 +954,11 @@ async function startDeck(deckName){
   document.getElementById('gear-btn-wrap').style.display='flex';
   document.querySelector('.comment-area').style.display='flex';
   document.body.classList.add('reviewing');
+  // Soluvisa visibility is controlled by the devOwner listener — re-fire it by checking Firestore
+  db.collection('gamestate').doc('devOwner').get().then(doc=>{
+    const ssb=document.getElementById('soluvisa-sphere-btn');
+    if(ssb) ssb.style.display = doc.exists ? 'flex' : 'none';
+  }).catch(()=>{});
   history.pushState({reviewing: true}, '');
 }
 
@@ -1206,7 +1185,7 @@ function exitJoukkupeli(){
   groupMode=false;
   const cb=document.getElementById('mode-toggle-input2'); if(cb) cb.checked=false;
   localStorage.setItem('anki-group-mode',JSON.stringify(false));
-  const tsb=document.getElementById('tietovisa-sphere-btn'); if(tsb) tsb.classList.remove('tietovisa-active');
+  const ssb=document.getElementById('soluvisa-sphere-btn'); if(ssb) ssb.classList.remove('soluvisa-active');
   hideJoukkupeliOverlay(); updateGroupUI(); updateShowBtn(); loadBuzzers();
 }
 
@@ -1531,9 +1510,9 @@ function toggleGroupModeFromSwitch(){
   groupMode=document.getElementById('mode-toggle-input2').checked;
   if(groupMode){ showJoukkupeliOverlay(); } else { hideJoukkupeliOverlay(); }
   localStorage.setItem('anki-group-mode',JSON.stringify(groupMode));
-  // Sync tietovisa sphere button appearance
-  const tsb=document.getElementById('tietovisa-sphere-btn');
-  if(tsb) tsb.classList.toggle('tietovisa-active',groupMode);
+  // Sync Soluvisa sphere button appearance
+  const ssb=document.getElementById('soluvisa-sphere-btn');
+  if(ssb) ssb.classList.toggle('soluvisa-active',groupMode);
   updateGroupUI(); updateShowBtn(); loadBuzzers();
 }
 
@@ -1580,6 +1559,7 @@ function showDecks(){
   document.getElementById('site-brand').style.display='';
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
+  const _ssb=document.getElementById('soluvisa-sphere-btn'); if(_ssb) _ssb.style.display='none';
   document.querySelector('.comment-area').style.display='none';
   document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
@@ -1781,13 +1761,17 @@ function applyWordLinks(element){
 // FIREBASE devOwner listener
 // ════════════════════════════════════════════════════════════
 db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
-  const tietovisaLabel=document.getElementById('tietovisa-label');
+  const soluvisaBtn=document.getElementById('soluvisa-sphere-btn');
+  const inReview=document.getElementById('card-screen')?.style.display==='flex';
   if(doc.exists){
     const ownerId=doc.data().userId;
-    if(tietovisaLabel) tietovisaLabel.style.display='';
+    // Show Soluvisa button to ALL users when a dev is active and we're in review mode
+    if(soluvisaBtn) soluvisaBtn.style.display = inReview ? 'flex' : 'none';
+    // If I was the dev but someone else took over, drop my dev status
     if(devMode&&ownerId!==getUserId()){ devMode=false; localStorage.setItem('anki-dev-mode',JSON.stringify(false)); applyDevMode(); if(currentCard) loadFirestoreComments(); }
   } else {
-    if(tietovisaLabel) tietovisaLabel.style.display='none';
+    // No dev active — hide Soluvisa for everyone
+    if(soluvisaBtn) soluvisaBtn.style.display='none';
   }
 });
 
