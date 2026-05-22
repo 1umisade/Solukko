@@ -621,6 +621,7 @@ document.addEventListener('click',e=>{
 // ════════════════════════════════════════════════════════════
 let _swipeHintShown = false;   // true once dismissed this session
 let _swipeHintEl    = null;
+let _suppressNextAnswer = false; // set when hint is dismissed mid-gesture so the gesture doesn't also reveal the answer
 
 function showSwipeHint(){
   const fc = document.getElementById('flashcard');
@@ -1120,6 +1121,7 @@ async function renderCurrentCard(){
   document.getElementById('show-row').style.display='none';
   document.getElementById('grade-row').style.display='none';
   cardAnswerShown = false;
+  _suppressNextAnswer = false; // always start clean for each new card
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   requestAnimationFrame(scrollToCard);
   const fc=document.getElementById('flashcard');
@@ -1662,11 +1664,12 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   function clearIndicator(){ overlay.style.opacity='0'; stamp.style.opacity='0'; lastDir=null; }
   let startY=0, axis=null;
   function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const rect=fc.getBoundingClientRect(); const touchYInCard=isTouch?(y-rect.top):(rect.height/2); const targetTop=touchYInCard-90; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=rect.height; stamp.style.top=targetTop+'px';
+    if(_swipeHintEl){ _suppressNextAnswer = true; } // this gesture dismisses the hint — don't also show the answer
     dismissSwipeHint(); // any touch/click dismisses the hint
   }
   function onMove(x,y,event){ if(!dragging) return; const dx=x-startX; const dy=y-startY; if(axis===null&&(Math.abs(dx)>6||Math.abs(dy)>6)){ axis=Math.abs(dx)>=Math.abs(dy)?'h':'v'; } if(axis==='v'){ dragging=false; fc.style.transform=''; clearIndicator(); return; } if(axis==='h'&&event){ event.preventDefault(); } dragDelta=dx; if(Math.abs(dragDelta)>10) didSwipe=true; const rot=dragDelta*0.025; fc.style.transform='translateX('+(dragDelta*0.12)+'px) rotate('+rot+'deg)'; if(cardAnswerShown) setIndicator(dragDelta); }
-  function onEnd(){ if(!dragging) return; dragging=false; axis=null; lastStampDir=null; overlay.style.transition='opacity 0.2s ease'; clearIndicator(); if(cardAnswerShown&&Math.abs(dragDelta)>=SWIPE_THRESHOLD){ // Snap immediately then grade — no spring-back transition fighting the exit animation
-    fc.style.transition='none'; fc.style.transform=''; fc.style.animation=''; gradeCard(dragDelta>0); } else { fc.style.transition='transform 0.22s ease'; fc.style.transform=''; fc.style.animation=''; if(!cardAnswerShown&&Math.abs(dragDelta)>8){ showAnswer(); } } }
+  function onEnd(){ if(!dragging) return; dragging=false; axis=null; lastStampDir=null; overlay.style.transition='opacity 0.2s ease'; clearIndicator(); if(cardAnswerShown&&Math.abs(dragDelta)>=SWIPE_THRESHOLD){ fc.style.transition='none'; fc.style.transform=''; fc.style.animation=''; _suppressNextAnswer=false; gradeCard(dragDelta>0); } else { fc.style.transition='transform 0.22s ease'; fc.style.transform=''; fc.style.animation=''; if(!_suppressNextAnswer&&!cardAnswerShown&&Math.abs(dragDelta)>8){ showAnswer(); } // Defer clearing so the 'click' event (which fires after pointerup) still sees the flag
+    setTimeout(()=>{ _suppressNextAnswer=false; }, 400); } }
   let lastStampDir=null;
   fc.addEventListener('touchstart', e=>onStart(e.touches[0].clientX,e.touches[0].clientY,true),{passive:true});
   fc.addEventListener('touchmove',  e=>onMove(e.touches[0].clientX,e.touches[0].clientY,e),{passive:false});
@@ -1678,7 +1681,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.addEventListener('click',e=>{
     const link=e.target.closest('.word-link');
     if(link){ e.stopPropagation(); didSwipe=false; return; } // tooltip-only; no new window
-    if(_swipeHintEl) return; // hint visible — only swiping reveals the answer, not tapping
+    if(_suppressNextAnswer){ _suppressNextAnswer=false; return; } // hint was just dismissed — don't reveal answer
     if(!didSwipe) showAnswer();
     didSwipe=false;
   });
