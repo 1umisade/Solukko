@@ -227,32 +227,14 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
   line-height: 1;
   user-select: none;
   -webkit-user-select: none;
-  /* Subtle pulse while held down */
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 #darkmode-btn.pressing {
-  transform: scale(0.9);
+  transform: scale(0.92);
   box-shadow: 0 2px 6px rgba(0,0,0,0.18);
 }
-/* Progress ring while holding */
-#darkmode-btn-progress {
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #c0392b;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-#darkmode-btn-progress.visible {
-  opacity: 1;
-  animation: spinProgress 5s linear forwards;
-}
-@keyframes spinProgress {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
+body.dark-mode #darkmode-ring circle { stroke: #e07060; }
+
 
 /* ── TIETOVISA SPHERE BUTTON ─────────────────────────────── */
 #tietovisa-sphere-btn {
@@ -458,10 +440,24 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <span  id="tietovisa-label"     style="display:none;"></span>
 
     <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt -->
-    <div style="position:relative;display:inline-flex;">
-      <div id="darkmode-btn-progress"></div>
+    <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;">
+      <!-- SVG progress ring: radius 23, cx/cy 27, circumference ≈ 144.51 -->
+      <svg id="darkmode-ring" width="54" height="54"
+           style="position:absolute;top:-4px;left:-4px;pointer-events:none;overflow:visible;">
+        <circle id="darkmode-ring-circle"
+          cx="27" cy="27" r="23"
+          fill="none"
+          stroke="#c0392b"
+          stroke-width="2.8"
+          stroke-linecap="round"
+          stroke-dasharray="144.51"
+          stroke-dashoffset="144.51"
+          transform="rotate(-90 27 27)"
+          style="opacity:0;"
+        />
+      </svg>
       <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila">
-        <span id="darkmode-icon">🌙</span>
+        <span id="darkmode-icon">☀️</span>
       </button>
     </div>
   </div>
@@ -596,7 +592,7 @@ function applyDarkMode(){
   const t=document.getElementById('dark-toggle-input2'); if(t) t.checked=darkMode;
   // Update sun/moon icon
   const icon=document.getElementById('darkmode-icon');
-  if(icon) icon.textContent = darkMode ? '☀️' : '🌙';
+  if(icon) icon.textContent = darkMode ? '🌙' : '☀️';
 }
 
 function toggleDarkModeFromSwitch(){
@@ -667,40 +663,64 @@ function dismissSwipeHint(immediate){
 //                   hold 5 s = dev password prompt
 // ════════════════════════════════════════════════════════════
 function initDarkmodeBtn(){
-  const btn      = document.getElementById('darkmode-btn');
-  const progress = document.getElementById('darkmode-btn-progress');
+  const btn    = document.getElementById('darkmode-btn');
+  const circle = document.getElementById('darkmode-ring-circle');
   if(!btn) return;
 
-  let pressTimer  = null;
-  let longFired   = false;
-  let pressStart  = 0;
+  const CIRCUMFERENCE = 144.51; // 2π × 23
+  let pressTimer    = null;
+  let ringTimer     = null;
+  let longFired     = false;
+  let ringAnimStart = null;
+  let ringRaf       = null;
+
+  function resetRing(){
+    cancelAnimationFrame(ringRaf); ringRaf = null;
+    clearTimeout(ringTimer); ringTimer = null;
+    if(circle){
+      circle.style.transition    = 'none';
+      circle.style.opacity       = '0';
+      circle.style.strokeDashoffset = String(CIRCUMFERENCE);
+    }
+  }
+
+  function startRingAnimation(){
+    // Ring fills from empty (dashoffset = CIRCUMFERENCE) → full (dashoffset = 0)
+    // over 2 s using CSS transition, starting from top (rotate -90° is baked in HTML)
+    if(!circle) return;
+    circle.style.opacity          = '1';
+    circle.style.transition       = 'stroke-dashoffset 2s linear';
+    circle.style.strokeDashoffset = '0';
+  }
 
   function startPress(){
-    longFired  = false;
-    pressStart = Date.now();
+    longFired = false;
     btn.classList.add('pressing');
-    if(progress){ progress.classList.add('visible'); }
+    resetRing();
+
+    // Show ring only after 3 s; it then fills over 2 s → total 5 s
+    ringTimer = setTimeout(startRingAnimation, 3000);
+
     pressTimer = setTimeout(()=>{
       longFired = true;
       btn.classList.remove('pressing');
-      if(progress) progress.classList.remove('visible');
+      resetRing();
       promptDevMode();
     }, 5000);
   }
 
   function cancelPress(wasTap){
     clearTimeout(pressTimer); pressTimer = null;
+    clearTimeout(ringTimer);  ringTimer  = null;
+    resetRing();
     btn.classList.remove('pressing');
-    if(progress) progress.classList.remove('visible');
     if(wasTap && !longFired) toggleDarkModeFromSwitch();
   }
 
-  // We use pointerdown/up so it works on both mouse and touch
-  btn.addEventListener('pointerdown', e => { e.preventDefault(); startPress(); });
-  btn.addEventListener('pointerup',   () => cancelPress(true));
-  btn.addEventListener('pointerleave',() => cancelPress(false));
-  btn.addEventListener('pointercancel',()=> cancelPress(false));
-  // Prevent default click so we don't double-fire
+  btn.addEventListener('pointerdown',  e => { e.preventDefault(); startPress(); });
+  btn.addEventListener('pointerup',    () => cancelPress(true));
+  btn.addEventListener('pointerleave', () => cancelPress(false));
+  btn.addEventListener('pointercancel',() => cancelPress(false));
   btn.addEventListener('click', e => e.stopPropagation());
 }
 
