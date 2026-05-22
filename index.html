@@ -344,39 +344,46 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
 /* ── Right swipe: plays 0–45% of cycle, left plays 55–100% ── */
 /* Total cycle = 3.6 s so each phase ≈ 1.6 s with 0.4 s gap  */
 .swipe-hint-hand-r {
-  animation: hintSwipeR 3.6s ease-in-out infinite;
+  animation: hintSwipeR 3.6s linear infinite;
 }
 .swipe-hint-hand-l {
-  animation: hintSwipeL 3.6s ease-in-out infinite;
+  animation: hintSwipeL 3.6s linear infinite;
 }
 
 @keyframes hintSwipeR {
-  /* fade in on the left, slide to the right, fade out */
-  0%    { transform: translateX(-28px); opacity: 0; }
-  6%    { opacity: 1; }
-  38%   { transform: translateX(28px);  opacity: 1; }
-  44%   { transform: translateX(36px);  opacity: 0; }
-  44.1% { transform: translateX(-28px); opacity: 0; } /* instant reset */
-  100%  { transform: translateX(-28px); opacity: 0; }
+  /* appear at left edge */
+  0%    { transform: translateX(-30px); opacity: 0; }
+  /* visible — slow start, ease-in applied to next segment */
+  5%    { transform: translateX(-28px); opacity: 1; animation-timing-function: cubic-bezier(0.42, 0, 1, 1); }
+  /* arriving fast — fade out while still accelerating, no deceleration */
+  40%   { transform: translateX(26px);  opacity: 1; animation-timing-function: linear; }
+  44%   { transform: translateX(54px);  opacity: 0; }
+  /* instant reset off-screen */
+  44.1% { transform: translateX(-30px); opacity: 0; }
+  100%  { transform: translateX(-30px); opacity: 0; }
 }
 
 @keyframes hintSwipeL {
-  /* stays hidden during right-swipe phase, then mirrors it */
-  0%    { transform: translateX(28px);  opacity: 0; }
-  55%   { transform: translateX(28px);  opacity: 0; }
-  61%   { opacity: 1; }
-  93%   { transform: translateX(-28px); opacity: 1; }
-  99%   { transform: translateX(-36px); opacity: 0; }
-  99.1% { transform: translateX(28px);  opacity: 0; } /* instant reset */
-  100%  { transform: translateX(28px);  opacity: 0; }
+  /* hold off-screen during right phase */
+  0%    { transform: translateX(30px);  opacity: 0; }
+  55%   { transform: translateX(30px);  opacity: 0; }
+  /* appear at right edge — slow start, ease-in to next segment */
+  60%   { transform: translateX(28px);  opacity: 1; animation-timing-function: cubic-bezier(0.42, 0, 1, 1); }
+  /* arriving fast — fade out while still accelerating */
+  95%   { transform: translateX(-26px); opacity: 1; animation-timing-function: linear; }
+  99%   { transform: translateX(-54px); opacity: 0; }
+  /* instant reset */
+  99.1% { transform: translateX(30px);  opacity: 0; }
+  100%  { transform: translateX(30px);  opacity: 0; }
 }
 
 .swipe-hint-text {
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.88);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  line-height: 1.5;
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
@@ -635,7 +642,7 @@ function showSwipeHint(){
     '<div class="swipe-hint-hand-r">👉</div>' +
     '<div class="swipe-hint-hand-l">👈</div>' +
     '</div>' +
-    '<div class="swipe-hint-text">KERTAA PYYHKÄISEMÄLLÄ</div>';
+    '<div class="swipe-hint-text">selaa kysymyskortteja<br>pyyhkäisemällä</div>';
   fc.appendChild(hint);
   _swipeHintEl = hint;
 }
@@ -950,7 +957,10 @@ async function loadDecks(){
 
     function _reverseStep(ts){
       if(_lastTs===null) _lastTs=ts;
-      const elapsed=(ts-_lastTs)/1000; _lastTs=ts;
+      const elapsed=(ts-_lastTs)/1000;
+      // Throttle to ~30 fps — skip RAF ticks that arrive too quickly
+      if(elapsed<0.028){ _rafId=requestAnimationFrame(_reverseStep); return; }
+      _lastTs=ts;
       const newTime=video.currentTime-elapsed;
       if(newTime<=0.02){
         video.currentTime=0;
