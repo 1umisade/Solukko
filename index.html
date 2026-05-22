@@ -344,37 +344,29 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
 /* ── Right swipe: plays 0–45% of cycle, left plays 55–100% ── */
 /* Total cycle = 3.6 s so each phase ≈ 1.6 s with 0.4 s gap  */
 .swipe-hint-hand-r {
-  animation: hintSwipeR 3.6s linear infinite;
+  animation: hintSwipeR 3.2s linear infinite;
 }
 .swipe-hint-hand-l {
-  animation: hintSwipeL 3.6s linear infinite;
+  animation: hintSwipeL 3.2s linear infinite;
 }
 
 @keyframes hintSwipeR {
-  /* appear at left edge */
-  0%    { transform: translateX(-30px); opacity: 0; }
-  /* visible — slow start, ease-in applied to next segment */
-  5%    { transform: translateX(-28px); opacity: 1; animation-timing-function: cubic-bezier(0.42, 0, 1, 1); }
-  /* arriving fast — fade out while still accelerating, no deceleration */
-  40%   { transform: translateX(26px);  opacity: 1; animation-timing-function: linear; }
-  44%   { transform: translateX(54px);  opacity: 0; }
-  /* instant reset off-screen */
-  44.1% { transform: translateX(-30px); opacity: 0; }
-  100%  { transform: translateX(-30px); opacity: 0; }
+  0%    { transform: translateX(-18px); opacity: 0; }
+  8%    { transform: translateX(-14px); opacity: 1; }
+  38%   { transform: translateX(36px);  opacity: 1; }
+  46%   { transform: translateX(42px);  opacity: 0; }
+  47%   { transform: translateX(-18px); opacity: 0; }
+  100%  { transform: translateX(-18px); opacity: 0; }
 }
 
 @keyframes hintSwipeL {
-  /* hold off-screen during right phase */
-  0%    { transform: translateX(30px);  opacity: 0; }
-  55%   { transform: translateX(30px);  opacity: 0; }
-  /* appear at right edge — slow start, ease-in to next segment */
-  60%   { transform: translateX(28px);  opacity: 1; animation-timing-function: cubic-bezier(0.42, 0, 1, 1); }
-  /* arriving fast — fade out while still accelerating */
-  95%   { transform: translateX(-26px); opacity: 1; animation-timing-function: linear; }
-  99%   { transform: translateX(-54px); opacity: 0; }
-  /* instant reset */
-  99.1% { transform: translateX(30px);  opacity: 0; }
-  100%  { transform: translateX(30px);  opacity: 0; }
+  0%    { transform: translateX(18px);  opacity: 0; }
+  53%   { transform: translateX(18px);  opacity: 0; }
+  61%   { transform: translateX(14px);  opacity: 1; }
+  91%   { transform: translateX(-36px); opacity: 1; }
+  99%   { transform: translateX(-42px); opacity: 0; }
+  99.5% { transform: translateX(18px);  opacity: 0; }
+  100%  { transform: translateX(18px);  opacity: 0; }
 }
 
 .swipe-hint-text {
