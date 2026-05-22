@@ -926,10 +926,7 @@ async function loadDecks(){
     const shortName=deck.replace('TYKRY::','');
     const courseCode=(shortName.match(/\(([^h][^t][^t][^p].*?)\)/)||[])[1]||'';
     const cleanName=shortName.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'').replace(/\s*\(.*?\)\s*/,'').trim();
-    let bgVideo='default.mp4';
-    if(cleanName.includes('Kasvibiokemia')) bgVideo='kasvibio.mp4';
-    if(cleanName.includes('Molekyylibiologia')) bgVideo='DNApolymerase.mp4';
-    if(cleanName.includes('Immunologia')) bgVideo='Mitosis in an animal cell Under the Microscope.mp4';
+    const bgVideo = cleanName + '.mp4';
     return {deck,cleanName,courseCode,bgVideo};
   });
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
@@ -939,7 +936,7 @@ async function loadDecks(){
 
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn';
-    btn.innerHTML=`<video class="deck-video" muted loop playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"></video><div style="position:relative;z-index:2"><div class="deck-title">${item.cleanName}</div><div style="font-size:14px;opacity:0.82;font-weight:400;">${item.courseCode}</div></div>`;
+    btn.innerHTML=`<video class="deck-video" muted loop playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div style="position:relative;z-index:2"><div class="deck-title">${item.cleanName}</div><div style="font-size:14px;opacity:0.82;font-weight:400;">${item.courseCode}</div></div>`;
     const video=btn.querySelector('.deck-video');
     btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); });
     btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; });
@@ -1031,11 +1028,8 @@ function renderReviewDeckCard(deckName){
   const courseCodeMatch=withoutUrl.match(/\(([^)]+)\)/);
   const courseCode=courseCodeMatch?courseCodeMatch[1]:'';
   const cleanName=withoutUrl.replace(/\s*\(.*?\)\s*/,'').trim();
-  let bgVideo='default.mp4';
-  if(cleanName.includes('Kasvibiokemia')) bgVideo='kasvibio.mp4';
-  if(cleanName.includes('Molekyylibiologia')) bgVideo='DNApolymerase.mp4';
-  if(cleanName.includes('Immunologia')) bgVideo='Mitosis in an animal cell Under the Microscope.mp4';
-  box.innerHTML=`<button class="deck-btn" style="width:var(--deck-card-width,260px)"><video class="deck-video" muted loop playsinline preload="metadata"><source src="${bgVideo}" type="video/mp4"></video><div style="position:relative;z-index:2"><div class="deck-title">${cleanName}</div><div style="font-size:14px;opacity:0.82;font-weight:400;">${courseCode}</div></div></button><a href="${moodleLink}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.5rem 0.8rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;width:100%;box-shadow:0 2px 8px rgba(0,0,0,0.08);"><img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:5px;">Tarkista tenttiajankohdat Moodlesta</a>`;
+  const bgVideo = cleanName + '.mp4';
+  box.innerHTML=`<button class="deck-btn" style="width:var(--deck-card-width,260px)"><video class="deck-video" muted loop playsinline preload="metadata"><source src="${bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div style="position:relative;z-index:2"><div class="deck-title">${cleanName}</div><div style="font-size:14px;opacity:0.82;font-weight:400;">${courseCode}</div></div></button><a href="${moodleLink}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;background:#fffef9;border:1px solid #d4cec4;border-radius:10px;padding:0.5rem 0.8rem;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;width:100%;box-shadow:0 2px 8px rgba(0,0,0,0.08);"><img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:5px;">Tarkista tenttiajankohdat Moodlesta</a>`;
   const btn=box.querySelector('.deck-btn'),video=box.querySelector('video');
   if(btn&&video){ btn.addEventListener('mouseenter',()=>{ video.currentTime=0; video.play().catch(()=>{}); }); btn.addEventListener('mouseleave',()=>{ video.pause(); video.currentTime=0; }); }
 }
