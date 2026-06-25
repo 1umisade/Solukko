@@ -215,6 +215,7 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
 #darkmode-btn {
   width: 46px;
   height: 46px;
+  touch-action: manipulation;
   background: #fffef9;
   border: 1px solid #d4cec4;
   border-radius: 50%;
@@ -1611,10 +1612,10 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.appendChild(stamp);
   let lastDir=null;
   function clampStamp(dir){ if(dir===lastDir) return; lastDir=dir; const h=stamp.offsetHeight||60; const cardH=parseFloat(stamp.dataset.cardH)||fc.offsetHeight; const target=parseFloat(stamp.dataset.targetTop)||cardH/2; const margin=h/2+10; stamp.style.top=Math.max(margin,Math.min(cardH-margin,target))+'px'; }
-  function setIndicator(delta){ if(Math.abs(delta)<8){ clearIndicator(); return; } const progress=Math.min(1,Math.abs(delta)/SWIPE_THRESHOLD); stamp.style.opacity=String(Math.min(0.95,progress*1.3)); if(delta>0){ overlay.style.opacity=String(progress*0.12); overlay.style.background='rgba(39,174,96,1)'; stamp.style.background='#27ae60'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='Tiesin! ✓'; clampStamp('r'); } else { overlay.style.opacity='0'; overlay.style.background='transparent'; stamp.style.background='#2980b9'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='🔄 Kysy uudestaan'; clampStamp('l'); } }
+  function setIndicator(delta){ const DEADZONE=30; if(Math.abs(delta)<DEADZONE){ clearIndicator(); return; } const progress=Math.min(1,(Math.abs(delta)-DEADZONE)/(SWIPE_THRESHOLD-DEADZONE)); stamp.style.opacity=String(Math.min(0.95,0.35+progress*0.6)); if(delta>0){ overlay.style.opacity=String(progress*0.12); overlay.style.background='rgba(39,174,96,1)'; stamp.style.background='#27ae60'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='Tiesin! ✓'; clampStamp('r'); } else { overlay.style.opacity='0'; overlay.style.background='transparent'; stamp.style.background='#2980b9'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='🔄 Kysy uudestaan'; clampStamp('l'); } }
   function clearIndicator(){ overlay.style.opacity='0'; stamp.style.opacity='0'; lastDir=null; }
   let startY=0, axis=null;
-  function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const rect=fc.getBoundingClientRect(); const touchYInCard=isTouch?(y-rect.top):(rect.height/2); const targetTop=touchYInCard-90; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=rect.height; stamp.style.top=targetTop+'px';
+  function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const rect=fc.getBoundingClientRect(); const targetTop=rect.height/2; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=rect.height; stamp.style.top=targetTop+'px';
     if(_swipeHintEl){ _suppressNextAnswer = true; }
     dismissSwipeHint();
   }
