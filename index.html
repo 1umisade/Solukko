@@ -89,7 +89,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .btn-row { display: flex; gap: 1rem; width: 100%; }
 .show-btn { width: 100%; background: #56533c; color: #f5f0e8; border: none; border-radius: 8px; padding: 0.9rem; font-family: 'Lora', serif; font-size: 1rem; cursor: pointer; }
 .cloze-blank { display: inline-block; background: #e8e4db; border-radius: 4px; padding: 0 0.4em; color: transparent; min-width: 3em; }
-.cloze-answer, .cloze-answer-line { background: none; color: inherit; font-weight: 700; }
+.cloze-answer, .cloze-answer-line { background: none; color: inherit; font-weight: inherit; }
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
 .btn-wrong { background: #c0392b; }
 .btn-right { background: #27ae60; }
@@ -331,34 +331,21 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
 @keyframes hintAppear { from { opacity: 0; } to { opacity: 1; } }
 .swipe-hint.dismissing { animation: hintVanish 0.35s ease forwards !important; pointer-events: none; }
 @keyframes hintVanish { from { opacity: 1; } to { opacity: 0; } }
-.swipe-hint-hands { position: relative; width: 120px; height: 48px; }
-.swipe-hint-hand-r,
-.swipe-hint-hand-l {
+.swipe-hint-hands { position: absolute; inset: 0; z-index: 0; }
+.swipe-hint-hand {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 2.2rem; line-height: 1; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.45));
+  font-size: 8.8rem; line-height: 1; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.45));
+  animation: hintSwipe 2.4s ease-in-out infinite;
 }
-.swipe-hint-hand-r { animation: hintSwipeR 3.2s linear infinite; }
-.swipe-hint-hand-l { animation: hintSwipeL 3.2s linear infinite; }
-@keyframes hintSwipeR {
-  0%    { transform: translateX(-18px); opacity: 0; }
-  8%    { transform: translateX(-14px); opacity: 1; }
-  38%   { transform: translateX(36px);  opacity: 1; }
-  46%   { transform: translateX(42px);  opacity: 0; }
-  47%   { transform: translateX(-18px); opacity: 0; }
-  100%  { transform: translateX(-18px); opacity: 0; }
-}
-@keyframes hintSwipeL {
-  0%    { transform: translateX(18px);  opacity: 0; }
-  53%   { transform: translateX(18px);  opacity: 0; }
-  61%   { transform: translateX(14px);  opacity: 1; }
-  91%   { transform: translateX(-36px); opacity: 1; }
-  99%   { transform: translateX(-42px); opacity: 0; }
-  99.5% { transform: translateX(18px);  opacity: 0; }
-  100%  { transform: translateX(18px);  opacity: 0; }
+.swipe-hint-hand span { display: inline-block; transform: rotate(-90deg); }
+@keyframes hintSwipe {
+  0%, 100% { transform: translateX(-48px); }
+  50%      { transform: translateX(48px); }
 }
 .swipe-hint-text {
+  position: relative; z-index: 1;
   color: rgba(255, 255, 255, 0.88); font-family: 'JetBrains Mono', monospace;
-  font-size: 0.68rem; letter-spacing: 0.04em; text-align: center; line-height: 1.5;
+  font-size: 1.7rem; letter-spacing: 0.04em; text-align: center; line-height: 1.5;
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
@@ -629,8 +616,7 @@ function showSwipeHint(){
   hint.className = 'swipe-hint';
   hint.innerHTML =
     '<div class="swipe-hint-hands">' +
-    '<div class="swipe-hint-hand-r">👉</div>' +
-    '<div class="swipe-hint-hand-l">👈</div>' +
+    '<div class="swipe-hint-hand"><span>👉</span></div>' +
     '</div>' +
     '<div class="swipe-hint-text">selaa kysymyskortteja<br>pyyhkäisemällä</div>';
   fc.appendChild(hint);
@@ -1362,6 +1348,12 @@ function showAnswer(){
   else { document.getElementById('answer-section').style.display='block'; }
   document.getElementById('show-row').style.display='none';
   document.getElementById('grade-row').style.display='none';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const fc=document.getElementById('flashcard');
+    if(fc && fc.getBoundingClientRect().bottom > window.innerHeight){
+      window.scrollTo({top:fc.getBoundingClientRect().top+window.scrollY-24, behavior:'smooth'});
+    }
+  }));
 }
 
 function gradeCard(correct){
