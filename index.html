@@ -235,6 +235,29 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
   transform: scale(0.92);
   box-shadow: 0 2px 6px rgba(0,0,0,0.18);
 }
+#shuffle-btn {
+  width: 46px;
+  height: 46px;
+  touch-action: manipulation;
+  background: #fffef9;
+  border: 1px solid #d4cec4;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  line-height: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+#shuffle-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
 body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 
 /* ── EXIT DEV MODE SPHERE BUTTON ─────────────────────────── */
@@ -408,6 +431,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <input id="dark-toggle-input2"  type="checkbox" style="display:none">
     <input id="dev-toggle-input2"   type="checkbox" style="display:none">
     <span  id="tietovisa-label"     style="display:none;"></span>
+
+    <!-- 🔀 Shuffle — randomise the order of the remaining cards -->
+    <button id="shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">
+      <span id="shuffle-icon">🔀</span>
+    </button>
 
     <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt -->
     <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;">
@@ -1081,7 +1109,7 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
   _suppressNextAnswer = false;
   selectedGroup=null; updateGroupUI(); renderCardOverview();
-  requestAnimationFrame(()=>{ fitQuestionToViewport(); scrollToCard(); });
+  requestAnimationFrame(scrollToCard);
   const fc=document.getElementById('flashcard');
   fc.style.transition = 'none';
   fc.style.transform  = '';
@@ -1095,6 +1123,13 @@ async function renderCurrentCard(){
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
   if(ca) ca.style.top=ft+'px';
+}
+
+function shuffleDeck(){
+  if(currentCard) queue.push(currentCard);   // return the current card to the pool
+  if(!queue.length) return;
+  for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; }
+  nextCard();
 }
 
 async function nextCard(){
@@ -1351,7 +1386,7 @@ function showAnswer(){
   document.getElementById('grade-row').style.display='none';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     const fc=document.getElementById('flashcard');
-    if(fc && fc.getBoundingClientRect().bottom > window.innerHeight){
+    if(fc && fc.getBoundingClientRect().bottom > viewportH()){
       window.scrollTo({top:fc.getBoundingClientRect().top+window.scrollY-24, behavior:'smooth'});
     }
   }));
@@ -1654,30 +1689,17 @@ function positionCommentArea(){
   if(window.matchMedia('(orientation: portrait)').matches){ ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform=''; }
   else { const csRect=cs.getBoundingClientRect(); const w=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--deck-card-width'))||260; ca.style.position='absolute'; ca.style.width=w+'px'; ca.style.left=(csRect.right+window.scrollX+50)+'px'; ca.style.top=(csRect.top+window.scrollY+52)+'px'; ca.style.transform=''; }
 }
-window.addEventListener('resize',()=>{ fitQuestionToViewport(); positionCommentArea(); });
+window.addEventListener('resize',positionCommentArea);
 
-function fitQuestionToViewport(){
-  if(cardAnswerShown) return;                       // only shrink the unturned card
-  const fc=document.getElementById('flashcard');
-  const qc=document.getElementById('question-content');
-  if(!fc||!qc) return;
-  qc.style.fontSize='';                             // reset to default (1.2rem)
-  const availH=window.innerHeight-48;               // leave breathing room top+bottom
-  const fcH=fc.offsetHeight;
-  if(fcH<=availH) return;                           // already fits
-  const contentH=qc.offsetHeight; if(!contentH) return;
-  const nonContentH=fcH-contentH;                   // padding, borders, stars row
-  const targetContentH=Math.max(40,availH-nonContentH);
-  const scale=Math.max(0.4,Math.min(1,targetContentH/contentH));
-  qc.style.fontSize=(1.2*scale).toFixed(3)+'rem';
-}
+// Height of the *visible* viewport — excludes the mobile browser's URL/search bar
+function viewportH(){ return (window.visualViewport && window.visualViewport.height) || window.innerHeight; }
 
 function scrollToCard(){
   if(!window.matchMedia('(orientation: portrait)').matches){ positionCommentArea(); return; }
   const fc=document.getElementById('flashcard'), cs=document.getElementById('card-screen');
   if(!fc||!cs) return;
   positionCommentArea();
-  const vpH=window.innerHeight, fcH=fc.offsetHeight;
+  const vpH=viewportH(), fcH=fc.offsetHeight;
   const fcOffsetInCS=fc.getBoundingClientRect().top-cs.getBoundingClientRect().top;
   cs.style.marginTop=Math.max(0,(vpH-fcH)/2-fcOffsetInCS+24)+'px';
   const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
