@@ -85,6 +85,17 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .io-overlay svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 
+/* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
+.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; }
+.progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
+.progress-fill { height: 100%; width: 0%; background: #27ae60; border-radius: 999px; transition: width 0.4s ease; }
+body.dark-mode .progress-tube { background: #5a5148; }
+.ball-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, box-shadow 0.1s ease; }
+.ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+.ball-btn.grade-correct { background: #27ae60; border-color: #27ae60; color: #ffffff; }
+.ball-btn.grade-again { color: #8a7d72; }
+body.dark-mode .ball-btn.grade-again { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
+
 /* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
 .btn-row { display: flex; gap: 1rem; width: 100%; }
 .show-btn { width: 100%; background: #56533c; color: #f5f0e8; border: none; border-radius: 8px; padding: 0.9rem; font-family: 'Lora', serif; font-size: 1rem; cursor: pointer; }
@@ -540,6 +551,16 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="answer-section" id="answer-section">
       <div class="card-content" id="answer-content"></div>
     </div>
+  </div>
+
+  <div class="progress-row" id="progress-row" style="display:none">
+    <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Tiesin">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </button>
+    <div class="progress-tube"><div class="progress-fill" id="progress-fill"></div></div>
+    <button class="ball-btn grade-again" onclick="gradeCard(false)" title="Kysy uudestaan">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+    </button>
   </div>
 
   <div class="btn-row" id="show-row">
@@ -1133,6 +1154,8 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
   _suppressNextAnswer = false;
   document.querySelector('.comment-area').style.display='none';   // hidden until the answer is revealed
+  document.getElementById('progress-row').style.display='flex';
+  updateProgress();
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   requestAnimationFrame(()=>{ scrollToCard(); fitDeckTitle(); });
   const fc=document.getElementById('flashcard');
@@ -1148,6 +1171,14 @@ async function renderCurrentCard(){
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
   if(ca) ca.style.top=ft+'px';
+}
+
+// Fill the progress tube proportionally to cards marked "known"
+function updateProgress(){
+  const fill=document.getElementById('progress-fill'); if(!fill) return;
+  const total=reviewCards.length||1;
+  const known=reviewCards.filter(c=>cardGrades[c.cardId]==='known').length;
+  fill.style.width=(known/total*100)+'%';
 }
 
 let shuffleMode=false;
@@ -1170,7 +1201,7 @@ async function nextCard(){
     document.getElementById('card-stars').textContent='';
     document.getElementById('question-content').innerHTML='<div style="width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:#6b6055;text-align:center;">✓ Valmista tuli</div>';
     document.getElementById('answer-content').innerHTML='';
-    ['answer-section','show-row','grade-row'].forEach(id=>document.getElementById(id).style.display='none');
+    ['answer-section','show-row','grade-row','progress-row'].forEach(id=>document.getElementById(id).style.display='none');
     return;
   }
   currentCard=queue.shift();
@@ -1428,7 +1459,7 @@ function showAnswer(){
 
 function gradeCard(correct){
   if(coinAnimating) return;
-  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
+  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
   const fc=document.getElementById('flashcard');
   fc.style.transition = 'none';
   fc.style.transform  = '';
@@ -1499,7 +1530,7 @@ function renderCardOverview(){
   var _name=_noUrl.replace(/\s*\(.*?\)\s*/,'').trim();
   var mbtn=document.getElementById('moodle-btn');
   if(mbtn){ if(_mLink){ mbtn.href=_mLink; mbtn.style.display='flex'; } else { mbtn.style.display='none'; } }
-  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-bottom:0.6rem;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;">'+_code+'</div>':'')+'</div>';
+  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-bottom:0.6rem;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;text-align:left;">'+_code+'</div>':'')+'</div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
