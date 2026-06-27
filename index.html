@@ -358,8 +358,8 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
   display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.word-link { cursor: pointer; border-bottom: 1px dashed transparent; transition: border-color 0.15s; }
-.word-link:hover { border-bottom-color: #8a7d72; }
+.word-link { cursor: pointer; border-bottom: 1px dotted #8a7d72; transition: border-color 0.15s; }
+.word-link:hover { border-bottom-color: #56533c; }
 body.dark-mode .word-link { border-bottom-color: #6d5f52; }
 body.dark-mode .word-link:hover { border-bottom-color: #eadfce; }
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(520px, calc(100vw - 24px)); max-width: min(520px, calc(100vw - 24px)); min-width: 180px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.75rem 1rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
@@ -1081,7 +1081,7 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
   _suppressNextAnswer = false;
   selectedGroup=null; updateGroupUI(); renderCardOverview();
-  requestAnimationFrame(scrollToCard);
+  requestAnimationFrame(()=>{ fitQuestionToViewport(); scrollToCard(); });
   const fc=document.getElementById('flashcard');
   fc.style.transition = 'none';
   fc.style.transform  = '';
@@ -1654,7 +1654,23 @@ function positionCommentArea(){
   if(window.matchMedia('(orientation: portrait)').matches){ ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform=''; }
   else { const csRect=cs.getBoundingClientRect(); const w=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--deck-card-width'))||260; ca.style.position='absolute'; ca.style.width=w+'px'; ca.style.left=(csRect.right+window.scrollX+50)+'px'; ca.style.top=(csRect.top+window.scrollY+52)+'px'; ca.style.transform=''; }
 }
-window.addEventListener('resize',positionCommentArea);
+window.addEventListener('resize',()=>{ fitQuestionToViewport(); positionCommentArea(); });
+
+function fitQuestionToViewport(){
+  if(cardAnswerShown) return;                       // only shrink the unturned card
+  const fc=document.getElementById('flashcard');
+  const qc=document.getElementById('question-content');
+  if(!fc||!qc) return;
+  qc.style.fontSize='';                             // reset to default (1.2rem)
+  const availH=window.innerHeight-48;               // leave breathing room top+bottom
+  const fcH=fc.offsetHeight;
+  if(fcH<=availH) return;                           // already fits
+  const contentH=qc.offsetHeight; if(!contentH) return;
+  const nonContentH=fcH-contentH;                   // padding, borders, stars row
+  const targetContentH=Math.max(40,availH-nonContentH);
+  const scale=Math.max(0.4,Math.min(1,targetContentH/contentH));
+  qc.style.fontSize=(1.2*scale).toFixed(3)+'rem';
+}
 
 function scrollToCard(){
   if(!window.matchMedia('(orientation: portrait)').matches){ positionCommentArea(); return; }
