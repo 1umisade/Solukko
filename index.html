@@ -258,6 +258,24 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
   transform: scale(0.92);
   box-shadow: 0 2px 6px rgba(0,0,0,0.18);
 }
+#shuffle-btn.active { background: #27ae60; border-color: #27ae60; }
+body.dark-mode #shuffle-btn.active { background: #27ae60 !important; border-color: #27ae60 !important; }
+#moodle-btn {
+  width: 46px;
+  height: 46px;
+  background: #fffef9;
+  border: 1px solid #d4cec4;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+#moodle-btn img { width: 28px; height: 28px; object-fit: contain; border-radius: 5px; }
+body.dark-mode #moodle-btn { background: #3a312b; border-color: #6d5f52; }
 body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 
 /* ── EXIT DEV MODE SPHERE BUTTON ─────────────────────────── */
@@ -381,10 +399,10 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
   display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.word-link { cursor: pointer; border-bottom: 1px dotted #8a7d72; transition: border-color 0.15s; }
-.word-link:hover { border-bottom-color: #56533c; }
-body.dark-mode .word-link { border-bottom-color: #6d5f52; }
-body.dark-mode .word-link:hover { border-bottom-color: #eadfce; }
+.word-link { cursor: pointer; background-image: radial-gradient(circle, #2b211b 1.2px, transparent 1.6px); background-repeat: repeat-x; background-size: 8px 3px; background-position: 0 100%; padding-bottom: 3px; }
+.word-link:hover { background-image: radial-gradient(circle, #000 1.2px, transparent 1.6px); }
+body.dark-mode .word-link { background-image: radial-gradient(circle, #cbbda8 1.2px, transparent 1.6px); }
+body.dark-mode .word-link:hover { background-image: radial-gradient(circle, #eadfce 1.2px, transparent 1.6px); }
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(520px, calc(100vw - 24px)); max-width: min(520px, calc(100vw - 24px)); min-width: 180px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.75rem 1rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
@@ -431,6 +449,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <input id="dark-toggle-input2"  type="checkbox" style="display:none">
     <input id="dev-toggle-input2"   type="checkbox" style="display:none">
     <span  id="tietovisa-label"     style="display:none;"></span>
+
+    <!-- Moodle — exam dates for the current course -->
+    <a id="moodle-btn" href="#" target="_blank" rel="noopener" title="Tarkista tenttiajankohdat Moodlesta" style="display:none;">
+      <img src="moodlelogo.png" alt="Moodle">
+    </a>
 
     <!-- 🔀 Shuffle — randomise the order of the remaining cards -->
     <button id="shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">
@@ -990,6 +1013,7 @@ async function startDeck(deckName){
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   reviewCards=infos; queue=infos.slice();
+  shuffleMode=false; document.getElementById('shuffle-btn')?.classList.remove('active');
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
@@ -998,7 +1022,7 @@ async function startDeck(deckName){
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
   sessionStorage.setItem('solukko-savedDeck', deckName);
-  if(window.matchMedia('(orientation: portrait)').matches) setTimeout(scrollToCard, 200);
+  setTimeout(scrollToCard, 200);
   document.getElementById('site-brand').style.display='none';
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='flex';
@@ -1125,11 +1149,18 @@ async function renderCurrentCard(){
   if(ca) ca.style.top=ft+'px';
 }
 
+let shuffleMode=false;
 function shuffleDeck(){
-  if(currentCard) queue.push(currentCard);   // return the current card to the pool
-  if(!queue.length) return;
-  for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; }
-  nextCard();
+  shuffleMode=!shuffleMode;
+  document.getElementById('shuffle-btn')?.classList.toggle('active',shuffleMode);
+  if(shuffleMode){
+    // randomise the order of the upcoming cards
+    for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; }
+  } else {
+    // restore the deck's original order from the current card onward
+    const ci=currentCard?reviewCards.indexOf(currentCard):-1;
+    queue=reviewCards.slice(ci+1);
+  }
 }
 
 async function nextCard(){
@@ -1156,7 +1187,7 @@ function loadCommentForCard(){
   document.getElementById('card-comment').value='';
   document.getElementById('comment-status').textContent='';
   loadFirestoreComments();
-  if(window.matchMedia('(orientation: portrait)').matches) setTimeout(scrollToCard, 600);
+  setTimeout(scrollToCard, 600);
 }
 function saveCommentForCard(){ if(currentCard) localStorage.setItem(commentKey(currentCard),document.getElementById('card-comment').value); }
 function showCommentDisplay(text){
@@ -1463,7 +1494,9 @@ function renderCardOverview(){
   var _noUrl=_short.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'');
   var _code=(_noUrl.match(/\(([^)]+)\)/)||[])[1]||'';
   var _name=_noUrl.replace(/\s*\(.*?\)\s*/,'').trim();
-  var deckHeaderHtml='<div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div style="flex:1;"><div class="deck-header-name" style="font-size:1.35rem;font-weight:700;line-height:1.25;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;">'+_code+'</div>':'')+  '</div>'+(_mLink?'<a href="'+_mLink+'" target="_blank" title="Tarkista tenttiajankohdat Moodlesta" style="width:44px;height:44px;border-radius:50%;background:#fffef9;border:1px solid #d4cec4;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,0.1);flex-shrink:0;text-decoration:none;"><img src="moodlelogo.png" alt="Moodle" style="width:28px;height:28px;object-fit:contain;border-radius:4px;"></a>':'')+  '</div>';
+  var mbtn=document.getElementById('moodle-btn');
+  if(mbtn){ if(_mLink){ mbtn.href=_mLink; mbtn.style.display='flex'; } else { mbtn.style.display='none'; } }
+  var deckHeaderHtml='<div style="width:100%;margin-bottom:0.6rem;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div class="deck-header-name" style="font-size:1.35rem;font-weight:700;line-height:1.25;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;">'+_code+'</div>':'')+'</div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
@@ -1486,7 +1519,7 @@ function renderCardOverview(){
   listenToKuvaajat();
 }
 
-function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); nextCardFromCurrent(); }
+function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } } nextCardFromCurrent(); }
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2')?.checked??true; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
 
@@ -1695,18 +1728,17 @@ window.addEventListener('resize',positionCommentArea);
 function viewportH(){ return (window.visualViewport && window.visualViewport.height) || window.innerHeight; }
 
 function scrollToCard(){
-  if(!window.matchMedia('(orientation: portrait)').matches){ positionCommentArea(); return; }
   const fc=document.getElementById('flashcard'), cs=document.getElementById('card-screen');
   if(!fc||!cs) return;
-  positionCommentArea();
   const vpH=viewportH(), fcH=fc.offsetHeight;
   const fcOffsetInCS=fc.getBoundingClientRect().top-cs.getBoundingClientRect().top;
   cs.style.marginTop=Math.max(0,(vpH-fcH)/2-fcOffsetInCS+24)+'px';
   const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
-  const scrollTop=Math.max(0,fcDocTop-(vpH-fcH)/2);
+  const scrollTop=fcH>=vpH ? Math.max(0,fcDocTop-24) : Math.max(0,fcDocTop-(vpH-fcH)/2);
   const grid=document.getElementById('card-overview-grid');
   if(grid){ grid.style.marginTop=Math.max(16,(scrollTop+vpH)-(fcDocTop+fcH)+24)+'px'; }
   window.scrollTo({top:scrollTop,behavior:'instant'});
+  positionCommentArea();
 }
 
 
