@@ -72,15 +72,16 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
-.flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; }
+.flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
 .flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y; will-change: transform; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
+.dim-paren { opacity: 0.5; }
 .answer-section .card-content { text-align: left; }
 
 /* ── 7. IMAGE OCCLUSION ─────────────────────────────────── */
 .io-card-image { position: relative; width: 100%; display: inline-block; }
-.io-card-image img { max-width: 100%; height: auto; display: block; }
+.io-card-image img { max-width: 100%; height: auto; max-height: none; display: block; }
 .io-overlay { position: absolute; inset: 0; pointer-events: none; }
 .io-overlay svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
@@ -1087,6 +1088,8 @@ async function renderCurrentCard(){
   document.getElementById('question-content').innerHTML=qHtml;
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
+  dimParentheses(document.getElementById('question-content'));
+  dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
   applyWordLinks(document.getElementById('answer-content'));
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
@@ -1388,7 +1391,7 @@ function renderCardStars(){
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
   cardAnswerShown=true;
-  if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; applyWordLinks(document.getElementById('question-content')); document.getElementById('answer-section').style.display='none'; }
+  if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; dimParentheses(document.getElementById('question-content')); applyWordLinks(document.getElementById('question-content')); document.getElementById('answer-section').style.display='none'; }
   else { document.getElementById('answer-section').style.display='block'; }
   document.getElementById('show-row').style.display='none';
   document.getElementById('grade-row').style.display='none';
@@ -1409,21 +1412,10 @@ function gradeCard(correct){
   if(coinAnimating) return;
   if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
   const fc=document.getElementById('flashcard');
+  const pr=document.getElementById('progress-row');
   const ov=document.getElementById('card-overlay');
-  if(ov){ ov.style.transition='opacity 0.22s ease'; ov.style.background=correct?'rgba(73,141,101,0.55)':'rgba(0,0,0,0.5)'; ov.style.opacity='1'; }
-  if(correct){
-    const tube=document.querySelector('.progress-tube'), fill=document.getElementById('progress-fill');
-    [tube,fill].forEach(el=>{ if(el){ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1000); } });
-  }
-  fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
-  fc.style.transition = 'none';
-  fc.style.transform  = '';
-  fc.style.animation  = 'none';
-  void fc.offsetWidth;
-  fc.style.animation  = '';
-  fc.classList.add('card-out-up');
   const doNext=()=>{
-    fc.classList.remove('card-out-left','card-out-right','card-out-up');
+    [fc,pr].forEach(el=>el.classList.remove('card-out-left','card-out-right','card-out-up'));
     if(ov){ ov.style.transition='none'; ov.style.opacity='0'; }
     if(correct&&groupMode){
       if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
@@ -1434,7 +1426,24 @@ function gradeCard(correct){
     if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
     selectedGroup=null; updateGroupUI(); nextCard();
   };
-  setTimeout(doNext, correct?1100:260);
+  const flyOut=()=>{                                  // card + bar fly up together
+    if(ov){ ov.style.transition='opacity 0.22s ease'; ov.style.background=correct?'rgba(73,141,101,0.55)':'rgba(0,0,0,0.5)'; ov.style.opacity='1'; }
+    [fc,pr].forEach(el=>{
+      el.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
+      el.style.transition='none'; el.style.transform=''; el.style.animation='none';
+      void el.offsetWidth;
+      el.style.animation=''; el.classList.add('card-out-up');
+    });
+    setTimeout(doNext,280);
+  };
+  if(correct){                                        // paint the card green while the bar glows
+    if(ov){ ov.style.transition='opacity 0.22s ease'; ov.style.background='rgba(73,141,101,0.55)'; ov.style.opacity='1'; }
+    const tube=document.querySelector('.progress-tube'), fill=document.getElementById('progress-fill');
+    [tube,fill].forEach(el=>{ if(el){ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } });
+    setTimeout(()=>{ [tube,fill].forEach(el=>el&&el.classList.remove('flash')); flyOut(); },1000);
+  } else {
+    flyOut();
+  }
 }
 
 
@@ -1797,6 +1806,25 @@ function _wrapTextNode(textNode){
   filtered.forEach(m=>{ if(m.start>pos) frag.appendChild(document.createTextNode(text.slice(pos,m.start))); const span=document.createElement('span'); span.className='word-link'; span.dataset.cardIndex=m.cardIndex; span.textContent=m.text; frag.appendChild(span); pos=m.end; });
   if(pos<text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
   textNode.parentNode.replaceChild(frag,textNode);
+}
+
+// Dim text inside parentheses to 50% opacity
+function dimParentheses(element){
+  if(!element) return;
+  const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT,{
+    acceptNode(node){ let p=node.parentElement; while(p&&p!==element){ if(p.classList&&(p.classList.contains('word-link')||p.classList.contains('dim-paren')||p.classList.contains('cloze-blank'))) return NodeFilter.FILTER_REJECT; p=p.parentElement; } return /\([^()]*\)/.test(node.textContent)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }
+  });
+  const nodes=[]; let n; while((n=walker.nextNode())) nodes.push(n);
+  nodes.forEach(textNode=>{
+    const text=textNode.textContent; const re=/\([^()]*\)/g; let m, last=0; const frag=document.createDocumentFragment();
+    while((m=re.exec(text))!==null){
+      if(m.index>last) frag.appendChild(document.createTextNode(text.slice(last,m.index)));
+      const span=document.createElement('span'); span.className='dim-paren'; span.textContent=m[0]; frag.appendChild(span);
+      last=m.index+m[0].length;
+    }
+    if(last<text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    textNode.parentNode.replaceChild(frag,textNode);
+  });
 }
 
 function applyWordLinks(element){
