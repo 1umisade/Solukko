@@ -62,7 +62,7 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 .iphone-toggle-wrap input { display: none; }
 .iphone-toggle { width: 51px; height: 31px; background: #e9e5dd; border-radius: 999px; position: relative; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: background 0.25s ease; }
 .iphone-toggle::before { content: ""; position: absolute; width: 27px; height: 27px; left: 2px; top: 2px; background: #fffef9; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.28); transition: transform 0.25s ease; }
-.iphone-toggle-wrap input:checked + .iphone-toggle { background: #34c759; }
+.iphone-toggle-wrap input:checked + .iphone-toggle { background: #59a26b; }
 .iphone-toggle-wrap input:checked + .iphone-toggle::before { transform: translateX(20px); }
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 
@@ -88,13 +88,19 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
 .progress-row { width: 100%; display: flex; align-items: center; gap: 12px; }
 .progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
-.progress-fill { height: 100%; width: 0%; background: #27ae60; border-radius: 999px; transition: width 0.4s ease; }
+.progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
+body.dark-mode .progress-fill { background: #6f8f77; }
 body.dark-mode .progress-tube { background: #5a5148; }
+.progress-tube.flash { overflow: visible; }
+@keyframes fillGlow { 0%,100% { filter: brightness(1); box-shadow: none; } 45% { filter: brightness(1.9); box-shadow: 0 0 20px 6px rgba(110,200,150,0.95); } }
+.progress-fill.flash { animation: fillGlow 1s ease; }
 .ball-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, box-shadow 0.1s ease; }
 .ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
-.ball-btn.grade-correct { background: #27ae60; border-color: #27ae60; color: #ffffff; }
+.ball-btn.grade-correct { background: #9ab8a1; border-color: #9ab8a1; color: #ffffff; }
+body.dark-mode .ball-btn.grade-correct { background: #6f8f77; border-color: #6f8f77; }
 .ball-btn.grade-again { color: #8a7d72; }
 body.dark-mode .ball-btn.grade-again { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
+body.dark-mode #eye-row .ball-btn { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
 
 /* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
 .btn-row { display: flex; gap: 1rem; width: 100%; }
@@ -103,7 +109,7 @@ body.dark-mode .ball-btn.grade-again { background: #3a312b; border-color: #6d5f5
 .cloze-answer, .cloze-answer-line { background: none; color: inherit; font-weight: inherit; }
 .grade-btn { flex: 1; border: none; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; cursor: pointer; color: white; }
 .btn-wrong { background: #c0392b; }
-.btn-right { background: #27ae60; }
+.btn-right { background: #498d65; }
 
 /* ── 9. TUMMATILA ────────────────────────────────────────── */
 body.dark-mode { background: #2b211b; color: #eadfce; }
@@ -153,7 +159,7 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 .comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; pointer-events: none; }
 .comment-box.open { max-height: 600px; overflow: visible; cursor: default; padding-bottom: 52px; }
 .comment-box.open::before { opacity: 0; pointer-events: none; }
-.comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #27ae60; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #498d65; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
 .comment-box.open .comment-img-btn { display: flex; align-items: center; justify-content: center; }
 .comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
@@ -187,7 +193,7 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 .deck-header-code  { font-family: 'JetBrains Mono', monospace; color: #6b6055; }
 
 /* ── 12. OVERVIEW GRID ───────────────────────────────────── */
-#card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 1.1rem; margin-top: 12rem; }
+#card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 2.5rem; margin-top: 12rem; }
 .overview-section { width: 100%; }
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
 .overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
@@ -212,11 +218,11 @@ body.dark-mode .overview-card-stars { color: #e8b84b; }
 
 .subdeck-video-embed { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; margin: 0.5rem 0; background: #000; }
 .subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
-.overview-card.active  { border: 2px solid #27ae60; }
-.overview-card.known   { background: #e6f4ea; border-color: #8bc79a; }
+.overview-card.active  { border: 2px solid #498d65; }
+.overview-card.known   { background: #ebf1ed; border-color: #9ab8a1; }
 .overview-card.unknown { background: #fffef9; border-color: #d4cec4; }
 body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode .overview-card.known   { background: #294333; border-color: #5f9f70; }
+body.dark-mode .overview-card.known   { background: #303d35; border-color: #6f8f77; }
 body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f52; }
 
 .card-stars { position: absolute; right: 1rem; bottom: 0.8rem; font-size: 1.4rem; line-height: 1; color: #d4a017; letter-spacing: 0.08em; cursor: help; }
@@ -269,8 +275,8 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
   transform: scale(0.92);
   box-shadow: 0 2px 6px rgba(0,0,0,0.18);
 }
-#shuffle-btn.active { background: #27ae60; border-color: #27ae60; }
-body.dark-mode #shuffle-btn.active { background: #27ae60 !important; border-color: #27ae60 !important; }
+#shuffle-btn.active { background: #498d65; border-color: #498d65; }
+body.dark-mode #shuffle-btn.active { background: #498d65 !important; border-color: #498d65 !important; }
 #moodle-btn {
   width: 46px;
   height: 46px;
@@ -328,8 +334,8 @@ body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 /* ── 13. TIETOVISA-RYHMÄKORTIT & KOLIKKOANIMAATIO ──────── */
 .group-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.8rem; position: relative; overflow: hidden; min-height: 190px; cursor: pointer; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
 body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
-.group-card.selected { border: 3px solid #27ae60; box-shadow: 0 0 0 4px rgba(39,174,96,0.22), 0 6px 18px rgba(0,0,0,0.16); background: #f2fff7; }
-.group-card.selected .group-name { color: #1a7f3c; }
+.group-card.selected { border: 3px solid #498d65; box-shadow: 0 0 0 4px rgba(73,141,101,0.22), 0 6px 18px rgba(0,0,0,0.16); background: #f4faf6; }
+.group-card.selected .group-name { color: #336644; }
 .group-name { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 600; color: #1a1612; margin-bottom: 0.6rem; user-select: none; }
 .group-money { position: absolute; bottom: 6px; left: 10px; font-family: "Trebuchet MS","Arial Black",sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: -0.04em; color: #8a5b00; text-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 2px 3px rgba(0,0,0,0.18); line-height: 1; }
 .coin-tower { position: absolute; right: 14px; bottom: 10px; width: 54px; min-height: 70px; }
@@ -342,14 +348,16 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 @keyframes moneyBounce { 0%{transform:scale(1)} 35%{transform:scale(1.28)} 65%{transform:scale(0.96)} 100%{transform:scale(1)} }
 
 /* ── 14. KORTTIANIMAATIOT ────────────────────────────────── */
-@keyframes cardSlideOutLeft { from{transform:translateX(0);opacity:1} to{transform:translateX(-50px);opacity:0} }
+@keyframes cardSlideOutLeft { from{transform:translateX(0);opacity:1} to{transform:translateX(-130px);opacity:0} }
 @keyframes cardSlideInRight { from{transform:translateX(50px);opacity:0} to{transform:translateX(0);opacity:1} }
-@keyframes cardSlideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(50px);opacity:0} }
+@keyframes cardSlideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(130px);opacity:0} }
 @keyframes cardSlideInLeft { from{transform:translateX(-50px);opacity:0} to{transform:translateX(0);opacity:1} }
-.card-out-left { animation: cardSlideOutLeft 0.18s ease forwards; pointer-events:none; }
+.card-out-left { animation: cardSlideOutLeft 0.26s ease forwards; pointer-events:none; }
 .card-in-right { animation: cardSlideInRight 0.18s ease forwards; }
-.card-out-right { animation: cardSlideOutRight 0.18s ease forwards; pointer-events:none; }
+.card-out-right { animation: cardSlideOutRight 0.26s ease forwards; pointer-events:none; }
 .card-in-left { animation: cardSlideInLeft 0.18s ease forwards; }
+@keyframes cardSlideOutUp { from{transform:translateY(0);opacity:1} to{transform:translateY(-160px);opacity:0} }
+.card-out-up { animation: cardSlideOutUp 0.26s ease forwards; pointer-events:none; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* ── 15. TIETOVISA-OVERLAY ──────────────────────────────── */
@@ -365,43 +373,6 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
   .comment-area { position: static; width: 100%; }
 }
 
-/* ── SWIPE HINT OVERLAY (first card of a new deck) ──────── */
-.swipe-hint {
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.9rem;
-  pointer-events: none;
-  background: rgba(26, 22, 18, 0.38);
-  animation: hintAppear 0.6s ease forwards;
-}
-body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
-@keyframes hintAppear { from { opacity: 0; } to { opacity: 1; } }
-.swipe-hint.dismissing { animation: hintVanish 0.35s ease forwards !important; pointer-events: none; }
-@keyframes hintVanish { from { opacity: 1; } to { opacity: 0; } }
-.swipe-hint-hands { position: absolute; inset: 0; z-index: 0; }
-.swipe-hint-hand {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 8.8rem; line-height: 1; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.45));
-  animation: hintSwipe 2.4s ease-in-out infinite;
-}
-.swipe-hint-hand span { display: inline-block; transform: rotate(-90deg); }
-@keyframes hintSwipe {
-  0%, 100% { transform: translateX(-48px); }
-  50%      { transform: translateX(48px); }
-}
-.swipe-hint-text {
-  position: relative; z-index: 1;
-  color: rgba(255, 255, 255, 0.88); font-family: 'JetBrains Mono', monospace;
-  font-size: 1.7rem; letter-spacing: 0.04em; text-align: center; line-height: 1.5;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-}
-
 /* ── STAR RATING TOOLTIP ─────────────────────────────────── */
 #star-tooltip {
   position: fixed; z-index: 99999; background: rgba(22, 18, 14, 0.88); color: #f5f0e8;
@@ -410,9 +381,8 @@ body.dark-mode .swipe-hint { background: rgba(0, 0, 0, 0.52); }
   display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.word-link { cursor: pointer; background-image: radial-gradient(circle, #2b211b 1.2px, transparent 1.6px); background-repeat: repeat-x; background-size: 8px 3px; background-position: 0 100%; padding-bottom: 3px; }
-.word-link:hover { background-image: radial-gradient(circle, #000 1.2px, transparent 1.6px); }
-body.dark-mode .word-link { background-image: radial-gradient(circle, #cbbda8 1.2px, transparent 1.6px); }
+.word-link { cursor: pointer; padding-bottom: 3px; }
+.word-link:hover { background-image: radial-gradient(circle, #2b211b 1.2px, transparent 1.6px); background-repeat: repeat-x; background-size: 8px 3px; background-position: 0 100%; }
 body.dark-mode .word-link:hover { background-image: radial-gradient(circle, #eadfce 1.2px, transparent 1.6px); }
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(520px, calc(100vw - 24px)); max-width: min(520px, calc(100vw - 24px)); min-width: 180px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.75rem 1rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
@@ -553,13 +523,19 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     </div>
   </div>
 
-  <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Tiesin">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  <div class="progress-row" id="eye-row" style="display:none;justify-content:center">
+    <button class="ball-btn" onclick="showAnswer()" title="Näytä vastaus">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
     </button>
-    <div class="progress-tube"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="progress-row" id="progress-row" style="display:none">
     <button class="ball-btn grade-again" onclick="gradeCard(false)" title="Kysy uudestaan">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+    </button>
+    <div class="progress-tube"><div class="progress-fill" id="progress-fill"></div></div>
+    <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Tiesin">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
     </button>
   </div>
 
@@ -677,35 +653,7 @@ document.addEventListener('click',e=>{
 // ════════════════════════════════════════════════════════════
 // SWIPE HINT — shown on first card of a freshly opened deck
 // ════════════════════════════════════════════════════════════
-let _swipeHintShown = false;
-let _swipeHintEl    = null;
 let _suppressNextAnswer = false;
-
-function showSwipeHint(){
-  const fc = document.getElementById('flashcard');
-  if(!fc || _swipeHintShown) return;
-  dismissSwipeHint(true);
-  const hint = document.createElement('div');
-  hint.className = 'swipe-hint';
-  hint.innerHTML =
-    '<div class="swipe-hint-hands">' +
-    '<div class="swipe-hint-hand"><span>👉</span></div>' +
-    '</div>' +
-    '<div class="swipe-hint-text">selaa kysymyskortteja<br>pyyhkäisemällä</div>';
-  fc.appendChild(hint);
-  _swipeHintEl = hint;
-}
-
-function dismissSwipeHint(immediate){
-  if(!_swipeHintEl) return;
-  _swipeHintShown = true;
-  const el = _swipeHintEl;
-  _swipeHintEl = null;
-  if(immediate){ el.remove(); return; }
-  el.classList.add('dismissing');
-  setTimeout(()=>el.remove(), 380);
-}
-
 
 // ════════════════════════════════════════════════════════════
 // DARKMODE BTN — hold 5 s = dev password prompt
@@ -1038,7 +986,6 @@ async function startDeck(deckName){
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
-  _swipeHintShown = false;
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
@@ -1154,20 +1101,18 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
   _suppressNextAnswer = false;
   document.querySelector('.comment-area').style.display='none';   // hidden until the answer is revealed
-  document.getElementById('progress-row').style.display='flex';
-  updateProgress();
+  document.getElementById('eye-row').style.display='flex';        // only the reveal eye until answered
+  document.getElementById('progress-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   requestAnimationFrame(()=>{ scrollToCard(); fitDeckTitle(); });
   const fc=document.getElementById('flashcard');
   fc.style.transition = 'none';
   fc.style.transform  = '';
+  fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation  = 'none';
-  fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right');
   void fc.offsetWidth;
+  fc.style.animation  = '';
   fc.classList.add('card-in-right');
-  if(!_swipeHintShown && currentOverviewIndex === 0){
-    setTimeout(showSwipeHint, 420);
-  }
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
   if(ca) ca.style.top=ft+'px';
@@ -1201,7 +1146,7 @@ async function nextCard(){
     document.getElementById('card-stars').textContent='';
     document.getElementById('question-content').innerHTML='<div style="width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:#6b6055;text-align:center;">✓ Valmista tuli</div>';
     document.getElementById('answer-content').innerHTML='';
-    ['answer-section','show-row','grade-row','progress-row'].forEach(id=>document.getElementById(id).style.display='none');
+    ['answer-section','show-row','grade-row','progress-row','eye-row'].forEach(id=>document.getElementById(id).style.display='none');
     return;
   }
   currentCard=queue.shift();
@@ -1323,7 +1268,7 @@ function listenToGameState(){
     if(!doc.exists){ if(indicator){ indicator.textContent='⏳ Odota kehittäjää...'; indicator.style.color='#aaa'; } return; }
     const data=doc.data();
     if(data.mode==='ended'){ exitJoukkupeli(); return; }
-    if(indicator){ indicator.textContent='🟢 Kehittäjä aktiivinen'; indicator.style.color='#27ae60'; }
+    if(indicator){ indicator.textContent='🟢 Kehittäjä aktiivinen'; indicator.style.color='#498d65'; }
     const newCardId=data.cardId;
     if(newCardId&&newCardId!==currentGameCardId){ currentGameCardId=newCardId; resetVastaaBtn(); }
   });
@@ -1421,7 +1366,7 @@ function submitComment(e){
 
 function editComment(docId,btn){
   const item=btn.closest('.comment-item'), wrap=item.querySelector('.comment-text-wrap'), currentText=item.querySelector('.comment-text').textContent;
-  wrap.innerHTML=`<textarea style="width:100%;font-family:'Lora',serif;font-size:0.82rem;border:1px solid #d4cec4;border-radius:8px;padding:0.5rem;resize:vertical;min-height:60px;background:#fffef9;color:#1a1612;">${currentText}</textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="saveEditComment('${docId}',this)" style="background:#27ae60;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Tallenna</button><button onclick="cancelEditComment(this)" style="background:none;border:1px solid #d4cec4;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Peruuta</button><button onclick="deleteComment('${docId}')" style="background:#c0392b;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;margin-left:auto;">Poista</button></div>`;
+  wrap.innerHTML=`<textarea style="width:100%;font-family:'Lora',serif;font-size:0.82rem;border:1px solid #d4cec4;border-radius:8px;padding:0.5rem;resize:vertical;min-height:60px;background:#fffef9;color:#1a1612;">${currentText}</textarea><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><button onclick="saveEditComment('${docId}',this)" style="background:#498d65;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Tallenna</button><button onclick="cancelEditComment(this)" style="background:none;border:1px solid #d4cec4;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">Peruuta</button><button onclick="deleteComment('${docId}')" style="background:#c0392b;color:white;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.78rem;margin-left:auto;">Poista</button></div>`;
 }
 function saveEditComment(docId,btn){ const textarea=btn.closest('.comment-text-wrap').querySelector('textarea'); const newText=textarea.value.trim(); if(!newText) return; db.collection('comments').doc(docId).update({text:newText}).then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 function cancelEditComment(btn){ loadFirestoreComments(); }
@@ -1447,6 +1392,9 @@ function showAnswer(){
   else { document.getElementById('answer-section').style.display='block'; }
   document.getElementById('show-row').style.display='none';
   document.getElementById('grade-row').style.display='none';
+  document.getElementById('eye-row').style.display='none';        // hide the eye, reveal the bar + grade balls
+  document.getElementById('progress-row').style.display='flex';
+  updateProgress();
   document.querySelector('.comment-area').style.display='flex';   // comments appear once revealed
   requestAnimationFrame(()=>requestAnimationFrame(()=>{           // smoothly recenter the now-bigger card
     const fc=document.getElementById('flashcard'); if(!fc) return;
@@ -1461,12 +1409,22 @@ function gradeCard(correct){
   if(coinAnimating) return;
   if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
   const fc=document.getElementById('flashcard');
+  const ov=document.getElementById('card-overlay');
+  if(ov){ ov.style.transition='opacity 0.22s ease'; ov.style.background=correct?'rgba(73,141,101,0.55)':'rgba(0,0,0,0.5)'; ov.style.opacity='1'; }
+  if(correct){
+    const tube=document.querySelector('.progress-tube'), fill=document.getElementById('progress-fill');
+    [tube,fill].forEach(el=>{ if(el){ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1000); } });
+  }
+  fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.transition = 'none';
   fc.style.transform  = '';
+  fc.style.animation  = 'none';
   void fc.offsetWidth;
-  fc.classList.add(correct?'card-out-left':'card-out-right');
+  fc.style.animation  = '';
+  fc.classList.add('card-out-up');
   const doNext=()=>{
-    fc.classList.remove('card-out-left','card-out-right');
+    fc.classList.remove('card-out-left','card-out-right','card-out-up');
+    if(ov){ ov.style.transition='none'; ov.style.opacity='0'; }
     if(correct&&groupMode){
       if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
       const wg=selectedGroup; coinAnimating=true;
@@ -1476,7 +1434,7 @@ function gradeCard(correct){
     if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
     selectedGroup=null; updateGroupUI(); nextCard();
   };
-  setTimeout(doNext,180);
+  setTimeout(doNext, correct?1100:260);
 }
 
 
@@ -1503,9 +1461,9 @@ function makeVideoEmbed(embedUrl,name){
   var nameStyle='font-family:\'EB Garamond\',Garamond,serif;font-size:min(1.9rem,6vw);font-weight:600;color:#56533c;letter-spacing:-0.02em;text-align:center;';
   if(!embedUrl){
     var safeId=name.replace(/[^a-zA-Z0-9\u00C0-\u024F\s\-]/g,'').trim();
-    return '<div class="video-cover" style="width:100%;aspect-ratio:16/9;border-radius:16px;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.1rem;"><span style="'+nameStyle+'">'+name+'</span><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">'+playBtn('#c8c0b4','80px')+'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.87rem;color:#6b5f57;letter-spacing:0.02em;text-align:center;">Luentovideo ei vielä saatavilla</span></div><div class="kuvaaja-wrap" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;"><button class="kuvaaja-btn" data-subdeck="'+name+'" style="background:none;color:#56533c;border:1px solid #d4cec4;border-radius:999px;padding:0.4rem 1.1rem;font-family:\'Lora\',serif;font-size:0.8rem;cursor:pointer;">&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi</button></div></div>';
+    return '<div class="video-cover" style="width:100%;aspect-ratio:16/9;border-radius:16px;margin:0 0 2.5rem;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.1rem;"><span style="'+nameStyle+'">'+name+'</span><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">'+playBtn('#c8c0b4','80px')+'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.87rem;color:#6b5f57;letter-spacing:0.02em;text-align:center;">Luentovideo ei vielä saatavilla</span></div><div class="kuvaaja-wrap" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;"><button class="kuvaaja-btn" data-subdeck="'+name+'" style="background:none;color:#56533c;border:1px solid #d4cec4;border-radius:999px;padding:0.4rem 1.1rem;font-family:\'Lora\',serif;font-size:0.8rem;cursor:pointer;">&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi</button></div></div>';
   }
-  return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0.5rem 0;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);"><iframe src="'+embedUrl+'" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe><div class="video-overlay" onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;"><span style="'+nameStyle+'">'+name+'</span><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'+playBtn('#56533c','80px')+'</div><div></div></div></div>';
+  return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0 0 2.5rem;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);"><iframe src="'+embedUrl+'" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe><div class="video-overlay" onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;"><span style="'+nameStyle+'">'+name+'</span><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'+playBtn('#56533c','80px')+'</div><div></div></div></div>';
 }
 
 function renderCardOverview(){
@@ -1530,14 +1488,12 @@ function renderCardOverview(){
   var _name=_noUrl.replace(/\s*\(.*?\)\s*/,'').trim();
   var mbtn=document.getElementById('moodle-btn');
   if(mbtn){ if(_mLink){ mbtn.href=_mLink; mbtn.style.display='flex'; } else { mbtn.style.display='none'; } }
-  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-bottom:0.6rem;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;text-align:left;">'+_code+'</div>':'')+'</div>';
+  var deckHeaderHtml='<div style="width:100%;text-align:center;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;text-align:left;">'+_code+'</div>':'')+'</div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
     const embedUrl = (!isPaapakka && group.link) ? getYouTubeEmbedUrl(group.link) : null;
     const videoHtml = isPaapakka ? '' : makeVideoEmbed(embedUrl, group.name);
-    const isLast=groupIndex===deckGroups.length-1;
-    const separatorHtml=isLast?'':`<div style="width:100%;border-top:1px solid #d4cec4;margin:1.4rem 0 0;"></div>`;
 
     const cardsHtml=group.cards.map(card=>{
       const index=reviewCards.indexOf(card);
@@ -1548,8 +1504,8 @@ function renderCardOverview(){
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
-    return `<div class="overview-section" style="padding-bottom:${isLast?'0':'2.5rem'}">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div>${separatorHtml}</div>`;
-  }).join('');
+    return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
+  }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>');
   listenToKuvaajat();
   fitDeckTitle();
 }
@@ -1584,7 +1540,7 @@ function listenToKuvaajat(){
 function updateKuvaajaBtnState(btn,state){
   var wrap=btn.parentElement; var xBtn=wrap?wrap.querySelector('.kuvaaja-cancel'):null;
   if(!xBtn&&wrap){ xBtn=document.createElement('button'); xBtn.className='kuvaaja-cancel'; xBtn.title='Peruuta ilmoittautuminen'; xBtn.style.cssText='background:none;border:1px solid #c0392b;border-radius:50%;width:28px;height:28px;font-size:0.75rem;color:#c0392b;cursor:pointer;display:none;flex-shrink:0;'; xBtn.textContent='✕'; wrap.appendChild(xBtn); }
-  if(state==='mine'){ btn.innerHTML='✓ Olet ilmoittautunut kuvaamaan tämän luennon'; btn.style.background='#27ae60'; btn.style.color='white'; btn.style.border='1px solid #27ae60'; btn.style.cursor='default'; btn.onclick=null; if(xBtn){ xBtn.style.display='flex'; xBtn.style.alignItems='center'; xBtn.style.justifyContent='center'; xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); }; } }
+  if(state==='mine'){ btn.innerHTML='✓ Olet ilmoittautunut kuvaamaan tämän luennon'; btn.style.background='#498d65'; btn.style.color='white'; btn.style.border='1px solid #498d65'; btn.style.cursor='default'; btn.onclick=null; if(xBtn){ xBtn.style.display='flex'; xBtn.style.alignItems='center'; xBtn.style.justifyContent='center'; xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); }; } }
   else if(state==='taken'){ btn.innerHTML='Joku on ilmoittautunut kuvaamaan tämän luennon'; btn.style.background='none'; btn.style.color='#b0a898'; btn.style.border='1px solid #d4cec4'; btn.style.cursor='default'; btn.onclick=null; if(xBtn){ if(devMode){ xBtn.style.display='flex'; xBtn.style.alignItems='center'; xBtn.style.justifyContent='center'; xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); }; } else { xBtn.style.display='none'; } } }
   else { btn.innerHTML='&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi'; btn.style.background='none'; btn.style.color='#56533c'; btn.style.border='1px solid #d4cec4'; btn.style.cursor='pointer'; btn.onclick=function(){ ilmoittauduKuvaajaksi(this,this.dataset.subdeck); }; if(xBtn) xBtn.style.display='none'; }
 }
@@ -1619,7 +1575,7 @@ function renderPresenceList(users){
   el.style.display='flex'; if(!users.length){ el.innerHTML=''; return; }
   const myUid=getUserId(), now=Date.now();
   const relTime=(ms)=>{ if(!ms) return '?'; const s=Math.floor((now-ms)/1000); if(s<15) return 'juuri äsken'; if(s<60) return s+'s sitten'; const m=Math.floor(s/60); if(m<60) return m+' min sitten'; return Math.floor(m/60)+'h sitten'; };
-  el.innerHTML='<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt ('+users.length+')</span><div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'+users.map(u=>{ const isMe=u.userId===myUid; const border=isMe?'#27ae60':'#d4cec4'; const color=isMe?'#1a7f3c':'#56533c'; const meTag=isMe?'<span style="opacity:0.55;font-size:0.62rem;margin-left:3px;">(sinä)</span>':''; const devTag=devMode&&!isMe?'<span style="opacity:0.45;font-size:0.55rem;margin-left:4px;">'+relTime(u.lastInteraction)+'</span>':''; return '<span style="background:#fffef9;border:1px solid '+border+';border-radius:999px;padding:0.22rem 0.75rem;font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:'+color+';display:inline-flex;align-items:center;">'+u.word+meTag+devTag+'</span>'; }).join('')+'</div>';
+  el.innerHTML='<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt ('+users.length+')</span><div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'+users.map(u=>{ const isMe=u.userId===myUid; const border=isMe?'#498d65':'#d4cec4'; const color=isMe?'#336644':'#56533c'; const meTag=isMe?'<span style="opacity:0.55;font-size:0.62rem;margin-left:3px;">(sinä)</span>':''; const devTag=devMode&&!isMe?'<span style="opacity:0.45;font-size:0.55rem;margin-left:4px;">'+relTime(u.lastInteraction)+'</span>':''; return '<span style="background:#fffef9;border:1px solid '+border+';border-radius:999px;padding:0.22rem 0.75rem;font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:'+color+';display:inline-flex;align-items:center;">'+u.word+meTag+devTag+'</span>'; }).join('')+'</div>';
 }
 
 
@@ -1719,6 +1675,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   const SWIPE_THRESHOLD=75;
   let startX=0, dragDelta=0, dragging=false, didSwipe=false;
   const overlay=document.createElement('div');
+  overlay.id='card-overlay';
   overlay.style.cssText='position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;z-index:10;transition:none;';
   fc.appendChild(overlay);
   const stamp=document.createElement('div');
@@ -1726,12 +1683,10 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.appendChild(stamp);
   let lastDir=null;
   function clampStamp(dir){ if(dir===lastDir) return; lastDir=dir; const h=stamp.offsetHeight||60; const cardH=parseFloat(stamp.dataset.cardH)||fc.offsetHeight; const target=parseFloat(stamp.dataset.targetTop)||cardH/2; const margin=h/2+10; stamp.style.top=Math.max(margin,Math.min(cardH-margin,target))+'px'; }
-  function setIndicator(delta){ const DEADZONE=30; if(Math.abs(delta)<DEADZONE){ clearIndicator(); return; } const progress=Math.min(1,(Math.abs(delta)-DEADZONE)/(SWIPE_THRESHOLD-DEADZONE)); stamp.style.opacity=String(Math.min(0.95,0.35+progress*0.6)); if(delta>0){ overlay.style.opacity=String(progress*0.12); overlay.style.background='rgba(39,174,96,1)'; stamp.style.background='#27ae60'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='Tiesin! ✓'; clampStamp('r'); } else { overlay.style.opacity='0'; overlay.style.background='transparent'; stamp.style.background='#2980b9'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='🔄 Kysy uudestaan'; clampStamp('l'); } }
+  function setIndicator(delta){ const DEADZONE=30; if(Math.abs(delta)<DEADZONE){ clearIndicator(); return; } const progress=Math.min(1,(Math.abs(delta)-DEADZONE)/(SWIPE_THRESHOLD-DEADZONE)); stamp.style.opacity=String(Math.min(0.95,0.35+progress*0.6)); if(delta>0){ overlay.style.opacity=String(progress*0.12); overlay.style.background='rgba(73,141,101,1)'; stamp.style.background='#498d65'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='Tiesin! ✓'; clampStamp('r'); } else { overlay.style.opacity='0'; overlay.style.background='transparent'; stamp.style.background='#2980b9'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='🔄 Kysy uudestaan'; clampStamp('l'); } }
   function clearIndicator(){ overlay.style.opacity='0'; stamp.style.opacity='0'; lastDir=null; }
   let startY=0, axis=null;
   function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const rect=fc.getBoundingClientRect(); const targetTop=rect.height/2; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=rect.height; stamp.style.top=targetTop+'px';
-    if(_swipeHintEl){ _suppressNextAnswer = true; }
-    dismissSwipeHint();
   }
   function onMove(x,y,event){ if(!dragging) return; const dx=x-startX; const dy=y-startY; if(axis===null&&(Math.abs(dx)>6||Math.abs(dy)>6)){ axis=Math.abs(dx)>=Math.abs(dy)?'h':'v'; } if(axis==='v'){ dragging=false; fc.style.transform=''; clearIndicator(); return; } if(axis==='h'&&event){ event.preventDefault(); } dragDelta=dx; if(Math.abs(dragDelta)>10) didSwipe=true; const rot=dragDelta*0.025; fc.style.transform='translateX('+(dragDelta*0.12)+'px) rotate('+rot+'deg)'; if(cardAnswerShown) setIndicator(dragDelta); }
   function onEnd(){ if(!dragging) return; dragging=false; axis=null; lastStampDir=null; overlay.style.transition='opacity 0.2s ease'; clearIndicator(); if(cardAnswerShown&&Math.abs(dragDelta)>=SWIPE_THRESHOLD){ fc.style.transition='none'; fc.style.transform=''; fc.style.animation=''; _suppressNextAnswer=false; gradeCard(dragDelta>0); } else { fc.style.transition='transform 0.22s ease'; fc.style.transform=''; fc.style.animation=''; if(!_suppressNextAnswer&&!cardAnswerShown&&Math.abs(dragDelta)>8){ showAnswer(); } setTimeout(()=>{ _suppressNextAnswer=false; }, 400); } }
@@ -1831,7 +1786,7 @@ function _wrapTextNode(textNode){
   const matches=[];
   _wordLinks.forEach(link=>{
     if(link.cardIndex===currentOverviewIndex) return;
-    const re=new RegExp('(?<![\\wäöåÄÖÅ])'+_escapeReg(link.text)+'(?![\\wäöåÄÖÅ])','gi');
+    const re=new RegExp('(?<![\\wäöåÄÖÅ-])'+_escapeReg(link.text)+'(?![\\wäöåÄÖÅ-])','gi');
     let m; while((m=re.exec(text))!==null) matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:link.cardIndex});
   });
   if(!matches.length) return;
