@@ -1534,6 +1534,9 @@ function showAnswer(){
   // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation='none';
+  fc.style.transition='none';
+  fc.style.transform='perspective(1000px) rotateY(0deg)';   // commit the start state so phase 1 actually animates
+  void fc.offsetWidth;
   fc.style.transition='transform 0.2s ease-in';
   fc.style.transform='perspective(1000px) rotateY(90deg)';
   setTimeout(()=>{
