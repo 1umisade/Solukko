@@ -184,10 +184,8 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 /* ── 11. SOLUKKO-LOGO ────────────────────────────────────── */
 .site-brand { position: relative; width: min(252px, 56vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
 .brand-logo-img { width: 100%; height: 100%; object-fit: contain; display: block; -webkit-user-drag: none; user-select: none; }
-.logo-eye { position: absolute; width: 18.5%; aspect-ratio: 1 / 1; border-radius: 50%; background: #ebe3cf; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
+.logo-eye { position: absolute; width: 18.5%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
 .logo-pupil { width: 64%; height: 64%; border-radius: 50%; background: #141414; transition: transform 0.08s linear; }
-.logo-eyelid { position: absolute; inset: 0; border-radius: 50%; background: #ebe3cf; transform: scaleY(0); transform-origin: top; pointer-events: none; animation: logoBlink 10s ease-in-out infinite; }
-@keyframes logoBlink { 0%, 100% { transform: scaleY(0); } 2% { transform: scaleY(1); } 4% { transform: scaleY(0); } }
 #logo-eye-l { left: 29%; top: 45.5%; }
 #logo-eye-r { left: 72.5%; top: 43.5%; }
 .site-brand { cursor: pointer; }
@@ -498,8 +496,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ SOLUKKO-LOGO ══════════════════════════════════════════ -->
 <div class="site-brand" id="site-brand" onclick="logoScream()">
   <img src="solukkologo_eyes.png" alt="Solukko" class="brand-logo-img">
-  <div class="logo-eye" id="logo-eye-l"><span class="logo-pupil"></span><span class="logo-eyelid"></span></div>
-  <div class="logo-eye" id="logo-eye-r"><span class="logo-pupil"></span><span class="logo-eyelid"></span></div>
+  <div class="logo-eye" id="logo-eye-l"><span class="logo-pupil"></span></div>
+  <div class="logo-eye" id="logo-eye-r"><span class="logo-pupil"></span></div>
 </div>
 
 <div id="loading">ladataan…</div>
@@ -875,6 +873,17 @@ function logoScream(){
   window.addEventListener('mousemove', e=>move(e.clientX,e.clientY));
   window.addEventListener('touchmove', e=>{ if(e.touches[0]) move(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
 })();
+
+// Blink by swapping in blink.png for 0.3s every 10s (pupils hidden while blinking)
+setInterval(()=>{
+  const logo=document.getElementById('site-brand'); if(!logo) return;
+  const img=logo.querySelector('.brand-logo-img'); if(!img) return;
+  if(logo.classList.contains('eyes-closed')) return;            // skip if already closed (e.g. scream click)
+  if((img.getAttribute('src')||'').indexOf('solukkologo_eyes.png')<0) return;
+  img.src='blink.png';
+  logo.classList.add('eyes-closed');
+  setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },300);
+},10000);
 
 
 // ════════════════════════════════════════════════════════════
