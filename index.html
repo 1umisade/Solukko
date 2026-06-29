@@ -183,15 +183,24 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 
 /* ── 11. SOLUKKO-LOGO ────────────────────────────────────── */
 .site-brand { position: relative; width: min(252px, 56vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
-#peek-logo { position: fixed; left: 0; bottom: 72px; width: 150px; height: 150px; transform: translateX(-100%); transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); z-index: 40; }
+#peek-logo { position: fixed; left: 0; width: 150px; height: 150px; transform: translateX(-100%); transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); z-index: 40; }
 #peek-logo .brand-logo-img { width: 100%; height: 100%; }
-#peek-logo.peek-show { transform: translateX(-50%); }
+#peek-logo[data-side="left"]  { left: 0; right: auto; transform: translateX(-100%); }
+#peek-logo[data-side="left"].peek-show  { transform: translateX(-50%); }
+#peek-logo[data-side="right"] { right: 0; left: auto; transform: translateX(100%); }
+#peek-logo[data-side="right"].peek-show { transform: translateX(50%); }
 @media (orientation: portrait) { #peek-logo { display: none; } }
-.peek-bubble { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; white-space: nowrap; background: #fffef9; color: #56533c; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.5rem 0.65rem; box-shadow: 0 6px 18px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-#peek-logo:hover .peek-bubble { opacity: 1; pointer-events: auto; }
+.peek-bubble { position: absolute; top: 50%; transform: translateY(-50%); width: max-content; max-width: 230px; background: #fffef9; color: #56533c; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.55rem 0.7rem; box-shadow: 0 6px 18px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.35; display: none; align-items: center; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+.peek-bubble.active { display: flex; }
+#peek-logo:hover .peek-bubble.active { opacity: 1; pointer-events: auto; }
+#peek-logo[data-side="left"]  .peek-bubble { left: 100%; margin-left: 6px; }
+#peek-logo[data-side="right"] .peek-bubble { right: 100%; margin-right: 6px; }
+.peek-bubble::before { content: ""; position: absolute; top: 0; bottom: 0; width: 16px; }   /* hover bridge over the gap */
+#peek-logo[data-side="left"]  .peek-bubble::before { right: 100%; }
+#peek-logo[data-side="right"] .peek-bubble::before { left: 100%; }
 body.dark-mode .peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-.peek-dark-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-body.dark-mode .peek-dark-btn { background: #2b211b; border-color: #6d5f52; }
+.peek-act-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+body.dark-mode .peek-act-btn { background: #2b211b; border-color: #6d5f52; }
 .brand-logo-img { width: 100%; height: 100%; object-fit: contain; display: block; -webkit-user-drag: none; user-select: none; }
 .logo-eye { position: absolute; width: 18.5%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
 .logo-pupil { width: 64%; height: 64%; border-radius: 50%; background: #141414; transition: transform 0.08s linear; }
@@ -507,7 +516,9 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <img src="solukkologo_eyes.png" alt="" class="brand-logo-img">
   <div class="logo-eye le"><span class="logo-pupil"></span></div>
   <div class="logo-eye re"><span class="logo-pupil"></span></div>
-  <div class="peek-bubble">Testaa dark-modea!<button class="peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
+  <div class="peek-bubble">Testaa dark-modea!<button class="peek-act-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
+  <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
+  <div class="peek-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
 </div>
 
 <!-- ══ SOLUKKO-LOGO ══════════════════════════════════════════ -->
@@ -893,14 +904,22 @@ function logoScream(){
 // Desktop only: peek the logo in from the side every 5s, then hide it again 5s later
 (function initPeekLogo(){
   const pk=document.getElementById('peek-logo'); if(!pk) return;
+  const bubbles=pk.querySelectorAll('.peek-bubble');
   let shown=false;
+  function peekIn(){
+    pk.dataset.side = Math.random()<0.5 ? 'left' : 'right';   // random side
+    pk.style.top = (50 + Math.random()*28) + 'vh';            // random spot in the bottom half
+    const idx=Math.floor(Math.random()*bubbles.length);       // random bubble
+    bubbles.forEach((b,i)=>b.classList.toggle('active', i===idx));
+    pk.classList.add('peek-show'); shown=true;
+  }
   setInterval(()=>{
     const reviewing=document.getElementById('card-screen').style.display==='flex';
     const portrait=window.matchMedia('(orientation: portrait)').matches;
     if(!reviewing||portrait){ shown=false; pk.classList.remove('peek-show'); return; }   // peek only while reviewing (desktop)
     if(pk.matches(':hover')){ shown=true; pk.classList.add('peek-show'); return; }        // stay out while hovered
-    shown=!shown;
-    pk.classList.toggle('peek-show',shown);
+    if(shown){ pk.classList.remove('peek-show'); shown=false; }
+    else { peekIn(); }
   },5000);
 })();
 
