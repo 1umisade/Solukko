@@ -195,7 +195,7 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 @media (orientation: portrait) { #peek-logo { display: none; } }
 .peek-bubble { position: absolute; top: 50%; transform: translateY(-50%); width: max-content; max-width: 230px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.35; display: none; align-items: center; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
 .peek-bubble.active { display: flex; }
-#peek-logo:hover .peek-bubble.active { opacity: 1; pointer-events: auto; }
+#peek-logo.bubble-open .peek-bubble.active { opacity: 1; pointer-events: auto; }
 #peek-logo[data-side="left"]  .peek-bubble { left: 100%; margin-left: 14px; }
 #peek-logo[data-side="right"] .peek-bubble { right: 100%; margin-right: 14px; }
 .peek-bubble::before { content: ""; position: absolute; top: 0; bottom: 0; width: 22px; }   /* hover bridge over the gap */
@@ -932,17 +932,22 @@ function logoScream(){
     pk.style.transition=''; if(inner) inner.style.transition='';
     pk.classList.add('peek-show'); shown=true;
   }
-  pk.addEventListener('click',e=>{                            // click the logo to switch the comment
+  let bubbleTimer=null;
+  pk.addEventListener('click',e=>{                            // click the logo to show + switch the comment
     if(e.target.closest('.peek-bubble')) return;             // ignore clicks on the bubble/buttons
+    playScream();
     const cur=[...bubbles].findIndex(b=>b.classList.contains('active'));
     const next=(cur+1)%bubbles.length;
     bubbles.forEach((b,i)=>b.classList.toggle('active', i===next));
+    pk.classList.add('bubble-open');
+    clearTimeout(bubbleTimer);
+    bubbleTimer=setTimeout(()=>pk.classList.remove('bubble-open'),5000);   // auto-close so it can retract
   });
   setInterval(()=>{
     const reviewing=document.getElementById('card-screen').style.display==='flex';
     const portrait=window.matchMedia('(orientation: portrait)').matches;
-    if(!reviewing||portrait){ shown=false; pk.classList.remove('peek-show'); return; }   // peek only while reviewing (desktop)
-    if(pk.matches(':hover')){ shown=true; pk.classList.add('peek-show'); return; }        // stay out while hovered
+    if(!reviewing||portrait){ shown=false; pk.classList.remove('peek-show','bubble-open'); return; }   // peek only while reviewing (desktop)
+    if(pk.classList.contains('bubble-open')){ shown=true; pk.classList.add('peek-show'); return; }     // stay out while the bubble is open
     if(shown){ pk.classList.remove('peek-show'); shown=false; }
     else { peekIn(); }
   },5000);
