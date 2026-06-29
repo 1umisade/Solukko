@@ -2020,6 +2020,7 @@ function cardViewportH(){ return viewportH() - bottomReserve(); }
 function fitCardScale(){
   const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
   if(!wrap||!fc) return;
+  if(window.matchMedia('(orientation: portrait)').matches){ wrap.style.transform=''; wrap.style.marginBottom=''; return; }  // mobile: full width, no scaling (scroll if tall)
   const natural=fc.offsetHeight; if(!natural) return;
   const s=Math.min(1,(cardViewportH()-16)/natural);
   wrap.style.transform = s<1 ? 'scale('+s+')' : '';
