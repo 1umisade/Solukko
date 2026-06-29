@@ -106,10 +106,10 @@ body.dark-mode .progress-tube { background: #5a5148; }
 .progress-fill.flash { animation: fillGlow 1s ease; }
 .ball-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, box-shadow 0.1s ease; }
 .ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
-.ball-btn.grade-correct { background: #9ab8a1; border-color: #9ab8a1; color: #ffffff; }
-body.dark-mode .ball-btn.grade-correct { background: #6f8f77; border-color: #6f8f77; }
-.ball-btn.grade-again { background: #f5ab97; border-color: #f5ab97; color: #ffffff; }
-body.dark-mode .ball-btn.grade-again { background: #e8a08b; border-color: #e8a08b; color: #ffffff; }
+.ball-btn.grade-correct { background: #9ab8a1; border-color: #9ab8a1; color: #ffffff; --glow: #9ab8a1; }
+body.dark-mode .ball-btn.grade-correct { background: #6f8f77; border-color: #6f8f77; --glow: #6f8f77; }
+.ball-btn.grade-again { background: #f5ab97; border-color: #f5ab97; color: #ffffff; --glow: #f5ab97; }
+body.dark-mode .ball-btn.grade-again { background: #e8a08b; border-color: #e8a08b; color: #ffffff; --glow: #e8a08b; }
 body.dark-mode #eye-row .ball-btn { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
 
 /* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
@@ -389,7 +389,7 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .card-out-up { animation: cardSlideOutUp 0.26s ease forwards; pointer-events:none; }
 @keyframes cardShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-7px)} 80%{transform:translateX(5px)} }
 .card-shake { animation: cardShake 0.45s ease; }
-@keyframes btnAttention { 0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,0.12); } 40%{ box-shadow:0 0 24px 5px rgba(255,205,130,0.95), 0 4px 14px rgba(0,0,0,0.18); } }
+@keyframes btnAttention { 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,0.12); } 40%{ transform:scale(1.2); box-shadow:0 0 26px 7px var(--glow,#ffcd82), 0 4px 14px rgba(0,0,0,0.18); } }
 .ball-btn.btn-attention { animation: btnAttention 0.7s ease; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
