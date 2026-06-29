@@ -176,13 +176,18 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
 
 /* ── 11. SOLUKKO-LOGO ────────────────────────────────────── */
-.site-brand { width: min(calc(560px * 0.8), 90vw); height: min(calc(320px * 0.8), calc(90vw * 320 / 560)); perspective: 1200px; z-index: 9999; cursor: pointer; margin: 0 auto; }
+.site-brand { position: relative; width: min(360px, 80vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
+.brand-logo-img { width: 100%; height: 100%; object-fit: contain; display: block; -webkit-user-drag: none; user-select: none; }
+.logo-eye { position: absolute; width: 12.5%; aspect-ratio: 1 / 1; border-radius: 50%; background: #ebe3cf; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
+.logo-pupil { width: 64%; height: 64%; border-radius: 50%; background: #141414; transition: transform 0.08s linear; }
+#logo-eye-l { left: 28%; top: 44.5%; }
+#logo-eye-r { left: 70.5%; top: 43.5%; }
 .site-brand-inner { position: relative; width: 100%; height: 100%; will-change: transform; transform-style: preserve-3d; transition: transform 0.55s ease; }
 .site-brand.flipped .site-brand-inner { transform: rotateY(180deg); }
 .brand-front, .brand-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 4px 18px rgba(0,0,0,0.12); }
 .brand-front { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .brand-back { transform: rotateY(180deg); padding: 1.5rem; color: #56533c; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.45; text-align: left; overflow: hidden; }
-.site-brand img { width: min(120px, 20vw); height: min(120px, 20vw); object-fit: contain; }
+.site-brand img { width: 100%; height: 100%; object-fit: contain; }
 .brand-front span { font-family: "EB Garamond", Garamond, serif; font-size: min(5rem, 15vw); font-weight: 600; color: #56533c; letter-spacing: -0.03em; }
 body.dark-mode .brand-front span { color: #fff2cb; }
 body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: #eadfce !important; }
@@ -470,25 +475,10 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 </div>
 
 <!-- ══ SOLUKKO-LOGO ══════════════════════════════════════════ -->
-<div class="site-brand site-brand-card" id="site-brand" onclick="clickLogoHome()">
-  <div class="site-brand-inner">
-    <div class="brand-front">
-      <img src="solukkologo22.png" alt="Solukko logo">
-      <span>Solukko</span>
-    </div>
-    <div class="brand-back">
-      <div style="font-size:1.25rem;font-weight:700;text-align:center;margin-bottom:0.5rem;color:#56533c;line-height:1.2;">Treenaa aivosolusi tenttikuntoon!</div>
-      <div style="font-size:0.82rem;line-height:1.5;">
-        Solukko.com on biokemian opiskelijoiden ylläpitämä kysymyspankki,
-        jossa yliopistokurssit voi opiskella valmiiden kysymyskorttien avulla.<br><br>
-        • Ei kirjautumista<br>
-        • Ei maksuja<br>
-        • Opiskelet jo yhdellä painalluksella<br>
-        • Kysymyksiin merkitty tenttitodennäköisyys<br>
-        • Palkintoja sisällöntuottajille<br>
-      </div>
-    </div>
-  </div>
+<div class="site-brand" id="site-brand">
+  <img src="solukkologo_eyes.png" alt="Solukko" class="brand-logo-img">
+  <div class="logo-eye" id="logo-eye-l"><span class="logo-pupil"></span></div>
+  <div class="logo-eye" id="logo-eye-r"><span class="logo-pupil"></span></div>
 </div>
 
 <div id="loading">ladataan…</div>
@@ -817,6 +807,24 @@ function clickLogoHome(){
   const inner = document.querySelector('.site-brand-inner');
   if(inner) inner.style.transform = 'rotateY(' + _brandAngle + 'deg)';
 }
+
+// Logo eyes follow the cursor
+(function initLogoEyes(){
+  const sb=document.getElementById('site-brand'); if(!sb) return;
+  const eyes=sb.querySelectorAll('.logo-eye');
+  function move(x,y){
+    if(sb.offsetParent===null) return;   // logo hidden (e.g. while reviewing)
+    eyes.forEach(eye=>{
+      const r=eye.getBoundingClientRect();
+      const ang=Math.atan2(y-(r.top+r.height/2), x-(r.left+r.width/2));
+      const max=r.width*0.18;
+      const pupil=eye.firstElementChild;
+      if(pupil) pupil.style.transform='translate('+(Math.cos(ang)*max)+'px,'+(Math.sin(ang)*max)+'px)';
+    });
+  }
+  window.addEventListener('mousemove', e=>move(e.clientX,e.clientY));
+  window.addEventListener('touchmove', e=>{ if(e.touches[0]) move(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+})();
 
 
 // ════════════════════════════════════════════════════════════
