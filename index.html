@@ -183,14 +183,20 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 
 /* ── 11. SOLUKKO-LOGO ────────────────────────────────────── */
 .site-brand { position: relative; width: min(252px, 56vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
-#peek-logo { position: fixed; left: 0; bottom: 72px; width: 150px; height: 150px; object-fit: contain; transform: translateX(-100%); transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); z-index: 40; pointer-events: none; }
+#peek-logo { position: fixed; left: 0; bottom: 72px; width: 150px; height: 150px; transform: translateX(-100%); transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); z-index: 40; }
+#peek-logo .brand-logo-img { width: 100%; height: 100%; }
 #peek-logo.peek-show { transform: translateX(-50%); }
 @media (orientation: portrait) { #peek-logo { display: none; } }
+.peek-bubble { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; white-space: nowrap; background: #fffef9; color: #56533c; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.5rem 0.65rem; box-shadow: 0 6px 18px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+#peek-logo:hover .peek-bubble { opacity: 1; pointer-events: auto; }
+body.dark-mode .peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+.peek-dark-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+body.dark-mode .peek-dark-btn { background: #2b211b; border-color: #6d5f52; }
 .brand-logo-img { width: 100%; height: 100%; object-fit: contain; display: block; -webkit-user-drag: none; user-select: none; }
 .logo-eye { position: absolute; width: 18.5%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
 .logo-pupil { width: 64%; height: 64%; border-radius: 50%; background: #141414; transition: transform 0.08s linear; }
-#logo-eye-l { left: 29%; top: 45.5%; }
-#logo-eye-r { left: 72.5%; top: 43.5%; }
+.logo-eye.le { left: 29%; top: 45.5%; }
+.logo-eye.re { left: 72.5%; top: 43.5%; }
 .site-brand { cursor: pointer; }
 .site-brand.eyes-closed .logo-eye { display: none; }
 .site-brand.twitch { animation: logoTwitch 0.45s ease; }
@@ -496,14 +502,19 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 </div>
 
-<!-- Peeking logo (desktop only) -->
-<img id="peek-logo" src="solukkologo_eyes.png" alt="">
+<!-- Peeking logo (desktop only, during review) -->
+<div id="peek-logo">
+  <img src="solukkologo_eyes.png" alt="" class="brand-logo-img">
+  <div class="logo-eye le"><span class="logo-pupil"></span></div>
+  <div class="logo-eye re"><span class="logo-pupil"></span></div>
+  <div class="peek-bubble">Testaa dark-modea!<button class="peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
+</div>
 
 <!-- ══ SOLUKKO-LOGO ══════════════════════════════════════════ -->
 <div class="site-brand" id="site-brand" onclick="logoScream()">
   <img src="solukkologo_eyes.png" alt="Solukko" class="brand-logo-img">
-  <div class="logo-eye" id="logo-eye-l"><span class="logo-pupil"></span></div>
-  <div class="logo-eye" id="logo-eye-r"><span class="logo-pupil"></span></div>
+  <div class="logo-eye le"><span class="logo-pupil"></span></div>
+  <div class="logo-eye re"><span class="logo-pupil"></span></div>
 </div>
 
 <div id="loading">ladataan…</div>
@@ -864,12 +875,11 @@ function logoScream(){
 
 // Logo eyes follow the cursor
 (function initLogoEyes(){
-  const sb=document.getElementById('site-brand'); if(!sb) return;
-  const eyes=sb.querySelectorAll('.logo-eye');
   function move(x,y){
-    if(sb.offsetParent===null) return;   // logo hidden (e.g. while reviewing)
-    eyes.forEach(eye=>{
+    document.querySelectorAll('.logo-eye').forEach(eye=>{
+      if(eye.offsetParent===null) return;   // eye hidden
       const r=eye.getBoundingClientRect();
+      if(!r.width) return;
       const ang=Math.atan2(y-(r.top+r.height/2), x-(r.left+r.width/2));
       const max=r.width*0.18;
       const pupil=eye.firstElementChild;
@@ -888,6 +898,7 @@ function logoScream(){
     const reviewing=document.getElementById('card-screen').style.display==='flex';
     const portrait=window.matchMedia('(orientation: portrait)').matches;
     if(!reviewing||portrait){ shown=false; pk.classList.remove('peek-show'); return; }   // peek only while reviewing (desktop)
+    if(pk.matches(':hover')){ shown=true; pk.classList.add('peek-show'); return; }        // stay out while hovered
     shown=!shown;
     pk.classList.toggle('peek-show',shown);
   },5000);
