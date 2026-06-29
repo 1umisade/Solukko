@@ -871,16 +871,18 @@ function clickLogoHome(){
 }
 
 let _logoTimer=null;
-// Decode the scream into a Web Audio buffer up front so it fires with zero delay on click
-let _screamBuf=null, _audioCtx=null;
-const _screamAudio=new Audio('scream.mp3'); _screamAudio.preload='auto';
+// Decode the sound clips up front so a random one fires with zero delay on click
+const _soundFiles=['frog1.mp3','frog2.mp3','frog3.mp3','frog4.mp3'];
+const _soundBufs=[]; let _audioCtx=null;
+const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; return a; });
 try{
   _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  fetch('scream.mp3').then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _screamBuf=buf; }).catch(()=>{});
+  _soundFiles.forEach((f,i)=>{ fetch(f).then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _soundBufs[i]=buf; }).catch(()=>{}); });
 }catch(e){}
 function playScream(){
-  if(_screamBuf&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_screamBuf; s.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
-  try{ _screamAudio.currentTime=0; _screamAudio.play().catch(()=>{}); }catch(e){}
+  const i=Math.floor(Math.random()*_soundFiles.length);   // random clip
+  if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; s.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
+  try{ _soundEls[i].currentTime=0; _soundEls[i].play().catch(()=>{}); }catch(e){}
 }
 function logoScream(){
   const logo=document.getElementById('site-brand'); if(!logo) return;
