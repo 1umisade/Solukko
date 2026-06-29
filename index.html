@@ -544,7 +544,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
-  <div class="home-bubble">Moi, tervetuloa Solukkoon! Täältä löydät valmiita kysymyskortteja biokemian opiskelijoille. Valitse kurssi tai katso ensin ohjevideo</div>
+  <div class="home-bubble">Tervetuloa Solukkoon! Täältä löydät valmiita kysymyskortteja biokemian opiskeluun. Aloita valitsemalla haluamasi kurssi.</div>
   <div class="home-bubble">Hyvä sinä! Taas opiskelemassa.</div>
   <div class="home-bubble">Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.</div>
   <div class="home-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
@@ -1185,11 +1185,11 @@ function layoutDecksRadial(){
   if(logo && logo.parentElement!==list) list.appendChild(logo);
   const btns=[...list.querySelectorAll('.deck-btn')];
   const n=btns.length; if(!n) return;
-  if(isMobile()){   // mobile: simple vertical stack (logo on top, courses below)
-    list.style.transform=''; list.style.width=''; list.style.height=''; list.style.marginBottom='';
+  if(isMobile() || window.innerWidth < 760){   // mobile / narrow: simple vertical stack (logo on top, courses below)
+    list.style.transform=''; list.style.transformOrigin=''; list.style.width=''; list.style.height=''; list.style.marginBottom='';
     list.style.position='relative'; list.style.display='flex'; list.style.flexDirection='column'; list.style.alignItems='center'; list.style.gap='20px';
-    btns.forEach(b=>{ b.style.position='static'; b.style.left=''; b.style.top=''; });
-    if(logo){ logo.style.position='static'; logo.style.left=''; logo.style.top=''; logo.style.margin='0 auto'; logo.style.order='-1'; }
+    btns.forEach(b=>{ b.style.position='relative'; b.style.left=''; b.style.top=''; });
+    if(logo){ logo.style.position='relative'; logo.style.left=''; logo.style.top=''; logo.style.margin='0 auto'; logo.style.order='-1'; }
     return;
   }
   list.style.display=''; list.style.flexDirection=''; list.style.alignItems=''; list.style.gap='';   // reset mobile stacking
@@ -1209,8 +1209,11 @@ function layoutDecksRadial(){
   });
   if(logo){ logo.style.position='absolute'; logo.style.left=(cx-logoSize/2)+'px'; logo.style.top=(cy-logoSize/2)+'px'; logo.style.margin='0'; }
   const s=Math.min(1,(window.innerWidth-40)/D);
-  list.style.transform='scale('+s+')';
-  list.style.transformOrigin='50% 0';
+  // scale from the top-left and translate so the scaled ring is horizontally centered in the viewport
+  list.style.transform='none'; void list.offsetWidth;
+  const desiredLeft=(window.innerWidth - D*s)/2;
+  list.style.transformOrigin='0 0';
+  list.style.transform='translateX('+(desiredLeft-list.getBoundingClientRect().left)+'px) scale('+s+')';
   list.style.marginBottom=(D*s-D)+'px';
 }
 
