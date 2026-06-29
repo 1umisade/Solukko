@@ -87,7 +87,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
-.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; }
+.progress-row { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(760px, calc(100vw - 2rem)); display: flex; align-items: center; gap: 12px; z-index: 50; }
 .progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
@@ -1413,10 +1413,9 @@ function gradeCard(correct){
   if(coinAnimating) return;
   if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
   const fc=document.getElementById('flashcard');
-  const pr=document.getElementById('progress-row');
   const ov=document.getElementById('card-overlay');
   const doNext=()=>{
-    [fc,pr].forEach(el=>el.classList.remove('card-out-left','card-out-right','card-out-up'));
+    fc.classList.remove('card-out-left','card-out-right','card-out-up');
     if(ov){ ov.style.transition='none'; ov.style.opacity='0'; }
     if(correct&&groupMode){
       if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
@@ -1427,14 +1426,12 @@ function gradeCard(correct){
     if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
     selectedGroup=null; updateGroupUI(); nextCard();
   };
-  const flyOut=()=>{                                  // card + bar fly up together
+  const flyOut=()=>{                                  // only the card flies up; bar stays pinned at bottom
     if(ov){ ov.style.transition='opacity 0.22s ease'; ov.style.background=correct?'rgba(73,141,101,0.55)':'rgba(0,0,0,0.5)'; ov.style.opacity='1'; }
-    [fc,pr].forEach(el=>{
-      el.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
-      el.style.transition='none'; el.style.transform=''; el.style.animation='none';
-      void el.offsetWidth;
-      el.style.animation=''; el.classList.add('card-out-up');
-    });
+    fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
+    fc.style.transition='none'; fc.style.transform=''; fc.style.animation='none';
+    void fc.offsetWidth;
+    fc.style.animation=''; fc.classList.add('card-out-up');
     setTimeout(doNext,280);
   };
   if(correct){                                        // paint the card green while the bar glows
