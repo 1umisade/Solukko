@@ -179,7 +179,7 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
 
 /* ── 11. SOLUKKO-LOGO ────────────────────────────────────── */
-.site-brand { position: relative; width: min(252px, 56vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
+.site-brand { position: relative; width: min(202px, 45vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
 .brand-inner { position: relative; width: 100%; height: 100%; }
 .brand-inner.twitch { animation: logoTwitch 0.45s ease; }
 .home-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 18px; width: max-content; max-width: 280px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.8rem 1.1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.4; text-align: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; }
@@ -1179,6 +1179,16 @@ function layoutDecksRadial(){
   if(logo && logo.parentElement!==list) list.appendChild(logo);
   const btns=[...list.querySelectorAll('.deck-btn')];
   const n=btns.length; if(!n) return;
+  if(isMobile()){   // mobile: simple vertical stack (logo on top, courses below)
+    list.style.transform=''; list.style.width=''; list.style.height=''; list.style.marginBottom='';
+    list.style.position='relative'; list.style.display='flex'; list.style.flexDirection='column'; list.style.alignItems='center'; list.style.gap='20px';
+    btns.forEach(b=>{ b.style.position='static'; b.style.left=''; b.style.top=''; });
+    if(logo){ logo.style.position='static'; logo.style.left=''; logo.style.top=''; logo.style.margin='0 auto'; logo.style.order='-1'; }
+    return;
+  }
+  list.style.display=''; list.style.flexDirection=''; list.style.alignItems=''; list.style.gap='';   // reset mobile stacking
+  if(logo) logo.style.order='';
+  btns.forEach(b=>{ b.style.position=''; });
   list.style.transform='none'; list.style.width=''; list.style.height=''; list.style.marginBottom='';
   const cardSize=btns[0].offsetWidth||130;
   const logoSize=logo?logo.offsetWidth:0;
@@ -1822,13 +1832,23 @@ function peruutaKuvaaja(name){ const uid=getUserId(); db.collection('kuvaajat').
 // ════════════════════════════════════════════════════════════
 // KÄYTTÄJÄLÄSNÄOLO
 // ════════════════════════════════════════════════════════════
+function countKnownCards(){   // total cards marked "osasin" (known) across all decks
+  let n=0;
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k && k.indexOf('solukko-grades-')===0){
+      try{ const g=JSON.parse(localStorage.getItem(k)||'{}'); for(const v of Object.values(g)) if(v==='known') n++; }catch(e){}
+    }
+  }
+  return n;
+}
 function initPresence(){
   const uid=getUserId(), word=getUserWord();
   const ref=db.collection('presence').doc(uid);
   let lastInteractionTime=Date.now();
   ['mousedown','keydown','touchstart','click'].forEach(ev=>window.addEventListener(ev,()=>{ lastInteractionTime=Date.now(); },{passive:true,capture:true}));
-  ref.set({ userId:uid, word, lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
-  setInterval(()=>{ ref.set({ userId:uid, word, lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(lastInteractionTime) },{merge:true}).catch(()=>{}); },30000);
+  ref.set({ userId:uid, word, known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
+  setInterval(()=>{ ref.set({ userId:uid, word, known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(lastInteractionTime) },{merge:true}).catch(()=>{}); },30000);
   const deletePresenceUrl='https://firestore.googleapis.com/v1/projects/solukko/databases/(default)/documents/presence/'+uid+'?key=AIzaSyAeWTSjX8-M_-Xs780nnC_0o9d1YmYroGo';
   window.addEventListener('pagehide',()=>{ fetch(deletePresenceUrl,{method:'DELETE',keepalive:true}).catch(()=>{}); });
   listenToPresence();
@@ -1837,7 +1857,7 @@ let _lastPresenceUsers=[];
 function listenToPresence(){
   db.collection('presence').onSnapshot(snap=>{
     const now=Date.now(), users=[];
-    snap.forEach(doc=>{ const d=doc.data(); const lastSeen=d.lastSeen?.toMillis?.()||0; if(now-lastSeen<90000){ users.push({ word:d.word||d.userId, userId:d.userId, lastInteraction:d.lastInteraction?.toMillis?.()||0 }); } });
+    snap.forEach(doc=>{ const d=doc.data(); const lastSeen=d.lastSeen?.toMillis?.()||0; if(now-lastSeen<90000){ users.push({ word:d.word||d.userId, userId:d.userId, known:d.known||0, lastInteraction:d.lastInteraction?.toMillis?.()||0 }); } });
     _lastPresenceUsers=users;
     renderPresenceList(users);
   },()=>{});
@@ -1848,7 +1868,7 @@ function renderPresenceList(users){
   el.style.display='flex'; if(!users.length){ el.innerHTML=''; return; }
   const myUid=getUserId(), now=Date.now();
   const relTime=(ms)=>{ if(!ms) return '?'; const s=Math.floor((now-ms)/1000); if(s<15) return 'juuri äsken'; if(s<60) return s+'s sitten'; const m=Math.floor(s/60); if(m<60) return m+' min sitten'; return Math.floor(m/60)+'h sitten'; };
-  el.innerHTML='<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt ('+users.length+')</span><div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'+users.map(u=>{ const isMe=u.userId===myUid; const border=isMe?'#498d65':'#d4cec4'; const color=isMe?'#336644':'#56533c'; const meTag=isMe?'<span style="opacity:0.55;font-size:0.62rem;margin-left:3px;">(sinä)</span>':''; const devTag=devMode&&!isMe?'<span style="opacity:0.45;font-size:0.55rem;margin-left:4px;">'+relTime(u.lastInteraction)+'</span>':''; return '<span style="background:#fffef9;border:1px solid '+border+';border-radius:999px;padding:0.22rem 0.75rem;font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:'+color+';display:inline-flex;align-items:center;">'+u.word+meTag+devTag+'</span>'; }).join('')+'</div>';
+  el.innerHTML='<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt ('+users.length+')</span><div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'+users.map(u=>{ const isMe=u.userId===myUid; const border=isMe?'#498d65':'#d4cec4'; const color=isMe?'#336644':'#56533c'; const meTag=isMe?'<span style="opacity:0.55;font-size:0.62rem;margin-left:3px;">(sinä)</span>':''; const knownTag='<span style="opacity:0.6;font-size:0.6rem;margin-left:4px;">✓'+u.known+'</span>'; const devTag=devMode&&!isMe?'<span style="opacity:0.45;font-size:0.55rem;margin-left:4px;">'+relTime(u.lastInteraction)+'</span>':''; return '<span style="background:#fffef9;border:1px solid '+border+';border-radius:999px;padding:0.22rem 0.75rem;font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:'+color+';display:inline-flex;align-items:center;">'+u.word+knownTag+meTag+devTag+'</span>'; }).join('')+'</div>';
 }
 
 
