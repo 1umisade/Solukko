@@ -107,8 +107,8 @@ body.dark-mode .progress-tube { background: #5a5148; }
 .ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
 .ball-btn.grade-correct { background: #9ab8a1; border-color: #9ab8a1; color: #ffffff; }
 body.dark-mode .ball-btn.grade-correct { background: #6f8f77; border-color: #6f8f77; }
-.ball-btn.grade-again { background: #e8836b; border-color: #e8836b; color: #ffffff; }
-body.dark-mode .ball-btn.grade-again { background: #c96f54; border-color: #c96f54; color: #ffffff; }
+.ball-btn.grade-again { background: #ff7a6e; border-color: #ff7a6e; color: #ffffff; }
+body.dark-mode .ball-btn.grade-again { background: #f2715f; border-color: #f2715f; color: #ffffff; }
 body.dark-mode #eye-row .ball-btn { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
 
 /* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
@@ -1513,7 +1513,7 @@ function showAnswer(){
   };
   const recenter=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{   // smoothly recenter the now-bigger card
     if(!fc) return;
-    const vpH=viewportH(), fcH=fc.getBoundingClientRect().height;
+    const vpH=cardViewportH(), fcH=fc.getBoundingClientRect().height;
     const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
     const target=fcH>=vpH ? Math.max(0,fcDocTop-24) : Math.max(0,fcDocTop-(vpH-fcH)/2);
     window.scrollTo({top:target,behavior:'smooth'});
@@ -1851,12 +1851,23 @@ window.addEventListener('resize',()=>{ fitCardScale(); positionCommentArea(); fi
 // Height of the *visible* viewport — excludes the mobile browser's URL/search bar
 function viewportH(){ return (window.visualViewport && window.visualViewport.height) || window.innerHeight; }
 
-// Uniformly scale the whole card (and its text) down so it always fits the viewport height
+// Space the grade/eye buttons need at the bottom, so the card never overlaps them
+function bottomReserve(){
+  const er=document.getElementById('eye-row'), pr=document.getElementById('progress-row');
+  let h=0;
+  if(er&&er.offsetParent) h=er.offsetHeight;
+  else if(pr&&pr.offsetParent) h=pr.offsetHeight;
+  return (h||46) + 40;   // button height + bottom inset + gap
+}
+// Height available for the card (viewport minus the bottom button area)
+function cardViewportH(){ return viewportH() - bottomReserve(); }
+
+// Uniformly scale the whole card (and its text) down so it fits the viewport AND the buttons
 function fitCardScale(){
   const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
   if(!wrap||!fc) return;
   const natural=fc.offsetHeight; if(!natural) return;
-  const s=Math.min(1,(viewportH()-32)/natural);
+  const s=Math.min(1,(cardViewportH()-16)/natural);
   wrap.style.transform = s<1 ? 'scale('+s+')' : '';
   wrap.style.marginBottom = s<1 ? (natural*(s-1))+'px' : '';
 }
@@ -1864,7 +1875,7 @@ function fitCardScale(){
 function scrollToCard(smooth){
   const fc=document.getElementById('flashcard'), cs=document.getElementById('card-screen');
   if(!fc||!cs) return;
-  const vpH=viewportH(), fcH=fc.getBoundingClientRect().height;
+  const vpH=cardViewportH(), fcH=fc.getBoundingClientRect().height;
   const fcOffsetInCS=fc.getBoundingClientRect().top-cs.getBoundingClientRect().top;
   cs.style.marginTop=Math.max(0,(vpH-fcH)/2-fcOffsetInCS+24)+'px';
   const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
