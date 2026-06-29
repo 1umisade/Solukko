@@ -1657,13 +1657,6 @@ function showAnswer(){
     clearTimeout(_revealFadeTimer);
     _revealFadeTimer=setTimeout(()=>{ pr.classList.add('shown'); ca.classList.add('shown'); },1000);
   };
-  const recenter=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{   // smoothly recenter the now-bigger card
-    if(!fc) return;
-    const vpH=cardViewportH(), fcH=fc.getBoundingClientRect().height;
-    const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
-    const target=fcH>=vpH ? Math.max(0,fcDocTop-24) : Math.max(0,fcDocTop-(vpH-fcH)/2);
-    window.scrollTo({top:target,behavior:'smooth'});
-  }));
   // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation='none';
@@ -1679,7 +1672,7 @@ function showAnswer(){
     void fc.offsetWidth;
     fc.style.transition='transform 0.2s ease-out';
     fc.style.transform='perspective(1000px) rotateY(0deg)';
-    setTimeout(()=>{ fc.style.transition=''; fc.style.transform=''; fc.style.animation=''; recenter(); },210);
+    setTimeout(()=>{ fc.style.transition=''; fc.style.transform=''; fc.style.animation=''; },210);
   },200);
 }
 
