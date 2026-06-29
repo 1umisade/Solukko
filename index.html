@@ -564,6 +564,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ PAKKAVALINNANÄYTTÖ ════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
+  <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;padding:1.5rem 0 0.5rem;margin-top:auto;"></div>
 </div>
 
 <!-- KOMMENTTILAATIKKO -->
@@ -628,7 +629,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
   </div>
   <div class="group-scoreboard" id="group-scoreboard"></div>
-  <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;padding:1.5rem 0 0.5rem;"></div>
 </div>
 
 <input type="file" id="comment-img-input" accept="image/*" style="display:none" onchange="handleCommentImage(this)">
@@ -700,6 +700,7 @@ function applyDevMode(){
   if(dp) dp.style.display = devMode ? 'flex' : 'none';
   const xb=document.getElementById('exit-devmode-btn');
   if(xb) xb.style.display = devMode ? 'flex' : 'none';
+  if(typeof renderPresenceList==='function') renderPresenceList(_lastPresenceUsers||[]);   // refresh the dev presence list
 }
 
 function exitDevMode(){
@@ -877,6 +878,10 @@ function playLogoClickSound(){
 const commentBoxWrap=document.querySelector('.comment-box');
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
 document.addEventListener('click',e=>{ if(!document.querySelector('.comment-area').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
+document.addEventListener('click',e=>{                      // click away closes the speech bubbles
+  const sb=document.getElementById('site-brand'); if(sb && !sb.contains(e.target)) sb.classList.remove('home-bubble-open');
+  const pk=document.getElementById('peek-logo');  if(pk && !pk.contains(e.target)) pk.classList.remove('bubble-open');
+});
 
 
 // ════════════════════════════════════════════════════════════
@@ -893,14 +898,14 @@ let _logoTimer=null;
 // Decode the sound clips up front so a random one fires with zero delay on click
 const _soundFiles=['frog1.mp3','frog2.mp3','frog3.mp3','frog4.mp3'];
 const _soundBufs=[]; let _audioCtx=null;
-const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; a.volume=0.5; return a; });
+const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; a.volume=0.25; return a; });
 try{
   _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
   _soundFiles.forEach((f,i)=>{ fetch(f).then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _soundBufs[i]=buf; }).catch(()=>{}); });
 }catch(e){}
 function playScream(){
   const i=Math.floor(Math.random()*_soundFiles.length);   // random clip
-  if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; const g=_audioCtx.createGain(); g.gain.value=0.5; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
+  if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; const g=_audioCtx.createGain(); g.gain.value=0.25; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
   try{ _soundEls[i].currentTime=0; _soundEls[i].play().catch(()=>{}); }catch(e){}
 }
 function logoScream(ev){
@@ -1835,10 +1840,12 @@ function initPresence(){
   window.addEventListener('pagehide',()=>{ fetch(deletePresenceUrl,{method:'DELETE',keepalive:true}).catch(()=>{}); });
   listenToPresence();
 }
+let _lastPresenceUsers=[];
 function listenToPresence(){
   db.collection('presence').onSnapshot(snap=>{
     const now=Date.now(), users=[];
     snap.forEach(doc=>{ const d=doc.data(); const lastSeen=d.lastSeen?.toMillis?.()||0; if(now-lastSeen<90000){ users.push({ word:d.word||d.userId, userId:d.userId, lastInteraction:d.lastInteraction?.toMillis?.()||0 }); } });
+    _lastPresenceUsers=users;
     renderPresenceList(users);
   },()=>{});
 }
@@ -1923,6 +1930,7 @@ function showDecks(){
   if(gamestateUnsubscribe){ gamestateUnsubscribe(); gamestateUnsubscribe=null; }
   _lastBuzzerDocs=[]; _lastMoneyDocs=[];
   document.getElementById('site-brand').style.display='';
+  document.getElementById('peek-logo')?.classList.remove('peek-show','bubble-open');   // hide the peeker on the homepage
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
   const _ssb=document.getElementById('soluvisa-sphere-btn'); if(_ssb) _ssb.style.display='none';
