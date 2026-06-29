@@ -893,14 +893,14 @@ let _logoTimer=null;
 // Decode the sound clips up front so a random one fires with zero delay on click
 const _soundFiles=['frog1.mp3','frog2.mp3','frog3.mp3','frog4.mp3'];
 const _soundBufs=[]; let _audioCtx=null;
-const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; return a; });
+const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; a.volume=0.5; return a; });
 try{
   _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
   _soundFiles.forEach((f,i)=>{ fetch(f).then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _soundBufs[i]=buf; }).catch(()=>{}); });
 }catch(e){}
 function playScream(){
   const i=Math.floor(Math.random()*_soundFiles.length);   // random clip
-  if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; s.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
+  if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; const g=_audioCtx.createGain(); g.gain.value=0.5; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
   try{ _soundEls[i].currentTime=0; _soundEls[i].play().catch(()=>{}); }catch(e){}
 }
 function logoScream(ev){
@@ -922,6 +922,14 @@ function logoScream(ev){
     _logoTimer=setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },1000);
   }
 }
+
+// Auto-hide the homepage bubble a moment after the mouse leaves the logo
+(function initHomeBubbleAutoHide(){
+  const logo=document.getElementById('site-brand'); if(!logo) return;
+  let t=null;
+  logo.addEventListener('mouseenter',()=>clearTimeout(t));
+  logo.addEventListener('mouseleave',()=>{ clearTimeout(t); t=setTimeout(()=>logo.classList.remove('home-bubble-open'),3000); });
+})();
 
 // Logo eyes follow the cursor
 (function initLogoEyes(){
