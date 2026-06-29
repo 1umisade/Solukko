@@ -49,7 +49,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .deck-list { position: relative; margin: 0 auto; }
 .deck-btn { position: absolute; min-width: 0; width: min(252px, 56vw); aspect-ratio: 1 / 1; padding: 12px; border-radius: 50%; overflow: hidden; text-decoration: none; border: 4px solid #1f3d2a; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; background: #111; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .deck-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
-.deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
+.deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; filter: sepia(0.65) saturate(0.85) brightness(0.97); }
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
 .deck-title { font-size: clamp(0.7rem, 2.3vw, 0.95rem); font-weight: 700; margin-bottom: 4px; white-space: normal; line-height: 1.15; }
 
@@ -72,6 +72,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
+#flashcard-wrap { width: 100%; transform-origin: top center; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
 .flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y; will-change: transform; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
@@ -521,11 +522,13 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
   </div>
 
-  <div class="flashcard" id="flashcard">
-    <div class="card-stars" id="card-stars"></div>
-    <div class="card-content" id="question-content"></div>
-    <div class="answer-section" id="answer-section">
-      <div class="card-content" id="answer-content"></div>
+  <div id="flashcard-wrap">
+    <div class="flashcard" id="flashcard">
+      <div class="card-stars" id="card-stars"></div>
+      <div class="card-content" id="question-content"></div>
+      <div class="answer-section" id="answer-section">
+        <div class="card-content" id="answer-content"></div>
+      </div>
     </div>
   </div>
 
@@ -1184,7 +1187,7 @@ async function renderCurrentCard(){
   document.getElementById('eye-row').style.display='flex';        // only the reveal eye until answered
   document.getElementById('progress-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
-  requestAnimationFrame(()=>{ scrollToCard(); fitDeckTitle(); });
+  requestAnimationFrame(()=>{ fitCardScale(); scrollToCard(); fitDeckTitle(); });
   const fc=document.getElementById('flashcard');
   // pre-size the card to the answer height at load, so the front already matches the back (continuous flip)
   fc.style.minHeight='';
@@ -1490,7 +1493,7 @@ function showAnswer(){
   };
   const recenter=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{   // smoothly recenter the now-bigger card
     if(!fc) return;
-    const vpH=viewportH(), fcH=fc.offsetHeight;
+    const vpH=viewportH(), fcH=fc.getBoundingClientRect().height;
     const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
     const target=fcH>=vpH ? Math.max(0,fcDocTop-24) : Math.max(0,fcDocTop-(vpH-fcH)/2);
     window.scrollTo({top:target,behavior:'smooth'});
@@ -1795,7 +1798,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   function setIndicator(delta){ const DEADZONE=30; if(Math.abs(delta)<DEADZONE){ clearIndicator(); return; } const progress=Math.min(1,(Math.abs(delta)-DEADZONE)/(SWIPE_THRESHOLD-DEADZONE)); stamp.style.opacity=String(Math.min(0.95,0.35+progress*0.6)); if(delta>0){ overlay.style.opacity=String(progress*0.12); overlay.style.background='rgba(73,141,101,1)'; stamp.style.background='#498d65'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='Tiesin! ✓'; clampStamp('r'); } else { overlay.style.opacity='0'; overlay.style.background='transparent'; stamp.style.background='#2980b9'; stamp.style.transform='translateX(-50%) translateY(-50%)'; stamp.textContent='🔄 Kysy uudestaan'; clampStamp('l'); } }
   function clearIndicator(){ overlay.style.opacity='0'; stamp.style.opacity='0'; lastDir=null; }
   let startY=0, axis=null;
-  function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const rect=fc.getBoundingClientRect(); const targetTop=rect.height/2; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=rect.height; stamp.style.top=targetTop+'px';
+  function onStart(x,y,isTouch){ fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right'); fc.style.animation='none'; startX=x; startY=y; dragDelta=0; dragging=true; didSwipe=false; axis=null; fc.style.transition='none'; overlay.style.transition='none'; const cardH=fc.offsetHeight; const targetTop=cardH/2; stamp.dataset.targetTop=targetTop; stamp.dataset.cardH=cardH; stamp.style.top=targetTop+'px';
   }
   function onMove(x,y,event){ if(!dragging) return; const dx=x-startX; const dy=y-startY; if(axis===null&&(Math.abs(dx)>6||Math.abs(dy)>6)){ axis=Math.abs(dx)>=Math.abs(dy)?'h':'v'; } if(axis==='v'){ dragging=false; fc.style.transform=''; clearIndicator(); return; } if(axis==='h'&&event){ event.preventDefault(); } dragDelta=dx; if(Math.abs(dragDelta)>10) didSwipe=true; const rot=dragDelta*0.025; fc.style.transform='translateX('+(dragDelta*0.12)+'px) rotate('+rot+'deg)'; if(cardAnswerShown) setIndicator(dragDelta); }
   function onEnd(){ if(!dragging) return; dragging=false; axis=null; lastStampDir=null; overlay.style.transition='opacity 0.2s ease'; clearIndicator(); if(cardAnswerShown&&Math.abs(dragDelta)>=SWIPE_THRESHOLD){ fc.style.transition='none'; fc.style.transform=''; fc.style.animation=''; _suppressNextAnswer=false; gradeCard(dragDelta>0); } else { fc.style.transition='transform 0.22s ease'; fc.style.transform=''; fc.style.animation=''; if(!_suppressNextAnswer&&!cardAnswerShown&&Math.abs(dragDelta)>8){ showAnswer(); } setTimeout(()=>{ _suppressNextAnswer=false; }, 400); } }
@@ -1835,15 +1838,25 @@ function positionCommentArea(){
   if(window.matchMedia('(orientation: portrait)').matches || wouldClip){ ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform=''; }
   else { ca.style.position='absolute'; ca.style.width=w+'px'; ca.style.left=(csRect.right+window.scrollX+50)+'px'; ca.style.top=(csRect.top+window.scrollY+52)+'px'; ca.style.transform=''; }
 }
-window.addEventListener('resize',()=>{ positionCommentArea(); fitDeckTitle(); });
+window.addEventListener('resize',()=>{ fitCardScale(); positionCommentArea(); fitDeckTitle(); });
 
 // Height of the *visible* viewport — excludes the mobile browser's URL/search bar
 function viewportH(){ return (window.visualViewport && window.visualViewport.height) || window.innerHeight; }
 
+// Uniformly scale the whole card (and its text) down so it always fits the viewport height
+function fitCardScale(){
+  const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
+  if(!wrap||!fc) return;
+  const natural=fc.offsetHeight; if(!natural) return;
+  const s=Math.min(1,(viewportH()-32)/natural);
+  wrap.style.transform = s<1 ? 'scale('+s+')' : '';
+  wrap.style.marginBottom = s<1 ? (natural*(s-1))+'px' : '';
+}
+
 function scrollToCard(smooth){
   const fc=document.getElementById('flashcard'), cs=document.getElementById('card-screen');
   if(!fc||!cs) return;
-  const vpH=viewportH(), fcH=fc.offsetHeight;
+  const vpH=viewportH(), fcH=fc.getBoundingClientRect().height;
   const fcOffsetInCS=fc.getBoundingClientRect().top-cs.getBoundingClientRect().top;
   cs.style.marginTop=Math.max(0,(vpH-fcH)/2-fcOffsetInCS+24)+'px';
   const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
