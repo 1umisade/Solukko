@@ -45,13 +45,13 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
 
 /* ── 3. PAKKAVALINNANÄYTTÖ ───────────────────────────────── */
-#deck-screen { width: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 1.5rem; gap: 2rem; }
-.deck-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; max-width: 1392px; margin: 0 auto; }
-.deck-btn { position: relative; min-width: 0; width: 100%; aspect-ratio: 7 / 4; padding: 20px; border-radius: 16px; overflow: hidden; text-decoration: none; border: 1px solid #333; display: flex; flex-direction: column; justify-content: flex-end; cursor: pointer; font-family: 'Lora', serif; text-align: left; color: white; background: #111; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+#deck-screen { width: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 1.5rem; gap: 2rem; overflow-x: hidden; }
+.deck-list { position: relative; margin: 0 auto; }
+.deck-btn { position: absolute; min-width: 0; width: clamp(96px, 20vw, 152px); aspect-ratio: 1 / 1; padding: 12px; border-radius: 50%; overflow: hidden; text-decoration: none; border: 1px solid #333; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; background: #111; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .deck-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
-.deck-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; }
+.deck-title { font-size: clamp(0.7rem, 2.3vw, 0.95rem); font-weight: 700; margin-bottom: 4px; white-space: normal; line-height: 1.15; }
 
 /* ── 4. GEAR / TOP-RIGHT BUTTON AREA ────────────────────── */
 .gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 50%; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
@@ -380,8 +380,6 @@ body.joukkupeli-active > *:not(#joukkupeli-overlay) { visibility: hidden; pointe
 
 /* ── 16. RESPONSIIVISUUS ─────────────────────────────────── */
 @media (max-width: 600px), (orientation: portrait) {
-  .deck-list { flex-direction: column; gap: 24px; align-items: center; }
-  .deck-btn { width: min(448px, 90vw) !important; height: min(256px, calc(90vw * 4 / 7)) !important; }
   .comment-area { position: static; width: 100%; }
 }
 
@@ -922,7 +920,7 @@ async function loadDecks(){
     return;
   }
 
-  const list=document.getElementById('deck-list'); list.innerHTML='';
+  const list=document.getElementById('deck-list'); list.querySelectorAll('.deck-btn').forEach(b=>b.remove());
   await document.fonts.ready;
   const canvas=document.createElement('canvas'); const ctx2=canvas.getContext('2d'); ctx2.font='700 22px Lora, Georgia, serif';
   const decks=names.map(deck=>{
@@ -989,7 +987,35 @@ async function loadDecks(){
   const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
   show('deck-screen');
+  requestAnimationFrame(layoutDecksRadial);
 }
+
+// Arrange the course circles around the centered logo
+function layoutDecksRadial(){
+  const list=document.getElementById('deck-list'); if(!list||list.offsetParent===null) return;
+  const logo=document.getElementById('site-brand');
+  if(logo && logo.parentElement!==list) list.appendChild(logo);
+  const btns=[...list.querySelectorAll('.deck-btn')];
+  const n=btns.length; if(!n) return;
+  list.style.transform='none'; list.style.width=''; list.style.height=''; list.style.marginBottom='';
+  const cardSize=btns[0].offsetWidth||130;
+  const logoSize=logo?logo.offsetWidth:0;
+  const gap=18;
+  const R=Math.max(logoSize/2+cardSize/2+gap, n>1 ? (cardSize+gap)/(2*Math.sin(Math.PI/n)) : 0);
+  const D=2*R+cardSize, cx=D/2, cy=D/2;
+  list.style.position='relative'; list.style.width=D+'px'; list.style.height=D+'px';
+  btns.forEach((btn,i)=>{
+    const ang=-Math.PI/2 + i*(2*Math.PI/n);
+    btn.style.left=(cx+R*Math.cos(ang)-cardSize/2)+'px';
+    btn.style.top =(cy+R*Math.sin(ang)-cardSize/2)+'px';
+  });
+  if(logo){ logo.style.position='absolute'; logo.style.left=(cx-logoSize/2)+'px'; logo.style.top=(cy-logoSize/2)+'px'; logo.style.margin='0'; }
+  const s=Math.min(1,(window.innerWidth-40)/D);
+  list.style.transform='scale('+s+')';
+  list.style.transformOrigin='50% 0';
+  list.style.marginBottom=(D*s-D)+'px';
+}
+window.addEventListener('resize', layoutDecksRadial);
 
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
