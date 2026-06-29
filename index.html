@@ -1184,7 +1184,7 @@ async function renderCurrentCard(){
   const _src=_clz.length ? [..._clz].map(e=>e.textContent).join(' ') : (_ac.textContent||'');
   const _backLen=_src.replace(/\s+/g,' ').trim().length;
   const _ext=document.getElementById('card-extent');
-  if(_backLen){ _ext.textContent='Vastauksen laajuus noin '+(Math.ceil(_backLen/10)*10)+' merkkiä'; _ext.style.display='block'; }
+  if(_backLen){ _ext.textContent='Vastauksen laajuus noin '+Math.ceil(_backLen/8)+' sanaa'; _ext.style.display='block'; }
   else { _ext.style.display='none'; }
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
   sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
