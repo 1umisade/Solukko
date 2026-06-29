@@ -1337,7 +1337,6 @@ async function renderCurrentCard(){
   document.getElementById('eye-row').style.display='flex';        // only the reveal eye until answered
   document.getElementById('progress-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
-  requestAnimationFrame(()=>{ fitCardScale(); scrollToCard(); fitDeckTitle(); });
   const fc=document.getElementById('flashcard');
   // pre-size the card to the answer height at load, so the front already matches the back (continuous flip)
   fc.style.minHeight='';
@@ -1355,6 +1354,7 @@ async function renderCurrentCard(){
   void fc.offsetWidth;
   fc.style.animation  = '';
   fc.classList.add('card-in-right');
+  fitCardScale(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
   if(ca) ca.style.top=ft+'px';
@@ -1407,7 +1407,6 @@ function loadCommentForCard(){
   document.getElementById('card-comment').value='';
   document.getElementById('comment-status').textContent='';
   loadFirestoreComments();
-  setTimeout(scrollToCard, 600);
 }
 function saveCommentForCard(){ if(currentCard) localStorage.setItem(commentKey(currentCard),document.getElementById('card-comment').value); }
 function showCommentDisplay(text){
