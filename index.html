@@ -887,7 +887,7 @@ function logoScream(){
   setInterval(()=>{
     const reviewing=document.getElementById('card-screen').style.display==='flex';
     const portrait=window.matchMedia('(orientation: portrait)').matches;
-    if(reviewing||portrait){ shown=false; pk.classList.remove('peek-show'); return; }
+    if(!reviewing||portrait){ shown=false; pk.classList.remove('peek-show'); return; }   // peek only while reviewing (desktop)
     shown=!shown;
     pk.classList.toggle('peek-show',shown);
   },5000);
