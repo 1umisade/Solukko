@@ -73,6 +73,10 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 #flashcard-wrap { width: 100%; transform-origin: top center; }
+.card-extent { position: absolute; left: 0; right: 0; bottom: 0.9rem; text-align: center; font-size: 0.78rem; color: #9a8d80; pointer-events: none; }
+body.dark-mode .card-extent { color: #9a8878; }
+.reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+.reveal-fade.shown { opacity: 1; pointer-events: auto; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
 .flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y; will-change: transform; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
@@ -531,6 +535,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <div class="answer-section" id="answer-section">
         <div class="card-content" id="answer-content"></div>
       </div>
+      <div class="card-extent" id="card-extent"></div>
     </div>
   </div>
 
@@ -1174,6 +1179,10 @@ async function renderCurrentCard(){
   dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
   applyWordLinks(document.getElementById('answer-content'));
+  const _backLen=(document.getElementById('answer-content').textContent||'').replace(/\s+/g,' ').trim().length;
+  const _ext=document.getElementById('card-extent');
+  if(_backLen){ _ext.textContent='Vastauksen laajuus noin '+(Math.ceil(_backLen/10)*10)+' merkkiä'; _ext.style.display='block'; }
+  else { _ext.style.display='none'; }
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
   sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
   if(devMode && currentCard){
@@ -1240,7 +1249,7 @@ async function nextCard(){
     document.getElementById('card-stars').textContent='';
     document.getElementById('question-content').innerHTML='<div style="width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:#6b6055;text-align:center;">✓ Valmista tuli</div>';
     document.getElementById('answer-content').innerHTML='';
-    ['answer-section','show-row','grade-row','progress-row','eye-row'].forEach(id=>document.getElementById(id).style.display='none');
+    ['answer-section','show-row','grade-row','progress-row','eye-row','card-extent'].forEach(id=>document.getElementById(id).style.display='none');
     return;
   }
   currentCard=queue.shift();
@@ -1479,6 +1488,7 @@ function renderCardStars(){
   box.removeAttribute('title');
 }
 
+let _revealFadeTimer=null;
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
   cardAnswerShown=true;
@@ -1488,10 +1498,15 @@ function showAnswer(){
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
-    document.getElementById('eye-row').style.display='none';        // hide the spin button, reveal the bar + grade balls
-    document.getElementById('progress-row').style.display='flex';
+    document.getElementById('eye-row').style.display='none';        // hide the spin button
+    document.getElementById('card-extent').style.display='none';    // hide the length label on the back
     updateProgress();
-    document.querySelector('.comment-area').style.display='flex';   // comments appear once revealed
+    const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
+    pr.style.display='flex'; ca.style.display='flex';
+    pr.classList.add('reveal-fade'); ca.classList.add('reveal-fade');   // start invisible, fade in after 1s
+    pr.classList.remove('shown'); ca.classList.remove('shown');
+    clearTimeout(_revealFadeTimer);
+    _revealFadeTimer=setTimeout(()=>{ pr.classList.add('shown'); ca.classList.add('shown'); },1000);
   };
   const recenter=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{   // smoothly recenter the now-bigger card
     if(!fc) return;
