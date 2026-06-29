@@ -107,8 +107,8 @@ body.dark-mode .progress-tube { background: #5a5148; }
 .ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
 .ball-btn.grade-correct { background: #9ab8a1; border-color: #9ab8a1; color: #ffffff; }
 body.dark-mode .ball-btn.grade-correct { background: #6f8f77; border-color: #6f8f77; }
-.ball-btn.grade-again { color: #8a7d72; }
-body.dark-mode .ball-btn.grade-again { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
+.ball-btn.grade-again { background: #e8836b; border-color: #e8836b; color: #ffffff; }
+body.dark-mode .ball-btn.grade-again { background: #c96f54; border-color: #c96f54; color: #ffffff; }
 body.dark-mode #eye-row .ball-btn { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
 
 /* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
@@ -547,7 +547,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
   <div class="progress-row" id="progress-row" style="display:none">
     <button class="ball-btn grade-again" onclick="gradeCard(false)" title="Kysy uudestaan">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="progress-tube"><div class="progress-fill" id="progress-fill"></div></div>
     <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Tiesin">
