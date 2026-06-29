@@ -820,9 +820,10 @@ function clickLogoHome(){
 }
 
 let _logoTimer=null;
+const _screamAudio=new Audio('scream.mp3'); _screamAudio.preload='auto';
 function logoScream(){
   const logo=document.getElementById('site-brand'); if(!logo) return;
-  try{ new Audio('scream.mp3').play().catch(()=>{}); }catch(e){}
+  try{ _screamAudio.currentTime=0; _screamAudio.play().catch(()=>{}); }catch(e){}
   logo.classList.remove('twitch'); void logo.offsetWidth; logo.classList.add('twitch');
   setTimeout(()=>logo.classList.remove('twitch'),500);
   const img=logo.querySelector('.brand-logo-img');
@@ -830,7 +831,7 @@ function logoScream(){
     img.src='solukkologo_eyes_closed.png';
     logo.classList.add('eyes-closed');            // hide the moving eyes
     clearTimeout(_logoTimer);
-    _logoTimer=setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },2000);
+    _logoTimer=setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },1000);
   }
 }
 
