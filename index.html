@@ -1003,7 +1003,9 @@ function logoScream(ev){
   });
   setInterval(()=>{
     const reviewing=document.getElementById('card-screen').style.display==='flex';
-    if(!reviewing){ shown=false; pk.classList.remove('peek-show','bubble-open'); return; }   // peek only while reviewing (any device)
+    const onHome=document.getElementById('deck-screen').style.display==='flex';
+    const active=isMobile() ? onHome : reviewing;   // mobile: peek on homepage; desktop: peek during review
+    if(!active){ shown=false; pk.classList.remove('peek-show','bubble-open'); return; }
     if(pk.classList.contains('bubble-open')){ shown=true; pk.classList.add('peek-show'); return; }     // stay out while the bubble is open
     if(shown){ pk.classList.remove('peek-show'); shown=false; }
     else { peekIn(); }
