@@ -196,7 +196,6 @@ body.dark-mode .home-bubble::after { border-top-color: #3a312b; }
 .peek-inner { width: 100%; height: 100%; position: relative; transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); }
 #peek-logo[data-side="left"].peek-show  .peek-inner { transform: rotate(8deg); }
 #peek-logo[data-side="right"].peek-show .peek-inner { transform: rotate(-8deg); }
-body.is-mobile #peek-logo { display: none; }
 .peek-bubble { position: absolute; top: 50%; transform: translateY(-50%); width: max-content; max-width: 230px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.35; display: none; align-items: center; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
 .peek-bubble.active { display: flex; }
 #peek-logo.bubble-open .peek-bubble.active { opacity: 1; pointer-events: auto; }
@@ -870,6 +869,9 @@ function playLogoClickSound(){
 // ⑥ KOMMENTTILAATIKON UI
 // ════════════════════════════════════════════════════════════
 const commentBoxWrap=document.querySelector('.comment-box');
+// Move the comment area inside the card screen (before the overview grid) so revealing it
+// appears below the card instead of pushing the card down
+(function(){ const ca=document.querySelector('.comment-area'), cog=document.getElementById('card-overview-grid'); if(ca&&cog&&cog.parentElement) cog.parentElement.insertBefore(ca,cog); })();
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
 document.addEventListener('click',e=>{ if(!document.querySelector('.comment-area').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
@@ -901,7 +903,13 @@ try{
 let _audioWarmed=false;
 function _warmAudio(){
   if(_audioWarmed||!_audioCtx) return; _audioWarmed=true;
-  try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const b=_audioCtx.createBuffer(1,1,22050); const s=_audioCtx.createBufferSource(); s.buffer=b; s.connect(_audioCtx.destination); s.start(0); }catch(e){}
+  try{
+    if(_audioCtx.state==='suspended') _audioCtx.resume();
+    const buf=_soundBufs.find(b=>b) || _audioCtx.createBuffer(1,1,22050);   // play a real clip silently to prime the path
+    const s=_audioCtx.createBufferSource(); s.buffer=buf;
+    const g=_audioCtx.createGain(); g.gain.value=0;
+    s.connect(g); g.connect(_audioCtx.destination); s.start(0);
+  }catch(e){}
 }
 ['pointerdown','touchstart','keydown','click'].forEach(ev=>window.addEventListener(ev,_warmAudio,{capture:true,passive:true}));
 function playScream(){
@@ -995,8 +1003,7 @@ function logoScream(ev){
   });
   setInterval(()=>{
     const reviewing=document.getElementById('card-screen').style.display==='flex';
-    const portrait=isMobile();
-    if(!reviewing||portrait){ shown=false; pk.classList.remove('peek-show','bubble-open'); return; }   // peek only while reviewing (desktop)
+    if(!reviewing){ shown=false; pk.classList.remove('peek-show','bubble-open'); return; }   // peek only while reviewing (any device)
     if(pk.classList.contains('bubble-open')){ shown=true; pk.classList.add('peek-show'); return; }     // stay out while the bubble is open
     if(shown){ pk.classList.remove('peek-show'); shown=false; }
     else { peekIn(); }
