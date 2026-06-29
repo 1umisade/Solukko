@@ -1113,7 +1113,15 @@ async function renderCurrentCard(){
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   requestAnimationFrame(()=>{ scrollToCard(); fitDeckTitle(); });
   const fc=document.getElementById('flashcard');
-  fc.style.minHeight  = '';
+  // pre-size the card to the answer height at load, so the front already matches the back (continuous flip)
+  fc.style.minHeight='';
+  {
+    const qc=document.getElementById('question-content'), ansSec=document.getElementById('answer-section');
+    let hBack;
+    if(currentCard._isSpecial){ const front=qc.innerHTML; qc.innerHTML=currentCard._aHtml; hBack=fc.offsetHeight; qc.innerHTML=front; }
+    else { const d=ansSec.style.display; ansSec.style.visibility='hidden'; ansSec.style.display='block'; hBack=fc.offsetHeight; ansSec.style.display=d||'none'; ansSec.style.visibility=''; }
+    fc.style.minHeight=hBack+'px';
+  }
   fc.style.transition = 'none';
   fc.style.transform  = '';
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
@@ -1414,12 +1422,6 @@ function showAnswer(){
     const target=fcH>=vpH ? Math.max(0,fcDocTop-24) : Math.max(0,fcDocTop-(vpH-fcH)/2);
     window.scrollTo({top:target,behavior:'smooth'});
   }));
-  // pre-size the card to the answer's height so the front matches the back — keeps the spin continuous
-  const qc=document.getElementById('question-content'), ansSec=document.getElementById('answer-section');
-  let hBack;
-  if(currentCard._isSpecial){ const front=qc.innerHTML; qc.innerHTML=currentCard._aHtml; hBack=fc.offsetHeight; qc.innerHTML=front; }
-  else { const d=ansSec.style.display, v=ansSec.style.visibility; ansSec.style.visibility='hidden'; ansSec.style.display='block'; hBack=fc.offsetHeight; ansSec.style.display=d; ansSec.style.visibility=v; }
-  fc.style.minHeight=hBack+'px';
   // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation='none';
