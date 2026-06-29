@@ -530,7 +530,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
   <div class="progress-row" id="eye-row" style="display:none;justify-content:center">
     <button class="ball-btn" onclick="showAnswer()" title="Näytä vastaus">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      <img src="spin_logo.png" alt="Näytä vastaus" style="width:28px;height:28px;object-fit:contain;">
     </button>
   </div>
 
@@ -1395,21 +1395,38 @@ function renderCardStars(){
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
   cardAnswerShown=true;
-  if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; dimParentheses(document.getElementById('question-content')); applyWordLinks(document.getElementById('question-content')); document.getElementById('answer-section').style.display='none'; }
-  else { document.getElementById('answer-section').style.display='block'; }
-  document.getElementById('show-row').style.display='none';
-  document.getElementById('grade-row').style.display='none';
-  document.getElementById('eye-row').style.display='none';        // hide the eye, reveal the bar + grade balls
-  document.getElementById('progress-row').style.display='flex';
-  updateProgress();
-  document.querySelector('.comment-area').style.display='flex';   // comments appear once revealed
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{           // smoothly recenter the now-bigger card
-    const fc=document.getElementById('flashcard'); if(!fc) return;
+  const fc=document.getElementById('flashcard');
+  const reveal=()=>{
+    if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; dimParentheses(document.getElementById('question-content')); applyWordLinks(document.getElementById('question-content')); document.getElementById('answer-section').style.display='none'; }
+    else { document.getElementById('answer-section').style.display='block'; }
+    document.getElementById('show-row').style.display='none';
+    document.getElementById('grade-row').style.display='none';
+    document.getElementById('eye-row').style.display='none';        // hide the spin button, reveal the bar + grade balls
+    document.getElementById('progress-row').style.display='flex';
+    updateProgress();
+    document.querySelector('.comment-area').style.display='flex';   // comments appear once revealed
+  };
+  const recenter=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{   // smoothly recenter the now-bigger card
+    if(!fc) return;
     const vpH=viewportH(), fcH=fc.offsetHeight;
     const fcDocTop=fc.getBoundingClientRect().top+window.scrollY;
     const target=fcH>=vpH ? Math.max(0,fcDocTop-24) : Math.max(0,fcDocTop-(vpH-fcH)/2);
     window.scrollTo({top:target,behavior:'smooth'});
   }));
+  // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
+  fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
+  fc.style.animation='none';
+  fc.style.transition='transform 0.2s ease-in';
+  fc.style.transform='perspective(1000px) rotateY(90deg)';
+  setTimeout(()=>{
+    reveal();
+    fc.style.transition='none';
+    fc.style.transform='perspective(1000px) rotateY(-90deg)';
+    void fc.offsetWidth;
+    fc.style.transition='transform 0.2s ease-out';
+    fc.style.transform='perspective(1000px) rotateY(0deg)';
+    setTimeout(()=>{ fc.style.transition=''; fc.style.transform=''; fc.style.animation=''; recenter(); },210);
+  },200);
 }
 
 function gradeCard(correct){
