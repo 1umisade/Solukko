@@ -820,10 +820,20 @@ function clickLogoHome(){
 }
 
 let _logoTimer=null;
+// Decode the scream into a Web Audio buffer up front so it fires with zero delay on click
+let _screamBuf=null, _audioCtx=null;
 const _screamAudio=new Audio('scream.mp3'); _screamAudio.preload='auto';
+try{
+  _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  fetch('scream.mp3').then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _screamBuf=buf; }).catch(()=>{});
+}catch(e){}
+function playScream(){
+  if(_screamBuf&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_screamBuf; s.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
+  try{ _screamAudio.currentTime=0; _screamAudio.play().catch(()=>{}); }catch(e){}
+}
 function logoScream(){
   const logo=document.getElementById('site-brand'); if(!logo) return;
-  try{ _screamAudio.currentTime=0; _screamAudio.play().catch(()=>{}); }catch(e){}
+  playScream();
   logo.classList.remove('twitch'); void logo.offsetWidth; logo.classList.add('twitch');
   setTimeout(()=>logo.classList.remove('twitch'),500);
   const img=logo.querySelector('.brand-logo-img');
