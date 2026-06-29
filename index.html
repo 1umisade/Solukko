@@ -183,6 +183,10 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 
 /* ── 11. SOLUKKO-LOGO ────────────────────────────────────── */
 .site-brand { position: relative; width: min(252px, 56vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
+.home-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 18px; width: max-content; max-width: 280px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.8rem 1.1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.4; text-align: center; z-index: 10000; }
+.home-bubble::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 12px solid transparent; border-top-color: #fffef9; margin-top: -2px; }
+body.dark-mode .home-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode .home-bubble::after { border-top-color: #3a312b; }
 #peek-logo { position: fixed; left: 0; width: 150px; height: 150px; transform: translateX(-100%); transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); z-index: 40; cursor: pointer; }
 #peek-logo .brand-logo-img { width: 100%; height: 100%; }
 #peek-logo[data-side="left"]  { left: 0; right: auto; transform: translateX(-100%); }
@@ -538,6 +542,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <img src="solukkologo_eyes.png" alt="Solukko" class="brand-logo-img">
   <div class="logo-eye le"><span class="logo-pupil"></span></div>
   <div class="logo-eye re"><span class="logo-pupil"></span></div>
+  <div class="home-bubble">Moi, tervetuloa Solukkoon! Täältä löydät valmiita kysymyskortteja biokemian opiskelijoille. Valitse kurssi tai katso ensin ohjevideo</div>
 </div>
 
 <div id="loading">ladataan…</div>
