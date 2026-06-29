@@ -1179,7 +1179,10 @@ async function renderCurrentCard(){
   dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
   applyWordLinks(document.getElementById('answer-content'));
-  const _backLen=(document.getElementById('answer-content').textContent||'').replace(/\s+/g,' ').trim().length;
+  const _ac=document.getElementById('answer-content');
+  const _clz=_ac.querySelectorAll('.cloze-answer, .cloze-answer-line, .cloze');   // cloze: count only the deleted text
+  const _src=_clz.length ? [..._clz].map(e=>e.textContent).join(' ') : (_ac.textContent||'');
+  const _backLen=_src.replace(/\s+/g,' ').trim().length;
   const _ext=document.getElementById('card-extent');
   if(_backLen){ _ext.textContent='Vastauksen laajuus noin '+(Math.ceil(_backLen/10)*10)+' merkkiä'; _ext.style.display='block'; }
   else { _ext.style.display='none'; }
