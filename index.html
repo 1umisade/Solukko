@@ -950,9 +950,9 @@ function logoScream(){
     if(pkImg){                                                // shake + blink like the homepage logo
       pkImg.classList.remove('peek-logo-shake'); void pkImg.offsetWidth; pkImg.classList.add('peek-logo-shake');
       setTimeout(()=>pkImg.classList.remove('peek-logo-shake'),500);
-      pkImg.src='blink.png'; pk.classList.add('eyes-closed');
+      pkImg.src='solukkologo_eyes_closed.png'; pk.classList.add('eyes-closed');
       clearTimeout(pkBlinkTimer);
-      pkBlinkTimer=setTimeout(()=>{ pkImg.src='solukkologo_eyes.png'; pk.classList.remove('eyes-closed'); },300);
+      pkBlinkTimer=setTimeout(()=>{ pkImg.src='solukkologo_eyes.png'; pk.classList.remove('eyes-closed'); },1000);
     }
   });
   setInterval(()=>{
