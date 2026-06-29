@@ -36,7 +36,7 @@ const db = firebase.firestore();
 <style>
 
 /* ── 1. RESET & BODY ─────────────────────────────────────── */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
 /* ── 2. VIRHEVIESTI-PALKKI ───────────────────────────────── */
@@ -94,9 +94,6 @@ body.dark-mode .card-extent { color: #9a8878; }
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
 .progress-row { width: 100%; display: flex; align-items: center; gap: 12px; }
-@media (orientation: portrait){
-  .progress-row { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(760px, calc(100vw - 2rem)); z-index: 50; }
-}
 .progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
