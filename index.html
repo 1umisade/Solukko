@@ -201,6 +201,7 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 body.dark-mode .peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 .peek-act-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 body.dark-mode .peek-act-btn { background: #2b211b; border-color: #6d5f52; }
+.peek-act-btn.active { background: #2f80c4; border-color: #2f80c4; }
 .brand-logo-img { width: 100%; height: 100%; object-fit: contain; display: block; -webkit-user-drag: none; user-select: none; }
 .logo-eye { position: absolute; width: 18.5%; aspect-ratio: 1 / 1; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
 .logo-pupil { width: 64%; height: 64%; border-radius: 50%; background: #141414; transition: transform 0.08s linear; }
@@ -320,8 +321,8 @@ body.dark-mode .card-stars { color: #eadfce; }
   transform: scale(0.92);
   box-shadow: 0 2px 6px rgba(0,0,0,0.18);
 }
-#shuffle-btn.active { background: #498d65; border-color: #498d65; }
-body.dark-mode #shuffle-btn.active { background: #498d65 !important; border-color: #498d65 !important; }
+#shuffle-btn.active { background: #2f80c4; border-color: #2f80c4; }
+body.dark-mode #shuffle-btn.active { background: #2f80c4 !important; border-color: #2f80c4 !important; }
 #moodle-btn {
   width: 46px;
   height: 46px;
@@ -517,7 +518,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="logo-eye le"><span class="logo-pupil"></span></div>
   <div class="logo-eye re"><span class="logo-pupil"></span></div>
   <div class="peek-bubble">Testaa dark-modea!<button class="peek-act-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
-  <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
+  <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
   <div class="peek-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
 </div>
 
@@ -913,6 +914,12 @@ function logoScream(){
     bubbles.forEach((b,i)=>b.classList.toggle('active', i===idx));
     pk.classList.add('peek-show'); shown=true;
   }
+  pk.addEventListener('click',e=>{                            // click the logo to switch the comment
+    if(e.target.closest('.peek-bubble')) return;             // ignore clicks on the bubble/buttons
+    const cur=[...bubbles].findIndex(b=>b.classList.contains('active'));
+    const next=(cur+1)%bubbles.length;
+    bubbles.forEach((b,i)=>b.classList.toggle('active', i===next));
+  });
   setInterval(()=>{
     const reviewing=document.getElementById('card-screen').style.display==='flex';
     const portrait=window.matchMedia('(orientation: portrait)').matches;
@@ -1299,6 +1306,7 @@ let shuffleMode=false;
 function shuffleDeck(){
   shuffleMode=!shuffleMode;
   document.getElementById('shuffle-btn')?.classList.toggle('active',shuffleMode);
+  document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.toggle('active',shuffleMode));
   if(shuffleMode){
     // randomise the order of the upcoming cards
     for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; }
