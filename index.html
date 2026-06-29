@@ -1184,6 +1184,7 @@ async function renderCurrentCard(){
   document.getElementById('card-css').textContent=(card.css||'')+'\n'+q.css+'\n'+aFull.css;
   const [qHtml,aHtml]=await Promise.all([fixImages(frontRaw),fixImages(answerRaw)]);
   card._qHtml=qHtml; card._aHtml=aHtml;
+  if(card._isSpecial){ const _t=document.createElement('div'); _t.innerHTML=aHtml; dimParentheses(_t); applyWordLinks(_t); card._aProcessed=_t.innerHTML; } else { card._aProcessed=null; }
   document.getElementById('question-content').innerHTML=qHtml;
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
@@ -1509,7 +1510,7 @@ function showAnswer(){
   cardAnswerShown=true;
   const fc=document.getElementById('flashcard');
   const reveal=()=>{
-    if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aHtml; dimParentheses(document.getElementById('question-content')); applyWordLinks(document.getElementById('question-content')); document.getElementById('answer-section').style.display='none'; }
+    if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aProcessed||currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
