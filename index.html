@@ -1199,7 +1199,6 @@ function layoutDecksRadial(){
   list.style.transformOrigin='50% 0';
   list.style.marginBottom=(D*s-D)+'px';
 }
-window.addEventListener('resize', layoutDecksRadial);
 
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
@@ -1996,7 +1995,12 @@ function positionCommentArea(){
   if(window.matchMedia('(orientation: portrait)').matches || wouldClip){ ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform=''; }
   else { ca.style.position='absolute'; ca.style.width=w+'px'; ca.style.left=(csRect.right+window.scrollX+50)+'px'; ca.style.top=(csRect.top+window.scrollY+52)+'px'; ca.style.transform=''; }
 }
-window.addEventListener('resize',()=>{ fitCardScale(); positionCommentArea(); fitDeckTitle(); });
+let _lastResizeW=window.innerWidth;
+window.addEventListener('resize',()=>{
+  if(window.innerWidth===_lastResizeW) return;   // ignore height-only changes (mobile URL bar) to avoid jumpiness
+  _lastResizeW=window.innerWidth;
+  fitCardScale(); positionCommentArea(); fitDeckTitle(); layoutDecksRadial();
+});
 
 // Height of the *visible* viewport — excludes the mobile browser's URL/search bar
 function viewportH(){ return (window.visualViewport && window.visualViewport.height) || window.innerHeight; }
