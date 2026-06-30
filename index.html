@@ -78,9 +78,11 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 #flashcard-wrap { width: 100%; transform-origin: top center; position: relative; margin-top: 60px; }
 .card-extent { display: none; }   /* replaced by the peeking-logo speech bubble */
-.card-peek { position: absolute; top: -60px; left: 14px; width: 92px; height: 92px; z-index: 0; pointer-events: none; }
-.card-peek-img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.card-peek-bubble { position: absolute; left: 100px; top: -2px; width: max-content; max-width: min(62vw, 360px); background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
+.card-peek { position: absolute; top: -60px; left: 14px; width: 92px; height: 92px; z-index: 0; cursor: pointer; }
+.card-peek-bottom { top: calc(100% - 4px); }
+.card-peek-inner { position: relative; width: 100%; height: 100%; }
+.card-peek-bubble { position: absolute; left: 100px; top: -2px; width: max-content; max-width: min(62vw, 360px); background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; }
+.card-peek-bottom .card-peek-bubble { top: 26px; }
 .card-peek-bubble:empty { display: none; }
 .card-peek-bubble::after { content: ""; position: absolute; right: 100%; top: 50%; transform: translateY(-50%); border: 8px solid transparent; border-right-color: #fffef9; }
 body.dark-mode .card-peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
@@ -102,10 +104,7 @@ body.dark-mode .card-peek-bubble::after { border-right-color: #3a312b; }
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
-.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; }
-.progress-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) translateY(4px); opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; z-index: 5; font-family: 'Lora', serif; font-weight: 700; font-size: 1.9rem; color: #56533c; white-space: nowrap; text-shadow: 0 1px 7px rgba(245,240,232,0.95), 0 0 4px rgba(245,240,232,0.95); }
-body.dark-mode .progress-hint { color: #eadfce; text-shadow: 0 1px 7px rgba(43,33,27,0.95), 0 0 4px rgba(43,33,27,0.95); }
-.progress-row.hint-show .progress-hint { opacity: 1; transform: translate(-50%, -50%); }
+.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 40px; z-index: 2; }
 .progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
@@ -592,8 +591,20 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
   <div id="flashcard-wrap">
     <div class="card-peek" id="card-peek">
-      <img src="solukkologo_eyes.png" class="card-peek-img" alt="">
+      <div class="card-peek-inner">
+        <img src="solukkologo_eyes.png" class="brand-logo-img" alt="">
+        <div class="logo-eye le"><span class="logo-pupil"></span></div>
+        <div class="logo-eye re"><span class="logo-pupil"></span></div>
+      </div>
       <div class="card-peek-bubble" id="card-peek-bubble"></div>
+    </div>
+    <div class="card-peek card-peek-bottom" id="card-peek-bottom" style="display:none">
+      <div class="card-peek-inner">
+        <img src="solukkologo_eyes.png" class="brand-logo-img" alt="">
+        <div class="logo-eye le"><span class="logo-pupil"></span></div>
+        <div class="logo-eye re"><span class="logo-pupil"></span></div>
+      </div>
+      <div class="card-peek-bubble" id="card-peek-bottom-bubble">Tiesitkö?</div>
     </div>
     <div class="flashcard" id="flashcard">
       <div class="card-stars" id="card-stars"></div>
@@ -605,7 +616,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <div class="progress-hint" id="progress-hint">Tiesitkö?</div>
     <button class="ball-btn grade-again" onclick="gradeCard(false)" title="Kysy uudestaan">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
@@ -1019,6 +1029,31 @@ function logoScream(ev){
   },5000);
 })();
 
+// Card peekers (top = laajuus, bottom = Tiesitkö): click for a new speech + shake + frog
+const PEEK_SPEECHES = [
+  'Hyvä sinä! Taas opiskelemassa.',
+  'Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.',
+  'Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!',
+  'Kertaa kortteja satunnaisesti tai järjestyksessä.',
+  'Testaa dark-modea! 🌙',
+];
+function wireCardPeeker(peekId, bubbleId){
+  const peek=document.getElementById(peekId); if(!peek) return;
+  const bubble=document.getElementById(bubbleId);
+  const inner=peek.querySelector('.card-peek-inner');
+  const img=peek.querySelector('.brand-logo-img');
+  let blinkT=null, idx=0;
+  peek.addEventListener('click',e=>{
+    if(e.target.closest('.card-peek-bubble')) return;
+    playScream();
+    if(bubble){ bubble.textContent=PEEK_SPEECHES[idx%PEEK_SPEECHES.length]; idx++; }
+    if(inner){ inner.classList.remove('peek-logo-shake'); void inner.offsetWidth; inner.classList.add('peek-logo-shake'); setTimeout(()=>inner.classList.remove('peek-logo-shake'),500); }
+    if(img){ img.src='solukkologo_eyes_closed.png'; peek.classList.add('eyes-closed'); clearTimeout(blinkT); blinkT=setTimeout(()=>{ img.src='solukkologo_eyes.png'; peek.classList.remove('eyes-closed'); },1000); }
+  });
+}
+wireCardPeeker('card-peek','card-peek-bubble');
+wireCardPeeker('card-peek-bottom','card-peek-bottom-bubble');
+
 // Blink by swapping in blink.png for 0.3s every 10s (pupils hidden while blinking)
 setInterval(()=>{
   const logo=document.getElementById('site-brand'); if(!logo) return;
@@ -1371,6 +1406,7 @@ async function renderCurrentCard(){
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
   if(_peek){ _peek.style.display=''; _peek.style.visibility='visible'; }
   if(_bub) _bub.textContent = _rounded ? ('Vastauksen laajuus noin '+_rounded+' sanaa') : '';
+  const _pb0=document.getElementById('card-peek-bottom'); if(_pb0) _pb0.style.display='none';   // bottom peek only after reveal
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
   sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
   if(devMode && currentCard){
@@ -1437,7 +1473,7 @@ async function nextCard(){
     document.getElementById('card-stars').textContent='';
     document.getElementById('question-content').innerHTML='<div style="width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:#6b6055;text-align:center;">✓ Valmista tuli</div>';
     document.getElementById('answer-content').innerHTML='';
-    ['answer-section','show-row','grade-row','progress-row','card-peek'].forEach(id=>document.getElementById(id).style.display='none');
+    ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
     return;
   }
   currentCard=queue.shift();
@@ -1685,7 +1721,9 @@ function showAnswer(){
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
-    { const _p=document.getElementById('card-peek'); if(_p) _p.style.visibility='hidden'; }    // hide the peeking logo+bubble on reveal
+    { const _p=document.getElementById('card-peek'); if(_p) _p.style.visibility='hidden'; }    // hide the top (laajuus) peeker on reveal
+    { const _pb=document.getElementById('card-peek-bottom'), _bb=document.getElementById('card-peek-bottom-bubble');   // bottom peeker asks "Tiesitkö?"
+      if(_pb){ _pb.style.display=''; _pb.style.visibility='visible'; } if(_bb) _bb.textContent='Tiesitkö?'; }
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
     pr.style.display='flex'; ca.style.display='flex';
@@ -2037,8 +2075,6 @@ function shakeCard(){
     const delta=ca.getBoundingClientRect().top - window.innerHeight - 6;
     window.scrollBy({top:delta, behavior:'smooth'});
   } else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
-  const prow=document.getElementById('progress-row');   // show "Tiesitkö?" above the bar while the buttons glow
-  if(prow){ prow.classList.add('hint-show'); setTimeout(()=>prow.classList.remove('hint-show'),1400); }
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
