@@ -110,7 +110,7 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-sing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .disco { display: none; position: absolute; left: -30%; top: -30%; width: 160%; height: 160%; z-index: 0; pointer-events: none; transform-origin: center; filter: blur(8px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 4s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
 .mona-sing.playing .disco { display: block; }   /* disco fills the whole card, after the drop */
-.mona-body { position: relative; z-index: 1; width: 150px; height: 150px; transform-origin: 50% 92%; }   /* centered by mona-sing */
+.mona-body { position: relative; z-index: 1; width: 300px; height: 300px; transform-origin: 50% 92%; }   /* centered by mona-sing */
 .mona-sing.intro .mona-body, .mona-sing.playing .mona-body { animation: monaSwing 1.7s ease-in-out infinite; }
 .mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; transform-origin: center; will-change: transform; }
 .mona-bubble { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); z-index: 2; max-width: 36%; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.6rem 0.85rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
@@ -1771,7 +1771,7 @@ function startMonaNotes(){
     const s=document.querySelector('.mona-sing'); if(!s){ stopMonaNotes(); return; }
     const n=document.createElement('div'); n.className='mona-note n'+(1+Math.floor(Math.random()*3));
     n.textContent=notes[Math.floor(Math.random()*notes.length)];
-    n.style.left=(42+Math.random()*16)+'%'; n.style.top='58%';
+    n.style.left=(5+Math.random()*88)+'%'; n.style.top=(8+Math.random()*80)+'%';   // all over the card
     n.style.setProperty('--nx',(Math.random()*60-30)+'px');
     n.style.fontSize=(1.1+Math.random()*0.9)+'rem';
     s.appendChild(n); setTimeout(()=>n.remove(),1600);
@@ -1803,7 +1803,7 @@ function startCelebViz(){   // Mona scales with the track's amplitude (graph alr
       _celebAnalyser.getByteFrequencyData(data);
       let sum=0, n=Math.max(1,Math.floor(data.length*0.6)); for(let i=0;i<n;i++) sum+=data[i];
       const avg=sum/n/255;                                   // 0..1 bass+mid energy
-      img.style.transform='scale('+(0.9 + avg*1.8).toFixed(3)+')';   // heavy pulse with the beat
+      img.style.transform='scale('+(0.9 + avg*0.2).toFixed(3)+')';   // subtle pulse: 90%..110%
       _celebRAF=requestAnimationFrame(loop);
     };
     loop();
@@ -1815,7 +1815,7 @@ function showCelebration(){
   clearTimeout(_cardPeekTimer); clearTimeout(_bottomPeekTimer);   // keep the peeker hidden
   document.getElementById('card-stars').textContent='';
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
-  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voidaanko soittaa mun lempibiisi sen kunniaksi?</div><div class="mona-body"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div>';
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voinko soittaa sulle yhen bängerin sen kunniaks?</div><div class="mona-body"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
   fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
@@ -1826,6 +1826,7 @@ let _vizStarted=false;
 function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
   const play=document.querySelector('.mona-play'); if(play) play.style.display='none';
+  const bub=document.querySelector('.mona-bubble'); if(bub) bub.style.display='none';
   _vizStarted=false;
   playCelebration();
   if(_celebrationAudio){
