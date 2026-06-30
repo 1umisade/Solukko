@@ -107,7 +107,6 @@ body.dark-mode .progress-tube { background: #5a5148; }
 body.dark-mode .ball-btn.grade-correct { background: #6f8f77; border-color: #6f8f77; --glow: #6f8f77; }
 .ball-btn.grade-again { background: #f5ab97; border-color: #f5ab97; color: #ffffff; --glow: #f5ab97; }
 body.dark-mode .ball-btn.grade-again { background: #e8a08b; border-color: #e8a08b; color: #ffffff; --glow: #e8a08b; }
-body.dark-mode #eye-row .ball-btn { background: #3a312b; border-color: #6d5f52; color: #cbbda8; }
 
 /* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
 .btn-row { display: flex; gap: 1rem; width: 100%; }
@@ -193,6 +192,7 @@ body.dark-mode .home-bubble::after { border-top-color: #3a312b; }
 #peek-logo[data-side="left"].peek-show  { transform: translateX(-22%); }
 #peek-logo[data-side="right"] { right: 0; left: auto; transform: translateX(100%); }
 #peek-logo[data-side="right"].peek-show { transform: translateX(22%); }
+body.is-mobile #peek-logo { width: 75px; height: 75px; }   /* half size on mobile so it never reaches the courses */
 .peek-inner { width: 100%; height: 100%; position: relative; transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); }
 #peek-logo[data-side="left"].peek-show  .peek-inner { transform: rotate(8deg); }
 #peek-logo[data-side="right"].peek-show .peek-inner { transform: rotate(-8deg); }
@@ -591,12 +591,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         <div class="card-content" id="answer-content"></div>
       </div>
     </div>
-  </div>
-
-  <div class="progress-row" id="eye-row" style="display:none;justify-content:center">
-    <button class="ball-btn" onclick="showAnswer()" title="Näytä vastaus">
-      <img src="spin_logo.png" alt="Näytä vastaus" style="width:28px;height:28px;object-fit:contain;">
-    </button>
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
@@ -1199,11 +1193,11 @@ function layoutDecksRadial(){
     list.style.transform=''; list.style.transformOrigin=''; list.style.width=''; list.style.height=''; list.style.marginBottom='';
     list.style.position='relative'; list.style.display='flex'; list.style.flexDirection='column'; list.style.alignItems='center'; list.style.gap='20px';
     btns.forEach(b=>{ b.style.position='relative'; b.style.left=''; b.style.top=''; });
-    if(logo){ logo.style.position='relative'; logo.style.left=''; logo.style.top=''; logo.style.margin='0 auto'; logo.style.order='-1'; }
+    if(logo){ logo.style.display='none'; }   // mobile: no centered logo — only the peeker
     return;
   }
   list.style.display=''; list.style.flexDirection=''; list.style.alignItems=''; list.style.gap='';   // reset mobile stacking
-  if(logo) logo.style.order='';
+  if(logo){ logo.style.order=''; logo.style.display=''; }
   btns.forEach(b=>{ b.style.position=''; });
   list.style.transform='none'; list.style.width=''; list.style.height=''; list.style.marginBottom='';
   const cardSize=btns[0].offsetWidth||130;
@@ -1363,7 +1357,6 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
   _suppressNextAnswer = false;
   document.querySelector('.comment-area').style.display='none';   // hidden until the answer is revealed
-  document.getElementById('eye-row').style.display='flex';        // only the reveal eye until answered
   document.getElementById('progress-row').style.display='none';
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   const fc=document.getElementById('flashcard');
@@ -1418,7 +1411,7 @@ async function nextCard(){
     document.getElementById('card-stars').textContent='';
     document.getElementById('question-content').innerHTML='<div style="width:100%;min-height:220px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:700;color:#6b6055;text-align:center;">✓ Valmista tuli</div>';
     document.getElementById('answer-content').innerHTML='';
-    ['answer-section','show-row','grade-row','progress-row','eye-row','card-extent'].forEach(id=>document.getElementById(id).style.display='none');
+    ['answer-section','show-row','grade-row','progress-row','card-extent'].forEach(id=>document.getElementById(id).style.display='none');
     return;
   }
   currentCard=queue.shift();
@@ -1666,7 +1659,6 @@ function showAnswer(){
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
-    document.getElementById('eye-row').style.display='none';        // hide the spin button
     document.getElementById('card-extent').style.visibility='hidden';    // hide the length label on reveal (keep its space so the card doesn't jump)
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
@@ -1983,13 +1975,22 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   overlay.style.cssText='position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;z-index:10;transition:none;';
   fc.appendChild(overlay);
 
-  let pressT=0;
+  let pressT=0, sx=0, sy=0, swiped=false;
   fc.addEventListener('mousedown',e=>{ if(e.button===0) pressT=Date.now(); });
-  fc.addEventListener('touchstart',()=>{ pressT=Date.now(); },{passive:true});
+  fc.addEventListener('touchstart',e=>{ pressT=Date.now(); const t=e.touches[0]; if(t){ sx=t.clientX; sy=t.clientY; } swiped=false; },{passive:true});
+  fc.addEventListener('touchend',e=>{                       // horizontal swipe reveals the answer
+    const t=e.changedTouches[0]; if(!t) return;
+    const dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.2){
+      swiped=true;
+      if(!cardAnswerShown && !e.target.closest('.word-link')) showAnswer();
+    }
+  },{passive:true});
 
   fc.addEventListener('click',e=>{
     if(e.target.closest('.word-link')){ e.stopPropagation(); return; }
-    if(!cardAnswerShown){ showAnswer(); return; }          // front: reveal the answer
+    if(swiped){ swiped=false; return; }                    // swipe already handled the reveal
+    if(!cardAnswerShown){ showAnswer(); return; }          // front: tap reveals the answer
     if(Date.now()-pressT<=400) shakeCard();                // back: quick tap shakes; long press does nothing
   });
 
@@ -2006,7 +2007,7 @@ function shakeCard(){
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
   const pr=document.getElementById('progress-row');
-  if(pr) pr.scrollIntoView({behavior:'smooth', block:'nearest'});   // gently bring the grade buttons into view
+  if(pr) pr.scrollIntoView({behavior:'smooth', block:'center'});   // smoothly bring the grade buttons into view
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
@@ -2044,10 +2045,9 @@ document.body.classList.toggle('is-mobile', isMobile());
 
 // Space the grade/eye buttons need at the bottom, so the card never overlaps them
 function bottomReserve(){
-  const er=document.getElementById('eye-row'), pr=document.getElementById('progress-row');
+  const pr=document.getElementById('progress-row');
   let h=0;
-  if(er&&er.offsetParent) h=er.offsetHeight;
-  else if(pr&&pr.offsetParent) h=pr.offsetHeight;
+  if(pr&&pr.offsetParent) h=pr.offsetHeight;
   return (h||46) + 40;   // button height + bottom inset + gap
 }
 // Height available for the card (viewport minus the bottom button area)
