@@ -106,7 +106,8 @@ body.is-mobile .card-peek-bubble { left: 54px; font-size: 0.8rem; padding: 0.35r
 body.is-mobile .card-peek-bottom .card-peek-bubble { top: 12px; left: 66px; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
 /* deck finished: Mona swings and sings */
-.mona-sing { width: 100%; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; position: relative; overflow: hidden; }
+.mona-sing { width: 100%; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; position: relative; }
+.mona-body .brand-logo-img { transform-origin: center 70%; will-change: transform; }
 .disco { position: absolute; left: 50%; top: 42%; width: 280px; height: 280px; transform: translate(-50%, -50%); border-radius: 50%; z-index: 0; pointer-events: none; filter: blur(16px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 3s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
 .mona-body { position: relative; z-index: 1; width: 150px; height: 150px; transform-origin: 50% 92%; animation: monaSwing 1.7s ease-in-out infinite; }
 .mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
@@ -1775,9 +1776,38 @@ function startMonaNotes(){
     s.appendChild(n); setTimeout(()=>n.remove(),1600);
   }, 340);
 }
-function stopMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); if(_celebrationAudio){ try{ _celebrationAudio.pause(); }catch(e){} } }
-let _celebrationAudio=null;
-function playCelebration(){ try{ if(!_celebrationAudio){ _celebrationAudio=new Audio('celebration.mp3'); _celebrationAudio.volume=0.6; } _celebrationAudio.currentTime=0; _celebrationAudio.play().catch(()=>{}); }catch(e){} }
+function stopMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); if(_celebrationAudio){ try{ _celebrationAudio.pause(); }catch(e){} } stopCelebViz(); }
+let _celebrationAudio=null, _celebCtx=null, _celebAnalyser=null, _celebRAF=null;
+function playCelebration(){
+  try{
+    if(!_celebrationAudio){ _celebrationAudio=new Audio('celebration.mp3'); _celebrationAudio.volume=0.6; }
+    _celebrationAudio.currentTime=0; _celebrationAudio.play().catch(()=>{});
+    startCelebViz();
+  }catch(e){}
+}
+function startCelebViz(){   // Mona scales heavily with the track's amplitude
+  try{
+    if(!_celebCtx){
+      _celebCtx=new (window.AudioContext||window.webkitAudioContext)();
+      const src=_celebCtx.createMediaElementSource(_celebrationAudio);
+      _celebAnalyser=_celebCtx.createAnalyser(); _celebAnalyser.fftSize=256; _celebAnalyser.smoothingTimeConstant=0.75;
+      src.connect(_celebAnalyser); _celebAnalyser.connect(_celebCtx.destination);
+    }
+    if(_celebCtx.state==='suspended') _celebCtx.resume();
+    cancelAnimationFrame(_celebRAF);
+    const data=new Uint8Array(_celebAnalyser.frequencyBinCount);
+    const loop=()=>{
+      const img=document.querySelector('.mona-sing .brand-logo-img'); if(!img){ _celebRAF=null; return; }
+      _celebAnalyser.getByteFrequencyData(data);
+      let sum=0, n=Math.max(1,Math.floor(data.length*0.6)); for(let i=0;i<n;i++) sum+=data[i];
+      const avg=sum/n/255;                                   // 0..1 bass+mid energy
+      img.style.transform='scale('+(0.9 + avg*1.8).toFixed(3)+')';   // heavy pulse with the beat
+      _celebRAF=requestAnimationFrame(loop);
+    };
+    loop();
+  }catch(e){}
+}
+function stopCelebViz(){ if(_celebRAF){ cancelAnimationFrame(_celebRAF); _celebRAF=null; } const img=document.querySelector('.mona-sing .brand-logo-img'); if(img) img.style.transform=''; }
 function showCardPeekBottom(){
   const pb=document.getElementById('card-peek-bottom'), bb=document.getElementById('card-peek-bottom-bubble'); if(!pb) return;
   pb.classList.remove('peek-out'); pb.style.display=''; pb.style.visibility='visible';
