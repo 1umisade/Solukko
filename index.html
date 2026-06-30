@@ -125,8 +125,8 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-sing.intro .mona-friend.right .mona-body, .mona-sing.playing .mona-friend.right .mona-body { animation-delay: -1.15s; }
 .mona-scale { position: relative; width: 100%; height: 100%; transform-origin: center; will-change: transform; }   /* visualizer scales this (logo + pupils) */
 .mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
-.mona-bubble { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); z-index: 2; max-width: 36%; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.6rem 0.85rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
-.mona-bubble::after { content: ""; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-left-color: #fffef9; }
+.mona-bubble { position: absolute; left: 50%; bottom: 56%; transform: translateX(-50%); z-index: 2; max-width: 78%; text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.6rem 0.85rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
+.mona-bubble::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 9px solid transparent; border-top-color: #fffef9; }
 .mona-play { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 2; width: 54px; height: 54px; border-radius: 50%; border: none; background: #3a7a52; color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; padding: 0; }
 .mona-play:hover { background: #2e6342; }
 .mona-vol { position: absolute; left: 50%; top: 67%; transform: translateX(-50%); z-index: 2; width: 64%; max-width: 340px; height: 44px; cursor: pointer; -webkit-appearance: none; appearance: none; background: transparent; }
@@ -136,7 +136,7 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 44px; height: 44px; margin-top: -16px; border-radius: 50%; background: #9a9a9a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 24px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; }
 .mona-vol::-moz-range-thumb { width: 44px; height: 44px; border: none; border-radius: 50%; background: #9a9a9a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 24px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; }
 body.dark-mode .mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode .mona-bubble::after { border-left-color: #3a312b; }
+body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 .celebration-card { text-align: center; font-weight: 700; background: linear-gradient(120deg, #fff3d6, #ffe0ec, #dff5e6) !important; }
 .mona-note { position: absolute; z-index: 1; pointer-events: none; will-change: transform, opacity; animation: monaNoteFloat 1.6s ease-out forwards; }
 .mona-note.n1 { color: #3a7a52; } .mona-note.n2 { color: #c98a2e; } .mona-note.n3 { color: #b0562f; }
@@ -1862,18 +1862,41 @@ function celebrationEnd(){   // song finished: stop the party, prompt to enrol f
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
   const sl=sing.querySelector('.mona-vol'); if(sl) sl.style.display='none';
   const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Nyt sitten vaan ilmoittautumaan tenttiin!'; bub.style.display=''; }
+  _celebEnded=true; _monaEndIdx=0;   // Mona is now clickable (like the peeker)
+}
+let _celebEnded=false, _monaEndIdx=0, _monaBlinkT=null;
+const MONA_END_SPEECHES=[
+  'Tsemppiä tenttiin – mä uskon suhun! 💪',
+  'Muista pitää taukoja ja juoda vettä.',
+  'Kertaa vaikeimmat kohdat vielä kerran.',
+  'Sä osaat tän. Ihan oikeasti.',
+  'Nähdään tietovisassa perjantaina!',
+  'Nyt sitten vaan ilmoittautumaan tenttiin!'
+];
+function monaCelebClick(ev){   // after the song: click Mona like the peeker — shake, squeak, new speech bubble
+  if(!_celebEnded) return;
+  const sing=document.querySelector('.mona-sing'); if(!sing) return;
+  const body=sing.querySelector('.mona-body'); if(!body) return;
+  if(!clickInCircle(ev, body.querySelector('.mona-scale')||body)) return;   // circular hitbox
+  playScream();
+  const bub=sing.querySelector('.mona-bubble');
+  if(bub){ bub.style.display=''; bub.textContent=MONA_END_SPEECHES[_monaEndIdx%MONA_END_SPEECHES.length]; _monaEndIdx++; }
+  body.classList.remove('peek-logo-shake'); void body.offsetWidth; body.classList.add('peek-logo-shake');   // twitch
+  setTimeout(()=>body.classList.remove('peek-logo-shake'),500);
+  const img=body.querySelector('.brand-logo-img');
+  if(img){ img.src='solukkologo_eyes_closed.png'; sing.classList.add('eyes-closed'); clearTimeout(_monaBlinkT); _monaBlinkT=setTimeout(()=>{ img.src='solukkologo_eyes.png'; sing.classList.remove('eyes-closed'); },1000); }
 }
 function showCelebration(){
   currentCard=null;
   clearTimeout(_cardPeekTimer); clearTimeout(_bottomPeekTimer);   // keep the peeker hidden
   document.getElementById('card-stars').textContent='';
   cardAnswerShown=false;
-  _celebStarted=false;
+  _celebStarted=false; _celebEnded=false;
   if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.onended=null; _celebrationAudio.ontimeupdate=null; }catch(e){} }
   _celebrationAudio=null; _celebAnalyser=null;   // rebuild the graph for the freshly picked track
   _celebTrack=CELEB_TRACKS[Math.floor(Math.random()*CELEB_TRACKS.length)];
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
-  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voinko soittaa sulle yhen bängerin sen kunniaks?</div><div class="mona-body"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div><div class="mona-friend left blue"><div class="mona-body"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div><div class="mona-friend right red"><div class="mona-body"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div><input type="range" class="mona-vol" min="0" max="100" value="50" oninput="onCelebVolume(this.value)" onpointerdown="startCelebOnTouch()" title="Äänenvoimakkuus" aria-label="Äänenvoimakkuus"></div>';
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voinko soittaa sulle yhen bängerin sen kunniaks?</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div><div class="mona-friend left blue"><div class="mona-body"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div><div class="mona-friend right red"><div class="mona-body"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div><input type="range" class="mona-vol" min="0" max="100" value="50" oninput="onCelebVolume(this.value)" onpointerdown="startCelebOnTouch()" title="Äänenvoimakkuus" aria-label="Äänenvoimakkuus"></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
   fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
