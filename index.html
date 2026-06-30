@@ -965,9 +965,17 @@ function playScream(){
   if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; const g=_audioCtx.createGain(); g.gain.value=0.125; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
   try{ _soundEls[i].currentTime=0; _soundEls[i].play().catch(()=>{}); }catch(e){}
 }
+// Mona's hitbox is a circle the diameter of the PNG (the transparent corners aren't clickable)
+function clickInCircle(ev, el){
+  if(!ev || ev.clientX==null || !el) return true;
+  const r=el.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2, rad=el.offsetWidth/2;
+  const dx=ev.clientX-cx, dy=ev.clientY-cy;
+  return dx*dx + dy*dy <= rad*rad;
+}
 function logoScream(ev){
   const logo=document.getElementById('site-brand'); if(!logo) return;
   if(ev && ev.target.closest('.home-bubble')) return;   // ignore clicks on the bubble/buttons
+  if(!clickInCircle(ev, logo.querySelector('.brand-inner'))) return;   // ignore the transparent corners
   playScream();
   const hb=logo.querySelectorAll('.home-bubble');   // cycle through the bubbles, then dismiss
   const cur=[...hb].findIndex(b=>b.classList.contains('active'));
@@ -1034,6 +1042,7 @@ function logoScream(ev){
   let pkBlinkTimer=null;
   pk.addEventListener('click',e=>{                            // click the logo to show + switch the comment
     if(e.target.closest('.peek-bubble')) return;             // ignore clicks on the bubble/buttons
+    if(!clickInCircle(e, pk.querySelector('.peek-inner'))) return;   // circular hitbox
     playScream();
     const cur=[...bubbles].findIndex(b=>b.classList.contains('active'));
     const next=(cur+1)%bubbles.length;
@@ -1076,6 +1085,7 @@ function wireCardPeeker(peekId, bubbleId){
   let blinkT=null, idx=0;
   peek.addEventListener('click',e=>{
     if(e.target.closest('.card-peek-bubble')) return;
+    if(!clickInCircle(e, peek.querySelector('.card-peek-inner'))) return;   // circular hitbox
     playScream();
     if(bubble){ bubble.textContent=PEEK_SPEECHES[idx%PEEK_SPEECHES.length]; idx++; }
     if(inner){ inner.classList.remove('peek-logo-shake'); void inner.offsetWidth; inner.classList.add('peek-logo-shake'); setTimeout(()=>inner.classList.remove('peek-logo-shake'),500); }
