@@ -1856,11 +1856,12 @@ function showCelebration(){
 const INTRO_DURATION=28.8;   // intro length: 00:28:03:28 - 00:27:35:04 = 28s + 24f @30fps = 28.8s
 const VIZ_START=16;          // audio visualizer kicks in midway through the intro
 const EYES_OPEN=40;          // Mona (and friends) blink their eyes back open
-let _vizStarted=false, _dropped=false, _eyesReopened=false;
+const EYES_CLOSE2=42;        // ...then shut them again
+let _vizStarted=false, _dropped=false, _eyesReopened=false, _eyesReclosed=false;
 function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
   const bub=document.querySelector('.mona-bubble'); if(bub){ bub.textContent='JEE! Kutsun mun kaveritkin.'; setTimeout(()=>{ if(bub) bub.style.display='none'; }, 2000); }   // brief shout then gone
-  _vizStarted=false; _dropped=false; _eyesReopened=false;
+  _vizStarted=false; _dropped=false; _eyesReopened=false; _eyesReclosed=false;
   playCelebration();
   if(_celebrationAudio){
     _celebrationAudio.onended=celebrationEnd;
@@ -1868,7 +1869,8 @@ function startCelebrationMusic(){   // play button: start the music; Mona swings
       const t=_celebrationAudio.currentTime;
       if(t>=VIZ_START && !_vizStarted){ _vizStarted=true; startCelebViz(); }      // pulse from 16s
       if(t>=INTRO_DURATION && !_dropped){ _dropped=true; celebrationDrop(); }      // drop at ~29s
-      if(t>=EYES_OPEN && !_eyesReopened){ _eyesReopened=true; reopenCelebEyes(); _celebrationAudio.ontimeupdate=null; }   // eyes open at 40s
+      if(t>=EYES_OPEN && !_eyesReopened){ _eyesReopened=true; reopenCelebEyes(); }      // eyes open at 40s
+      if(t>=EYES_CLOSE2 && !_eyesReclosed){ _eyesReclosed=true; closeCelebEyes(); _celebrationAudio.ontimeupdate=null; }   // shut again at 42s
     };
   }
 }
@@ -1882,6 +1884,11 @@ function reopenCelebEyes(){   // ~40s: eyes pop back open (main Mona + friends)
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   sing.classList.remove('eyes-closed');
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
+}
+function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
+  const sing=document.querySelector('.mona-sing'); if(!sing) return;
+  sing.classList.add('eyes-closed');
+  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes_closed.png');
 }
 function showCardPeekBottom(){
   const pb=document.getElementById('card-peek-bottom'), bb=document.getElementById('card-peek-bottom-bubble'); if(!pb) return;
