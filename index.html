@@ -190,6 +190,7 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 .home-bubble::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 12px solid transparent; border-top-color: #fffef9; margin-top: -2px; }
 body.dark-mode .home-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .home-bubble::after { border-top-color: #3a312b; }
+.user-word { font-weight: 700; white-space: nowrap; }
 #peek-logo { position: fixed; left: 0; width: 150px; height: 150px; transform: translateX(-100%); transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); z-index: 40; cursor: pointer; }
 #peek-logo .brand-logo-img { width: 100%; height: 100%; }
 #peek-logo[data-side="left"]  { left: 0; right: auto; transform: translateX(-100%); }
@@ -532,7 +533,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="peek-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
   <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
   <div class="peek-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
-  <div class="peek-bubble">Tervetuloa Solukkoon! Täältä löydät valmiita kysymyskortteja biokemian opiskeluun. Aloita klikkaamalla haluamaasi kurssia.</div>
+  <div class="peek-bubble"><span>Tervetuloa Solukkoon! Täältä löydät minun ja ystävieni tekemiä kysymyskortteja biokemian opiskeluun. Nimeni on Mona, mutta en tiedä sinun nimeäsi. Kutsun sinua tästä eteenpäin nimellä <span class="user-word"></span>. Se toimii myös tunnisteenasi, jos haluat osallistua tietovisoihin.</span></div>
   <div class="peek-bubble">Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.</div>
 </div>
 
@@ -543,7 +544,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
-  <div class="home-bubble">Tervetuloa Solukkoon! Täältä löydät valmiita kysymyskortteja biokemian opiskeluun. Aloita valitsemalla haluamasi kurssi.</div>
+  <div class="home-bubble"><span>Tervetuloa Solukkoon! Täältä löydät minun ja ystävieni tekemiä kysymyskortteja biokemian opiskeluun. Nimeni on Mona, mutta en tiedä sinun nimeäsi. Kutsun sinua tästä eteenpäin nimellä <span class="user-word"></span>. Se toimii myös tunnisteenasi, jos haluat osallistua tietovisoihin.</span></div>
   <div class="home-bubble">Hyvä sinä! Taas opiskelemassa.</div>
   <div class="home-bubble">Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.</div>
   <div class="home-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
@@ -2300,6 +2301,7 @@ updateGroupUI();
 updateOverviewVisibility();
 initPresence();
 initDarkmodeBtn();
+document.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());   // Mona's nickname for the user
 init();
 </script>
 
