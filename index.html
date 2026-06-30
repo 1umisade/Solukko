@@ -451,7 +451,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <body>
 
 <!-- ══ YLÄPALKKI ════════════════════════════════════════════ -->
-<div id="global-topbar" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 12px 0;box-sizing:border-box;margin-bottom:25px;">
+<div id="global-topbar" style="width:100%;max-width:760px;margin:0 auto 25px;display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;box-sizing:border-box;">
 
   <!-- ← Takaisin -->
   <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
@@ -2007,7 +2007,11 @@ function shakeCard(){
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
   const pr=document.getElementById('progress-row');
-  if(pr) pr.scrollIntoView({behavior:'smooth', block:'center'});   // smoothly bring the grade buttons into view
+  const ca=document.querySelector('.comment-area');
+  if(ca && ca.offsetParent){   // scroll so the buttons reveal fully and the comment stays just below the viewport
+    const delta=ca.getBoundingClientRect().top - window.innerHeight - 6;
+    window.scrollBy({top:delta, behavior:'smooth'});
+  } else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
