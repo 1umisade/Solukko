@@ -74,7 +74,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 #flashcard-wrap { width: 100%; transform-origin: top center; }
-.card-extent { position: absolute; left: 0; right: 0; bottom: 0.9rem; text-align: center; font-size: 0.78rem; color: #9a8d80; pointer-events: none; }
+.card-extent { text-align: center; font-size: 0.78rem; color: #9a8d80; pointer-events: none; margin: 0 0 0.55rem; }
 body.dark-mode .card-extent { color: #9a8878; }
 .reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .reveal-fade.shown { opacity: 1; pointer-events: auto; }
@@ -581,6 +581,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
   </div>
 
+  <div class="card-extent" id="card-extent"></div>
+
   <div id="flashcard-wrap">
     <div class="flashcard" id="flashcard">
       <div class="card-stars" id="card-stars"></div>
@@ -588,7 +590,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <div class="answer-section" id="answer-section">
         <div class="card-content" id="answer-content"></div>
       </div>
-      <div class="card-extent" id="card-extent"></div>
     </div>
   </div>
 
@@ -1348,7 +1349,7 @@ async function renderCurrentCard(){
   const _words=_src.trim()?_src.trim().split(/\s+/).length:0;
   const _rounded=Math.round(_words/10)*10;
   const _ext=document.getElementById('card-extent');
-  if(_rounded){ _ext.textContent='Vastauksen laajuus noin '+_rounded+' sanaa'; _ext.style.display='block'; }
+  if(_rounded){ _ext.textContent='Vastauksen laajuus noin '+_rounded+' sanaa'; _ext.style.display='block'; _ext.style.visibility='visible'; }
   else { _ext.style.display='none'; }
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
   sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
@@ -1666,7 +1667,7 @@ function showAnswer(){
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
     document.getElementById('eye-row').style.display='none';        // hide the spin button
-    document.getElementById('card-extent').style.display='none';    // hide the length label on the back
+    document.getElementById('card-extent').style.visibility='hidden';    // hide the length label on reveal (keep its space so the card doesn't jump)
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
     pr.style.display='flex'; ca.style.display='flex';
