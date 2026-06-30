@@ -52,6 +52,9 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .deck-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
 .deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
+.deck-btn.soluvisa-deck { background: radial-gradient(circle at 42% 36%, #3a7a52, #0e2a1a); }
+.deck-btn.soluvisa-deck::before { background: linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.02)); }
+.deck-btn.soluvisa-deck.soluvisa-active { background: radial-gradient(circle at 42% 36%, #e07060, #7a1a0e); }
 .deck-title { font-size: clamp(0.7rem, 2.3vw, 0.95rem); font-weight: 700; margin-bottom: 4px; white-space: normal; line-height: 1.15; }
 
 /* ── 4. GEAR / TOP-RIGHT BUTTON AREA ────────────────────── */
@@ -79,7 +82,7 @@ body.dark-mode .card-extent { color: #9a8878; }
 .reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .reveal-fade.shown { opacity: 1; pointer-events: auto; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
-.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y; will-change: transform; }
+.flashcard { position: relative; width: 100%; min-height: 260px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow: hidden; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y pinch-zoom; will-change: transform; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .card-content.left-align { text-align: left; }
 .dim-paren { opacity: 0.5; }
@@ -93,7 +96,10 @@ body.dark-mode .card-extent { color: #9a8878; }
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
-.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; }
+.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; }
+.progress-hint { position: absolute; left: 50%; top: -1.6rem; transform: translateX(-50%) translateY(4px); opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; font-family: 'Lora', serif; font-weight: 600; font-size: 0.95rem; color: #56533c; white-space: nowrap; }
+body.dark-mode .progress-hint { color: #eadfce; }
+.progress-row.hint-show .progress-hint { opacity: 1; transform: translateX(-50%) translateY(0); }
 .progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
@@ -154,8 +160,6 @@ body.dark-mode .deck-header-code  { color: #cbbda8; }
 
 /* ── DARK MODE: new top-bar buttons ─────────────────────── */
 body.dark-mode #darkmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
-body.dark-mode #soluvisa-sphere-btn { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
-body.dark-mode #soluvisa-sphere-btn.soluvisa-active { background: #c0392b !important; border-color: #c0392b !important; color: white !important; }
 body.dark-mode #deploy-timestamp-pill { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
 
@@ -271,7 +275,7 @@ body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6
   pointer-events: none;
   display: block;
 }
-body.dark-mode .overview-card-stars { color: #eadfce; }
+body.dark-mode .overview-card-stars { color: #c9a06a; }
 
 .subdeck-video-embed { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; margin: 0.5rem 0; background: #000; }
 .subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
@@ -284,7 +288,7 @@ body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f
 
 .card-stars { position: absolute; right: 1rem; bottom: 0.8rem; font-size: 1.4rem; line-height: 1; color: #56533c; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
-body.dark-mode .card-stars { color: #eadfce; }
+body.dark-mode .card-stars { color: #c9a06a; }
 
 /* ── SUN/MOON DARKMODE BUTTON ────────────────────────────── */
 #darkmode-btn {
@@ -456,11 +460,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- ← Takaisin -->
   <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
-  <!-- 🦠 Soluvisa — visible to ALL users when a dev is active -->
-  <button id="soluvisa-sphere-btn" onclick="toggleGroupModeFromButton()" title="Liity Soluvisa-peliin"
-    style="display:none;height:46px;padding:0 1.1rem;background:#fffef9;border:1px solid #d4cec4;border-radius:999px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:#56533c;white-space:nowrap;align-items:center;gap:0.35rem;transition:background 0.2s,color 0.2s,border-color 0.2s;">
-    liity soluvisaan
-  </button>
+  <!-- Soluvisa now lives on the homepage as a course circle (see updateSoluvisaCircle) -->
 
   <!-- TOP-RIGHT: exit-dev sphere + timestamp pill + sun/moon btn -->
   <div id="gear-btn-wrap" style="display:none;align-items:center;gap:8px;">
@@ -594,6 +594,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
+    <div class="progress-hint" id="progress-hint">Tiesitkö?</div>
     <button class="ball-btn grade-again" onclick="gradeCard(false)" title="Kysy uudestaan">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
@@ -1168,6 +1169,7 @@ async function loadDecks(){
     list.appendChild(btn);
     video.addEventListener('loadeddata',()=>{ video.currentTime=0.5; },{once:true});
   });
+  updateSoluvisaCircle();
   hide('card-screen');
 
   const _p=new URLSearchParams(window.location.search);
@@ -1180,6 +1182,23 @@ async function loadDecks(){
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
   show('deck-screen');
   requestAnimationFrame(layoutDecksRadial);
+}
+
+let _devActive=false;
+// The Soluvisa game shows up as a course circle on the homepage while a dev is hosting
+function updateSoluvisaCircle(){
+  const list=document.getElementById('deck-list'); if(!list) return;
+  let c=document.getElementById('soluvisa-deck-btn');
+  if(_devActive){
+    if(!c){
+      c=document.createElement('button');
+      c.id='soluvisa-deck-btn'; c.className='deck-btn soluvisa-deck';
+      c.innerHTML='<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:2.4rem;line-height:1;">🦠</div><div class="deck-title">Soluvisa</div><div style="font-size:14px;opacity:0.85;font-weight:400;">Liity peliin</div></div>';
+      c.onclick=toggleGroupModeFromButton;
+      list.appendChild(c);
+    }
+    c.classList.toggle('soluvisa-active', !!groupMode);
+  } else if(c){ c.remove(); }
 }
 
 // Arrange the course circles around the centered logo
@@ -1241,10 +1260,6 @@ async function startDeck(deckName){
   document.getElementById('gear-btn-wrap').style.display='flex';
   document.querySelector('.comment-area').style.display='none';
   document.body.classList.add('reviewing');
-  db.collection('gamestate').doc('devOwner').get().then(doc=>{
-    const ssb=document.getElementById('soluvisa-sphere-btn');
-    if(ssb) ssb.style.display = doc.exists ? 'flex' : 'none';
-  }).catch(()=>{});
   history.pushState({reviewing: true}, '');
 }
 
@@ -1515,7 +1530,7 @@ function exitJoukkupeli(){
   groupMode=false;
   const cb=document.getElementById('mode-toggle-input2'); if(cb) cb.checked=false;
   localStorage.setItem('anki-group-mode',JSON.stringify(false));
-  const ssb=document.getElementById('soluvisa-sphere-btn'); if(ssb) ssb.classList.remove('soluvisa-active');
+  const ssb=document.getElementById('soluvisa-deck-btn'); if(ssb) ssb.classList.remove('soluvisa-active');
   hideJoukkupeliOverlay(); updateGroupUI(); updateShowBtn(); loadBuzzers();
 }
 
@@ -1643,7 +1658,7 @@ function deleteComment(docId){ if(!confirm('Poistetaanko kommentti?')) return; d
 function renderCardStars(){
   const box=document.getElementById('card-stars'); if(!box||!currentCard) return;
   const count=(currentCard.tags||[]).join(' ').match(/★/g)?.length||0;
-  box.textContent=count?'★'.repeat(count):'';
+  box.textContent=count?'★︎'.repeat(count):'';   // VS15 forces text (not emoji) so CSS color applies
   const meanings=['','Tuskin tentissä','Ehkä tentissä','Luultavasti tentissä'];
   box.dataset.starMeaning = count ? meanings[Math.min(count,3)] : '';
   box.removeAttribute('title');
@@ -1785,7 +1800,7 @@ function renderCardOverview(){
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       const starCount=(card.tags||[]).join(' ').match(/★/g)?.length||0;
-      const starsHtml=starCount?`<span class="overview-card-stars">${'★'.repeat(starCount)}</span>`:'';
+      const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
@@ -1901,7 +1916,7 @@ function toggleGroupModeFromSwitch(){
   groupMode=document.getElementById('mode-toggle-input2').checked;
   if(groupMode){ showJoukkupeliOverlay(); } else { hideJoukkupeliOverlay(); }
   localStorage.setItem('anki-group-mode',JSON.stringify(groupMode));
-  const ssb=document.getElementById('soluvisa-sphere-btn');
+  const ssb=document.getElementById('soluvisa-deck-btn');
   if(ssb) ssb.classList.toggle('soluvisa-active',groupMode);
   updateGroupUI(); updateShowBtn(); loadBuzzers();
 }
@@ -1950,7 +1965,6 @@ function showDecks(){
   document.getElementById('peek-logo')?.classList.remove('peek-show','bubble-open');   // hide the peeker on the homepage
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
-  const _ssb=document.getElementById('soluvisa-sphere-btn'); if(_ssb) _ssb.style.display='none';
   document.querySelector('.comment-area').style.display='none';
   document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
@@ -2012,6 +2026,8 @@ function shakeCard(){
     const delta=ca.getBoundingClientRect().top - window.innerHeight - 6;
     window.scrollBy({top:delta, behavior:'smooth'});
   } else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
+  const prow=document.getElementById('progress-row');   // show "Tiesitkö?" above the bar while the buttons glow
+  if(prow){ prow.classList.add('hint-show'); setTimeout(()=>prow.classList.remove('hint-show'),1400); }
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
@@ -2267,15 +2283,13 @@ function applyWordLinks(element){
 // FIREBASE devOwner listener
 // ════════════════════════════════════════════════════════════
 db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
-  const soluvisaBtn=document.getElementById('soluvisa-sphere-btn');
-  const inReview=document.getElementById('card-screen')?.style.display==='flex';
+  _devActive = doc.exists;
   if(doc.exists){
     const ownerId=doc.data().userId;
-    if(soluvisaBtn) soluvisaBtn.style.display = inReview ? 'flex' : 'none';
     if(devMode&&ownerId!==getUserId()){ devMode=false; localStorage.setItem('anki-dev-mode',JSON.stringify(false)); applyDevMode(); if(currentCard) loadFirestoreComments(); }
-  } else {
-    if(soluvisaBtn) soluvisaBtn.style.display='none';
   }
+  updateSoluvisaCircle();
+  if(document.getElementById('deck-screen').style.display==='flex') layoutDecksRadial();
 });
 
 
