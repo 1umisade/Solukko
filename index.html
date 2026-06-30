@@ -164,7 +164,7 @@ body.dark-mode #deploy-timestamp-pill { background: #3a312b; color: #eadfce; bor
 body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
-.comment-area { display: flex; flex-direction: column; gap: 8px; }
+.comment-area { display: flex; flex-direction: column; gap: 8px; margin-top: 2.2rem; }
 .comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.4s ease; }
 .comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; pointer-events: none; }
 .comment-box.open { max-height: 600px; overflow: visible; cursor: default; padding-bottom: 52px; }
@@ -2038,14 +2038,10 @@ function shakeCard(){
 // ════════════════════════════════════════════════════════════
 // KOMMENTTIASETTELU & SCROLL
 // ════════════════════════════════════════════════════════════
-function positionCommentArea(){
-  const ca=document.querySelector('.comment-area'), cs=document.getElementById('card-screen');
-  if(!ca||!cs||cs.style.display==='none') return;
-  const csRect=cs.getBoundingClientRect();
-  const w=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--deck-card-width'))||260;
-  const wouldClip=(csRect.right+50+w+8)>window.innerWidth;   // side comment would run off-screen
-  if(isMobile() || wouldClip){ ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform=''; }
-  else { ca.style.position='absolute'; ca.style.width=w+'px'; ca.style.left=(csRect.right+window.scrollX+50)+'px'; ca.style.top=(csRect.top+window.scrollY+52)+'px'; ca.style.transform=''; }
+function positionCommentArea(){   // comment area sits in-flow under the buttons on every device
+  const ca=document.querySelector('.comment-area');
+  if(!ca) return;
+  ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform='';
 }
 let _lastResizeW=window.innerWidth;
 window.addEventListener('resize',()=>{
