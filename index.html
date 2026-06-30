@@ -112,7 +112,8 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-sing.playing .disco { display: block; }   /* disco fills the whole card, after the drop */
 .mona-body { position: relative; z-index: 1; width: 300px; height: 300px; transform-origin: 50% 92%; }   /* centered by mona-sing */
 .mona-sing.intro .mona-body, .mona-sing.playing .mona-body { animation: monaSwing 1.7s ease-in-out infinite; }
-.mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; transform-origin: center; will-change: transform; }
+.mona-scale { position: relative; width: 100%; height: 100%; transform-origin: center; will-change: transform; }   /* visualizer scales this (logo + pupils) */
+.mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
 .mona-bubble { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); z-index: 2; max-width: 36%; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.6rem 0.85rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
 .mona-bubble::after { content: ""; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-left-color: #fffef9; }
 .mona-play { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 2; width: 54px; height: 54px; border-radius: 50%; border: none; background: #3a7a52; color: #fff; font-size: 1.45rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; padding-left: 4px; }
@@ -1019,7 +1020,8 @@ function logoScream(ev){
       const ang=Math.atan2(y-(r.top+r.height/2), x-(r.left+r.width/2));
       const max=r.width*0.18;
       const pupil=eye.firstElementChild;
-      if(pupil) pupil.style.transform='translate('+(Math.cos(ang)*max)+'px,'+(Math.sin(ang)*max)+'px)';
+      const fy=eye.closest('#card-peek-bottom') ? -1 : 1;   // bottom peeker is scaleY(-1): invert the vertical
+      if(pupil) pupil.style.transform='translate('+(Math.cos(ang)*max)+'px,'+(fy*Math.sin(ang)*max)+'px)';
     });
   }
   window.addEventListener('mousemove', e=>move(e.clientX,e.clientY));
@@ -1773,7 +1775,7 @@ function startMonaNotes(){
     n.textContent=notes[Math.floor(Math.random()*notes.length)];
     n.style.left=(5+Math.random()*88)+'%'; n.style.top=(8+Math.random()*80)+'%';   // all over the card
     n.style.setProperty('--nx',(Math.random()*60-30)+'px');
-    n.style.fontSize=(1.1+Math.random()*0.9)+'rem';
+    n.style.fontSize=(3.3+Math.random()*2.7)+'rem';   // 3x bigger
     s.appendChild(n); setTimeout(()=>n.remove(),1600);
   }, 340);
 }
@@ -1799,23 +1801,24 @@ function startCelebViz(){   // Mona scales with the track's amplitude (graph alr
     if(!_celebAnalyser || _celebRAF) return;
     const data=new Uint8Array(_celebAnalyser.frequencyBinCount);
     const loop=()=>{
-      const img=document.querySelector('.mona-sing .brand-logo-img'); if(!img){ _celebRAF=null; return; }
+      const el=document.querySelector('.mona-sing .mona-scale'); if(!el){ _celebRAF=null; return; }
       _celebAnalyser.getByteFrequencyData(data);
       let sum=0, n=Math.max(1,Math.floor(data.length*0.6)); for(let i=0;i<n;i++) sum+=data[i];
       const avg=sum/n/255;                                   // 0..1 bass+mid energy
-      img.style.transform='scale('+(0.9 + avg*0.2).toFixed(3)+')';   // subtle pulse: 90%..110%
+      el.style.transform='scale('+(0.9 + avg*0.2).toFixed(3)+')';   // subtle pulse: 90%..110% (logo + pupils)
       _celebRAF=requestAnimationFrame(loop);
     };
     loop();
   }catch(e){}
 }
-function stopCelebViz(){ if(_celebRAF){ cancelAnimationFrame(_celebRAF); _celebRAF=null; } const img=document.querySelector('.mona-sing .brand-logo-img'); if(img) img.style.transform=''; }
+function stopCelebViz(){ if(_celebRAF){ cancelAnimationFrame(_celebRAF); _celebRAF=null; } const el=document.querySelector('.mona-sing .mona-scale'); if(el) el.style.transform=''; }
 function showCelebration(){
   currentCard=null;
   clearTimeout(_cardPeekTimer); clearTimeout(_bottomPeekTimer);   // keep the peeker hidden
   document.getElementById('card-stars').textContent='';
+  cardAnswerShown=false;
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
-  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voinko soittaa sulle yhen bängerin sen kunniaks?</div><div class="mona-body"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div>';
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voinko soittaa sulle yhen bängerin sen kunniaks?</div><div class="mona-body"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
   fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
@@ -1826,7 +1829,7 @@ let _vizStarted=false;
 function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
   const play=document.querySelector('.mona-play'); if(play) play.style.display='none';
-  const bub=document.querySelector('.mona-bubble'); if(bub) bub.style.display='none';
+  const bub=document.querySelector('.mona-bubble'); if(bub){ bub.textContent='JEE!'; setTimeout(()=>{ if(bub) bub.style.display='none'; }, 2000); }   // brief "JEE!" then gone
   _vizStarted=false;
   playCelebration();
   if(_celebrationAudio){
@@ -2200,6 +2203,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   },{passive:true});
 
   fc.addEventListener('click',e=>{
+    if(!currentCard) return;                               // celebration / done screen: no reveal or shake
     if(e.target.closest('.word-link')){ e.stopPropagation(); return; }
     if(swiped){ swiped=false; return; }                    // swipe already handled the reveal
     if(!cardAnswerShown){ showAnswer(); return; }          // front: tap reveals the answer
