@@ -1816,7 +1816,7 @@ function showCelebration(){
   ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
   const fc=document.getElementById('flashcard'); if(fc) fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
-const INTRO_DURATION=28.8;   // song intro length (s) before the beat drops
+const INTRO_DURATION=28.8;   // intro length: 00:28:03:28 - 00:27:35:04 = 28s + 24f @30fps = 28.8s
 function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
   const play=document.querySelector('.mona-play'); if(play) play.style.display='none';
