@@ -1800,9 +1800,9 @@ function stopMonaNotes(){ clearMonaNotes(); if(_celebrationAudio){ try{ _celebra
 let _celebrationAudio=null, _celebCtx=null, _celebAnalyser=null, _celebRAF=null;
 // three tracks, picked at random per celebration; each has its own viz-start and drop times
 const CELEB_TRACKS=[
-  {src:'celebration1.mp3', viz:25,  drop:37},
-  {src:'celebration2.mp3', viz:16,  drop:28.8},   // the original track
-  {src:'celebration3.mp3', viz:12,  drop:23.3}
+  {src:'celebration1.mp3', viz:25,  drop:37,   eyeOpen:40, eyeClose:42},
+  {src:'celebration2.mp3', viz:16,  drop:28.8, eyeOpen:40, eyeClose:42},   // the original track
+  {src:'celebration3.mp3', viz:13,  drop:27,   eyeOpen:38, eyeClose:39}
 ];
 let _celebTrack=CELEB_TRACKS[1];
 function playCelebration(){
@@ -1878,8 +1878,6 @@ function showCelebration(){
   ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
   fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
-const EYES_OPEN=40;          // Mona (and friends) blink their eyes back open
-const EYES_CLOSE2=42;        // ...then shut them again
 let _vizStarted=false, _dropped=false, _eyesReopened=false, _eyesReclosed=false;
 function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
@@ -1892,8 +1890,8 @@ function startCelebrationMusic(){   // play button: start the music; Mona swings
       const t=_celebrationAudio.currentTime;
       if(t>=_celebTrack.viz && !_vizStarted){ _vizStarted=true; startCelebViz(); }      // pulse from the track's midway
       if(t>=_celebTrack.drop && !_dropped){ _dropped=true; celebrationDrop(); }           // drop at the track's drop time
-      if(t>=EYES_OPEN && !_eyesReopened){ _eyesReopened=true; reopenCelebEyes(); }      // eyes open at 40s
-      if(t>=EYES_CLOSE2 && !_eyesReclosed){ _eyesReclosed=true; closeCelebEyes(); _celebrationAudio.ontimeupdate=null; }   // shut again at 42s
+      if(t>=_celebTrack.eyeOpen && !_eyesReopened){ _eyesReopened=true; reopenCelebEyes(); }      // brief eye open
+      if(t>=_celebTrack.eyeClose && !_eyesReclosed){ _eyesReclosed=true; closeCelebEyes(); _celebrationAudio.ontimeupdate=null; }   // ...then shut again
     };
   }
 }
