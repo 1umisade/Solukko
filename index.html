@@ -112,7 +112,7 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-sing.playing .disco { display: block; }   /* lights only after pressing play */
 .mona-row { display: flex; align-items: center; justify-content: center; gap: 1rem; position: relative; z-index: 1; }
 .mona-body { position: relative; z-index: 1; width: 150px; height: 150px; transform-origin: 50% 92%; }
-.mona-sing.playing .mona-body { animation: monaSwing 1.7s ease-in-out infinite; }   /* dance only after play */
+.mona-sing.intro .mona-body, .mona-sing.playing .mona-body { animation: monaSwing 1.7s ease-in-out infinite; }   /* swing during intro and drop */
 .mona-play { width: 54px; height: 54px; flex-shrink: 0; border-radius: 50%; border: none; background: #3a7a52; color: #fff; font-size: 1.45rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; padding-left: 4px; }
 .mona-play:hover { background: #2e6342; }
 .mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
@@ -1776,13 +1776,12 @@ function startMonaNotes(){
     s.appendChild(n); setTimeout(()=>n.remove(),1600);
   }, 340);
 }
-function stopMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); if(_celebrationAudio){ try{ _celebrationAudio.pause(); }catch(e){} } stopCelebViz(); }
+function stopMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.ontimeupdate=null; }catch(e){} } stopCelebViz(); }
 let _celebrationAudio=null, _celebCtx=null, _celebAnalyser=null, _celebRAF=null;
 function playCelebration(){
   try{
     if(!_celebrationAudio){ _celebrationAudio=new Audio('celebration.mp3'); _celebrationAudio.volume=0.6; }
     _celebrationAudio.currentTime=0; _celebrationAudio.play().catch(()=>{});
-    startCelebViz();
   }catch(e){}
 }
 function startCelebViz(){   // Mona scales heavily with the track's amplitude
@@ -1812,15 +1811,25 @@ function showCelebration(){
   currentCard=null;
   document.getElementById('card-stars').textContent='';
   document.getElementById('flashcard').style.minHeight='';
-  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-row"><div class="mona-body"><img src="solukkologo_eyes_closed.png" class="brand-logo-img" alt="Mona"></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voidaanko soittaa mun lempibiisi sen kunniaksi?</div></div>';
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-row"><div class="mona-body"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voidaanko soittaa mun lempibiisi sen kunniaksi?</div></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
   const fc=document.getElementById('flashcard'); if(fc) fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
-function startCelebrationMusic(){   // play button: start the music, lights and dancing
-  const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('playing');
+const INTRO_DURATION=28.8;   // song intro length (s) before the beat drops
+function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
+  const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
   const play=document.querySelector('.mona-play'); if(play) play.style.display='none';
-  startMonaNotes(); playCelebration();
+  playCelebration();
+  if(_celebrationAudio){
+    _celebrationAudio.ontimeupdate=function(){ if(_celebrationAudio.currentTime>=INTRO_DURATION){ _celebrationAudio.ontimeupdate=null; celebrationDrop(); } };
+  }
+}
+function celebrationDrop(){   // after the intro: lights, heavy dancing, notes, closed eyes
+  const sing=document.querySelector('.mona-sing'); if(!sing) return;
+  sing.classList.add('playing'); sing.classList.add('eyes-closed');
+  const img=sing.querySelector('.brand-logo-img'); if(img) img.src='solukkologo_eyes_closed.png';
+  startMonaNotes(); startCelebViz();
 }
 function showCardPeekBottom(){
   const pb=document.getElementById('card-peek-bottom'), bb=document.getElementById('card-peek-bottom-bubble'); if(!pb) return;
