@@ -77,7 +77,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 #flashcard-wrap { width: 100%; transform-origin: top center; }
-.card-extent { text-align: center; font-size: 0.78rem; color: #9a8d80; pointer-events: none; margin: 0 0 0.55rem; }
+.card-extent { text-align: center; font-size: 1.56rem; color: #9a8d80; pointer-events: none; margin: 0 0 0.55rem; }
 body.dark-mode .card-extent { color: #9a8878; }
 .reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .reveal-fade.shown { opacity: 1; pointer-events: auto; }
@@ -97,9 +97,9 @@ body.dark-mode .card-extent { color: #9a8878; }
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
 .progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; }
-.progress-hint { position: absolute; left: 50%; top: -1.6rem; transform: translateX(-50%) translateY(4px); opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; font-family: 'Lora', serif; font-weight: 600; font-size: 0.95rem; color: #56533c; white-space: nowrap; }
-body.dark-mode .progress-hint { color: #eadfce; }
-.progress-row.hint-show .progress-hint { opacity: 1; transform: translateX(-50%) translateY(0); }
+.progress-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) translateY(4px); opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; z-index: 5; font-family: 'Lora', serif; font-weight: 700; font-size: 1.9rem; color: #56533c; white-space: nowrap; text-shadow: 0 1px 7px rgba(245,240,232,0.95), 0 0 4px rgba(245,240,232,0.95); }
+body.dark-mode .progress-hint { color: #eadfce; text-shadow: 0 1px 7px rgba(43,33,27,0.95), 0 0 4px rgba(43,33,27,0.95); }
+.progress-row.hint-show .progress-hint { opacity: 1; transform: translate(-50%, -50%); }
 .progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
@@ -2208,14 +2208,16 @@ function applyWordLinks(element){
   }
   requestAnimationFrame(updateTip);
 
+  let _lpTimer=null;                                          // mobile: only a long-press shows the bubble
+  document.addEventListener('touchstart', e=>{
+    const link=e.target.closest('.word-link'); if(!link) return;
+    _lpTimer=setTimeout(()=>{ touchPinnedLink=link; showTip(link); _lpTimer=null; }, 450);
+  }, {passive:true});
+  document.addEventListener('touchmove', ()=>{ if(_lpTimer){ clearTimeout(_lpTimer); _lpTimer=null; } }, {passive:true});
   document.addEventListener('touchend', e=>{
+    if(_lpTimer){ clearTimeout(_lpTimer); _lpTimer=null; }    // released before the long-press → just a tap, ignore
     const link=e.target.closest('.word-link');
-    if(link){
-      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; }
-      else { touchPinnedLink=link; showTip(link); }
-    } else {
-      if(touchPinnedLink){ touchPinnedLink=null; tip.style.display='none'; }
-    }
+    if(touchPinnedLink && link!==touchPinnedLink){ touchPinnedLink=null; tip.style.display='none'; }   // tap away closes it
   }, {passive:true});
 })();
 
