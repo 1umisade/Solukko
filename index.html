@@ -106,18 +106,18 @@ body.is-mobile .card-peek-bubble { left: 54px; font-size: 0.8rem; padding: 0.35r
 body.is-mobile .card-peek-bottom .card-peek-bubble { top: 12px; left: 66px; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
 /* deck finished: Mona swings and sings */
-.mona-sing { width: 100%; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; position: relative; }
-.mona-body { position: relative; width: 150px; height: 150px; transform-origin: 50% 92%; animation: monaSwing 1.7s ease-in-out infinite; }
+.mona-sing { width: 100%; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; position: relative; overflow: hidden; }
+.disco { position: absolute; left: 50%; top: 42%; width: 280px; height: 280px; transform: translate(-50%, -50%); border-radius: 50%; z-index: 0; pointer-events: none; filter: blur(16px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 3s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
+.mona-body { position: relative; z-index: 1; width: 150px; height: 150px; transform-origin: 50% 92%; animation: monaSwing 1.7s ease-in-out infinite; }
 .mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
-.mona-mouth { position: absolute; left: 50%; top: 63%; width: 22%; height: 15%; background: #3a7a52; border-radius: 50%; transform: translate(-50%, -50%); animation: monaSing 0.5s ease-in-out infinite; }
-body.dark-mode .mona-mouth { background: #4f9d6c; }
-.mona-caption { font-size: 1.9rem; font-weight: 700; color: #6b6055; }
+.mona-caption { position: relative; z-index: 1; font-size: 1.9rem; font-weight: 700; color: #6b6055; }
 body.dark-mode .mona-caption { color: #cbbda8; }
 .mona-note { position: absolute; pointer-events: none; will-change: transform, opacity; animation: monaNoteFloat 1.6s ease-out forwards; }
 .mona-note.n1 { color: #3a7a52; } .mona-note.n2 { color: #c98a2e; } .mona-note.n3 { color: #b0562f; }
 @keyframes monaSwing { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
-@keyframes monaSing { 0%,100% { transform: translate(-50%,-50%) scaleY(0.35); } 50% { transform: translate(-50%,-50%) scaleY(1); } }
 @keyframes monaNoteFloat { 0% { opacity: 0; transform: translate(-50%, 0) rotate(0deg); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--nx, 0px)), -85px) rotate(18deg); } }
+@keyframes discoSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes discoPulse { from { opacity: 0.4; } to { opacity: 0.75; } }
 .reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .reveal-fade.shown { opacity: 1; pointer-events: auto; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
@@ -1276,16 +1276,14 @@ let _devActive=false;
 function updateSoluvisaCircle(){
   const list=document.getElementById('deck-list'); if(!list) return;
   let c=document.getElementById('soluvisa-deck-btn');
-  if(_devActive){
-    if(!c){
-      c=document.createElement('button');
-      c.id='soluvisa-deck-btn'; c.className='deck-btn soluvisa-deck';
-      c.innerHTML='<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:2.4rem;line-height:1;">🦠</div><div class="deck-title">Soluvisa</div><div style="font-size:14px;opacity:0.85;font-weight:400;">Liity peliin</div></div>';
-      c.onclick=toggleGroupModeFromButton;
-      list.appendChild(c);
-    }
-    c.classList.toggle('soluvisa-active', !!groupMode);
-  } else if(c){ c.remove(); }
+  if(!c){
+    c=document.createElement('button');
+    c.id='soluvisa-deck-btn'; c.className='deck-btn soluvisa-deck';
+    c.innerHTML='<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:2.4rem;line-height:1;">🦠</div><div class="deck-title">Soluvisa</div><div style="font-size:14px;opacity:0.85;font-weight:400;">Liity peliin</div></div>';
+    c.onclick=toggleGroupModeFromButton;
+    list.appendChild(c);
+  }
+  c.classList.toggle('soluvisa-active', !!groupMode);
 }
 
 // Arrange the course circles around the centered logo
@@ -1516,10 +1514,10 @@ async function nextCard(){
     currentCard=null;
     document.getElementById('card-stars').textContent='';
     document.getElementById('flashcard').style.minHeight='';
-    document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="mona-body"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div><div class="mona-mouth"></div></div><div class="mona-caption">Valmista tuli!</div></div>';
+    document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-body"><img src="solukkologo_eyes_closed.png" class="brand-logo-img" alt="Mona"></div><div class="mona-caption">Valmista tuli!</div></div>';
     document.getElementById('answer-content').innerHTML='';
     ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
-    startMonaNotes();
+    startMonaNotes(); playCelebration();
     return;
   }
   stopMonaNotes();
@@ -1777,7 +1775,9 @@ function startMonaNotes(){
     s.appendChild(n); setTimeout(()=>n.remove(),1600);
   }, 340);
 }
-function stopMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); }
+function stopMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); if(_celebrationAudio){ try{ _celebrationAudio.pause(); }catch(e){} } }
+let _celebrationAudio=null;
+function playCelebration(){ try{ if(!_celebrationAudio){ _celebrationAudio=new Audio('celebration.mp3'); _celebrationAudio.volume=0.6; } _celebrationAudio.currentTime=0; _celebrationAudio.play().catch(()=>{}); }catch(e){} }
 function showCardPeekBottom(){
   const pb=document.getElementById('card-peek-bottom'), bb=document.getElementById('card-peek-bottom-bubble'); if(!pb) return;
   pb.classList.remove('peek-out'); pb.style.display=''; pb.style.visibility='visible';
@@ -2154,10 +2154,10 @@ function shakeCard(){
   setTimeout(()=>fc.classList.remove('card-shake'),500);
   const pr=document.getElementById('progress-row');
   const ca=document.querySelector('.comment-area');
-  if(ca && ca.offsetParent){   // scroll so the buttons reveal fully and the comment stays just below the viewport
-    const delta=ca.getBoundingClientRect().top - window.innerHeight - 6;
-    window.scrollBy({top:delta, behavior:'smooth'});
-  } else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
+  if(isMobile()){   // only mobile scrolls to bring the buttons up; desktop stays put
+    if(ca && ca.offsetParent){ const delta=ca.getBoundingClientRect().top - window.innerHeight - 6; window.scrollBy({top:delta, behavior:'smooth'}); }
+    else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
+  }
   { const _pb=document.getElementById('card-peek-bottom');   // shake toggles the bottom peeker (animated)
     const showing = _pb && _pb.style.display!=='none' && _pb.style.visibility!=='hidden' && !_pb.classList.contains('peek-out');
     if(showing) hideCardPeekBottom(); else showCardPeekBottom(); }
