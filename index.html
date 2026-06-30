@@ -111,8 +111,11 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .disco { position: absolute; left: 50%; top: 42%; width: 280px; height: 280px; transform: translate(-50%, -50%); border-radius: 50%; z-index: 0; pointer-events: none; filter: blur(16px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 3s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
 .mona-body { position: relative; z-index: 1; width: 150px; height: 150px; transform-origin: 50% 92%; animation: monaSwing 1.7s ease-in-out infinite; }
 .mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
-.mona-caption { position: relative; z-index: 1; font-size: 1.9rem; font-weight: 700; color: #6b6055; }
-body.dark-mode .mona-caption { color: #cbbda8; }
+.mona-bubble { position: relative; z-index: 1; max-width: min(82%, 420px); background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.7rem 1.05rem; font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.35; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
+.mona-bubble::after { content: ""; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 9px solid transparent; border-bottom-color: #fffef9; }
+body.dark-mode .mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode .mona-bubble::after { border-bottom-color: #3a312b; }
+.celebration-card { text-align: center; font-weight: 700; background: linear-gradient(120deg, #fff3d6, #ffe0ec, #dff5e6) !important; }
 .mona-note { position: absolute; pointer-events: none; will-change: transform, opacity; animation: monaNoteFloat 1.6s ease-out forwards; }
 .mona-note.n1 { color: #3a7a52; } .mona-note.n2 { color: #c98a2e; } .mona-note.n3 { color: #b0562f; }
 @keyframes monaSwing { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
@@ -1406,6 +1409,7 @@ function renderReviewDeckCard(deckName){
 }
 
 async function renderCurrentCard(){
+  stopMonaNotes();
   const card=currentCard;
   const q=extractBody(card.question||'');
   const aFull=extractBody(card.answer||'');
@@ -1511,16 +1515,7 @@ function shuffleDeck(){
 }
 
 async function nextCard(){
-  if(!queue.length){
-    currentCard=null;
-    document.getElementById('card-stars').textContent='';
-    document.getElementById('flashcard').style.minHeight='';
-    document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-body"><img src="solukkologo_eyes_closed.png" class="brand-logo-img" alt="Mona"></div><div class="mona-caption">Valmista tuli!</div></div>';
-    document.getElementById('answer-content').innerHTML='';
-    ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
-    startMonaNotes(); playCelebration();
-    return;
-  }
+  if(!queue.length){ showCelebration(); return; }
   stopMonaNotes();
   currentCard=queue.shift();
   currentOverviewIndex=reviewCards.indexOf(currentCard);
@@ -1808,6 +1803,16 @@ function startCelebViz(){   // Mona scales heavily with the track's amplitude
   }catch(e){}
 }
 function stopCelebViz(){ if(_celebRAF){ cancelAnimationFrame(_celebRAF); _celebRAF=null; } const img=document.querySelector('.mona-sing .brand-logo-img'); if(img) img.style.transform=''; }
+function showCelebration(){
+  currentCard=null;
+  document.getElementById('card-stars').textContent='';
+  document.getElementById('flashcard').style.minHeight='';
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-body"><img src="solukkologo_eyes_closed.png" class="brand-logo-img" alt="Mona"></div><div class="mona-bubble">Wau!! Olet opiskellut KOKO kurssin. Soitan sulle nyt mun lempibiisin!</div></div>';
+  document.getElementById('answer-content').innerHTML='';
+  ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
+  startMonaNotes(); playCelebration();
+  const fc=document.getElementById('flashcard'); if(fc) fc.scrollIntoView({behavior:'smooth', block:'center'});
+}
 function showCardPeekBottom(){
   const pb=document.getElementById('card-peek-bottom'), bb=document.getElementById('card-peek-bottom-bubble'); if(!pb) return;
   pb.classList.remove('peek-out'); pb.style.display=''; pb.style.visibility='visible';
@@ -1967,7 +1972,8 @@ function renderCardOverview(){
     }).join('');
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
-  }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>');
+  }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>')
+  + (devMode ? '<div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onclick="showCelebration()">🎉 Juhlanäyttö (dev)</div></div></div>' : '');
   listenToKuvaajat();
   fitDeckTitle();
 }
