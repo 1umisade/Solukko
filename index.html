@@ -130,10 +130,11 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-play { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 2; width: 54px; height: 54px; border-radius: 50%; border: none; background: #3a7a52; color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; padding: 0; }
 .mona-play:hover { background: #2e6342; }
 .mona-vol { position: absolute; left: 50%; top: 67%; transform: translateX(-50%); z-index: 2; width: 64%; max-width: 340px; height: 44px; cursor: pointer; -webkit-appearance: none; appearance: none; background: transparent; }
-.mona-vol::-webkit-slider-runnable-track { height: 12px; border-radius: 999px; background: rgba(58,122,82,0.35); }
-.mona-vol::-moz-range-track { height: 12px; border-radius: 999px; background: rgba(58,122,82,0.35); }
-.mona-vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 44px; height: 44px; margin-top: -16px; border-radius: 50%; background: #3a7a52 url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 24px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; }
-.mona-vol::-moz-range-thumb { width: 44px; height: 44px; border: none; border-radius: 50%; background: #3a7a52 url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 24px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; }
+.mona-vol::-webkit-slider-runnable-track { height: 12px; border-radius: 999px; background: linear-gradient(to right, #3a7a52 0 var(--p,50%), #dcdcdc var(--p,50%) 100%); }
+.mona-vol::-moz-range-track { height: 12px; border-radius: 999px; background: #dcdcdc; }
+.mona-vol::-moz-range-progress { height: 12px; border-radius: 999px; background: #3a7a52; }
+.mona-vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 44px; height: 44px; margin-top: -16px; border-radius: 50%; background: #9a9a9a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 24px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; }
+.mona-vol::-moz-range-thumb { width: 44px; height: 44px; border: none; border-radius: 50%; background: #9a9a9a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 24px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.3); cursor: pointer; }
 body.dark-mode .mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .mona-bubble::after { border-left-color: #3a312b; }
 .celebration-card { text-align: center; font-weight: 700; background: linear-gradient(120deg, #fff3d6, #ffe0ec, #dff5e6) !important; }
@@ -1851,6 +1852,7 @@ function startCelebOnTouch(){   // touching the slider starts the music (at the 
 }
 function onCelebVolume(v){   // slider drag sets the volume (and starts the music if not yet playing)
   startCelebOnTouch();
+  const sl=document.querySelector('.mona-vol'); if(sl) sl.style.setProperty('--p', v+'%');   // green fill up to the knob, light grey after
   if(_celebrationAudio){ _celebrationAudio.muted=false; _celebrationAudio.volume=Math.max(0,Math.min(1,v/100)); }
 }
 function celebrationEnd(){   // song finished: stop the party, prompt to enrol for the exam
@@ -1881,7 +1883,7 @@ const EYES_CLOSE2=42;        // ...then shut them again
 let _vizStarted=false, _dropped=false, _eyesReopened=false, _eyesReclosed=false;
 function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
-  const bub=document.querySelector('.mona-bubble'); if(bub){ bub.textContent='JEE! Kutsun mun kaveritkin.'; setTimeout(()=>{ if(bub) bub.style.display='none'; }, 5000); }   // shout for 5s then gone
+  const bub=document.querySelector('.mona-bubble'); if(bub){ bub.textContent='JEE! Mun kaveritkin tulee käymään nopee.'; setTimeout(()=>{ if(bub) bub.style.display='none'; }, 5000); }   // shout for 5s then gone
   _vizStarted=false; _dropped=false; _eyesReopened=false; _eyesReclosed=false;
   playCelebration();
   if(_celebrationAudio){
