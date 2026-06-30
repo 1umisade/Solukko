@@ -1762,8 +1762,9 @@ let _cardPeekTimer=null;
 let _bottomPeekTimer=null;
 function playPeekIn(el){ if(!el) return; el.classList.remove('peek-in'); void el.offsetWidth; el.classList.add('peek-in'); }   // (re)start the lively entry
 let _monaNoteTimer=null;
+function clearMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); }
 function startMonaNotes(){
-  stopMonaNotes();
+  clearMonaNotes();
   if(!document.querySelector('.mona-sing')) return;
   const notes=['♪','♫','♩','♬'];
   _monaNoteTimer=setInterval(()=>{
@@ -1776,24 +1777,26 @@ function startMonaNotes(){
     s.appendChild(n); setTimeout(()=>n.remove(),1600);
   }, 340);
 }
-function stopMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.ontimeupdate=null; }catch(e){} } stopCelebViz(); }
+function stopMonaNotes(){ clearMonaNotes(); if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.ontimeupdate=null; }catch(e){} } _vizStarted=false; stopCelebViz(); }
 let _celebrationAudio=null, _celebCtx=null, _celebAnalyser=null, _celebRAF=null;
 function playCelebration(){
   try{
     if(!_celebrationAudio){ _celebrationAudio=new Audio('celebration.mp3'); _celebrationAudio.volume=0.6; }
-    _celebrationAudio.currentTime=0; _celebrationAudio.play().catch(()=>{});
-  }catch(e){}
-}
-function startCelebViz(){   // Mona scales heavily with the track's amplitude
-  try{
-    if(!_celebCtx){
+    // build the analyser graph ONCE here (called from the play click = user gesture),
+    // so the audio routed through the context stays audible the whole time
+    if(!_celebAnalyser){
       _celebCtx=new (window.AudioContext||window.webkitAudioContext)();
       const src=_celebCtx.createMediaElementSource(_celebrationAudio);
       _celebAnalyser=_celebCtx.createAnalyser(); _celebAnalyser.fftSize=256; _celebAnalyser.smoothingTimeConstant=0.75;
       src.connect(_celebAnalyser); _celebAnalyser.connect(_celebCtx.destination);
     }
-    if(_celebCtx.state==='suspended') _celebCtx.resume();
-    cancelAnimationFrame(_celebRAF);
+    if(_celebCtx && _celebCtx.state==='suspended') _celebCtx.resume();
+    _celebrationAudio.currentTime=0; _celebrationAudio.play().catch(()=>{});
+  }catch(e){}
+}
+function startCelebViz(){   // Mona scales with the track's amplitude (graph already built at play)
+  try{
+    if(!_celebAnalyser || _celebRAF) return;
     const data=new Uint8Array(_celebAnalyser.frequencyBinCount);
     const loop=()=>{
       const img=document.querySelector('.mona-sing .brand-logo-img'); if(!img){ _celebRAF=null; return; }
@@ -1817,19 +1820,26 @@ function showCelebration(){
   const fc=document.getElementById('flashcard'); if(fc) fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
 const INTRO_DURATION=28.8;   // intro length: 00:28:03:28 - 00:27:35:04 = 28s + 24f @30fps = 28.8s
+const VIZ_START=16;          // audio visualizer kicks in midway through the intro
+let _vizStarted=false;
 function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
   const play=document.querySelector('.mona-play'); if(play) play.style.display='none';
+  _vizStarted=false;
   playCelebration();
   if(_celebrationAudio){
-    _celebrationAudio.ontimeupdate=function(){ if(_celebrationAudio.currentTime>=INTRO_DURATION){ _celebrationAudio.ontimeupdate=null; celebrationDrop(); } };
+    _celebrationAudio.ontimeupdate=function(){
+      const t=_celebrationAudio.currentTime;
+      if(t>=VIZ_START && !_vizStarted){ _vizStarted=true; startCelebViz(); }      // pulse from 16s
+      if(t>=INTRO_DURATION){ _celebrationAudio.ontimeupdate=null; celebrationDrop(); }
+    };
   }
 }
-function celebrationDrop(){   // after the intro: lights, heavy dancing, notes, closed eyes
+function celebrationDrop(){   // after the intro: lights, notes, closed eyes (viz already running)
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   sing.classList.add('playing'); sing.classList.add('eyes-closed');
   const img=sing.querySelector('.brand-logo-img'); if(img) img.src='solukkologo_eyes_closed.png';
-  startMonaNotes(); startCelebViz();
+  startMonaNotes();
 }
 function showCardPeekBottom(){
   const pb=document.getElementById('card-peek-bottom'), bb=document.getElementById('card-peek-bottom-bubble'); if(!pb) return;
