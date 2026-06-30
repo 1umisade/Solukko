@@ -105,28 +105,27 @@ body.is-mobile .card-peek-bottom { top: calc(100% - 18px); }
 body.is-mobile .card-peek-bubble { left: 54px; font-size: 0.8rem; padding: 0.35rem 0.6rem; }
 body.is-mobile .card-peek-bottom .card-peek-bubble { top: 12px; left: 66px; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
-/* deck finished: Mona swings and sings */
-.mona-sing { width: 100%; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; position: relative; }
-.mona-body .brand-logo-img { transform-origin: center 70%; will-change: transform; }
-.disco { display: none; position: absolute; left: 50%; top: 42%; width: 280px; height: 280px; transform: translate(-50%, -50%); border-radius: 50%; z-index: 0; pointer-events: none; filter: blur(16px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 3s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
-.mona-sing.playing .disco { display: block; }   /* lights only after pressing play */
-.mona-row { display: flex; align-items: center; justify-content: center; gap: 1rem; position: relative; z-index: 1; }
-.mona-body { position: relative; z-index: 1; width: 150px; height: 150px; transform-origin: 50% 92%; }
-.mona-sing.intro .mona-body, .mona-sing.playing .mona-body { animation: monaSwing 1.7s ease-in-out infinite; }   /* swing during intro and drop */
-.mona-play { width: 54px; height: 54px; flex-shrink: 0; border-radius: 50%; border: none; background: #3a7a52; color: #fff; font-size: 1.45rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; padding-left: 4px; }
+/* deck finished: Mona dances on a disco floor (square card) */
+.flashcard.celebrating { aspect-ratio: 1 / 1; min-height: 0; padding: 0; overflow: hidden; }
+.mona-sing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.disco { display: none; position: absolute; left: -30%; top: -30%; width: 160%; height: 160%; z-index: 0; pointer-events: none; transform-origin: center; filter: blur(8px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 4s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
+.mona-sing.playing .disco { display: block; }   /* disco fills the whole card, after the drop */
+.mona-body { position: relative; z-index: 1; width: 150px; height: 150px; transform-origin: 50% 92%; }   /* centered by mona-sing */
+.mona-sing.intro .mona-body, .mona-sing.playing .mona-body { animation: monaSwing 1.7s ease-in-out infinite; }
+.mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; transform-origin: center; will-change: transform; }
+.mona-bubble { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); z-index: 2; max-width: 36%; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.6rem 0.85rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
+.mona-bubble::after { content: ""; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-left-color: #fffef9; }
+.mona-play { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 2; width: 54px; height: 54px; border-radius: 50%; border: none; background: #3a7a52; color: #fff; font-size: 1.45rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; padding-left: 4px; }
 .mona-play:hover { background: #2e6342; }
-.mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
-.mona-bubble { position: relative; z-index: 1; max-width: min(82%, 420px); background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.7rem 1.05rem; font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.35; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
-.mona-bubble::after { content: ""; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 9px solid transparent; border-bottom-color: #fffef9; }
 body.dark-mode .mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode .mona-bubble::after { border-bottom-color: #3a312b; }
+body.dark-mode .mona-bubble::after { border-left-color: #3a312b; }
 .celebration-card { text-align: center; font-weight: 700; background: linear-gradient(120deg, #fff3d6, #ffe0ec, #dff5e6) !important; }
-.mona-note { position: absolute; pointer-events: none; will-change: transform, opacity; animation: monaNoteFloat 1.6s ease-out forwards; }
+.mona-note { position: absolute; z-index: 1; pointer-events: none; will-change: transform, opacity; animation: monaNoteFloat 1.6s ease-out forwards; }
 .mona-note.n1 { color: #3a7a52; } .mona-note.n2 { color: #c98a2e; } .mona-note.n3 { color: #b0562f; }
 @keyframes monaSwing { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
 @keyframes monaNoteFloat { 0% { opacity: 0; transform: translate(-50%, 0) rotate(0deg); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--nx, 0px)), -85px) rotate(18deg); } }
-@keyframes discoSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-@keyframes discoPulse { from { opacity: 0.4; } to { opacity: 0.75; } }
+@keyframes discoSpin { to { transform: rotate(360deg); } }
+@keyframes discoPulse { from { opacity: 0.5; } to { opacity: 0.85; } }
 .reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
 .reveal-fade.shown { opacity: 1; pointer-events: auto; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
@@ -1415,6 +1414,7 @@ function renderReviewDeckCard(deckName){
 
 async function renderCurrentCard(){
   stopMonaNotes();
+  document.getElementById('flashcard').classList.remove('celebrating');
   const card=currentCard;
   const q=extractBody(card.question||'');
   const aFull=extractBody(card.answer||'');
@@ -1812,12 +1812,13 @@ function startCelebViz(){   // Mona scales with the track's amplitude (graph alr
 function stopCelebViz(){ if(_celebRAF){ cancelAnimationFrame(_celebRAF); _celebRAF=null; } const img=document.querySelector('.mona-sing .brand-logo-img'); if(img) img.style.transform=''; }
 function showCelebration(){
   currentCard=null;
+  clearTimeout(_cardPeekTimer); clearTimeout(_bottomPeekTimer);   // keep the peeker hidden
   document.getElementById('card-stars').textContent='';
-  document.getElementById('flashcard').style.minHeight='';
-  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-row"><div class="mona-body"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voidaanko soittaa mun lempibiisi sen kunniaksi?</div></div>';
+  const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voidaanko soittaa mun lempibiisi sen kunniaksi?</div><div class="mona-body"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div><button class="mona-play" onclick="startCelebrationMusic()" title="Soita lempibiisi" aria-label="Soita">&#9654;</button></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','progress-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
-  const fc=document.getElementById('flashcard'); if(fc) fc.scrollIntoView({behavior:'smooth', block:'center'});
+  fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
 const INTRO_DURATION=28.8;   // intro length: 00:28:03:28 - 00:27:35:04 = 28s + 24f @30fps = 28.8s
 const VIZ_START=16;          // audio visualizer kicks in midway through the intro
