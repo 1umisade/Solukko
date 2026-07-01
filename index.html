@@ -54,7 +54,8 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .deck-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.5); pointer-events: none; }   /* 50% black layer over the video */
 .deck-label { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 14px; }
 .deck-code { position: absolute; left: 12px; bottom: 10px; z-index: 2; font-size: 14px; font-weight: 600; opacity: 0.92; color: #fff; text-shadow: 0 1px 5px rgba(0,0,0,0.85); pointer-events: none; }
-.pack-back { position: absolute; inset: 0; border-radius: 16px; background: #fffef9; border: 3px solid #ebe3cf; box-shadow: 0 6px 16px rgba(0,0,0,0.22); transition: transform 0.34s cubic-bezier(0.34, 1.4, 0.64, 1); }   /* same cream as the review cards; flare set randomly by JS */
+.pack-back { position: absolute; inset: 0; border-radius: 16px; background: #fffef9; border: 3px solid #ebe3cf; box-shadow: 0 6px 16px rgba(0,0,0,0.22); overflow: hidden; transition: transform 0.34s cubic-bezier(0.34, 1.4, 0.64, 1); }   /* same cream as the review cards; flare set randomly by JS */
+.pack-back-content { position: absolute; inset: 0; padding: 16px; font-family: 'Lora', serif; font-size: 0.74rem; line-height: 1.4; color: #1a1612; text-align: left; overflow: hidden; }   /* a real card backside from the deck */
 .pack-back-1 { z-index: 4; transform: rotate(-2deg) translateY(-2px); }
 .pack-back-2 { z-index: 3; transform: rotate(2deg) translateY(-4px); }
 .pack-back-3 { z-index: 2; transform: rotate(-3deg) translateY(-6px); }
@@ -343,10 +344,9 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 /* ── 12. OVERVIEW GRID ───────────────────────────────────── */
 #card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 2.5rem; margin-top: 12rem; }
 .overview-section { width: 100%; }
-.section-tools { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 8px; }
-.section-tool-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
-.section-tool-btn:active { transform: scale(0.9); }
-body.dark-mode .section-tool-btn { background: #3a312b; border-color: #6d5f52; }
+.grid-shuffle-btn { position: absolute; right: 0; bottom: 0.7rem; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
+.grid-shuffle-btn:active { transform: scale(0.9); }
+body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
 .overview-card { will-change: transform; }
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
 .overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
@@ -1279,7 +1279,11 @@ async function loadDecks(){
 
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn';
-    btn.innerHTML=`<div class="pack-back pack-back-4"></div><div class="pack-back pack-back-3"></div><div class="pack-back pack-back-2"></div><div class="pack-back pack-back-1"></div><div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
+    const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
+    const _tmp=document.createElement('div');
+    const _tops=_dc.map(c=>{ _tmp.innerHTML=extractBody(c.answer||'').body; return (_tmp.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (entities decoded)
+    const _bk=(cls,i)=>`<div class="pack-back ${cls}">${_tops[i]?`<div class="pack-back-content">${escCmt(_tops[i].slice(0,600))}</div>`:''}</div>`;
+    btn.innerHTML=`${_bk('pack-back-4',3)}${_bk('pack-back-3',2)}${_bk('pack-back-2',1)}${_bk('pack-back-1',0)}<div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
     btn.addEventListener('mouseenter',()=>{   // natural scattered flare, fresh each hover (each card drifts a random direction)
       btn.querySelectorAll('.pack-back').forEach((bk)=>{
         const ang=Math.random()*Math.PI*2, dist=7+Math.random()*10;
@@ -2210,16 +2214,12 @@ function flipReorderGrid(grid, newOrder){
     }
   });
 }
-function shuffleGridSection(btn){
-  const grid=btn.closest('.overview-section').querySelector('.overview-section-grid'); if(!grid) return;
-  const cards=[...grid.querySelectorAll('.overview-card')];
-  for(let i=cards.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=cards[i]; cards[i]=cards[j]; cards[j]=t; }
-  flipReorderGrid(grid, cards);
-}
-function restoreGridSection(btn){
-  const grid=btn.closest('.overview-section').querySelector('.overview-section-grid'); if(!grid) return;
-  const cards=[...grid.querySelectorAll('.overview-card')].sort((a,b)=>(+a.dataset.cardIndex||0)-(+b.dataset.cardIndex||0));
-  flipReorderGrid(grid, cards);
+function shuffleAllCards(){   // one button: scramble every section's cards, animated
+  document.querySelectorAll('#card-overview-grid .overview-section-grid').forEach(grid=>{
+    const cards=[...grid.querySelectorAll('.overview-card')];
+    for(let i=cards.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=cards[i]; cards[i]=cards[j]; cards[j]=t; }
+    flipReorderGrid(grid, cards);
+  });
 }
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
@@ -2247,7 +2247,7 @@ function renderCardOverview(){
   var _name=_noUrl.replace(/\s*\(.*?\)\s*/,'').trim();
   var mbtn=document.getElementById('moodle-btn');
   if(mbtn){ if(_mLink){ mbtn.href=_mLink; mbtn.style.display='flex'; } else { mbtn.style.display='none'; } }
-  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;text-align:left;">'+_code+'</div>':'')+'</div>';
+  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;text-align:left;">'+_code+'</div>':'')+'<button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
@@ -2263,7 +2263,7 @@ function renderCardOverview(){
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
-    return `<div class="overview-section"><div class="section-tools"><button class="section-tool-btn" onclick="shuffleGridSection(this)" title="Sekoita kortit">🔀</button><button class="section-tool-btn" onclick="restoreGridSection(this)" title="Palauta järjestys">🔢</button></div>${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
+    return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
   }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>')
   + ((devMode || (reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known'))) ? CELEB_GRID_HTML : '');
   listenToKuvaajat();
@@ -2482,9 +2482,7 @@ function shakeCard(){
   const fc=document.getElementById('flashcard'); if(!fc) return;
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
-  const gr=document.getElementById('grade-row'), pr=document.getElementById('progress-row');
-  const target=(gr && getComputedStyle(gr).display!=='none') ? gr : pr;   // focus the page on the answer buttons
-  if(target) target.scrollIntoView({behavior:'smooth', block:'center'});
+  document.getElementById('flashcard').scrollIntoView({behavior:'smooth', block:'center'});   // centre the card in the viewport (buttons show below it)
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
