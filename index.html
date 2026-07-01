@@ -104,7 +104,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 #card-peek-bottom.peek-in { animation: slideInBottom 0.55s cubic-bezier(0.34, 1.45, 0.64, 1); }
 #card-peek-bottom.peek-in .card-peek-inner { animation: wiggleBottom 0.6s ease; }
 @keyframes slideOutBottom { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(calc(var(--slideD) * -1)); opacity: 0; } }
-#card-peek-bottom.peek-out { animation: slideOutBottom 0.38s ease-in forwards; }
+#card-peek.peek-out { animation: slideOutBottom 0.4s ease-in forwards; }   /* retract up behind the card */
 .card-peek-bubble { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(80vw, 320px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; }   /* below the card bottom, centered, on top of everything */
 .card-peek-bubble:empty { display: none; }
 .card-peek-bubble::after { content: ""; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); border: 8px solid transparent; border-left-color: #fffef9; }   /* tail points right, at Mona */
@@ -163,7 +163,7 @@ body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
-.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 40px; z-index: 2; }
+.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 30px; z-index: 2; }   /* as close to the card as possible without the bar overlapping the peeker bubble */
 .progress-tube { flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
@@ -1155,6 +1155,20 @@ function wireCardPeeker(peekId, bubbleId){
   });
 }
 wireCardPeeker('card-peek','card-peek-bubble');
+// The shake-shown peeker stays out for 3s, then retracts behind the card — unless hovered or re-shaken
+let _peekRetractTimer=null, _peekAutoRetract=false;
+function retractCardPeek(){
+  const p=document.getElementById('card-peek'); if(!p) return;
+  _peekAutoRetract=false;
+  if(getComputedStyle(p).visibility==='hidden') return;
+  p.classList.remove('peek-in'); void p.offsetWidth; p.classList.add('peek-out');
+  setTimeout(()=>{ if(p.classList.contains('peek-out')){ p.classList.remove('peek-out'); p.style.visibility='hidden'; } }, 420);
+}
+function scheduleCardPeekRetract(){ clearTimeout(_peekRetractTimer); _peekAutoRetract=true; _peekRetractTimer=setTimeout(retractCardPeek, 3000); }
+(function(){ const p=document.getElementById('card-peek'); if(!p) return;
+  p.addEventListener('mouseenter',()=>clearTimeout(_peekRetractTimer));                                   // hovering pauses the retract
+  p.addEventListener('mouseleave',()=>{ if(_peekAutoRetract && getComputedStyle(p).visibility!=='hidden') scheduleCardPeekRetract(); });
+})();
 
 // Blink by swapping in blink.png for 0.3s every 10s (pupils hidden while blinking)
 setInterval(()=>{
@@ -1283,14 +1297,16 @@ async function loadDecks(){
     const _tops=_dc.map(c=>{ _tmp.innerHTML=extractBody(c.answer||'').body; return (_tmp.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (entities decoded)
     const _bk=(cls,i)=>`<div class="pack-back ${cls}">${_tops[i]?`<div class="pack-back-content">${escCmt(_tops[i].slice(0,600))}</div>`:''}</div>`;
     btn.innerHTML=`${_bk('pack-back-4',3)}${_bk('pack-back-3',2)}${_bk('pack-back-2',1)}${_bk('pack-back-1',0)}<div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
-    btn.addEventListener('mouseenter',()=>{   // natural scattered flare, fresh each hover (each card drifts a random direction)
-      btn.querySelectorAll('.pack-back').forEach((bk)=>{
-        const ang=Math.random()*Math.PI*2, dist=7+Math.random()*10;
-        const tx=(Math.cos(ang)*dist).toFixed(1), ty=(Math.sin(ang)*dist-2).toFixed(1), rot=((Math.random()*2-1)*16).toFixed(1);
-        bk.style.transform='translate('+tx+'%,'+ty+'%) rotate('+rot+'deg)';
+    if(!isMobile()){
+      btn.addEventListener('mouseenter',()=>{   // natural scattered flare, fresh each hover (each card drifts a random direction)
+        btn.querySelectorAll('.pack-back').forEach((bk)=>{
+          const ang=Math.random()*Math.PI*2, dist=7+Math.random()*10;
+          const tx=(Math.cos(ang)*dist).toFixed(1), ty=(Math.sin(ang)*dist-2).toFixed(1), rot=((Math.random()*2-1)*16).toFixed(1);
+          bk.style.transform='translate('+tx+'%,'+ty+'%) rotate('+rot+'deg)';
+        });
       });
-    });
-    btn.addEventListener('mouseleave',()=>{ btn.querySelectorAll('.pack-back').forEach(bk=>{ bk.style.transform=''; }); });
+      btn.addEventListener('mouseleave',()=>{ btn.querySelectorAll('.pack-back').forEach(bk=>{ bk.style.transform=''; }); });
+    }
     const video=btn.querySelector('.deck-video');
 
     function fitVideo(){
@@ -1320,11 +1336,10 @@ async function loadDecks(){
     function _start(){ _going=true; _stopReverse(); video.currentTime=0; video.play().catch(()=>{}); }
     function _stop(){ _going=false; _stopReverse(); video.pause(); video.currentTime=0; }
 
-    btn.addEventListener('mouseenter', _start);
-    btn.addEventListener('mouseleave', _stop);
-    btn.addEventListener('touchstart',()=>{ if(_playingDeckVideo&&_playingDeckVideo!==video){ _playingDeckVideo._stop&&_playingDeckVideo._stop(); } _playingDeckVideo=video; video._stop=_stop; _start(); },{passive:true});
-    btn.addEventListener('touchend',  ()=>{ _stop(); _playingDeckVideo=null; },{passive:true});
-    btn.addEventListener('touchcancel',()=>{ _stop(); _playingDeckVideo=null; },{passive:true});
+    if(!isMobile()){   // desktop only: hover plays the video. Mobile: no playback (touch was interfering with scrolling)
+      btn.addEventListener('mouseenter', _start);
+      btn.addEventListener('mouseleave', _stop);
+    }
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
     video.addEventListener('loadeddata',()=>{ video.currentTime=0.5; },{once:true});
@@ -1533,7 +1548,8 @@ async function renderCurrentCard(){
     if(_firstReviewPeek){ _bub.textContent='Paina korttia kun haluat tarkistaa vastauksen'; _firstReviewPeek=false; }
     else _bub.textContent = _rounded ? ('Vastauksen laajuus noin '+_rounded+' sanaa') : '';
   }
-  if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in'); }
+  if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
+  clearTimeout(_peekRetractTimer); _peekAutoRetract=false;   // a fresh card cancels any pending retract (front peeker stays out)
   clearTimeout(_cardPeekTimer);                       // top peeker animates in 2s after the card loads
   _cardPeekTimer=setTimeout(()=>{ const p=document.getElementById('card-peek'); if(p && !cardAnswerShown){ p.style.visibility='visible'; playPeekIn(p); } }, 2000);
   const _pb0=document.getElementById('card-peek-bottom'); if(_pb0){ _pb0.style.display='none'; _pb0.classList.remove('peek-in','peek-out'); }   // bottom peek only on shake
@@ -2483,7 +2499,8 @@ function shakeCard(){
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
   if(ca){ ca.style.display='flex'; ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
   const _b=document.getElementById('card-peek-bubble'); if(_b) _b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia';   // peeker bubble on shake
-  const _p=document.getElementById('card-peek'); if(_p){ _p.style.display=''; _p.style.visibility='visible'; playPeekIn(_p); }
+  const _p=document.getElementById('card-peek'); if(_p){ _p.classList.remove('peek-out'); _p.style.display=''; _p.style.visibility='visible'; playPeekIn(_p); }
+  scheduleCardPeekRetract();   // stays out 3s, then retracts behind the card unless hovered/re-shaken
   fitCardScale(); scrollToCard();   // re-lay out exactly like a fresh card load, leaving room for the buttons
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
