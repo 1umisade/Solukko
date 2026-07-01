@@ -1553,14 +1553,12 @@ async function renderCurrentCard(){
   const _rounded=Math.round(_words/10)*10;
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
   const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus on '+_words+' sanaa') : ('Vastauksen laajuus on noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
-  if(_bub) _bub.textContent='Paina korttia kun haluat tarkistaa vastauksen';   // front tip; changes to the answer length after 4s
+  const _frontText = 'Paina korttia kun haluat tarkistaa vastauksen.' + (_laajuusText ? (' '+_laajuusText+'.') : '');   // two sentences in one bubble
+  if(_bub) _bub.textContent=_frontText;
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
-  clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // top peeker animates in 2s after the card loads
-  _cardPeekTimer=setTimeout(()=>{ const p=document.getElementById('card-peek'); if(p && !cardAnswerShown){ p.style.visibility='visible'; playPeekIn(p);
-    clearTimeout(_laajuusTimer);
-    _laajuusTimer=setTimeout(()=>{ const b=document.getElementById('card-peek-bubble'); if(b && !cardAnswerShown){ b.textContent=_laajuusText; requestAnimationFrame(()=>positionPeekMona(document.getElementById('card-peek'))); } }, 4000);   // 4s later: show the answer length
-  } }, 2000);
+  clearTimeout(_cardPeekTimer);   // top peeker animates in 2s after the card loads
+  _cardPeekTimer=setTimeout(()=>{ const p=document.getElementById('card-peek'); if(p && !cardAnswerShown){ p.style.visibility='visible'; playPeekIn(p); } }, 2000);
   const _pb0=document.getElementById('card-peek-bottom'); if(_pb0){ _pb0.style.display='none'; _pb0.classList.remove('peek-in','peek-out'); }   // bottom peek only on shake
   clearTimeout(_bottomPeekTimer);
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
@@ -1902,7 +1900,7 @@ function positionPeekMona(peek){   // bubble is centered; Mona peeks from behind
   const pr=peek.getBoundingClientRect(), br=bubble.getBoundingClientRect();
   const w=inner.offsetWidth||92, h=inner.offsetHeight||92;
   inner.style.left=((br.right-pr.left)+6)+'px';                       // right of the bubble, no overlap
-  inner.style.top=(-h/2)+'px';                                        // centred on the card's bottom edge -> only her bottom 50% shows below the card
+  inner.style.top=(-h*0.4)+'px';                                      // 60% of Mona shows below the card, 40% behind it
 }
 let _monaNoteTimer=null;
 function clearMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); }
@@ -2508,7 +2506,6 @@ function shakeCard(){
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
   if(ca){ ca.style.display='flex'; ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
-  showBackPeek();   // bring the peeker in (and keep it) on shake too
   fitCardScale(); scrollToCard();   // re-lay out exactly like a fresh card load, leaving room for the buttons
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
