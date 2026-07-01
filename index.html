@@ -90,31 +90,28 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 #flashcard-wrap { width: 100%; max-width: 96vw; margin-left: auto; margin-right: auto; transform-origin: top center; position: relative; margin-top: 60px; }
 .card-extent { display: none; }   /* replaced by the peeking-logo speech bubble */
-.card-peek { position: absolute; top: 0; left: 0; width: 100%; height: 0; --slideD: 56px; }   /* full-width anchor, no stacking context (so Mona can sit behind the card and the bubble on top) */
-.card-peek-bottom { top: 100%; }
-.card-peek-inner { position: absolute; top: -66px; left: calc(50% - 46px); width: 92px; height: 92px; transform: rotate(-3deg); z-index: 0; cursor: pointer; }   /* Mona BEHIND the card; JS shifts left so she peeks beside the bubble */
+.card-peek { position: absolute; top: 100%; left: 0; width: 100%; height: 0; --slideD: 56px; }   /* anchored at the card BOTTOM; no stacking context (Mona behind the card, bubble on top) */
+.card-peek-inner { position: absolute; top: -20px; left: calc(50% - 46px); width: 92px; height: 92px; transform: rotate(-3deg); z-index: 0; cursor: pointer; }   /* Mona BEHIND the card; JS shifts her beside the bubble */
 .card-peek-bottom .card-peek-inner { top: -26px; transform: scaleY(-1); }
 /* entry: container slides in (bubble rides along, unrotated); the logo wiggles */
 @keyframes slideInTop { 0% { transform: translateY(var(--slideD)); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 @keyframes slideInBottom { 0% { transform: translateY(calc(var(--slideD) * -1)); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 @keyframes wiggleTop { 0% { transform: rotate(-3deg); } 55% { transform: rotate(8deg); } 100% { transform: rotate(-3deg); } }
 @keyframes wiggleBottom { 0% { transform: scaleY(-1) rotate(0deg); } 55% { transform: scaleY(-1) rotate(8deg); } 100% { transform: scaleY(-1) rotate(0deg); } }
-#card-peek.peek-in { animation: slideInTop 0.55s cubic-bezier(0.34, 1.45, 0.64, 1); }
+#card-peek.peek-in { animation: slideInBottom 0.55s cubic-bezier(0.34, 1.45, 0.64, 1); }
 #card-peek.peek-in .card-peek-inner { animation: wiggleTop 0.6s ease; }
 #card-peek-bottom.peek-in { animation: slideInBottom 0.55s cubic-bezier(0.34, 1.45, 0.64, 1); }
 #card-peek-bottom.peek-in .card-peek-inner { animation: wiggleBottom 0.6s ease; }
 @keyframes slideOutBottom { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(calc(var(--slideD) * -1)); opacity: 0; } }
 #card-peek-bottom.peek-out { animation: slideOutBottom 0.38s ease-in forwards; }
-.card-peek-bubble { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(80vw, 320px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; }   /* centered on the card edge, on top of everything */
-.card-peek-bottom .card-peek-bubble { bottom: auto; top: 12px; }
+.card-peek-bubble { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(80vw, 320px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; }   /* below the card bottom, centered, on top of everything */
 .card-peek-bubble:empty { display: none; }
 .card-peek-bubble::after { content: ""; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); border: 8px solid transparent; border-left-color: #fffef9; }   /* tail points right, at Mona */
 body.dark-mode .card-peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .card-peek-bubble::after { border-left-color: #3a312b; }
 /* mobile: half-size peekers */
 body.is-mobile .card-peek { --slideD: 28px; }
-body.is-mobile .card-peek-inner { width: 46px; height: 46px; top: -34px; left: calc(50% - 23px); }
-body.is-mobile .card-peek-bottom .card-peek-inner { top: -12px; }
+body.is-mobile .card-peek-inner { width: 46px; height: 46px; top: -10px; left: calc(50% - 23px); }
 body.is-mobile .card-peek-bubble { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
 /* deck finished: Mona dances on a disco floor (square card) */
@@ -1369,13 +1366,14 @@ setInterval(updateSoluvisaCountdown, 20000);
 
 // Arrange the course circles around the centered logo
 function layoutDecksRadial(){
-  const list=document.getElementById('deck-list'); if(!list||list.offsetParent===null) return;
+  const list=document.getElementById('deck-list'); if(!list) return;
+  const _ds=document.getElementById('deck-screen'); if(!_ds || getComputedStyle(_ds).display==='none') return;   // (fixed list has no offsetParent, so check the screen instead)
   const logo=document.getElementById('site-brand');
   if(logo && logo.parentElement!==list) list.appendChild(logo);
   const btns=[...list.querySelectorAll('.deck-btn')];
   const n=btns.length; if(!n) return;
   if(isMobile() || window.innerWidth < 760){   // mobile / narrow: simple vertical stack (logo on top, courses below)
-    list.style.transform=''; list.style.transformOrigin=''; list.style.width=''; list.style.height=''; list.style.marginBottom='';
+    list.style.transform=''; list.style.transformOrigin=''; list.style.width=''; list.style.height=''; list.style.marginBottom=''; list.style.left=''; list.style.top='';
     list.style.position='relative'; list.style.display='flex'; list.style.flexDirection='column'; list.style.alignItems='center'; list.style.gap='20px';
     btns.forEach(b=>{ b.style.position='relative'; b.style.left=''; b.style.top=''; });
     if(logo){ logo.style.display='none'; }   // mobile: no centered logo — only the peeker
@@ -1391,33 +1389,17 @@ function layoutDecksRadial(){
   const gap=26;
   const R=Math.max(logoSize/2+cardSize/2+gap, n>1 ? (cardSize+gap)/(2*Math.sin(Math.PI/n)) : 0);
   const D=2*R+cardSize, cx=D/2, cy=D/2;
-  list.style.position='relative'; list.style.width=D+'px'; list.style.height=D+'px';
+  list.style.position='fixed'; list.style.left='50%'; list.style.top='50%'; list.style.width=D+'px'; list.style.height=D+'px';
   btns.forEach((btn,i)=>{
     const ang=-Math.PI/2 + i*(2*Math.PI/n);
     btn.style.left=(cx+R*Math.cos(ang)-cardW/2)+'px';
     btn.style.top =(cy+R*Math.sin(ang)-cardH/2)+'px';
   });
   if(logo){ logo.style.position='absolute'; logo.style.left=(cx-logoSize/2)+'px'; logo.style.top=(cy-logoSize/2)+'px'; logo.style.margin='0'; }
-  // scale to fit, then translate so Mona (ring centre) sits in the very middle of the viewport
-  const s=Math.min(1, (window.innerWidth-40)/D, (window.innerHeight-40)/D);
-  list.style.transform='none'; void list.offsetWidth;
-  const rect=list.getBoundingClientRect();
-  const tx=window.innerWidth/2 - rect.left - (D/2)*s;
-  const ty=window.innerHeight/2 - rect.top - (D/2)*s;
-  list.style.transformOrigin='0 0';
-  list.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')';
-  list.style.marginBottom=(D*s-D)+'px';
-  requestAnimationFrame(()=>{   // safety net: if any pack still poked out, shrink to the real rendered box and re-centre
-    const rs=btns.map(b=>b.getBoundingClientRect());
-    const top=Math.min.apply(null,rs.map(r=>r.top)), bot=Math.max.apply(null,rs.map(r=>r.bottom));
-    const left=Math.min.apply(null,rs.map(r=>r.left)), right=Math.max.apply(null,rs.map(r=>r.right));
-    const fit=Math.min(1,(window.innerHeight-24)/(bot-top),(window.innerWidth-24)/(right-left));
-    if(fit<0.995){
-      const ns=s*fit;
-      list.style.transform='translate('+(window.innerWidth/2-rect.left-(D/2)*ns)+'px,'+(window.innerHeight/2-rect.top-(D/2)*ns)+'px) scale('+ns+')';
-      list.style.marginBottom=(D*ns-D)+'px';
-    }
-  });
+  // fixed + viewport-centred, scaled to fit: Mona (ring centre) sits dead centre and nothing can clip
+  const s=Math.min(1, (window.innerWidth-24)/D, (window.innerHeight-24)/D);
+  list.style.marginBottom=''; list.style.transformOrigin='center';
+  list.style.transform='translate(-50%,-50%) scale('+s+')';
 }
 
 async function startDeck(deckName){
@@ -2500,12 +2482,9 @@ function shakeCard(){
   const fc=document.getElementById('flashcard'); if(!fc) return;
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
-  const pr=document.getElementById('progress-row');
-  const ca=document.querySelector('.comment-area');
-  if(isMobile()){   // only mobile scrolls to bring the buttons up; desktop stays put
-    if(ca && ca.offsetParent){ const delta=ca.getBoundingClientRect().top - window.innerHeight - 6; window.scrollBy({top:delta, behavior:'smooth'}); }
-    else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
-  }
+  const gr=document.getElementById('grade-row'), pr=document.getElementById('progress-row');
+  const target=(gr && getComputedStyle(gr).display!=='none') ? gr : pr;   // focus the page on the answer buttons
+  if(target) target.scrollIntoView({behavior:'smooth', block:'center'});
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
