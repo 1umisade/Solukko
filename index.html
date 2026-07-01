@@ -51,6 +51,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 /* course = a pack of cards: a top card (video) with several cards behind that flare out a little on hover */
 .pack-top { position: absolute; inset: 0; z-index: 5; border-radius: 16px; overflow: hidden; border: 3px solid #ebe3cf; background: #111; box-shadow: 0 10px 26px rgba(0,0,0,0.32); }
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
+.deck-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.5); pointer-events: none; }   /* 50% black layer over the video */
 .deck-label { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 14px; }
 .deck-code { position: absolute; left: 12px; bottom: 10px; z-index: 2; font-size: 14px; font-weight: 600; opacity: 0.92; color: #fff; text-shadow: 0 1px 5px rgba(0,0,0,0.85); pointer-events: none; }
 .pack-back { position: absolute; inset: 0; border-radius: 16px; background: #fffef9; border: 3px solid #ebe3cf; box-shadow: 0 6px 16px rgba(0,0,0,0.22); transition: transform 0.34s cubic-bezier(0.34, 1.4, 0.64, 1); }   /* same cream as the review cards; flare set randomly by JS */
@@ -246,23 +247,6 @@ body:not(.is-mobile) .comment-box { width: 50%; }   /* half size on desktop */
 .comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; align-items: center; }   /* centered comment boxes */
 .comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); width: max-content; max-width: 100%; text-align: left; }   /* as wide as the comment; text left */
 .comment-item-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #a09080; margin-top: 4px; }
-/* replies + dev Mona bubble on a comment */
-.comment-item { position: relative; }
-.comment-reply-btn { background: none; border: none; color: #8a7f6a; cursor: pointer; font-family: 'Lora', serif; font-size: 0.72rem; padding: 4px 0 0; margin-top: 2px; text-decoration: underline; }
-.comment-replies { margin-top: 6px; display: flex; flex-direction: column; gap: 5px; }
-.comment-reply { background: #f3efe6; border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.78rem; color: #56533c; margin-left: 14px; }
-body.dark-mode .comment-reply { background: #332a24; color: #eadfce; }
-.comment-reply-input { margin-top: 6px; display: flex; gap: 6px; }
-.comment-reply-input textarea { flex: 1; font-family: 'Lora', serif; font-size: 0.8rem; border: 1px solid #d4cec4; border-radius: 8px; padding: 0.4rem; resize: vertical; min-height: 44px; background: #fffef9; color: #1a1612; }
-.comment-reply-input button { background: #498d65; color: #fff; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; font-size: 0.78rem; flex-shrink: 0; }
-.dev-mona { position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 40px; height: 40px; cursor: pointer; z-index: 9999; }   /* halfway outside the comment box */
-.dev-mona-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); pointer-events: none; }
-.dev-mona .logo-eye { pointer-events: none; }
-.dev-mona-bubble { display: none; position: absolute; right: 0; top: 112%; width: max-content; max-width: 220px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 14px; padding: 0.5rem 0.7rem; font-family: 'Lora', serif; font-size: 0.8rem; line-height: 1.35; box-shadow: 0 6px 20px rgba(0,0,0,0.18); z-index: 9999; text-align: left; }
-.dev-mona.open .dev-mona-bubble { display: block; }
-.dev-mona-bubble::after { content: ""; position: absolute; bottom: 100%; right: 12px; border: 8px solid transparent; border-bottom-color: #fffef9; }
-body.dark-mode .dev-mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode .dev-mona-bubble::after { border-bottom-color: #3a312b; }
 /* separate dev screen: online activity + every comment */
 #dev-screen { display: none; width: 100%; }
 .dev-screen-inner { width: 100%; max-width: 620px; margin: 0 auto; padding: 4.5rem 1rem 2rem; display: flex; flex-direction: column; gap: 0.6rem; }
@@ -708,14 +692,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       </div>
       <div class="card-peek-bubble" id="card-peek-bubble"></div>
     </div>
-    <div class="card-peek card-peek-bottom" id="card-peek-bottom" style="display:none">
-      <div class="card-peek-inner">
-        <img src="solukkologo_eyes.png" class="brand-logo-img" alt="">
-        <div class="logo-eye le"><span class="logo-pupil"></span></div>
-        <div class="logo-eye re"><span class="logo-pupil"></span></div>
-      </div>
-      <div class="card-peek-bubble" id="card-peek-bottom-bubble">Tiesitkö?</div>
-    </div>
     <div class="flashcard" id="flashcard">
       <div class="card-stars" id="card-stars"></div>
       <div class="card-content" id="question-content"></div>
@@ -1058,6 +1034,7 @@ function logoScream(ev){
   const logo=document.getElementById('site-brand'); if(!logo) return;
   if(ev && ev.target.closest('.home-bubble')) return;   // ignore clicks on the bubble/buttons
   if(!clickInCircle(ev, logo.querySelector('.brand-inner'))) return;   // ignore the transparent corners
+  _homeHoverOpened=false;   // a click takes over: the bubble now persists (won't vanish on mouseleave)
   playScream();
   const hb=logo.querySelectorAll('.home-bubble');   // cycle through the bubbles, then dismiss
   const cur=[...hb].findIndex(b=>b.classList.contains('active'));
@@ -1075,18 +1052,18 @@ function logoScream(ev){
   }
 }
 
-// Hover shows the "Tervetuloa" bubble; clicking Mona cycles through the rest. Auto-hides after the mouse leaves.
+// Hover shows the "Tervetuloa" bubble (vanishes on leave); clicking Mona cycles through the rest (persists).
+let _homeHoverOpened=false;
 (function initHomeBubbleAutoHide(){
   const logo=document.getElementById('site-brand'); if(!logo) return;
-  let t=null;
   logo.addEventListener('mouseenter',()=>{
-    clearTimeout(t);
     if(!logo.classList.contains('home-bubble-open')){
       logo.classList.add('home-bubble-open');
       logo.querySelectorAll('.home-bubble').forEach((b,i)=>b.classList.toggle('active',i===0));   // Tervetuloa on hover
+      _homeHoverOpened=true;
     }
   });
-  logo.addEventListener('mouseleave',()=>{ clearTimeout(t); t=setTimeout(()=>logo.classList.remove('home-bubble-open'),3000); });
+  logo.addEventListener('mouseleave',()=>{ if(_homeHoverOpened){ logo.classList.remove('home-bubble-open'); _homeHoverOpened=false; } });   // hover bubble disappears when you leave
 })();
 
 // Logo eyes follow the cursor
@@ -1182,7 +1159,6 @@ function wireCardPeeker(peekId, bubbleId){
   });
 }
 wireCardPeeker('card-peek','card-peek-bubble');
-wireCardPeeker('card-peek-bottom','card-peek-bottom-bubble');
 
 // Blink by swapping in blink.png for 0.3s every 10s (pupils hidden while blinking)
 setInterval(()=>{
@@ -1306,12 +1282,12 @@ async function loadDecks(){
 
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn';
-    btn.innerHTML=`<div class="pack-back pack-back-4"></div><div class="pack-back pack-back-3"></div><div class="pack-back pack-back-2"></div><div class="pack-back pack-back-1"></div><div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
-    btn.addEventListener('mouseenter',()=>{   // random flare, fresh each hover
-      btn.querySelectorAll('.pack-back').forEach((bk,i)=>{
-        const dir=(i%2===0)?-1:1;
-        const rot=(dir*(5+Math.random()*11)).toFixed(1), tx=(dir*(5+Math.random()*13)).toFixed(1), ty=(-(2+Math.random()*9)).toFixed(1);
-        bk.style.transform='rotate('+rot+'deg) translate('+tx+'%,'+ty+'%)';
+    btn.innerHTML=`<div class="pack-back pack-back-4"></div><div class="pack-back pack-back-3"></div><div class="pack-back pack-back-2"></div><div class="pack-back pack-back-1"></div><div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
+    btn.addEventListener('mouseenter',()=>{   // natural scattered flare, fresh each hover (each card drifts a random direction)
+      btn.querySelectorAll('.pack-back').forEach((bk)=>{
+        const ang=Math.random()*Math.PI*2, dist=7+Math.random()*10;
+        const tx=(Math.cos(ang)*dist).toFixed(1), ty=(Math.sin(ang)*dist-2).toFixed(1), rot=((Math.random()*2-1)*16).toFixed(1);
+        bk.style.transform='translate('+tx+'%,'+ty+'%) rotate('+rot+'deg)';
       });
     });
     btn.addEventListener('mouseleave',()=>{ btn.querySelectorAll('.pack-back').forEach(bk=>{ bk.style.transform=''; }); });
@@ -1661,41 +1637,16 @@ function loadFirestoreComments(){
   const cardId=String(currentCard.cardId||currentCard.noteId||'');
   commentsUnsubscribe=db.collection('comments').where('cardId','==',cardId).onSnapshot(snap=>{
     feed.innerHTML=''; if(snap.empty) return;
-    const all=snap.docs.map(doc=>Object.assign({id:doc.id}, doc.data()));
-    const parents=all.filter(c=>!c.parentId).sort((a,b)=>((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)-((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0));
-    const repliesByParent={};
-    all.filter(c=>c.parentId).forEach(r=>{ (repliesByParent[r.parentId]=repliesByParent[r.parentId]||[]).push(r); });
-    Object.values(repliesByParent).forEach(arr=>arr.sort((a,b)=>((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0)-((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)));
-    parents.forEach(d=>{
-      const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=d.id;
+    const docs=[...snap.docs].filter(dc=>!dc.data().parentId).sort((a,b)=>{ const ta=a.data().timestamp?.toMillis?.()||0, tb=b.data().timestamp?.toMillis?.()||0; return tb-ta; });
+    docs.forEach(doc=>{
+      const d=doc.data(); const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=doc.id;
       const isOwn=d.userId&&d.userId===getUserId(); const canEdit=isOwn||devMode;
-      const btns=canEdit?`<button onclick="editComment('${d.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:'';
+      const btns=canEdit?`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:'';
       const imgHtml=d.imageData?`<img src="${d.imageData}" style="max-width:100%;border-radius:8px;margin-top:6px;display:block;">`:'';
-      const reps=repliesByParent[d.id]||[];
-      const devReps=reps.filter(r=>r.dev), normReps=reps.filter(r=>!r.dev);
-      const normHtml=normReps.map(r=>`<div class="comment-reply"><span class="comment-text">${escCmt(r.text)}</span></div>`).join('');
-      const devBubble=devReps.length?`<div class="dev-mona" onclick="toggleDevBubble(this)" title="Kehittäjän vastaus"><img src="solukkologo_eyes.png" alt="Mona" class="brand-logo-img dev-mona-img"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div><div class="dev-mona-bubble">${devReps.map(r=>escCmt(r.text)).join('<br><br>')}</div></div>`:'';
-      const replyBtn=devMode?`<button class="comment-reply-btn" onclick="openReply('${d.id}',this)">Vastaa</button>`:'';   // only dev can reply
-      el.innerHTML=`${devBubble}<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div><div class="comment-replies">${normHtml}</div>${replyBtn}`;
+      el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div>`;
       feed.appendChild(el);
     });
   }, err=>{ feed.innerHTML=`<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#c0392b;padding:4px;">Virhe: ${err.message}</div>`; });
-}
-function toggleDevBubble(el){ el.classList.toggle('open'); }
-function openReply(parentId, btn){
-  const item=btn.closest('.comment-item'); if(!item) return;
-  if(item.querySelector('.comment-reply-input')) return;   // already open
-  const box=document.createElement('div'); box.className='comment-reply-input';
-  const ta=document.createElement('textarea'); ta.placeholder='Vastaa...';
-  const send=document.createElement('button'); send.textContent='Lähetä'; send.onclick=()=>submitReply(parentId, ta, box);
-  box.appendChild(ta); box.appendChild(send); item.appendChild(box); ta.focus();
-}
-function submitReply(parentId, ta, box){
-  const text=ta.value.trim(); if(!text) return;
-  const cardId=String(currentCard?.cardId||currentCard?.noteId||'');
-  db.collection('comments').add({ text, cardId, parentId, userId:getUserId(), dev:!!devMode, timestamp:firebase.firestore.FieldValue.serverTimestamp() })
-    .then(()=>{ if(box) box.remove(); setTimeout(loadFirestoreComments,300); })
-    .catch(err=>alert('Virhe: '+err.message));
 }
 async function openCardById(cardId){
   const cid=String(cardId);
@@ -2107,7 +2058,7 @@ function showCelebration(){
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
   document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-rover"><div class="mona-bubble">Koko kurssi opiskeltu!</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
   document.getElementById('answer-content').innerHTML='';
-  ['answer-section','show-row','grade-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
+  ['answer-section','show-row','grade-row','card-peek'].forEach(id=>document.getElementById(id).style.display='none');
   document.querySelector('.comment-area').style.display='none';   // no comments on the celebration card
   const pr=document.getElementById('progress-row'); pr.style.display='flex'; pr.classList.add('celebrating');   // full green glowing bar = the volume slider
   let vsl=pr.querySelector('.mona-vol');
@@ -2152,20 +2103,6 @@ function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
   sing.classList.add('eyes-closed');
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes_closed.png');
 }
-function showCardPeekBottom(){
-  const pb=document.getElementById('card-peek-bottom'), bb=document.getElementById('card-peek-bottom-bubble'); if(!pb) return;
-  pb.classList.remove('peek-out'); pb.style.display=''; pb.style.visibility='visible';
-  if(bb) bb.textContent='Tiesitkö?';
-  playPeekIn(pb);
-  clearTimeout(_bottomPeekTimer); _bottomPeekTimer=setTimeout(hideCardPeekBottom, 3000);   // slides back after 3s
-}
-function hideCardPeekBottom(){
-  const pb=document.getElementById('card-peek-bottom'); if(!pb) return;
-  clearTimeout(_bottomPeekTimer);
-  if(getComputedStyle(pb).visibility==='hidden' || pb.classList.contains('peek-out')) return;
-  pb.classList.remove('peek-in'); void pb.offsetWidth; pb.classList.add('peek-out');         // animate back behind the card
-  setTimeout(()=>{ if(pb.classList.contains('peek-out')){ pb.classList.remove('peek-out'); pb.style.visibility='hidden'; } }, 380);
-}
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
   cardAnswerShown=true;
@@ -2176,7 +2113,9 @@ function showAnswer(){
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
-    { const _p=document.getElementById('card-peek'); if(_p) _p.style.visibility='hidden'; }    // top (laajuus) peeker spun out of view
+    { const _p=document.getElementById('card-peek'), _b=document.getElementById('card-peek-bubble');   // back side: the peeker now asks "Tiesitkö?"
+      if(_b) _b.textContent='Tiesitkö?';
+      if(_p){ _p.style.display=''; _p.style.visibility='visible'; playPeekIn(_p); } }
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
     pr.style.display='flex'; ca.style.display='flex';
@@ -2567,10 +2506,6 @@ function shakeCard(){
     if(ca && ca.offsetParent){ const delta=ca.getBoundingClientRect().top - window.innerHeight - 6; window.scrollBy({top:delta, behavior:'smooth'}); }
     else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
   }
-  { const _pb=document.getElementById('card-peek-bottom');   // each shake keeps Mona out; she only retracts after 3s of no shaking
-    const showing = _pb && _pb.style.display!=='none' && _pb.style.visibility!=='hidden' && !_pb.classList.contains('peek-out');
-    if(showing){ clearTimeout(_bottomPeekTimer); _bottomPeekTimer=setTimeout(hideCardPeekBottom,3000); }   // restart the idle timer, don't hide
-    else showCardPeekBottom(); }
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
