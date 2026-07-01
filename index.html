@@ -46,8 +46,11 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 
 /* ── 3. PAKKAVALINNANÄYTTÖ ───────────────────────────────── */
 #deck-screen { width: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 1.5rem; gap: 2rem; overflow-x: hidden; }
+body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none; }   /* hide the scrollbar on the mobile homepage */
+body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .deck-list { position: relative; margin: 0 auto; }
-.deck-btn { position: absolute; min-width: 0; width: min(240px, 52vw); aspect-ratio: 1 / 1.5; padding: 0; border: none; border-radius: 0; overflow: visible; background: none; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; transition: transform 0.3s ease; }
+.deck-btn { position: absolute; min-width: 0; width: min(240px, 52vw); aspect-ratio: 1 / 1.5; padding: 0; border: none; border-radius: 0; overflow: visible; background: none; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; transition: transform 0.3s ease; touch-action: pan-y; }   /* pan-y so a vertical drag scrolls the page instead of getting captured */
+.deck-btn * { touch-action: inherit; }
 /* course = a pack of cards: a top card (video) with several cards behind that flare out a little on hover */
 .pack-top { position: absolute; inset: 0; z-index: 5; border-radius: 16px; overflow: hidden; border: 3px solid #ebe3cf; background: #111; box-shadow: 0 10px 26px rgba(0,0,0,0.32); }
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
@@ -68,7 +71,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 .deck-btn.soluvisa-deck::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.02)); z-index: 1; pointer-events: none; }
 .deck-btn.soluvisa-deck.soluvisa-active { background: radial-gradient(circle at 42% 36%, #e07060, #7a1a0e); }
 .deck-btn.soluvisa-deck:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
-.deck-title { font-size: clamp(1.4rem, 4.6vw, 1.9rem); font-weight: 800; margin-bottom: 6px; white-space: normal; line-height: 1.15; text-align: center; overflow-wrap: anywhere; text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.8); }   /* centered, 2x bold, wraps; shadow keeps it legible over the video */
+.deck-title { font-size: clamp(1.26rem, 4.14vw, 1.71rem); font-weight: 800; margin-bottom: 6px; white-space: normal; line-height: 1.15; text-align: center; overflow-wrap: anywhere; text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.8); }   /* centered, bold, wraps; shadow keeps it legible over the video */
 
 /* ── 4. GEAR / TOP-RIGHT BUTTON AREA ────────────────────── */
 .gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 50%; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
@@ -2035,7 +2038,7 @@ function celebrationEnd(){   // song finished: stop the party, prompt to enrol f
   clearMonaNotes(); stopCelebViz(); stopMonaBounce(true);   // ease Mona back to the middle
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
   const sl=document.querySelector('#progress-row .mona-vol'); if(sl) sl.style.display='none';
-  const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Koko kurssi opiskeltu!'; bub.style.display=''; }   // constant bubble
+  const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Tsemppiä tenttiin!'; bub.style.display=''; }   // song over: switch the bubble to the exam send-off
   _celebEnded=true;   // Mona stays clickable (reacts, doesn't change the constant text)
   monaReact();
 }
@@ -2169,6 +2172,7 @@ let _celebratedDeck=false;   // auto-show the celebration only once per deck ses
 function gradeCard(correct){
   if(coinAnimating) return;
   if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
+  if(!correct){ _celebratedDeck=false; }   // marking a card "unknown" re-arms the celebration, so re-completing the deck shows it again
   const _allKnownNow = correct && reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known');   // did this "known" complete the deck?
   const fc=document.getElementById('flashcard');
   const ov=document.getElementById('card-overlay');
