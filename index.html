@@ -47,14 +47,25 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 /* ── 3. PAKKAVALINNANÄYTTÖ ───────────────────────────────── */
 #deck-screen { width: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 1.5rem; gap: 2rem; overflow-x: hidden; }
 .deck-list { position: relative; margin: 0 auto; }
-.deck-btn { position: absolute; min-width: 0; width: min(252px, 56vw); aspect-ratio: 1 / 1; padding: 12px; border-radius: 50%; overflow: hidden; text-decoration: none; border: 4px solid #1f3d2a; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; background: #111; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.deck-btn::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 4px solid #ebe3cf; z-index: 3; pointer-events: none; }
-.deck-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
+.deck-btn { position: absolute; min-width: 0; width: min(252px, 56vw); aspect-ratio: 1 / 1.18; padding: 0; border: none; border-radius: 0; overflow: visible; background: none; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; transition: transform 0.3s ease; }
+/* course = a little pack of cards: a top card (video) with two cards behind that flare out on hover */
+.pack-top { position: absolute; inset: 0; z-index: 3; border-radius: 16px; overflow: hidden; border: 3px solid #ebe3cf; background: #111; box-shadow: 0 10px 26px rgba(0,0,0,0.32); }
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
-.deck-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); z-index: 1; pointer-events: none; }
-.deck-btn.soluvisa-deck { background: radial-gradient(circle at 42% 36%, #3a7a52, #0e2a1a); }
-.deck-btn.soluvisa-deck::before { background: linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.02)); }
+.deck-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.05)); pointer-events: none; }
+.deck-label { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 14px; }
+.pack-back { position: absolute; inset: 0; z-index: 1; border-radius: 16px; background: #e7ddc7; border: 3px solid #ebe3cf; box-shadow: 0 6px 16px rgba(0,0,0,0.22); transition: transform 0.34s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.pack-back-1 { z-index: 2; transform: rotate(-3deg) translateY(-3px); }
+.pack-back-2 { z-index: 1; transform: rotate(4deg) translateY(-6px); background: #ded3ba; }
+.deck-btn:hover { transform: scale(1.04); }
+.deck-btn:hover .pack-back-1 { transform: rotate(-13deg) translate(-18%, -4%); }
+.deck-btn:hover .pack-back-2 { transform: rotate(14deg) translate(18%, -7%); }
+.deck-btn:hover .pack-top { box-shadow: 0 16px 34px rgba(0,0,0,0.4); }
+/* Soluvisa stays a circle */
+.deck-btn.soluvisa-deck { aspect-ratio: 1 / 1; border-radius: 50%; overflow: hidden; border: 4px solid #1f3d2a; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at 42% 36%, #3a7a52, #0e2a1a); }
+.deck-btn.soluvisa-deck::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 4px solid #ebe3cf; z-index: 3; pointer-events: none; }
+.deck-btn.soluvisa-deck::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.02)); z-index: 1; pointer-events: none; }
 .deck-btn.soluvisa-deck.soluvisa-active { background: radial-gradient(circle at 42% 36%, #e07060, #7a1a0e); }
+.deck-btn.soluvisa-deck:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
 .deck-title { font-size: clamp(0.7rem, 2.3vw, 0.95rem); font-weight: 700; margin-bottom: 4px; white-space: normal; line-height: 1.15; }
 
 /* ── 4. GEAR / TOP-RIGHT BUTTON AREA ────────────────────── */
@@ -1273,7 +1284,7 @@ async function loadDecks(){
 
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn';
-    btn.innerHTML=`<video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div style="position:relative;z-index:2"><div class="deck-title">${item.cleanName}</div><div style="font-size:14px;opacity:0.82;font-weight:400;">${item.courseCode}</div></div>`;
+    btn.innerHTML=`<div class="pack-back pack-back-2"></div><div class="pack-back pack-back-1"></div><div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div><div style="font-size:14px;opacity:0.82;font-weight:400;">${item.courseCode}</div></div></div>`;
     const video=btn.querySelector('.deck-video');
 
     function fitVideo(){
