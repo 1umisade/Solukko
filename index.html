@@ -1438,7 +1438,7 @@ async function startDeck(deckName){
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
-  _firstReviewPeek=true;
+  _firstReviewPeek=true; _celebratedDeck=false;
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   if(devMode && reviewCards.length){   // dev: mark every card studied except one random card (to test the all-osattu flow)
@@ -2160,14 +2160,17 @@ function showAnswer(){
   },200);
 }
 
+let _celebratedDeck=false;   // auto-show the celebration only once per deck session
 function gradeCard(correct){
   if(coinAnimating) return;
   if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
+  const _allKnownNow = correct && reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known');   // did this "known" complete the deck?
   const fc=document.getElementById('flashcard');
   const ov=document.getElementById('card-overlay');
   const doNext=()=>{
     fc.classList.remove('card-out-left','card-out-right','card-out-up');
     if(ov){ ov.style.transition='none'; ov.style.opacity='0'; }
+    if(_allKnownNow && !_celebratedDeck){ _celebratedDeck=true; showCelebration(); return; }   // deck just finished -> auto-show the celebration once
     if(correct&&groupMode){
       if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
       const wg=selectedGroup; coinAnimating=true;
