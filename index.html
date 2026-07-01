@@ -280,7 +280,7 @@ body.dark-mode .dev-comment-snip { color: #eadfce; }
 .home-bubble::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 12px solid transparent; border-top-color: #fffef9; margin-top: -2px; }
 body.dark-mode .home-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .home-bubble::after { border-top-color: #3a312b; }
-.user-word { display: block; text-align: center; font-weight: 700; font-size: 2em; margin: 0.35rem 0; overflow-wrap: anywhere; }
+.user-word { font-weight: 700; overflow-wrap: anywhere; }   /* the nickname flows inline in the sentence, just bold */
 #peek-logo { position: fixed; left: 0; width: 150px; height: 150px; transform: translateX(-100%); transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); z-index: 40; cursor: pointer; }
 #peek-logo .brand-logo-img { width: 100%; height: 100%; }
 #peek-logo[data-side="left"]  { left: 0; right: auto; transform: translateX(-100%); }
@@ -620,7 +620,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
-  <div class="peek-bubble"><span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span> Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span></div>
+  <div class="peek-bubble"><span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span>. Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span></div>
   <div class="peek-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
   <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
   <div class="peek-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
@@ -634,7 +634,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
-  <div class="home-bubble"><span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span> Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span></div>
+  <div class="home-bubble"><span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span>. Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span></div>
   <div class="home-bubble">Hyvä sinä! Taas opiskelemassa.</div>
   <div class="home-bubble">Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.</div>
   <div class="home-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
@@ -1000,28 +1000,33 @@ let _logoTimer=null;
 // Decode the sound clips up front so a random one fires with zero delay on click
 const _soundFiles=['frog1.mp3','frog2.mp3','frog3.mp3','frog4.mp3'];
 const _soundBufs=[]; let _audioCtx=null;
-const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; a.volume=0.125; return a; });
-try{
-  _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  _soundFiles.forEach((f,i)=>{ fetch(f).then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _soundBufs[i]=buf; }).catch(()=>{}); });
-}catch(e){}
-// Warm up the audio pipeline on the first user gesture so the first frog has no delay
+const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; a.volume=0.125; a.setAttribute('playsinline',''); return a; });
+function _decodeFrogs(){   // decode the clips into buffers for zero-delay playback (needs a context)
+  if(!_audioCtx) return;
+  _soundFiles.forEach((f,i)=>{ if(_soundBufs[i]) return; fetch(f).then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _soundBufs[i]=buf; }).catch(()=>{}); });
+}
+// Warm up on the first user gesture. iOS only unlocks Web Audio when the context is created/resumed
+// inside a gesture, so we create it here (not at load) and also unlock the HTMLAudio fallbacks.
 let _audioWarmed=false;
 function _warmAudio(){
-  if(_audioWarmed||!_audioCtx) return; _audioWarmed=true;
+  if(_audioWarmed) return; _audioWarmed=true;
   try{
+    if(!_audioCtx) _audioCtx=new (window.AudioContext||window.webkitAudioContext)();
     if(_audioCtx.state==='suspended') _audioCtx.resume();
-    const buf=_soundBufs.find(b=>b) || _audioCtx.createBuffer(1,1,22050);   // play a real clip silently to prime the path
+    _decodeFrogs();
+    const buf=_soundBufs.find(b=>b) || _audioCtx.createBuffer(1,1,22050);   // play a clip silently to prime the path
     const s=_audioCtx.createBufferSource(); s.buffer=buf;
     const g=_audioCtx.createGain(); g.gain.value=0;
     s.connect(g); g.connect(_audioCtx.destination); s.start(0);
+    _soundEls.forEach(a=>{ try{ a.muted=true; const p=a.play(); if(p&&p.then) p.then(()=>{ a.pause(); a.currentTime=0; a.muted=false; }).catch(()=>{ a.muted=false; }); }catch(e){} });   // silently unlock the HTMLAudio fallbacks for iOS
   }catch(e){}
 }
 ['pointerdown','touchstart','keydown','click'].forEach(ev=>window.addEventListener(ev,_warmAudio,{capture:true,passive:true}));
 function playScream(){
+  if(!_audioCtx){ try{ _audioCtx=new (window.AudioContext||window.webkitAudioContext)(); _decodeFrogs(); }catch(e){} }
   const i=Math.floor(Math.random()*_soundFiles.length);   // random clip
   if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; const g=_audioCtx.createGain(); g.gain.value=0.125; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
-  try{ _soundEls[i].currentTime=0; _soundEls[i].play().catch(()=>{}); }catch(e){}
+  try{ _soundEls[i].currentTime=0; _soundEls[i].muted=false; _soundEls[i].volume=0.125; _soundEls[i].play().catch(()=>{}); }catch(e){}
 }
 // Mona's hitbox is a circle the diameter of the PNG (the transparent corners aren't clickable)
 function clickInCircle(ev, el){
@@ -1352,9 +1357,14 @@ async function loadDecks(){
     function _start(){ _going=true; _stopReverse(); video.currentTime=0; video.play().catch(()=>{}); }
     function _stop(){ _going=false; _stopReverse(); video.pause(); video.currentTime=0; }
 
-    if(!isMobile()){   // desktop only: hover plays the video. Mobile: no playback (touch was interfering with scrolling)
+    if(!isMobile()){   // desktop: hover ping-pongs the video (play forward, then reverse)
       btn.addEventListener('mouseenter', _start);
       btn.addEventListener('mouseleave', _stop);
+    } else {   // mobile: muted inline autoplay in a loop so the deck art is alive (iOS allows this only for muted+playsinline)
+      video.loop=true; video.muted=true; video.setAttribute('muted',''); video.setAttribute('playsinline','');
+      const _autoplay=()=>{ try{ const p=video.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} };
+      _autoplay();
+      window.addEventListener('touchstart', _autoplay, {once:true, passive:true});   // retry after the first gesture if iOS blocked the initial autoplay
     }
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
@@ -1932,7 +1942,12 @@ function startMonaNotes(){
   }, 340);
 }
 function stopMonaNotes(){ clearMonaNotes(); if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.ontimeupdate=null; _celebrationAudio.onended=null; }catch(e){} } _vizStarted=false; _celebStarted=false; if(_rampRAF){ cancelAnimationFrame(_rampRAF); _rampRAF=null; } stopCelebViz(); stopMonaBounce(false); }
-let _celebrationAudio=null, _celebCtx=null, _celebAnalyser=null, _celebRAF=null;
+let _celebrationAudio=null, _celebCtx=null, _celebAnalyser=null, _celebRAF=null, _celebGain=null;
+function setCelebVol(v01){   // set volume via the gain node (iOS ignores element .volume, but honours gain)
+  v01=Math.max(0,Math.min(1,v01));
+  if(_celebGain){ try{ _celebGain.gain.value=v01; return; }catch(e){} }
+  if(_celebrationAudio){ try{ _celebrationAudio.volume=v01; }catch(e){} }   // fallback before the graph exists
+}
 // three tracks, picked at random per celebration; each has its own viz-start and drop times
 const CELEB_TRACKS=[
   {src:'celebration2.mp3', viz:16,  drop:28.8, eyeOpen:40, eyeClose:42},   // the original track
@@ -1941,14 +1956,15 @@ const CELEB_TRACKS=[
 let _celebTrack=CELEB_TRACKS[1];
 function playCelebration(){
   try{
-    if(!_celebrationAudio){ _celebrationAudio=new Audio(_celebTrack.src); _celebrationAudio.volume=0.5; }
+    if(!_celebrationAudio){ _celebrationAudio=new Audio(_celebTrack.src); _celebrationAudio.volume=1; }   // volume is controlled by the gain node, not the element
     // build the analyser graph here (called from the touch = user gesture),
     // so the audio routed through the context stays audible the whole time
     if(!_celebAnalyser){
       if(!_celebCtx) _celebCtx=new (window.AudioContext||window.webkitAudioContext)();
       const src=_celebCtx.createMediaElementSource(_celebrationAudio);
       _celebAnalyser=_celebCtx.createAnalyser(); _celebAnalyser.fftSize=256; _celebAnalyser.smoothingTimeConstant=0.75;
-      src.connect(_celebAnalyser); _celebAnalyser.connect(_celebCtx.destination);
+      _celebGain=_celebCtx.createGain(); _celebGain.gain.value=0;   // gain controls volume (works on iOS, unlike element .volume)
+      src.connect(_celebAnalyser); _celebAnalyser.connect(_celebGain); _celebGain.connect(_celebCtx.destination);
     }
     if(_celebCtx && _celebCtx.state==='suspended') _celebCtx.resume();
     _celebrationAudio.currentTime=0; _celebrationAudio.play().catch(()=>{});
@@ -2010,18 +2026,18 @@ function toggleCelebrationSound(){
 function startCelebOnTouch(){   // touching the slider starts the music (at the slider's medium position)
   if(_celebStarted) return;
   _celebStarted=true; startCelebrationMusic();
-  if(_celebrationAudio){ _celebrationAudio.muted=false; const sl=document.querySelector('.mona-vol'); if(sl) _celebrationAudio.volume=Math.max(0,Math.min(1,sl.value/100)); }
+  if(_celebrationAudio){ _celebrationAudio.muted=false; const sl=document.querySelector('.mona-vol'); if(sl) setCelebVol(sl.value/100); }
 }
 let _rampRAF=null;
 function rampCelebVolume(){   // knob glides from the far left to centre, fading the volume in
   if(_rampRAF){ cancelAnimationFrame(_rampRAF); _rampRAF=null; }
   const sl=document.querySelector('#progress-row .mona-vol');
-  if(_celebrationAudio) _celebrationAudio.volume=0;
+  setCelebVol(0);
   const dur=6000, t0=performance.now();
   const step=(now)=>{
     const p=Math.min(1,(now-t0)/dur), v=Math.round(p*500);   // 0..500 = far left to centre, fine steps
     if(sl){ sl.value=v; sl.style.setProperty('--p', (v/10)+'%'); }
-    if(_celebrationAudio && !_celebrationAudio.muted) _celebrationAudio.volume=v/1000;
+    if(_celebrationAudio && !_celebrationAudio.muted) setCelebVol(v/1000);
     if(p<1) _rampRAF=requestAnimationFrame(step); else _rampRAF=null;
   };
   _rampRAF=requestAnimationFrame(step);
@@ -2030,7 +2046,7 @@ function onCelebVolume(v){   // slider drag sets the volume (cancels the auto-ra
   if(_rampRAF){ cancelAnimationFrame(_rampRAF); _rampRAF=null; }
   startCelebOnTouch();
   const sl=document.querySelector('.mona-vol'); if(sl) sl.style.setProperty('--p', (v/10)+'%');
-  if(_celebrationAudio){ _celebrationAudio.muted=false; _celebrationAudio.volume=Math.max(0,Math.min(1,v/1000)); }
+  if(_celebrationAudio){ _celebrationAudio.muted=false; setCelebVol(v/1000); }
 }
 function celebrationEnd(){   // song finished: stop the party, prompt to enrol for the exam
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
@@ -2074,7 +2090,7 @@ function showCelebration(){
   cardAnswerShown=false;
   _celebStarted=false; _celebEnded=false; stopMonaBounce(false);
   if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.onended=null; _celebrationAudio.ontimeupdate=null; }catch(e){} }
-  _celebrationAudio=null; _celebAnalyser=null;   // rebuild the graph for the freshly picked track
+  _celebrationAudio=null; _celebAnalyser=null; _celebGain=null;   // rebuild the graph for the freshly picked track
   _celebTrack=CELEB_TRACKS[Math.floor(Math.random()*CELEB_TRACKS.length)];
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
   document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-rover"><div class="mona-bubble">Koko kurssi opiskeltu!</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
@@ -2087,7 +2103,7 @@ function showCelebration(){
   vsl.value=0; vsl.style.display='';   // knob starts at the far left (silent)
   monaReact();   // the ask bubble appeared -> react as if clicked
   _celebStarted=true; startCelebrationMusic();          // music plays immediately
-  if(_celebrationAudio) _celebrationAudio.volume=0;
+  setCelebVol(0);
   rampCelebVolume();                                    // knob eases left -> centre, volume fades in
   fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
