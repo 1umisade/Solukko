@@ -89,10 +89,10 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 #flashcard-wrap { width: 100%; max-width: 96vw; margin-left: auto; margin-right: auto; transform-origin: top center; position: relative; margin-top: 60px; }
 .card-extent { display: none; }   /* replaced by the peeking-logo speech bubble */
-.card-peek { position: absolute; top: -55px; right: 18px; left: auto; width: 92px; height: 92px; z-index: 6; cursor: pointer; --slideD: 56px; }   /* Mona peeks at the right edge */
-.card-peek-bottom { top: calc(100% - 37px); right: 18px; left: auto; transform: none; }
-.card-peek-inner { position: relative; width: 100%; height: 100%; transform: rotate(-3deg); }   /* tilt the logo only, not the bubble */
-.card-peek-bottom .card-peek-inner { transform: scaleY(-1); }                                    /* bottom peeker is upside down */
+.card-peek { position: absolute; top: 0; left: 0; width: 100%; height: 0; --slideD: 56px; }   /* full-width anchor, no stacking context (so Mona can sit behind the card and the bubble on top) */
+.card-peek-bottom { top: 100%; }
+.card-peek-inner { position: absolute; top: -66px; left: calc(50% - 46px); width: 92px; height: 92px; transform: rotate(-3deg); z-index: 0; cursor: pointer; }   /* Mona BEHIND the card; JS shifts left so she peeks beside the bubble */
+.card-peek-bottom .card-peek-inner { top: -26px; transform: scaleY(-1); }
 /* entry: container slides in (bubble rides along, unrotated); the logo wiggles */
 @keyframes slideInTop { 0% { transform: translateY(var(--slideD)); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 @keyframes slideInBottom { 0% { transform: translateY(calc(var(--slideD) * -1)); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
@@ -104,14 +104,18 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 #card-peek-bottom.peek-in .card-peek-inner { animation: wiggleBottom 0.6s ease; }
 @keyframes slideOutBottom { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(calc(var(--slideD) * -1)); opacity: 0; } }
 #card-peek-bottom.peek-out { animation: slideOutBottom 0.38s ease-in forwards; }
-.card-peek-bubble { position: absolute; right: calc(100% + 10px); left: auto; top: 50%; transform: translateY(-50%); width: max-content; max-width: min(72vw, 300px); text-align: left; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; z-index: 9999; }   /* bubble sits left of Mona, next to the card edge; overlaps everything */
+.card-peek-bubble { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(80vw, 320px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; }   /* centered on the card edge, on top of everything */
+.card-peek-bottom .card-peek-bubble { bottom: auto; top: 12px; }
 .card-peek-bubble:empty { display: none; }
-.card-peek-bubble::after { content: ""; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); border: 8px solid transparent; border-left-color: #fffef9; }   /* tail points right, to Mona */
+.card-peek-bubble::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: #fffef9; }
+.card-peek-bottom .card-peek-bubble::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: #fffef9; }
 body.dark-mode .card-peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode .card-peek-bubble::after { border-left-color: #3a312b; }
+body.dark-mode .card-peek-bubble::after { border-top-color: #3a312b; }
+body.dark-mode .card-peek-bottom .card-peek-bubble::after { border-top-color: transparent; border-bottom-color: #3a312b; }
 /* mobile: half-size peekers */
-body.is-mobile .card-peek { --slideD: 28px; top: -28px; right: 8px; left: auto; width: 46px; height: 46px; }
-body.is-mobile .card-peek-bottom { top: calc(100% - 18px); }
+body.is-mobile .card-peek { --slideD: 28px; }
+body.is-mobile .card-peek-inner { width: 46px; height: 46px; top: -34px; left: calc(50% - 23px); }
+body.is-mobile .card-peek-bottom .card-peek-inner { top: -12px; }
 body.is-mobile .card-peek-bubble { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
 /* deck finished: Mona dances on a disco floor (square card) */
@@ -1167,7 +1171,7 @@ function wireCardPeeker(peekId, bubbleId){
     if(e.target.closest('.card-peek-bubble')) return;
     if(!clickInCircle(e, peek.querySelector('.card-peek-inner'))) return;   // circular hitbox
     playScream();
-    if(bubble){ bubble.textContent=PEEK_SPEECHES[idx%PEEK_SPEECHES.length]; idx++; }
+    if(bubble){ bubble.textContent=PEEK_SPEECHES[idx%PEEK_SPEECHES.length]; idx++; requestAnimationFrame(()=>positionPeekMona(peek)); }
     if(inner){ inner.classList.remove('peek-logo-shake'); void inner.offsetWidth; inner.classList.add('peek-logo-shake'); setTimeout(()=>inner.classList.remove('peek-logo-shake'),500); }
     if(img){ img.src='solukkologo_eyes_closed.png'; peek.classList.add('eyes-closed'); clearTimeout(blinkT); blinkT=setTimeout(()=>{ img.src='solukkologo_eyes.png'; peek.classList.remove('eyes-closed'); },1000); }
   });
@@ -1903,7 +1907,16 @@ let _revealFadeTimer=null;
 let _cardPeekTimer=null;
 let _bottomPeekTimer=null;
 let _firstReviewPeek=true;   // first peeker of a review session shows the "press the card" tip
-function playPeekIn(el){ if(!el) return; el.classList.remove('peek-in'); void el.offsetWidth; el.classList.add('peek-in'); }   // (re)start the lively entry
+function playPeekIn(el){ if(!el) return; el.classList.remove('peek-in'); void el.offsetWidth; el.classList.add('peek-in'); requestAnimationFrame(()=>positionPeekMona(el)); }   // (re)start the lively entry
+function positionPeekMona(peek){   // bubble is centered; Mona peeks from behind the card just to the right of it
+  if(!peek) return;
+  const bubble=peek.querySelector('.card-peek-bubble'), inner=peek.querySelector('.card-peek-inner');
+  if(!bubble||!inner) return;
+  if(!bubble.textContent.trim()){ inner.style.left=''; return; }
+  const pr=peek.getBoundingClientRect(), br=bubble.getBoundingClientRect();
+  const w=inner.offsetWidth||92;
+  inner.style.left=((br.right-pr.left)-w*0.35)+'px';   // straddle the bubble's right edge
+}
 let _monaNoteTimer=null;
 function clearMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); }
 function startMonaNotes(){
