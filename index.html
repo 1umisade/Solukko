@@ -1363,6 +1363,7 @@ async function startDeck(deckName){
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
+  _firstReviewPeek=true;
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
   show('card-screen'); nextCard(); hide('loading');
@@ -1473,7 +1474,10 @@ async function renderCurrentCard(){
   const _words=_src.trim()?_src.trim().split(/\s+/).length:0;
   const _rounded=Math.round(_words/10)*10;
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
-  if(_bub) _bub.textContent = _rounded ? ('Vastauksen laajuus noin '+_rounded+' sanaa') : '';
+  if(_bub){
+    if(_firstReviewPeek){ _bub.textContent='Paina korttia kun haluat tarkistaa vastauksen'; _firstReviewPeek=false; }
+    else _bub.textContent = _rounded ? ('Vastauksen laajuus noin '+_rounded+' sanaa') : '';
+  }
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in'); }
   clearTimeout(_cardPeekTimer);                       // top peeker animates in 2s after the card loads
   _cardPeekTimer=setTimeout(()=>{ const p=document.getElementById('card-peek'); if(p && !cardAnswerShown){ p.style.visibility='visible'; playPeekIn(p); } }, 2000);
@@ -1780,6 +1784,7 @@ function renderCardStars(){
 let _revealFadeTimer=null;
 let _cardPeekTimer=null;
 let _bottomPeekTimer=null;
+let _firstReviewPeek=true;   // first peeker of a review session shows the "press the card" tip
 function playPeekIn(el){ if(!el) return; el.classList.remove('peek-in'); void el.offsetWidth; el.classList.add('peek-in'); }   // (re)start the lively entry
 let _monaNoteTimer=null;
 function clearMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); }
@@ -1888,7 +1893,7 @@ function celebrationEnd(){   // song finished: stop the party, prompt to enrol f
   clearMonaNotes(); stopCelebViz(); stopMonaBounce(true);   // ease Mona back to the middle
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
   const sl=sing.querySelector('.mona-vol'); if(sl) sl.style.display='none';
-  const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Nyt sitten vaan ilmoittautumaan tenttiin!'; bub.style.display=''; }
+  const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Tsemppiä tenttiin!'; bub.style.display=''; }
   _celebEnded=true; _monaEndIdx=0;   // Mona is now clickable (like the peeker)
 }
 let _celebEnded=false, _monaEndIdx=0, _monaBlinkT=null;
