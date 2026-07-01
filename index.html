@@ -373,10 +373,10 @@ body.dark-mode .overview-card-stars { color: #eadfce; }
 .subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
 .overview-card.active  { border: 2px solid #498d65; }
 .overview-card.known   { background: #ebf1ed; border-color: #9ab8a1; }
-.overview-card.unknown { background: #fffef9; border-color: #d4cec4; }
+.overview-card.unknown { background: #fce4d0; border-color: #ef9a5f; }   /* "En tiedä" cards painted orange */
 body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .overview-card.known   { background: #303d35; border-color: #6f8f77; }
-body.dark-mode .overview-card.unknown { background: #3a312b; border-color: #6d5f52; }
+body.dark-mode .overview-card.unknown { background: #3f3022; border-color: #b87a45; }
 
 .card-stars { position: absolute; right: 1rem; bottom: 0.8rem; font-size: 1.4rem; line-height: 1; color: #b5824a; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
@@ -1441,6 +1441,11 @@ async function startDeck(deckName){
   _firstReviewPeek=true;
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
+  if(devMode && reviewCards.length){   // dev: mark every card studied except one random card (to test the all-osattu flow)
+    cardGrades={}; const _skip=Math.floor(Math.random()*reviewCards.length);
+    reviewCards.forEach((c,i)=>{ if(i!==_skip) cardGrades[c.cardId]='known'; });
+    localStorage.setItem('solukko-grades-'+deckName, JSON.stringify(cardGrades));
+  }
   show('card-screen'); nextCard(); hide('loading');
   sessionStorage.setItem('solukko-savedDeck', deckName);
   setTimeout(scrollToCard, 200);
