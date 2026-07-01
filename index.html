@@ -361,8 +361,7 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
-.overview-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1.5 / 1; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }
-body.is-mobile .overview-card { aspect-ratio: 1 / 1.5; }   /* vertical on mobile, horizontal on desktop */
+.overview-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1 / 1.5; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }   /* vertical on all devices */
 
 /* ── STAR BADGE inside overview cards ─────────────────────  */
 .overview-card-stars {
@@ -1337,22 +1336,13 @@ async function loadDecks(){
   show('deck-screen');
   renderDevCommentsPanel();
   requestAnimationFrame(layoutDecksRadial);
+  setTimeout(layoutDecksRadial, 140); setTimeout(layoutDecksRadial, 450);   // re-run once the packs have settled to their final size
 }
 
 let _devActive=false;
 // The Soluvisa game shows up as a course circle on the homepage while a dev is hosting
 function updateSoluvisaCircle(){
-  const list=document.getElementById('deck-list'); if(!list) return;
-  let c=document.getElementById('soluvisa-deck-btn');
-  if(!c){
-    c=document.createElement('button');
-    c.id='soluvisa-deck-btn'; c.className='deck-btn soluvisa-deck';
-    c.innerHTML='<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:2.4rem;line-height:1;">🦠</div><div class="deck-title">Soluvisa</div><div style="font-size:14px;opacity:0.85;font-weight:400;">Liity peliin</div><div id="soluvisa-countdown" style="font-size:12px;opacity:0.95;font-weight:600;margin-top:2px;letter-spacing:0.02em;"></div></div>';
-    c.onclick=toggleGroupModeFromButton;
-    list.appendChild(c);
-  }
-  c.classList.toggle('soluvisa-active', !!groupMode);
-  updateSoluvisaCountdown();
+  const c=document.getElementById('soluvisa-deck-btn'); if(c) c.remove();   // Soluvisa no longer shown on the homepage
 }
 // Countdown to the next Soluvisa: every Friday at 14:00
 function nextSoluvisaTime(){
@@ -1388,24 +1378,27 @@ function layoutDecksRadial(){
   if(logo){ logo.style.order=''; logo.style.display=''; }
   btns.forEach(b=>{ b.style.position=''; });
   list.style.transform='none'; list.style.width=''; list.style.height=''; list.style.marginBottom='';
-  const cardSize=btns[0].offsetWidth||130;
+  const cardW=btns[0].offsetWidth||130, cardH=btns[0].offsetHeight||cardW;
+  const cardSize=Math.max(cardW, cardH);        // space by the larger dimension so the (taller) packs never overlap
   const logoSize=logo?logo.offsetWidth:0;
-  const gap=18;
+  const gap=26;
   const R=Math.max(logoSize/2+cardSize/2+gap, n>1 ? (cardSize+gap)/(2*Math.sin(Math.PI/n)) : 0);
   const D=2*R+cardSize, cx=D/2, cy=D/2;
   list.style.position='relative'; list.style.width=D+'px'; list.style.height=D+'px';
   btns.forEach((btn,i)=>{
     const ang=-Math.PI/2 + i*(2*Math.PI/n);
-    btn.style.left=(cx+R*Math.cos(ang)-cardSize/2)+'px';
-    btn.style.top =(cy+R*Math.sin(ang)-cardSize/2)+'px';
+    btn.style.left=(cx+R*Math.cos(ang)-cardW/2)+'px';
+    btn.style.top =(cy+R*Math.sin(ang)-cardH/2)+'px';
   });
   if(logo){ logo.style.position='absolute'; logo.style.left=(cx-logoSize/2)+'px'; logo.style.top=(cy-logoSize/2)+'px'; logo.style.margin='0'; }
-  const s=Math.min(1,(window.innerWidth-40)/D);
-  // scale from the top-left and translate so the scaled ring is horizontally centered in the viewport
+  // scale to fit, then translate so Mona (ring centre) sits in the very middle of the viewport
+  const s=Math.min(1, (window.innerWidth-40)/D, (window.innerHeight-40)/D);
   list.style.transform='none'; void list.offsetWidth;
-  const desiredLeft=(window.innerWidth - D*s)/2;
+  const rect=list.getBoundingClientRect();
+  const tx=window.innerWidth/2 - rect.left - (D/2)*s;
+  const ty=window.innerHeight/2 - rect.top - (D/2)*s;
   list.style.transformOrigin='0 0';
-  list.style.transform='translateX('+(desiredLeft-list.getBoundingClientRect().left)+'px) scale('+s+')';
+  list.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')';
   list.style.marginBottom=(D*s-D)+'px';
 }
 
@@ -2533,9 +2526,7 @@ function fitCardScale(){
   const cs=document.getElementById('card-screen');
   const availH=Math.max(180, cardViewportH()-16);                       // fits under the buttons
   const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
-  let w, h;
-  if(isMobile()){ w=Math.min(availW, availH/1.5); h=w*1.5; }            // mobile: vertical card, 1 : 1.5
-  else { h=Math.min(availH, availW/1.5); w=h*1.5; }                      // desktop: horizontal card, 1.5 : 1
+  const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5) on all devices
   fc.style.height=Math.round(h)+'px';
   wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
 }
