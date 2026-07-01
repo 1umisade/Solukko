@@ -1155,7 +1155,15 @@ function wireCardPeeker(peekId, bubbleId){
   });
 }
 wireCardPeeker('card-peek','card-peek-bubble');
-// The shake-shown peeker stays out for 3s, then retracts behind the card — unless hovered or re-shaken
+// Backside peeker: comes into view 3s after the answer is revealed, then stays out
+let _backPeekTimer=null;
+function showBackPeek(){
+  if(!cardAnswerShown) return;   // back side only
+  const p=document.getElementById('card-peek'), b=document.getElementById('card-peek-bubble');
+  if(!p) return;
+  if(b) b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia';
+  p.classList.remove('peek-out'); p.style.display=''; p.style.visibility='visible'; playPeekIn(p);
+}
 let _peekRetractTimer=null, _peekAutoRetract=false;
 function retractCardPeek(){
   const p=document.getElementById('card-peek'); if(!p) return;
@@ -1547,7 +1555,7 @@ async function renderCurrentCard(){
   const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus on '+_words+' sanaa') : ('Vastauksen laajuus on noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
   if(_bub) _bub.textContent='Paina korttia kun haluat tarkistaa vastauksen';   // front tip; changes to the answer length after 4s
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
-  clearTimeout(_peekRetractTimer); _peekAutoRetract=false;   // a fresh card cancels any pending retract (front peeker stays out)
+  clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // top peeker animates in 2s after the card loads
   _cardPeekTimer=setTimeout(()=>{ const p=document.getElementById('card-peek'); if(p && !cardAnswerShown){ p.style.visibility='visible'; playPeekIn(p);
     clearTimeout(_laajuusTimer);
@@ -2116,7 +2124,8 @@ function showAnswer(){
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
-    { const _p=document.getElementById('card-peek'); if(_p) _p.style.visibility='hidden'; }   // peeker hidden on reveal; it reappears on shake
+    { const _p=document.getElementById('card-peek'); if(_p){ _p.style.visibility='hidden'; _p.classList.remove('peek-in','peek-out'); } }   // hidden on reveal
+    clearTimeout(_backPeekTimer); _backPeekTimer=setTimeout(showBackPeek, 3000);   // bring the backside peeker in after 3s and keep it in view
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
     pr.style.display='flex'; ca.style.display='flex';
@@ -2500,9 +2509,7 @@ function shakeCard(){
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
   if(ca){ ca.style.display='flex'; ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
-  const _b=document.getElementById('card-peek-bubble'); if(_b) _b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia';   // peeker bubble on shake
-  const _p=document.getElementById('card-peek'); if(_p){ _p.classList.remove('peek-out'); _p.style.display=''; _p.style.visibility='visible'; playPeekIn(_p); }
-  scheduleCardPeekRetract();   // stays out 3s, then retracts behind the card unless hovered/re-shaken
+  showBackPeek();   // bring the peeker in (and keep it) on shake too
   fitCardScale(); scrollToCard();   // re-lay out exactly like a fresh card load, leaving room for the buttons
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
