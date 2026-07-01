@@ -1799,7 +1799,7 @@ function startMonaNotes(){
     s.appendChild(n); setTimeout(()=>n.remove(),1600);
   }, 340);
 }
-function stopMonaNotes(){ clearMonaNotes(); if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.ontimeupdate=null; _celebrationAudio.onended=null; }catch(e){} } _vizStarted=false; _celebStarted=false; stopCelebViz(); stopMonaBounce(false); }
+function stopMonaNotes(){ clearMonaNotes(); if(_celebrationAudio){ try{ _celebrationAudio.pause(); _celebrationAudio.ontimeupdate=null; _celebrationAudio.onended=null; }catch(e){} } _vizStarted=false; _celebStarted=false; if(_rampRAF){ cancelAnimationFrame(_rampRAF); _rampRAF=null; } stopCelebViz(); stopMonaBounce(false); }
 let _celebrationAudio=null, _celebCtx=null, _celebAnalyser=null, _celebRAF=null;
 // three tracks, picked at random per celebration; each has its own viz-start and drop times
 const CELEB_TRACKS=[
@@ -1879,9 +1879,24 @@ function startCelebOnTouch(){   // touching the slider starts the music (at the 
   _celebStarted=true; startCelebrationMusic();
   if(_celebrationAudio){ _celebrationAudio.muted=false; const sl=document.querySelector('.mona-vol'); if(sl) _celebrationAudio.volume=Math.max(0,Math.min(1,sl.value/100)); }
 }
-function onCelebVolume(v){   // slider drag sets the volume (and starts the music if not yet playing)
+let _rampRAF=null;
+function rampCelebVolume(){   // knob glides from the far left to centre, fading the volume in
+  if(_rampRAF){ cancelAnimationFrame(_rampRAF); _rampRAF=null; }
+  const sl=document.querySelector('#progress-row .mona-vol');
+  if(_celebrationAudio) _celebrationAudio.volume=0;
+  const dur=6000, t0=performance.now();
+  const step=(now)=>{
+    const p=Math.min(1,(now-t0)/dur), v=Math.round(p*50);
+    if(sl){ sl.value=v; sl.style.setProperty('--p', v+'%'); }
+    if(_celebrationAudio && !_celebrationAudio.muted) _celebrationAudio.volume=v/100;
+    if(p<1) _rampRAF=requestAnimationFrame(step); else _rampRAF=null;
+  };
+  _rampRAF=requestAnimationFrame(step);
+}
+function onCelebVolume(v){   // slider drag sets the volume (cancels the auto-ramp)
+  if(_rampRAF){ cancelAnimationFrame(_rampRAF); _rampRAF=null; }
   startCelebOnTouch();
-  const sl=document.querySelector('.mona-vol'); if(sl) sl.style.setProperty('--p', v+'%');   // green fill up to the knob, light grey after
+  const sl=document.querySelector('.mona-vol'); if(sl) sl.style.setProperty('--p', v+'%');
   if(_celebrationAudio){ _celebrationAudio.muted=false; _celebrationAudio.volume=Math.max(0,Math.min(1,v/100)); }
 }
 function celebrationEnd(){   // song finished: stop the party, prompt to enrol for the exam
@@ -1934,17 +1949,21 @@ function showCelebration(){
   document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voinko soittaa sulle yhen bängerin sen kunniaks?</div><div class="mona-rover"><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
+  document.querySelector('.comment-area').style.display='none';   // no comments on the celebration card
   const pr=document.getElementById('progress-row'); pr.style.display='flex'; pr.classList.add('celebrating');   // full green glowing bar = the volume slider
   let vsl=pr.querySelector('.mona-vol');
   if(!vsl){ vsl=document.createElement('input'); vsl.type='range'; vsl.className='mona-vol'; vsl.min=0; vsl.max=100; vsl.title='Äänenvoimakkuus'; vsl.setAttribute('aria-label','Äänenvoimakkuus'); vsl.setAttribute('oninput','onCelebVolume(this.value)'); vsl.setAttribute('onpointerdown','startCelebOnTouch()'); pr.appendChild(vsl); }
-  vsl.value=50; vsl.style.display='';   // knob starts in the middle (medium volume)
+  vsl.value=0; vsl.style.display='';   // knob starts at the far left (silent)
   monaReact();   // the ask bubble appeared -> react as if clicked
+  _celebStarted=true; startCelebrationMusic();          // music plays immediately
+  if(_celebrationAudio) _celebrationAudio.volume=0;
+  rampCelebVolume();                                    // knob eases left -> centre, volume fades in
+  const _wau=document.querySelector('.mona-bubble'); if(_wau){ setTimeout(()=>{ if(_wau) _wau.style.display='none'; }, 5000); }   // greeting fades after 5s
   fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
 let _vizStarted=false, _dropped=false, _eyesReopened=false, _eyesReclosed=false;
-function startCelebrationMusic(){   // play button: start the music; Mona swings (open eyes) through the intro
+function startCelebrationMusic(){   // start the music; Mona swings (open eyes) through the intro
   const sing=document.querySelector('.mona-sing'); if(sing) sing.classList.add('intro');
-  const bub=document.querySelector('.mona-bubble'); if(bub) bub.style.display='none';   // hide the ask bubble once the music starts
   _vizStarted=false; _dropped=false; _eyesReopened=false; _eyesReclosed=false;
   playCelebration();
   startMonaBounce();   // Mona flies around the card while the music plays
