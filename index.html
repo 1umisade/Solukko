@@ -89,30 +89,28 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
 #flashcard-wrap { width: 100%; max-width: 96vw; margin-left: auto; margin-right: auto; transform-origin: top center; position: relative; margin-top: 60px; }
 .card-extent { display: none; }   /* replaced by the peeking-logo speech bubble */
-.card-peek { position: absolute; top: -55px; left: 14px; width: 92px; height: 92px; z-index: 0; cursor: pointer; --slideD: 56px; }
-.card-peek-bottom { top: calc(100% - 37px); left: 50%; transform: translateX(-50%); }
-#card-peek { left: 50%; transform: translateX(-50%); }   /* top peeker centered so its bubble centers on the card too */
+.card-peek { position: absolute; top: -55px; right: 18px; left: auto; width: 92px; height: 92px; z-index: 6; cursor: pointer; --slideD: 56px; }   /* Mona peeks at the right edge */
+.card-peek-bottom { top: calc(100% - 37px); right: 18px; left: auto; transform: none; }
 .card-peek-inner { position: relative; width: 100%; height: 100%; transform: rotate(-3deg); }   /* tilt the logo only, not the bubble */
 .card-peek-bottom .card-peek-inner { transform: scaleY(-1); }                                    /* bottom peeker is upside down */
 /* entry: container slides in (bubble rides along, unrotated); the logo wiggles */
-@keyframes slideInTop { 0% { transform: translateX(-50%) translateY(var(--slideD)); opacity: 0; } 100% { transform: translateX(-50%) translateY(0); opacity: 1; } }
-@keyframes slideInBottom { 0% { transform: translateX(-50%) translateY(calc(var(--slideD) * -1)); opacity: 0; } 100% { transform: translateX(-50%) translateY(0); opacity: 1; } }
+@keyframes slideInTop { 0% { transform: translateY(var(--slideD)); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+@keyframes slideInBottom { 0% { transform: translateY(calc(var(--slideD) * -1)); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 @keyframes wiggleTop { 0% { transform: rotate(-3deg); } 55% { transform: rotate(8deg); } 100% { transform: rotate(-3deg); } }
 @keyframes wiggleBottom { 0% { transform: scaleY(-1) rotate(0deg); } 55% { transform: scaleY(-1) rotate(8deg); } 100% { transform: scaleY(-1) rotate(0deg); } }
 #card-peek.peek-in { animation: slideInTop 0.55s cubic-bezier(0.34, 1.45, 0.64, 1); }
 #card-peek.peek-in .card-peek-inner { animation: wiggleTop 0.6s ease; }
 #card-peek-bottom.peek-in { animation: slideInBottom 0.55s cubic-bezier(0.34, 1.45, 0.64, 1); }
 #card-peek-bottom.peek-in .card-peek-inner { animation: wiggleBottom 0.6s ease; }
-@keyframes slideOutBottom { 0% { transform: translateX(-50%) translateY(0); opacity: 1; } 100% { transform: translateX(-50%) translateY(calc(var(--slideD) * -1)); opacity: 0; } }
+@keyframes slideOutBottom { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(calc(var(--slideD) * -1)); opacity: 0; } }
 #card-peek-bottom.peek-out { animation: slideOutBottom 0.38s ease-in forwards; }
-.card-peek-bubble { position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); width: max-content; max-width: min(88vw, 320px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; }
-.card-peek-bottom .card-peek-bubble { top: calc(100% + 8px); left: 50%; }
+.card-peek-bubble { position: absolute; right: calc(100% + 10px); left: auto; top: 50%; transform: translateY(-50%); width: max-content; max-width: min(72vw, 300px); text-align: left; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); pointer-events: none; z-index: 9999; }   /* bubble sits left of Mona, next to the card edge; overlaps everything */
 .card-peek-bubble:empty { display: none; }
-.card-peek-bubble::after { content: ""; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-bottom-color: #fffef9; }
+.card-peek-bubble::after { content: ""; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); border: 8px solid transparent; border-left-color: #fffef9; }   /* tail points right, to Mona */
 body.dark-mode .card-peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
-body.dark-mode .card-peek-bubble::after { border-bottom-color: #3a312b; }
+body.dark-mode .card-peek-bubble::after { border-left-color: #3a312b; }
 /* mobile: half-size peekers */
-body.is-mobile .card-peek { --slideD: 28px; top: -28px; left: 8px; width: 46px; height: 46px; }
+body.is-mobile .card-peek { --slideD: 28px; top: -28px; right: 8px; left: auto; width: 46px; height: 46px; }
 body.is-mobile .card-peek-bottom { top: calc(100% - 18px); }
 body.is-mobile .card-peek-bubble { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
@@ -235,8 +233,9 @@ body.dark-mode #deploy-timestamp-pill { background: #3a312b; color: #eadfce; bor
 body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
-.comment-area { display: flex; flex-direction: column; gap: 8px; margin-top: 2.2rem; }
+.comment-area { display: flex; flex-direction: column; gap: 8px; margin-top: 2.2rem; align-items: center; }   /* centered boxes */
 .comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.4s ease; }
+body:not(.is-mobile) .comment-box { width: 50%; }   /* half size on desktop */
 .comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; pointer-events: none; }
 .comment-box.open { max-height: 600px; overflow: visible; cursor: default; padding-bottom: 52px; }
 .comment-box.open::before { opacity: 0; pointer-events: none; }
@@ -244,8 +243,8 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
 .comment-box.open .comment-img-btn { display: flex; align-items: center; justify-content: center; }
 .comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
-.comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-.comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+.comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; align-items: center; }   /* centered comment boxes */
+.comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); width: max-content; max-width: 100%; text-align: left; }   /* as wide as the comment; text left */
 .comment-item-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #a09080; margin-top: 4px; }
 /* replies + dev Mona bubble on a comment */
 .comment-item { position: relative; }
@@ -256,9 +255,10 @@ body.dark-mode .comment-reply { background: #332a24; color: #eadfce; }
 .comment-reply-input { margin-top: 6px; display: flex; gap: 6px; }
 .comment-reply-input textarea { flex: 1; font-family: 'Lora', serif; font-size: 0.8rem; border: 1px solid #d4cec4; border-radius: 8px; padding: 0.4rem; resize: vertical; min-height: 44px; background: #fffef9; color: #1a1612; }
 .comment-reply-input button { background: #498d65; color: #fff; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; font-size: 0.78rem; flex-shrink: 0; }
-.dev-mona { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; cursor: pointer; z-index: 3; }
-.dev-mona-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); pointer-events: none; }
-.dev-mona-bubble { display: none; position: absolute; right: 0; top: 112%; width: max-content; max-width: 220px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 14px; padding: 0.5rem 0.7rem; font-family: 'Lora', serif; font-size: 0.8rem; line-height: 1.35; box-shadow: 0 6px 20px rgba(0,0,0,0.18); z-index: 5; }
+.dev-mona { position: absolute; top: 50%; right: -18px; transform: translateY(-50%); width: 40px; height: 40px; cursor: pointer; z-index: 9999; }   /* halfway outside the comment box */
+.dev-mona-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); pointer-events: none; }
+.dev-mona .logo-eye { pointer-events: none; }
+.dev-mona-bubble { display: none; position: absolute; right: 0; top: 112%; width: max-content; max-width: 220px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 14px; padding: 0.5rem 0.7rem; font-family: 'Lora', serif; font-size: 0.8rem; line-height: 1.35; box-shadow: 0 6px 20px rgba(0,0,0,0.18); z-index: 9999; text-align: left; }
 .dev-mona.open .dev-mona-bubble { display: block; }
 .dev-mona-bubble::after { content: ""; position: absolute; bottom: 100%; right: 12px; border: 8px solid transparent; border-bottom-color: #fffef9; }
 body.dark-mode .dev-mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
@@ -1631,8 +1631,9 @@ function loadFirestoreComments(){
       const reps=repliesByParent[d.id]||[];
       const devReps=reps.filter(r=>r.dev), normReps=reps.filter(r=>!r.dev);
       const normHtml=normReps.map(r=>`<div class="comment-reply"><span class="comment-text">${escCmt(r.text)}</span></div>`).join('');
-      const devBubble=devReps.length?`<div class="dev-mona" onclick="toggleDevBubble(this)" title="Kehittäjän vastaus"><img src="solukkologo_eyes.png" alt="Mona" class="dev-mona-img"><div class="dev-mona-bubble">${devReps.map(r=>escCmt(r.text)).join('<br><br>')}</div></div>`:'';
-      el.innerHTML=`${devBubble}<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div><div class="comment-replies">${normHtml}</div><button class="comment-reply-btn" onclick="openReply('${d.id}',this)">Vastaa</button>`;
+      const devBubble=devReps.length?`<div class="dev-mona" onclick="toggleDevBubble(this)" title="Kehittäjän vastaus"><img src="solukkologo_eyes.png" alt="Mona" class="brand-logo-img dev-mona-img"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div><div class="dev-mona-bubble">${devReps.map(r=>escCmt(r.text)).join('<br><br>')}</div></div>`:'';
+      const replyBtn=devMode?`<button class="comment-reply-btn" onclick="openReply('${d.id}',this)">Vastaa</button>`:'';   // only dev can reply
+      el.innerHTML=`${devBubble}<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div><div class="comment-replies">${normHtml}</div>${replyBtn}`;
       feed.appendChild(el);
     });
   }, err=>{ feed.innerHTML=`<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#c0392b;padding:4px;">Virhe: ${err.message}</div>`; });
