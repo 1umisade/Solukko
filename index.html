@@ -263,7 +263,13 @@ body.dark-mode .comment-reply { background: #332a24; color: #eadfce; }
 .dev-mona-bubble::after { content: ""; position: absolute; bottom: 100%; right: 12px; border: 8px solid transparent; border-bottom-color: #fffef9; }
 body.dark-mode .dev-mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .dev-mona-bubble::after { border-bottom-color: #3a312b; }
-/* dev-only homepage: every comment, click to open its card */
+/* separate dev screen: online activity + every comment */
+#dev-screen { display: none; width: 100%; }
+.dev-screen-inner { width: 100%; max-width: 620px; margin: 0 auto; padding: 4.5rem 1rem 2rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.dev-back-btn { align-self: flex-start; background: none; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.4rem 0.9rem; cursor: pointer; font-family: 'Lora', serif; color: #56533c; margin-bottom: 0.5rem; }
+.dev-section-title { font-family: 'Lora', serif; font-weight: 700; font-size: 1.05rem; margin-top: 1rem; color: #56533c; }
+body.dark-mode .dev-section-title, body.dark-mode .dev-back-btn { color: #eadfce; border-color: #6d5f52; }
+/* dev-only: every comment, click to open its card */
 #dev-comments-panel { width: min(92vw, 560px); margin: 0 auto; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; padding: 0.8rem 1rem; box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
 body.dark-mode #dev-comments-panel { background: #2b211b; border-color: #6d5f52; }
 .dev-comments-title { font-family: 'Lora', serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; color: #56533c; }
@@ -657,8 +663,16 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ PAKKAVALINNANÄYTTÖ ════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
-  <div id="dev-comments-panel" style="display:none"></div>
-  <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;padding:1.5rem 0 0.5rem;margin-top:auto;"></div>
+</div>
+<button id="dev-screen-btn" onclick="showDevScreen()" title="Kehittäjänäkymä" style="display:none;position:fixed;top:14px;left:14px;width:44px;height:44px;border-radius:50%;border:1px solid #d4cec4;background:#fffef9;color:#56533c;font-size:1.2rem;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.14);z-index:50;align-items:center;justify-content:center;">🛠️</button>
+<div id="dev-screen" style="display:none">
+  <div class="dev-screen-inner">
+    <button class="dev-back-btn" onclick="closeDevScreen()">← Takaisin</button>
+    <div class="dev-section-title">Paikalla nyt</div>
+    <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;"></div>
+    <div class="dev-section-title">Kaikki kommentit</div>
+    <div id="dev-comments-panel" style="display:none"></div>
+  </div>
 </div>
 
 <!-- KOMMENTTILAATIKKO -->
@@ -806,7 +820,9 @@ function applyDevMode(){
   const xb=document.getElementById('exit-devmode-btn');
   if(xb) xb.style.display = devMode ? 'flex' : 'none';
   if(typeof renderPresenceList==='function') renderPresenceList(_lastPresenceUsers||[]);   // refresh the dev presence list
-  if(typeof renderDevCommentsPanel==='function') renderDevCommentsPanel();   // dev-only "all comments" list on the homepage
+  if(typeof renderDevCommentsPanel==='function') renderDevCommentsPanel();
+  const dsb=document.getElementById('dev-screen-btn');
+  if(dsb) dsb.style.display = (devMode && document.getElementById('deck-screen').style.display==='flex') ? 'flex' : 'none';
 }
 
 function exitDevMode(){
@@ -1334,7 +1350,7 @@ async function loadDecks(){
   const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
   show('deck-screen');
-  renderDevCommentsPanel();
+  { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display=devMode?'flex':'none'; }
   requestAnimationFrame(layoutDecksRadial);
   setTimeout(layoutDecksRadial, 140); setTimeout(layoutDecksRadial, 450);   // re-run once the packs have settled to their final size
 }
@@ -1419,6 +1435,7 @@ async function startDeck(deckName){
   sessionStorage.setItem('solukko-savedDeck', deckName);
   setTimeout(scrollToCard, 200);
   document.getElementById('site-brand').style.display='none';
+  { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display='none'; }
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='flex';
   document.querySelector('.comment-area').style.display='none';
@@ -1662,6 +1679,17 @@ async function openCardById(cardId){
   await startDeck(topDeck);
   const ci=reviewCards.findIndex(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(ci>=0) jumpToOverviewCard(ci);
+}
+function showDevScreen(){
+  hide('deck-screen'); hide('card-screen'); show('dev-screen');
+  const b=document.getElementById('dev-screen-btn'); if(b) b.style.display='none';
+  renderPresenceList(_lastPresenceUsers||[]);
+  renderDevCommentsPanel();
+}
+function closeDevScreen(){
+  hide('dev-screen'); show('deck-screen');
+  const b=document.getElementById('dev-screen-btn'); if(b) b.style.display=devMode?'flex':'none';
+  requestAnimationFrame(layoutDecksRadial); setTimeout(layoutDecksRadial,140);
 }
 function renderDevCommentsPanel(){
   const panel=document.getElementById('dev-comments-panel'); if(!panel) return;
