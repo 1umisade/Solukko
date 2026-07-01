@@ -116,7 +116,7 @@ body.is-mobile .card-peek-inner { width: 46px; height: 46px; top: -10px; left: c
 body.is-mobile .card-peek-bubble { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
 /* deck finished: Mona dances on a disco floor (square card) */
-.flashcard.celebrating { aspect-ratio: 1 / 1; min-height: 0; padding: 0; overflow: hidden; }
+.flashcard.celebrating { aspect-ratio: 1 / 1.5; min-height: 0; padding: 0; overflow: hidden; }   /* same 1.5:1 as the review cards (fitCardScale sizes it) */
 .mona-sing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .disco { display: none; position: absolute; left: -30%; top: -30%; width: 160%; height: 160%; z-index: 0; pointer-events: none; transform-origin: center; filter: blur(8px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 4s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
 .mona-sing.playing .disco { display: block; }   /* disco fills the whole card, after the drop */
@@ -617,6 +617,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
+  <div class="peek-bubble"><span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span> Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span></div>
   <div class="peek-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
   <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
   <div class="peek-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
@@ -1106,9 +1107,13 @@ let _homeHoverOpened=false;
     if(e.target.closest('.peek-bubble')) return;             // ignore clicks on the bubble/buttons
     if(!clickInCircle(e, pk.querySelector('.peek-inner'))) return;   // circular hitbox
     playScream();
-    const cur=[...bubbles].findIndex(b=>b.classList.contains('active'));
-    const next=(cur+1)%bubbles.length;
-    bubbles.forEach((b,i)=>b.classList.toggle('active', i===next));
+    if(!pk.classList.contains('bubble-open')){   // first press: show the Tervetuloa greeting
+      bubbles.forEach((b,i)=>b.classList.toggle('active', i===0));
+    } else {                                      // further presses: cycle through the rest
+      const cur=[...bubbles].findIndex(b=>b.classList.contains('active'));
+      const next=(cur+1)%bubbles.length;
+      bubbles.forEach((b,i)=>b.classList.toggle('active', i===next));
+    }
     pk.classList.add('bubble-open');
     clearTimeout(bubbleTimer);
     bubbleTimer=setTimeout(()=>pk.classList.remove('bubble-open'),5000);   // auto-close so it can retract
@@ -2560,7 +2565,6 @@ function fitCardScale(){
   const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
   if(!wrap||!fc) return;
   wrap.style.transform=''; wrap.style.marginBottom='';
-  if(fc.classList.contains('celebrating')){ fc.style.height=''; fc.style.width=''; wrap.style.width=''; return; }   // celebration keeps its own square
   const cs=document.getElementById('card-screen');
   const availH=Math.max(180, cardViewportH()-16);                       // fits under the buttons
   const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
