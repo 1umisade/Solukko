@@ -2456,9 +2456,10 @@ function shakeCard(){
     if(ca && ca.offsetParent){ const delta=ca.getBoundingClientRect().top - window.innerHeight - 6; window.scrollBy({top:delta, behavior:'smooth'}); }
     else if(pr){ pr.scrollIntoView({behavior:'smooth', block:'end'}); }
   }
-  { const _pb=document.getElementById('card-peek-bottom');   // shake toggles the bottom peeker (animated)
+  { const _pb=document.getElementById('card-peek-bottom');   // each shake keeps Mona out; she only retracts after 3s of no shaking
     const showing = _pb && _pb.style.display!=='none' && _pb.style.visibility!=='hidden' && !_pb.classList.contains('peek-out');
-    if(showing) hideCardPeekBottom(); else showCardPeekBottom(); }
+    if(showing){ clearTimeout(_bottomPeekTimer); _bottomPeekTimer=setTimeout(hideCardPeekBottom,3000); }   // restart the idle timer, don't hide
+    else showCardPeekBottom(); }
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
