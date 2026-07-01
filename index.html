@@ -1552,8 +1552,8 @@ async function renderCurrentCard(){
   const _words=_src.trim()?_src.trim().split(/\s+/).length:0;
   const _rounded=Math.round(_words/10)*10;
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
-  const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus on '+_words+' sanaa') : ('Vastauksen laajuus on noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
-  const _frontText = 'Paina korttia kun haluat tarkistaa vastauksen.' + (_laajuusText ? (' '+_laajuusText+'.') : '');   // two sentences in one bubble
+  const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus '+_words+' sanaa') : ('Vastauksen laajuus noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
+  const _frontText = 'Klikkaa korttia tarkistaaksesi vastauksen.' + (_laajuusText ? (' '+_laajuusText+'.') : '');   // two sentences in one bubble
   if(_bub) _bub.textContent=_frontText;
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
