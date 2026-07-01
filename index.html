@@ -234,6 +234,34 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 .comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 .comment-item-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #a09080; margin-top: 4px; }
+/* replies + dev Mona bubble on a comment */
+.comment-item { position: relative; }
+.comment-reply-btn { background: none; border: none; color: #8a7f6a; cursor: pointer; font-family: 'Lora', serif; font-size: 0.72rem; padding: 4px 0 0; margin-top: 2px; text-decoration: underline; }
+.comment-replies { margin-top: 6px; display: flex; flex-direction: column; gap: 5px; }
+.comment-reply { background: #f3efe6; border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.78rem; color: #56533c; margin-left: 14px; }
+body.dark-mode .comment-reply { background: #332a24; color: #eadfce; }
+.comment-reply-input { margin-top: 6px; display: flex; gap: 6px; }
+.comment-reply-input textarea { flex: 1; font-family: 'Lora', serif; font-size: 0.8rem; border: 1px solid #d4cec4; border-radius: 8px; padding: 0.4rem; resize: vertical; min-height: 44px; background: #fffef9; color: #1a1612; }
+.comment-reply-input button { background: #498d65; color: #fff; border: none; border-radius: 8px; padding: 0 12px; cursor: pointer; font-size: 0.78rem; flex-shrink: 0; }
+.dev-mona { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; cursor: pointer; z-index: 3; }
+.dev-mona-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); pointer-events: none; }
+.dev-mona-bubble { display: none; position: absolute; right: 0; top: 112%; width: max-content; max-width: 220px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 14px; padding: 0.5rem 0.7rem; font-family: 'Lora', serif; font-size: 0.8rem; line-height: 1.35; box-shadow: 0 6px 20px rgba(0,0,0,0.18); z-index: 5; }
+.dev-mona.open .dev-mona-bubble { display: block; }
+.dev-mona-bubble::after { content: ""; position: absolute; bottom: 100%; right: 12px; border: 8px solid transparent; border-bottom-color: #fffef9; }
+body.dark-mode .dev-mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode .dev-mona-bubble::after { border-bottom-color: #3a312b; }
+/* dev-only homepage: every comment, click to open its card */
+#dev-comments-panel { width: min(92vw, 560px); margin: 0 auto; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; padding: 0.8rem 1rem; box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+body.dark-mode #dev-comments-panel { background: #2b211b; border-color: #6d5f52; }
+.dev-comments-title { font-family: 'Lora', serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; color: #56533c; }
+body.dark-mode .dev-comments-title { color: #eadfce; }
+.dev-comment-row { display: flex; gap: 8px; align-items: baseline; padding: 0.45rem 0.3rem; border-top: 1px solid #ece7dd; cursor: pointer; }
+.dev-comment-row:hover { background: #f5f1e8; border-radius: 8px; }
+body.dark-mode .dev-comment-row { border-top-color: #4a4038; }
+body.dark-mode .dev-comment-row:hover { background: #362c25; }
+.dev-comment-deck { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: #a09080; flex-shrink: 0; max-width: 34%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dev-comment-snip { font-family: 'Lora', serif; font-size: 0.8rem; color: #56533c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.dark-mode .dev-comment-snip { color: #eadfce; }
 #card-comment { width: 100%; min-height: 360px; height: auto; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }
 .comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
@@ -616,6 +644,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ PAKKAVALINNANÄYTTÖ ════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
+  <div id="dev-comments-panel" style="display:none"></div>
   <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;padding:1.5rem 0 0.5rem;margin-top:auto;"></div>
 </div>
 
@@ -764,6 +793,7 @@ function applyDevMode(){
   const xb=document.getElementById('exit-devmode-btn');
   if(xb) xb.style.display = devMode ? 'flex' : 'none';
   if(typeof renderPresenceList==='function') renderPresenceList(_lastPresenceUsers||[]);   // refresh the dev presence list
+  if(typeof renderDevCommentsPanel==='function') renderDevCommentsPanel();   // dev-only "all comments" list on the homepage
 }
 
 function exitDevMode(){
@@ -1291,6 +1321,7 @@ async function loadDecks(){
   const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
   show('deck-screen');
+  renderDevCommentsPanel();
   requestAnimationFrame(layoutDecksRadial);
 }
 
@@ -1564,6 +1595,7 @@ function showCommentDisplay(text){
   const d=document.getElementById('comment-display'); if(!d) return;
   if(text){ d.textContent=text; d.style.display='block'; } else { d.style.display='none'; }
 }
+function escCmt(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function loadFirestoreComments(){
   const feed=document.getElementById('comment-feed'); if(!feed||!currentCard) return;
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
@@ -1571,16 +1603,63 @@ function loadFirestoreComments(){
   const cardId=String(currentCard.cardId||currentCard.noteId||'');
   commentsUnsubscribe=db.collection('comments').where('cardId','==',cardId).onSnapshot(snap=>{
     feed.innerHTML=''; if(snap.empty) return;
-    const docs=[...snap.docs].sort((a,b)=>{ const ta=a.data().timestamp?.toMillis?.()||0, tb=b.data().timestamp?.toMillis?.()||0; return tb-ta; });
-    docs.forEach(doc=>{
-      const d=doc.data(); const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=doc.id;
+    const all=snap.docs.map(doc=>Object.assign({id:doc.id}, doc.data()));
+    const parents=all.filter(c=>!c.parentId).sort((a,b)=>((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)-((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0));
+    const repliesByParent={};
+    all.filter(c=>c.parentId).forEach(r=>{ (repliesByParent[r.parentId]=repliesByParent[r.parentId]||[]).push(r); });
+    Object.values(repliesByParent).forEach(arr=>arr.sort((a,b)=>((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0)-((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)));
+    parents.forEach(d=>{
+      const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=d.id;
       const isOwn=d.userId&&d.userId===getUserId(); const canEdit=isOwn||devMode;
-      const btns=canEdit?`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:'';
+      const btns=canEdit?`<button onclick="editComment('${d.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:'';
       const imgHtml=d.imageData?`<img src="${d.imageData}" style="max-width:100%;border-radius:8px;margin-top:6px;display:block;">`:'';
-      el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div>`;
+      const reps=repliesByParent[d.id]||[];
+      const devReps=reps.filter(r=>r.dev), normReps=reps.filter(r=>!r.dev);
+      const normHtml=normReps.map(r=>`<div class="comment-reply"><span class="comment-text">${escCmt(r.text)}</span></div>`).join('');
+      const devBubble=devReps.length?`<div class="dev-mona" onclick="toggleDevBubble(this)" title="Kehittäjän vastaus"><img src="solukkologo_eyes.png" alt="Mona" class="dev-mona-img"><div class="dev-mona-bubble">${devReps.map(r=>escCmt(r.text)).join('<br><br>')}</div></div>`:'';
+      el.innerHTML=`${devBubble}<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div><div class="comment-replies">${normHtml}</div><button class="comment-reply-btn" onclick="openReply('${d.id}',this)">Vastaa</button>`;
       feed.appendChild(el);
     });
   }, err=>{ feed.innerHTML=`<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#c0392b;padding:4px;">Virhe: ${err.message}</div>`; });
+}
+function toggleDevBubble(el){ el.classList.toggle('open'); }
+function openReply(parentId, btn){
+  const item=btn.closest('.comment-item'); if(!item) return;
+  if(item.querySelector('.comment-reply-input')) return;   // already open
+  const box=document.createElement('div'); box.className='comment-reply-input';
+  const ta=document.createElement('textarea'); ta.placeholder='Vastaa...';
+  const send=document.createElement('button'); send.textContent='Lähetä'; send.onclick=()=>submitReply(parentId, ta, box);
+  box.appendChild(ta); box.appendChild(send); item.appendChild(box); ta.focus();
+}
+function submitReply(parentId, ta, box){
+  const text=ta.value.trim(); if(!text) return;
+  const cardId=String(currentCard?.cardId||currentCard?.noteId||'');
+  db.collection('comments').add({ text, cardId, parentId, userId:getUserId(), dev:!!devMode, timestamp:firebase.firestore.FieldValue.serverTimestamp() })
+    .then(()=>{ if(box) box.remove(); setTimeout(loadFirestoreComments,300); })
+    .catch(err=>alert('Virhe: '+err.message));
+}
+async function openCardById(cardId){
+  const cid=String(cardId);
+  const tc=(allCards||[]).find(c=>String(c.cardId)===cid||String(c.noteId)===cid);
+  if(!tc){ alert('Korttia ei löytynyt.'); return; }
+  const topDeck='TYKRY::'+tc.deckName.replace('TYKRY::','').split('::')[0];
+  await startDeck(topDeck);
+  const ci=reviewCards.findIndex(c=>String(c.cardId)===cid||String(c.noteId)===cid);
+  if(ci>=0) jumpToOverviewCard(ci);
+}
+function renderDevCommentsPanel(){
+  const panel=document.getElementById('dev-comments-panel'); if(!panel) return;
+  if(!devMode){ panel.style.display='none'; panel.innerHTML=''; return; }
+  panel.style.display='block';
+  panel.innerHTML='<div class="dev-comments-title">Kaikki kommentit</div><div style="opacity:0.6;font-size:0.8rem;">Ladataan…</div>';
+  db.collection('comments').get().then(snap=>{
+    const docs=snap.docs.map(dc=>Object.assign({id:dc.id}, dc.data())).filter(c=>!c.parentId);
+    docs.sort((a,b)=>((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)-((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0));
+    let html='<div class="dev-comments-title">Kaikki kommentit ('+docs.length+')</div>';
+    if(!docs.length) html+='<div style="opacity:0.6;font-size:0.8rem;">Ei kommentteja.</div>';
+    docs.forEach(c=>{ const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('TYKRY::','')); const cid=escCmt(String(c.cardId||'')); html+='<div class="dev-comment-row" onclick="openCardById(\''+cid+'\')"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span></div>'; });
+    panel.innerHTML=html;
+  }).catch(err=>{ panel.innerHTML='<div class="dev-comments-title">Kaikki kommentit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+err.message+'</div>'; });
 }
 
 
@@ -2320,6 +2399,7 @@ function showDecks(){
   document.getElementById('site-brand')?.classList.remove('flipped');
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';
   stopMonaNotes(); saveGroups(); updateGroupUI(); hide('card-screen'); loadDecks();
+  renderDevCommentsPanel();
 }
 
 document.getElementById('card-comment').addEventListener('input',()=>saveCommentForCard());
