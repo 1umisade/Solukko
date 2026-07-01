@@ -1162,7 +1162,7 @@ function showBackPeek(){
   const p=document.getElementById('card-peek'), b=document.getElementById('card-peek-bubble');
   if(!p) return;
   if(b) b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia';
-  p.classList.remove('peek-out'); p.style.display=''; p.style.visibility='visible'; playPeekIn(p);
+  p.classList.remove('peek-out'); p.style.display=''; p.style.transition=''; p.style.transform=''; p.style.transformOrigin=''; p.style.visibility='visible'; playPeekIn(p);   // clear the leftover flip transform so it stays in view
 }
 let _peekRetractTimer=null, _peekAutoRetract=false;
 function retractCardPeek(){
