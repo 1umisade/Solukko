@@ -2257,7 +2257,7 @@ function renderCardOverview(){
         if(el) el.className=`overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}`.trim();
       });
     });
-    const showCeleb = devMode || (reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known'));   // all cards osattu -> show the celebration card
+    const showCeleb = reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known');   // all cards osattu -> show the celebration card
     const ex=document.getElementById('grid-celeb');
     if(showCeleb && !ex) grid.insertAdjacentHTML('beforeend', CELEB_GRID_HTML);
     else if(!showCeleb && ex) ex.remove();
@@ -2290,7 +2290,7 @@ function renderCardOverview(){
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
   }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>')
-  + ((devMode || (reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known'))) ? CELEB_GRID_HTML : '');
+  + ((reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known')) ? CELEB_GRID_HTML : '');
   listenToKuvaajat();
   fitDeckTitle();
 }
