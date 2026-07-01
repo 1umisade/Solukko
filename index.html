@@ -620,7 +620,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="peek-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
   <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
   <div class="peek-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
-  <div class="peek-bubble"><span>Tervetuloa Solukkoon! Täältä löydät minun ja ystävieni tekemiä kysymyskortteja biokemian opiskeluun. Nimeni on Mona ja minua klikkaamalla kerron lisää tämän sivuston käytöstä. En tiedä sinun nimeäsi, mutta kutsun sinua tästä eteenpäin nimellä <span class="user-word"></span> Se toimii myös tunnisteenasi, jos haluat osallistua tietovisoihin.</span></div>
   <div class="peek-bubble">Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.</div>
 </div>
 
@@ -2099,9 +2098,7 @@ function showAnswer(){
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
-    { const _p=document.getElementById('card-peek'), _b=document.getElementById('card-peek-bubble');   // back side: the peeker now asks "Tiesitkö?"
-      if(_b) _b.textContent='Tiesitkö?';
-      if(_p){ _p.style.display=''; _p.style.visibility='visible'; playPeekIn(_p); } }
+    { const _p=document.getElementById('card-peek'); if(_p) _p.style.visibility='hidden'; }   // peeker hidden on reveal; it reappears on shake
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
     pr.style.display='flex'; ca.style.display='flex';
@@ -2482,7 +2479,12 @@ function shakeCard(){
   const fc=document.getElementById('flashcard'); if(!fc) return;
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
-  document.getElementById('flashcard').scrollIntoView({behavior:'smooth', block:'center'});   // centre the card in the viewport (buttons show below it)
+  const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
+  if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
+  if(ca){ ca.style.display='flex'; ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
+  const _b=document.getElementById('card-peek-bubble'); if(_b) _b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia';   // peeker bubble on shake
+  const _p=document.getElementById('card-peek'); if(_p){ _p.style.display=''; _p.style.visibility='visible'; playPeekIn(_p); }
+  fitCardScale(); scrollToCard();   // re-lay out exactly like a fresh card load, leaving room for the buttons
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
