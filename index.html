@@ -1544,14 +1544,15 @@ async function renderCurrentCard(){
   const _words=_src.trim()?_src.trim().split(/\s+/).length:0;
   const _rounded=Math.round(_words/10)*10;
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
-  if(_bub){
-    if(_firstReviewPeek){ _bub.textContent='Paina korttia kun haluat tarkistaa vastauksen'; _firstReviewPeek=false; }
-    else _bub.textContent = _rounded ? ('Vastauksen laajuus noin '+_rounded+' sanaa') : '';
-  }
+  const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus on '+_words+' sanaa') : ('Vastauksen laajuus on noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
+  if(_bub) _bub.textContent='Paina korttia kun haluat tarkistaa vastauksen';   // front tip; changes to the answer length after 4s
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false;   // a fresh card cancels any pending retract (front peeker stays out)
-  clearTimeout(_cardPeekTimer);                       // top peeker animates in 2s after the card loads
-  _cardPeekTimer=setTimeout(()=>{ const p=document.getElementById('card-peek'); if(p && !cardAnswerShown){ p.style.visibility='visible'; playPeekIn(p); } }, 2000);
+  clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // top peeker animates in 2s after the card loads
+  _cardPeekTimer=setTimeout(()=>{ const p=document.getElementById('card-peek'); if(p && !cardAnswerShown){ p.style.visibility='visible'; playPeekIn(p);
+    clearTimeout(_laajuusTimer);
+    _laajuusTimer=setTimeout(()=>{ const b=document.getElementById('card-peek-bubble'); if(b && !cardAnswerShown){ b.textContent=_laajuusText; requestAnimationFrame(()=>positionPeekMona(document.getElementById('card-peek'))); } }, 4000);   // 4s later: show the answer length
+  } }, 2000);
   const _pb0=document.getElementById('card-peek-bottom'); if(_pb0){ _pb0.style.display='none'; _pb0.classList.remove('peek-in','peek-out'); }   // bottom peek only on shake
   clearTimeout(_bottomPeekTimer);
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
@@ -1881,6 +1882,7 @@ function renderCardStars(){
 
 let _revealFadeTimer=null;
 let _cardPeekTimer=null;
+let _laajuusTimer=null;
 let _bottomPeekTimer=null;
 let _firstReviewPeek=true;   // first peeker of a review session shows the "press the card" tip
 function playPeekIn(el){ if(!el) return; el.classList.remove('peek-in'); void el.offsetWidth; el.classList.add('peek-in'); requestAnimationFrame(()=>positionPeekMona(el)); }   // (re)start the lively entry
@@ -2123,7 +2125,7 @@ function showAnswer(){
     clearTimeout(_revealFadeTimer);
     _revealFadeTimer=setTimeout(()=>{ pr.classList.add('shown'); ca.classList.add('shown'); },1000);
   };
-  clearTimeout(_cardPeekTimer);                              // don't pop the top peeker in mid-flip
+  clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
   if(_pk){ _pk.classList.remove('peek-in'); const cr=fc.getBoundingClientRect(), pr=_pk.getBoundingClientRect(); _pk.style.transformOrigin=((cr.left+cr.width/2)-pr.left)+'px 50%'; }
   // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
