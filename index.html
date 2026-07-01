@@ -698,11 +698,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-again" onclick="gradeCard(false)" title="Kysy uudestaan">
+    <button class="ball-btn grade-again" onclick="gradeCard(false)" title="En">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="progress-tube"><div class="progress-fill" id="progress-fill"></div></div>
-    <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Tiesin">
+    <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Kyllä">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
     </button>
   </div>
@@ -1902,7 +1902,7 @@ function positionPeekMona(peek){   // bubble is centered; Mona peeks from behind
   const pr=peek.getBoundingClientRect(), br=bubble.getBoundingClientRect();
   const w=inner.offsetWidth||92, h=inner.offsetHeight||92;
   inner.style.left=((br.right-pr.left)+6)+'px';                       // right of the bubble, no overlap
-  inner.style.top=((br.top+br.height/2-pr.top)-h/2)+'px';            // vertically centred on the bubble, so the tail points at Mona
+  inner.style.top=(-h/2)+'px';                                        // centred on the card's bottom edge -> only her bottom 50% shows below the card
 }
 let _monaNoteTimer=null;
 function clearMonaNotes(){ if(_monaNoteTimer){ clearInterval(_monaNoteTimer); _monaNoteTimer=null; } document.querySelectorAll('.mona-note').forEach(n=>n.remove()); }
@@ -2176,15 +2176,14 @@ function gradeCard(correct){
     selectedGroup=null; updateGroupUI(); nextCard();
   };
   const flyOut=()=>{                                  // only the card flies up; bar stays pinned at bottom
-    if(ov){ ov.style.transition='opacity 0.22s ease'; ov.style.background=correct?'rgba(73,141,101,0.55)':'rgba(0,0,0,0.5)'; ov.style.opacity='1'; }
+    if(ov){ if(correct){ ov.style.opacity='0'; } else { ov.style.transition='opacity 0.22s ease'; ov.style.background='rgba(0,0,0,0.5)'; ov.style.opacity='1'; } }   // no green tint on "yes"
     fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
     fc.style.transition='none'; fc.style.transform=''; fc.style.animation='none';
     void fc.offsetWidth;
     fc.style.animation=''; fc.classList.add('card-out-up');
     setTimeout(doNext,280);
   };
-  if(correct){                                        // paint the card green while the bar glows
-    if(ov){ ov.style.transition='opacity 0.22s ease'; ov.style.background='rgba(73,141,101,0.55)'; ov.style.opacity='1'; }
+  if(correct){                                        // "yes": glow the bar (no green card), then fly out
     const tube=document.querySelector('.progress-tube'), fill=document.getElementById('progress-fill');
     [tube,fill].forEach(el=>{ if(el){ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } });
     setTimeout(()=>{ [tube,fill].forEach(el=>el&&el.classList.remove('flash')); flyOut(); },1000);
