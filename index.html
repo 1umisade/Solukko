@@ -140,6 +140,8 @@ body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
 .flashcard { position: relative; z-index: 1; box-sizing: border-box; width: 100%; min-height: 0; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-y: auto; overflow-x: hidden; overscroll-behavior: auto; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y pinch-zoom; will-change: transform; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
+.flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
+.flashcard.front-basic #question-content { text-align: center; line-height: 1.25; }
 .card-content.left-align { text-align: left; }
 .dim-paren { opacity: 0.5; }
 .answer-section .card-content { text-align: left; }
@@ -348,7 +350,8 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
-.overview-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; height: 90px; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }
+.overview-card { background: #fffef9; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1.5 / 1; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }
+body.is-mobile .overview-card { aspect-ratio: 1 / 1.5; }   /* vertical on mobile, horizontal on desktop */
 
 /* ── STAR BADGE inside overview cards ─────────────────────  */
 .overview-card-stars {
@@ -1333,12 +1336,28 @@ function updateSoluvisaCircle(){
   if(!c){
     c=document.createElement('button');
     c.id='soluvisa-deck-btn'; c.className='deck-btn soluvisa-deck';
-    c.innerHTML='<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:2.4rem;line-height:1;">🦠</div><div class="deck-title">Soluvisa</div><div style="font-size:14px;opacity:0.85;font-weight:400;">Liity peliin</div></div>';
+    c.innerHTML='<div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:2.4rem;line-height:1;">🦠</div><div class="deck-title">Soluvisa</div><div style="font-size:14px;opacity:0.85;font-weight:400;">Liity peliin</div><div id="soluvisa-countdown" style="font-size:12px;opacity:0.95;font-weight:600;margin-top:2px;letter-spacing:0.02em;"></div></div>';
     c.onclick=toggleGroupModeFromButton;
     list.appendChild(c);
   }
   c.classList.toggle('soluvisa-active', !!groupMode);
+  updateSoluvisaCountdown();
 }
+// Countdown to the next Soluvisa: every Friday at 14:00
+function nextSoluvisaTime(){
+  const now=new Date(), d=new Date(now); d.setHours(14,0,0,0);
+  let days=(5 - now.getDay() + 7) % 7;                 // Friday = 5
+  if(days===0 && now.getTime()>=d.getTime()) days=7;   // it's Friday past 14:00 -> next week
+  d.setDate(now.getDate()+days); d.setHours(14,0,0,0);
+  return d;
+}
+function updateSoluvisaCountdown(){
+  const el=document.getElementById('soluvisa-countdown'); if(!el) return;
+  let ms=nextSoluvisaTime().getTime()-Date.now(); if(ms<0) ms=0;
+  const tot=Math.floor(ms/60000), dd=Math.floor(tot/1440), hh=Math.floor((tot%1440)/60), mm=tot%60;
+  el.textContent=dd+' pv  '+hh+' h  '+mm+' min';
+}
+setInterval(updateSoluvisaCountdown, 20000);
 
 // Arrange the course circles around the centered logo
 function layoutDecksRadial(){
@@ -1534,7 +1553,7 @@ async function renderCurrentCard(){
   void fc.offsetWidth;
   fc.style.animation  = '';
   fc.classList.add('card-in-right');
-  fitCardScale(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
+  fitCardScale(); fitFrontText(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
   if(ca) ca.style.top=ft+'px';
@@ -2084,6 +2103,7 @@ function showAnswer(){
   cardAnswerShown=true;
   const fc=document.getElementById('flashcard');
   const reveal=()=>{
+    fc.classList.remove('front-basic'); document.getElementById('question-content').style.fontSize='';   // back to normal size/flow for the answer
     if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aProcessed||currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
     else { document.getElementById('answer-section').style.display='block'; }
     document.getElementById('show-row').style.display='none';
@@ -2499,9 +2519,24 @@ function fitCardScale(){
   if(!wrap||!fc) return;
   wrap.style.transform=''; wrap.style.marginBottom='';
   if(fc.classList.contains('celebrating')){ fc.style.height=''; fc.style.width=''; wrap.style.width=''; return; }   // celebration keeps its own square
-  const h=Math.max(180, cardViewportH()-16);   // fill the viewport, leaving room for the buttons below
-  fc.style.height=h+'px';
-  wrap.style.width=Math.round(h/3)+'px';        // 1:3 card: width = height / 3 (content scrolls inside)
+  const cs=document.getElementById('card-screen');
+  const availH=Math.max(180, cardViewportH()-16);                       // fits under the buttons
+  const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
+  let w, h;
+  if(isMobile()){ w=Math.min(availW, availH/1.5); h=w*1.5; }            // mobile: vertical card, 1 : 1.5
+  else { h=Math.min(availH, availW/1.5); w=h*1.5; }                      // desktop: horizontal card, 1.5 : 1
+  fc.style.height=Math.round(h)+'px';
+  wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
+}
+// Basic-card front: centred, 3x-bigger question; drop to 2x only if 3x doesn't fit (no other sizes)
+function fitFrontText(){
+  const fc=document.getElementById('flashcard'), q=document.getElementById('question-content');
+  if(!fc||!q) return;
+  fc.classList.remove('front-basic'); q.style.fontSize='';
+  if(!currentCard || currentCard._isSpecial || cardAnswerShown) return;
+  fc.classList.add('front-basic');
+  q.style.fontSize='3.6rem';                                              // 3x
+  if(fc.scrollHeight>fc.clientHeight+1 || q.scrollWidth>q.clientWidth+1) q.style.fontSize='2.4rem';   // 2x fallback
 }
 
 function scrollToCard(smooth){
