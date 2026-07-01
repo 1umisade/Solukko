@@ -364,6 +364,11 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 /* ── 12. OVERVIEW GRID ───────────────────────────────────── */
 #card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 2.5rem; margin-top: 12rem; }
 .overview-section { width: 100%; }
+.section-tools { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 8px; }
+.section-tool-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
+.section-tool-btn:active { transform: scale(0.9); }
+body.dark-mode .section-tool-btn { background: #3a312b; border-color: #6d5f52; }
+.overview-card { will-change: transform; }
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
 .overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
@@ -602,10 +607,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <img src="moodlelogo.png" alt="Moodle">
     </a>
 
-    <!-- 🔀 Shuffle — randomise the order of the remaining cards -->
-    <button id="shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">
-      <span id="shuffle-icon">🔀</span>
-    </button>
 
     <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt -->
     <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;">
@@ -2249,6 +2250,32 @@ function makeVideoEmbed(embedUrl,name){
 }
 
 const CELEB_GRID_HTML='<div id="grid-celeb"><div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onclick="showCelebration()">🎉 Koko kurssi opiskeltu!</div></div></div></div>';
+// FLIP-animate a grid into a new order of its card nodes
+function flipReorderGrid(grid, newOrder){
+  if(!grid) return;
+  const first=new Map();
+  [...grid.querySelectorAll('.overview-card')].forEach(n=>first.set(n, n.getBoundingClientRect()));
+  newOrder.forEach(n=>grid.appendChild(n));
+  newOrder.forEach(n=>{
+    const f=first.get(n); if(!f) return;
+    const l=n.getBoundingClientRect(), dx=f.left-l.left, dy=f.top-l.top;
+    if(dx||dy){ n.style.transition='none'; n.style.transform='translate('+dx+'px,'+dy+'px)';
+      requestAnimationFrame(()=>{ n.style.transition='transform 0.5s cubic-bezier(0.2,0.85,0.25,1)'; n.style.transform=''; });
+      setTimeout(()=>{ n.style.transition=''; n.style.transform=''; }, 560);
+    }
+  });
+}
+function shuffleGridSection(btn){
+  const grid=btn.closest('.overview-section').querySelector('.overview-section-grid'); if(!grid) return;
+  const cards=[...grid.querySelectorAll('.overview-card')];
+  for(let i=cards.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=cards[i]; cards[i]=cards[j]; cards[j]=t; }
+  flipReorderGrid(grid, cards);
+}
+function restoreGridSection(btn){
+  const grid=btn.closest('.overview-section').querySelector('.overview-section-grid'); if(!grid) return;
+  const cards=[...grid.querySelectorAll('.overview-card')].sort((a,b)=>(+a.dataset.cardIndex||0)-(+b.dataset.cardIndex||0));
+  flipReorderGrid(grid, cards);
+}
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
 
@@ -2291,7 +2318,7 @@ function renderCardOverview(){
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
-    return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
+    return `<div class="overview-section"><div class="section-tools"><button class="section-tool-btn" onclick="shuffleGridSection(this)" title="Sekoita kortit">🔀</button><button class="section-tool-btn" onclick="restoreGridSection(this)" title="Palauta järjestys">🔢</button></div>${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
   }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>')
   + ((devMode || (reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known'))) ? CELEB_GRID_HTML : '');
   listenToKuvaajat();
