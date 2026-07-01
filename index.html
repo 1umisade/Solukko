@@ -124,7 +124,7 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-sing.intro .mona-body, .mona-sing.playing .mona-body { animation: monaSwing 1.7s ease-in-out infinite; }
 .mona-scale { position: relative; width: 100%; height: 100%; transform-origin: center; will-change: transform; }   /* visualizer scales this (logo + pupils) */
 .mona-body .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
-.mona-bubble { position: absolute; left: 50%; bottom: 56%; transform: translateX(-50%); z-index: 2; max-width: 78%; text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.6rem 0.85rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
+.mona-bubble { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); z-index: 9999; width: max-content; max-width: 60vw; text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.6rem 0.85rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }   /* anchored above Mona, moves with her */
 .mona-bubble::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 9px solid transparent; border-top-color: #fffef9; }
 .mona-play { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 2; width: 54px; height: 54px; border-radius: 50%; border: none; background: #3a7a52; color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; padding: 0; }
 .mona-play:hover { background: #2e6342; }
@@ -132,9 +132,8 @@ body.is-mobile #flashcard-wrap { margin-top: 34px; }
 .mona-vol { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 3; width: 100%; height: 40px; margin: 0; cursor: pointer; -webkit-appearance: none; appearance: none; background: transparent; }
 .mona-vol::-webkit-slider-runnable-track { height: 14px; border-radius: 999px; background: transparent; }
 .mona-vol::-moz-range-track { height: 14px; border-radius: 999px; background: transparent; }
-.mona-vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 40px; height: 40px; margin-top: -13px; border-radius: 50%; background: #9a9a9a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 22px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.35); cursor: pointer; animation: knobFlash 1s ease-in-out infinite; }
-.mona-vol::-moz-range-thumb { width: 40px; height: 40px; border: none; border-radius: 50%; background: #9a9a9a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 22px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.35); cursor: pointer; animation: knobFlash 1s ease-in-out infinite; }
-@keyframes knobFlash { 0%,100% { background-color: #9a9a9a; box-shadow: 0 3px 10px rgba(0,0,0,0.35); } 50% { background-color: #ff8c1a; box-shadow: 0 0 14px 5px rgba(255,140,26,0.9); } }
+.mona-vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 40px; height: 40px; margin-top: -13px; border-radius: 50%; background: #ff8c1a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 22px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.35); cursor: pointer; }
+.mona-vol::-moz-range-thumb { width: 40px; height: 40px; border: none; border-radius: 50%; background: #ff8c1a url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4%209v6h4l5%204V5L8%209H4z'%20fill='%23ffffff'/%3E%3Cpath%20d='M16.5%208.8a4%204%200%200%201%200%206.4M19%206.3a8%208%200%200%201%200%2011.4'%20fill='none'%20stroke='%23ffffff'%20stroke-width='2'%20stroke-linecap='round'/%3E%3C/svg%3E") center / 22px no-repeat; box-shadow: 0 3px 10px rgba(0,0,0,0.35); cursor: pointer; }
 body.dark-mode .mona-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 .celebration-card { text-align: center; font-weight: 700; background: linear-gradient(120deg, #fff3d6, #ffe0ec, #dff5e6) !important; }
@@ -174,8 +173,7 @@ body.dark-mode .progress-tube { background: #5a5148; }
 /* celebration: a full green progress bar breathing a soft glow */
 .progress-row.celebrating .ball-btn { display: none; }
 .progress-row.celebrating .progress-tube { overflow: visible; }
-.progress-row.celebrating .progress-fill { width: 100% !important; background: #3a7a52; animation: progressBreath 2.6s ease-in-out infinite; }
-@keyframes progressBreath { 0%,100% { box-shadow: none; filter: brightness(1); } 50% { box-shadow: 0 0 20px 6px rgba(110,200,150,0.95); filter: brightness(1.9); } }
+.progress-row.celebrating .progress-fill { width: 100% !important; background: #3a7a52; box-shadow: 0 0 12px 3px rgba(110,200,150,0.55); }   /* the JS visualizer pulses this glow with the music */
 .ball-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, box-shadow 0.1s ease; }
 .ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
 .ball-btn.grade-correct { background: #9ab8a1; border-color: #9ab8a1; color: #ffffff; --glow: #9ab8a1; }
@@ -1957,12 +1955,14 @@ function startCelebViz(){   // Mona scales with the track's amplitude (graph alr
       const avg=sum/n/255;                                   // 0..1 bass+mid energy
       const s='scale('+(0.7 + avg*0.6).toFixed(3)+')';       // pulse: 70%..130% (logo + pupils)
       els.forEach(el=>el.style.transform=s);                 // main Mona + friends
+      const pf=document.getElementById('progress-fill');     // progress bar glows as a visualizer too
+      if(pf){ pf.style.boxShadow='0 0 '+(8+avg*34).toFixed(0)+'px '+(2+avg*8).toFixed(0)+'px rgba(110,200,150,0.95)'; pf.style.filter='brightness('+(1+avg*0.9).toFixed(2)+')'; }
       _celebRAF=requestAnimationFrame(loop);
     };
     loop();
   }catch(e){}
 }
-function stopCelebViz(){ if(_celebRAF){ cancelAnimationFrame(_celebRAF); _celebRAF=null; } document.querySelectorAll('.mona-sing .mona-scale').forEach(el=>el.style.transform=''); }
+function stopCelebViz(){ if(_celebRAF){ cancelAnimationFrame(_celebRAF); _celebRAF=null; } document.querySelectorAll('.mona-sing .mona-scale').forEach(el=>el.style.transform=''); const pf=document.getElementById('progress-fill'); if(pf){ pf.style.boxShadow=''; pf.style.filter=''; } }
 let _bounceRAF=null;
 function startMonaBounce(){   // DVD-style drift, reflecting off the card edges
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
@@ -2009,9 +2009,9 @@ function rampCelebVolume(){   // knob glides from the far left to centre, fading
   if(_celebrationAudio) _celebrationAudio.volume=0;
   const dur=6000, t0=performance.now();
   const step=(now)=>{
-    const p=Math.min(1,(now-t0)/dur), v=Math.round(p*50);
-    if(sl){ sl.value=v; sl.style.setProperty('--p', v+'%'); }
-    if(_celebrationAudio && !_celebrationAudio.muted) _celebrationAudio.volume=v/100;
+    const p=Math.min(1,(now-t0)/dur), v=Math.round(p*500);   // 0..500 = far left to centre, fine steps
+    if(sl){ sl.value=v; sl.style.setProperty('--p', (v/10)+'%'); }
+    if(_celebrationAudio && !_celebrationAudio.muted) _celebrationAudio.volume=v/1000;
     if(p<1) _rampRAF=requestAnimationFrame(step); else _rampRAF=null;
   };
   _rampRAF=requestAnimationFrame(step);
@@ -2019,8 +2019,8 @@ function rampCelebVolume(){   // knob glides from the far left to centre, fading
 function onCelebVolume(v){   // slider drag sets the volume (cancels the auto-ramp)
   if(_rampRAF){ cancelAnimationFrame(_rampRAF); _rampRAF=null; }
   startCelebOnTouch();
-  const sl=document.querySelector('.mona-vol'); if(sl) sl.style.setProperty('--p', v+'%');
-  if(_celebrationAudio){ _celebrationAudio.muted=false; _celebrationAudio.volume=Math.max(0,Math.min(1,v/100)); }
+  const sl=document.querySelector('.mona-vol'); if(sl) sl.style.setProperty('--p', (v/10)+'%');
+  if(_celebrationAudio){ _celebrationAudio.muted=false; _celebrationAudio.volume=Math.max(0,Math.min(1,v/1000)); }
 }
 function celebrationEnd(){   // song finished: stop the party, prompt to enrol for the exam
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
@@ -2028,9 +2028,9 @@ function celebrationEnd(){   // song finished: stop the party, prompt to enrol f
   clearMonaNotes(); stopCelebViz(); stopMonaBounce(true);   // ease Mona back to the middle
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
   const sl=document.querySelector('#progress-row .mona-vol'); if(sl) sl.style.display='none';
-  const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Tsemppiä tenttiin!'; bub.style.display=''; }
-  _celebEnded=true; _monaEndIdx=0;   // Mona is now clickable (like the peeker)
-  monaReact();   // bubble appeared -> react as if clicked
+  const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Koko kurssi opiskeltu!'; bub.style.display=''; }   // constant bubble
+  _celebEnded=true;   // Mona stays clickable (reacts, doesn't change the constant text)
+  monaReact();
 }
 let _celebEnded=false, _monaEndIdx=0, _monaBlinkT=null;
 const MONA_END_SPEECHES=[
@@ -2055,9 +2055,7 @@ function monaCelebClick(ev){   // after the song: click Mona like the peeker —
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   const body=sing.querySelector('.mona-body'); if(!body) return;
   if(!clickInCircle(ev, body.querySelector('.mona-scale')||body)) return;   // circular hitbox
-  const bub=sing.querySelector('.mona-bubble');
-  if(bub){ bub.style.display=''; bub.textContent=MONA_END_SPEECHES[_monaEndIdx%MONA_END_SPEECHES.length]; _monaEndIdx++; }
-  monaReact();
+  monaReact();   // shake + squeak; the constant bubble stays "Koko kurssi opiskeltu!"
 }
 function showCelebration(){
   currentCard=null;
@@ -2069,19 +2067,18 @@ function showCelebration(){
   _celebrationAudio=null; _celebAnalyser=null;   // rebuild the graph for the freshly picked track
   _celebTrack=CELEB_TRACKS[Math.floor(Math.random()*CELEB_TRACKS.length)];
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
-  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-bubble">Wau!!! Opiskelit KOKO kurssialueen. Voinko soittaa sulle yhen bängerin sen kunniaks?</div><div class="mona-rover"><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-rover"><div class="mona-bubble">Koko kurssi opiskeltu!</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','card-peek','card-peek-bottom'].forEach(id=>document.getElementById(id).style.display='none');
   document.querySelector('.comment-area').style.display='none';   // no comments on the celebration card
   const pr=document.getElementById('progress-row'); pr.style.display='flex'; pr.classList.add('celebrating');   // full green glowing bar = the volume slider
   let vsl=pr.querySelector('.mona-vol');
-  if(!vsl){ vsl=document.createElement('input'); vsl.type='range'; vsl.className='mona-vol'; vsl.min=0; vsl.max=100; vsl.title='Äänenvoimakkuus'; vsl.setAttribute('aria-label','Äänenvoimakkuus'); vsl.setAttribute('oninput','onCelebVolume(this.value)'); vsl.setAttribute('onpointerdown','startCelebOnTouch()'); pr.appendChild(vsl); }
+  if(!vsl){ vsl=document.createElement('input'); vsl.type='range'; vsl.className='mona-vol'; vsl.min=0; vsl.max=1000; vsl.step=1; vsl.title='Äänenvoimakkuus'; vsl.setAttribute('aria-label','Äänenvoimakkuus'); vsl.setAttribute('oninput','onCelebVolume(this.value)'); vsl.setAttribute('onpointerdown','startCelebOnTouch()'); pr.appendChild(vsl); }
   vsl.value=0; vsl.style.display='';   // knob starts at the far left (silent)
   monaReact();   // the ask bubble appeared -> react as if clicked
   _celebStarted=true; startCelebrationMusic();          // music plays immediately
   if(_celebrationAudio) _celebrationAudio.volume=0;
   rampCelebVolume();                                    // knob eases left -> centre, volume fades in
-  const _wau=document.querySelector('.mona-bubble'); if(_wau){ setTimeout(()=>{ if(_wau) _wau.style.display='none'; }, 5000); }   // greeting fades after 5s
   fitCardScale(); fc.scrollIntoView({behavior:'smooth', block:'center'});
 }
 let _vizStarted=false, _dropped=false, _eyesReopened=false, _eyesReclosed=false;
@@ -2238,6 +2235,7 @@ function makeVideoEmbed(embedUrl,name){
   return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0 0 2.5rem;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);"><iframe src="'+embedUrl+'" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe><div class="video-overlay" onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;"><span style="'+nameStyle+'">'+name+'</span><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'+playBtn('#56533c','80px')+'</div><div></div></div></div>';
 }
 
+const CELEB_GRID_HTML='<div id="grid-celeb"><div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onclick="showCelebration()">🎉 Koko kurssi opiskeltu!</div></div></div></div>';
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
 
@@ -2249,6 +2247,10 @@ function renderCardOverview(){
         if(el) el.className=`overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}`.trim();
       });
     });
+    const showCeleb = devMode || (reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known'));   // all cards osattu -> show the celebration card
+    const ex=document.getElementById('grid-celeb');
+    if(showCeleb && !ex) grid.insertAdjacentHTML('beforeend', CELEB_GRID_HTML);
+    else if(!showCeleb && ex) ex.remove();
     return;
   }
 
@@ -2278,7 +2280,7 @@ function renderCardOverview(){
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
   }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>')
-  + (devMode ? '<div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onclick="showCelebration()">🎉 Juhlanäyttö (dev)</div></div></div>' : '');
+  + ((devMode || (reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known'))) ? CELEB_GRID_HTML : '');
   listenToKuvaajat();
   fitDeckTitle();
 }
