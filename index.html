@@ -49,7 +49,7 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none; }   /* hide the scrollbar on the mobile homepage */
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
-.deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1100px; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
+.deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1600px; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
 #home-mona { align-self: flex-start; display: flex; align-items: flex-start; margin: 4px 0 2px; }
 #home-mona .site-brand { width: 140px; margin: 0; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
@@ -1064,17 +1064,8 @@ function clickInCircle(ev, el){
   const dx=ev.clientX-cx, dy=ev.clientY-cy;
   return dx*dx + dy*dy <= rad*rad;
 }
-function logoScream(ev){
+function siteBrandReact(){   // Mona shakes and blinks (used on the homepage greeting + when clicked)
   const logo=document.getElementById('site-brand'); if(!logo) return;
-  if(ev && ev.target.closest('.home-greet')) return;   // a click on the greeting's own buttons does its own thing
-  if(!clickInCircle(ev, logo.querySelector('.brand-inner'))) return;   // ignore the transparent corners
-  playScream();
-  const greet=document.querySelector('#home-mona .home-greet');   // advance the big bubble through all of Mona's speeches
-  if(greet && typeof HOME_BUBBLE_ORDER!=='undefined'){
-    _greetIdx=(_greetIdx+1)%HOME_BUBBLE_ORDER.length;
-    greet.innerHTML=MONA_BUBBLES[HOME_BUBBLE_ORDER[_greetIdx]]||'';
-    greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
-  }
   const inner=logo.querySelector('.brand-inner');
   if(inner){ inner.classList.remove('twitch'); void inner.offsetWidth; inner.classList.add('twitch'); setTimeout(()=>inner.classList.remove('twitch'),500); }
   const img=logo.querySelector('.brand-logo-img');
@@ -1084,6 +1075,13 @@ function logoScream(ev){
     clearTimeout(_logoTimer);
     _logoTimer=setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },1000);
   }
+}
+function logoScream(ev){
+  const logo=document.getElementById('site-brand'); if(!logo) return;
+  if(ev && ev.target.closest('.home-greet')) return;   // clicks on the greeting's buttons do their own thing
+  if(!clickInCircle(ev, logo.querySelector('.brand-inner'))) return;   // ignore the transparent corners
+  playScream();
+  siteBrandReact();
 }
 
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
@@ -1512,11 +1510,11 @@ function buildDeckGrid(decks, list){
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }   // Mona lives at the top-left now
-  const greet=document.createElement('div'); greet.className='home-greet';               // greeting to Mona's right; click Mona to cycle
-  _greetIdx=0;                                                                            // start on Tervetuloa
-  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES[HOME_BUBBLE_ORDER[0]]:'');
+  const greet=document.createElement('div'); greet.className='home-greet';               // permanent Tervetuloa greeting to Mona's right
+  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES.tervetuloa:'');
   greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
   header.appendChild(greet);
+  if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks as the greeting appears (desktop only)
   list.appendChild(header);
   const byYear={};
   decks.forEach(it=>{ const y=it.year||'?'; (byYear[y]=byYear[y]||{S:[],K:[],none:[]}); const s=(it.semester==='S'||it.semester==='K')?it.semester:'none'; byYear[y][s].push(it); });
