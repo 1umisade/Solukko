@@ -52,6 +52,11 @@ body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; hei
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1100px; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
 #home-mona { align-self: flex-start; display: flex; align-items: flex-start; margin: 4px 0 2px; }
 #home-mona .site-brand { width: 140px; margin: 0; }
+/* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
+.home-greet { position: relative; align-self: center; margin-left: 22px; max-width: 520px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.9rem 1.2rem; font-family: 'Lora', serif; font-size: 1.8rem; line-height: 1.35; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
+.home-greet::after { content: ""; position: absolute; right: 100%; top: 50%; transform: translateY(-50%); border: 13px solid transparent; border-right-color: #fffef9; }
+body.dark-mode .home-greet { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .year-section { width: 100%; }
 .year-heading { font-family: 'Lora', serif; font-weight: 800; font-size: 1.15rem; color: #56533c; opacity: 0.88; border-bottom: 2px solid #d4cec4; padding-bottom: 6px; margin-bottom: 16px; }
 .year-row { display: flex; gap: 24px; align-items: flex-start; }
@@ -68,6 +73,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
   .sem-col.spring { border-left: none; padding-left: 0; border-top: 1px dashed #cfc8bc; padding-top: 16px; }
   .sem-col { justify-content: center; }
   #home-mona { align-self: center; }
+  .home-greet { font-size: 1.1rem; max-width: 60vw; margin-left: 12px; padding: 0.6rem 0.8rem; }
   body.dark-mode .sem-col.spring { border-top-color: #6d5f52; }
 }
 .deck-btn { position: absolute; min-width: 0; width: min(240px, 52vw); aspect-ratio: 1 / 1.5; padding: 0; border: none; border-radius: 0; overflow: visible; background: none; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; transition: transform 0.3s ease; touch-action: pan-y; }   /* pan-y so a vertical drag scrolls the page instead of getting captured */
@@ -1517,6 +1523,10 @@ function buildDeckGrid(decks, list){
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }   // Mona lives at the top-left now
+  const greet=document.createElement('div'); greet.className='home-greet';               // permanent greeting to Mona's right
+  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES.tervetuloa:'');
+  greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
+  header.appendChild(greet);
   list.appendChild(header);
   const byYear={};
   decks.forEach(it=>{ const y=it.year||'?'; (byYear[y]=byYear[y]||{S:[],K:[],none:[]}); const s=(it.semester==='S'||it.semester==='K')?it.semester:'none'; byYear[y][s].push(it); });
