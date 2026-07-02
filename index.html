@@ -614,33 +614,22 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 </div>
 
-<!-- Peeking logo (desktop only, during review) -->
+<!-- Peeking Mona: slides in from a screen edge (during review, and the mobile homepage). Bubbles injected by buildMonaBubbles(). -->
 <div id="peek-logo">
   <div class="peek-inner">
     <img src="solukkologo_eyes.png" alt="" class="brand-logo-img">
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
-  <div class="peek-bubble"><span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span>. Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span></div>
-  <div class="peek-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
-  <div class="peek-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
-  <div class="peek-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
-  <div class="peek-bubble">Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.</div>
 </div>
 
-<!-- ══ SOLUKKO-LOGO ══════════════════════════════════════════ -->
+<!-- ══ SOLUKKO-LOGO (homepage) — bubbles injected by buildMonaBubbles() ══ -->
 <div class="site-brand" id="site-brand" onclick="logoScream(event)">
   <div class="brand-inner">
     <img src="solukkologo_eyes.png" alt="Solukko" class="brand-logo-img">
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
-  <div class="home-bubble"><span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span>. Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span></div>
-  <div class="home-bubble">Hyvä sinä! Taas opiskelemassa.</div>
-  <div class="home-bubble">Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.</div>
-  <div class="home-bubble">Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button></div>
-  <div class="home-bubble">Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button></div>
-  <div class="home-bubble">Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!</div>
 </div>
 
 <div id="loading">ladataan…</div>
@@ -1057,6 +1046,26 @@ function logoScream(ev){
     _logoTimer=setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },1000);
   }
 }
+
+// Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
+// and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
+const MONA_BUBBLES={
+  tervetuloa:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span>. Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span>',
+  hyva:'Hyvä sinä! Taas opiskelemassa.',
+  tietovisa:'Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.',
+  darkmode:'Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button>',
+  shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
+  comment:'Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
+};
+const HOME_BUBBLE_ORDER=['tervetuloa','hyva','tietovisa','darkmode','shuffle','comment'];   // homepage logo order
+const PEEK_BUBBLE_ORDER=['tervetuloa','darkmode','shuffle','comment','tietovisa'];           // edge-peeker order
+function buildMonaBubbles(){   // inject the bubble divs into both containers from the shared definitions
+  const home=document.getElementById('site-brand');
+  if(home) HOME_BUBBLE_ORDER.forEach(k=>{ const d=document.createElement('div'); d.className='home-bubble'; d.innerHTML=MONA_BUBBLES[k]; home.appendChild(d); });
+  const peek=document.getElementById('peek-logo');
+  if(peek) PEEK_BUBBLE_ORDER.forEach(k=>{ const d=document.createElement('div'); d.className='peek-bubble'; d.innerHTML=MONA_BUBBLES[k]; peek.appendChild(d); });
+}
+buildMonaBubbles();
 
 // Hover shows the "Tervetuloa" bubble (vanishes on leave); clicking Mona cycles through the rest (persists).
 let _homeHoverOpened=false;
