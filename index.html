@@ -1340,7 +1340,7 @@ async function loadDecks(){
       video.style.position='absolute';
     }
     video.addEventListener('loadedmetadata', fitVideo, {once:true});
-    video.addEventListener('loadeddata', ()=>{ fitVideo(); video.currentTime=0.5; },{once:true});
+    video.addEventListener('loadeddata', ()=>{ fitVideo(); if(!isMobile()) video.currentTime=0.5; },{once:true});
 
     let _rafId=null, _lastTs=null, _going=false;
     function _stopReverse(){ if(_rafId){ cancelAnimationFrame(_rafId); _rafId=null; } _lastTs=null; }
@@ -1360,15 +1360,23 @@ async function loadDecks(){
     if(!isMobile()){   // desktop: hover ping-pongs the video (play forward, then reverse)
       btn.addEventListener('mouseenter', _start);
       btn.addEventListener('mouseleave', _stop);
-    } else {   // mobile: muted inline autoplay in a loop so the deck art is alive (iOS allows this only for muted+playsinline)
-      video.loop=true; video.muted=true; video.setAttribute('muted',''); video.setAttribute('playsinline','');
-      const _autoplay=()=>{ try{ const p=video.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} };
-      _autoplay();
-      window.addEventListener('touchstart', _autoplay, {once:true, passive:true});   // retry after the first gesture if iOS blocked the initial autoplay
+    } else {   // mobile: no playback — freeze on the 15th frame as a still (looping video was eating the first scroll swipe)
+      video.loop=false; video.muted=true; video.setAttribute('muted',''); video.setAttribute('playsinline','');
+      let _frozen=false;
+      const _freeze=()=>{ if(_frozen) return; _frozen=true; try{ video.pause(); }catch(e){} };
+      if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
+        let _fc=0;
+        const _tick=()=>{ if(_frozen) return; if(++_fc>=15){ _freeze(); return; } video.requestVideoFrameCallback(_tick); };   // stop on the 15th presented frame
+        video.requestVideoFrameCallback(_tick);
+      } else {
+        const _onTU=()=>{ if(video.currentTime>=0.5){ video.removeEventListener('timeupdate',_onTU); _freeze(); } };   // fallback: ~15th frame at 30fps
+        video.addEventListener('timeupdate',_onTU);
+      }
+      const p=video.play(); if(p&&p.catch) p.catch(()=>{});   // play muted just long enough to decode the still, then freeze (iOS won't decode frames otherwise)
     }
     btn.onclick=()=>startDeck(item.deck);
     list.appendChild(btn);
-    video.addEventListener('loadeddata',()=>{ video.currentTime=0.5; },{once:true});
+    if(!isMobile()) video.addEventListener('loadeddata',()=>{ video.currentTime=0.5; },{once:true});
   });
   updateSoluvisaCircle();
   hide('card-screen');
