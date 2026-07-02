@@ -1066,15 +1066,15 @@ function clickInCircle(ev, el){
 }
 function logoScream(ev){
   const logo=document.getElementById('site-brand'); if(!logo) return;
-  if(ev && ev.target.closest('.home-bubble')) return;   // ignore clicks on the bubble/buttons
+  if(ev && ev.target.closest('.home-greet')) return;   // a click on the greeting's own buttons does its own thing
   if(!clickInCircle(ev, logo.querySelector('.brand-inner'))) return;   // ignore the transparent corners
-  _homeHoverOpened=false;   // a click takes over: the bubble now persists (won't vanish on mouseleave)
   playScream();
-  const hb=logo.querySelectorAll('.home-bubble');   // cycle through the bubbles, then dismiss
-  const cur=[...hb].findIndex(b=>b.classList.contains('active'));
-  if(!logo.classList.contains('home-bubble-open')){ logo.classList.add('home-bubble-open'); hb.forEach((b,i)=>b.classList.toggle('active',i===0)); }
-  else if(cur < hb.length-1){ hb.forEach((b,i)=>b.classList.toggle('active',i===cur+1)); }
-  else { logo.classList.remove('home-bubble-open'); }
+  const greet=document.querySelector('#home-mona .home-greet');   // advance the big bubble through all of Mona's speeches
+  if(greet && typeof HOME_BUBBLE_ORDER!=='undefined'){
+    _greetIdx=(_greetIdx+1)%HOME_BUBBLE_ORDER.length;
+    greet.innerHTML=MONA_BUBBLES[HOME_BUBBLE_ORDER[_greetIdx]]||'';
+    greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
+  }
   const inner=logo.querySelector('.brand-inner');
   if(inner){ inner.classList.remove('twitch'); void inner.offsetWidth; inner.classList.add('twitch'); setTimeout(()=>inner.classList.remove('twitch'),500); }
   const img=logo.querySelector('.brand-logo-img');
@@ -1106,19 +1106,8 @@ function buildMonaBubbles(){   // inject the bubble divs into both containers fr
 }
 buildMonaBubbles();
 
-// Hover shows the "Tervetuloa" bubble (vanishes on leave); clicking Mona cycles through the rest (persists).
-let _homeHoverOpened=false;
-(function initHomeBubbleAutoHide(){
-  const logo=document.getElementById('site-brand'); if(!logo) return;
-  logo.addEventListener('mouseenter',()=>{
-    if(!logo.classList.contains('home-bubble-open')){
-      logo.classList.add('home-bubble-open');
-      logo.querySelectorAll('.home-bubble').forEach((b,i)=>b.classList.toggle('active',i===0));   // Tervetuloa on hover
-      _homeHoverOpened=true;
-    }
-  });
-  logo.addEventListener('mouseleave',()=>{ if(_homeHoverOpened){ logo.classList.remove('home-bubble-open'); _homeHoverOpened=false; } });   // hover bubble disappears when you leave
-})();
+// The greeting bubble (to Mona's right) shows Tervetuloa on load; clicking Mona cycles it through the rest.
+let _homeHoverOpened=false, _greetIdx=0;
 
 // Logo eyes follow the cursor
 (function initLogoEyes(){
@@ -1523,8 +1512,9 @@ function buildDeckGrid(decks, list){
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }   // Mona lives at the top-left now
-  const greet=document.createElement('div'); greet.className='home-greet';               // permanent greeting to Mona's right
-  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES.tervetuloa:'');
+  const greet=document.createElement('div'); greet.className='home-greet';               // greeting to Mona's right; click Mona to cycle
+  _greetIdx=0;                                                                            // start on Tervetuloa
+  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES[HOME_BUBBLE_ORDER[0]]:'');
   greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
   header.appendChild(greet);
   list.appendChild(header);
