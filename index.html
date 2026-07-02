@@ -1050,7 +1050,7 @@ function logoScream(ev){
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
-  tervetuloa:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian yliopistokurssien opiskeluun. Nimeni on Mona, mutta sinua kutsun lempinimellä <span class="user-word"></span>. Jos haluat joskus osallistua tietovisoihin, tunnistan sinut sillä nimellä.</span>',
+  tervetuloa:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Nimeni on Mona ja annan sinulle lempinimen <span class="user-word"></span>. Se on myös tunnisteesi, jos haluat joskus osallistua tietovisoihin.</span>',
   hyva:'Hyvä sinä! Taas opiskelemassa.',
   tietovisa:'Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.',
   darkmode:'Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button>',
@@ -2324,7 +2324,7 @@ function renderCardOverview(){
   var _codeSafe=String(_code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   var _pSafe=String(_pLink).replace(/"/g,'&quot;');
   var _reveal=_code?(' '+(_pLink?'<a href="'+_pSafe+'" target="_blank" rel="noopener" style="font-weight:700;color:inherit;">'+_codeSafe+'</a>':'<span style="font-weight:700;">'+_codeSafe+'</span>')):'';
-  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div><div class="deck-header-note">Solukko.com ei tee yhteistyötä minkään suomalaisen yliopiston kanssa. Tuottamiamme oppimateriaaleja saa käyttää ja jakaa avoimesti ilman kreditointia. Tämän kurssisivun kysymyskortit on tehty kattamaan Turun yliopiston kurssin'+_reveal+' aiheet.</div><button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
+  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div><div class="deck-header-note">Vastaa Turun yliopiston kurssia'+_reveal+'.</div><button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
@@ -2610,7 +2610,8 @@ function fitCardScale(){
   if(!wrap||!fc) return;
   wrap.style.transform=''; wrap.style.marginBottom='';
   const cs=document.getElementById('card-screen');
-  const availH=Math.max(180, cardViewportH()-16);                       // fits under the buttons
+  const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
+  const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
   const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
   const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5) on all devices
   fc.style.height=Math.round(h)+'px';
