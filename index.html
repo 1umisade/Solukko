@@ -147,7 +147,7 @@ body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 @keyframes monaNoteFloat { 0% { opacity: 0; transform: translate(-50%, 0) rotate(0deg); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--nx, 0px)), -85px) rotate(18deg); } }
 @keyframes discoSpin { to { transform: rotate(360deg); } }
 @keyframes discoPulse { from { opacity: 0.5; } to { opacity: 0.85; } }
-.reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.6s ease; }
+.reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
 .reveal-fade.shown { opacity: 1; pointer-events: auto; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
 .flashcard { position: relative; z-index: 1; box-sizing: border-box; width: 100%; min-height: 0; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-y: auto; overflow-x: hidden; overscroll-behavior: auto; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y pinch-zoom; will-change: transform; }
@@ -450,8 +450,6 @@ body.dark-mode #shuffle-btn.active { background: #2f80c4 !important; border-colo
 }
 #moodle-btn img { width: 28px; height: 28px; object-fit: contain; border-radius: 5px; }
 body.dark-mode #moodle-btn { background: #3a312b; border-color: #6d5f52; }
-#peppi-btn { width: 46px; height: 46px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); padding: 0; align-items: center; justify-content: center; text-decoration: none; font-family: 'Lora', serif; font-weight: 800; font-size: 24px; color: #56533c; }
-body.dark-mode #peppi-btn { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 .deck-header-note { font-size: 0.72rem; margin-top: 8px; opacity: 0.8; line-height: 1.4; text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; }
 body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 
@@ -591,7 +589,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <a id="moodle-btn" href="#" target="_blank" rel="noopener" title="Tarkista tenttiajankohdat Moodlesta" style="display:none;">
       <img src="moodlelogo.png" alt="Moodle">
     </a>
-    <a id="peppi-btn" href="#" target="_blank" rel="noopener" title="Katso opintojakso Pepissä" style="display:none;">P</a>
 
 
     <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt -->
@@ -2167,10 +2164,10 @@ function showAnswer(){
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
     pr.style.display='flex'; ca.style.display='flex';
-    pr.classList.add('reveal-fade'); ca.classList.add('reveal-fade');   // start invisible, fade in after 1s
+    pr.classList.add('reveal-fade'); ca.classList.add('reveal-fade');   // start invisible, fade in shortly after the flip
     pr.classList.remove('shown'); ca.classList.remove('shown');
     clearTimeout(_revealFadeTimer);
-    _revealFadeTimer=setTimeout(()=>{ pr.classList.add('shown'); ca.classList.add('shown'); },1000);
+    _revealFadeTimer=setTimeout(()=>{ pr.classList.add('shown'); ca.classList.add('shown'); },300);
   };
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
@@ -2314,11 +2311,10 @@ function renderCardOverview(){
   var _code=(_noUrl.match(/\(([^)]+)\)/)||[])[1]||'';
   var _name=_noUrl.replace(/\s*\(.*?\)\s*/,'').trim();
   var mbtn=document.getElementById('moodle-btn');
-  if(mbtn){ if(_mLink){ mbtn.href=_mLink; mbtn.style.display='flex'; } else { mbtn.style.display='none'; } }
-  var pbtn=document.getElementById('peppi-btn');
-  if(pbtn){ if(_pLink){ pbtn.href=_pLink; pbtn.style.display='flex'; } else { pbtn.style.display='none'; } }
+  if(mbtn){ mbtn.style.display='none'; }   // Moodle button hidden for now
   var _codeSafe=String(_code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  var _reveal=_code?' <span style="font-weight:700;">'+_codeSafe+'</span>':'';
+  var _pSafe=String(_pLink).replace(/"/g,'&quot;');
+  var _reveal=_code?(' '+(_pLink?'<a href="'+_pSafe+'" target="_blank" rel="noopener" style="font-weight:700;color:inherit;">'+_codeSafe+'</a>':'<span style="font-weight:700;">'+_codeSafe+'</span>')):'';
   var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div><div class="deck-header-note">Solukko.com ei tee yhteistyötä minkään suomalaisen yliopiston kanssa. Tuottamiamme oppimateriaaleja saa käyttää ja jakaa avoimesti ilman kreditointia. Tämän sivun kysymyskortit vastaavat sisällöltään Turun yliopiston kurssia'+_reveal+'</div><button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
