@@ -1316,9 +1316,12 @@ async function loadDecks(){
   const canvas=document.createElement('canvas'); const ctx2=canvas.getContext('2d'); ctx2.font='700 22px Lora, Georgia, serif';
   const decks=names.map(deck=>{
     const shortName=deck.replace('SOLUKKO::','');
-    const courseCode=(shortName.match(/\(([^h][^t][^t][^p].*?)\)/)||[])[1]||'';
-    const cleanName=shortName.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'').replace(/\s*\(.*?\)\s*/,'').trim();
-    const bgVideo = cleanName + '.mp4';
+    const parens=[...shortName.matchAll(/\(([^)]*)\)/g)].map(m=>m[1].trim());
+    const nonUrls=parens.filter(p=>!/^https?:\/\//i.test(p));   // parens that aren't links: [0]=course code, [1]=video filename
+    const courseCode=nonUrls[0]||'';
+    const videoName=nonUrls[1]||'';                             // optional: the homepage video file (without .mp4)
+    const cleanName=shortName.replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();   // strip every parenthetical
+    const bgVideo = (videoName||cleanName) + '.mp4';            // named video if given, else fall back to the deck name
     return {deck,cleanName,courseCode,bgVideo};
   });
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
@@ -1348,10 +1351,10 @@ async function loadDecks(){
     function fitVideo(){
       const bw=btn.offsetWidth, bh=btn.offsetHeight;
       if(!bw||!bh||!video.videoWidth) return;
-      const scale=Math.max(bw/video.videoWidth, bh/video.videoHeight);
-      const vw=video.videoWidth*scale, vh=video.videoHeight*scale;
+      const scale=bh/video.videoHeight;                  // match the deck height exactly
+      const vw=video.videoWidth*scale, vh=bh;
       video.style.width=vw+'px'; video.style.height=vh+'px';
-      video.style.left=((bw-vw)/2)+'px'; video.style.top=((bh-vh)/2)+'px';
+      video.style.left=((bw-vw)/2)+'px'; video.style.top='0px';   // centered horizontally, full deck height
       video.style.position='absolute';
     }
     video.addEventListener('loadedmetadata', fitVideo, {once:true});
@@ -2323,7 +2326,7 @@ function renderCardOverview(){
   if(!_mLink) _mLink=_urls.find(u=>!/peppi/i.test(u))||'';   // older decks: the non-Peppi link is the Moodle one
   var _noUrl=_short.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'');
   var _code=(_noUrl.match(/\(([^)]+)\)/)||[])[1]||'';
-  var _name=_noUrl.replace(/\s*\(.*?\)\s*/,'').trim();
+  var _name=_noUrl.replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();   // strip every parenthetical (code + video name)
   var mbtn=document.getElementById('moodle-btn');
   if(mbtn){ mbtn.style.display='none'; }   // Moodle button hidden for now
   var _codeSafe=String(_code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
