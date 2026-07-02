@@ -1385,8 +1385,9 @@ async function loadDecks(){
       video.style.left=((bw-vw)/2)+'px'; video.style.top='0px';   // centered horizontally, full deck height
       video.style.position='absolute';
     }
+    function _stillTime(){ const d=video.duration||2; return Math.min(Math.max(0.8, d*0.25), d-0.05); }   // resting preview frame: ~25% in, past any black fade-in
     video.addEventListener('loadedmetadata', fitVideo, {once:true});
-    video.addEventListener('loadeddata', ()=>{ fitVideo(); if(!isMobile()) video.currentTime=0.5; },{once:true});
+    video.addEventListener('loadeddata', ()=>{ fitVideo(); if(!isMobile()) video.currentTime=_stillTime(); },{once:true});
 
     let _rafId=null, _lastTs=null, _going=false;
     function _stopReverse(){ if(_rafId){ cancelAnimationFrame(_rafId); _rafId=null; } _lastTs=null; }
@@ -1401,7 +1402,7 @@ async function loadDecks(){
     }
     video.addEventListener('ended',()=>{ if(!_going) return; _stopReverse(); _lastTs=null; _rafId=requestAnimationFrame(_reverseStep); });
     function _start(){ _going=true; _stopReverse(); video.currentTime=0; video.play().catch(()=>{}); }
-    function _stop(){ _going=false; _stopReverse(); video.pause(); video.currentTime=0; }
+    function _stop(){ _going=false; _stopReverse(); video.pause(); video.currentTime=_stillTime(); }   // rest on the content frame, not the (maybe black) start
 
     if(!isMobile()){   // desktop: hover ping-pongs the video (play forward, then reverse)
       btn.addEventListener('mouseenter', _start);
@@ -1409,7 +1410,7 @@ async function loadDecks(){
     } else {   // mobile: no playback — freeze on the 15th frame as a still (looping video was eating the first scroll swipe)
       video.loop=false; video.muted=true; video.setAttribute('muted',''); video.setAttribute('playsinline','');
       let _frozen=false;
-      const _freeze=()=>{ if(_frozen) return; _frozen=true; try{ video.pause(); }catch(e){} };
+      const _freeze=()=>{ if(_frozen) return; _frozen=true; try{ video.pause(); video.currentTime=_stillTime(); }catch(e){} };   // after decoding, jump to the content frame (skips a black intro)
       if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
         let _fc=0;
         const _tick=()=>{ if(_frozen) return; if(++_fc>=15){ _freeze(); return; } video.requestVideoFrameCallback(_tick); };   // stop on the 15th presented frame
@@ -1422,7 +1423,7 @@ async function loadDecks(){
     }
     btn.onclick=()=>startDeck(item.deck);
     item.btn=btn;
-    if(!isMobile()) video.addEventListener('loadeddata',()=>{ video.currentTime=0.5; },{once:true});
+    if(!isMobile()) video.addEventListener('loadeddata',()=>{ video.currentTime=_stillTime(); },{once:true});
   });
   buildDeckGrid(decks, list);
   updateSoluvisaCircle();
