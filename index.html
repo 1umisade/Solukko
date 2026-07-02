@@ -86,6 +86,13 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .pack-back-4 { z-index: 1; transform: rotate(3deg) translateY(-8px); }
 .deck-btn:hover { transform: scale(1.04); }
 .deck-btn:hover .pack-top { box-shadow: 0 16px 34px rgba(0,0,0,0.4); }
+/* course with no cards yet: dimmed placeholder, not clickable */
+.deck-btn.deck-empty { opacity: 0.45; cursor: default; }
+.deck-btn.deck-empty:hover { transform: none; }
+.deck-btn.deck-empty .pack-top { background: #d7d0c2; border-color: #cdc4b2; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.deck-btn.deck-empty .deck-title, .deck-btn.deck-empty .deck-code { color: #5c5749; text-shadow: none; }
+body.dark-mode .deck-btn.deck-empty .pack-top { background: #3a352d; border-color: #4a443a; }
+body.dark-mode .deck-btn.deck-empty .deck-title, body.dark-mode .deck-btn.deck-empty .deck-code { color: #b7ae9c; }
 /* Soluvisa stays a circle */
 .deck-btn.soluvisa-deck { aspect-ratio: 1 / 1; border-radius: 50%; overflow: hidden; border: 4px solid #1f3d2a; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at 42% 36%, #3a7a52, #0e2a1a); }
 .deck-btn.soluvisa-deck::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 4px solid #ebe3cf; z-index: 3; pointer-events: none; }
@@ -1320,10 +1327,43 @@ function parseAnkiDB(db) {
 // ════════════════════════════════════════════════════════════
 // ⑨ PAKKOJEN LATAAMINEN
 // ════════════════════════════════════════════════════════════
+// A "course" is a reviewable deck. Two layouts are supported:
+//   • hierarchy (new): SOLUKKO::"N. LUKUVUOSI"::"N.M SYKSY|KEVÄT"::Course[::lecture…] — year/sem from the path
+//   • flat (old):      SOLUKKO::Course[::lecture…] — year/sem from a (1S)/(2K) token in the name
+// Returns a Map: coursePath -> { year, semester(S/K), name }.
+function collectCourses(){
+  const paths=new Set();
+  (typeof allDeckNames!=='undefined'?allDeckNames:[]).forEach(d=>{ if(d&&d.startsWith('SOLUKKO')) paths.add(d); });
+  (allCards||[]).forEach(c=>{ const d=c.deckName||''; if(d.startsWith('SOLUKKO')) paths.add(d); });
+  const courses=new Map();
+  paths.forEach(d=>{
+    if(!d.startsWith('SOLUKKO::')) return;
+    const segs=d.slice('SOLUKKO::'.length).split('::');
+    if(/LUKUVUOSI/i.test(segs[0])){                         // hierarchy: year :: semester :: course :: …
+      if(segs.length<3) return;                             // year or semester node — not a course
+      const path='SOLUKKO::'+segs.slice(0,3).join('::');
+      if(!courses.has(path)) courses.set(path,{ year:(segs[0].match(/(\d+)/)||[])[1]||'', semester:/SYKSY/i.test(segs[1])?'S':/KEV[ÄA]T/i.test(segs[1])?'K':'', name:segs[2] });
+    } else {                                                // flat: course :: …
+      const path='SOLUKKO::'+segs[0];
+      if(!courses.has(path)){
+        let year='',sem='';
+        [...segs[0].matchAll(/\(([^)]*)\)/g)].forEach(m=>{ const mm=m[1].trim().match(/^(\d+)\s*([SKsk])$/); if(mm){ year=mm[1]; sem=mm[2].toUpperCase(); } });
+        courses.set(path,{ year, semester:sem, name:segs[0] });
+      }
+    }
+  });
+  return courses;
+}
+// Map any card/deck path to its course path (the reviewable deck), for both layouts.
+function coursePathOf(deckName){
+  if(!deckName||!deckName.startsWith('SOLUKKO::')) return deckName;
+  const segs=deckName.slice('SOLUKKO::'.length).split('::');
+  if(/LUKUVUOSI/i.test(segs[0])) return 'SOLUKKO::'+segs.slice(0,3).join('::');   // hierarchy: year::sem::course
+  return 'SOLUKKO::'+segs[0];                                                       // flat: course
+}
 async function loadDecks(){
-  const seen=new Set(), names=[];
-  allDeckNames.forEach(d=>{ if(!d.startsWith('SOLUKKO::')) return; const top='SOLUKKO::'+d.replace('SOLUKKO::','').split('::')[0]; if(!seen.has(top)){ seen.add(top); names.push(top); } });
-  allCards.forEach(card=>{ const d=card.deckName||''; if(!d.startsWith('SOLUKKO::')) return; const top='SOLUKKO::'+d.replace('SOLUKKO::','').split('::')[0]; if(!seen.has(top)){ seen.add(top); names.push(top); } });
+  const courseMap=collectCourses();
+  const names=[...courseMap.keys()];
 
   if(names.length === 0){
     const d = document.getElementById('conn-error'); d.style.display = 'block';
@@ -1336,21 +1376,21 @@ async function loadDecks(){
   await document.fonts.ready;
   const canvas=document.createElement('canvas'); const ctx2=canvas.getContext('2d'); ctx2.font='700 22px Lora, Georgia, serif';
   const decks=names.map(deck=>{
-    const shortName=deck.replace('SOLUKKO::','');
-    // classify each parenthetical by pattern (order-independent):
-    //   link=(http…)  year+semester=(1S / 2K …, S=syksy/autumn, K=kevät/spring)  code=(BKEM5024)  video=(filename)
-    const parens=[...shortName.matchAll(/\(([^)]*)\)/g)].map(m=>m[1].trim());
-    let courseCode='', videoName='', year='', semester='';
+    const meta=courseMap.get(deck)||{};
+    const name=meta.name||deck.replace('SOLUKKO::','');   // course name only (year/sem come from the path, not the name)
+    // classify each parenthetical in the course name: link=(http…) code=(BKEM5024) video=(filename); ignore a stray (1S) token
+    const parens=[...name.matchAll(/\(([^)]*)\)/g)].map(m=>m[1].trim());
+    let courseCode='', videoName='';
     parens.forEach(p=>{
       if(/^https?:\/\//i.test(p)) return;                                            // moodle/peppi link
-      let m;
-      if(m=p.match(/^(\d+)\s*([SKsk])$/)){ year=m[1]; semester=m[2].toUpperCase(); return; }   // e.g. "1S"
+      if(/^\d+\s*[SKsk]$/.test(p)) return;                                            // stray (1S)/(2K) token — year/sem already known
       if(/^[A-Za-zÅÄÖåäö]{2,}\s?\d{2,}$/.test(p)){ if(!courseCode) courseCode=p; return; }        // course code
       if(/^[\w\-.]+$/.test(p)){ if(!videoName) videoName=p; return; }                             // filename-like -> video
     });
-    const cleanName=shortName.replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();   // strip every parenthetical
+    const cleanName=name.replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();   // strip every parenthetical
     const bgVideo = (videoName||cleanName) + '.mp4';            // named video if given, else fall back to the deck name
-    return {deck,cleanName,courseCode,bgVideo,year,semester};
+    const hasCards=(allCards||[]).some(c=>c.deckName===deck || (c.deckName||'').startsWith(deck+'::'));
+    return {deck,cleanName,courseCode,bgVideo,year:meta.year||'',semester:meta.semester||'',hasCards};
   });
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
@@ -1358,7 +1398,12 @@ async function loadDecks(){
   let _playingDeckVideo = null;
 
   decks.forEach(item=>{
-    const btn=document.createElement('button'); btn.className='deck-btn';
+    const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
+    if(!item.hasCards){   // no cards yet: dimmed, non-clickable placeholder (no video / backsides)
+      btn.disabled=true;
+      btn.innerHTML=`<div class="pack-top"><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+      item.btn=btn; return;
+    }
     const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
     const _tmp=document.createElement('div');
     const _tops=_dc.map(c=>{ _tmp.innerHTML=extractBody(c.answer||'').body; return (_tmp.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (entities decoded)
@@ -1433,7 +1478,7 @@ async function loadDecks(){
   const _pc=_p.get('solukko-card'), _pa=_p.get('solukko-answer');
   if(_pc){
     const _tc=allCards.find(c=>String(c.cardId)===_pc);
-    if(_tc){ const _topDeck='SOLUKKO::'+_tc.deckName.replace('SOLUKKO::','').split('::')[0]; if(names.includes(_topDeck)){ await startDeck(_topDeck); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
+    if(_tc){ const _topDeck=coursePathOf(_tc.deckName); if(names.includes(_topDeck)){ await startDeck(_topDeck); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
   }
   const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
@@ -1730,7 +1775,7 @@ async function openCardById(cardId){
   const cid=String(cardId);
   const tc=(allCards||[]).find(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(!tc){ alert('Korttia ei löytynyt.'); return; }
-  const topDeck='SOLUKKO::'+tc.deckName.replace('SOLUKKO::','').split('::')[0];
+  const topDeck=coursePathOf(tc.deckName);
   await startDeck(topDeck);
   const ci=reviewCards.findIndex(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(ci>=0) jumpToOverviewCard(ci);
@@ -2340,7 +2385,7 @@ function renderCardOverview(){
   }
 
   grid.dataset.deckName=currentDeck;
-  var _short=currentDeck.replace('SOLUKKO::','');
+  var _short=currentDeck.split('::').pop();   // course name is the last path segment (both layouts)
   var _urls=(_short.match(/https?:\/\/[^)\s]+/g)||[]);
   var _mLink=_urls.find(u=>/moodle/i.test(u))||'';
   var _pLink=_urls.find(u=>/peppi/i.test(u))||'';
