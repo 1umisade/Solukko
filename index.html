@@ -1392,10 +1392,11 @@ async function loadDecks(){
       if(/^[\w\-.]+$/.test(p)){ if(!videoName) videoName=p; return; }                             // filename-like -> video
     });
     const cleanName=name.replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();   // strip every parenthetical
-    const bgVideo = (videoName||cleanName) + '.mp4';            // named video if given, else fall back to the deck name
+    const _vc=[]; if(videoName) _vc.push(videoName); _vc.push('video_'+cleanName, cleanName);   // token → "video_<name>" convention → "<name>" → default.mp4
+    const videoSources=[...new Set(_vc)].map(s=>s+'.mp4').concat('default.mp4');
     const cardCount=(allCards||[]).filter(c=>c.deckName===deck || (c.deckName||'').startsWith(deck+'::')).length;
     const hasCards=cardCount>1;   // a lone card is just a placeholder -> keep the course dimmed & unclickable
-    return {deck,cleanName,courseCode,bgVideo,year:meta.year||'',semester:meta.semester||'',hasCards};
+    return {deck,cleanName,courseCode,videoSources,year:meta.year||'',semester:meta.semester||'',hasCards};
   });
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
@@ -1408,7 +1409,7 @@ async function loadDecks(){
     const _tmp=document.createElement('div');
     const _tops=_dc.map(c=>{ _tmp.innerHTML=extractBody(c.answer||'').body; return (_tmp.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (entities decoded)
     const _bk=(cls,i)=>`<div class="pack-back ${cls}">${_tops[i]?`<div class="pack-back-content">${escCmt(_tops[i].slice(0,600))}</div>`:''}</div>`;
-    btn.innerHTML=`${_bk('pack-back-4',3)}${_bk('pack-back-3',2)}${_bk('pack-back-2',1)}${_bk('pack-back-1',0)}<div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
+    btn.innerHTML=`${_bk('pack-back-4',3)}${_bk('pack-back-3',2)}${_bk('pack-back-2',1)}${_bk('pack-back-1',0)}<div class="pack-top"><video class="deck-video" muted playsinline preload="auto">${item.videoSources.map(s=>`<source src="${s}" type="video/mp4">`).join('')}</video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
     if(!isMobile() && item.hasCards){
       btn.addEventListener('mouseenter',()=>{   // natural scattered flare, fresh each hover (each card drifts a random direction)
         btn.querySelectorAll('.pack-back').forEach((bk)=>{
