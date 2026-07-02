@@ -99,7 +99,7 @@ body.dark-mode .deck-btn.deck-empty .deck-title, body.dark-mode .deck-btn.deck-e
 .deck-btn.soluvisa-deck::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.02)); z-index: 1; pointer-events: none; }
 .deck-btn.soluvisa-deck.soluvisa-active { background: radial-gradient(circle at 42% 36%, #e07060, #7a1a0e); }
 .deck-btn.soluvisa-deck:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
-.deck-title { font-size: clamp(1.26rem, 4.14vw, 1.71rem); font-weight: 800; margin-bottom: 6px; white-space: normal; line-height: 1.15; text-align: center; overflow-wrap: anywhere; text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.8); }   /* centered, bold, wraps; shadow keeps it legible over the video */
+.deck-title { font-size: clamp(0.63rem, 2.07vw, 0.855rem); font-weight: 800; margin-bottom: 6px; white-space: normal; line-height: 1.15; text-align: center; overflow-wrap: anywhere; text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.8); }   /* centered, bold, wraps; shadow keeps it legible over the video */
 
 /* ── 4. GEAR / TOP-RIGHT BUTTON AREA ────────────────────── */
 .gear-btn { width: 42px; height: 42px; border: 1px solid #d4cec4; border-radius: 50%; background: #fffef9; color: #56533c; font-size: 1.35rem; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
@@ -1361,67 +1361,6 @@ function coursePathOf(deckName){
   if(/LUKUVUOSI/i.test(segs[0])) return 'SOLUKKO::'+segs.slice(0,3).join('::');   // hierarchy: year::sem::course
   return 'SOLUKKO::'+segs[0];                                                       // flat: course
 }
-// Full degree curriculum (Peppi 2024–2027). Anki only exports decks that have cards, so the rest
-// are listed here and drawn as dimmed placeholders. y=year, s=S(yksy)/K(evät). Update if the plan changes.
-const CURRICULUM=[
-  {y:'1',s:'S',n:'Avaimet biokemian opiskeluun'},
-  {y:'1',s:'S',n:'Solu- ja biomolekyylit - teoria'},
-  {y:'1',s:'S',n:'Solu- ja biomolekyylit - käytäntö'},
-  {y:'1',s:'S',n:'Johdatus biotekniikkaan'},
-  {y:'1',s:'S',n:'Kemian peruskurssi I'},
-  {y:'1',s:'S',n:'Kemian peruskurssi II'},
-  {y:'1',s:'S',n:'Kemian laboratoriomenetelmät'},
-  {y:'1',s:'S',n:'English for STEM A'},
-  {y:'1',s:'K',n:'Mikrobiologia'},
-  {y:'1',s:'K',n:'Molekyylibiologia - teoria'},
-  {y:'1',s:'K',n:'Molekyylibiologia - käytäntö'},
-  {y:'1',s:'K',n:'Kemia III'},
-  {y:'1',s:'K',n:'Kemia IV'},
-  {y:'1',s:'K',n:'English for STEM B'},
-  {y:'2',s:'S',n:'Aineenvaihdunta'},
-  {y:'2',s:'S',n:'Kasvibiokemia - teoria 1'},
-  {y:'2',s:'S',n:'Kasvibiokemia - teoria 2'},
-  {y:'2',s:'S',n:'Kasvibiokemia - käytäntö'},
-  {y:'2',s:'S',n:'Solubiologia'},
-  {y:'2',s:'S',n:'Ruotsin kieli: Teknillinen tiedekunta, kirjallinen taito'},
-  {y:'2',s:'S',n:'Ruotsin kieli: Teknillinen tiedekunta, suullinen taito'},
-  {y:'2',s:'K',n:'Proteiinit ja entsyymit - teoria'},
-  {y:'2',s:'K',n:'Proteiinit ja entsyymit - käytäntö'},
-  {y:'2',s:'K',n:'Molekyylibiologia - käytäntö 2'},
-  {y:'2',s:'K',n:'Systeemibiologia'},
-  {y:'2',s:'K',n:'Molekyylibiotieteiden tutkimuksen esittely'},
-  {y:'2',s:'K',n:'Biotekniset järjestelmät'},
-  {y:'2',s:'K',n:'Biotekniikan harjoitustyö'},
-  {y:'3',s:'S',n:'Immunologia - teoria'},
-  {y:'3',s:'S',n:'Immunologia - käytäntö'},
-  {y:'3',s:'S',n:'Bioprosessitekniikka'},
-  {y:'3',s:'S',n:'Biotekniset analyysimenetelmät'},
-  {y:'3',s:'S',n:'Kandidaatintutkielma, biokemia'},
-  {y:'3',s:'S',n:'Tutkielmaseminaari, biokemia'},
-  {y:'3',s:'S',n:'LuK-tutkinnon kypsyysnäyte kirjoituskokeena'},
-  {y:'3',s:'S',n:'Akateemiset tekstitaidot LuK-opiskelijoille'},
-  {y:'3',s:'S',n:'Asiantuntijan vuorovaikutusosaaminen, tekniikka, oikeustiede ja luonnontieteet'},
-  {y:'3',s:'K',n:'Laatu ja metrologia'},
-  {y:'3',s:'K',n:'Biokemistinä työelämässä'},
-  {y:'3',s:'K',n:'Laboratoriolaskut'},
-  {y:'3',s:'K',n:'Johdatus bioturvallisuuteen'},
-  {y:'3',s:'K',n:'Tilastotieteen peruskurssi soveltajille'},
-  {y:'3',s:'K',n:'Tilastotieteen peruskurssi soveltajille, biokemian harjoitukset'}
-];
-// Overlay the apkg's real courses onto the curriculum; unmatched curriculum entries become dimmed placeholders.
-function mergeCurriculum(apkgCourses){
-  const norm=s=>String(s).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9åäöü]/gi,'');
-  const byKey=new Map();
-  apkgCourses.forEach(d=>byKey.set(d.year+'|'+d.semester+'|'+norm(d.cleanName), d));
-  const used=new Set(), out=[];
-  CURRICULUM.forEach(c=>{
-    const key=c.y+'|'+c.s+'|'+norm(c.n), hit=byKey.get(key);
-    if(hit){ used.add(key); out.push(hit); }
-    else out.push({deck:null, cleanName:c.n, courseCode:'', bgVideo:null, year:c.y, semester:c.s, hasCards:false});
-  });
-  apkgCourses.forEach(d=>{ const key=d.year+'|'+d.semester+'|'+norm(d.cleanName); if(!used.has(key)) out.push(d); });   // apkg courses not in the plan (extras)
-  return out;
-}
 async function loadDecks(){
   const courseMap=collectCourses();
   const names=[...courseMap.keys()];
@@ -1450,16 +1389,16 @@ async function loadDecks(){
     });
     const cleanName=name.replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();   // strip every parenthetical
     const bgVideo = (videoName||cleanName) + '.mp4';            // named video if given, else fall back to the deck name
-    const hasCards=(allCards||[]).some(c=>c.deckName===deck || (c.deckName||'').startsWith(deck+'::'));
+    const cardCount=(allCards||[]).filter(c=>c.deckName===deck || (c.deckName||'').startsWith(deck+'::')).length;
+    const hasCards=cardCount>1;   // a lone card is just a placeholder -> keep the course dimmed & unclickable
     return {deck,cleanName,courseCode,bgVideo,year:meta.year||'',semester:meta.semester||'',hasCards};
   });
-  const merged=mergeCurriculum(decks);   // full curriculum; real (card-bearing) courses overlaid, the rest dimmed
-  let widestTitle=0; merged.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
+  let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
   let _playingDeckVideo = null;
 
-  merged.forEach(item=>{
+  decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
     if(!item.hasCards){   // no cards yet: dimmed, non-clickable placeholder (no video / backsides)
       btn.disabled=true;
@@ -1532,7 +1471,7 @@ async function loadDecks(){
     item.btn=btn;
     if(!isMobile()) video.addEventListener('loadeddata',()=>{ video.currentTime=_stillTime(); },{once:true});
   });
-  buildDeckGrid(merged, list);
+  buildDeckGrid(decks, list);
   updateSoluvisaCircle();
   hide('card-screen');
 
