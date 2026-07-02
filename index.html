@@ -450,6 +450,10 @@ body.dark-mode #shuffle-btn.active { background: #2f80c4 !important; border-colo
 }
 #moodle-btn img { width: 28px; height: 28px; object-fit: contain; border-radius: 5px; }
 body.dark-mode #moodle-btn { background: #3a312b; border-color: #6d5f52; }
+#peppi-btn { width: 46px; height: 46px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); padding: 0; align-items: center; justify-content: center; text-decoration: none; font-family: 'Lora', serif; font-weight: 800; font-size: 24px; color: #56533c; }
+body.dark-mode #peppi-btn { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
+.deck-header-note { font-size: 0.72rem; margin-top: 8px; opacity: 0.8; line-height: 1.4; text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; }
+.course-code-reveal { cursor: pointer; text-decoration: underline; white-space: nowrap; }
 body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 
 /* ── EXIT DEV MODE SPHERE BUTTON ─────────────────────────── */
@@ -588,6 +592,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <a id="moodle-btn" href="#" target="_blank" rel="noopener" title="Tarkista tenttiajankohdat Moodlesta" style="display:none;">
       <img src="moodlelogo.png" alt="Moodle">
     </a>
+    <a id="peppi-btn" href="#" target="_blank" rel="noopener" title="Katso opintojakso Pepissä" style="display:none;">P</a>
 
 
     <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt -->
@@ -1520,6 +1525,12 @@ function renderClozeText(text,showAnswers){
   return `<div class="enhanced-line">${html.replace(/\s*\r?\n\s*/g,' ')}</div>`;
 }
 
+function revealCourseCode(el){   // "(näytä kurssikoodi)" -> reveal the course code inline
+  if(!el) return;
+  el.textContent=el.getAttribute('data-code')||'';
+  el.style.textDecoration='none'; el.style.cursor='default'; el.style.fontWeight='700';
+  el.onclick=null;
+}
 function renderReviewDeckCard(deckName){
   const box=document.getElementById('review-deck-card'); if(!box) return;
   const shortName=deckName.replace('TYKRY::','');
@@ -2302,13 +2313,20 @@ function renderCardOverview(){
 
   grid.dataset.deckName=currentDeck;
   var _short=currentDeck.replace('TYKRY::','');
-  var _mLink=(_short.match(/\((https?:\/\/.*?)\)/)||[])[1]||'';
+  var _urls=(_short.match(/https?:\/\/[^)\s]+/g)||[]);
+  var _mLink=_urls.find(u=>/moodle/i.test(u))||'';
+  var _pLink=_urls.find(u=>/peppi/i.test(u))||'';
+  if(!_mLink) _mLink=_urls.find(u=>!/peppi/i.test(u))||'';   // older decks: the non-Peppi link is the Moodle one
   var _noUrl=_short.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'');
   var _code=(_noUrl.match(/\(([^)]+)\)/)||[])[1]||'';
   var _name=_noUrl.replace(/\s*\(.*?\)\s*/,'').trim();
   var mbtn=document.getElementById('moodle-btn');
   if(mbtn){ if(_mLink){ mbtn.href=_mLink; mbtn.style.display='flex'; } else { mbtn.style.display='none'; } }
-  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div>'+(_code?'<div class="deck-header-code" style="font-size:0.72rem;margin-top:2px;text-align:left;">'+_code+'</div>':'')+'<button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
+  var pbtn=document.getElementById('peppi-btn');
+  if(pbtn){ if(_pLink){ pbtn.href=_pLink; pbtn.style.display='flex'; } else { pbtn.style.display='none'; } }
+  var _codeAttr=String(_code).replace(/"/g,'&quot;');
+  var _reveal=_code?' <span class="course-code-reveal" data-code="'+_codeAttr+'" onclick="revealCourseCode(this)">(näytä kurssikoodi)</span>':'';
+  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div><div class="deck-header-note">Solukko.com ei tee yhteistyötä minkään suomalaisen yliopiston kanssa. Tuottamiamme oppimateriaaleja saa käyttää ja jakaa avoimesti ilman kreditointia. Tämän sivun kysymyskortit vastaavat sisällöltään Turun yliopiston kurssia'+_reveal+'</div><button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
