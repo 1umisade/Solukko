@@ -1094,13 +1094,17 @@ function logoScream(ev){
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
   tervetuloa:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Klikkaamalla minua kerron lisää.</span>',
-  hyva:'Hyvä sinä! Taas opiskelemassa.',
+  intro1:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia.',
+  intro2:'Kurssipakat koostuvat kaksipuolisista kysymyskorteista. Kun esitän kortin kysymyspuolen sinulle, tulee sinun vastata parhaasi mukaan. Vastauksen voi tarkistaa sitten kortin kääntöpuolelta.',
+  intro3:'Jos et vielä osannut vastata haluamallasi tarkkuudella, voit painaa X-nappia, jolloin esitän kysymyksen hetken kuluttua sinulle uudestaan.',
+  intro4:'Jos et vielä osannut vastata haluamallasi tarkkuudella, voit painaa X-nappia, jolloin esitän kysymyksen hetken kuluttua sinulle uudestaan.',
+  hyva:'Kun avaat kurssin, näytän sinulle sen ensimmäisen kysymyskortin. Jos et tiedä vastausta, voit painaa "en tiedä"-nappia, jolloin kysyn sen sinulta hetken kuluttua uudelleen.',
   tietovisa:'Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.',
   darkmode:'Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button>',
   shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
   comment:'Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
 };
-const HOME_BUBBLE_ORDER=['tervetuloa','hyva','tietovisa','darkmode','shuffle','comment'];   // homepage logo order
+const HOME_BUBBLE_ORDER=['tervetuloa','intro1','intro2','intro3','intro4','hyva','tietovisa','darkmode','shuffle','comment'];   // homepage logo order
 const PEEK_BUBBLE_ORDER=['tervetuloa','darkmode','shuffle','comment','tietovisa'];           // edge-peeker order
 function buildMonaBubbles(){   // inject the bubble divs into both containers from the shared definitions
   const home=document.getElementById('site-brand');
