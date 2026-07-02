@@ -48,7 +48,28 @@ body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612;
 #deck-screen { width: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 1.5rem; gap: 2rem; overflow-x: hidden; }
 body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none; }   /* hide the scrollbar on the mobile homepage */
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
-.deck-list { position: relative; margin: 0 auto; }
+/* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
+.deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1100px; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
+#home-mona { align-self: flex-start; display: flex; align-items: flex-start; margin: 4px 0 2px; }
+#home-mona .site-brand { width: 140px; margin: 0; }
+.year-section { width: 100%; }
+.year-heading { font-family: 'Lora', serif; font-weight: 800; font-size: 1.15rem; color: #56533c; opacity: 0.88; border-bottom: 2px solid #d4cec4; padding-bottom: 6px; margin-bottom: 16px; }
+.year-row { display: flex; gap: 24px; align-items: flex-start; }
+.sem-col { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 18px 16px; align-content: flex-start; }
+.sem-col.spring { border-left: 1px dashed #cfc8bc; padding-left: 24px; }
+.sem-col.sem-empty { border: none !important; padding-left: 0 !important; padding-top: 0 !important; }
+.sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
+.year-row .deck-btn { position: relative; left: auto; top: auto; width: 160px; }
+body.dark-mode .year-heading { color: #eadfce; border-bottom-color: #6d5f52; }
+body.dark-mode .sem-label { color: #eadfce; }
+body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
+@media (max-width: 760px) {   /* narrow / mobile: single column by year, autumn then spring stacked */
+  .year-row { flex-direction: column; gap: 18px; }
+  .sem-col.spring { border-left: none; padding-left: 0; border-top: 1px dashed #cfc8bc; padding-top: 16px; }
+  .sem-col { justify-content: center; }
+  #home-mona { align-self: center; }
+  body.dark-mode .sem-col.spring { border-top-color: #6d5f52; }
+}
 .deck-btn { position: absolute; min-width: 0; width: min(240px, 52vw); aspect-ratio: 1 / 1.5; padding: 0; border: none; border-radius: 0; overflow: visible; background: none; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; transition: transform 0.3s ease; touch-action: pan-y; }   /* pan-y so a vertical drag scrolls the page instead of getting captured */
 .deck-btn * { touch-action: inherit; }
 /* course = a pack of cards: a top card (video) with several cards behind that flare out a little on hover */
@@ -1151,7 +1172,7 @@ let _homeHoverOpened=false;
   setInterval(()=>{
     const reviewing=document.getElementById('card-screen').style.display==='flex';
     const onHome=document.getElementById('deck-screen').style.display==='flex';
-    const active=isMobile() && onHome;   // side peeker only on the mobile homepage; review uses the top card-peek
+    const active=false;   // edge-peeker retired: Mona now sits top-left on the homepage; review uses the top card-peek
     if(!active){ shown=false; pk.classList.remove('peek-show','bubble-open'); return; }
     if(pk.classList.contains('bubble-open')){ shown=true; pk.classList.add('peek-show'); return; }     // stay out while the bubble is open
     if(shown){ pk.classList.remove('peek-show'); shown=false; }
@@ -1316,13 +1337,20 @@ async function loadDecks(){
   const canvas=document.createElement('canvas'); const ctx2=canvas.getContext('2d'); ctx2.font='700 22px Lora, Georgia, serif';
   const decks=names.map(deck=>{
     const shortName=deck.replace('SOLUKKO::','');
+    // classify each parenthetical by pattern (order-independent):
+    //   link=(http…)  year+semester=(1S / 2K …, S=syksy/autumn, K=kevät/spring)  code=(BKEM5024)  video=(filename)
     const parens=[...shortName.matchAll(/\(([^)]*)\)/g)].map(m=>m[1].trim());
-    const nonUrls=parens.filter(p=>!/^https?:\/\//i.test(p));   // parens that aren't links: [0]=course code, [1]=video filename
-    const courseCode=nonUrls[0]||'';
-    const videoName=nonUrls[1]||'';                             // optional: the homepage video file (without .mp4)
+    let courseCode='', videoName='', year='', semester='';
+    parens.forEach(p=>{
+      if(/^https?:\/\//i.test(p)) return;                                            // moodle/peppi link
+      let m;
+      if(m=p.match(/^(\d+)\s*([SKsk])$/)){ year=m[1]; semester=m[2].toUpperCase(); return; }   // e.g. "1S"
+      if(/^[A-Za-zÅÄÖåäö]{2,}\s?\d{2,}$/.test(p)){ if(!courseCode) courseCode=p; return; }        // course code
+      if(/^[\w\-.]+$/.test(p)){ if(!videoName) videoName=p; return; }                             // filename-like -> video
+    });
     const cleanName=shortName.replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();   // strip every parenthetical
     const bgVideo = (videoName||cleanName) + '.mp4';            // named video if given, else fall back to the deck name
-    return {deck,cleanName,courseCode,bgVideo};
+    return {deck,cleanName,courseCode,bgVideo,year,semester};
   });
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
@@ -1393,9 +1421,10 @@ async function loadDecks(){
       const p=video.play(); if(p&&p.catch) p.catch(()=>{});   // play muted just long enough to decode the still, then freeze (iOS won't decode frames otherwise)
     }
     btn.onclick=()=>startDeck(item.deck);
-    list.appendChild(btn);
+    item.btn=btn;
     if(!isMobile()) video.addEventListener('loadeddata',()=>{ video.currentTime=0.5; },{once:true});
   });
+  buildDeckGrid(decks, list);
   updateSoluvisaCircle();
   hide('card-screen');
 
@@ -1434,43 +1463,34 @@ function updateSoluvisaCountdown(){
 }
 setInterval(updateSoluvisaCountdown, 20000);
 
-// Arrange the course circles around the centered logo
-function layoutDecksRadial(){
-  const list=document.getElementById('deck-list'); if(!list) return;
-  const _ds=document.getElementById('deck-screen'); if(!_ds || getComputedStyle(_ds).display==='none') return;   // (fixed list has no offsetParent, so check the screen instead)
+// Build the homepage: Mona (+ greeting) top-left, then one section per academic year,
+// with autumn courses on the left and spring on the right (single column on narrow screens).
+function buildDeckGrid(decks, list){
   const logo=document.getElementById('site-brand');
-  if(logo && logo.parentElement!==list) list.appendChild(logo);
-  const btns=[...list.querySelectorAll('.deck-btn')];
-  const n=btns.length; if(!n) return;
-  if(isMobile() || window.innerWidth < 760){   // mobile / narrow: simple vertical stack (logo on top, courses below)
-    list.style.transform=''; list.style.transformOrigin=''; list.style.width=''; list.style.height=''; list.style.marginBottom=''; list.style.left=''; list.style.top='';
-    list.style.position='relative'; list.style.display='flex'; list.style.flexDirection='column'; list.style.alignItems='center'; list.style.gap='20px';
-    btns.forEach(b=>{ b.style.position='relative'; b.style.left=''; b.style.top=''; });
-    if(logo){ logo.style.display='none'; }   // mobile: no centered logo — only the peeker
-    return;
-  }
-  list.style.display=''; list.style.flexDirection=''; list.style.alignItems=''; list.style.gap='';   // reset mobile stacking
-  if(logo){ logo.style.order=''; logo.style.display=''; }
-  btns.forEach(b=>{ b.style.position=''; });
-  list.style.transform='none'; list.style.width=''; list.style.height=''; list.style.marginBottom='';
-  const cardW=btns[0].offsetWidth||130, cardH=cardW*1.5;   // packs are 1:1.5 (compute from width; offsetHeight may not be settled yet)
-  const cardSize=Math.max(cardW, cardH);        // space by the larger dimension so the (taller) packs never overlap
-  const logoSize=logo?logo.offsetWidth:0;
-  const gap=26;
-  const R=Math.max(logoSize/2+cardSize/2+gap, n>1 ? (cardSize+gap)/(2*Math.sin(Math.PI/n)) : 0);
-  const D=2*R+cardSize, cx=D/2, cy=D/2;
-  list.style.position='fixed'; list.style.left='50%'; list.style.top='50%'; list.style.width=D+'px'; list.style.height=D+'px';
-  btns.forEach((btn,i)=>{
-    const ang=-Math.PI/2 + i*(2*Math.PI/n);
-    btn.style.left=(cx+R*Math.cos(ang)-cardW/2)+'px';
-    btn.style.top =(cy+R*Math.sin(ang)-cardH/2)+'px';
+  list.innerHTML='';
+  const header=document.createElement('div'); header.id='home-mona';
+  if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }   // Mona lives at the top-left now
+  list.appendChild(header);
+  const byYear={};
+  decks.forEach(it=>{ const y=it.year||'?'; (byYear[y]=byYear[y]||{S:[],K:[],none:[]}); const s=(it.semester==='S'||it.semester==='K')?it.semester:'none'; byYear[y][s].push(it); });
+  const years=Object.keys(byYear).sort((a,b)=>{ if(a==='?')return 1; if(b==='?')return -1; return (+a)-(+b); });
+  years.forEach(y=>{
+    const g=byYear[y];
+    const section=document.createElement('div'); section.className='year-section';
+    const h=document.createElement('div'); h.className='year-heading'; h.textContent = y==='?' ? 'Muut' : (y+'. vuosi'); section.appendChild(h);
+    const row=document.createElement('div'); row.className='year-row';
+    const col=(cls,label,items)=>{
+      const c=document.createElement('div'); c.className='sem-col '+cls+(items.length?'':' sem-empty');
+      if(items.length){ const l=document.createElement('div'); l.className='sem-label'; l.textContent=label; c.appendChild(l); items.forEach(it=>c.appendChild(it.btn)); }
+      return c;
+    };
+    row.appendChild(col('autumn','Syksy', g.S.concat(g.none)));   // decks with a year but no semester default to autumn
+    row.appendChild(col('spring','Kevät', g.K));
+    section.appendChild(row);
+    list.appendChild(section);
   });
-  if(logo){ logo.style.position='absolute'; logo.style.left=(cx-logoSize/2)+'px'; logo.style.top=(cy-logoSize/2)+'px'; logo.style.margin='0'; }
-  // fixed + viewport-centred, scaled to fit: Mona (ring centre) sits dead centre and nothing can clip
-  const s=Math.min(1, (window.innerWidth-24)/D, (window.innerHeight-24)/D);
-  list.style.marginBottom=''; list.style.transformOrigin='center';
-  list.style.transform='translate(-50%,-50%) scale('+s+')';
 }
+function layoutDecksRadial(){ /* homepage layout is CSS-driven (see buildDeckGrid); nothing to reposition on resize */ }
 
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
