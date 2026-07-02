@@ -453,7 +453,6 @@ body.dark-mode #moodle-btn { background: #3a312b; border-color: #6d5f52; }
 #peppi-btn { width: 46px; height: 46px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); padding: 0; align-items: center; justify-content: center; text-decoration: none; font-family: 'Lora', serif; font-weight: 800; font-size: 24px; color: #56533c; }
 body.dark-mode #peppi-btn { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 .deck-header-note { font-size: 0.72rem; margin-top: 8px; opacity: 0.8; line-height: 1.4; text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; }
-.course-code-reveal { cursor: pointer; text-decoration: underline; white-space: nowrap; }
 body.dark-mode #darkmode-ring circle { stroke: #e07060; }
 
 /* ── EXIT DEV MODE SPHERE BUTTON ─────────────────────────── */
@@ -1525,12 +1524,6 @@ function renderClozeText(text,showAnswers){
   return `<div class="enhanced-line">${html.replace(/\s*\r?\n\s*/g,' ')}</div>`;
 }
 
-function revealCourseCode(el){   // "(näytä kurssikoodi)" -> reveal the course code inline
-  if(!el) return;
-  el.textContent=el.getAttribute('data-code')||'';
-  el.style.textDecoration='none'; el.style.cursor='default'; el.style.fontWeight='700';
-  el.onclick=null;
-}
 function renderReviewDeckCard(deckName){
   const box=document.getElementById('review-deck-card'); if(!box) return;
   const shortName=deckName.replace('SOLUKKO::','');
@@ -2324,8 +2317,8 @@ function renderCardOverview(){
   if(mbtn){ if(_mLink){ mbtn.href=_mLink; mbtn.style.display='flex'; } else { mbtn.style.display='none'; } }
   var pbtn=document.getElementById('peppi-btn');
   if(pbtn){ if(_pLink){ pbtn.href=_pLink; pbtn.style.display='flex'; } else { pbtn.style.display='none'; } }
-  var _codeAttr=String(_code).replace(/"/g,'&quot;');
-  var _reveal=_code?' <span class="course-code-reveal" data-code="'+_codeAttr+'" onclick="revealCourseCode(this)">(näytä kurssikoodi)</span>':'';
+  var _codeSafe=String(_code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var _reveal=_code?' <span style="font-weight:700;">'+_codeSafe+'</span>':'';
   var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div><div class="deck-header-note">Solukko.com ei tee yhteistyötä minkään suomalaisen yliopiston kanssa. Tuottamiamme oppimateriaaleja saa käyttää ja jakaa avoimesti ilman kreditointia. Tämän sivun kysymyskortit vastaavat sisällöltään Turun yliopiston kurssia'+_reveal+'</div><button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
