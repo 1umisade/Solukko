@@ -1093,18 +1093,22 @@ function logoScream(ev){
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
-  homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Jos olet uusi täällä, kerron lisää jos klikkaat minua.</span>',
-  homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii.',
+  homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Oletko uusi täällä? Klikkaa minua, niin kerron lisää.</span>',
+  homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
+  homepage3:'Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko™-tietovisoista!',
 
-  tietovisa1:'Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Kaikki ovat vapaita osallistumaan. Ilmoittautumista ei tarvita. Palkintoja kaikille oikein vastaaville.',
-  tietovisa2:'Tietovisoissa isännöitsijä heijastaa kysymyskortin kaikkien nähtäville. Osallistujien puhelimiin syttyy tällöin "Vastausvuoro"-nappi, jota ensimmäisenä painanut joukkue saa yrittää vastata kortin kysymykseen ensimmäisenä. Vastausvuoro siirtyy, jos vastaus on puutteellinen.',
+  tietovisa1:'Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Vapaa osallistuminen. Ilmoittautumista ei tarvita. Palkintoja kaikille oikein vastaaville.',
+  tietovisa2:'Tietovisan isännöitsijä heijastaa kysymyskortin kaikkien nähtäville. Joukkueiden puhelimiin syttyy tällöin "Vastausvuoro"-nappi, jota ensimmäisenä painanut saa yrittää vastata kortin kysymykseen ensimmäisenä.',
+  tietovisa3:'Oikeasta vastauksesta joukkue tienaa 0.25€. Puutteellinen vastaus puolestaan vähentää joukkueen potista saman summan ja vastausvuoro siirtyy seuraavalle joukkueelle. Mikäli aika riittää, yhdessä tietovisassa kerrataan 25 korttia.',
+  tietovisa4:'Tietovisat ovat oiva tapa treenata sekä kurssiaiheita että paineensietokykyä ja tienata pientä taskurahaa, jos menestyt. Jokaisesta oikeasta vastauksesta joukkueesi tienaa 0.25€.',
+
 
   darkmode:'Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button>',
   shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
   comment:'Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
 };
-const HOME_BUBBLE_ORDER=['homepage1','homepage2','tietovisa1','tietovisa2','darkmode','shuffle','comment'];   // homepage logo order (keys must exist in MONA_BUBBLES)
-const PEEK_BUBBLE_ORDER=['homepage1','darkmode','shuffle','comment','tietovisa1'];           // edge-peeker order (retired, but keep keys valid)
+const HOME_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // cycle follows MONA_BUBBLES definition order — just add unique keys above
+const PEEK_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // edge-peeker retired; keys kept valid
 function buildMonaBubbles(){   // inject the bubble divs into both containers from the shared definitions
   const home=document.getElementById('site-brand');
   if(home) HOME_BUBBLE_ORDER.forEach(k=>{ const d=document.createElement('div'); d.className='home-bubble'; d.innerHTML=MONA_BUBBLES[k]; home.appendChild(d); });
