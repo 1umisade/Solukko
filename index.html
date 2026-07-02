@@ -305,6 +305,11 @@ body.is-mobile #peek-logo { width: 75px; height: 75px; }   /* half size on mobil
 body.dark-mode .peek-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #peek-logo[data-side="left"]  .peek-bubble::after { border-right-color: #3a312b; }
 body.dark-mode #peek-logo[data-side="right"] .peek-bubble::after { border-left-color: #3a312b; }
+/* mobile homepage: no animation at all — Mona and the decks appear/react without sliding, shaking or transitions */
+body.is-mobile:not(.reviewing) #peek-logo,
+body.is-mobile:not(.reviewing) #peek-logo *,
+body.is-mobile:not(.reviewing) #deck-list .deck-btn,
+body.is-mobile:not(.reviewing) #deck-list .deck-btn * { transition: none !important; animation: none !important; }
 .peek-act-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 body.dark-mode .peek-act-btn { background: #2b211b; border-color: #6d5f52; }
 .peek-act-btn.active { background: #2f80c4; border-color: #2f80c4; }
