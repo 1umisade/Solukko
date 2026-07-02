@@ -80,7 +80,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-btn * { touch-action: inherit; }
 /* course = a pack of cards: a top card (video) with several cards behind that flare out a little on hover */
 .pack-top { position: absolute; inset: 0; z-index: 5; border-radius: 16px; overflow: hidden; border: 3px solid #ebe3cf; background: #111; box-shadow: 0 10px 26px rgba(0,0,0,0.32); }
-.deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; filter: grayscale(1); }   /* course videos in black & white */
+.deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
 .deck-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.5); pointer-events: none; }   /* 50% black layer over the video */
 .deck-label { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 14px; }
 .deck-code { position: absolute; left: 12px; bottom: 10px; z-index: 2; font-size: 14px; font-weight: 600; opacity: 0.92; color: #fff; text-shadow: 0 1px 5px rgba(0,0,0,0.85); pointer-events: none; }
@@ -94,7 +94,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-btn:hover .pack-top { box-shadow: 0 16px 34px rgba(0,0,0,0.4); }
 /* course with no cards yet: dimmed placeholder, not clickable */
 /* course with no cards yet: same pack (video shows through), just greyed out and not clickable */
-.deck-btn.deck-empty { opacity: 0.5; cursor: default; filter: grayscale(0.5); }
+.deck-btn.deck-empty { opacity: 0.5; cursor: default; filter: grayscale(1); }
 .deck-btn.deck-empty:hover { transform: none; }
 .deck-btn.deck-empty:hover .pack-top { box-shadow: 0 10px 26px rgba(0,0,0,0.32); }   /* no hover lift */
 /* Soluvisa stays a circle */
@@ -401,7 +401,7 @@ body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6
   bottom: 4px;
   right: 5px;
   font-size: 0.48rem;
-  color: #b5824a;
+  color: #6b4423;
   line-height: 1;
   letter-spacing: -0.04em;
   pointer-events: none;
@@ -418,7 +418,7 @@ body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-colo
 body.dark-mode .overview-card.known   { background: #303d35; border-color: #6f8f77; }
 body.dark-mode .overview-card.unknown { background: #3f3022; border-color: #b87a45; }
 
-.card-stars { position: absolute; right: 1rem; bottom: 0.8rem; font-size: 1.4rem; line-height: 1; color: #b5824a; letter-spacing: 0.08em; cursor: help; }
+.card-stars { position: absolute; right: 1rem; bottom: 0.8rem; font-size: 1.4rem; line-height: 1; color: #6b4423; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
 body.dark-mode .card-stars { color: #eadfce; }
 
@@ -1673,7 +1673,7 @@ async function renderCurrentCard(){
   const _rounded=Math.round(_words/10)*10;
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
   const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus '+_words+' sanaa') : ('Vastauksen laajuus noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
-  const _frontText = 'Klikkaa korttia tarkistaaksesi vastauksen.' + (_laajuusText ? (' '+_laajuusText+'.') : '');   // two sentences in one bubble
+  const _frontText = (_laajuusText ? (_laajuusText+'. ') : '') + 'Klikkaa korttia tarkistaaksesi vastauksen.';   // laajuus first, then the click prompt
   if(_bub) _bub.textContent=_frontText;
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
