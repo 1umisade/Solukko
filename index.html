@@ -1082,12 +1082,18 @@ function logoScream(ev){
   if(!clickInCircle(ev, logo.querySelector('.brand-inner'))) return;   // ignore the transparent corners
   playScream();
   siteBrandReact();
+  const greet=document.querySelector('#home-mona .home-greet');   // advance the greeting through Mona's other speeches
+  if(greet && typeof HOME_BUBBLE_ORDER!=='undefined'){
+    _greetIdx=(_greetIdx+1)%HOME_BUBBLE_ORDER.length;
+    greet.innerHTML=MONA_BUBBLES[HOME_BUBBLE_ORDER[_greetIdx]]||'';
+    greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
+  }
 }
 
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
-  tervetuloa:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun.</span>',
+  tervetuloa:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Klikkaamalla minua kerron lisää.</span>',
   hyva:'Hyvä sinä! Taas opiskelemassa.',
   tietovisa:'Tietovisoja joka perjantai Orbitaalilla klo 14:00. Muodosta joukkue yksin tai kaveriesi kanssa. Ei ilmoittautumista.',
   darkmode:'Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button>',
@@ -1510,7 +1516,8 @@ function buildDeckGrid(decks, list){
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }   // Mona lives at the top-left now
-  const greet=document.createElement('div'); greet.className='home-greet';               // permanent Tervetuloa greeting to Mona's right
+  const greet=document.createElement('div'); greet.className='home-greet';               // greeting to Mona's right; starts on Tervetuloa, clicking Mona cycles
+  _greetIdx=0;
   greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES.tervetuloa:'');
   greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
   header.appendChild(greet);
