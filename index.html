@@ -118,7 +118,7 @@ body.is-mobile .card-peek { --slideD: 28px; }
 body.is-mobile .card-peek-inner { width: 46px; height: 46px; top: -10px; left: calc(50% - 23px); }
 body.is-mobile .card-peek-bubble { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
-/* deck finished: Mona dances on a disco floor (square card) */
+/* deck finished: Mona dances on a disco floor (1.5:1 card, same as review cards) */
 .flashcard.celebrating { aspect-ratio: 1 / 1.5; min-height: 0; padding: 0; overflow: hidden; }   /* same 1.5:1 as the review cards (fitCardScale sizes it) */
 .mona-sing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .disco { display: none; position: absolute; left: -30%; top: -30%; width: 160%; height: 160%; z-index: 0; pointer-events: none; transform-origin: center; filter: blur(8px); background: conic-gradient(#ff4d6d, #ffd24d, #4dff88, #4dd2ff, #b84dff, #ff4d6d); animation: discoSpin 4s linear infinite, discoPulse 0.7s ease-in-out infinite alternate; }
@@ -2064,7 +2064,7 @@ function celebrationEnd(){   // song finished: stop the party, prompt to enrol f
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
   const sl=document.querySelector('#progress-row .mona-vol'); if(sl) sl.style.display='none';
   const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Tsemppiä tenttiin!'; bub.style.display=''; }   // song over: switch the bubble to the exam send-off
-  _celebEnded=true;   // Mona stays clickable (reacts, doesn't change the constant text)
+  _celebEnded=true;   // after this, clicking Mona still reacts but the bubble stays "Tsemppiä tenttiin!"
   monaReact();
 }
 let _celebEnded=false, _monaEndIdx=0, _monaBlinkT=null;
@@ -2085,12 +2085,12 @@ function monaReact(){   // the lively "as if clicked" reaction: twitch, squeak, 
   const img=body.querySelector('.brand-logo-img');
   if(img){ img.src='solukkologo_eyes_closed.png'; sing.classList.add('eyes-closed'); clearTimeout(_monaBlinkT); _monaBlinkT=setTimeout(()=>{ img.src='solukkologo_eyes.png'; sing.classList.remove('eyes-closed'); },1000); }
 }
-function monaCelebClick(ev){   // after the song: click Mona like the peeker — cycles a new speech bubble
+function monaCelebClick(ev){   // after the song: clicking Mona just reacts (shake + squeak); the bubble text is left as-is
   if(!_celebEnded) return;
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   const body=sing.querySelector('.mona-body'); if(!body) return;
   if(!clickInCircle(ev, body.querySelector('.mona-scale')||body)) return;   // circular hitbox
-  monaReact();   // shake + squeak; the constant bubble stays "Koko kurssi opiskeltu!"
+  monaReact();   // shake + squeak; the bubble text ("Tsemppiä tenttiin!") stays
 }
 function showCelebration(){
   currentCard=null;
