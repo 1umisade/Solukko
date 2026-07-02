@@ -1291,13 +1291,13 @@ function parseAnkiDB(db) {
 // ════════════════════════════════════════════════════════════
 async function loadDecks(){
   const seen=new Set(), names=[];
-  allDeckNames.forEach(d=>{ if(!d.startsWith('TYKRY::')) return; const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0]; if(!seen.has(top)){ seen.add(top); names.push(top); } });
-  allCards.forEach(card=>{ const d=card.deckName||''; if(!d.startsWith('TYKRY::')) return; const top='TYKRY::'+d.replace('TYKRY::','').split('::')[0]; if(!seen.has(top)){ seen.add(top); names.push(top); } });
+  allDeckNames.forEach(d=>{ if(!d.startsWith('SOLUKKO.COM::')) return; const top='SOLUKKO.COM::'+d.replace('SOLUKKO.COM::','').split('::')[0]; if(!seen.has(top)){ seen.add(top); names.push(top); } });
+  allCards.forEach(card=>{ const d=card.deckName||''; if(!d.startsWith('SOLUKKO.COM::')) return; const top='SOLUKKO.COM::'+d.replace('SOLUKKO.COM::','').split('::')[0]; if(!seen.has(top)){ seen.add(top); names.push(top); } });
 
   if(names.length === 0){
     const d = document.getElementById('conn-error'); d.style.display = 'block';
     const adn=[...new Set(allCards.map(c=>c.deckName).filter(Boolean))].slice(0,10);
-    d.innerHTML=`<strong>Kortteja löytyi (${allCards.length} kpl) mutta ei TYKRY-pakkoja.</strong><br><br>Löydetyt pakannimet:<br><code>${adn.join('<br>')||'(ei yhtään)'}</code><br><br>Varmista että pakkaasi vie nimellä <code>TYKRY</code>.`;
+    d.innerHTML=`<strong>Kortteja löytyi (${allCards.length} kpl) mutta ei SOLUKKO.COM-pakkoja.</strong><br><br>Löydetyt pakannimet:<br><code>${adn.join('<br>')||'(ei yhtään)'}</code><br><br>Varmista että pakkaasi vie nimellä <code>SOLUKKO.COM</code>.`;
     return;
   }
 
@@ -1305,7 +1305,7 @@ async function loadDecks(){
   await document.fonts.ready;
   const canvas=document.createElement('canvas'); const ctx2=canvas.getContext('2d'); ctx2.font='700 22px Lora, Georgia, serif';
   const decks=names.map(deck=>{
-    const shortName=deck.replace('TYKRY::','');
+    const shortName=deck.replace('SOLUKKO.COM::','');
     const courseCode=(shortName.match(/\(([^h][^t][^t][^p].*?)\)/)||[])[1]||'';
     const cleanName=shortName.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'').replace(/\s*\(.*?\)\s*/,'').trim();
     const bgVideo = cleanName + '.mp4';
@@ -1390,7 +1390,7 @@ async function loadDecks(){
   const _pc=_p.get('solukko-card'), _pa=_p.get('solukko-answer');
   if(_pc){
     const _tc=allCards.find(c=>String(c.cardId)===_pc);
-    if(_tc){ const _topDeck='TYKRY::'+_tc.deckName.replace('TYKRY::','').split('::')[0]; if(names.includes(_topDeck)){ await startDeck(_topDeck); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
+    if(_tc){ const _topDeck='SOLUKKO.COM::'+_tc.deckName.replace('SOLUKKO.COM::','').split('::')[0]; if(names.includes(_topDeck)){ await startDeck(_topDeck); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
   }
   const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
@@ -1533,7 +1533,7 @@ function revealCourseCode(el){   // "(näytä kurssikoodi)" -> reveal the course
 }
 function renderReviewDeckCard(deckName){
   const box=document.getElementById('review-deck-card'); if(!box) return;
-  const shortName=deckName.replace('TYKRY::','');
+  const shortName=deckName.replace('SOLUKKO.COM::','');
   const moodleMatch=shortName.match(/\((https?:\/\/.*?)\)/);
   const moodleLink=moodleMatch?moodleMatch[1]:'#';
   const withoutUrl=shortName.replace(/\s*\(https?:\/\/[^)]*\)\s*/g,'');
@@ -1702,7 +1702,7 @@ async function openCardById(cardId){
   const cid=String(cardId);
   const tc=(allCards||[]).find(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(!tc){ alert('Korttia ei löytynyt.'); return; }
-  const topDeck='TYKRY::'+tc.deckName.replace('TYKRY::','').split('::')[0];
+  const topDeck='SOLUKKO.COM::'+tc.deckName.replace('SOLUKKO.COM::','').split('::')[0];
   await startDeck(topDeck);
   const ci=reviewCards.findIndex(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(ci>=0) jumpToOverviewCard(ci);
@@ -1728,7 +1728,7 @@ function renderDevCommentsPanel(){
     docs.sort((a,b)=>((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)-((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0));
     let html='<div class="dev-comments-title">Kaikki kommentit ('+docs.length+')</div>';
     if(!docs.length) html+='<div style="opacity:0.6;font-size:0.8rem;">Ei kommentteja.</div>';
-    docs.forEach(c=>{ const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('TYKRY::','')); const cid=escCmt(String(c.cardId||'')); html+='<div class="dev-comment-row" onclick="openCardById(\''+cid+'\')"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span></div>'; });
+    docs.forEach(c=>{ const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('SOLUKKO.COM::','')); const cid=escCmt(String(c.cardId||'')); html+='<div class="dev-comment-row" onclick="openCardById(\''+cid+'\')"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span></div>'; });
     panel.innerHTML=html;
   }).catch(err=>{ panel.innerHTML='<div class="dev-comments-title">Kaikki kommentit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+err.message+'</div>'; });
 }
@@ -2312,7 +2312,7 @@ function renderCardOverview(){
   }
 
   grid.dataset.deckName=currentDeck;
-  var _short=currentDeck.replace('TYKRY::','');
+  var _short=currentDeck.replace('SOLUKKO.COM::','');
   var _urls=(_short.match(/https?:\/\/[^)\s]+/g)||[]);
   var _mLink=_urls.find(u=>/moodle/i.test(u))||'';
   var _pLink=_urls.find(u=>/peppi/i.test(u))||'';
