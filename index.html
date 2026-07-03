@@ -50,22 +50,13 @@ body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
-#home-mona { align-self: flex-start; display: flex; align-items: flex-start; margin: 4px 0 2px; }
+#home-mona { align-self: center; display: flex; align-items: center; margin: 4px 0 6px; }   /* Mona + greeting centered at the top (Mona left of the bubble) */
 #home-mona .site-brand { width: 140px; margin: 0; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
 .home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: 140px; box-sizing: border-box; display: flex; align-items: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.6rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
 .home-greet::after { content: ""; position: absolute; right: 100%; top: 50%; transform: translateY(-50%); border: 13px solid transparent; border-right-color: #fffef9; }
 body.dark-mode .home-greet { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .home-greet::after { border-right-color: #3a312b; }
-/* top-right homepage banner: countdown to the next Solukko-tietovisa */
-#soluvisa-banner { position: fixed; top: 16px; right: 16px; z-index: 60; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; padding: 0.65rem 1.1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.12); font-family: 'Lora', serif; text-align: center; color: #56533c; }
-#soluvisa-banner .sv-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.7; }
-#soluvisa-banner .sv-count { font-size: 1.5rem; font-weight: 800; margin: 3px 0; color: #6b4423; letter-spacing: 0.01em; }
-#soluvisa-banner .sv-when { font-size: 0.68rem; opacity: 0.65; }
-body.dark-mode #soluvisa-banner { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
-body.dark-mode #soluvisa-banner .sv-count { color: #d7a86a; }
-body.reviewing #soluvisa-banner { display: none; }   /* homepage only */
-@media (max-width: 760px) { #soluvisa-banner { top: 8px; right: 8px; padding: 0.45rem 0.7rem; } #soluvisa-banner .sv-count { font-size: 1.1rem; } #soluvisa-banner .sv-label, #soluvisa-banner .sv-when { font-size: 0.6rem; } }
 .year-section { width: 100%; }
 .year-heading { font-family: 'Lora', serif; font-weight: 800; font-size: 1.15rem; color: #56533c; opacity: 0.88; border-bottom: 2px solid #d4cec4; padding-bottom: 6px; margin-bottom: 16px; }
 .year-row { display: flex; gap: 24px; align-items: flex-start; }
@@ -692,12 +683,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ PAKKAVALINNANÄYTTÖ ════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
-</div>
-<!-- Top-right homepage banner: countdown to the next Solukko-tietovisa -->
-<div id="soluvisa-banner">
-  <div class="sv-label">Seuraava Solukko-tietovisa alkaa</div>
-  <div id="soluvisa-countdown" class="sv-count">–</div>
-  <div class="sv-when">Perjantaisin klo 14:00 · Orbitaali</div>
 </div>
 <button id="dev-screen-btn" onclick="showDevScreen()" title="Kehittäjänäkymä" style="display:none;position:fixed;top:14px;left:14px;width:44px;height:44px;border-radius:50%;border:1px solid #d4cec4;background:#fffef9;color:#56533c;font-size:1.2rem;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.14);z-index:50;align-items:center;justify-content:center;">🛠️</button>
 <div id="dev-screen" style="display:none">
@@ -2426,7 +2411,7 @@ function renderCardOverview(){
   var _codeSafe=String(_code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   var _pSafe=String(_pLink).replace(/"/g,'&quot;');
   var _reveal=_code?(' '+(_pLink?'<a href="'+_pSafe+'" target="_blank" rel="noopener" style="font-weight:700;color:inherit;">'+_codeSafe+'</a>':'<span style="font-weight:700;">'+_codeSafe+'</span>')):'';
-  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div><div class="deck-header-note">Vastaa Turun yliopiston kurssia'+_reveal+'.</div><button class="grid-shuffle-btn" onclick="shuffleAllCards()" title="Sekoita kaikki kortit">🔀</button></div>';
+  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div></div>';
 
   grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
