@@ -1127,22 +1127,32 @@ buildMonaBubbles();
 // The greeting bubble (to Mona's right) shows Tervetuloa on load; clicking Mona cycles it through the rest.
 let _homeHoverOpened=false, _greetIdx=0;
 
-// Logo eyes follow the cursor
+// Logo eyes follow the cursor — rAF-throttled with cached geometry so a mousemove
+// never triggers a layout read (the old version did getBoundingClientRect + offsetParent
+// on every eye on every mousemove = heavy layout thrashing).
 (function initLogoEyes(){
-  function move(x,y){
+  let px=0, py=0, ticking=false, cache=[], geomStale=true;
+  function refresh(){   // expensive layout reads, done rarely (only when geometry may have changed)
+    cache=[];
     document.querySelectorAll('.logo-eye').forEach(eye=>{
-      if(eye.offsetParent===null) return;   // eye hidden
-      const r=eye.getBoundingClientRect();
-      if(!r.width) return;
-      const ang=Math.atan2(y-(r.top+r.height/2), x-(r.left+r.width/2));
-      const max=r.width*0.18;
-      const pupil=eye.firstElementChild;
-      const fy=eye.closest('#card-peek') ? -1 : 1;   // the review peeker is scaleY(-1): invert the pupil vertical
-      if(pupil) pupil.style.transform='translate('+(Math.cos(ang)*max)+'px,'+(fy*Math.sin(ang)*max)+'px)';
+      if(eye.offsetParent===null) return;   // hidden
+      const r=eye.getBoundingClientRect(); if(!r.width) return;
+      cache.push({ pupil:eye.firstElementChild, cx:r.left+r.width/2, cy:r.top+r.height/2, max:r.width*0.18, fy:eye.closest('#card-peek')?-1:1 });
     });
+    geomStale=false;
   }
-  window.addEventListener('mousemove', e=>move(e.clientX,e.clientY));
-  window.addEventListener('touchmove', e=>{ if(e.touches[0]) move(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+  function apply(){   // hot path: no layout reads, just transform writes
+    ticking=false;
+    if(geomStale) refresh();
+    for(const e of cache){ if(!e.pupil) continue; const ang=Math.atan2(py-e.cy, px-e.cx); e.pupil.style.transform='translate('+(Math.cos(ang)*e.max)+'px,'+(e.fy*Math.sin(ang)*e.max)+'px)'; }
+  }
+  function onMove(x,y){ px=x; py=y; if(!ticking){ ticking=true; requestAnimationFrame(apply); } }
+  window.addEventListener('mousemove', e=>onMove(e.clientX,e.clientY), {passive:true});
+  window.addEventListener('touchmove', e=>{ if(e.touches[0]) onMove(e.touches[0].clientX,e.touches[0].clientY); },{passive:true});
+  const invalidate=()=>{ geomStale=true; };
+  window.addEventListener('scroll', invalidate, {passive:true});
+  window.addEventListener('resize', invalidate);
+  setInterval(invalidate, 1000);   // re-read geometry ~1x/s to catch slow layout changes (peeker slide-in, Mona twitch)
 })();
 
 // Desktop only: peek the logo in from the side every 5s, then hide it again 5s later
