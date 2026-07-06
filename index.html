@@ -94,9 +94,10 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-btn:hover .pack-top { box-shadow: 0 16px 34px rgba(0,0,0,0.4); }
 /* course with no cards yet: dimmed placeholder, not clickable */
 /* course with no cards yet: same pack (video shows through), just greyed out and not clickable */
-.deck-btn.deck-empty { opacity: 0.5; cursor: default; filter: grayscale(1) sepia(0.7); }   /* B&W but warm/beige, not cold grey */
+.deck-btn.deck-empty { opacity: 0.9; cursor: default; }   /* placeholder shows construction.png; not clickable */
 .deck-btn.deck-empty:hover { transform: none; }
 .deck-btn.deck-empty:hover .pack-top { box-shadow: 0 10px 26px rgba(0,0,0,0.32); }   /* no hover lift */
+.deck-construction { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
 /* Soluvisa stays a circle */
 .deck-btn.soluvisa-deck { aspect-ratio: 1 / 1; border-radius: 50%; overflow: hidden; border: 4px solid #1f3d2a; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at 42% 36%, #3a7a52, #0e2a1a); }
 .deck-btn.soluvisa-deck::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 4px solid #ebe3cf; z-index: 3; pointer-events: none; }
@@ -278,7 +279,7 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 .comment-area { display: flex; flex-direction: column; gap: 8px; margin-top: 2.2rem; align-items: center; }   /* centered boxes */
 .comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.4s ease; }
 body:not(.is-mobile) .comment-box { width: 50%; }   /* half size on desktop */
-.comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; pointer-events: none; }
+.comment-box::before { content: "💬  Kommentoi tätä korttia"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; pointer-events: none; }
 .comment-box.open { max-height: 600px; overflow: visible; cursor: default; padding-bottom: 52px; }
 .comment-box.open::before { opacity: 0; pointer-events: none; }
 .comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #498d65; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
@@ -737,11 +738,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-again" onclick="gradeCard(false)" title="En">
+    <button class="ball-btn grade-again" onclick="gradeCard(false)" onmouseenter="peekHint('Kysyn kohta uudestaan')" onmouseleave="peekHint()" title="En">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="progress-tube"><div class="progress-fill" id="progress-fill"></div></div>
-    <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Kyllä">
+    <button class="ball-btn grade-correct" onclick="gradeCard(true)" onmouseenter="peekHint('En kysy enää tänään uudestaan')" onmouseleave="peekHint()" title="Kyllä">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
     </button>
   </div>
@@ -1232,6 +1233,11 @@ function showBackPeek(){
   if(b) b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia';
   p.classList.remove('peek-out'); p.style.display=''; p.style.transition=''; p.style.transform=''; p.style.transformOrigin=''; p.style.visibility='visible'; playPeekIn(p);   // clear the leftover flip transform so it stays in view
 }
+function peekHint(text){   // grade-button hover: temporarily swap the bottom peeker bubble text, restore on leave
+  const b=document.getElementById('card-peek-bubble'); if(!b) return;
+  if(text){ if(b.dataset.orig===undefined) b.dataset.orig=b.textContent; b.textContent=text; }
+  else if(b.dataset.orig!==undefined){ b.textContent=b.dataset.orig; delete b.dataset.orig; }
+}
 let _peekRetractTimer=null, _peekAutoRetract=false;
 function retractCardPeek(){
   const p=document.getElementById('card-peek'); if(!p) return;
@@ -1411,7 +1417,11 @@ async function loadDecks(){
   let _playingDeckVideo = null;
 
   decks.forEach(item=>{
-    const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');   // empty courses get the same pack, just dimmed & non-clickable
+    const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
+    if(!item.hasCards){   // placeholder: static "under construction" image — no video/backsides (keeps the homepage light)
+      btn.innerHTML=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+      item.btn=btn; return;
+    }
     const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
     const _tmp=document.createElement('div');
     const _tops=_dc.map(c=>{ _tmp.innerHTML=extractBody(c.answer||'').body; return (_tmp.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (entities decoded)
