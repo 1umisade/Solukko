@@ -1071,9 +1071,12 @@ function _warmAudio(){
   }catch(e){}
 }
 ['pointerdown','touchstart','keydown','click'].forEach(ev=>window.addEventListener(ev,_warmAudio,{capture:true,passive:true}));
+let _lastFrogIdx=-1;
 function playScream(){
   if(!_audioCtx){ try{ _audioCtx=new (window.AudioContext||window.webkitAudioContext)(); _decodeFrogs(); }catch(e){} }
-  const i=Math.floor(Math.random()*_soundFiles.length);   // random clip
+  let i=Math.floor(Math.random()*_soundFiles.length);   // random clip, never the same one twice in a row
+  if(_soundFiles.length>1 && i===_lastFrogIdx){ i=(i+1+Math.floor(Math.random()*(_soundFiles.length-1)))%_soundFiles.length; }
+  _lastFrogIdx=i;
   if(_soundBufs[i]&&_audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_soundBufs[i]; const g=_audioCtx.createGain(); g.gain.value=0.125; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }
   try{ _soundEls[i].currentTime=0; _soundEls[i].muted=false; _soundEls[i].volume=0.125; _soundEls[i].play().catch(()=>{}); }catch(e){}
 }
