@@ -202,7 +202,7 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.front-basic #question-content { text-align: center; line-height: 1.25; }
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
-.card-embed-3d { width: 100%; margin-top: 1.2rem; border-radius: 10px; overflow: hidden; }   /* wrapper clips the iframe, so its rounded corners have no dark fringe */
+.card-embed-3d { width: 50%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; }   /* half size, centered; wrapper clips the iframe so its rounded corners have no dark fringe */
 .embed-3d-frame { width: 100%; aspect-ratio: 1 / 1; height: auto; border: none; border-radius: 0; background: #efe9dd; display: block; pointer-events: none; }   /* front: no interaction — clicks flip the card */
 .answer-shown .embed-3d-frame { pointer-events: auto; }   /* answer/back side: allow rotating the model */
 body.dark-mode .embed-3d-frame { background: #2a2622; }
@@ -1447,6 +1447,11 @@ async function loadDecks(){
 
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
+    if(isMobile()){   // mobile: a single static construction.png for every deck (no videos/gifs/backsides — keeps the phone homepage light)
+      btn.innerHTML=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+      if(item.hasCards) btn.onclick=()=>startDeck(item.deck);
+      item.btn=btn; return;
+    }
     if(!item.hasCards){   // placeholder course: its own gif/named video if it has one, else the generic immunologia still (no backsides/hover/click)
       const _gif=EMPTY_DECK_GIFS[item.cleanName];
       const _media=_gif
@@ -2326,7 +2331,6 @@ function showAnswer(){
     fc.classList.remove('front-basic'); document.getElementById('question-content').style.fontSize='';   // back to normal size/flow for the answer
     if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aProcessed||currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
     else { document.getElementById('answer-section').style.display='block'; }
-    { const _emb=fc.querySelector('.card-embed-3d'); if(_emb) fc.appendChild(_emb); }   // 3D embed drops to the very bottom of the back, after all the answer text
     document.getElementById('show-row').style.display='none';
     document.getElementById('grade-row').style.display='none';
     { const _p=document.getElementById('card-peek'); if(_p){ _p.style.visibility='hidden'; _p.classList.remove('peek-in','peek-out'); } }   // hidden on reveal
