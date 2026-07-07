@@ -1455,6 +1455,17 @@ async function loadDecks(){
       btn.innerHTML=`<div class="pack-top">${_media}<div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
       const _pv=btn.querySelector('video.deck-video');
       if(_pv) _pv.addEventListener('loadeddata',()=>{ try{ const d=_pv.duration||2; _pv.currentTime=Math.min(Math.max(0.8,d*0.25),d-0.05); }catch(e){} },{once:true});
+      if(_gif){   // gif animates only while hovered: freeze a static first-frame poster, swap to the live gif on hover
+        const _img=btn.querySelector('img.deck-video');
+        _img.addEventListener('load',()=>{
+          const _cv=document.createElement('canvas'); _cv.className='deck-video';
+          _cv.width=_img.naturalWidth||480; _cv.height=_img.naturalHeight||480;
+          try{ _cv.getContext('2d').drawImage(_img,0,0); }catch(e){}
+          _img.after(_cv); _img.style.display='none'; _img.removeAttribute('src');   // stop the gif, show the frozen poster
+          btn.addEventListener('mouseenter',()=>{ _img.src=_gif; _img.style.display=''; _cv.style.display='none'; });   // play from the start
+          btn.addEventListener('mouseleave',()=>{ _cv.style.display=''; _img.style.display='none'; _img.removeAttribute('src'); });   // freeze again
+        },{once:true});
+      }
       item.btn=btn; return;
     }
     const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
