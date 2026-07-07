@@ -201,6 +201,10 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.front-basic #question-content { text-align: center; line-height: 1.25; }
+/* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
+.card-embed-3d { width: 100%; margin-top: 1.2rem; }
+.embed-3d-frame { width: 100%; height: 340px; border: none; border-radius: 10px; background: #efe9dd; display: block; }
+body.dark-mode .embed-3d-frame { background: #2a2622; }
 .card-content.left-align { text-align: left; }
 .dim-paren { opacity: 0.5; }
 .answer-section .card-content { text-align: left; }
@@ -780,6 +784,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 // ① KONFIGURAATIO & TILA
 // ════════════════════════════════════════════════════════════
 const APKG_FILE = 'SOLUKKO.apkg';
+const EMBED_3D_BASE = 'https://geneesi.com/?model=';   // cards with a non-empty 3D field embed this on the front; the field value is appended. Swap for the real viewer URL.
 let allCards  = [];
 let allDeckNames = [];
 let mediaMap  = {};
@@ -1702,6 +1707,12 @@ async function renderCurrentCard(){
   dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
   applyWordLinks(document.getElementById('answer-content'));
+  // Cards with a non-empty 3D field embed the external viewer at the bottom of the front, fed with that value
+  { const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D']).replace(/<[^>]*>/g,'').trim();
+    if(_3d){ const _qc=document.getElementById('question-content'); const _emb=document.createElement('div'); _emb.className='card-embed-3d';
+      _emb.innerHTML='<iframe class="embed-3d-frame" src="'+EMBED_3D_BASE+encodeURIComponent(_3d)+'" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>';
+      _qc.appendChild(_emb); }
+  }
   const _ac=document.getElementById('answer-content');
   const _clz=_ac.querySelectorAll('.cloze-answer, .cloze-answer-line, .cloze');   // cloze: count only the deleted text
   const _src=_clz.length ? [..._clz].map(e=>e.textContent).join(' ') : (_ac.textContent||'');
