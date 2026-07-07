@@ -2758,15 +2758,13 @@ function fitCardScale(){
   fc.style.height=Math.round(h)+'px';
   wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
 }
-// Basic-card front: centred, 3x-bigger question; drop to 2x only if 3x doesn't fit (no other sizes)
+// Basic-card front: centred question at the same size as the back (one font size front & back)
 function fitFrontText(){
   const fc=document.getElementById('flashcard'), q=document.getElementById('question-content');
   if(!fc||!q) return;
   fc.classList.remove('front-basic'); q.style.fontSize='';
   if(!currentCard || currentCard._isSpecial || cardAnswerShown) return;
   fc.classList.add('front-basic');
-  q.style.fontSize='3.6rem';                                              // 3x
-  if(fc.scrollHeight>fc.clientHeight+1 || q.scrollWidth>q.clientWidth+1) q.style.fontSize='2.4rem';   // 2x fallback
 }
 
 function scrollToCard(smooth){
