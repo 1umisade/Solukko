@@ -408,6 +408,11 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 .grid-shuffle-btn { position: absolute; right: 0; bottom: 0.7rem; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
 .grid-shuffle-btn:active { transform: scale(0.9); }
 body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
+.grid-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; width: 100%; margin-top: 1.4rem; }
+.grid-tool-btn { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #6b6055; background: #fffef9; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.5rem 0.9rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.1s ease, background 0.15s ease; }
+.grid-tool-btn:hover { background: #f5f0e8; }
+.grid-tool-btn:active { transform: scale(0.96); }
+body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-color: #6d5f52; }
 .overview-card { will-change: transform; }
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
 .overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
@@ -768,6 +773,12 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div id="card-overview-grid"></div>
+
+  <div class="grid-tools" id="grid-tools">
+    <button class="grid-tool-btn" onclick="resetDeckProgress()" title="Merkitse kaikki kortit uusiksi">↺ Nollaa edistyminen</button>
+    <button class="grid-tool-btn" onclick="shuffleReviewOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
+    <button class="grid-tool-btn" onclick="restoreDefaultOrder()" title="Palauta alkuperäinen järjestys">↕ Oletusjärjestys</button>
+  </div>
 
   <div class="group-tools">
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
@@ -1807,6 +1818,29 @@ function shuffleDeck(){
     const ci=currentCard?reviewCards.indexOf(currentCard):-1;
     queue=reviewCards.slice(ci+1);
   }
+}
+
+// Card-grid tools (under the overview grid in review mode)
+function resetDeckProgress(){   // mark every card "new" again
+  cardGrades={};
+  try{ localStorage.removeItem('solukko-grades-'+currentDeck); }catch(e){}
+  _celebratedDeck=false;
+  updateProgress();
+  renderCardOverview();
+}
+function shuffleReviewOrder(){   // randomise the upcoming cards; scramble the grid for feedback
+  shuffleMode=true;
+  document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.add('active'));
+  for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; }
+  shuffleAllCards();
+}
+function restoreDefaultOrder(){   // back to the deck's original order, grid included
+  shuffleMode=false;
+  document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.remove('active'));
+  const ci=currentCard?reviewCards.indexOf(currentCard):-1;
+  queue=reviewCards.slice(ci+1);
+  const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render in default order
+  renderCardOverview();
 }
 
 async function nextCard(){
