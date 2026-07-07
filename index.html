@@ -1442,13 +1442,18 @@ async function loadDecks(){
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
   let _playingDeckVideo = null;
   const _htmlTextParser = new DOMParser();   // parse card HTML to text WITHOUT loading its <img>/gif resources
+  const EMPTY_DECK_GIFS = { 'Kemian peruskurssi I': 'Kemian peruskurssi I.gif' };   // placeholder decks that use an animated gif instead of a video
 
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
-    if(!item.hasCards){   // placeholder course: the immunologia video still (no backsides/hover/click — one shared file, so it caches once)
-      btn.innerHTML=`<div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="video_immunologia.mp4" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
-      const _pv=btn.querySelector('.deck-video');
-      _pv.addEventListener('loadeddata',()=>{ try{ const d=_pv.duration||2; _pv.currentTime=Math.min(Math.max(0.8,d*0.25),d-0.05); }catch(e){} },{once:true});
+    if(!item.hasCards){   // placeholder course: its own gif/named video if it has one, else the generic immunologia still (no backsides/hover/click)
+      const _gif=EMPTY_DECK_GIFS[item.cleanName];
+      const _media=_gif
+        ? `<img class="deck-video" src="${_gif}" alt="">`
+        : `<video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="video_immunologia.mp4" type="video/mp4"><source src="default.mp4" type="video/mp4"></video>`;
+      btn.innerHTML=`<div class="pack-top">${_media}<div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+      const _pv=btn.querySelector('video.deck-video');
+      if(_pv) _pv.addEventListener('loadeddata',()=>{ try{ const d=_pv.duration||2; _pv.currentTime=Math.min(Math.max(0.8,d*0.25),d-0.05); }catch(e){} },{once:true});
       item.btn=btn; return;
     }
     const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
