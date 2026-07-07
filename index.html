@@ -437,7 +437,7 @@ body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-colo
 body.dark-mode .overview-card.known   { background: #303d35; border-color: #6f8f77; }
 body.dark-mode .overview-card.unknown { background: #3f3022; border-color: #b87a45; }
 
-.card-stars { position: absolute; right: 1rem; bottom: 0.8rem; font-size: 1.4rem; line-height: 1; color: #6b4423; letter-spacing: 0.08em; cursor: help; }
+.card-stars { position: absolute; right: 1rem; bottom: 0.8rem; z-index: 3; font-size: 1.4rem; line-height: 1; color: #6b4423; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
 body.dark-mode .card-stars { color: #eadfce; }
 
@@ -739,12 +739,12 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <div class="card-peek-bubble" id="card-peek-bubble"></div>
     </div>
     <div class="flashcard" id="flashcard">
-      <div class="card-stars" id="card-stars"></div>
       <div class="card-content" id="question-content"></div>
       <div class="answer-section" id="answer-section">
         <div class="card-content" id="answer-content"></div>
       </div>
     </div>
+    <div class="card-stars" id="card-stars"></div>
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
