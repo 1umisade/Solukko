@@ -2817,6 +2817,19 @@ function buildWordLinks(){
   _wordLinks=[];
   const seen=new Set();
 
+  // Pass 0: explicit "references" field — words the card author chose to link to this card (highest priority)
+  reviewCards.forEach((card,idx)=>{
+    const ref=(getField(card,['references','References'])||'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/&[a-z]+;/gi,' ');
+    ref.split(/[\n,;]+/).forEach(part=>{
+      const clean=part.replace(/\s+/g,' ').trim();
+      if(!clean||clean.length<2) return;
+      const lower=clean.toLowerCase();
+      if(seen.has(lower)) return;
+      seen.add(lower);
+      _wordLinks.push({text:clean,lower,cardIndex:idx});
+    });
+  });
+
   // Pass 1: front-field text (existing behaviour)
   reviewCards.forEach((card,idx)=>{
     const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
