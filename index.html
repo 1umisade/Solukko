@@ -2045,9 +2045,18 @@ function deleteComment(docId){ if(!confirm('Poistetaanko kommentti?')) return; d
 // ════════════════════════════════════════════════════════════
 // ⑬ KORTTIARVIOINTI
 // ════════════════════════════════════════════════════════════
+// Exam-probability stars: read the "propability" field (★ chars or a 1–5 number); fall back to old ★ tags.
+function cardStarCount(card){
+  const f=String(getField(card,['propability','probability','Probability','tenttitodennäköisyys','Tenttitodennäköisyys'])||'').replace(/<[^>]*>/g,'').trim();
+  const stars=(f.match(/★/g)||[]).length;
+  if(stars) return Math.min(stars,3);
+  const num=parseInt(f,10);
+  if(num>=1 && num<=3) return num;
+  return Math.min(((card.tags||[]).join(' ').match(/★/g)||[]).length,3);
+}
 function renderCardStars(){
   const box=document.getElementById('card-stars'); if(!box||!currentCard) return;
-  const count=(currentCard.tags||[]).join(' ').match(/★/g)?.length||0;
+  const count=cardStarCount(currentCard);
   box.textContent=count?'★︎'.repeat(count):'';   // VS15 forces text (not emoji) so CSS color applies
   const meanings=['','Tuskin tentissä','Ehkä tentissä','Luultavasti tentissä'];
   box.dataset.starMeaning = count ? meanings[Math.min(count,3)] : '';
@@ -2462,7 +2471,7 @@ function renderCardOverview(){
       const index=reviewCards.indexOf(card);
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
-      const starCount=(card.tags||[]).join(' ').match(/★/g)?.length||0;
+      const starCount=cardStarCount(card);
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
