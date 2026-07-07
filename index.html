@@ -1798,8 +1798,9 @@ function loadFirestoreComments(){
       const d=doc.data(); const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=doc.id;
       const isOwn=d.userId&&d.userId===getUserId(); const canEdit=isOwn||devMode;
       const btns=canEdit?`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:'';
-      const imgHtml=d.imageData?`<img src="${d.imageData}" style="max-width:100%;border-radius:8px;margin-top:6px;display:block;">`:'';
-      el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${d.text}</span>${imgHtml}</div>`;
+      const _safeImg=(typeof d.imageData==='string' && /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=\s]+$/.test(d.imageData)) ? d.imageData : '';   // only a real base64 image data-URL (no attribute break-out)
+      const imgHtml=_safeImg?`<img src="${_safeImg}" style="max-width:100%;border-radius:8px;margin-top:6px;display:block;">`:'';
+      el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${escCmt(d.text)}</span>${imgHtml}</div>`;   // escape user text -> no HTML/script injection
       feed.appendChild(el);
     });
   }, err=>{ feed.innerHTML=`<div style="font-family:JetBrains Mono,monospace;font-size:0.7rem;color:#c0392b;padding:4px;">Virhe: ${err.message}</div>`; });
