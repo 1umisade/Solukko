@@ -19,6 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyAeWTSjX8-M_-Xs780nnC_0o9d1YmYroGo",
@@ -29,6 +30,11 @@ firebase.initializeApp({
   appId: "1:143174538900:web:b55db7c61ce724827a4681"
 });
 const db = firebase.firestore();
+// Anonymous auth — gives every device a real, stable uid that the Firestore rules can verify.
+// (Requires "Anonymous" sign-in to be enabled in the Firebase console → Authentication.)
+try{
+  firebase.auth().signInAnonymously().catch(e=>console.warn('Anonymous auth failed — enable it in Firebase console → Authentication:', e.code||e.message));
+}catch(e){ console.warn('Auth init failed:', e); }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
@@ -802,7 +808,9 @@ let kuvaajatUnsubscribe=null;
 // ② KÄYTTÄJÄN IDENTITEETTI
 // ════════════════════════════════════════════════════════════
 function getUserId(){
-  let uid = localStorage.getItem('solukko-uid');
+  const au = (window.firebase && firebase.auth && firebase.auth().currentUser) ? firebase.auth().currentUser.uid : null;   // real anonymous-auth uid (what the Firestore rules verify)
+  if(au) return au;
+  let uid = localStorage.getItem('solukko-uid');   // fallback before sign-in completes / if anonymous auth isn't enabled
   if(!uid){ uid = Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('solukko-uid',uid); }
   return uid;
 }

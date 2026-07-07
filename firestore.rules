@@ -1,0 +1,65 @@
+rules_version = '2';
+// Solukko Firestore security rules.
+// Deploy: Firebase console -> Firestore Database -> Rules -> paste -> Publish.
+// Requires Anonymous sign-in enabled (Authentication -> Sign-in method -> Anonymous).
+//
+// NOTE ON "dev"/admin powers: there is no server, so we can't mint custom claims.
+// To let YOU (the dev) moderate any comment or control the quiz, paste your own
+// anonymous uid into isAdmin() below (get it from Authentication -> Users, or run
+// `firebase.auth().currentUser.uid` in the site console while signed in).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function str(v, max) { return v is string && v.size() <= max; }
+    // Fill in your uid(s) to unlock dev moderation / quiz control:
+    function isAdmin() { return signedIn() && request.auth.uid in ['PASTE_YOUR_DEV_UID']; }
+
+    // ── Comments (card comments + replies) ──
+    match /comments/{id} {
+      allow read: if true;                                             // comments are public
+      allow create: if signedIn()
+                    && request.resource.data.userId == request.auth.uid    // can only post as yourself
+                    && str(request.resource.data.text, 2000)
+                    && str(request.resource.data.cardId, 200)
+                    && (!('imageData' in request.resource.data)
+                        || (request.resource.data.imageData is string
+                            && request.resource.data.imageData.size() <= 900000));   // ~0.9 MB cap
+      allow update, delete: if isOwner(resource.data.userId) || isAdmin();           // author (or dev) only
+    }
+
+    // ── Presence (online users); doc id == uid ──
+    match /presence/{uid} {
+      allow read: if true;
+      allow create, update: if isOwner(uid);
+      allow delete: if true;   // ephemeral; also removed via unauthenticated REST cleanup
+    }
+
+    // ── Live quiz: current card / owner, buzzers, team money, volunteers ──
+    // Best-effort without admin auth: signed-in + validated. Lock to the dev by
+    // switching the writes to `if isAdmin()` once you've filled in your uid above.
+    match /gamestate/{doc} {
+      allow read: if true;
+      allow write: if signedIn();
+    }
+    match /buzzers/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid && str(request.resource.data.word, 100);
+      allow delete: if signedIn();
+    }
+    match /joukkueet/{id} {
+      allow read: if true;
+      allow write: if signedIn();
+    }
+    match /kuvaajat/{id} {
+      allow read: if true;
+      allow create: if signedIn() && str(request.resource.data.word, 200);
+      allow update, delete: if signedIn();
+    }
+
+    // Everything else is denied.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
