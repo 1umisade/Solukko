@@ -202,8 +202,9 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.front-basic #question-content { text-align: center; line-height: 1.25; }
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
-.card-embed-3d { width: 100%; margin-top: 1.2rem; }
-.embed-3d-frame { width: 100%; aspect-ratio: 1 / 1; height: auto; border: none; border-radius: 10px; background: #efe9dd; display: block; }
+.card-embed-3d { width: 100%; margin-top: 1.2rem; border-radius: 10px; overflow: hidden; }   /* wrapper clips the iframe, so its rounded corners have no dark fringe */
+.embed-3d-frame { width: 100%; aspect-ratio: 1 / 1; height: auto; border: none; border-radius: 0; background: #efe9dd; display: block; pointer-events: none; }   /* front: no interaction — clicks flip the card */
+.answer-shown .embed-3d-frame { pointer-events: auto; }   /* answer/back side: allow rotating the model */
 body.dark-mode .embed-3d-frame { background: #2a2622; }
 .card-content.left-align { text-align: left; }
 .dim-paren { opacity: 0.5; }
@@ -1756,6 +1757,7 @@ async function renderCurrentCard(){
   fc.style.minHeight='';   // fixed 1:3 card (fitCardScale sets height/width); no flip pre-size needed
   fc.style.transition = 'none';
   fc.style.transform  = '';
+  fc.classList.remove('answer-shown');   // front side again: 3D embed non-interactive until the answer is shown
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation  = 'none';
   void fc.offsetWidth;
@@ -2309,6 +2311,7 @@ function showAnswer(){
   cardAnswerShown=true;
   const fc=document.getElementById('flashcard');
   const reveal=()=>{
+    fc.classList.add('answer-shown');   // back side: the 3D embed becomes interactive
     fc.classList.remove('front-basic'); document.getElementById('question-content').style.fontSize='';   // back to normal size/flow for the answer
     if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aProcessed||currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
     else { document.getElementById('answer-section').style.display='block'; }
