@@ -137,8 +137,7 @@ body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::
 #fs-exit-btn.visible { opacity: 1; pointer-events: auto; }
 body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 /* Mona lives on the progress bar as a draggable knob, with a hint bubble beside her */
-.pb-knob { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin-top: -26px; margin-left: -26px; cursor: grab; touch-action: none; z-index: 3; }
-.pb-knob:active { cursor: grabbing; }
+.pb-knob { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin-top: -26px; margin-left: -26px; cursor: default; touch-action: none; z-index: 3; }
 .pb-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
 .pb-bubble { position: absolute; top: 50%; z-index: 9999; width: max-content; max-width: min(70vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.15s ease; }
 .pb-bubble.show { opacity: 1; }
@@ -280,7 +279,7 @@ body.dark-mode .embed-3d-frame { background: #2a2622; }
 .answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
-.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 30px; z-index: 2; }   /* as close to the card as possible without the bar overlapping the peeker bubble */
+.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 6px; z-index: 2; }   /* close to the card bottom */
 .progress-tube { position: relative; flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: visible; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
@@ -638,10 +637,10 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .card-out-right { animation: cardSlideOutRight 0.26s ease forwards; pointer-events:none; }
 .card-in-left { animation: cardSlideInLeft 0.18s ease forwards; }
 /* card change: fade to black (no slide) */
-@keyframes cardFadeOut { from{filter:brightness(1)} to{filter:brightness(0)} }
-@keyframes cardFadeIn { from{filter:brightness(0)} to{filter:brightness(1)} }
-.card-in-right { animation: cardFadeIn 0.2s ease forwards; }
-.card-out-up { animation: cardFadeOut 0.22s ease forwards; pointer-events:none; }
+/* card change: old card slides out to the left, new card slides in from the right (both modes) */
+.card-in-right { animation: cardSlideInRight 0.2s ease forwards; }
+@keyframes cardSlideOutUp { from{transform:translateY(0);opacity:1} to{transform:translateY(-160px);opacity:0} }
+.card-out-up { animation: cardSlideOutUp 0.26s ease forwards; pointer-events:none; }
 @keyframes cardShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-7px)} 80%{transform:translateX(5px)} }
 .card-shake { animation: cardShake 0.45s ease; }
 @keyframes btnAttention { 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,0.12); } 40%{ transform:scale(1.2); box-shadow:0 0 26px 7px var(--glow,#ffcd82), 0 4px 14px rgba(0,0,0,0.18); } }
@@ -2056,10 +2055,15 @@ function hideGradeHint(){ if(!cardAnswerShown) return; const b=document.getEleme
 function showFrontMona(){
   const pr=document.getElementById('progress-row'); if(!pr) return;
   pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
-  const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='10%'; }
-  const b=document.getElementById('pb-bubble');
+  const b=document.getElementById('pb-bubble'), k=_fsKnob(), tube=document.getElementById('progress-tube');
   if(b){ b.textContent='Paina korttia nähdäksesi vastauksen'; b.style.left=''; b.classList.remove('side-left','side-right'); b.classList.add('side-center','show'); }
   updateProgress();
+  if(b&&k&&tube){   // put Mona right next to the (centred) bubble's left edge
+    const tr=tube.getBoundingClientRect(), br=b.getBoundingClientRect();
+    let pct = tr.width ? ((br.left-tr.left) - (k.offsetWidth/2) - 6)/tr.width*100 : 8;
+    pct=Math.max(2, Math.min(96, pct));
+    k.style.transition='none'; k.style.left=pct+'%';
+  }
 }
 function clearFrontMona(){   // called on reveal: back to the normal (graded) bar
   const pr=document.getElementById('progress-row'); if(pr) pr.classList.remove('pb-front');
@@ -2671,7 +2675,7 @@ function gradeCard(correct){
     fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
     fc.style.transition='none'; fc.style.transform=''; fc.style.animation='none';
     void fc.offsetWidth;
-    fc.style.animation=''; fc.classList.add('card-out-up');
+    fc.style.animation=''; fc.classList.add('card-out-left');
     setTimeout(doNext,280);
   };
   if(correct){                                        // "yes": glow the bar (no green card), then fly out
