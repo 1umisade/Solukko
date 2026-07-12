@@ -111,10 +111,12 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .custom-deck-icon { font-size: 2.4rem; margin-bottom: 10px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
 /* Rotate-card button (top middle in review) + the 90° card rotation */
 #global-topbar { position: relative; }
-#rotate-btn { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); }
+#rotate-btn { position: absolute; top: 10px; right: 10px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.15rem; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.15); align-items: center; justify-content: center; line-height: 1; }
 #rotate-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
-body.dark-mode #rotate-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode #rotate-btn { background: rgba(58,49,43,0.92); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
+#card-screen:fullscreen #rotate-btn { display: none !important; }   /* in fullscreen the exit button (top-right) handles it */
+#card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }   /* fade the mouse pointer after 2s of stillness in fullscreen */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
 #card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #f5f0e8; margin: 0 !important; }
 #card-screen:fullscreen::backdrop { background: #f5f0e8; }
@@ -705,9 +707,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- ← Takaisin -->
   <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showTopHint('Takaisin etusivulle')" onmouseleave="hideTopHint()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
-  <!-- ⟳ Käännä kortti 90° (top middle, review mode) -->
-  <button id="rotate-btn" onclick="toggleCardFullscreen()" onmouseenter="showTopHint('Koko näytön tila – kortti täyttää ruudun')" onmouseleave="hideTopHint()" title="Koko näytön tila" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.25rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">⛶</button>
-
   <!-- Soluvisa now lives on the homepage as a course circle (see updateSoluvisaCircle) -->
 
   <!-- TOP-RIGHT: exit-dev sphere + timestamp pill + sun/moon btn -->
@@ -854,6 +853,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="card-extent" id="card-extent"></div>
 
   <div id="flashcard-wrap">
+    <button id="rotate-btn" onclick="toggleCardFullscreen()" title="Koko näytön tila" style="display:none;">⛶</button>
     <div class="flashcard" id="flashcard">
       <div class="card-content" id="question-content"></div>
       <div class="answer-section" id="answer-section">
@@ -2024,16 +2024,24 @@ function flashFsExitBtn(){   // show the exit button for ~1s (on entering fullsc
   b.style.display='flex'; b.classList.add('visible');
   clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>b.classList.remove('visible'),1000);
 }
+let _fsCursorTimer=null;
+function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness (fullscreen only)
+  const cs=document.getElementById('card-screen'); if(!cs) return;
+  cs.classList.remove('cursor-hidden');
+  clearTimeout(_fsCursorTimer);
+  if(document.fullscreenElement) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement) cs.classList.add('cursor-hidden'); }, 2000);
+}
+document.addEventListener('mousemove', _fsCursorActivity);
 document.addEventListener('fullscreenchange',()=>{
   const cs=document.getElementById('card-screen');
   const on = !!document.fullscreenElement && document.fullscreenElement===cs;
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
   fitCardScale(); scrollToCard(); updateFsSlider();
   const b=document.getElementById('fs-exit-btn');
-  if(on){ flashFsExitBtn(); }
-  else if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); }
+  if(on){ flashFsExitBtn(); _fsCursorActivity(); }
+  else { if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden'); }
 });
-document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement) flashFsExitBtn(); }, true);
+document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
 
 // Grading slider — Mona rides the progress bar as a draggable knob between the two answer buttons
 let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false;
@@ -2046,8 +2054,10 @@ function fsHot(which){   // expand + glow the button Mona is over ('wrong' | 'ri
   if(r) r.classList.toggle('fs-ans-hot', which==='right');
 }
 function _fsFullscreen(){ return document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen'); }
+function _hidePbBubble(){ const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
 function _fsStartDrag(e){
   const t=document.getElementById('progress-tube'); if(!t) return;
+  _hidePbBubble();   // Mona is moving -> hide the speech bubble
   _fsDrag=true; _fsTrackW=t.getBoundingClientRect().width||1; _fsStartX=e.clientX; _fsStartPct=_fsPct(); _fsSwipeMoved=false;
   const k=_fsKnob(); if(k) k.style.transition='none';
 }
@@ -2067,7 +2077,8 @@ function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) 
   else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; fsHot('right'); fsSliderGrade(true); } // swiped onto the right (correct) button
   else { fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210); }   // snap back to centre
 }
-function fsSliderPick(correct){   // arrow key: slide Mona onto the button, glow it, then grade
+function fsSliderPick(correct){   // arrow key / button click: slide Mona onto the button, glow it, then grade
+  _hidePbBubble();   // Mona moving to the button -> hide the bubble
   const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
   setTimeout(()=>fsHot(correct?'right':'wrong'), 240);
   setTimeout(()=>fsSliderGrade(correct), 430);
@@ -2077,11 +2088,11 @@ function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.s
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 // grade-button hover: show the hint bubble on Mona's corresponding side
 let _frontMonaTimer=null, _backBubbleTimer=null;
-const _BACK_BUBBLE_TEXT='Tiesitkö? Paina kyllä- tai ei-nappia';
+const _BACK_BUBBLE_TEXT='Joko osasit? Paina Kyllä- tai Ei-nappia.';
 function showGradeHint(correct){   // grade-button hover: swap the centred bubble text to the button's function
   if(!cardAnswerShown) return;
   const b=document.getElementById('pb-bubble'); if(!b) return;
-  b.textContent = correct ? 'Tiesin – en kysy enää tänään uudestaan' : 'Palataan asiaan – kysyn kohta uudestaan';
+  b.textContent = correct ? 'Kysyn huomenna uudestaan' : 'Kysyn kohta uudestaan';
   b.classList.add('show');
 }
 function hideGradeHint(){   // revert to the "Tiesitkö…" prompt
