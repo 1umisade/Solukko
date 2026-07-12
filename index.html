@@ -184,10 +184,30 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 /* ── 6. KORTTIRUUTU & FLASHCARD ─────────────────────────── */
 :root { --side-card-gap: 50px; }
 #card-screen { position: relative; width: 100%; max-width: 1180px; min-width: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; margin-top: 0; }
+#deck-title-bar { flex: 0 0 auto; text-align: center; padding: 10px 64px 6px; font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.1rem, 2.2vw, 1.6rem); line-height: 1.15; color: #1a1612; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#deck-title-bar:empty { display: none; }
+body.dark-mode #deck-title-bar { color: #eadfce; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; }
 #card-col { flex: 0 0 clamp(300px, 34vw, 440px); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
-@media (max-width: 900px) {   /* narrow: back to a single column, card on top, grid below */
+#card-stack { display: flex; flex-direction: column; align-items: center; }
+/* ── DESKTOP review: full viewport, no page scroll; 50/50 with a centre divider; card left + comments right ── */
+@media (min-width: 901px) {
+  body.reviewing { padding: 0 !important; overflow: hidden; }
+  body.reviewing #global-topbar { position: fixed; top: 0; left: 0; right: 0; width: 100%; max-width: none; margin: 0; padding: 10px 16px 0; z-index: 60; pointer-events: none; }
+  body.reviewing #global-topbar > * { pointer-events: auto; }
+  body.reviewing #card-screen { max-width: none; width: 100vw; height: 100vh; overflow: hidden; }
+  body.reviewing #review-cols { flex: 1 1 auto; min-height: 0; align-items: stretch; gap: 0; }
+  body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 0.4rem 1.2rem 1.4rem; }
+  body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; }
+  body.reviewing #card-col::before { content: ''; position: absolute; left: 0; top: 8%; bottom: 8%; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, transparent, #d4cec4 14%, #d4cec4 86%, transparent); }
+  body.dark-mode.reviewing #card-col::before { background: linear-gradient(to bottom, transparent, #6d5f52 14%, #6d5f52 86%, transparent); }
+  body.reviewing #card-stack { flex: 1 1 0; min-width: 0; max-height: 100%; justify-content: center; gap: 0.5rem; }
+  body.reviewing #comment-col { flex: 0 0 clamp(200px, 42%, 320px); min-width: 0; align-self: stretch; overflow-y: auto; padding: 1rem 0; }
+  body.reviewing #flashcard-wrap { margin-top: 0; }
+}
+@media (max-width: 900px) {   /* narrow: single column, card on top, grid below (unchanged) */
+  #deck-title-bar { padding: 6px 12px; font-size: 1.15rem; }
   #review-cols { flex-direction: column; align-items: center; gap: 1.4rem; }
   #grid-col { order: 2; position: static; max-height: none; overflow: visible; width: 100%; padding: 0; }
   #card-col { order: 1; position: static; height: auto; flex: none; width: 100%; }
@@ -814,6 +834,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
   </button>
+  <div id="deck-title-bar"></div>
   <div id="review-cols">
   <div id="grid-col">
   <div id="card-overview-grid"></div>
@@ -825,6 +846,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
   </div>
   <div id="card-col">
+  <div id="card-stack">
   <div class="top-bar">
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
   </div>
@@ -871,6 +893,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
   </div>
   <div class="group-scoreboard" id="group-scoreboard"></div>
+  </div><!-- /card-stack -->
+  <div id="comment-col"></div>
   </div><!-- /card-col -->
   </div><!-- /review-cols -->
 </div>
@@ -1129,7 +1153,7 @@ function playLogoClickSound(){
 const commentBoxWrap=document.querySelector('.comment-box');
 // Move the comment area inside the card screen (before the overview grid) so revealing it
 // appears below the card instead of pushing the card down
-(function(){ const ca=document.querySelector('.comment-area'), cog=document.getElementById('card-overview-grid'); if(ca&&cog&&cog.parentElement) cog.parentElement.insertBefore(ca,cog); })();
+(function(){ const ca=document.querySelector('.comment-area'), col=document.getElementById('comment-col'); if(ca&&col) col.appendChild(ca); })();   // comments live in the right half, next to the card
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
 document.addEventListener('click',e=>{ if(!document.querySelector('.comment-area').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
@@ -2796,9 +2820,9 @@ function renderCardOverview(){
   var _codeSafe=String(_code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   var _pSafe=String(_pLink).replace(/"/g,'&quot;');
   var _reveal=_code?(' '+(_pLink?'<a href="'+_pSafe+'" target="_blank" rel="noopener" style="font-weight:700;color:inherit;">'+_codeSafe+'</a>':'<span style="font-weight:700;">'+_codeSafe+'</span>')):'';
-  var deckHeaderHtml='<div style="width:100%;text-align:center;margin-top:56.25%;padding-bottom:0.8rem;border-bottom:1px solid #d4cec4;position:relative;"><div class="deck-header-name" style="font-weight:700;line-height:1.1;white-space:nowrap;">'+_name+'</div></div>';
+  { const _tb=document.getElementById('deck-title-bar'); if(_tb) _tb.textContent=_name; }   // course title goes in the top-centre bar
 
-  grid.innerHTML=deckHeaderHtml+deckGroups.map((group,groupIndex)=>{
+  grid.innerHTML=deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
     const embedUrl = (!isPaapakka && group.link) ? getYouTubeEmbedUrl(group.link) : null;
     const videoHtml = isPaapakka ? '' : makeVideoEmbed(embedUrl, group.name);
@@ -3103,8 +3127,8 @@ function fitCardScale(){
   }
   const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
   const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
-  const col=document.getElementById('card-col');
-  const availW=Math.max(180, ((col&&col.clientWidth)||(cs?cs.clientWidth:wrap.clientWidth))-4);   // size to the card column, not the whole screen
+  const stack=document.getElementById('card-stack');
+  const availW=Math.max(180, ((stack&&stack.clientWidth)||(cs?cs.clientWidth:wrap.clientWidth))-8);   // size to the card's part of the column (comments take the rest)
   const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5)
   fc.style.height=Math.round(h)+'px';
   wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
