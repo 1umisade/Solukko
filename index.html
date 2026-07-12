@@ -112,9 +112,10 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 /* Rotate-card button (top middle in review) + the 90° card rotation */
 #global-topbar { position: relative; }
 #rotate-btn, #comment-btn { position: absolute; top: 10px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.92); color: #56533c; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.15); display: none; align-items: center; justify-content: center; line-height: 1; }
-#rotate-btn { right: 10px; font-size: 1.3rem; }
-#comment-btn { right: -46px; top: 50%; transform: translateY(-50%); }   /* sits just outside the card's right edge */
-body.reviewing #card-col.commenting #comment-btn { display: none !important; }   /* it "expands" into the comment field */
+#rotate-btn { left: -46px; top: 50%; transform: translateY(-50%); font-size: 1.3rem; }   /* just outside the card's left edge, centred */
+#comment-btn { right: -46px; top: 50%; transform: translateY(-50%); }   /* just outside the card's right edge, centred */
+@media (max-width: 900px) { #rotate-btn { left: auto; right: 10px; top: 10px; transform: none; } }   /* mobile: keep the fullscreen button in the card's top-right */
+body.reviewing #card-col.commenting #comment-btn, body.reviewing #card-col.commenting #rotate-btn { display: none !important; }   /* both hide while the comment field is open */
 #rotate-btn.active, #comment-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
 body.dark-mode #rotate-btn, body.dark-mode #comment-btn { background: rgba(58,49,43,0.92); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
@@ -518,9 +519,9 @@ body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
 .grid-tool-btn:active { transform: scale(0.96); }
 body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-color: #6d5f52; }
 .overview-card { will-change: transform; transition: transform 0.16s ease, box-shadow 0.16s ease; }
-.overview-card:hover { transform: scale(1.4); z-index: 30; box-shadow: 0 10px 28px rgba(0,0,0,0.28); -webkit-line-clamp: 16; }   /* hovering a grid card pops it out and shows more text */
+.overview-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }   /* subtle pop on hover */
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
-.overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+.overview-section-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
@@ -1178,6 +1179,40 @@ const commentBoxWrap=document.querySelector('.comment-box');
 // appears below the card instead of pushing the card down
 (function(){ const ca=document.querySelector('.comment-area'), col=document.getElementById('comment-col'); if(ca&&col) col.appendChild(ca); })();   // comments live in the right half, next to the card
 (function(){ const dm=document.getElementById('darkmode-wrap'), gt=document.getElementById('grid-tools'); if(dm&&gt) gt.appendChild(dm); })();   // dark-mode toggle sits with the shuffle / reset tools under the grid
+// Elastic rubberband for the right half (desktop): the card springs when you over-scroll, even if its content fits
+(function(){
+  const col=document.getElementById('card-col'), inner=document.getElementById('card-stack');
+  if(!col||!inner) return;
+  let offset=0, raf=null, releaseTO=null;
+  const MAX=130;
+  function apply(){ inner.style.transform = offset ? 'translateY('+offset.toFixed(1)+'px)' : ''; }
+  function spring(){
+    cancelAnimationFrame(raf);
+    (function step(){
+      offset *= 0.82;
+      if(Math.abs(offset)<0.4){ offset=0; apply(); return; }
+      apply(); raf=requestAnimationFrame(step);
+    })();
+  }
+  col.addEventListener('wheel', e=>{
+    if(window.matchMedia('(max-width: 900px)').matches) return;   // right-half rubberband is a desktop thing
+    // let any scrollable child (long card, comment feed) consume the wheel first
+    let node=e.target;
+    while(node && node!==col){
+      const st=getComputedStyle(node);
+      if(node.scrollHeight>node.clientHeight+1 && /(auto|scroll)/.test(st.overflowY)){
+        if((e.deltaY<0 && node.scrollTop>0) || (e.deltaY>0 && node.scrollTop+node.clientHeight<node.scrollHeight-1)) return;
+      }
+      node=node.parentElement;
+    }
+    if((e.deltaY<0 && col.scrollTop>0) || (e.deltaY>0 && col.scrollTop+col.clientHeight<col.scrollHeight-1)) return;   // card-col can still scroll
+    e.preventDefault();               // nothing left to scroll -> rubberband
+    cancelAnimationFrame(raf);
+    offset = Math.max(-MAX, Math.min(MAX, offset - e.deltaY*0.28));
+    apply();
+    clearTimeout(releaseTO); releaseTO=setTimeout(spring, 55);
+  }, {passive:false});
+})();
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
 document.addEventListener('click',e=>{ if(!_commenting && !document.querySelector('.comment-area').contains(e.target) && !e.target.closest('#comment-btn')) document.querySelector('.comment-box').classList.remove('open'); });   // don't fight the comment-panel toggle
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
@@ -3217,7 +3252,7 @@ function fitCardScale(){
   const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
   const stack=document.getElementById('card-stack');
   const _mobile=window.matchMedia('(max-width: 900px)').matches;
-  const _gutter=(!_mobile && !_commenting)?60:0;   // leave room just outside the card for the comment button (desktop, comments closed)
+  const _gutter=(!_mobile && !_commenting)?104:0;   // room on both sides of the card for the fullscreen (left) + comment (right) buttons
   const availW=Math.max(180, ((stack&&stack.clientWidth)||(cs?cs.clientWidth:wrap.clientWidth))-8-_gutter);   // size to the card's part of the column (comments take the rest)
   const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5)
   fc.style.height=Math.round(h)+'px';
