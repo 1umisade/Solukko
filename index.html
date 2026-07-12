@@ -152,8 +152,10 @@ body.dark-mode .pb-bubble { background: #3a312b; color: #eadfce; border-color: #
 body.dark-mode .pb-bubble.side-left::after { border-left-color: #3a312b; }
 body.dark-mode .pb-bubble.side-right::after,
 body.dark-mode .pb-bubble.side-center::after { border-right-color: #3a312b; }
-/* front side: Mona sits on the bar (no grade buttons yet), moved left so the bubble centers */
+/* front side: no bar or grade buttons — just Mona (centred) and her speech bubble */
 .progress-row.pb-front .ball-btn { display: none; }
+.progress-row.pb-front .progress-tube { background: none; box-shadow: none; }
+.progress-row.pb-front .progress-fill { display: none; }
 /* grade button expands + glows when Mona overlaps it */
 .ball-btn.fs-ans-hot { transform: scale(1.22); }
 .grade-again.fs-ans-hot { box-shadow: 0 0 24px 7px rgba(245,171,151,0.95); }
@@ -901,6 +903,7 @@ let coinAnimating=false;
 let cardAnswerShown=false;
 let commentsUnsubscribe=null;
 let kuvaajatUnsubscribe=null;
+let _frontHintText='';   // "Vastauksen laajuus … · Klikkaa korttia" — shown in Mona's front bubble
 
 
 // ════════════════════════════════════════════════════════════
@@ -1883,6 +1886,7 @@ async function renderCurrentCard(){
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
   const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus '+_words+' sanaa') : ('Vastauksen laajuus noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
   const _frontText = (_laajuusText ? (_laajuusText+'. ') : '') + 'Klikkaa korttia tarkistaaksesi vastauksen.';   // laajuus first, then the click prompt
+  _frontHintText = _frontText;   // Mona's front bubble shows this
   if(_bub) _bub.textContent=_frontText;
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
@@ -2052,18 +2056,12 @@ function showGradeHint(correct){
 }
 function hideGradeHint(){ if(!cardAnswerShown) return; const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
 // front side: Mona rides the bar (no grade buttons yet), moved left, with a centered hint bubble
-function showFrontMona(){
+function showFrontMona(){   // front: no progress bar — Mona centred, speech bubble to her right
   const pr=document.getElementById('progress-row'); if(!pr) return;
   pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
-  const b=document.getElementById('pb-bubble'), k=_fsKnob(), tube=document.getElementById('progress-tube');
-  if(b){ b.textContent='Paina korttia nähdäksesi vastauksen'; b.style.left=''; b.classList.remove('side-left','side-right'); b.classList.add('side-center','show'); }
-  updateProgress();
-  if(b&&k&&tube){   // put Mona right next to the (centred) bubble's left edge
-    const tr=tube.getBoundingClientRect(), br=b.getBoundingClientRect();
-    let pct = tr.width ? ((br.left-tr.left) - (k.offsetWidth/2) - 6)/tr.width*100 : 8;
-    pct=Math.max(2, Math.min(96, pct));
-    k.style.transition='none'; k.style.left=pct+'%';
-  }
+  const b=document.getElementById('pb-bubble'), k=_fsKnob();
+  if(k){ k.style.transition='none'; k.style.left='50%'; }   // Mona in the centre
+  if(b){ b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; b.style.left='50%'; b.classList.remove('side-left','side-center'); b.classList.add('side-right','show'); }
 }
 function clearFrontMona(){   // called on reveal: back to the normal (graded) bar
   const pr=document.getElementById('progress-row'); if(pr) pr.classList.remove('pb-front');
