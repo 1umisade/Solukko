@@ -104,6 +104,18 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-btn.deck-empty:hover { transform: none; }
 .deck-btn.deck-empty:hover .pack-top { box-shadow: 0 10px 26px rgba(0,0,0,0.32); }   /* no hover lift */
 .deck-construction { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
+/* "review from your own device" — a deck-looking button that opens a file picker */
+.custom-import-wrap { display: flex; justify-content: center; width: 100%; margin: 2.5rem auto 1rem; }
+.deck-btn.custom-deck-btn { position: relative; left: auto; top: auto; width: min(240px, 60vw); }
+.deck-btn.custom-deck-btn .pack-top { background: linear-gradient(155deg, #6b8f7a 0%, #3a5c4c 55%, #2b3f38 100%); }
+.custom-deck-icon { font-size: 2.4rem; margin-bottom: 10px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+/* Rotate-card button (top middle in review) + the 90° card rotation */
+#global-topbar { position: relative; }
+#rotate-btn { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); }
+#rotate-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
+body.dark-mode #rotate-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
+#flashcard-wrap.rot-90 { transform: rotate(90deg); transform-origin: center center; }
 /* Soluvisa stays a circle */
 .deck-btn.soluvisa-deck { aspect-ratio: 1 / 1; border-radius: 50%; overflow: hidden; border: 4px solid #1f3d2a; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at 42% 36%, #3a7a52, #0e2a1a); }
 .deck-btn.soluvisa-deck::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 4px solid #ebe3cf; z-index: 3; pointer-events: none; }
@@ -619,6 +631,9 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- ← Takaisin -->
   <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
+  <!-- ⟳ Käännä kortti 90° (top middle, review mode) -->
+  <button id="rotate-btn" onclick="toggleCardRotation()" title="Käännä kortti 90°" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">⟳</button>
+
   <!-- Soluvisa now lives on the homepage as a course circle (see updateSoluvisaCircle) -->
 
   <!-- TOP-RIGHT: exit-dev sphere + timestamp pill + sun/moon btn -->
@@ -701,7 +716,18 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ PAKKAVALINNANÄYTTÖ ════════════════════════════════════ -->
 <div id="deck-screen">
   <div class="deck-list" id="deck-list"></div>
+  <div class="custom-import-wrap">
+    <button class="deck-btn custom-deck-btn" onclick="document.getElementById('apkg-import-input').click()" title="Avaa .apkg-tiedosto laitteeltasi">
+      <div class="pack-top">
+        <div class="deck-label">
+          <div class="custom-deck-icon">📂</div>
+          <div class="deck-title">Kertaa kortteja omalta laitteeltasi</div>
+        </div>
+      </div>
+    </button>
+  </div>
 </div>
+<input type="file" id="apkg-import-input" accept=".apkg,application/octet-stream" style="display:none" onchange="importApkgFile(this.files&&this.files[0]); this.value='';">
 <button id="dev-screen-btn" onclick="showDevScreen()" title="Kehittäjänäkymä" style="display:none;position:fixed;top:14px;left:14px;width:44px;height:44px;border-radius:50%;border:1px solid #d4cec4;background:#fffef9;color:#56533c;font-size:1.2rem;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.14);z-index:50;align-items:center;justify-content:center;">🛠️</button>
 <div id="dev-screen" style="display:none">
   <div class="dev-screen-inner">
@@ -1380,6 +1406,47 @@ function parseAnkiDB(db) {
   return cards;
 }
 
+// Import an .apkg the user picks from their device → a one-off custom deck, then review it
+async function importApkgFile(file){
+  if(!file) return;
+  show('loading');
+  try{
+    const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
+    const buf = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(buf);
+    const mediaFile = zip.file('media');
+    if(mediaFile){
+      let mediaJson; try{ mediaJson = await mediaFile.async('string'); }catch(e){}
+      if(mediaJson){
+        let mediaIndex={}; try{ mediaIndex=JSON.parse(mediaJson); }catch(e){}
+        await Promise.all(Object.entries(mediaIndex).map(async ([num,name])=>{
+          const f=zip.file(num); if(!f) return;
+          const b64=await f.async('base64');
+          const ext=name.split('.').pop().toLowerCase();
+          const mime={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',svg:'image/svg+xml',webp:'image/webp'}[ext]||'application/octet-stream';
+          mediaMap[name]=`data:${mime};base64,${b64}`;
+        }));
+      }
+    }
+    const dbFile = zip.file('collection.anki21') || zip.file('collection.anki2');
+    if(!dbFile) throw new Error('Tiedostosta ei löytynyt Anki-korttikantaa (collection.anki21/anki2).');
+    const dbBuf = await dbFile.async('arraybuffer');
+    const db = new SQL.Database(new Uint8Array(dbBuf));
+    let cards = parseAnkiDB(db); db.close();
+    if(!cards.length) throw new Error('Pakassa ei ollut yhtään korttia.');
+    const base=(file.name||'Oma pakka').replace(/\.apkg$/i,'').replace(/::/g,' ').replace(/\s+/g,' ').trim()||'Oma pakka';
+    const deckName='OMA::'+base;
+    cards.forEach(c=>{ c.deckName=deckName; });
+    allCards = allCards.filter(c=>c.deckName!==deckName).concat(cards);   // replace any earlier import of the same file
+    if(typeof allDeckNames!=='undefined' && !allDeckNames.includes(deckName)) allDeckNames.push(deckName);
+    hide('loading');
+    startDeck(deckName);
+  }catch(e){
+    hide('loading');
+    alert('Kortiston lataus epäonnistui: '+((e&&e.message)||e));
+  }
+}
+
 
 // ════════════════════════════════════════════════════════════
 // ⑨ PAKKOJEN LATAAMINEN
@@ -1648,6 +1715,7 @@ async function startDeck(deckName){
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display='none'; }
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='flex';
+  resetCardRotation(); document.getElementById('rotate-btn').style.display='flex';
   document.querySelector('.comment-area').style.display='none';
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
@@ -1841,6 +1909,18 @@ function restoreDefaultOrder(){   // back to the deck's original order, grid inc
   queue=reviewCards.slice(ci+1);
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render in default order
   renderCardOverview();
+}
+
+let cardRotated=false;
+function toggleCardRotation(){   // rotate the reviewed card 90° (toggle)
+  cardRotated=!cardRotated;
+  document.getElementById('flashcard-wrap')?.classList.toggle('rot-90',cardRotated);
+  document.getElementById('rotate-btn')?.classList.toggle('active',cardRotated);
+}
+function resetCardRotation(){
+  cardRotated=false;
+  document.getElementById('flashcard-wrap')?.classList.remove('rot-90');
+  document.getElementById('rotate-btn')?.classList.remove('active');
 }
 
 async function nextCard(){
@@ -2702,6 +2782,7 @@ function showDecks(){
   document.getElementById('peek-logo')?.classList.remove('peek-show','bubble-open');   // hide the peeker on the homepage
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
+  resetCardRotation(); document.getElementById('rotate-btn').style.display='none';
   document.querySelector('.comment-area').style.display='none';
   document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
