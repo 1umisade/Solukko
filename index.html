@@ -137,14 +137,19 @@ body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::
 body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 /* fullscreen grading slider: answer buttons at the ends, Mona is the draggable knob */
 #fs-slider { display: none; position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%); width: min(720px, 90vw); align-items: center; gap: 16px; z-index: 95; }
-.fs-ans { width: 60px; height: 60px; flex-shrink: 0; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.22); transition: transform 0.1s ease; }
+.fs-ans { width: 60px; height: 60px; flex-shrink: 0; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.22); transition: transform 0.13s ease, box-shadow 0.13s ease; }
 .fs-ans:active { transform: scale(0.92); }
 .fs-ans-wrong { background: #f5ab97; }
 .fs-ans-right { background: #9ab8a1; }
 body.dark-mode .fs-ans-wrong { background: #e8a08b; }
 body.dark-mode .fs-ans-right { background: #6f8f77; }
-.fs-track { position: relative; flex: 1; height: 12px; border-radius: 999px; background: #e9e5dd; box-shadow: inset 0 1px 3px rgba(0,0,0,0.16); touch-action: none; }
+.fs-ans.fs-ans-hot { transform: scale(1.22); }                                  /* Mona overlaps: expand + glow */
+.fs-ans-wrong.fs-ans-hot { box-shadow: 0 0 24px 7px rgba(245,171,151,0.95); }
+.fs-ans-right.fs-ans-hot { box-shadow: 0 0 24px 7px rgba(154,184,161,0.95); }
+.fs-track { position: relative; flex: 1; height: 14px; border-radius: 999px; background: #e9e5dd; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); touch-action: none; }
+.fs-fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .fs-track { background: #5a5148; }
+body.dark-mode .fs-fill { background: #6f8f77; }
 .fs-knob { position: absolute; top: 50%; left: 50%; width: 66px; height: 66px; margin-top: -33px; margin-left: -33px; cursor: grab; touch-action: none; }
 .fs-knob:active { cursor: grabbing; }
 .fs-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
@@ -863,6 +868,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="fs-track" id="fs-track">
+      <div class="fs-fill" id="fs-fill"></div>
       <div class="fs-knob" id="fs-knob"><img src="solukkologo_eyes.png" alt=""></div>
     </div>
     <button class="fs-ans fs-ans-right" onclick="fsSliderPick(true)" title="Tiesin (oikea nuoli)">
@@ -1932,10 +1938,11 @@ async function renderCurrentCard(){
 
 // Fill the progress tube proportionally to cards marked "known"
 function updateProgress(){
-  const fill=document.getElementById('progress-fill'); if(!fill) return;
   const total=reviewCards.length||1;
   const known=reviewCards.filter(c=>cardGrades[c.cardId]==='known').length;
-  fill.style.width=(known/total*100)+'%';
+  const pct=(known/total*100)+'%';
+  const fill=document.getElementById('progress-fill'); if(fill) fill.style.width=pct;
+  const fsFill=document.getElementById('fs-fill'); if(fsFill) fsFill.style.width=pct;   // fullscreen slider doubles as the progress bar
 }
 
 let shuffleMode=false;
@@ -2011,23 +2018,29 @@ let _fsDrag=false, _fsTrackRect=null;
 function _fsKnob(){ return document.getElementById('fs-knob'); }
 function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
 function _fsDown(e){ const t=document.getElementById('fs-track'), k=_fsKnob(); if(!t||!k) return; _fsDrag=true; _fsTrackRect=t.getBoundingClientRect(); k.style.transition='none'; _fsMove(e); try{ k.setPointerCapture(e.pointerId); }catch(_){} e.preventDefault(); }
-function _fsMove(e){ if(!_fsDrag||!_fsTrackRect) return; _fsSetPct((e.clientX-_fsTrackRect.left)/_fsTrackRect.width*100); }
-function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=parseFloat(k.style.left)||50;
-  if(p<=15){ k.style.left='0%'; fsSliderGrade(false); }                       // landed on the left (wrong) button
-  else if(p>=85){ k.style.left='100%'; fsSliderGrade(true); }                 // landed on the right (correct) button
-  else { k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210); }   // snap back to centre
+function fsHot(which){   // expand + glow the button Mona is over ('wrong' | 'right' | null)
+  const w=document.querySelector('.fs-ans-wrong'), r=document.querySelector('.fs-ans-right');
+  if(w) w.classList.toggle('fs-ans-hot', which==='wrong');
+  if(r) r.classList.toggle('fs-ans-hot', which==='right');
 }
-function fsSliderPick(correct){   // clicking a button slides Mona onto it, then grades
+function _fsMove(e){ if(!_fsDrag||!_fsTrackRect) return; const p=(e.clientX-_fsTrackRect.left)/_fsTrackRect.width*100; _fsSetPct(p); fsHot(p<=15?'wrong':p>=85?'right':null); }
+function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=parseFloat(k.style.left)||50;
+  if(p<=15){ k.style.left='0%'; fsHot('wrong'); fsSliderGrade(false); }       // landed on the left (wrong) button
+  else if(p>=85){ k.style.left='100%'; fsHot('right'); fsSliderGrade(true); } // landed on the right (correct) button
+  else { fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210); }   // snap back to centre
+}
+function fsSliderPick(correct){   // clicking a button (or arrow key) slides Mona onto it, glows it, then grades
   const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
-  setTimeout(()=>fsSliderGrade(correct),260);
+  setTimeout(()=>fsHot(correct?'right':'wrong'), 240);   // glow when Mona reaches the button
+  setTimeout(()=>fsSliderGrade(correct), 430);
 }
 function fsSliderGrade(correct){ gradeCard(correct); setTimeout(resetFsKnob,300); }   // grade, then recentre Mona for the next card
-function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } }
+function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } fsHot(null); }
 function updateFsSlider(){   // slider shows only in fullscreen once the answer is revealed
   const s=document.getElementById('fs-slider'); if(!s) return;
   const show=!!document.fullscreenElement && cardAnswerShown;
   s.style.display=show?'flex':'none';
-  if(show) resetFsKnob();
+  if(show){ resetFsKnob(); updateProgress(); }
 }
 (function(){
   const k=_fsKnob(), t=document.getElementById('fs-track');
@@ -2585,6 +2598,12 @@ function showAnswer(){
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
   if(_pk){ _pk.classList.remove('peek-in'); const cr=fc.getBoundingClientRect(), pr=_pk.getBoundingClientRect(); _pk.style.transformOrigin=((cr.left+cr.width/2)-pr.left)+'px 50%'; }
+  if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){   // fullscreen: no spin — shake, then swap the content
+    fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
+    setTimeout(()=>fc.classList.remove('card-shake'),500);
+    reveal();
+    return;
+  }
   // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation='none';
@@ -2957,6 +2976,9 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
       e.preventDefault();
       if(!cardAnswerShown) showAnswer();                          // first press reveals the backside
+      else if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
+        fsSliderPick(e.key==='ArrowRight');                        // fullscreen: Mona slides to the button (which glows) then grades
+      }
       else {                                                       // then grade: → Tiesin, ← Palataan asiaan
         const _b=document.querySelector(e.key==='ArrowRight'?'.grade-correct':'.grade-again');
         if(_b){ _b.classList.remove('btn-attention'); void _b.offsetWidth; _b.classList.add('btn-attention'); setTimeout(()=>_b.classList.remove('btn-attention'),700); }   // glow + expand like a shake
