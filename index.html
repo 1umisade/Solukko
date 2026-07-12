@@ -199,7 +199,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 #grid-header { display: flex; align-items: center; gap: 12px; width: 100%; }
 #back-btn-fixed { flex: 0 0 auto; width: 46px; height: 46px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 50%; font-size: 1.2rem; color: #56533c; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); align-items: center; justify-content: center; line-height: 1; }
 #deck-title-bar { flex: 1 1 auto; min-width: 0; text-align: left; padding: 0; font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.3rem, 2.6vw, 2.2rem); line-height: 1.15; color: #1a1612; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#deck-title-bar:empty { display: none; }
+#deck-title-bar { display: none; }   /* deck name lives on the cover + welcome bubble, not next to the back button */
 body.dark-mode #deck-title-bar { color: #eadfce; }
 /* deck intro cover (built from a special intro card): title + esittely centred, fills the grid-half; cards sit below the fold */
 #deck-cover { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1rem; padding: 1.5rem 1.2rem 2.5rem; box-sizing: border-box; }
@@ -208,9 +208,10 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
 #deck-cover .cover-esittely :is(img,iframe,video) { max-width: 100%; height: auto; }
 body.dark-mode #deck-cover .cover-title { color: #eadfce; }
 body.dark-mode #deck-cover .cover-esittely { color: #cbbda8; }
-@media (min-width: 901px) { body.reviewing #deck-cover { min-height: calc(100vh - 84px); } }
+@media (min-width: 901px) { body.reviewing #deck-cover { min-height: 100vh; } }   /* fills the view once the back button is scrolled off the top */
 /* Deck welcome: on load the right half shows a big Mona + welcome bubble instead of a review card */
 #deck-welcome { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem; width: 100%; padding: 1rem; box-sizing: border-box; }
+#deck-welcome .welcome-mona { position: relative; display: inline-block; line-height: 0; }
 #deck-welcome .welcome-mona img { width: clamp(120px, 15vw, 190px); height: auto; display: block; }
 #deck-welcome .welcome-bubble { position: relative; max-width: 40ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 18px; padding: 1rem 1.3rem; font-family: 'Lora', serif; font-size: clamp(1rem, 1.5vw, 1.18rem); line-height: 1.55; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: center; }
 #deck-welcome .welcome-bubble::after { content: ''; position: absolute; left: 50%; bottom: -11px; transform: translateX(-50%); width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 12px solid #fffef9; }
@@ -902,7 +903,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div id="card-stack">
   <div id="deck-welcome">
     <div class="welcome-bubble" id="welcome-bubble"></div>
-    <div class="welcome-mona"><img src="solukkologo_eyes.png" alt=""></div>
+    <div class="welcome-mona">
+      <img src="solukkologo_eyes.png" alt="">
+      <div class="logo-eye le"><span class="logo-pupil"></span></div>
+      <div class="logo-eye re"><span class="logo-pupil"></span></div>
+    </div>
   </div>
   <div class="top-bar">
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
@@ -1893,7 +1898,13 @@ async function startDeck(deckName){
   }
   show('card-screen'); hide('loading');
   showDeckWelcome();   // right half: welcome Mona + bubble; pick a card in the grid to review it in fullscreen
-  { const _gc=document.getElementById('grid-col'); if(_gc) _gc.scrollTop=0; }   // open at the top so the cover fills the view
+  { const _scrollHeaderOff=()=>{   // open scrolled past the header so the back button starts off-screen; the cover fills the view
+      const _gc=document.getElementById('grid-col'); if(!_gc) return; _gc.scrollTop=0;
+      const _cov=document.getElementById('deck-cover');
+      const _tgt=(_cov&&getComputedStyle(_cov).display!=='none')?_cov:document.getElementById('card-overview-grid');
+      if(_tgt){ const _d=_tgt.getBoundingClientRect().top-_gc.getBoundingClientRect().top; _gc.scrollTop=Math.max(0,_d-1); } };
+    requestAnimationFrame(_scrollHeaderOff); setTimeout(_scrollHeaderOff,120); setTimeout(_scrollHeaderOff,350);   // re-assert past any load-time reflow
+  }
   sessionStorage.setItem('solukko-savedDeck', deckName);
   setTimeout(scrollToCard, 200);
   document.getElementById('site-brand').style.display='none';
