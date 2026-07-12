@@ -119,6 +119,11 @@ body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b21
 #card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #f5f0e8; }
 #card-screen:fullscreen::backdrop { background: #f5f0e8; }
 body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
+#card-screen:fullscreen { margin: 0 !important; }
+#card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
+#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; }
+#card-screen:fullscreen .card-content { font-size: 1.5rem; }
+#card-screen:fullscreen #card-peek { display: none !important; }   /* no bottom peeker in fullscreen */
 #card-screen:fullscreen .top-bar,
 #card-screen:fullscreen .progress-row,
 #card-screen:fullscreen #card-overview-grid,
@@ -3016,8 +3021,14 @@ function cardViewportH(){ return viewportH() - bottomReserve(); }
 function fitCardScale(){
   const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
   if(!wrap||!fc) return;
-  wrap.style.transform=''; wrap.style.marginBottom='';
+  wrap.style.transform=''; wrap.style.marginBottom=''; wrap.style.maxWidth=''; wrap.style.marginTop='';
   const cs=document.getElementById('card-screen');
+  if(document.fullscreenElement && document.fullscreenElement===cs){   // fullscreen: the card fills the whole screen
+    wrap.style.maxWidth='none'; wrap.style.marginTop='0';
+    wrap.style.width=window.innerWidth+'px';
+    fc.style.height=window.innerHeight+'px';
+    return;
+  }
   const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
   const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
   const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
