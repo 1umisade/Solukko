@@ -1936,6 +1936,7 @@ async function renderCurrentCard(){
   void fc.offsetWidth;
   fc.style.animation  = '';
   fc.classList.add('card-in-right');
+  setTimeout(()=>fc.classList.remove('card-in-right'),260);   // drop it after the fade-in so a later shake can't re-trigger it (flicker)
   fitCardScale(); fitFrontText(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
@@ -2019,20 +2020,32 @@ document.addEventListener('fullscreenchange',()=>{
 });
 document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement) flashFsExitBtn(); }, true);
 
-// Fullscreen grading slider — Mona is a draggable knob between the two answer buttons
-let _fsDrag=false, _fsTrackRect=null;
+// Fullscreen grading slider — Mona follows any horizontal swipe on the fullscreen card
+let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false;
 function _fsKnob(){ return document.getElementById('fs-knob'); }
 function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
-function _fsDown(e){ const t=document.getElementById('fs-track'), k=_fsKnob(); if(!t||!k) return; _fsDrag=true; _fsTrackRect=t.getBoundingClientRect(); k.style.transition='none'; _fsMove(e); try{ k.setPointerCapture(e.pointerId); }catch(_){} e.preventDefault(); }
+function _fsPct(){ const k=_fsKnob(); return k?(parseFloat(k.style.left)||50):50; }
 function fsHot(which){   // expand + glow the button Mona is over ('wrong' | 'right' | null)
   const w=document.querySelector('.fs-ans-wrong'), r=document.querySelector('.fs-ans-right');
   if(w) w.classList.toggle('fs-ans-hot', which==='wrong');
   if(r) r.classList.toggle('fs-ans-hot', which==='right');
 }
-function _fsMove(e){ if(!_fsDrag||!_fsTrackRect) return; const p=(e.clientX-_fsTrackRect.left)/_fsTrackRect.width*100; _fsSetPct(p); fsHot(p<=15?'wrong':p>=85?'right':null); }
-function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=parseFloat(k.style.left)||50;
-  if(p<=15){ k.style.left='0%'; fsHot('wrong'); fsSliderGrade(false); }       // landed on the left (wrong) button
-  else if(p>=85){ k.style.left='100%'; fsHot('right'); fsSliderGrade(true); } // landed on the right (correct) button
+function _fsActive(){ return document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen') && cardAnswerShown; }
+function _fsDown(e){   // a horizontal swipe ANYWHERE on the fullscreen card grabs Mona
+  if(!_fsActive()) return;
+  if(e.target.closest('.fs-ans')||e.target.closest('#fs-exit-btn')) return;   // let the buttons work
+  const t=document.getElementById('fs-track'); if(!t) return;
+  _fsDrag=true; _fsTrackW=t.getBoundingClientRect().width||1; _fsStartX=e.clientX; _fsStartPct=_fsPct(); _fsSwipeMoved=false;
+  const k=_fsKnob(); if(k) k.style.transition='none';
+}
+function _fsMove(e){ if(!_fsDrag) return;
+  if(Math.abs(e.clientX-_fsStartX)>4) _fsSwipeMoved=true;
+  const p=_fsStartPct+(e.clientX-_fsStartX)/_fsTrackW*100;                     // relative to where the swipe began
+  _fsSetPct(p); fsHot(p<=15?'wrong':p>=85?'right':null);
+}
+function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=_fsPct();
+  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; fsHot('wrong'); fsSliderGrade(false); }       // swiped onto the left (wrong) button
+  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; fsHot('right'); fsSliderGrade(true); } // swiped onto the right (correct) button
   else { fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210); }   // snap back to centre
 }
 function fsSliderPick(correct){   // clicking a button (or arrow key) slides Mona onto it, glows it, then grades
@@ -2049,9 +2062,8 @@ function updateFsSlider(){   // slider shows only in fullscreen once the answer 
   if(show){ resetFsKnob(); updateProgress(); }
 }
 (function(){
-  const k=_fsKnob(), t=document.getElementById('fs-track');
-  if(k) k.addEventListener('pointerdown',_fsDown);
-  if(t) t.addEventListener('pointerdown',_fsDown);   // swiping the track moves Mona too
+  const cs=document.getElementById('card-screen');
+  if(cs) cs.addEventListener('pointerdown',_fsDown);   // swipe anywhere on the fullscreen card moves Mona
   document.addEventListener('pointermove',_fsMove);
   document.addEventListener('pointerup',_fsUp);
   document.addEventListener('pointercancel',_fsUp);
@@ -2605,6 +2617,7 @@ function showAnswer(){
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
   if(_pk){ _pk.classList.remove('peek-in'); const cr=fc.getBoundingClientRect(), pr=_pk.getBoundingClientRect(); _pk.style.transformOrigin=((cr.left+cr.width/2)-pr.left)+'px 50%'; }
   if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){   // fullscreen: no spin — shake, then swap the content
+    fc.classList.remove('card-in-right','card-in-left');   // clear the fade-in so removing the shake can't re-run it (flicker)
     fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
     setTimeout(()=>fc.classList.remove('card-shake'),500);
     reveal();
@@ -2972,6 +2985,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.addEventListener('click',e=>{
     if(!currentCard) return;                               // celebration / done screen: no reveal or shake
     if(e.target.closest('.word-link')){ e.stopPropagation(); return; }
+    if(_fsSwipeMoved){ _fsSwipeMoved=false; return; }      // a fullscreen Mona-swipe already handled this — don't also shake
     if(swiped){ swiped=false; return; }                    // swipe already handled the reveal
     if(!cardAnswerShown){ showAnswer(); return; }          // front: tap reveals the answer
     if(Date.now()-pressT<=400) shakeCard();                // back: quick tap shakes; long press does nothing
@@ -2998,6 +3012,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
 
 function shakeCard(){
   const fc=document.getElementById('flashcard'); if(!fc) return;
+  fc.classList.remove('card-in-right','card-in-left');   // clear the fade-in so removing the shake can't re-run it (flicker)
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
