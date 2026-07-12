@@ -310,6 +310,7 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb { background: #a97f4e; border
 body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
+.flashcard.answer-shown { display: flex; flex-direction: column; justify-content: safe center; }   /* back side: centre the content on the Y axis too (safe = still scrolls from the top when it overflows) */
 .flashcard.front-basic #question-content { text-align: center; line-height: 1.25; }
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
 .card-embed-3d { width: 100%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; }   /* front: full size; wrapper clips the iframe so its rounded corners have no dark fringe */
