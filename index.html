@@ -629,11 +629,13 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 @keyframes cardSlideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(130px);opacity:0} }
 @keyframes cardSlideInLeft { from{transform:translateX(-50px);opacity:0} to{transform:translateX(0);opacity:1} }
 .card-out-left { animation: cardSlideOutLeft 0.26s ease forwards; pointer-events:none; }
-.card-in-right { animation: cardSlideInRight 0.18s ease forwards; }
 .card-out-right { animation: cardSlideOutRight 0.26s ease forwards; pointer-events:none; }
 .card-in-left { animation: cardSlideInLeft 0.18s ease forwards; }
-@keyframes cardSlideOutUp { from{transform:translateY(0);opacity:1} to{transform:translateY(-160px);opacity:0} }
-.card-out-up { animation: cardSlideOutUp 0.26s ease forwards; pointer-events:none; }
+/* card change: fade to black (no slide) */
+@keyframes cardFadeOut { from{filter:brightness(1)} to{filter:brightness(0)} }
+@keyframes cardFadeIn { from{filter:brightness(0)} to{filter:brightness(1)} }
+.card-in-right { animation: cardFadeIn 0.2s ease forwards; }
+.card-out-up { animation: cardFadeOut 0.22s ease forwards; pointer-events:none; }
 @keyframes cardShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-7px)} 80%{transform:translateX(5px)} }
 .card-shake { animation: cardShake 0.45s ease; }
 @keyframes btnAttention { 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,0.12); } 40%{ transform:scale(1.2); box-shadow:0 0 26px 7px var(--glow,#ffcd82), 0 4px 14px rgba(0,0,0,0.18); } }
@@ -869,7 +871,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     </button>
     <div class="fs-track" id="fs-track">
       <div class="fs-fill" id="fs-fill"></div>
-      <div class="fs-knob" id="fs-knob"><img src="solukkologo_eyes.png" alt=""></div>
+      <div class="fs-knob" id="fs-knob">
+        <img src="solukkologo_eyes.png" alt="">
+        <div class="logo-eye le"><span class="logo-pupil"></span></div>
+        <div class="logo-eye re"><span class="logo-pupil"></span></div>
+      </div>
     </div>
     <button class="fs-ans fs-ans-right" onclick="fsSliderPick(true)" title="Tiesin (oikea nuoli)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
