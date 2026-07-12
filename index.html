@@ -115,7 +115,15 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 #rotate-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
 body.dark-mode #rotate-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
-#flashcard-wrap.rot-90 { transform: rotate(90deg); transform-origin: center center; }
+/* widescreen mode: fitCardScale swaps the card to landscape; text stays upright (no CSS rotation) */
+/* Top peeker: Mona pops over the top edge of the card to explain a top-bar button on hover */
+.card-peek-top { position: absolute; bottom: 100%; left: 0; width: 100%; height: 0; z-index: 6; pointer-events: none; opacity: 0; transform: translateY(12px); transition: opacity 0.18s ease, transform 0.35s cubic-bezier(0.34,1.45,0.64,1); }
+.card-peek-top.show { opacity: 1; transform: translateY(0); }
+.card-peek-top-mona { position: absolute; bottom: -18px; left: calc(50% - 28px); width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25)); }
+.card-peek-top-bubble { position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%); width: max-content; max-width: min(80vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 18px; padding: 0.45rem 0.85rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
+.card-peek-top-bubble::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 8px solid transparent; border-top-color: #fffef9; }
+body.dark-mode .card-peek-top-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode .card-peek-top-bubble::after { border-top-color: #3a312b; }
 /* Soluvisa stays a circle */
 .deck-btn.soluvisa-deck { aspect-ratio: 1 / 1; border-radius: 50%; overflow: hidden; border: 4px solid #1f3d2a; padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at 42% 36%, #3a7a52, #0e2a1a); }
 .deck-btn.soluvisa-deck::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 4px solid #ebe3cf; z-index: 3; pointer-events: none; }
@@ -629,10 +637,10 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="global-topbar" style="width:100%;max-width:760px;margin:0 auto 25px;display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;box-sizing:border-box;">
 
   <!-- ← Takaisin -->
-  <button id="back-btn-fixed" onclick="showDecks()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
+  <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showTopHint('Takaisin etusivulle')" onmouseleave="hideTopHint()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
   <!-- ⟳ Käännä kortti 90° (top middle, review mode) -->
-  <button id="rotate-btn" onclick="toggleCardRotation()" title="Käännä kortti 90°" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">⟳</button>
+  <button id="rotate-btn" onclick="toggleCardRotation()" onmouseenter="showTopHint('Leveäkuvatila – sovita kortti laajakuvanäytölle')" onmouseleave="hideTopHint()" title="Leveäkuvatila" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">⟳</button>
 
   <!-- Soluvisa now lives on the homepage as a course circle (see updateSoluvisaCircle) -->
 
@@ -685,7 +693,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
           style="opacity:0;"
         />
       </svg>
-      <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila">
+      <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila" onmouseenter="showTopHint('Vaihda vaalea / tumma tila')" onmouseleave="hideTopHint()">
         <span id="darkmode-icon">☀️</span>
       </button>
     </div>
@@ -770,6 +778,10 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         <div class="logo-eye re"><span class="logo-pupil"></span></div>
       </div>
       <div class="card-peek-bubble" id="card-peek-bubble"></div>
+    </div>
+    <div class="card-peek-top" id="card-peek-top">
+      <div class="card-peek-top-bubble" id="card-peek-top-bubble"></div>
+      <img src="solukkologo_eyes.png" class="card-peek-top-mona" alt="">
     </div>
     <div class="flashcard" id="flashcard">
       <div class="card-content" id="question-content"></div>
@@ -1912,16 +1924,24 @@ function restoreDefaultOrder(){   // back to the deck's original order, grid inc
 }
 
 let cardRotated=false;
-function toggleCardRotation(){   // rotate the reviewed card 90° (toggle)
+function toggleCardRotation(){   // widescreen (landscape) mode toggle — resizes the card, text stays upright
   cardRotated=!cardRotated;
-  document.getElementById('flashcard-wrap')?.classList.toggle('rot-90',cardRotated);
+  document.getElementById('flashcard-wrap')?.classList.toggle('landscape',cardRotated);
   document.getElementById('rotate-btn')?.classList.toggle('active',cardRotated);
+  fitCardScale(); scrollToCard();
 }
 function resetCardRotation(){
   cardRotated=false;
-  document.getElementById('flashcard-wrap')?.classList.remove('rot-90');
+  document.getElementById('flashcard-wrap')?.classList.remove('landscape');
   document.getElementById('rotate-btn')?.classList.remove('active');
 }
+// Top-bar button hover: Mona peeks over the top of the card and says what the button does
+function showTopHint(text){
+  const p=document.getElementById('card-peek-top'), b=document.getElementById('card-peek-top-bubble');
+  if(!p||!b) return;
+  b.textContent=text; p.classList.add('show');
+}
+function hideTopHint(){ document.getElementById('card-peek-top')?.classList.remove('show'); }
 
 async function nextCard(){
   if(!queue.length){ showCelebration(); return; }
@@ -2894,7 +2914,9 @@ function fitCardScale(){
   const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
   const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
   const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
-  const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5) on all devices
+  let w, h;
+  if(cardRotated){ h=Math.min(availH, availW/1.5); w=h*1.5; }            // widescreen: landscape (1.5 : 1), still sized to the viewport height
+  else { w=Math.min(availW, availH/1.5); h=w*1.5; }                      // vertical card (1 : 1.5)
   fc.style.height=Math.round(h)+'px';
   wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
 }
