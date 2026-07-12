@@ -111,12 +111,15 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .custom-deck-icon { font-size: 2.4rem; margin-bottom: 10px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
 /* Rotate-card button (top middle in review) + the 90° card rotation */
 #global-topbar { position: relative; }
-#rotate-btn { position: absolute; top: 10px; right: 10px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.15rem; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.15); align-items: center; justify-content: center; line-height: 1; }
-#rotate-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
-body.dark-mode #rotate-btn { background: rgba(58,49,43,0.92); color: #eadfce; border-color: #6d5f52; }
-body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
-#card-screen:fullscreen #rotate-btn { display: none !important; }   /* in fullscreen the exit button (top-right) handles it */
-#card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }   /* fade the mouse pointer after 2s of stillness in fullscreen */
+#rotate-btn, #comment-btn { position: absolute; top: 10px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.92); color: #56533c; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.15); display: none; align-items: center; justify-content: center; line-height: 1; }
+#rotate-btn { right: 10px; font-family: 'Lora', serif; font-weight: 700; font-size: 1.15rem; }
+#comment-btn { right: 58px; }
+#rotate-btn.active, #comment-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
+body.dark-mode #rotate-btn, body.dark-mode #comment-btn { background: rgba(58,49,43,0.92); color: #eadfce; border-color: #6d5f52; }
+body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
+#card-screen:fullscreen #rotate-btn, #card-screen:fullscreen #comment-btn { display: none !important; }   /* in fullscreen the exit button (top-right) handles it */
+#card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }
+@media (max-width: 900px) { #comment-btn { display: none !important; } }   /* mobile: comments show inline on reveal */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
 #card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #f5f0e8; margin: 0 !important; }
 #card-screen:fullscreen::backdrop { background: #f5f0e8; }
@@ -201,11 +204,12 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
   body.reviewing #card-screen { max-width: none; width: 100vw; height: 100vh; overflow: hidden; }
   body.reviewing #review-cols { flex: 1 1 auto; min-height: 0; align-items: stretch; gap: 0; }
   body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 0.4rem 1.2rem 1.4rem; }
-  body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; }
+  body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; overflow-y: auto; overscroll-behavior: auto; }   /* right side scrolls/rubberbands like the grid */
   body.reviewing #card-col::before { content: ''; position: absolute; left: 0; top: 8%; bottom: 8%; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, transparent, #d4cec4 14%, #d4cec4 86%, transparent); }
   body.dark-mode.reviewing #card-col::before { background: linear-gradient(to bottom, transparent, #6d5f52 14%, #6d5f52 86%, transparent); }
   body.reviewing #card-stack { flex: 1 1 0; min-width: 0; max-height: 100%; justify-content: center; gap: 0.5rem; }
-  body.reviewing #comment-col { flex: 0 0 clamp(200px, 42%, 320px); min-width: 0; align-self: stretch; overflow-y: auto; padding: 1rem 0; }
+  body.reviewing #comment-col { display: none; flex: 0 0 clamp(200px, 42%, 320px); min-width: 0; align-self: stretch; overflow-y: auto; overscroll-behavior: auto; padding: 1rem 0; }
+  body.reviewing #card-col.commenting #comment-col { display: block; }   /* comments appear only after the comment button is clicked */
   body.reviewing #flashcard-wrap { margin-top: 0; }
 }
 @media (max-width: 900px) {   /* narrow: single column, card on top, grid below (unchanged) */
@@ -705,7 +709,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="global-topbar" style="width:100%;max-width:760px;margin:0 auto 25px;display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;box-sizing:border-box;">
 
   <!-- ← Takaisin -->
-  <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showTopHint('Takaisin etusivulle')" onmouseleave="hideTopHint()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
+  <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showMonaHint('Takaisin pakat-näkymään')" onmouseleave="hideMonaHint()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
   <!-- Soluvisa now lives on the homepage as a course circle (see updateSoluvisaCircle) -->
 
@@ -758,7 +762,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
           style="opacity:0;"
         />
       </svg>
-      <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila" onmouseenter="showTopHint('Vaihda vaalea / tumma tila')" onmouseleave="hideTopHint()">
+      <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila" onmouseenter="showMonaHint('Tumma teema')" onmouseleave="hideMonaHint()">
         <span id="darkmode-icon">☀️</span>
       </button>
     </div>
@@ -853,7 +857,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="card-extent" id="card-extent"></div>
 
   <div id="flashcard-wrap">
-    <button id="rotate-btn" onclick="toggleCardFullscreen()" title="Koko näytön tila" style="display:none;">⛶</button>
+    <button id="rotate-btn" onclick="toggleCardFullscreen()" onmouseenter="showMonaHint('Kokonäytön tila')" onmouseleave="hideMonaHint()" title="Kokonäytön tila" style="display:none;">F</button>
+    <button id="comment-btn" onclick="toggleComment()" onmouseenter="showMonaHint('Kommentoi tätä korttia')" onmouseleave="hideMonaHint()" title="Kommentoi tätä korttia" style="display:none;"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></button>
     <div class="flashcard" id="flashcard">
       <div class="card-content" id="question-content"></div>
       <div class="answer-section" id="answer-section">
@@ -1804,7 +1809,8 @@ async function startDeck(deckName){
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='flex';
   document.getElementById('rotate-btn').style.display='flex';
-  document.querySelector('.comment-area').style.display='none';
+  { const cb=document.getElementById('comment-btn'); if(cb && !window.matchMedia('(max-width: 900px)').matches) cb.style.display='flex'; }
+  resetComment();
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
 }
@@ -1915,7 +1921,7 @@ async function renderCurrentCard(){
   const _rounded=Math.round(_words/10)*10;
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
   const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus '+_words+' sanaa') : ('Vastauksen laajuus noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
-  const _frontText = (_laajuusText ? (_laajuusText+' · ') : '') + 'Klikkaa korttia!';   // laajuus + short click prompt (kept to one line)
+  const _frontText = (_laajuusText ? (_laajuusText+'. ') : '') + 'Klikkaa korttia tarkistaaksesi.';   // laajuus + click prompt
   _frontHintText = _frontText;   // Mona's front bubble shows this
   if(_bub) _bub.textContent=_frontText;
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
@@ -1935,7 +1941,7 @@ async function renderCurrentCard(){
   document.getElementById('grade-row').style.display='none';
   cardAnswerShown = false;
   _suppressNextAnswer = false;
-  document.querySelector('.comment-area').style.display='none';   // hidden until the answer is revealed
+  resetComment();   // new card: comments closed, card centred again
   document.getElementById('progress-row').style.display='none';
   updateFsSlider();   // hide the fullscreen slider until the new card's answer is revealed
   selectedGroup=null; updateGroupUI(); renderCardOverview();
@@ -2139,6 +2145,40 @@ function clearFrontMona(){
 })();
 function showTopHint(){}   // top peeker removed
 function hideTopHint(){}
+
+// Hovering a corner button (back / dark mode / fullscreen / comment) speaks the hint through Mona's bubble
+let _monaHintPrev=null;
+function showMonaHint(text){
+  const b=document.getElementById('pb-bubble'), k=_fsKnob(); if(!b) return;
+  if(_monaHintPrev===null) _monaHintPrev={ text:b.textContent, show:b.classList.contains('show'), op:k?k.style.opacity:'' };
+  b.textContent=text; b.classList.add('show'); if(k) k.style.opacity='1';   // make sure Mona is visible under her bubble
+}
+function hideMonaHint(){
+  const b=document.getElementById('pb-bubble'), k=_fsKnob(); if(!b||_monaHintPrev===null) return;
+  b.textContent=_monaHintPrev.text; b.classList.toggle('show', _monaHintPrev.show); if(k) k.style.opacity=_monaHintPrev.op;
+  _monaHintPrev=null;
+}
+
+// Comment panel — the card sits centred in the right half; clicking the bubble button slides it left and opens comments
+let _commenting=false;
+function _syncCommentArea(){   // desktop: comments only when toggled open; mobile: always after the answer shows
+  const ca=document.querySelector('.comment-area'); if(!ca) return;
+  const mobile=window.matchMedia('(max-width: 900px)').matches;
+  ca.style.display = (mobile || _commenting) ? 'flex' : 'none';
+}
+function toggleComment(){
+  _commenting=!_commenting;
+  document.getElementById('card-col')?.classList.toggle('commenting', _commenting);
+  document.getElementById('comment-btn')?.classList.toggle('active', _commenting);
+  _syncCommentArea();
+  fitCardScale(); scrollToCard();   // the card resizes as the comment panel takes/returns its width
+}
+function resetComment(){   // each new card starts centred with comments closed
+  _commenting=false;
+  document.getElementById('card-col')?.classList.remove('commenting');
+  document.getElementById('comment-btn')?.classList.remove('active');
+  const ca=document.querySelector('.comment-area'); if(ca) ca.style.display='none';
+}
 
 async function nextCard(){
   if(!queue.length){ showCelebration(); return; }
@@ -2670,7 +2710,7 @@ function showAnswer(){
     clearTimeout(_backPeekTimer); _backPeekTimer=setTimeout(showBackPeek, 3000);   // bring the backside peeker in after 3s and keep it in view
     updateProgress();
     const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');
-    pr.style.display='flex'; ca.style.display='flex';
+    pr.style.display='flex'; _syncCommentArea();   // comments: mobile shows inline, desktop waits for the comment button
     pr.classList.remove('reveal-fade'); ca.classList.remove('reveal-fade');
     pr.classList.add('shown'); ca.classList.add('shown');   // show fully — exactly like after a shake
     clearTimeout(_revealFadeTimer);
@@ -3010,7 +3050,8 @@ function showDecks(){
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
   exitCardFullscreen(); document.getElementById('rotate-btn').style.display='none';
-  document.querySelector('.comment-area').style.display='none';
+  { const cb=document.getElementById('comment-btn'); if(cb) cb.style.display='none'; }
+  resetComment();
   document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
@@ -3065,6 +3106,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     }
     if(e.key===' '&&currentCard){ e.preventDefault(); if(!cardAnswerShown) showAnswer(); else shakeCard(); }   // space = click the card (reveal, then shake)
     else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
+    else if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); }   // F = toggle fullscreen
   });
 })();
 
@@ -3081,7 +3123,7 @@ function shakeCard(){
   shakeStars();
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
-  if(ca){ ca.style.display='flex'; ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
+  if(ca){ _syncCommentArea(); ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
   fitCardScale(); scrollToCard();   // re-lay out exactly like a fresh card load, leaving room for the buttons
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
