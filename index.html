@@ -201,6 +201,14 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 #deck-title-bar { flex: 1 1 auto; min-width: 0; text-align: left; padding: 0; font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.3rem, 2.6vw, 2.2rem); line-height: 1.15; color: #1a1612; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #deck-title-bar:empty { display: none; }
 body.dark-mode #deck-title-bar { color: #eadfce; }
+/* deck intro cover (built from a special intro card): title + esittely centred, fills the grid-half; cards sit below the fold */
+#deck-cover { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1rem; padding: 1.5rem 1.2rem 2.5rem; box-sizing: border-box; }
+#deck-cover .cover-title { font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.18; color: #1a1612; }
+#deck-cover .cover-esittely { font-family: 'Lora', serif; font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.65; color: #56533c; max-width: 46ch; }
+#deck-cover .cover-esittely :is(img,iframe,video) { max-width: 100%; height: auto; }
+body.dark-mode #deck-cover .cover-title { color: #eadfce; }
+body.dark-mode #deck-cover .cover-esittely { color: #cbbda8; }
+@media (min-width: 901px) { body.reviewing #deck-cover { min-height: calc(100vh - 84px); } }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; }
 #card-col { flex: 0 0 clamp(300px, 34vw, 440px); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
@@ -866,6 +874,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showMonaHint('Takaisin pakat-näkymään')" onmouseleave="hideMonaHint()" style="display:none;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
     <div id="deck-title-bar"></div>
   </div>
+  <div id="deck-cover"></div>   <!-- intro card: title + esittely, fills the grid-half; scroll down to reveal the cards -->
   <div id="card-overview-grid"></div>
 
   <div class="grid-tools" id="grid-tools">
@@ -1847,7 +1856,9 @@ async function startDeck(deckName){
   currentDeck=deckName;
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
-  reviewCards=infos; queue=infos.slice();
+  _deckIntro = infos.find(c=>getField(c,['esittely','Esittely','esittely ']).replace(/<[^>]*>/g,'').trim()) || null;   // a card with an "esittely" field becomes the deck cover
+  reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
+  queue = reviewCards.slice();
   shuffleMode=false; document.getElementById('shuffle-btn')?.classList.remove('active');
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
@@ -2947,6 +2958,16 @@ function renderCardOverview(){
   var _pSafe=String(_pLink).replace(/"/g,'&quot;');
   var _reveal=_code?(' '+(_pLink?'<a href="'+_pSafe+'" target="_blank" rel="noopener" style="font-weight:700;color:inherit;">'+_codeSafe+'</a>':'<span style="font-weight:700;">'+_codeSafe+'</span>')):'';
   { const _tb=document.getElementById('deck-title-bar'); if(_tb) _tb.textContent=_name; }   // course title goes in the top-centre bar
+  { const cov=document.getElementById('deck-cover');   // deck cover from the intro card (title + esittely), fills the grid-half
+    if(cov){
+      if(_deckIntro){
+        const _title=(getField(_deckIntro,['title','Title','otsikko','Otsikko','Front','front'])||_deckIntro.question||_name);
+        const _es=(getField(_deckIntro,['esittely','Esittely'])||_deckIntro.answer||'');
+        cov.innerHTML='<div class="cover-title">'+_title+'</div><div class="cover-esittely">'+_es+'</div>';
+        cov.style.display='flex';
+      } else { cov.innerHTML=''; cov.style.display='none'; }
+    }
+  }
 
   grid.innerHTML=deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
@@ -3274,7 +3295,7 @@ function fitFrontText(){
   fc.classList.add('front-basic');
 }
 
-let _openingDeck=false;
+let _openingDeck=false, _deckIntro=null;
 function scrollGridToActive(){   // keep the current card visible in the left grid, without moving the window/card
   const gridCol=document.getElementById('grid-col'); if(!gridCol) return;
   if(_openingDeck){ _openingDeck=false; gridCol.scrollTop=0; return; }   // fresh deck: start at the top
