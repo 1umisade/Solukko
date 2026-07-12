@@ -127,7 +127,12 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
 #card-screen:fullscreen #review-cols { display: block; }
 #card-screen:fullscreen #grid-col { display: none !important; }
-#card-screen:fullscreen #card-col { position: static; height: 100vh; width: 100%; flex: none; }
+/* fullscreen must not inherit the desktop 50/50 split: no title, no divider, card fills the screen */
+#card-screen:fullscreen #deck-title-bar, #card-screen:fullscreen #grid-header { display: none !important; }
+#card-screen:fullscreen #card-col { position: static; height: 100vh; width: 100%; flex: none; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 0 !important; gap: 0 !important; overflow: visible !important; }
+#card-screen:fullscreen #card-col::before { display: none !important; }
+#card-screen:fullscreen #card-stack { max-height: none !important; width: 100% !important; }
+#card-screen:fullscreen #comment-col { display: none !important; }
 #card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
 #card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; }
 #card-screen:fullscreen .card-content { font-size: 1.5rem; }
@@ -190,7 +195,9 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 /* ── 6. KORTTIRUUTU & FLASHCARD ─────────────────────────── */
 :root { --side-card-gap: 50px; }
 #card-screen { position: relative; width: 100%; max-width: 1180px; min-width: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; margin-top: 0; }
-#deck-title-bar { flex: 0 0 auto; text-align: center; padding: 10px 64px 6px; font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.1rem, 2.2vw, 1.6rem); line-height: 1.15; color: #1a1612; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#grid-header { display: flex; align-items: center; gap: 12px; width: 100%; }
+#back-btn-fixed { flex: 0 0 auto; width: 46px; height: 46px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 50%; font-size: 1.2rem; color: #56533c; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); align-items: center; justify-content: center; line-height: 1; }
+#deck-title-bar { flex: 1 1 auto; min-width: 0; text-align: left; padding: 0; font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.3rem, 2.6vw, 2.2rem); line-height: 1.15; color: #1a1612; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #deck-title-bar:empty { display: none; }
 body.dark-mode #deck-title-bar { color: #eadfce; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
@@ -204,10 +211,10 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
   body.reviewing #global-topbar > * { pointer-events: auto; }
   body.reviewing #card-screen { max-width: none; width: 100vw; height: 100vh; overflow: hidden; }
   body.reviewing #review-cols { flex: 1 1 auto; min-height: 0; align-items: stretch; gap: 0; }
-  /* deck title lives in the grid half, big, with the back button to its left */
-  body.reviewing #back-btn-fixed { position: fixed; top: 13px; left: 16px; z-index: 62; }
-  body.reviewing #deck-title-bar { position: fixed; top: 14px; left: 78px; width: calc(50vw - 96px); max-width: calc(50vw - 96px); text-align: left; padding: 0; font-size: clamp(1.6rem, 2.9vw, 2.4rem); z-index: 61; }
-  body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 3.9rem 1.2rem 1.4rem; }
+  /* deck title + back button live at the top of the grid and scroll away with it */
+  body.reviewing #grid-header { padding: 8px 2px 14px; }
+  body.reviewing #deck-title-bar { font-size: clamp(1.6rem, 2.9vw, 2.4rem); }
+  body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 0.6rem 1.2rem 1.4rem; }
   body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; overflow-y: auto; overscroll-behavior: auto; }   /* right side scrolls/rubberbands like the grid */
   body.reviewing #card-col::before { content: ''; position: absolute; left: 0; top: 8%; bottom: 8%; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, transparent, #d4cec4 14%, #d4cec4 86%, transparent); }
   body.dark-mode.reviewing #card-col::before { background: linear-gradient(to bottom, transparent, #6d5f52 14%, #6d5f52 86%, transparent); }
@@ -218,7 +225,8 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
   body.reviewing #flashcard-wrap { margin-top: 0; }
 }
 @media (max-width: 900px) {   /* narrow: single column, card on top, grid below (unchanged) */
-  #deck-title-bar { padding: 6px 12px; font-size: 1.15rem; }
+  #deck-title-bar { font-size: 1.4rem; }
+  #grid-header { padding: 4px 2px 10px; }
   #review-cols { flex-direction: column; align-items: center; gap: 1.4rem; }
   #grid-col { order: 2; position: static; max-height: none; overflow: visible; width: 100%; padding: 0; }
   #card-col { order: 1; position: static; height: auto; flex: none; width: 100%; }
@@ -509,7 +517,8 @@ body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
 .grid-tool-btn:hover { background: #f5f0e8; }
 .grid-tool-btn:active { transform: scale(0.96); }
 body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-color: #6d5f52; }
-.overview-card { will-change: transform; }
+.overview-card { will-change: transform; transition: transform 0.16s ease, box-shadow 0.16s ease; }
+.overview-card:hover { transform: scale(1.4); z-index: 30; box-shadow: 0 10px 28px rgba(0,0,0,0.28); -webkit-line-clamp: 16; }   /* hovering a grid card pops it out and shows more text */
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
 .overview-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
@@ -533,7 +542,8 @@ body.dark-mode .overview-card-stars { color: #eadfce; }
 
 .subdeck-video-embed { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; margin: 0.5rem 0; background: #000; }
 .subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
-.overview-card.active  { border: 2px solid #498d65; }
+.overview-card.active  { border: 3px solid #498d65 !important; box-shadow: 0 0 0 4px rgba(73,141,101,0.5), 0 5px 16px rgba(0,0,0,0.18); }   /* thick, obvious highlight for the card being reviewed */
+body.dark-mode .overview-card.active { border-color: #7fd3a1 !important; box-shadow: 0 0 0 4px rgba(127,211,161,0.45), 0 5px 16px rgba(0,0,0,0.35); }
 .overview-card.known   { background: #ebf1ed; border-color: #9ab8a1; }
 .overview-card.unknown { background: #fce4d0; border-color: #ef9a5f; }   /* "En tiedä" cards painted orange */
 body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
@@ -679,8 +689,6 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .card-out-up { animation: cardSlideOutUp 0.26s ease forwards; pointer-events:none; }
 @keyframes cardShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-7px)} 80%{transform:translateX(5px)} }
 .card-shake { animation: cardShake 0.45s ease; }
-@keyframes starSpin { 0%{transform:perspective(500px) rotateY(0deg)} 100%{transform:perspective(500px) rotateY(360deg)} }
-.star-spin { animation: starSpin 0.4s ease-in-out; }
 @keyframes btnAttention { 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,0.12); } 40%{ transform:scale(1.2); box-shadow:0 0 26px 7px var(--glow,#ffcd82), 0 4px 14px rgba(0,0,0,0.18); } }
 .ball-btn.btn-attention { animation: btnAttention 0.7s ease; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -716,8 +724,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ YLÄPALKKI ════════════════════════════════════════════ -->
 <div id="global-topbar" style="width:100%;max-width:760px;margin:0 auto 25px;display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;box-sizing:border-box;">
 
-  <!-- ← Takaisin -->
-  <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showMonaHint('Takaisin pakat-näkymään')" onmouseleave="hideMonaHint()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
+  <!-- ← Takaisin: moved into the grid header (scrolls with the grid) -->
 
   <!-- Soluvisa now lives on the homepage as a course circle (see updateSoluvisaCircle) -->
 
@@ -806,7 +813,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <div class="pack-top">
         <div class="deck-label">
           <div class="custom-deck-icon">📂</div>
-          <div class="deck-title">Kertaa kortteja omalta laitteeltasi</div>
+          <div class="deck-title">Kertaa oman laitteesi kortteja</div>
         </div>
       </div>
     </button>
@@ -845,9 +852,12 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
   </button>
-  <div id="deck-title-bar"></div>
   <div id="review-cols">
   <div id="grid-col">
+  <div id="grid-header">
+    <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showMonaHint('Takaisin pakat-näkymään')" onmouseleave="hideMonaHint()" style="display:none;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
+    <div id="deck-title-bar"></div>
+  </div>
   <div id="card-overview-grid"></div>
 
   <div class="grid-tools" id="grid-tools">
@@ -2746,24 +2756,30 @@ function showAnswer(){
     return;
   }
   // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
-  spinStars();   // the star badge spins along with the card
+  const st=document.getElementById('card-stars');   // the stars ride the card: same rotation, around the card's own axis
+  let stOrig='';
+  if(st){ const cr=fc.getBoundingClientRect(), sr=st.getBoundingClientRect(); stOrig=((cr.left+cr.width/2)-sr.left)+'px '+((cr.top+cr.height*0.85)-sr.top)+'px'; }
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation='none';
   fc.style.transition='none';
   fc.style.transform='perspective(1000px) rotateY(0deg)';   // commit the start state so phase 1 actually animates
   if(_pk){ _pk.style.transition='none'; _pk.style.transform='perspective(1000px) rotateY(0deg)'; }
+  if(st){ st.style.transition='none'; st.style.transformOrigin=stOrig; st.style.transform='perspective(1000px) rotateY(0deg)'; }
   void fc.offsetWidth;
   fc.style.transition='transform 0.2s ease-in';
   fc.style.transform='perspective(1000px) rotateY(90deg)';
   if(_pk){ _pk.style.transition='transform 0.2s ease-in'; _pk.style.transform='perspective(1000px) rotateY(90deg)'; }
+  if(st){ st.style.transition='transform 0.2s ease-in'; st.style.transform='perspective(1000px) rotateY(90deg)'; }
   setTimeout(()=>{
     reveal();
     fc.style.transition='none';
     fc.style.transform='perspective(1000px) rotateY(-90deg)';
+    if(st){ st.style.transition='none'; st.style.transform='perspective(1000px) rotateY(-90deg)'; }
     void fc.offsetWidth;
     fc.style.transition='transform 0.2s ease-out';
     fc.style.transform='perspective(1000px) rotateY(0deg)';
-    setTimeout(()=>{ fc.style.transition=''; fc.style.transform=''; fc.style.animation=''; },210);
+    if(st){ st.style.transition='transform 0.2s ease-out'; st.style.transform='perspective(1000px) rotateY(0deg)'; }
+    setTimeout(()=>{ fc.style.transition=''; fc.style.transform=''; fc.style.animation=''; if(st){ st.style.transition=''; st.style.transform=''; st.style.transformOrigin=''; } },210);
   },200);
 }
 
@@ -3132,11 +3148,6 @@ function shakeStars(){   // the star badge shakes together with the card
   const st=document.getElementById('card-stars'); if(!st) return;
   st.classList.remove('card-shake'); void st.offsetWidth; st.classList.add('card-shake');
   setTimeout(()=>st.classList.remove('card-shake'),500);
-}
-function spinStars(){   // the star badge spins together with the card on reveal
-  const st=document.getElementById('card-stars'); if(!st) return;
-  st.classList.remove('star-spin'); void st.offsetWidth; st.classList.add('star-spin');
-  setTimeout(()=>st.classList.remove('star-spin'),440);
 }
 function shakeCard(){
   const fc=document.getElementById('flashcard'); if(!fc) return;
