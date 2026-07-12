@@ -521,7 +521,7 @@ body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-colo
 .overview-card { will-change: transform; transition: transform 0.16s ease, box-shadow 0.16s ease; }
 .overview-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }   /* subtle pop on hover */
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
-.overview-section-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.overview-section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 14px; }   /* fit as many small cards as the width allows — ultrawides show more per row */
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
