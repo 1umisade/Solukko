@@ -140,11 +140,21 @@ body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; b
 .pb-knob { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin-top: -26px; margin-left: -26px; cursor: grab; touch-action: none; z-index: 3; }
 .pb-knob:active { cursor: grabbing; }
 .pb-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
-.pb-bubble { position: absolute; bottom: calc(100% + 22px); z-index: 9999; width: max-content; max-width: min(70vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.15s ease; }
+.pb-bubble { position: absolute; top: 50%; z-index: 9999; width: max-content; max-width: min(70vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.15s ease; }
 .pb-bubble.show { opacity: 1; }
-.pb-bubble.side-left { transform: translateX(-100%); margin-left: -14px; }     /* to the LEFT of Mona (wrong button hovered) */
-.pb-bubble.side-right { margin-left: 14px; }                                   /* to the RIGHT of Mona (correct button hovered) */
+.pb-bubble.side-left { transform: translate(-100%, -50%); margin-left: -22px; }    /* to the LEFT of Mona */
+.pb-bubble.side-right { transform: translateY(-50%); margin-left: 22px; }          /* to the RIGHT of Mona */
+.pb-bubble.side-center { left: 50% !important; transform: translate(-50%, -50%); }  /* front side: centered on screen */
+.pb-bubble::after { content: ''; position: absolute; top: 50%; transform: translateY(-50%); border: 9px solid transparent; }
+.pb-bubble.side-left::after  { left: 100%;  border-left-color: #fffef9; }           /* tail on the right, points right at Mona */
+.pb-bubble.side-right::after,
+.pb-bubble.side-center::after { right: 100%; border-right-color: #fffef9; }         /* tail on the left, points left at Mona */
 body.dark-mode .pb-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode .pb-bubble.side-left::after { border-left-color: #3a312b; }
+body.dark-mode .pb-bubble.side-right::after,
+body.dark-mode .pb-bubble.side-center::after { border-right-color: #3a312b; }
+/* front side: Mona sits on the bar (no grade buttons yet), moved left so the bubble centers */
+.progress-row.pb-front .ball-btn { display: none; }
 /* grade button expands + glows when Mona overlaps it */
 .ball-btn.fs-ans-hot { transform: scale(1.22); }
 .grade-again.fs-ans-hot { box-shadow: 0 0 24px 7px rgba(245,171,151,0.95); }
@@ -814,7 +824,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-again" onclick="gradeCard(false)" onmouseenter="showGradeHint(false)" onmouseleave="hideGradeHint()" title="Vasen nuoli">
+    <button class="ball-btn grade-again" onclick="fsSliderPick(false)" onmouseenter="showGradeHint(false)" onmouseleave="hideGradeHint()" title="Vasen nuoli">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="progress-tube" id="progress-tube">
@@ -826,7 +836,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         <div class="logo-eye re"><span class="logo-pupil"></span></div>
       </div>
     </div>
-    <button class="ball-btn grade-correct" onclick="gradeCard(true)" onmouseenter="showGradeHint(true)" onmouseleave="hideGradeHint()" title="Oikea nuoli">
+    <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" onmouseenter="showGradeHint(true)" onmouseleave="hideGradeHint()" title="Oikea nuoli">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
     </button>
   </div>
@@ -1907,6 +1917,7 @@ async function renderCurrentCard(){
   fc.style.animation  = '';
   fc.classList.add('card-in-right');
   setTimeout(()=>fc.classList.remove('card-in-right'),260);   // drop it after the fade-in so a later shake can't re-trigger it (flicker)
+  showFrontMona();                                            // Mona rides the bar on the front side too
   fitCardScale(); fitFrontText(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
@@ -2032,13 +2043,29 @@ function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 // grade-button hover: show the hint bubble on Mona's corresponding side
 function showGradeHint(correct){
   const b=document.getElementById('pb-bubble'); if(!b) return;
+  if(!cardAnswerShown) return;                                          // front side keeps its own bubble
   b.textContent = correct ? 'Tiesin – en kysy enää tänään uudestaan' : 'Palataan asiaan – kysyn kohta uudestaan';
+  b.classList.remove('side-center');
   b.style.left = _fsPct()+'%';
   b.classList.toggle('side-left', !correct);
   b.classList.toggle('side-right', correct);
   b.classList.add('show');
 }
-function hideGradeHint(){ const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
+function hideGradeHint(){ if(!cardAnswerShown) return; const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
+// front side: Mona rides the bar (no grade buttons yet), moved left, with a centered hint bubble
+function showFrontMona(){
+  const pr=document.getElementById('progress-row'); if(!pr) return;
+  pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
+  const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='10%'; }
+  const b=document.getElementById('pb-bubble');
+  if(b){ b.textContent='Paina korttia nähdäksesi vastauksen'; b.style.left=''; b.classList.remove('side-left','side-right'); b.classList.add('side-center','show'); }
+  updateProgress();
+}
+function clearFrontMona(){   // called on reveal: back to the normal (graded) bar
+  const pr=document.getElementById('progress-row'); if(pr) pr.classList.remove('pb-front');
+  const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show','side-center');
+  resetFsKnob();
+}
 (function(){
   const cs=document.getElementById('card-screen'), knob=_fsKnob();
   if(knob) knob.addEventListener('pointerdown',_fsKnobDown);   // grab Mona directly
@@ -2569,6 +2596,7 @@ function showAnswer(){
   cardAnswerShown=true;
   const fc=document.getElementById('flashcard');
   const reveal=()=>{
+    clearFrontMona();                    // drop the front hint; the graded bar (buttons + centred Mona) takes over
     fc.classList.add('answer-shown');   // back side: the 3D embed becomes interactive
     fc.classList.remove('front-basic'); document.getElementById('question-content').style.fontSize='';   // back to normal size/flow for the answer
     if(currentCard._isSpecial){ document.getElementById('question-content').innerHTML=currentCard._aProcessed||currentCard._aHtml; document.getElementById('answer-section').style.display='none'; }
