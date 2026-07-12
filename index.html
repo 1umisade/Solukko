@@ -115,7 +115,9 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 #rotate-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
 body.dark-mode #rotate-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
-/* widescreen mode: fitCardScale swaps the card to landscape; text stays upright (no CSS rotation) */
+/* fullscreen mode: the card element itself fills the whole screen, content scrolls inside */
+#flashcard.is-fullscreen { width: 100vw !important; height: 100vh !important; max-width: none !important; border-radius: 0 !important; padding: 3.5rem clamp(1rem, 8vw, 8rem); box-sizing: border-box; overflow-y: auto; }
+#flashcard.is-fullscreen .card-content { font-size: 1.6rem; }
 /* Top peeker: exact mirror of the bottom peeker, anchored at the card's TOP edge (same size, bubble centered, Mona on the right) */
 .card-peek-top { position: absolute; top: 0; left: 0; width: 100%; height: 0; z-index: 6; pointer-events: none; opacity: 0; transition: opacity 0.18s ease; }
 .card-peek-top.show { opacity: 1; }
@@ -638,7 +640,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showTopHint('Takaisin etusivulle')" onmouseleave="hideTopHint()" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.2rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
 
   <!-- ⟳ Käännä kortti 90° (top middle, review mode) -->
-  <button id="rotate-btn" onclick="toggleCardRotation()" onmouseenter="showTopHint('Leveäkuvatila – sovita kortti laajakuvanäytölle')" onmouseleave="hideTopHint()" title="Leveäkuvatila" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.35rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">⟳</button>
+  <button id="rotate-btn" onclick="toggleCardFullscreen()" onmouseenter="showTopHint('Koko näytön tila – kortti täyttää ruudun')" onmouseleave="hideTopHint()" title="Koko näytön tila" style="display:none;width:46px;height:46px;background:#fffef9;border:1px solid #d4cec4;border-radius:50%;font-size:1.25rem;color:#56533c;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);align-items:center;justify-content:center;line-height:1;">⛶</button>
 
   <!-- Soluvisa now lives on the homepage as a course circle (see updateSoluvisaCircle) -->
 
@@ -1729,7 +1731,7 @@ async function startDeck(deckName){
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display='none'; }
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='flex';
-  resetCardRotation(); document.getElementById('rotate-btn').style.display='flex';
+  document.getElementById('rotate-btn').style.display='flex';
   document.querySelector('.comment-area').style.display='none';
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
@@ -1910,33 +1912,40 @@ function resetDeckProgress(){   // mark every card "new" again
   updateProgress();
   renderCardOverview();
 }
-function shuffleReviewOrder(){   // randomise the upcoming cards; scramble the grid for feedback
+function shuffleReviewOrder(){   // randomise the cards AND merge every lecture into one lump in the grid
   shuffleMode=true;
   document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.add('active'));
   for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; }
-  shuffleAllCards();
+  const all=reviewCards.slice();                                 // one shuffled pile — no lecture sections/videos
+  for(let i=all.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=all[i]; all[i]=all[j]; all[j]=t; }
+  deckGroups=[{name:'Pääpakka', link:null, cards:all}];
+  const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
+  renderCardOverview();
 }
-function restoreDefaultOrder(){   // back to the deck's original order, grid included
+function restoreDefaultOrder(){   // back to the deck's original order, lectures split out again
   shuffleMode=false;
   document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.remove('active'));
   const ci=currentCard?reviewCards.indexOf(currentCard):-1;
   queue=reviewCards.slice(ci+1);
+  deckGroups=buildDeckGroups(reviewCards,currentDeck);           // restore the per-lecture grouping
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render in default order
   renderCardOverview();
 }
 
-let cardRotated=false;
-function toggleCardRotation(){   // widescreen (landscape) mode toggle — resizes the card, text stays upright
-  cardRotated=!cardRotated;
-  document.getElementById('flashcard-wrap')?.classList.toggle('landscape',cardRotated);
-  document.getElementById('rotate-btn')?.classList.toggle('active',cardRotated);
-  fitCardScale(); scrollToCard();
+// Fullscreen mode: the card itself fills the whole screen (keyboard reveal/grade still work)
+function toggleCardFullscreen(){
+  const fc=document.getElementById('flashcard'); if(!fc) return;
+  if(!document.fullscreenElement){ (fc.requestFullscreen?fc.requestFullscreen():Promise.reject()).catch(()=>{}); }
+  else { document.exitFullscreen&&document.exitFullscreen(); }
 }
-function resetCardRotation(){
-  cardRotated=false;
-  document.getElementById('flashcard-wrap')?.classList.remove('landscape');
-  document.getElementById('rotate-btn')?.classList.remove('active');
-}
+function exitCardFullscreen(){ if(document.fullscreenElement) document.exitFullscreen&&document.exitFullscreen(); }
+document.addEventListener('fullscreenchange',()=>{
+  const fc=document.getElementById('flashcard');
+  const on = !!document.fullscreenElement && document.fullscreenElement===fc;
+  document.getElementById('rotate-btn')?.classList.toggle('active',on);
+  if(fc) fc.classList.toggle('is-fullscreen',on);
+  if(!on){ fitCardScale(); scrollToCard(); }   // restore the normal sized layout on exit
+});
 // Top-bar button hover: Mona peeks over the top of the card and says what the button does
 function showTopHint(text){
   const p=document.getElementById('card-peek-top'), b=document.getElementById('card-peek-top-bubble');
@@ -2805,7 +2814,7 @@ function showDecks(){
   document.getElementById('peek-logo')?.classList.remove('peek-show','bubble-open');   // hide the peeker on the homepage
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
-  resetCardRotation(); document.getElementById('rotate-btn').style.display='none';
+  exitCardFullscreen(); document.getElementById('rotate-btn').style.display='none';
   document.querySelector('.comment-area').style.display='none';
   document.body.classList.remove('reviewing');
   groups.forEach(g=>g.score=0); selectedGroup=null;
@@ -2853,8 +2862,11 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
 
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
-    if(e.key==='ArrowRight'&&cardAnswerShown) gradeCard(true);    // → : Tiesin
-    if(e.key==='ArrowLeft' &&cardAnswerShown) gradeCard(false);   // ← : Palataan asiaan
+    if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
+      e.preventDefault();
+      if(!cardAnswerShown) showAnswer();                          // first press reveals the backside
+      else gradeCard(e.key==='ArrowRight');                       // then grade: → Tiesin, ← Palataan asiaan
+    }
     if(e.key===' '&&currentCard){ e.preventDefault(); if(!cardAnswerShown) showAnswer(); else shakeCard(); }   // space = click the card (reveal, then shake)
     else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
   });
@@ -2913,14 +2925,13 @@ function cardViewportH(){ return viewportH() - bottomReserve(); }
 function fitCardScale(){
   const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
   if(!wrap||!fc) return;
+  if(fc.classList.contains('is-fullscreen')) return;                     // fullscreen: the browser sizes the card to the whole screen
   wrap.style.transform=''; wrap.style.marginBottom='';
   const cs=document.getElementById('card-screen');
   const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
   const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
   const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
-  let w, h;
-  if(cardRotated){ h=Math.min(availH, availW/1.5); w=h*1.5; }            // widescreen: landscape (1.5 : 1), still sized to the viewport height
-  else { w=Math.min(availW, availH/1.5); h=w*1.5; }                      // vertical card (1 : 1.5)
+  const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5)
   fc.style.height=Math.round(h)+'px';
   wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
 }
