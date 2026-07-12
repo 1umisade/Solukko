@@ -112,8 +112,9 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 /* Rotate-card button (top middle in review) + the 90° card rotation */
 #global-topbar { position: relative; }
 #rotate-btn, #comment-btn { position: absolute; top: 10px; z-index: 6; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.92); color: #56533c; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.15); display: none; align-items: center; justify-content: center; line-height: 1; }
-#rotate-btn { right: 10px; font-family: 'Lora', serif; font-weight: 700; font-size: 1.15rem; }
-#comment-btn { right: 58px; }
+#rotate-btn { right: 10px; font-size: 1.3rem; }
+#comment-btn { right: -46px; top: 50%; transform: translateY(-50%); }   /* sits just outside the card's right edge */
+body.reviewing #card-col.commenting #comment-btn { display: none !important; }   /* it "expands" into the comment field */
 #rotate-btn.active, #comment-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
 body.dark-mode #rotate-btn, body.dark-mode #comment-btn { background: rgba(58,49,43,0.92); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
@@ -203,13 +204,17 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
   body.reviewing #global-topbar > * { pointer-events: auto; }
   body.reviewing #card-screen { max-width: none; width: 100vw; height: 100vh; overflow: hidden; }
   body.reviewing #review-cols { flex: 1 1 auto; min-height: 0; align-items: stretch; gap: 0; }
-  body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 0.4rem 1.2rem 1.4rem; }
+  /* deck title lives in the grid half, big, with the back button to its left */
+  body.reviewing #back-btn-fixed { position: fixed; top: 13px; left: 16px; z-index: 62; }
+  body.reviewing #deck-title-bar { position: fixed; top: 14px; left: 78px; width: calc(50vw - 96px); max-width: calc(50vw - 96px); text-align: left; padding: 0; font-size: clamp(1.6rem, 2.9vw, 2.4rem); z-index: 61; }
+  body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 3.9rem 1.2rem 1.4rem; }
   body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; overflow-y: auto; overscroll-behavior: auto; }   /* right side scrolls/rubberbands like the grid */
   body.reviewing #card-col::before { content: ''; position: absolute; left: 0; top: 8%; bottom: 8%; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, transparent, #d4cec4 14%, #d4cec4 86%, transparent); }
   body.dark-mode.reviewing #card-col::before { background: linear-gradient(to bottom, transparent, #6d5f52 14%, #6d5f52 86%, transparent); }
   body.reviewing #card-stack { flex: 1 1 0; min-width: 0; max-height: 100%; justify-content: center; gap: 0.5rem; }
   body.reviewing #comment-col { display: none; flex: 0 0 clamp(200px, 42%, 320px); min-width: 0; align-self: stretch; overflow-y: auto; overscroll-behavior: auto; padding: 1rem 0; }
   body.reviewing #card-col.commenting #comment-col { display: block; }   /* comments appear only after the comment button is clicked */
+  body.reviewing #comment-col .comment-box { width: 100%; }   /* the comment field fills the panel */
   body.reviewing #flashcard-wrap { margin-top: 0; }
 }
 @media (max-width: 900px) {   /* narrow: single column, card on top, grid below (unchanged) */
@@ -498,7 +503,8 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 .grid-shuffle-btn { position: absolute; right: 0; bottom: 0.7rem; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
 .grid-shuffle-btn:active { transform: scale(0.9); }
 body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
-.grid-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; width: 100%; margin-top: 1.4rem; }
+.grid-tools { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.6rem; width: 100%; margin-top: 1.4rem; }
+#grid-tools #darkmode-wrap { flex: 0 0 auto; }
 .grid-tool-btn { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #6b6055; background: #fffef9; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.5rem 0.9rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.1s ease, background 0.15s ease; }
 .grid-tool-btn:hover { background: #f5f0e8; }
 .grid-tool-btn:active { transform: scale(0.96); }
@@ -673,6 +679,8 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .card-out-up { animation: cardSlideOutUp 0.26s ease forwards; pointer-events:none; }
 @keyframes cardShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-7px)} 80%{transform:translateX(5px)} }
 .card-shake { animation: cardShake 0.45s ease; }
+@keyframes starSpin { 0%{transform:perspective(500px) rotateY(0deg)} 100%{transform:perspective(500px) rotateY(360deg)} }
+.star-spin { animation: starSpin 0.4s ease-in-out; }
 @keyframes btnAttention { 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,0.12); } 40%{ transform:scale(1.2); box-shadow:0 0 26px 7px var(--glow,#ffcd82), 0 4px 14px rgba(0,0,0,0.18); } }
 .ball-btn.btn-attention { animation: btnAttention 0.7s ease; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -746,8 +754,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     </a>
 
 
-    <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt -->
-    <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;">
+    <!-- ☀️ / 🌙  Dark mode toggle — hold 5 s → dev password prompt (relocated into the grid tools during review) -->
+    <div id="darkmode-wrap" style="position:relative;display:inline-flex;align-items:center;justify-content:center;">
       <svg id="darkmode-ring" width="54" height="54"
            style="position:absolute;top:-4px;left:-4px;pointer-events:none;overflow:visible;">
         <circle id="darkmode-ring-circle"
@@ -857,7 +865,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="card-extent" id="card-extent"></div>
 
   <div id="flashcard-wrap">
-    <button id="rotate-btn" onclick="toggleCardFullscreen()" onmouseenter="showMonaHint('Kokonäytön tila')" onmouseleave="hideMonaHint()" title="Kokonäytön tila" style="display:none;">F</button>
+    <button id="rotate-btn" onclick="toggleCardFullscreen()" onmouseenter="showMonaHint('Kokonäytön tila (F)')" onmouseleave="hideMonaHint()" title="Kokonäytön tila (F)" style="display:none;">⛶</button>
     <button id="comment-btn" onclick="toggleComment()" onmouseenter="showMonaHint('Kommentoi tätä korttia')" onmouseleave="hideMonaHint()" title="Kommentoi tätä korttia" style="display:none;"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></button>
     <div class="flashcard" id="flashcard">
       <div class="card-content" id="question-content"></div>
@@ -1159,8 +1167,9 @@ const commentBoxWrap=document.querySelector('.comment-box');
 // Move the comment area inside the card screen (before the overview grid) so revealing it
 // appears below the card instead of pushing the card down
 (function(){ const ca=document.querySelector('.comment-area'), col=document.getElementById('comment-col'); if(ca&&col) col.appendChild(ca); })();   // comments live in the right half, next to the card
+(function(){ const dm=document.getElementById('darkmode-wrap'), gt=document.getElementById('grid-tools'); if(dm&&gt) gt.appendChild(dm); })();   // dark-mode toggle sits with the shuffle / reset tools under the grid
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
-document.addEventListener('click',e=>{ if(!document.querySelector('.comment-area').contains(e.target)) document.querySelector('.comment-box').classList.remove('open'); });
+document.addEventListener('click',e=>{ if(!_commenting && !document.querySelector('.comment-area').contains(e.target) && !e.target.closest('#comment-btn')) document.querySelector('.comment-box').classList.remove('open'); });   // don't fight the comment-panel toggle
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
   const sb=document.getElementById('site-brand'); if(sb && !sb.contains(e.target)) sb.classList.remove('home-bubble-open');
   const pk=document.getElementById('peek-logo');  if(pk && !pk.contains(e.target)) pk.classList.remove('bubble-open');
@@ -1793,6 +1802,7 @@ async function startDeck(deckName){
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
+  _openingDeck=true;   // the grid should start at the top on open, not centred on the active card
   _firstReviewPeek=true; _celebratedDeck=false;
   const savedGrades=localStorage.getItem('solukko-grades-'+deckName);
   cardGrades=savedGrades?JSON.parse(savedGrades):{};
@@ -2030,14 +2040,18 @@ function flashFsExitBtn(){   // show the exit button for ~1s (on entering fullsc
   b.style.display='flex'; b.classList.add('visible');
   clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>b.classList.remove('visible'),1000);
 }
-let _fsCursorTimer=null;
-function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness (fullscreen only)
+let _fsCursorTimer=null, _overCard=false;
+function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness (fullscreen, or while idling over the card)
   const cs=document.getElementById('card-screen'); if(!cs) return;
   cs.classList.remove('cursor-hidden');
   clearTimeout(_fsCursorTimer);
-  if(document.fullscreenElement) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement) cs.classList.add('cursor-hidden'); }, 2000);
+  if(document.fullscreenElement || _overCard) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement || _overCard) cs.classList.add('cursor-hidden'); }, 2000);
 }
 document.addEventListener('mousemove', _fsCursorActivity);
+(function(){ const w=document.getElementById('flashcard-wrap'); if(!w) return;
+  w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
+  w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); });
+})();
 document.addEventListener('fullscreenchange',()=>{
   const cs=document.getElementById('card-screen');
   const on = !!document.fullscreenElement && document.fullscreenElement===cs;
@@ -2170,6 +2184,8 @@ function toggleComment(){
   _commenting=!_commenting;
   document.getElementById('card-col')?.classList.toggle('commenting', _commenting);
   document.getElementById('comment-btn')?.classList.toggle('active', _commenting);
+  const box=document.getElementById('comment-box');
+  if(box) box.classList.toggle('open', _commenting);   // the small button expands into the comment field ("Auta...")
   _syncCommentArea();
   fitCardScale(); scrollToCard();   // the card resizes as the comment panel takes/returns its width
 }
@@ -2177,6 +2193,7 @@ function resetComment(){   // each new card starts centred with comments closed
   _commenting=false;
   document.getElementById('card-col')?.classList.remove('commenting');
   document.getElementById('comment-btn')?.classList.remove('active');
+  document.getElementById('comment-box')?.classList.remove('open');
   const ca=document.querySelector('.comment-area'); if(ca) ca.style.display='none';
 }
 
@@ -2729,6 +2746,7 @@ function showAnswer(){
     return;
   }
   // spin the card to reveal the answer (swap content while edge-on, so it never reads mirrored)
+  spinStars();   // the star badge spins along with the card
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
   fc.style.animation='none';
   fc.style.transition='none';
@@ -3115,6 +3133,11 @@ function shakeStars(){   // the star badge shakes together with the card
   st.classList.remove('card-shake'); void st.offsetWidth; st.classList.add('card-shake');
   setTimeout(()=>st.classList.remove('card-shake'),500);
 }
+function spinStars(){   // the star badge spins together with the card on reveal
+  const st=document.getElementById('card-stars'); if(!st) return;
+  st.classList.remove('star-spin'); void st.offsetWidth; st.classList.add('star-spin');
+  setTimeout(()=>st.classList.remove('star-spin'),440);
+}
 function shakeCard(){
   const fc=document.getElementById('flashcard'); if(!fc) return;
   fc.classList.remove('card-in-right','card-in-left');   // clear the fade-in so removing the shake can't re-run it (flicker)
@@ -3161,7 +3184,7 @@ function bottomReserve(){
   const pr=document.getElementById('progress-row');
   let h=0, mt=0;
   if(pr&&pr.offsetParent){ h=pr.offsetHeight; mt=parseFloat(getComputedStyle(pr).marginTop)||0; }   // include the gap that holds Mona + her bubble
-  return Math.max(h,46) + mt + 40;   // button row (min 46, so the front reserves the same room) + gap above the bar + bottom inset
+  return Math.max(h,46) + mt + 68;   // button row (min 46, so the front reserves the same room) + gap above the bar + bottom inset (room so the buttons never clip)
 }
 // Height available for the card (viewport minus the bottom button area)
 function cardViewportH(){ return viewportH() - bottomReserve(); }
@@ -3171,6 +3194,7 @@ function fitCardScale(){
   const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
   if(!wrap||!fc) return;
   wrap.style.transform=''; wrap.style.marginBottom=''; wrap.style.maxWidth=''; wrap.style.marginTop='';
+  const pr=document.getElementById('progress-row'); if(pr) pr.style.maxWidth='';   // reset; the answer bar matches the card width below
   const cs=document.getElementById('card-screen');
   if(document.fullscreenElement && document.fullscreenElement===cs){   // fullscreen: the card fills the whole screen
     wrap.style.maxWidth='none'; wrap.style.marginTop='0';
@@ -3181,10 +3205,13 @@ function fitCardScale(){
   const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
   const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
   const stack=document.getElementById('card-stack');
-  const availW=Math.max(180, ((stack&&stack.clientWidth)||(cs?cs.clientWidth:wrap.clientWidth))-8);   // size to the card's part of the column (comments take the rest)
+  const _mobile=window.matchMedia('(max-width: 900px)').matches;
+  const _gutter=(!_mobile && !_commenting)?60:0;   // leave room just outside the card for the comment button (desktop, comments closed)
+  const availW=Math.max(180, ((stack&&stack.clientWidth)||(cs?cs.clientWidth:wrap.clientWidth))-8-_gutter);   // size to the card's part of the column (comments take the rest)
   const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5)
   fc.style.height=Math.round(h)+'px';
   wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
+  if(pr) pr.style.maxWidth=Math.round(w)+'px';                           // keep the answer buttons within the card's side edges
 }
 // Basic-card front: centred question at the same size as the back (one font size front & back)
 function fitFrontText(){
@@ -3195,8 +3222,10 @@ function fitFrontText(){
   fc.classList.add('front-basic');
 }
 
+let _openingDeck=false;
 function scrollGridToActive(){   // keep the current card visible in the left grid, without moving the window/card
   const gridCol=document.getElementById('grid-col'); if(!gridCol) return;
+  if(_openingDeck){ _openingDeck=false; gridCol.scrollTop=0; return; }   // fresh deck: start at the top
   const active=gridCol.querySelector('.overview-card.active'); if(!active) return;
   const gr=gridCol.getBoundingClientRect(), ar=active.getBoundingClientRect();
   if(ar.top < gr.top+20 || ar.bottom > gr.bottom-20){
