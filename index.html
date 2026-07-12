@@ -120,15 +120,29 @@ body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b21
 #card-screen:fullscreen::backdrop { background: #f5f0e8; }
 body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
 #card-screen:fullscreen .top-bar,
+#card-screen:fullscreen .progress-row,
 #card-screen:fullscreen #card-overview-grid,
 #card-screen:fullscreen .grid-tools,
 #card-screen:fullscreen .comment-area,
 #card-screen:fullscreen .group-tools,
 #card-screen:fullscreen #group-scoreboard { display: none !important; }
-/* exit-fullscreen button: bottom center, flashed for ~1s on touch/click */
-#fs-exit-btn { display: none; position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 100; width: 50px; height: 50px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+/* exit-fullscreen button: top-right (out of the slider's way), flashed for ~1s on touch/click */
+#fs-exit-btn { display: none; position: fixed; top: 18px; right: 18px; z-index: 100; width: 50px; height: 50px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
 #fs-exit-btn.visible { opacity: 1; pointer-events: auto; }
 body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
+/* fullscreen grading slider: answer buttons at the ends, Mona is the draggable knob */
+#fs-slider { display: none; position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%); width: min(720px, 90vw); align-items: center; gap: 16px; z-index: 95; }
+.fs-ans { width: 60px; height: 60px; flex-shrink: 0; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.22); transition: transform 0.1s ease; }
+.fs-ans:active { transform: scale(0.92); }
+.fs-ans-wrong { background: #f5ab97; }
+.fs-ans-right { background: #9ab8a1; }
+body.dark-mode .fs-ans-wrong { background: #e8a08b; }
+body.dark-mode .fs-ans-right { background: #6f8f77; }
+.fs-track { position: relative; flex: 1; height: 12px; border-radius: 999px; background: #e9e5dd; box-shadow: inset 0 1px 3px rgba(0,0,0,0.16); touch-action: none; }
+body.dark-mode .fs-track { background: #5a5148; }
+.fs-knob { position: absolute; top: 50%; left: 50%; width: 66px; height: 66px; margin-top: -33px; margin-left: -33px; cursor: grab; touch-action: none; }
+.fs-knob:active { cursor: grabbing; }
+.fs-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
 /* Top peeker: exact mirror of the bottom peeker, anchored at the card's TOP edge (same size, bubble centered, Mona on the right) */
 .card-peek-top { position: absolute; top: 0; left: 0; width: 100%; height: 0; pointer-events: none; opacity: 0; }   /* no z-index: Mona sits BEHIND the card (bubble is z-index 9999); no transition so it hides instantly on mouseleave */
 .card-peek-top.show { opacity: 1; }
@@ -838,7 +852,20 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
   <div class="group-scoreboard" id="group-scoreboard"></div>
 
-  <!-- exit-fullscreen: bottom center, flashed for ~1s on touch/click -->
+  <!-- fullscreen grading slider: answer buttons at the ends, Mona is the draggable knob -->
+  <div id="fs-slider">
+    <button class="fs-ans fs-ans-wrong" onclick="fsSliderPick(false)" title="Palataan asiaan (vasen nuoli)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+    <div class="fs-track" id="fs-track">
+      <div class="fs-knob" id="fs-knob"><img src="solukkologo_eyes.png" alt=""></div>
+    </div>
+    <button class="fs-ans fs-ans-right" onclick="fsSliderPick(true)" title="Tiesin (oikea nuoli)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </button>
+  </div>
+
+  <!-- exit-fullscreen: top-right, flashed for ~1s on touch/click -->
   <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
   </button>
@@ -1880,6 +1907,7 @@ async function renderCurrentCard(){
   _suppressNextAnswer = false;
   document.querySelector('.comment-area').style.display='none';   // hidden until the answer is revealed
   document.getElementById('progress-row').style.display='none';
+  updateFsSlider();   // hide the fullscreen slider until the new card's answer is revealed
   selectedGroup=null; updateGroupUI(); renderCardOverview();
   const fc=document.getElementById('flashcard');
   fc.style.minHeight='';   // fixed 1:3 card (fitCardScale sets height/width); no flip pre-size needed
@@ -1966,12 +1994,44 @@ document.addEventListener('fullscreenchange',()=>{
   const cs=document.getElementById('card-screen');
   const on = !!document.fullscreenElement && document.fullscreenElement===cs;
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
-  fitCardScale(); scrollToCard();
+  fitCardScale(); scrollToCard(); updateFsSlider();
   const b=document.getElementById('fs-exit-btn');
   if(on){ flashFsExitBtn(); }
   else if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); }
 });
 document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement) flashFsExitBtn(); }, true);
+
+// Fullscreen grading slider — Mona is a draggable knob between the two answer buttons
+let _fsDrag=false, _fsTrackRect=null;
+function _fsKnob(){ return document.getElementById('fs-knob'); }
+function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
+function _fsDown(e){ const t=document.getElementById('fs-track'), k=_fsKnob(); if(!t||!k) return; _fsDrag=true; _fsTrackRect=t.getBoundingClientRect(); k.style.transition='none'; _fsMove(e); try{ k.setPointerCapture(e.pointerId); }catch(_){} e.preventDefault(); }
+function _fsMove(e){ if(!_fsDrag||!_fsTrackRect) return; _fsSetPct((e.clientX-_fsTrackRect.left)/_fsTrackRect.width*100); }
+function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=parseFloat(k.style.left)||50;
+  if(p<=15){ k.style.left='0%'; fsSliderGrade(false); }                       // landed on the left (wrong) button
+  else if(p>=85){ k.style.left='100%'; fsSliderGrade(true); }                 // landed on the right (correct) button
+  else { k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210); }   // snap back to centre
+}
+function fsSliderPick(correct){   // clicking a button slides Mona onto it, then grades
+  const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
+  setTimeout(()=>fsSliderGrade(correct),260);
+}
+function fsSliderGrade(correct){ gradeCard(correct); setTimeout(resetFsKnob,300); }   // grade, then recentre Mona for the next card
+function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } }
+function updateFsSlider(){   // slider shows only in fullscreen once the answer is revealed
+  const s=document.getElementById('fs-slider'); if(!s) return;
+  const show=!!document.fullscreenElement && cardAnswerShown;
+  s.style.display=show?'flex':'none';
+  if(show) resetFsKnob();
+}
+(function(){
+  const k=_fsKnob(), t=document.getElementById('fs-track');
+  if(k) k.addEventListener('pointerdown',_fsDown);
+  if(t) t.addEventListener('pointerdown',_fsDown);   // swiping the track moves Mona too
+  document.addEventListener('pointermove',_fsMove);
+  document.addEventListener('pointerup',_fsUp);
+  document.addEventListener('pointercancel',_fsUp);
+})();
 // Top-bar button hover: Mona peeks over the top of the card and says what the button does
 function showTopHint(text){
   const p=document.getElementById('card-peek-top'), b=document.getElementById('card-peek-top-bubble');
@@ -2515,6 +2575,7 @@ function showAnswer(){
     pr.classList.remove('shown'); ca.classList.remove('shown');
     clearTimeout(_revealFadeTimer);
     _revealFadeTimer=setTimeout(()=>{ pr.classList.add('shown'); ca.classList.add('shown'); },300);
+    updateFsSlider();   // in fullscreen: reveal shows the grading slider
   };
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
