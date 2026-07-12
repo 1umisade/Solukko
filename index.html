@@ -1186,22 +1186,19 @@ const commentBoxWrap=document.querySelector('.comment-box');
 // appears below the card instead of pushing the card down
 (function(){ const ca=document.querySelector('.comment-area'), col=document.getElementById('comment-col'); if(ca&&col) col.appendChild(ca); })();   // comments live in the right half, next to the card
 (function(){ const dm=document.getElementById('darkmode-wrap'), gt=document.getElementById('grid-tools'); if(dm&&gt) gt.appendChild(dm); })();   // dark-mode toggle sits with the shuffle / reset tools under the grid
-// Elastic rubberband for the right half (desktop): the card springs when you over-scroll, even if its content fits
+// Elastic rubberband for the whole right half (desktop): over-scroll pulls the content and it springs back live
 (function(){
   const col=document.getElementById('card-col');
-  const card=()=>document.getElementById('flashcard-wrap');   // bounce only the card; Mona + the answer bar stay put
+  const inner=()=>document.getElementById('card-stack');   // the whole right-side content (card + Mona + answer bar) bounces together
   if(!col) return;
-  let offset=0, raf=null, releaseTO=null;
-  const MAX=90;
-  function apply(){ const c=card(); if(c) c.style.transform = offset ? 'translateY('+offset.toFixed(1)+'px)' : ''; }
-  window._resetCardSpring=function(){ clearTimeout(releaseTO); cancelAnimationFrame(raf); offset=0; const c=card(); if(c) c.style.transform=''; };
-  function spring(){
-    cancelAnimationFrame(raf);
-    (function step(){
-      offset *= 0.78;
-      if(Math.abs(offset)<0.5){ offset=0; apply(); return; }
-      apply(); raf=requestAnimationFrame(step);
-    })();
+  let offset=0, raf=null;
+  const MAX=120;
+  function apply(){ const el=inner(); if(el) el.style.transform = offset ? 'translateY('+offset.toFixed(1)+'px)' : ''; }
+  window._resetCardSpring=function(){ cancelAnimationFrame(raf); raf=null; offset=0; apply(); };
+  function tick(){                          // ALWAYS pulling back toward 0 (no "hold at max then release" — springs live while you scroll)
+    offset *= 0.86;
+    if(Math.abs(offset)<0.4){ offset=0; apply(); raf=null; return; }
+    apply(); raf=requestAnimationFrame(tick);
   }
   col.addEventListener('wheel', e=>{
     if(document.fullscreenElement) return;                        // no bounce in fullscreen (would break the fixed slider)
@@ -1216,10 +1213,9 @@ const commentBoxWrap=document.querySelector('.comment-box');
       node=node.parentElement;
     }
     e.preventDefault();               // nothing left to scroll -> rubberband
-    cancelAnimationFrame(raf);
-    offset = Math.max(-MAX, Math.min(MAX, offset - e.deltaY*0.22));
+    offset = Math.max(-MAX, Math.min(MAX, offset - e.deltaY*0.30));
     apply();
-    clearTimeout(releaseTO); releaseTO=setTimeout(spring, 60);
+    if(!raf) raf=requestAnimationFrame(tick);   // keep the spring running so it decays every frame
   }, {passive:false});
 })();
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
