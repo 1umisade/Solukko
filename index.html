@@ -119,12 +119,13 @@ body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b21
 #card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #f5f0e8; margin: 0 !important; }
 #card-screen:fullscreen::backdrop { background: #f5f0e8; }
 body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
+#card-screen:fullscreen #review-cols { display: block; }
+#card-screen:fullscreen #grid-col { display: none !important; }
+#card-screen:fullscreen #card-col { position: static; height: 100vh; width: 100%; flex: none; }
 #card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
 #card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; }
 #card-screen:fullscreen .card-content { font-size: 1.5rem; }
 #card-screen:fullscreen .top-bar,
-#card-screen:fullscreen #card-overview-grid,
-#card-screen:fullscreen .grid-tools,
 #card-screen:fullscreen .comment-area,
 #card-screen:fullscreen .group-tools,
 #card-screen:fullscreen #group-scoreboard { display: none !important; }
@@ -139,14 +140,14 @@ body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; b
 /* Mona lives on the progress bar as a draggable knob, with a hint bubble beside her */
 .pb-knob { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin-top: -26px; margin-left: -26px; cursor: default; touch-action: none; z-index: 3; }
 .pb-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
-.pb-bubble { position: absolute; left: 50%; bottom: calc(100% + 26px); transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(92vw, 460px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+.pb-bubble { position: absolute; left: 50%; bottom: calc(100% + 26px); transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(88vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
 .pb-bubble.show { opacity: 1; }
 .pb-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 9px solid transparent; border-top-color: #fffef9; }   /* tail points down to Mona */
 body.dark-mode .pb-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .pb-bubble::after { border-top-color: #3a312b; }
 .pb-knob { transition: opacity 0.45s ease; }
 /* front side: no bar or grade buttons — just Mona (centred) and her speech bubble */
-.progress-row.pb-front .ball-btn { display: none; }
+.progress-row.pb-front .ball-btn { visibility: hidden; }   /* keep their space so the card doesn't shift on reveal */
 .progress-row.pb-front .progress-tube { background: none; box-shadow: none; }
 .progress-row.pb-front .progress-fill { display: none; }
 /* grade button expands + glows when Mona overlaps it */
@@ -182,7 +183,15 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 
 /* ── 6. KORTTIRUUTU & FLASHCARD ─────────────────────────── */
 :root { --side-card-gap: 50px; }
-#card-screen { position: relative; width: 100%; max-width: 760px; min-width: 0; display: none; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 30px; }
+#card-screen { position: relative; width: 100%; max-width: 1180px; min-width: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; margin-top: 0; }
+#review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
+#grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; }
+#card-col { flex: 0 0 clamp(300px, 34vw, 440px); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
+@media (max-width: 900px) {   /* narrow: back to a single column, card on top, grid below */
+  #review-cols { flex-direction: column; align-items: center; gap: 1.4rem; }
+  #grid-col { order: 2; position: static; max-height: none; overflow: visible; width: 100%; padding: 0; }
+  #card-col { order: 1; position: static; height: auto; flex: none; width: 100%; }
+}
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
 .remaining, .deck-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #6b6055; }
@@ -458,7 +467,7 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 .deck-header-code  { font-family: 'JetBrains Mono', monospace; color: #6b6055; }
 
 /* ── 12. OVERVIEW GRID ───────────────────────────────────── */
-#card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 2.5rem; margin-top: 12rem; }
+#card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 2.5rem; margin-top: 0; }
 .overview-section { width: 100%; }
 .grid-shuffle-btn { position: absolute; right: 0; bottom: 0.7rem; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
 .grid-shuffle-btn:active { transform: scale(0.9); }
@@ -801,6 +810,21 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
 <!-- ══ KORTTIRUUTU ════════════════════════════════════════════ -->
 <div id="card-screen">
+  <!-- exit-fullscreen: top-right, flashed for ~1s on touch/click -->
+  <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+  </button>
+  <div id="review-cols">
+  <div id="grid-col">
+  <div id="card-overview-grid"></div>
+
+  <div class="grid-tools" id="grid-tools">
+    <button class="grid-tool-btn" onclick="resetDeckProgress()" title="Merkitse kaikki kortit uusiksi">↺ Nollaa edistyminen</button>
+    <button class="grid-tool-btn" onclick="shuffleReviewOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
+    <button class="grid-tool-btn" onclick="restoreDefaultOrder()" title="Palauta alkuperäinen järjestys">↕ Oletusjärjestys</button>
+  </div>
+  </div>
+  <div id="card-col">
   <div class="top-bar">
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
   </div>
@@ -843,23 +867,12 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <button class="grade-btn btn-right" id="right-btn" onclick="gradeCard(true)">Tiesin! 🥳</button>
   </div>
 
-  <div id="card-overview-grid"></div>
-
-  <div class="grid-tools" id="grid-tools">
-    <button class="grid-tool-btn" onclick="resetDeckProgress()" title="Merkitse kaikki kortit uusiksi">↺ Nollaa edistyminen</button>
-    <button class="grid-tool-btn" onclick="shuffleReviewOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
-    <button class="grid-tool-btn" onclick="restoreDefaultOrder()" title="Palauta alkuperäinen järjestys">↕ Oletusjärjestys</button>
-  </div>
-
   <div class="group-tools">
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
   </div>
   <div class="group-scoreboard" id="group-scoreboard"></div>
-
-  <!-- exit-fullscreen: top-right, flashed for ~1s on touch/click -->
-  <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
-  </button>
+  </div><!-- /card-col -->
+  </div><!-- /review-cols -->
 </div>
 
 <input type="file" id="comment-img-input" accept="image/*" style="display:none" onchange="handleCommentImage(this)">
@@ -2063,7 +2076,7 @@ function showFrontMona(){
     if(cardAnswerShown) return;
     const k2=_fsKnob(); if(k2){ k2.style.transition='opacity 0.45s ease'; k2.style.opacity='1'; }
     const b2=document.getElementById('pb-bubble'); if(b2) b2.classList.add('show');
-  }, 1000);
+  }, 2000);   // Mona fades in 2s after the card loads
 }
 // reveal: Mona + bar + buttons immediately; the "Tiesitkö…" bubble after 1s
 function clearFrontMona(){
@@ -3080,7 +3093,8 @@ function fitCardScale(){
   }
   const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
   const availH=Math.max(180, (viewportH()*_zoom - bottomReserve())-16);   // when zoomed in, size to the un-zoomed height so the zoom enlarges the card instead of shrinking it back to fit
-  const availW=Math.max(180, (cs?cs.clientWidth:wrap.clientWidth)-4);
+  const col=document.getElementById('card-col');
+  const availW=Math.max(180, ((col&&col.clientWidth)||(cs?cs.clientWidth:wrap.clientWidth))-4);   // size to the card column, not the whole screen
   const w=Math.min(availW, availH/1.5), h=w*1.5;                         // vertical card (1 : 1.5)
   fc.style.height=Math.round(h)+'px';
   wrap.style.width=Math.round(w)+'px';                                   // content scrolls inside if it overflows
@@ -3097,6 +3111,9 @@ function fitFrontText(){
 function scrollToCard(smooth){
   const fc=document.getElementById('flashcard'), cs=document.getElementById('card-screen');
   if(!fc||!cs) return;
+  if(!window.matchMedia('(max-width: 900px)').matches){   // desktop: card column is fixed/centred, the grid scrolls on its own
+    cs.style.marginTop=''; const g=document.getElementById('card-overview-grid'); if(g) g.style.marginTop=''; positionCommentArea(); return;
+  }
   const vpH=cardViewportH(), fcH=fc.getBoundingClientRect().height;
   const fcOffsetInCS=fc.getBoundingClientRect().top-cs.getBoundingClientRect().top;
   cs.style.marginTop=Math.max(0,(vpH-fcH)/2-fcOffsetInCS+24)+'px';
