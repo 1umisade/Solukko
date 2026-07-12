@@ -209,6 +209,21 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
 body.dark-mode #deck-cover .cover-title { color: #eadfce; }
 body.dark-mode #deck-cover .cover-esittely { color: #cbbda8; }
 @media (min-width: 901px) { body.reviewing #deck-cover { min-height: calc(100vh - 84px); } }
+/* Deck welcome: on load the right half shows a big Mona + welcome bubble instead of a review card */
+#deck-welcome { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem; width: 100%; padding: 1rem; box-sizing: border-box; }
+#deck-welcome .welcome-mona img { width: clamp(120px, 15vw, 190px); height: auto; display: block; }
+#deck-welcome .welcome-bubble { position: relative; max-width: 40ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 18px; padding: 1rem 1.3rem; font-family: 'Lora', serif; font-size: clamp(1rem, 1.5vw, 1.18rem); line-height: 1.55; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: center; }
+#deck-welcome .welcome-bubble::after { content: ''; position: absolute; left: 50%; bottom: -11px; transform: translateX(-50%); width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 12px solid #fffef9; }
+body.dark-mode #deck-welcome .welcome-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
+body.dark-mode #deck-welcome .welcome-bubble::after { border-top-color: #3a312b; }
+body.reviewing #card-col.welcome #deck-welcome { display: flex; }
+body.reviewing #card-col.welcome #flashcard-wrap,
+body.reviewing #card-col.welcome .card-extent,
+body.reviewing #card-col.welcome .top-bar,
+body.reviewing #card-col.welcome #card-stars { display: none !important; }
+/* reviewing happens only in fullscreen: no answer bar or corner buttons in the non-fullscreen right half */
+@media (min-width: 901px) { body.reviewing #progress-row, body.reviewing #rotate-btn, body.reviewing #comment-btn { display: none !important; } }
+#card-screen:fullscreen #progress-row { display: flex !important; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; }
 #card-col { flex: 0 0 clamp(300px, 34vw, 440px); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
@@ -885,6 +900,10 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
   <div id="card-col">
   <div id="card-stack">
+  <div id="deck-welcome">
+    <div class="welcome-bubble" id="welcome-bubble"></div>
+    <div class="welcome-mona"><img src="solukkologo_eyes.png" alt=""></div>
+  </div>
   <div class="top-bar">
     <span class="remaining" id="remaining" style="width:100%;text-align:center;"></span>
   </div>
@@ -904,7 +923,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-again" onclick="fsSliderPick(false)" onmouseenter="showGradeHint(false)" onmouseleave="hideGradeHint()" title="Vasen nuoli">
+    <button class="ball-btn grade-again" onclick="fsSliderPick(false)" onmouseenter="showGradeHint(false)" onmouseleave="hideGradeHint()" title="Vasen nuolinäppäin">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="progress-tube" id="progress-tube">
@@ -916,7 +935,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         <div class="logo-eye re"><span class="logo-pupil"></span></div>
       </div>
     </div>
-    <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" onmouseenter="showGradeHint(true)" onmouseleave="hideGradeHint()" title="Oikea nuoli">
+    <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" onmouseenter="showGradeHint(true)" onmouseleave="hideGradeHint()" title="Oikea nuolinäppäin">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
     </button>
   </div>
@@ -1856,7 +1875,7 @@ async function startDeck(deckName){
   currentDeck=deckName;
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
-  _deckIntro = infos.find(c=>getField(c,['esittely','Esittely','esittely ']).replace(/<[^>]*>/g,'').trim()) || null;   // a card with an "esittely" field becomes the deck cover
+  _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
   reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
   queue = reviewCards.slice();
   shuffleMode=false; document.getElementById('shuffle-btn')?.classList.remove('active');
@@ -1872,16 +1891,16 @@ async function startDeck(deckName){
     reviewCards.forEach((c,i)=>{ if(i!==_skip) cardGrades[c.cardId]='known'; });
     localStorage.setItem('solukko-grades-'+deckName, JSON.stringify(cardGrades));
   }
-  show('card-screen'); nextCard(); hide('loading');
+  show('card-screen'); hide('loading');
+  showDeckWelcome();   // right half: welcome Mona + bubble; pick a card in the grid to review it in fullscreen
+  { const _gc=document.getElementById('grid-col'); if(_gc) _gc.scrollTop=0; }   // open at the top so the cover fills the view
   sessionStorage.setItem('solukko-savedDeck', deckName);
   setTimeout(scrollToCard, 200);
   document.getElementById('site-brand').style.display='none';
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display='none'; }
   document.getElementById('back-btn-fixed').style.display='flex';
   document.getElementById('gear-btn-wrap').style.display='flex';
-  document.getElementById('rotate-btn').style.display='flex';
-  { const cb=document.getElementById('comment-btn'); if(cb && !window.matchMedia('(max-width: 900px)').matches) cb.style.display='flex'; }
-  resetComment();
+  resetComment();   // fullscreen ⛶ + comment buttons stay hidden — reviewing happens in fullscreen, opened by clicking a card
   document.body.classList.add('reviewing');
   history.pushState({reviewing: true}, '');
 }
@@ -2121,7 +2140,8 @@ document.addEventListener('fullscreenchange',()=>{
   fitCardScale(); scrollToCard(); updateFsSlider();
   const b=document.getElementById('fs-exit-btn');
   if(on){ flashFsExitBtn(); _fsCursorActivity(); }
-  else { if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden'); }
+  else { if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
+    if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
 });
 document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
 
@@ -2267,6 +2287,31 @@ async function nextCard(){
   await renderCurrentCard();
 }
 async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard(); }
+
+// ── Deck landing: welcome Mona by default; hover a grid card to preview it; click to review it in fullscreen ──
+let _previewIndex=-1, _previewTO=null;
+function showDeckWelcome(){
+  if(document.fullscreenElement) return;
+  clearTimeout(_previewTO);
+  _previewIndex=-1; currentCard=null; currentOverviewIndex=-1; _openingDeck=false;
+  const cc=document.getElementById('card-col'); if(cc) cc.classList.add('welcome');
+  renderCardOverview();   // builds the grid/cover and sets the deck title first
+  const wb=document.getElementById('welcome-bubble');
+  if(wb){ const nm=(document.getElementById('deck-title-bar')?.textContent||'').trim();
+    wb.textContent='Tervetuloa '+nm+' kurssille! Vasemmalla näät kurssikuvauksen ja vierittämällä alaspäin kaikki kurssin kysymyskortit. Aloita opiskelu painamalla ensimmäistä kysymyskorttia.'; }
+}
+function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
+  if(document.fullscreenElement) return;
+  clearTimeout(_previewTO);
+  _previewTO=setTimeout(()=>_doPreview(index), 90);
+}
+function _doPreview(index){
+  if(document.fullscreenElement) return;
+  if(index===_previewIndex && currentCard===reviewCards[index]) return;
+  _previewIndex=index; currentOverviewIndex=index; currentCard=reviewCards[index];
+  const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
+  renderCurrentCard();
+}
 
 
 // ════════════════════════════════════════════════════════════
@@ -2961,9 +3006,8 @@ function renderCardOverview(){
   { const cov=document.getElementById('deck-cover');   // deck cover from the intro card (title + esittely), fills the grid-half
     if(cov){
       if(_deckIntro){
-        const _title=(getField(_deckIntro,['title','Title','otsikko','Otsikko','Front','front'])||_deckIntro.question||_name);
-        const _es=(getField(_deckIntro,['esittely','Esittely'])||_deckIntro.answer||'');
-        cov.innerHTML='<div class="cover-title">'+_title+'</div><div class="cover-esittely">'+_es+'</div>';
+        const _es=(getField(_deckIntro,['Back','back'])||_deckIntro.answer||'');   // the intro card's back = course description
+        cov.innerHTML='<div class="cover-title">'+_name+'</div><div class="cover-esittely">'+_es+'</div>';
         cov.style.display='flex';
       } else { cov.innerHTML=''; cov.style.display='none'; }
     }
@@ -2980,7 +3024,7 @@ function renderCardOverview(){
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       const starCount=cardStarCount(card);
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
-      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
+      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})" onmouseenter="previewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
@@ -3001,7 +3045,17 @@ function fitDeckTitle(){
   el.style.fontSize=Math.min(64,100*W/natural).toFixed(1)+'px';
 }
 
-function jumpToOverviewCard(index){ currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1); if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } } nextCardFromCurrent(); }
+function jumpToOverviewCard(index){   // clicking a grid card opens it for review in fullscreen
+  clearTimeout(_previewTO);
+  const changed = currentCard!==reviewCards[index];
+  currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1);
+  if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
+  _previewIndex=index;
+  document.getElementById('card-col')?.classList.remove('welcome');
+  const cs=document.getElementById('card-screen');
+  if(cs && cs.requestFullscreen && !document.fullscreenElement){ cs.requestFullscreen().catch(()=>{}); }   // synchronous with the click gesture
+  if(changed) nextCardFromCurrent();
+}
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2')?.checked??true; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
 
@@ -3180,13 +3234,17 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     const dx=t.clientX-sx, dy=t.clientY-sy;
     if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.2){
       swiped=true;
-      if(!cardAnswerShown && !e.target.closest('.word-link')) showAnswer();
+      if(document.fullscreenElement && !cardAnswerShown && !e.target.closest('.word-link')) showAnswer();   // reviewing only in fullscreen
     }
   },{passive:true});
 
   fc.addEventListener('click',e=>{
     if(!currentCard) return;                               // celebration / done screen: no reveal or shake
     if(e.target.closest('.word-link')){ e.stopPropagation(); return; }
+    if(!document.fullscreenElement){                        // pressing the card opens fullscreen; reviewing happens there
+      const cs=document.getElementById('card-screen'); if(cs&&cs.requestFullscreen) cs.requestFullscreen().catch(()=>{});
+      return;
+    }
     if(_fsSwipeMoved){ _fsSwipeMoved=false; return; }      // a fullscreen Mona-swipe already handled this — don't also shake
     if(swiped){ swiped=false; return; }                    // swipe already handled the reveal
     if(!cardAnswerShown){ showAnswer(); return; }          // front: tap reveals the answer
@@ -3195,6 +3253,8 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
 
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
+    if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); return; }   // F toggles fullscreen anytime
+    if(!document.fullscreenElement) return;                        // reveal/grade keys work only in fullscreen
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
       e.preventDefault();
       if(!cardAnswerShown) showAnswer();                          // first press reveals the backside
@@ -3202,7 +3262,6 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     }
     if(e.key===' '&&currentCard){ e.preventDefault(); if(!cardAnswerShown) showAnswer(); else shakeCard(); }   // space = click the card (reveal, then shake)
     else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
-    else if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); }   // F = toggle fullscreen
   });
 })();
 
