@@ -115,11 +115,22 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 #rotate-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
 body.dark-mode #rotate-btn { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #rotate-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
-/* fullscreen mode: the card element itself fills the whole screen, content scrolls inside */
-#flashcard.is-fullscreen { width: 100vw !important; height: 100vh !important; max-width: none !important; border-radius: 0 !important; padding: 3.5rem clamp(1rem, 8vw, 8rem); box-sizing: border-box; overflow-y: auto; }
-#flashcard.is-fullscreen .card-content { font-size: 1.6rem; }
+/* fullscreen mode: the whole review screen goes fullscreen, showing just the card + answer buttons */
+#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #f5f0e8; }
+#card-screen:fullscreen::backdrop { background: #f5f0e8; }
+body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
+#card-screen:fullscreen .top-bar,
+#card-screen:fullscreen #card-overview-grid,
+#card-screen:fullscreen .grid-tools,
+#card-screen:fullscreen .comment-area,
+#card-screen:fullscreen .group-tools,
+#card-screen:fullscreen #group-scoreboard { display: none !important; }
+/* exit-fullscreen button: bottom center, flashed for ~1s on touch/click */
+#fs-exit-btn { display: none; position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 100; width: 50px; height: 50px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+#fs-exit-btn.visible { opacity: 1; pointer-events: auto; }
+body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 /* Top peeker: exact mirror of the bottom peeker, anchored at the card's TOP edge (same size, bubble centered, Mona on the right) */
-.card-peek-top { position: absolute; top: 0; left: 0; width: 100%; height: 0; z-index: 6; pointer-events: none; opacity: 0; transition: opacity 0.18s ease; }
+.card-peek-top { position: absolute; top: 0; left: 0; width: 100%; height: 0; pointer-events: none; opacity: 0; }   /* no z-index: Mona sits BEHIND the card (bubble is z-index 9999); no transition so it hides instantly on mouseleave */
 .card-peek-top.show { opacity: 1; }
 .card-peek-top .card-peek-inner { transform: rotate(-3deg); }        /* upright: peeks DOWN over the top edge (JS positions it to the right of the bubble) */
 .card-peek-top .card-peek-bubble { top: auto; bottom: 12px; }        /* bubble sits just above the card's top edge, centered */
@@ -797,11 +808,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-again" onclick="gradeCard(false)" title="Palataan asiaan – kysyn kohta uudestaan (←)">
+    <button class="ball-btn grade-again" onclick="gradeCard(false)" onmouseenter="peekHint('Palataan asiaan – kysyn kohta uudestaan')" onmouseleave="peekHint()" title="Vasen nuoli">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <div class="progress-tube"><div class="progress-fill" id="progress-fill"></div></div>
-    <button class="ball-btn grade-correct" onclick="gradeCard(true)" title="Tiesin – en kysy enää tänään uudestaan (→)">
+    <button class="ball-btn grade-correct" onclick="gradeCard(true)" onmouseenter="peekHint('Tiesin – en kysy enää tänään uudestaan')" onmouseleave="peekHint()" title="Oikea nuoli">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
     </button>
   </div>
@@ -826,6 +837,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <button class="add-group-btn" onclick="addGroup()">+ lisää ryhmä</button>
   </div>
   <div class="group-scoreboard" id="group-scoreboard"></div>
+
+  <!-- exit-fullscreen: bottom center, flashed for ~1s on touch/click -->
+  <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+  </button>
 </div>
 
 <input type="file" id="comment-img-input" accept="image/*" style="display:none" onchange="handleCommentImage(this)">
@@ -1932,20 +1948,30 @@ function restoreDefaultOrder(){   // back to the deck's original order, lectures
   renderCardOverview();
 }
 
-// Fullscreen mode: the card itself fills the whole screen (keyboard reveal/grade still work)
+// Fullscreen mode: the whole review screen goes fullscreen (card + answer buttons)
 function toggleCardFullscreen(){
-  const fc=document.getElementById('flashcard'); if(!fc) return;
-  if(!document.fullscreenElement){ (fc.requestFullscreen?fc.requestFullscreen():Promise.reject()).catch(()=>{}); }
+  const cs=document.getElementById('card-screen'); if(!cs) return;
+  if(!document.fullscreenElement){ (cs.requestFullscreen?cs.requestFullscreen():Promise.reject()).catch(()=>{}); }
   else { document.exitFullscreen&&document.exitFullscreen(); }
 }
 function exitCardFullscreen(){ if(document.fullscreenElement) document.exitFullscreen&&document.exitFullscreen(); }
+let _fsHideTimer=null;
+function flashFsExitBtn(){   // show the exit button for ~1s (on entering fullscreen and on each touch/click)
+  if(!document.fullscreenElement) return;
+  const b=document.getElementById('fs-exit-btn'); if(!b) return;
+  b.style.display='flex'; b.classList.add('visible');
+  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>b.classList.remove('visible'),1000);
+}
 document.addEventListener('fullscreenchange',()=>{
-  const fc=document.getElementById('flashcard');
-  const on = !!document.fullscreenElement && document.fullscreenElement===fc;
+  const cs=document.getElementById('card-screen');
+  const on = !!document.fullscreenElement && document.fullscreenElement===cs;
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
-  if(fc) fc.classList.toggle('is-fullscreen',on);
-  if(!on){ fitCardScale(); scrollToCard(); }   // restore the normal sized layout on exit
+  fitCardScale(); scrollToCard();
+  const b=document.getElementById('fs-exit-btn');
+  if(on){ flashFsExitBtn(); }
+  else if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); }
 });
+document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement) flashFsExitBtn(); }, true);
 // Top-bar button hover: Mona peeks over the top of the card and says what the button does
 function showTopHint(text){
   const p=document.getElementById('card-peek-top'), b=document.getElementById('card-peek-top-bubble');
@@ -1953,7 +1979,7 @@ function showTopHint(text){
   b.textContent=text; p.classList.add('show');
   requestAnimationFrame(()=>positionPeekMona(p));   // same placement logic as the bottom peeker: bubble centered, Mona to its right
 }
-function hideTopHint(){ document.getElementById('card-peek-top')?.classList.remove('show'); }
+function hideTopHint(){ const p=document.getElementById('card-peek-top'), b=document.getElementById('card-peek-top-bubble'); if(p) p.classList.remove('show'); if(b) b.textContent=''; }
 
 async function nextCard(){
   if(!queue.length){ showCelebration(); return; }
@@ -2865,7 +2891,11 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
       e.preventDefault();
       if(!cardAnswerShown) showAnswer();                          // first press reveals the backside
-      else gradeCard(e.key==='ArrowRight');                       // then grade: → Tiesin, ← Palataan asiaan
+      else {                                                       // then grade: → Tiesin, ← Palataan asiaan
+        const _b=document.querySelector(e.key==='ArrowRight'?'.grade-correct':'.grade-again');
+        if(_b){ _b.classList.remove('btn-attention'); void _b.offsetWidth; _b.classList.add('btn-attention'); setTimeout(()=>_b.classList.remove('btn-attention'),700); }   // glow + expand like a shake
+        gradeCard(e.key==='ArrowRight');
+      }
     }
     if(e.key===' '&&currentCard){ e.preventDefault(); if(!cardAnswerShown) showAnswer(); else shakeCard(); }   // space = click the card (reveal, then shake)
     else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
@@ -2925,7 +2955,6 @@ function cardViewportH(){ return viewportH() - bottomReserve(); }
 function fitCardScale(){
   const wrap=document.getElementById('flashcard-wrap'), fc=document.getElementById('flashcard');
   if(!wrap||!fc) return;
-  if(fc.classList.contains('is-fullscreen')) return;                     // fullscreen: the browser sizes the card to the whole screen
   wrap.style.transform=''; wrap.style.marginBottom='';
   const cs=document.getElementById('card-screen');
   const _zoom=(window.visualViewport&&window.visualViewport.scale)||1;   // pinch-zoom factor (1 = no zoom)
