@@ -280,10 +280,10 @@ body.dark-mode .embed-3d-frame { background: #2a2622; }
 .io-card-image img { max-width: 100%; height: auto; max-height: none; display: block; }
 .io-overlay { position: absolute; inset: 0; pointer-events: none; }
 .io-overlay svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.answer-section { margin-top: 1.4rem; padding-top: 1.4rem; border-top: 1px solid #d4cec4; width: 100%; display: none; }
+.answer-section { margin: 1.4rem -2rem 0; padding: 1.4rem 2rem 0; border-top: 1px solid #d4cec4; display: none; }   /* span the full card width (counteract the card's 2rem side padding) */
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
-.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 58px; z-index: 2; }   /* room above the bar for Mona + her speech bubble (no overlap with the card) */
+.progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 66px; z-index: 2; }   /* room above the bar for Mona + her speech bubble (no overlap with the card) */
 .progress-tube { position: relative; flex: 1; height: 14px; background: #e9e5dd; border-radius: 999px; overflow: visible; box-shadow: inset 0 1px 3px rgba(0,0,0,0.14); }
 .progress-fill { height: 100%; width: 0%; background: #9ab8a1; border-radius: 999px; transition: width 0.4s ease; }
 body.dark-mode .progress-fill { background: #6f8f77; }
@@ -1928,6 +1928,8 @@ async function renderCurrentCard(){
   setTimeout(()=>fc.classList.remove('card-in-right'),260);   // drop it after the fade-in so a later shake can't re-trigger it (flicker)
   showFrontMona();                                            // Mona rides the bar on the front side too
   fitCardScale(); fitFrontText(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
+  fc.scrollTop=0;                                             // focus the new card: show it from the top
+  scrollGridToActive();                                       // and bring the current card into view in the grid
   const ft=document.getElementById('flashcard').offsetTop;
   const ca=document.querySelector('.comment-area');
   if(ca) ca.style.top=ft+'px';
@@ -2046,7 +2048,7 @@ function fsSliderPick(correct){   // arrow key: slide Mona onto the button, glow
   setTimeout(()=>fsHot(correct?'right':'wrong'), 240);
   setTimeout(()=>fsSliderGrade(correct), 430);
 }
-function fsSliderGrade(correct){ gradeCard(correct); setTimeout(resetFsKnob,300); }   // grade, then recentre Mona for the next card
+function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } fsHot(null); }
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 // grade-button hover: show the hint bubble on Mona's corresponding side
@@ -2068,6 +2070,7 @@ function showFrontMona(){
   const pr=document.getElementById('progress-row'); if(!pr) return;
   pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
   const b=document.getElementById('pb-bubble'), k=_fsKnob();
+  fsHot(null);   // clear any button glow left from grading the previous card
   if(k){ k.style.transition='none'; k.style.left='50%'; k.style.opacity='0'; }
   if(b){ b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; b.classList.remove('show'); }
   updateProgress();
@@ -2646,6 +2649,7 @@ function showAnswer(){
     fc.classList.remove('card-in-right','card-in-left');   // clear the fade-in so removing the shake can't re-run it (flicker)
     fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
     setTimeout(()=>fc.classList.remove('card-shake'),500);
+    shakeStars();
     reveal();
     return;
   }
@@ -3029,11 +3033,17 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   });
 })();
 
+function shakeStars(){   // the star badge shakes together with the card
+  const st=document.getElementById('card-stars'); if(!st) return;
+  st.classList.remove('card-shake'); void st.offsetWidth; st.classList.add('card-shake');
+  setTimeout(()=>st.classList.remove('card-shake'),500);
+}
 function shakeCard(){
   const fc=document.getElementById('flashcard'); if(!fc) return;
   fc.classList.remove('card-in-right','card-in-left');   // clear the fade-in so removing the shake can't re-run it (flicker)
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
+  shakeStars();
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
   if(ca){ ca.style.display='flex'; ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
@@ -3108,6 +3118,14 @@ function fitFrontText(){
   fc.classList.add('front-basic');
 }
 
+function scrollGridToActive(){   // keep the current card visible in the left grid, without moving the window/card
+  const gridCol=document.getElementById('grid-col'); if(!gridCol) return;
+  const active=gridCol.querySelector('.overview-card.active'); if(!active) return;
+  const gr=gridCol.getBoundingClientRect(), ar=active.getBoundingClientRect();
+  if(ar.top < gr.top+20 || ar.bottom > gr.bottom-20){
+    gridCol.scrollTop += (ar.top-gr.top) - gridCol.clientHeight/2 + active.offsetHeight/2;
+  }
+}
 function scrollToCard(smooth){
   const fc=document.getElementById('flashcard'), cs=document.getElementById('card-screen');
   if(!fc||!cs) return;
