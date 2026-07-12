@@ -130,7 +130,7 @@ body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::
 #card-screen:fullscreen #grid-col { display: none !important; }
 /* fullscreen must not inherit the desktop 50/50 split: no title, no divider, card fills the screen */
 #card-screen:fullscreen #deck-title-bar, #card-screen:fullscreen #grid-header { display: none !important; }
-#card-screen:fullscreen #card-col { position: static; height: 100vh; width: 100%; flex: none; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 0 !important; gap: 0 !important; overflow: visible !important; }
+#card-screen:fullscreen #card-col { position: static; height: 100vh; width: 100vw !important; max-width: 100vw !important; flex: none; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 0 !important; gap: 0 !important; overflow: visible !important; }
 #card-screen:fullscreen #card-col::before { display: none !important; }
 #card-screen:fullscreen #card-stack { max-height: none !important; width: 100% !important; }
 #card-screen:fullscreen #comment-col { display: none !important; }
@@ -222,7 +222,13 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
   body.reviewing #card-stack { flex: 1 1 0; min-width: 0; max-height: 100%; justify-content: center; gap: 0.5rem; }
   body.reviewing #comment-col { display: none; flex: 0 0 clamp(200px, 42%, 320px); min-width: 0; align-self: stretch; overflow-y: auto; overscroll-behavior: auto; padding: 1rem 0; }
   body.reviewing #card-col.commenting #comment-col { display: block; }   /* comments appear only after the comment button is clicked */
+  body.reviewing #comment-col .comment-area { align-items: stretch; width: 100%; box-sizing: border-box; }
   body.reviewing #comment-col .comment-box { width: 100%; }   /* the comment field fills the panel */
+  body.reviewing #comment-col .comment-display,
+  body.reviewing #comment-col .comment-item,
+  body.reviewing #comment-col .comment-feed,
+  body.reviewing #comment-col #buzzer-display,
+  body.reviewing #comment-col textarea { max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }   /* keep comment content inside the narrow panel */
   body.reviewing #flashcard-wrap { margin-top: 0; }
 }
 @media (max-width: 900px) {   /* narrow: single column, card on top, grid below (unchanged) */
@@ -1181,36 +1187,38 @@ const commentBoxWrap=document.querySelector('.comment-box');
 (function(){ const dm=document.getElementById('darkmode-wrap'), gt=document.getElementById('grid-tools'); if(dm&&gt) gt.appendChild(dm); })();   // dark-mode toggle sits with the shuffle / reset tools under the grid
 // Elastic rubberband for the right half (desktop): the card springs when you over-scroll, even if its content fits
 (function(){
-  const col=document.getElementById('card-col'), inner=document.getElementById('card-stack');
-  if(!col||!inner) return;
+  const col=document.getElementById('card-col');
+  const card=()=>document.getElementById('flashcard-wrap');   // bounce only the card; Mona + the answer bar stay put
+  if(!col) return;
   let offset=0, raf=null, releaseTO=null;
-  const MAX=130;
-  function apply(){ inner.style.transform = offset ? 'translateY('+offset.toFixed(1)+'px)' : ''; }
+  const MAX=90;
+  function apply(){ const c=card(); if(c) c.style.transform = offset ? 'translateY('+offset.toFixed(1)+'px)' : ''; }
+  window._resetCardSpring=function(){ clearTimeout(releaseTO); cancelAnimationFrame(raf); offset=0; const c=card(); if(c) c.style.transform=''; };
   function spring(){
     cancelAnimationFrame(raf);
     (function step(){
-      offset *= 0.82;
-      if(Math.abs(offset)<0.4){ offset=0; apply(); return; }
+      offset *= 0.78;
+      if(Math.abs(offset)<0.5){ offset=0; apply(); return; }
       apply(); raf=requestAnimationFrame(step);
     })();
   }
   col.addEventListener('wheel', e=>{
+    if(document.fullscreenElement) return;                        // no bounce in fullscreen (would break the fixed slider)
     if(window.matchMedia('(max-width: 900px)').matches) return;   // right-half rubberband is a desktop thing
-    // let any scrollable child (long card, comment feed) consume the wheel first
+    // let any scrollable element (long card, comment feed, card-col) consume the wheel first
     let node=e.target;
-    while(node && node!==col){
-      const st=getComputedStyle(node);
-      if(node.scrollHeight>node.clientHeight+1 && /(auto|scroll)/.test(st.overflowY)){
+    while(node){
+      if(node.scrollHeight>node.clientHeight+1 && /(auto|scroll)/.test(getComputedStyle(node).overflowY)){
         if((e.deltaY<0 && node.scrollTop>0) || (e.deltaY>0 && node.scrollTop+node.clientHeight<node.scrollHeight-1)) return;
       }
+      if(node===col) break;
       node=node.parentElement;
     }
-    if((e.deltaY<0 && col.scrollTop>0) || (e.deltaY>0 && col.scrollTop+col.clientHeight<col.scrollHeight-1)) return;   // card-col can still scroll
     e.preventDefault();               // nothing left to scroll -> rubberband
     cancelAnimationFrame(raf);
-    offset = Math.max(-MAX, Math.min(MAX, offset - e.deltaY*0.28));
+    offset = Math.max(-MAX, Math.min(MAX, offset - e.deltaY*0.22));
     apply();
-    clearTimeout(releaseTO); releaseTO=setTimeout(spring, 55);
+    clearTimeout(releaseTO); releaseTO=setTimeout(spring, 60);
   }, {passive:false});
 })();
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
@@ -1997,6 +2005,7 @@ async function renderCurrentCard(){
   cardAnswerShown = false;
   _suppressNextAnswer = false;
   resetComment();   // new card: comments closed, card centred again
+  if(window._resetCardSpring) _resetCardSpring();   // clear any leftover rubberband offset
   document.getElementById('progress-row').style.display='none';
   updateFsSlider();   // hide the fullscreen slider until the new card's answer is revealed
   selectedGroup=null; updateGroupUI(); renderCardOverview();
