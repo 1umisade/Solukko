@@ -208,7 +208,7 @@ body.dark-mode #deck-title-bar { color: #eadfce; }
 #deck-cover .cover-esittely :is(img,iframe,video) { max-width: 100%; height: auto; }
 body.dark-mode #deck-cover .cover-title { color: #eadfce; }
 body.dark-mode #deck-cover .cover-esittely { color: #cbbda8; }
-@media (min-width: 901px) { body.reviewing #deck-cover { min-height: 100vh; } }   /* fills the view once the back button is scrolled off the top */
+@media (min-width: 901px) { body.reviewing #deck-cover { min-height: calc(100vh - 210px); } }   /* leaves the first card row peeking below the description on load */
 /* Deck welcome: on load the right half shows a big Mona + welcome bubble instead of a review card */
 #deck-welcome { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem; width: 100%; padding: 1rem; box-sizing: border-box; }
 #deck-welcome .welcome-mona { position: relative; display: inline-block; line-height: 0; }
@@ -2300,7 +2300,12 @@ async function nextCard(){
 async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard(); }
 
 // ── Deck landing: welcome Mona by default; hover a grid card to preview it; click to review it in fullscreen ──
-let _previewIndex=-1, _previewTO=null;
+let _previewIndex=-1, _previewTO=null, _welcomeTO=null;
+function scheduleWelcome(){   // moving off a card (into a gap or out of the grid) brings Mona back
+  if(document.fullscreenElement) return;
+  clearTimeout(_previewTO); clearTimeout(_welcomeTO);
+  _welcomeTO=setTimeout(()=>{ if(!document.fullscreenElement) showDeckWelcome(); }, 60);
+}
 function showDeckWelcome(){
   if(document.fullscreenElement) return;
   clearTimeout(_previewTO);
@@ -2308,12 +2313,11 @@ function showDeckWelcome(){
   const cc=document.getElementById('card-col'); if(cc) cc.classList.add('welcome');
   renderCardOverview();   // builds the grid/cover and sets the deck title first
   const wb=document.getElementById('welcome-bubble');
-  if(wb){ const nm=(document.getElementById('deck-title-bar')?.textContent||'').trim();
-    wb.textContent='Tervetuloa '+nm+' kurssille! Vasemmalla näät kurssikuvauksen ja vierittämällä alaspäin kaikki kurssin kysymyskortit. Aloita opiskelu painamalla ensimmäistä kysymyskorttia.'; }
+  if(wb) wb.textContent='Kurssikuvauksen alla näet kysymyskortit. Klikkaa ensimmäistä kysmyskorttia aloittaaksesi opiskelun.';
 }
 function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
   if(document.fullscreenElement) return;
-  clearTimeout(_previewTO);
+  clearTimeout(_welcomeTO); clearTimeout(_previewTO);
   _previewTO=setTimeout(()=>_doPreview(index), 90);
 }
 function _doPreview(index){
@@ -3035,7 +3039,7 @@ function renderCardOverview(){
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       const starCount=cardStarCount(card);
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
-      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})" onmouseenter="previewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
+      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})" onmouseenter="previewCard(${index})" onmouseleave="scheduleWelcome()">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
@@ -3057,7 +3061,7 @@ function fitDeckTitle(){
 }
 
 function jumpToOverviewCard(index){   // clicking a grid card opens it for review in fullscreen
-  clearTimeout(_previewTO);
+  clearTimeout(_previewTO); clearTimeout(_welcomeTO);
   const changed = currentCard!==reviewCards[index];
   currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1);
   if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
@@ -3367,6 +3371,7 @@ function fitFrontText(){
 
 let _openingDeck=false, _deckIntro=null;
 function scrollGridToActive(){   // keep the current card visible in the left grid, without moving the window/card
+  if(!document.fullscreenElement) return;   // don't scroll the grid on hover-preview (grid is hidden in fullscreen anyway)
   const gridCol=document.getElementById('grid-col'); if(!gridCol) return;
   if(_openingDeck){ _openingDeck=false; gridCol.scrollTop=0; return; }   // fresh deck: start at the top
   const active=gridCol.querySelector('.overview-card.active'); if(!active) return;
