@@ -2328,17 +2328,15 @@ function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) 
     _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
   }
 }
-function fsSliderPick(correct){   // click/arrow: keycap press + sound, then slide Mona linearly (2s) onto the button; a "loading" indicator shows meanwhile; grade instantly the moment she touches it
+function fsSliderPick(correct){   // click/arrow: keycap press + sound, fast-slide Mona to just short of the button, then a ~1s "loading" pause before the new card swaps in
   if(_picking) return; _picking=true;
   clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);             // a pending reveal timer must not reset the bubble mid-pick
   playKeyClick(); pressKeycap(correct);                                       // up/down keycap animation + click sound
-  const b=_pbBubble(); if(b){ b.textContent=correct?_SLIDE_YES_TEXT:_SLIDE_NO_TEXT; b.style.transition='opacity 0.4s ease, left 2s linear'; b.style.left=correct?'100%':'0%'; } _pbShow();   // her bubble follows at the same linear pace
-  const k=_fsKnob(); if(k){ k.style.transition='left 2s linear'; k.style.left=correct?'100%':'0%'; }   // slide starts immediately, linear, 2s
-  showCardLoading();                                                          // "Ladataan uutta korttia" + spinner in the centre (card blurred)
-  _pickTO1=setTimeout(()=>{                                                   // she touches the button...
-    fsHot(correct?'right':'wrong');                                           // ...glow + expand it
-    _pickTO2=setTimeout(()=>{ hideCardLoading(); _gradeInstant=true; fsSliderGrade(correct); _picking=false; }, 250);   // ...wait 0.25s, then load the new card instantly (no fade)
-  }, 2000);
+  const dest = correct ? '90%' : '10%';                                       // stop just short of the button (almost touching)
+  const b=_pbBubble(); if(b){ b.textContent=correct?_SLIDE_YES_TEXT:_SLIDE_NO_TEXT; b.style.transition='opacity 0.4s ease, left 0.3s ease-out'; b.style.left=dest; } _pbShow();
+  const k=_fsKnob(); if(k){ k.style.transition='left 0.3s ease-out'; k.style.left=dest; }   // fast slide, almost touching the button
+  showCardLoading();                                                          // "Ladataan uutta korttia" + spinner (card blurred)
+  _pickTO1=setTimeout(()=>{ hideCardLoading(); _gradeInstant=true; fsSliderGrade(correct); _picking=false; }, 1000);   // wait ~1s for the new card to "load", then swap it in
 }
 function fsSliderPickNow(correct){   // double-click the button: skip the slide and load the next card immediately
   clearTimeout(_pickTO1); clearTimeout(_pickTO2); hideCardLoading();
