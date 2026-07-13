@@ -150,6 +150,13 @@ body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::
 #fs-exit-btn { display: none; position: fixed; top: 18px; right: 18px; z-index: 100; width: 50px; height: 50px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
 #fs-exit-btn.visible { opacity: 1; pointer-events: auto; }
 body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
+/* "loading the next card" overlay, centred while Mona slides to a button */
+#card-loading { position: fixed; inset: 0; z-index: 96; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; pointer-events: none; }
+#card-loading .cl-spinner { width: 46px; height: 46px; border: 4px solid rgba(160,106,53,0.25); border-top-color: #a06a35; border-radius: 50%; animation: clSpin 0.8s linear infinite; }
+#card-loading .cl-text { font-family: 'Lora', serif; font-size: 1.15rem; color: #6b4423; }
+@keyframes clSpin { to { transform: rotate(360deg); } }
+body.dark-mode #card-loading .cl-spinner { border-color: rgba(217,196,150,0.25); border-top-color: #d9c496; }
+body.dark-mode #card-loading .cl-text { color: #eadfce; }
 /* Mona lives on the progress bar as a draggable knob, with a hint bubble beside her */
 .pb-knob { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin-top: -26px; margin-left: -26px; cursor: default; touch-action: none; z-index: 3; }
 .pb-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
@@ -919,6 +926,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
 <!-- ══ KORTTIRUUTU ════════════════════════════════════════════ -->
 <div id="card-screen">
+  <!-- "loading the next card" overlay, shown while Mona slides to a button -->
+  <div id="card-loading" style="display:none;"><div class="cl-spinner"></div><div class="cl-text">Ladataan uutta korttia</div></div>
   <!-- exit-fullscreen: top-right, flashed for ~1s on touch/click -->
   <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
@@ -2115,8 +2124,8 @@ async function renderCurrentCard(){
   fc.style.animation  = 'none';
   void fc.offsetWidth;
   fc.style.animation  = '';
-  fc.classList.add('card-in-right');
-  setTimeout(()=>fc.classList.remove('card-in-right'),260);   // drop it after the fade-in so a later shake can't re-trigger it (flicker)
+  if(_skipCardFade){ _skipCardFade=false; }                   // instant swap (click flow): no fade-in
+  else { fc.classList.add('card-in-right'); setTimeout(()=>fc.classList.remove('card-in-right'),260); }   // drop it after the fade-in so a later shake can't re-trigger it (flicker)
   showFrontMona();                                            // Mona rides the bar on the front side too
   fitCardScale(); fitFrontText(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
   fc.scrollTop=0;                                             // focus the new card: show it from the top
@@ -2268,8 +2277,12 @@ function _fsKnob(){ return document.getElementById('pb-knob'); }
 function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
 function _fsPct(){ const k=_fsKnob(); return k?(parseFloat(k.style.left)||50):50; }
 const _PICK_PAUSE_MS=1500;   // (click/arrow) pause after the bubble changes, before Mona slides to the button
-let _picking=false;          // guard so a second click during the pause can't advance two cards
-let _pickTO1=null, _pickTO2=null, _pickTO3=null;   // pending pick timers, so a double-click can cancel them and grade now
+let _picking=false;          // guard so a second click during the slide can't advance two cards
+let _pickTO1=null;           // pending pick timer, so a double-click can cancel it and grade now
+let _gradeInstant=false;     // set for the click flow: grade with no fly-out / no fade-in (instant card swap)
+let _skipCardFade=false;     // consumed by renderCurrentCard to skip the fade-in on that instant swap
+function showCardLoading(){ const el=document.getElementById('card-loading'); if(el) el.style.display='flex'; }   // "Ladataan uutta korttia" + spinner in the centre
+function hideCardLoading(){ const el=document.getElementById('card-loading'); if(el) el.style.display='none'; }
 function _knobShown(){ const k=_fsKnob(); return !!k && k.style.opacity!=='0'; }   // '' or '1' = Mona visible
 function _pbShow(){ const b=_pbBubble(); if(b && _knobShown()) b.classList.add('show'); }   // never show the bubble unless Mona is visible
 function _setKnobShown(vis){ const k=_fsKnob(); if(k) k.style.opacity=vis?'1':'0'; if(!vis){ const b=_pbBubble(); if(b) b.classList.remove('show'); } }   // hiding Mona also hides her bubble
@@ -2312,24 +2325,19 @@ function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) 
     _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
   }
 }
-function fsSliderPick(correct){   // click/arrow: keycap press + sound + bubble change, pause, then slide Mona onto the button and grade the moment she arrives
+function fsSliderPick(correct){   // click/arrow: keycap press + sound, then slide Mona linearly (2s) onto the button; a "loading" indicator shows meanwhile; grade instantly the moment she touches it
   if(_picking) return; _picking=true;
-  clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);             // a pending reveal timer must not reset the bubble to "Tiesitkö?" mid-pick
-  playKeyClick(); pressKeycap(correct);                                       // 1) up/down keycap animation + click sound
-  const b=_pbBubble(); if(b){ b.textContent=correct?_SLIDE_YES_TEXT:_SLIDE_NO_TEXT; } _pbShow();  //    + change Mona's bubble immediately (Kyllä/Ei)
-  _pickTO1=setTimeout(()=>{                                                   // 2) wait 1.5s
-    _pbBubbleX(correct?100:0, true);                                          // 3) slide Mona (and her bubble) to the button
-    const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
-    _pickTO2=setTimeout(()=>{                                                 // 4) she touches the button -> glow it...
-      fsHot(correct?'right':'wrong');
-      _pickTO3=setTimeout(()=>{ fsSliderGrade(correct); _picking=false; }, 300);   //    ...then load the next card
-    }, 250);
-  }, _PICK_PAUSE_MS);
+  clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);             // a pending reveal timer must not reset the bubble mid-pick
+  playKeyClick(); pressKeycap(correct);                                       // up/down keycap animation + click sound
+  const b=_pbBubble(); if(b){ b.textContent=correct?_SLIDE_YES_TEXT:_SLIDE_NO_TEXT; b.style.transition='opacity 0.4s ease, left 2s linear'; b.style.left=correct?'100%':'0%'; } _pbShow();   // her bubble follows at the same linear pace
+  const k=_fsKnob(); if(k){ k.style.transition='left 2s linear'; k.style.left=correct?'100%':'0%'; }   // slide starts immediately, linear, 2s
+  showCardLoading();                                                          // "Ladataan uutta korttia" + spinner in the centre
+  _pickTO1=setTimeout(()=>{ hideCardLoading(); _gradeInstant=true; fsSliderGrade(correct); _picking=false; }, 2000);   // she touches the button -> load the new card instantly (no fade)
 }
-function fsSliderPickNow(correct){   // double-click the button: skip the pause/slide and load the next card immediately
-  clearTimeout(_pickTO1); clearTimeout(_pickTO2); clearTimeout(_pickTO3);
+function fsSliderPickNow(correct){   // double-click the button: skip the slide and load the next card immediately
+  clearTimeout(_pickTO1); hideCardLoading();
   const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left=correct?'100%':'0%'; }
-  fsHot(correct?'right':'wrong'); fsSliderGrade(correct); _picking=false;
+  _gradeInstant=true; fsSliderGrade(correct); _picking=false;
 }
 function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; } fsHot(null); }   // recentre Mona and her bubble
@@ -3084,6 +3092,13 @@ function gradeCard(correct){
     fc.style.animation=''; fc.classList.add('card-out-left');
     setTimeout(doNext,280);
   };
+  if(_gradeInstant){                                  // click flow: no fly-out, no fade-in — swap to the new card at once
+    _gradeInstant=false; _skipCardFade=true;
+    fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
+    fc.style.transition='none'; fc.style.transform=''; fc.style.animation='none';
+    doNext();
+    return;
+  }
   if(correct){                                        // "yes": glow the bar (no green card), then fly out
     const tube=document.querySelector('.progress-tube'), fill=document.getElementById('progress-fill');
     [tube,fill].forEach(el=>{ if(el){ el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); } });
