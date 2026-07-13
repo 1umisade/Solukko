@@ -609,8 +609,8 @@ body.dark-mode .overview-card-stars { color: #eadfce; }
 
 .subdeck-video-embed { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; margin: 0.5rem 0; background: #000; }
 .subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
-.overview-card.active  { border: 3px solid #498d65 !important; box-shadow: 0 0 0 4px rgba(73,141,101,0.5), 0 5px 16px rgba(0,0,0,0.18); }   /* thick, obvious highlight for the card being reviewed */
-body.dark-mode .overview-card.active { border-color: #7fd3a1 !important; box-shadow: 0 0 0 4px rgba(127,211,161,0.45), 0 5px 16px rgba(0,0,0,0.35); }
+.overview-card.active  { border: 3px solid #a06a35 !important; box-shadow: 0 0 0 4px rgba(160,106,53,0.5), 0 5px 16px rgba(0,0,0,0.18); }   /* thick brown highlight for the card being reviewed */
+body.dark-mode .overview-card.active { border-color: #d9c496 !important; box-shadow: 0 0 0 4px rgba(217,196,150,0.45), 0 5px 16px rgba(0,0,0,0.35); }   /* beige in dark mode */
 .overview-card.known   { background: #ebf1ed; border-color: #9ab8a1; }
 .overview-card.unknown { background: #fce4d0; border-color: #ef9a5f; }   /* "En tiedä" cards painted orange */
 body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
@@ -2267,7 +2267,9 @@ function _pbBubbleX(pct, animate){   // move the speech bubble horizontally to f
 function _fsKnob(){ return document.getElementById('pb-knob'); }
 function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
 function _fsPct(){ const k=_fsKnob(); return k?(parseFloat(k.style.left)||50):50; }
-const _GRADE_HOLD_MS=2000;   // once Mona reaches a button, hold the view this long so the changed bubble is readable
+const _GRADE_HOLD_MS=2000;   // (drag) once Mona reaches a button, hold the view this long so the changed bubble is readable
+const _PICK_PAUSE_MS=1500;   // (click/arrow) pause after the bubble changes, before Mona slides to the button
+let _picking=false;          // guard so a second click during the pause can't advance two cards
 function _knobShown(){ const k=_fsKnob(); return !!k && k.style.opacity!=='0'; }   // '' or '1' = Mona visible
 function _pbShow(){ const b=_pbBubble(); if(b && _knobShown()) b.classList.add('show'); }   // never show the bubble unless Mona is visible
 function _setKnobShown(vis){ const k=_fsKnob(); if(k) k.style.opacity=vis?'1':'0'; if(!vis){ const b=_pbBubble(); if(b) b.classList.remove('show'); } }   // hiding Mona also hides her bubble
@@ -2303,13 +2305,16 @@ function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) 
     _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
   }
 }
-function fsSliderPick(correct){   // arrow key / button click: press the keycap, slide Mona onto it, glow it, then grade
-  playKeyClick(); pressKeycap(correct);
-  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; } _pbShow();   // bubble follows Mona to the button (only if she's visible)
-  _pbBubbleX(correct?100:0, true);
-  const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
-  setTimeout(()=>fsHot(correct?'right':'wrong'), 240);
-  setTimeout(()=>fsSliderGrade(correct), 250 + _GRADE_HOLD_MS);   // slide (250ms) then hold so the changed bubble is readable
+function fsSliderPick(correct){   // click/arrow: keycap press + sound + bubble change, pause, then slide Mona onto the button and grade the moment she arrives
+  if(_picking) return; _picking=true;
+  playKeyClick(); pressKeycap(correct);                                       // 1) up/down keycap animation + click sound
+  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; } _pbShow();  //    + change Mona's bubble immediately
+  setTimeout(()=>{                                                            // 2) wait 1.5s
+    _pbBubbleX(correct?100:0, true);                                          // 3) slide Mona (and her bubble) to the button
+    const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
+    fsHot(correct?'right':'wrong');
+    setTimeout(()=>{ fsSliderGrade(correct); _picking=false; }, 250);         // 4) the moment she touches it, load the next card
+  }, _PICK_PAUSE_MS);
 }
 function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; } fsHot(null); }   // recentre Mona and her bubble
@@ -2319,6 +2324,7 @@ const _BACK_BUBBLE_TEXT='Tiesitkö?';                       // resting: Mona onl
 const _SLIDE_BUBBLE_TEXT='Kysyn huomenna uudestaan.';      // while she slides toward a button
 // front side: no bar — Mona centred, bubble centred above her; both fade in after 1s
 function showFrontMona(){
+  _picking=false;   // fresh card -> allow grading again
   clearTimeout(_backBubbleTimer);
   const pr=document.getElementById('progress-row'); if(!pr) return;
   pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
@@ -3446,6 +3452,7 @@ function shakeCard(){
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
   if(ca){ _syncCommentArea(); ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
   fitCardScale(); scrollToCard();   // re-lay out exactly like a fresh card load, leaving room for the buttons
+  const bub=_pbBubble(); if(bub){ bub.textContent='Paina Kyllä- tai Ei-nappia.'; bub.style.transition='opacity 0.4s ease'; bub.style.left='50%'; } _pbShow();   // Mona prompts for a button (only if she's visible)
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
