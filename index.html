@@ -144,7 +144,7 @@ body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::
 #card-screen:fullscreen #group-scoreboard { display: none !important; }
 /* the progress bar becomes a big fixed slider at the bottom in fullscreen */
 #card-screen:fullscreen .progress-row { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); width: min(760px, 92vw); margin: 0; z-index: 95; }
-#card-screen:fullscreen .ball-btn { width: 60px; height: 60px; }
+#card-screen:fullscreen .ball-btn { width: 75px; height: 75px; }
 #card-screen:fullscreen .pb-knob { width: 78px; height: 78px; margin-top: -39px; margin-left: -39px; }
 /* exit-fullscreen button: top-right, flashed for ~1s on touch/click */
 #fs-exit-btn { display: none; position: fixed; top: 18px; right: 18px; z-index: 100; width: 50px; height: 50px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
@@ -204,7 +204,7 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 body.dark-mode #deck-title-bar { color: #eadfce; }
 /* deck intro cover (built from a special intro card): title + esittely centred, fills the grid-half; cards sit below the fold */
 #deck-cover { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 1.1rem; padding: 1.5rem 1.2rem 2.5rem; box-sizing: border-box; }
-#deck-cover .cover-title { font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.18; color: #1a1612; }
+#deck-cover .cover-title { font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.8rem, 3.2vw, 2.8rem); line-height: 1.18; color: #1a1612; position: relative; z-index: 2; }   /* above Mona so she flies in from behind it */
 #deck-cover .cover-esittely { font-family: 'Lora', serif; font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.65; color: #56533c; max-width: 46ch; }
 #deck-cover .cover-esittely :is(img,iframe,video) { max-width: 100%; height: auto; }
 body.dark-mode #deck-cover .cover-title { color: #eadfce; }
@@ -234,7 +234,7 @@ body.deck-intro-anim #deck-cover .cover-esittely { animation: introFade 0.6s eas
 /* #card-overview-grid fades per-element via staggerGridIntro(): the first row of cards one-by-one, then the rest together */
 body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #card-overview-grid .overview-section > *:not(.overview-section-grid) { opacity: 0; }   /* start hidden so there's no flash before staggerGridIntro sets the staggered fade */
 /* Mona sits above the course title inside the cover (scrolls with the page); bubble centred on the title, Mona to its left */
-#mona-top-peek { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; margin-bottom: 1.6rem; }
+#mona-top-peek { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; margin-bottom: 1.6rem; position: relative; z-index: 1; }   /* z-index below the title so Mona flies in from behind it */
 .mona-top-inner { flex: 0 0 118px; width: 118px; height: 118px; position: relative; cursor: pointer; }
 .mona-top-inner img { width: 100%; height: auto; display: block; }
 .mona-top-inner.shake { animation: topPeekShake 0.5s ease; }
@@ -244,9 +244,9 @@ body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #c
 .mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
-@keyframes monaDropIn { from { transform: translateY(-240px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-body.deck-intro-anim #mona-top-peek .mona-top-inner { animation: monaDropIn 0.75s cubic-bezier(0.34, 1.5, 0.64, 1) both; animation-delay: 3.8s; }   /* drops in last, after the grid */
-body.deck-intro-anim #mona-top-peek .mona-top-bubble { animation: introFade 0.5s ease both; animation-delay: 4.7s; }   /* then her bubble */
+@keyframes monaFlyIn { from { transform: translateY(135px) scale(0.8); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+body.deck-intro-anim #mona-top-peek .mona-top-inner { animation: monaFlyIn 0.85s cubic-bezier(0.34, 1.45, 0.64, 1) 4s both; }   /* flies up from behind the title 4s in; 'both' keeps her hidden before and visible after */
+body.deck-intro-anim #mona-top-peek .mona-top-bubble { animation: introFade 0.5s ease 4.9s both; }   /* then her bubble */
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
@@ -399,9 +399,9 @@ body.dark-mode .progress-tube { background: #5a5148; }
 .progress-row.celebrating .ball-btn { display: none; }
 .progress-row.celebrating .progress-tube { overflow: visible; }
 .progress-row.celebrating .progress-fill { width: 100% !important; background: #3a7a52; box-shadow: 0 0 12px 3px rgba(110,200,150,0.55); }   /* the JS visualizer pulses this glow with the music */
-.ball-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: none; background: transparent; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, box-shadow 0.1s ease; }
-.ball-btn img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; border-radius: 50%; }
-.ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+.ball-btn { width: 58px; height: 58px; flex-shrink: 0; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, filter 0.1s ease; }   /* 25% bigger, no circular button frame — just the PNG */
+.ball-btn img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
+.ball-btn:active { transform: scale(0.92); }
 .ball-btn.grade-correct { --glow: #9ab8a1; }   /* PNG provides the look; --glow drives the expand/glow animations */
 body.dark-mode .ball-btn.grade-correct { --glow: #6f8f77; }
 .ball-btn.grade-again { --glow: #f5ab97; }
@@ -618,6 +618,8 @@ body.dark-mode .overview-card.unknown { background: #3f3022; border-color: #b87a
 
 .card-stars { position: absolute; right: 1rem; bottom: 0.8rem; z-index: 3; font-size: 1.4rem; line-height: 1; color: #6b4423; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
+@keyframes starsFade { from { opacity: 0; } to { opacity: 1; } }
+.card-stars.stars-fade { animation: starsFade 0.45s ease; }   /* re-fade the stars in whenever the card changes */
 body.dark-mode .card-stars { color: #eadfce; }
 
 /* ── SUN/MOON DARKMODE BUTTON ────────────────────────────── */
@@ -1964,7 +1966,7 @@ async function startDeck(deckName){
   resetComment();   // fullscreen ⛶ + comment buttons stay hidden — reviewing happens in fullscreen, opened by clicking a card
   document.body.classList.add('reviewing');
   document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
-  setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5600);
+  setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 6000);
   setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
   setTimeout(landingReveal, 3900);     // once the grid has faded in: highlight the first card, then show it on the right
   history.pushState({reviewing: true}, '');
@@ -2423,15 +2425,18 @@ function _doPreview(index){
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCurrentCard();
 }
-// Mona lives in the cover above the title (scrolls with the page); drops in on load via CSS. Clickable like the homepage logo.
+// Mona lives in the cover above the title (scrolls with the page); flies in on load via CSS. Clickable like the homepage logo.
 let _topPeekEyeTO=null;
-function _monaTopScream(withSound){
-  const inner=document.querySelector('#mona-top-peek .mona-top-inner'), img=document.querySelector('#mona-top-peek img');
-  if(inner){ inner.classList.remove('shake'); void inner.offsetWidth; inner.classList.add('shake'); setTimeout(()=>inner.classList.remove('shake'),520); }
-  if(img){ img.src='solukkologo_eyes_closed.png'; clearTimeout(_topPeekEyeTO); _topPeekEyeTO=setTimeout(()=>{ img.src='solukkologo_eyes.png'; },900); }
+function monaClick(withSound){   // unified Mona reaction: shake + eyes-closed png + hide the moving dots (+ optional scream) — mirrors homepage siteBrandReact
+  const inner=document.querySelector('#mona-top-peek .mona-top-inner'), img=inner&&inner.querySelector('img');
+  if(inner){
+    inner.classList.remove('shake'); void inner.offsetWidth; inner.classList.add('shake'); setTimeout(()=>inner.classList.remove('shake'),520);
+    inner.classList.add('eyes-closed');   // hide the moving pupils while she screams
+  }
+  if(img){ img.src='solukkologo_eyes_closed.png'; clearTimeout(_topPeekEyeTO); _topPeekEyeTO=setTimeout(()=>{ img.src='solukkologo_eyes.png'; if(inner) inner.classList.remove('eyes-closed'); },900); }
   if(withSound){ try{ playScream(); }catch(e){} }
 }
-function _monaTopClick(){ _monaTopScream(true); }   // clickable like the homepage: shake + scream
+function _monaTopClick(){ monaClick(true); }   // clickable like the homepage: shake + scream + eyes closed
 function staggerGridIntro(){   // on deck load: fade the first row of cards in one-by-one, then everything else together
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
   const cards=[...grid.querySelectorAll('.overview-card')]; if(!cards.length) return;
@@ -2715,6 +2720,7 @@ function renderCardStars(){
   const meanings=['','Tuskin tentissä','Ehkä tentissä','Luultavasti tentissä'];
   box.dataset.starMeaning = count ? meanings[Math.min(count,3)] : '';
   box.removeAttribute('title');
+  if(count){ box.classList.remove('stars-fade'); void box.offsetWidth; box.classList.add('stars-fade'); }   // fade the stars in on every card change
 }
 
 let _revealFadeTimer=null;
