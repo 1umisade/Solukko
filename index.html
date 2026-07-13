@@ -2323,12 +2323,12 @@ function _fsMove(e){ if(!_fsDrag) return;
   fsHot(zone);
   const b=_pbBubble(); if(b) b.textContent = zone==='wrong'?_SLIDE_NO_TEXT : zone==='right'?_SLIDE_YES_TEXT : _BACK_BUBBLE_TEXT;   // proper speech by which button she's near
   if(_fsSwipeMoved && (p<=4 || p>=96)){                                       // she touches the button -> load the next card immediately
-    _fsDrag=false; const correct=p>=96; _fsSetPct(correct?100:0); fsHot(correct?'right':'wrong'); fsSliderGrade(correct);
+    _fsDrag=false; const correct=p>=96; _fsSetPct(correct?100:0); fsHot(correct?'right':'wrong'); fsDragGrade(correct);
   }
 }
 function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=_fsPct();
-  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); fsSliderGrade(false); }       // released on the Ei button -> load next card immediately
-  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); fsSliderGrade(true); } // released on the Kyllä button -> load next card immediately
+  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); fsDragGrade(false); }       // released on the Ei button -> loading screen for ~1s, then the next card
+  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); fsDragGrade(true); } // released on the Kyllä button -> loading screen for ~1s, then the next card
   else {   // snap back to centre -> bubble returns to "Tiesitkö?"
     fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210);
     _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
@@ -2353,6 +2353,12 @@ function fsSliderPickNow(correct){   // double-click the button: skip the slide 
   fsHot(correct?'right':'wrong'); _gradeInstant=true; fsSliderGrade(correct); _picking=false;
 }
 function fsSliderGrade(correct){ _gradeInstant=true; gradeCard(correct); }   // every slider grade (click/drag/double-click) loads the next card instantly — no fly-out, no 1s "yes" flash
+function fsDragGrade(correct){   // dragging Mona onto a button: show the loading screen (spinner + blur) for ~1s, then load the new card
+  if(_picking) return; _picking=true;
+  clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);
+  showCardLoading();
+  _pickTO1=setTimeout(()=>{ hideCardLoading(); fsSliderGrade(correct); _picking=false; }, 1000);
+}
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; k.style.transform=''; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; b.style.transform=''; } fsHot(null); }   // recentre Mona and her bubble (clear the click-slide transform)
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 let _frontMonaTimer=null, _backBubbleTimer=null;
