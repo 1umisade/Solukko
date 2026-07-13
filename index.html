@@ -231,19 +231,23 @@ body.reviewing #show-row { display: none !important; }   /* the answer is reveal
 @keyframes introFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 body.deck-intro-anim #deck-cover .cover-title { animation: introFade 0.6s ease both; }
 body.deck-intro-anim #deck-cover .cover-esittely { animation: introFade 0.6s ease both; animation-delay: 1s; }
-body.deck-intro-anim #card-overview-grid { animation: introFade 0.6s ease both; animation-delay: 2s; }
-/* Mona peeks down from the top of the page, above the course title (grid half) */
+/* #card-overview-grid fades per-element via staggerGridIntro(): the first row of cards one-by-one, then the rest together */
+body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #card-overview-grid .overview-section > *:not(.overview-section-grid) { opacity: 0; }   /* start hidden so there's no flash before staggerGridIntro sets the staggered fade */
+/* Mona peeks down from the top of the page, above the course title — upside down, ~40% of her visible */
 #mona-top-peek { position: fixed; top: 0; left: 25vw; width: 118px; z-index: 55; transform: translate(-50%, -100%); transition: transform 0.75s cubic-bezier(0.34, 1.4, 0.64, 1); pointer-events: none; display: none; }
 body.reviewing #mona-top-peek { display: block; }
-#mona-top-peek.peeking { transform: translate(-50%, -14%); }   /* slides down showing most of Mona */
-.mona-top-inner { position: relative; width: 118px; height: 118px; transition: transform 0.75s cubic-bezier(0.34, 1.4, 0.64, 1); }
-#mona-top-peek.peeking .mona-top-inner { transform: rotate(6deg); }
+#mona-top-peek.peeking { transform: translate(-50%, -60%); }   /* ~40% of Mona hangs down from the top edge */
+.mona-top-inner { position: relative; width: 118px; height: 118px; transform: rotate(180deg); }   /* upside down */
+.mona-top-inner .logo-eye { display: none; }   /* static drawn eyes (tracking eyes don't work upside down) */
 .mona-top-inner img { width: 100%; height: auto; display: block; }
-.mona-top-bubble { position: absolute; top: 122px; left: 50%; transform: translateX(-50%); width: max-content; max-width: 30ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.65rem 1rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: center; opacity: 0; transition: opacity 0.35s ease; }
+.mona-top-inner.shake { animation: topPeekShake 0.5s ease; }
+@keyframes topPeekShake { 0%,100%{transform:rotate(180deg) translate(0,0)} 20%{transform:rotate(176deg) translate(4px,0)} 40%{transform:rotate(184deg) translate(-4px,0)} 60%{transform:rotate(178deg) translate(3px,0)} 80%{transform:rotate(182deg) translate(-2px,0)} }
+/* speech bubble to Mona's right (in the part of her that's visible below the top edge) */
+.mona-top-bubble { position: absolute; left: 126px; top: 74px; width: max-content; max-width: 24ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.65rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; opacity: 0; transition: opacity 0.35s ease; }
 .mona-top-bubble.show { opacity: 1; }
-.mona-top-bubble::before { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); border: 10px solid transparent; border-bottom-color: #fffef9; }
+.mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 16px; border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
-body.dark-mode .mona-top-bubble::before { border-bottom-color: #3a312b; }
+body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
 @media (max-width: 900px) { #mona-top-peek { left: 50vw; } }
 #card-screen:fullscreen #mona-top-peek { display: none !important; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
@@ -1972,6 +1976,7 @@ async function startDeck(deckName){
   document.body.classList.add('reviewing');
   document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
   setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5000);
+  setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
   startMonaTopPeek();   // Mona peeks from the top after the grid appears
   history.pushState({reviewing: true}, '');
 }
@@ -2223,10 +2228,12 @@ function _playFsFlip(){   // FLIP: card is now full-screen; animate it from wher
   const wrap=document.getElementById('flashcard-wrap'); if(!wrap||!_fsFlipRect){ _fsFlipRect=null; return; }
   const last=wrap.getBoundingClientRect(); const first=_fsFlipRect; _fsFlipRect=null;
   if(last.width<1||last.height<1){ return; }
-  const dx=first.left-last.left, dy=first.top-last.top, sx=first.width/last.width, sy=first.height/last.height;
-  wrap.style.transformOrigin='0 0';
+  // grow from the card's own centre (centre-right where it sat), not a corner
+  const dcx=(first.left+first.width/2)-(last.left+last.width/2), dcy=(first.top+first.height/2)-(last.top+last.height/2);
+  const sx=first.width/last.width, sy=first.height/last.height;
+  wrap.style.transformOrigin='50% 50%';
   wrap.style.transition='none';
-  wrap.style.transform='translate('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
+  wrap.style.transform='translate('+dcx.toFixed(1)+'px,'+dcy.toFixed(1)+'px) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
     wrap.style.transition='transform 0.5s cubic-bezier(0.16,1,0.3,1)';
     wrap.style.transform='translate(0,0) scale(1,1)';
@@ -2414,19 +2421,25 @@ function _doPreview(index){
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCurrentCard();
 }
-// Mona peeks down from the top of the page (above the course title), with the old bouncy peek animation
-let _topPeekTimer=null, _topPeekTO=[];
+// Mona peeks down (upside down) from the top of the page, shaking + screaming as she appears
+let _topPeekTimer=null, _topPeekTO=[], _topPeekEyeTO=null;
+function _monaTopScream(withSound){
+  const inner=document.querySelector('#mona-top-peek .mona-top-inner'), img=document.querySelector('#mona-top-peek img');
+  if(inner){ inner.classList.remove('shake'); void inner.offsetWidth; inner.classList.add('shake'); setTimeout(()=>inner.classList.remove('shake'),520); }
+  if(img){ img.src='solukkologo_eyes_closed.png'; clearTimeout(_topPeekEyeTO); _topPeekEyeTO=setTimeout(()=>{ img.src='solukkologo_eyes.png'; },900); }
+  if(withSound){ try{ playScream(); }catch(e){} }
+}
 function startMonaTopPeek(){
   const el=document.getElementById('mona-top-peek'), bub=document.getElementById('mona-top-bubble');
   if(!el) return;
   stopMonaTopPeek();
   if(bub) bub.textContent='Kurssikuvauksen alla näet kysymyskortit. Klikkaa ensimmäistä kysymyskorttia aloittaaksesi opiskelun.';
-  _topPeekTO.push(setTimeout(()=>{ if(!document.fullscreenElement) el.classList.add('peeking'); }, 3000));   // peek in at 3s (after the grid)
+  _topPeekTO.push(setTimeout(()=>{ if(!document.fullscreenElement){ el.classList.add('peeking'); _monaTopScream(true); } }, 3000));   // peek in + shake/scream at 3s
   _topPeekTO.push(setTimeout(()=>{ if(bub && !document.fullscreenElement) bub.classList.add('show'); }, 4000));   // her bubble at 4s
   _topPeekTimer=setInterval(()=>{                       // then peek in / retract every ~7s
     if(document.fullscreenElement) return;
     if(el.classList.contains('peeking')){ el.classList.remove('peeking'); if(bub) bub.classList.remove('show'); }
-    else el.classList.add('peeking');
+    else { el.classList.add('peeking'); _monaTopScream(false); if(bub) bub.classList.add('show'); }   // shake (no sound) on later peeks
   }, 7000);
 }
 function stopMonaTopPeek(){
@@ -2434,6 +2447,16 @@ function stopMonaTopPeek(){
   _topPeekTO.forEach(clearTimeout); _topPeekTO=[];
   const el=document.getElementById('mona-top-peek'), bub=document.getElementById('mona-top-bubble');
   if(el) el.classList.remove('peeking'); if(bub) bub.classList.remove('show');
+}
+function staggerGridIntro(){   // on deck load: fade the first row of cards in one-by-one, then everything else together
+  const grid=document.getElementById('card-overview-grid'); if(!grid) return;
+  const cards=[...grid.querySelectorAll('.overview-card')]; if(!cards.length) return;
+  const firstTop=cards[0].getBoundingClientRect().top, firstRow=[], rest=[];
+  cards.forEach(c=>{ (Math.abs(c.getBoundingClientRect().top-firstTop)<6 ? firstRow : rest).push(c); });
+  const restTime=(2 + firstRow.length*0.12 + 0.15);
+  firstRow.forEach((c,i)=>{ c.style.animation='introFade 0.5s ease both'; c.style.animationDelay=(2+i*0.12).toFixed(2)+'s'; });
+  rest.forEach(c=>{ c.style.animation='introFade 0.5s ease both'; c.style.animationDelay=restTime.toFixed(2)+'s'; });
+  grid.querySelectorAll('.overview-section > *:not(.overview-section-grid)').forEach(v=>{ v.style.animation='introFade 0.5s ease both'; v.style.animationDelay=restTime.toFixed(2)+'s'; });
 }
 
 
@@ -3147,7 +3170,7 @@ function renderCardOverview(){
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       const starCount=cardStarCount(card);
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
-      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})" onmouseenter="previewCard(${index})" onmouseleave="scheduleWelcome()">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
+      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
@@ -3168,17 +3191,19 @@ function fitDeckTitle(){
   el.style.fontSize=Math.min(64,100*W/natural).toFixed(1)+'px';
 }
 
-function jumpToOverviewCard(index){   // clicking a grid card opens it for review in fullscreen
+function jumpToOverviewCard(index){   // 1st click: highlight the card + show it on the right; 2nd click (same card): review it fullscreen
+  const isCurrent = (currentOverviewIndex===index && currentCard===reviewCards[index]);
+  if(isCurrent && !document.fullscreenElement){   // click the already-shown card again → fullscreen
+    _captureCardRect();
+    const cs=document.getElementById('card-screen');
+    if(cs && cs.requestFullscreen){ cs.requestFullscreen().catch(()=>{}); }
+    return;
+  }
   clearTimeout(_previewTO); clearTimeout(_welcomeTO);
-  _captureCardRect();   // the previewed card (right side) is what expands into fullscreen
-  const changed = currentCard!==reviewCards[index];
   currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1);
   if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
-  _previewIndex=index;
   document.getElementById('card-col')?.classList.remove('welcome');
-  const cs=document.getElementById('card-screen');
-  if(cs && cs.requestFullscreen && !document.fullscreenElement){ cs.requestFullscreen().catch(()=>{}); }   // synchronous with the click gesture
-  if(changed) nextCardFromCurrent();
+  _previewIndex=-1; _doPreview(index);   // highlight + show on the right (no fullscreen)
 }
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2')?.checked??true; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
