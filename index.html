@@ -87,8 +87,8 @@ body.dark-mode .shop-embed-imgwrap { background: #332b25; }
 body.dark-mode .shop-embed-name { color: #eadfce; }
 @media (max-width: 640px){ .shop-embed { width: 150px; margin-left: 1rem; } .shop-embed-imgwrap img { width: 104px; } }
 .hero-body { display: flex; align-items: flex-start; gap: 2.5rem; margin-top: 2rem; text-align: left; }
-.hero-shop { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }   /* right half */
-#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 1 1 0; min-width: 0; margin: 0; text-align: justify; overflow: hidden; }   /* left half; justified so the text fills the width; overflow:hidden contains the floated portrait */
+.hero-shop { flex: 0 0 220px; display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }   /* narrow right column */
+#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 1 1 auto; min-width: 0; margin: 0; text-align: justify; overflow: hidden; }   /* text takes the whole width on the left; justified; overflow:hidden contains the floated portrait */
 @media (max-width: 720px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; flex-direction: row; flex-wrap: wrap; justify-content: center; align-self: stretch; } .hero-shop .shop-embed { width: 170px; } }
 #home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 #home-hero .hero-link:hover { color: #7d5227; }
@@ -941,6 +941,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <div class="hero-shop">
         <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
         <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="solusota_web.jpg" alt="Solusota"></span><span class="shop-embed-name">Solusota &ndash; korttipeli</span><span class="shop-embed-price">19,90&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
+        <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="poster_web.jpg" alt="Juliste"></span><span class="shop-embed-name">Juliste</span><span class="shop-embed-price">15,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
       </div>
     </div>
   </div>
@@ -2316,11 +2317,15 @@ document.addEventListener('mousemove', _fsCursorActivity);
     w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
     w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); });
   }
-  // "Avaa opiskelunäkymässä" hint follows the cursor over the right-hand card OR the highlighted grid card (both open the study view on click)
+  // cursor-following hint: star significance over the stars (both modes); "Avaa opiskelunäkymässä" over the right-hand/grid card (non-fullscreen)
   document.addEventListener('mousemove',e=>{
+    const stars = e.target.closest ? e.target.closest('#card-stars') : null;
+    if(stars && stars.dataset.starMeaning){   // hovering the stars -> show their significance on the cursor
+      tip.textContent=stars.dataset.starMeaning; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; tip.style.display='block'; return;
+    }
     if(document.fullscreenElement){ if(tip.style.display!=='none') tip.style.display='none'; return; }
     const t = e.target.closest ? e.target.closest('#flashcard-wrap, .overview-card.active') : null;
-    if(t){ tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; }
+    if(t){ tip.textContent='Avaa opiskelunäkymässä'; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; }
     else if(tip.style.display!=='none'){ tip.style.display='none'; }
   });
 })();
@@ -3861,13 +3866,9 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
   tip.id = 'star-tooltip';
   document.body.appendChild(tip);
 
-  function show(target){
+  function show(target){   // touch only — mouse hover uses the cursor-following #card-hover-tip
     const text = target.dataset.starMeaning;
     if(!text) return;
-    if(typeof _fsFullscreen==='function' && _fsFullscreen()){   // fullscreen: speak the star meaning through Mona's bubble, not the floating tip
-      const b=_pbBubble(); if(b){ if(b.dataset.starPrev===undefined) b.dataset.starPrev=b.textContent; b.textContent=text; b.style.left='50%'; b.classList.add('show'); }
-      return;
-    }
     tip.textContent = text;
     tip.style.display = 'block';
     const r = target.getBoundingClientRect();
@@ -3881,16 +3882,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
     tip.style.top  = t + 'px';
   }
 
-  function hide(){
-    tip.style.display = 'none';
-    const b=_pbBubble();   // restore Mona's resting bubble text after a star hover
-    if(b && b.dataset.starPrev!==undefined){ b.textContent=b.dataset.starPrev; delete b.dataset.starPrev; if(typeof _knobShown==='function' && _knobShown()) _pbShow(); else b.classList.remove('show'); }
-  }
-
-  document.addEventListener('mouseover', e => {
-    const stars = e.target.closest('#card-stars');
-    if(stars && stars.dataset.starMeaning) show(stars); else hide();
-  });
+  function hide(){ tip.style.display = 'none'; }
 
   let _tipPinned = false;
   document.addEventListener('touchend', e => {
