@@ -227,13 +227,25 @@ body.reviewing #show-row { display: none !important; }   /* the answer is reveal
 /* reviewing happens only in fullscreen: no answer bar or corner buttons in the non-fullscreen right half */
 @media (min-width: 901px) { body.reviewing #progress-row, body.reviewing #rotate-btn, body.reviewing #comment-btn { display: none !important; } }
 #card-screen:fullscreen #progress-row { display: flex !important; }
-/* staggered fade-in on deck load: title → esittely → Mona → speech bubble → card grid */
+/* staggered fade-in on deck load: title → esittely → card grid + videos → (Mona peeks from the top at 3s, her bubble at 4s — driven by JS) */
 @keyframes introFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 body.deck-intro-anim #deck-cover .cover-title { animation: introFade 0.6s ease both; }
 body.deck-intro-anim #deck-cover .cover-esittely { animation: introFade 0.6s ease both; animation-delay: 1s; }
 body.deck-intro-anim #card-overview-grid { animation: introFade 0.6s ease both; animation-delay: 2s; }
-body.deck-intro-anim #deck-welcome .welcome-mona { animation: introFade 0.6s ease both; animation-delay: 3s; }
-body.deck-intro-anim #deck-welcome .welcome-bubble { animation: introFade 0.6s ease both; animation-delay: 4s; }
+/* Mona peeks down from the top of the page, above the course title (grid half) */
+#mona-top-peek { position: fixed; top: 0; left: 25vw; width: 118px; z-index: 55; transform: translate(-50%, -100%); transition: transform 0.75s cubic-bezier(0.34, 1.4, 0.64, 1); pointer-events: none; display: none; }
+body.reviewing #mona-top-peek { display: block; }
+#mona-top-peek.peeking { transform: translate(-50%, -14%); }   /* slides down showing most of Mona */
+.mona-top-inner { position: relative; width: 118px; height: 118px; transition: transform 0.75s cubic-bezier(0.34, 1.4, 0.64, 1); }
+#mona-top-peek.peeking .mona-top-inner { transform: rotate(6deg); }
+.mona-top-inner img { width: 100%; height: auto; display: block; }
+.mona-top-bubble { position: absolute; top: 122px; left: 50%; transform: translateX(-50%); width: max-content; max-width: 30ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.65rem 1rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: center; opacity: 0; transition: opacity 0.35s ease; }
+.mona-top-bubble.show { opacity: 1; }
+.mona-top-bubble::before { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); border: 10px solid transparent; border-bottom-color: #fffef9; }
+body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
+body.dark-mode .mona-top-bubble::before { border-bottom-color: #3a312b; }
+@media (max-width: 900px) { #mona-top-peek { left: 50vw; } }
+#card-screen:fullscreen #mona-top-peek { display: none !important; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
@@ -350,21 +362,21 @@ body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 body.dark-mode .flashcard { scrollbar-color: #a97f4e #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb { background: #a97f4e; border-color: #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; }
-.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; text-align: left; }   /* block sized to the longest line, centred on the card; short text ends up centred, long text stays left-aligned from the longest line */
-.card-content:has(iframe) { width: 100%; }   /* only 3D-embed cards need full width (an iframe has no intrinsic width); images size the fit-content block naturally so the card still centres */
+.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; text-align: center; }   /* plain single-paragraph text (questions, short answers) is centred */
+/* multi-line / list content: centre the block on the longest line, keep the rows left-aligned from there */
+.card-content:has(br), .card-content:has(li), .card-content:has(ul), .card-content:has(ol), .card-content:has(> * ~ *) { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; text-align: left; }
+.card-content:has(iframe) { width: 100%; }   /* 3D-embed cards keep full width (an iframe has no intrinsic width) */
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.answer-shown { display: flex; flex-direction: column; justify-content: safe center; }   /* back side: centre the content on the Y axis too (safe = still scrolls from the top when it overflows) */
 .flashcard:not(.front-basic):not(.answer-shown):not(.celebrating) { display: flex; flex-direction: column; justify-content: safe center; }   /* cloze / special fronts: centre on the Y axis too */
-.flashcard.front-basic #question-content { text-align: left; line-height: 1.25; }   /* fit-content + margin auto (from .card-content) centres it; short front text reads as centred */
+.flashcard.front-basic #question-content { line-height: 1.25; }
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
 .card-embed-3d { width: 100%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; }   /* front: full size; wrapper clips the iframe so its rounded corners have no dark fringe */
 .answer-shown .card-embed-3d { width: 100%; }   /* back: full width */
 .embed-3d-frame { width: 100%; aspect-ratio: 1 / 1; height: auto; border: none; border-radius: 0; background: #efe9dd; display: block; pointer-events: none; }   /* front: no interaction — clicks flip the card */
 .answer-shown .embed-3d-frame { pointer-events: auto; aspect-ratio: 2 / 1; }   /* back: full width, half the front's height; allow rotating the model */
 body.dark-mode .embed-3d-frame { background: #2a2622; }
-.card-content.left-align { text-align: left; }
 .dim-paren { opacity: 0.5; }
-.answer-section .card-content { text-align: left; }
 
 /* ── 7. IMAGE OCCLUSION ─────────────────────────────────── */
 .io-card-image { position: relative; width: 100%; display: inline-block; }
@@ -904,6 +916,15 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
   </button>
+  <!-- Mona peeks down from the top of the page, above the course title -->
+  <div id="mona-top-peek">
+    <div class="mona-top-bubble" id="mona-top-bubble"></div>
+    <div class="mona-top-inner">
+      <img src="solukkologo_eyes.png" alt="">
+      <div class="logo-eye le"><span class="logo-pupil"></span></div>
+      <div class="logo-eye re"><span class="logo-pupil"></span></div>
+    </div>
+  </div>
   <div id="review-cols">
   <div id="grid-col">
   <div id="grid-header">
@@ -1951,6 +1972,7 @@ async function startDeck(deckName){
   document.body.classList.add('reviewing');
   document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
   setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5000);
+  startMonaTopPeek();   // Mona peeks from the top after the grid appears
   history.pushState({reviewing: true}, '');
 }
 
@@ -2370,19 +2392,15 @@ async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard();
 
 // ── Deck landing: welcome Mona by default; hover a grid card to preview it; click to review it in fullscreen ──
 let _previewIndex=-1, _previewTO=null, _welcomeTO=null;
-function scheduleWelcome(){   // moving off a card (into a gap or out of the grid) brings Mona back
+function scheduleWelcome(){}   // the right side always shows a card now — no revert
+function showDeckWelcome(){   // deck landing: show a card on the right (the current one, or the first). Mona peeks from the top instead of a big welcome.
   if(document.fullscreenElement) return;
-  clearTimeout(_previewTO); clearTimeout(_welcomeTO);
-  _welcomeTO=setTimeout(()=>{ if(!document.fullscreenElement) showDeckWelcome(); }, 60);
-}
-function showDeckWelcome(){
-  if(document.fullscreenElement) return;
-  clearTimeout(_previewTO);
-  _previewIndex=-1; currentCard=null; currentOverviewIndex=-1; _openingDeck=false;
-  const cc=document.getElementById('card-col'); if(cc) cc.classList.add('welcome');
-  renderCardOverview();   // builds the grid/cover and sets the deck title first
-  const wb=document.getElementById('welcome-bubble');
-  if(wb) wb.textContent='Kurssikuvauksen alla näet kysymyskortit. Klikkaa ensimmäistä kysmyskorttia aloittaaksesi opiskelun.';
+  clearTimeout(_previewTO); clearTimeout(_welcomeTO); _openingDeck=false;
+  const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
+  renderCardOverview();   // builds the grid/cover and sets the deck title
+  if(!reviewCards.length) return;
+  const idx=(currentOverviewIndex>=0 && reviewCards[currentOverviewIndex]) ? currentOverviewIndex : 0;
+  _previewIndex=-1; _doPreview(idx);   // first/current card on the right
 }
 function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
   if(document.fullscreenElement) return;
@@ -2395,6 +2413,27 @@ function _doPreview(index){
   _previewIndex=index; currentOverviewIndex=index; currentCard=reviewCards[index];
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCurrentCard();
+}
+// Mona peeks down from the top of the page (above the course title), with the old bouncy peek animation
+let _topPeekTimer=null, _topPeekTO=[];
+function startMonaTopPeek(){
+  const el=document.getElementById('mona-top-peek'), bub=document.getElementById('mona-top-bubble');
+  if(!el) return;
+  stopMonaTopPeek();
+  if(bub) bub.textContent='Kurssikuvauksen alla näet kysymyskortit. Klikkaa ensimmäistä kysymyskorttia aloittaaksesi opiskelun.';
+  _topPeekTO.push(setTimeout(()=>{ if(!document.fullscreenElement) el.classList.add('peeking'); }, 3000));   // peek in at 3s (after the grid)
+  _topPeekTO.push(setTimeout(()=>{ if(bub && !document.fullscreenElement) bub.classList.add('show'); }, 4000));   // her bubble at 4s
+  _topPeekTimer=setInterval(()=>{                       // then peek in / retract every ~7s
+    if(document.fullscreenElement) return;
+    if(el.classList.contains('peeking')){ el.classList.remove('peeking'); if(bub) bub.classList.remove('show'); }
+    else el.classList.add('peeking');
+  }, 7000);
+}
+function stopMonaTopPeek(){
+  clearInterval(_topPeekTimer); _topPeekTimer=null;
+  _topPeekTO.forEach(clearTimeout); _topPeekTO=[];
+  const el=document.getElementById('mona-top-peek'), bub=document.getElementById('mona-top-bubble');
+  if(el) el.classList.remove('peeking'); if(bub) bub.classList.remove('show');
 }
 
 
@@ -3282,6 +3321,7 @@ function showDecks(){
   _lastBuzzerDocs=[]; _lastMoneyDocs=[];
   document.getElementById('site-brand').style.display='';
   document.getElementById('peek-logo')?.classList.remove('peek-show','bubble-open');   // hide the peeker on the homepage
+  stopMonaTopPeek();   // stop Mona's top peek when leaving the deck
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
   exitCardFullscreen(); document.getElementById('rotate-btn').style.display='none';
