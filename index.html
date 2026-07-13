@@ -70,8 +70,22 @@ body.dark-mode #decks-loading { color: #c9b48f; }
 .deck-btn.deck-in { animation: deckFadeIn 0.5s ease both; }
 /* homepage hero: title + slogan + manifest, at the very top (scrolled out of view on load) */
 #home-hero { align-self: stretch; max-width: 720px; margin: 0 auto; padding: 40px 1rem 24px; text-align: center; font-family: 'Lora', serif; }
-#home-hero .hero-title { font-weight: 800; font-size: clamp(2.6rem, 7vw, 4.5rem); line-height: 1; color: #1a1612; letter-spacing: -0.01em; }
-#home-hero .hero-slogan { font-size: clamp(1.1rem, 3vw, 1.6rem); color: #a06a35; margin-top: 0.6rem; }
+#home-hero .hero-title { font-weight: 800; font-size: clamp(2.6rem, 7vw, 4.5rem); line-height: 1; color: #4a2c14; letter-spacing: -0.01em; }   /* dark brown */
+/* fake solukko.shop product embed, floated to the right of the manifest */
+.shop-embed { float: right; width: 190px; margin: 5px 0 0.9rem 1.4rem; display: block; text-decoration: none; color: inherit; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.14); font-family: 'Lora', serif; transition: box-shadow 0.15s ease, transform 0.15s ease; }
+.shop-embed:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.22); transform: translateY(-2px); }
+.shop-embed-head { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 700; color: #56533c; padding: 0.5rem 0.7rem; border-bottom: 1px solid #ece6da; }
+.shop-embed-dot { width: 8px; height: 8px; border-radius: 50%; background: #2e5a3e; }
+.shop-embed-imgwrap { display: block; padding: 0.8rem; text-align: center; background: #faf6ee; }
+.shop-embed-imgwrap img { width: 128px; height: auto; display: inline-block; vertical-align: middle; }
+.shop-embed-name { display: block; font-size: 0.98rem; font-weight: 700; color: #1a1612; padding: 0.6rem 0.7rem 0; }
+.shop-embed-price { display: block; font-size: 1.15rem; font-weight: 800; color: #2e5a3e; padding: 0.1rem 0.7rem 0.55rem; }
+.shop-embed-buy { display: block; margin: 0 0.7rem 0.8rem; text-align: center; background: #2e5a3e; color: #fff; font-weight: 700; font-size: 0.9rem; padding: 0.5rem; border-radius: 10px; }
+body.dark-mode .shop-embed { background: #3a312b; border-color: #6d5f52; }
+body.dark-mode .shop-embed-head { color: #eadfce; border-bottom-color: #4a4038; }
+body.dark-mode .shop-embed-imgwrap { background: #332b25; }
+body.dark-mode .shop-embed-name { color: #eadfce; }
+@media (max-width: 640px){ .shop-embed { width: 150px; margin-left: 1rem; } .shop-embed-imgwrap img { width: 104px; } }
 #home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; max-width: 640px; margin: 2rem auto 0; text-align: justify; overflow: hidden; }   /* justified so the text fills the width; overflow:hidden contains the floated portrait */
 #home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 #home-hero .hero-link:hover { color: #7d5227; }
@@ -80,7 +94,6 @@ body.dark-mode #home-hero .hero-link:hover { color: #eadfce; }
 #aku-portrait { float: left; width: 170px; height: auto; margin: 5px 1.3rem 0.5rem 0; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); filter: grayscale(100%); }   /* rounded B&W portrait, top-left, text wraps around it */
 @media (max-width: 640px){ #aku-portrait { width: 130px; margin-right: 1rem; } }
 body.dark-mode #home-hero .hero-title { color: #eadfce; }
-body.dark-mode #home-hero .hero-slogan { color: #d9c496; }
 body.dark-mode #home-hero .hero-manifest { color: #cbb9a0; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
 .home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: 140px; box-sizing: border-box; display: flex; align-items: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.6rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
@@ -920,8 +933,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-title">Solukko.com</div>
-    <div class="hero-slogan">Oppiminen saa olla helppoa</div>
-    <p class="hero-manifest"><img id="aku-portrait" src="aku_bw.jpg" alt="Aku" width="170"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Tämän sivuston tavoite on tarjota tuleville tieteentekijöille ja kaikille tieteestä kiinnostuneille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali. Opiskelu solukko.comissa perustuu suosikkimenetelmääni eli kysymyskortteihin, joiden olen todennut tuottavan parhaan tenttimenestyksen ja pysyvimmän muistijäljen. Tällä hetkellä valikoimassa ovat Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille luonnontiedealoille. Jos haluat luoda kysymyskortteja omasta tutkinnostasi, otathan yhteyttä osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi sillä laitteella jolla kommentti jätettiin. Lunasta palkinto lähettämällä kuvakaappaus kultaisesta kommentistasi osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Onnea opintoihisi!</p>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku_bw.jpg" alt="Aku" width="170"><a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Tämän sivuston tavoite on tarjota tuleville tieteentekijöille ja kaikille tieteestä kiinnostuneille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali. Opiskelu solukko.comissa perustuu suosikkimenetelmääni eli kysymyskortteihin, joiden olen todennut tuottavan parhaan tenttimenestyksen ja pysyvimmän muistijäljen. Tällä hetkellä valikoimassa ovat Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille luonnontiedealoille. Jos haluat luoda kysymyskortteja omasta tutkinnostasi, otathan yhteyttä osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi sillä laitteella jolla kommentti jätettiin. Lunasta palkinto lähettämällä kuvakaappaus kultaisesta kommentistasi osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Onnea opintoihisi!</p>
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div class="custom-import-wrap">
