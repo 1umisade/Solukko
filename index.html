@@ -2314,8 +2314,10 @@ function fsSliderPick(correct){   // click/arrow: keycap press + sound + bubble 
   setTimeout(()=>{                                                            // 2) wait 1.5s
     _pbBubbleX(correct?100:0, true);                                          // 3) slide Mona (and her bubble) to the button
     const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
-    fsHot(correct?'right':'wrong');
-    setTimeout(()=>{ fsSliderGrade(correct); _picking=false; }, 250);         // 4) the moment she touches it, load the next card
+    setTimeout(()=>{                                                          // 4) she touches the button -> glow it...
+      fsHot(correct?'right':'wrong');
+      setTimeout(()=>{ fsSliderGrade(correct); _picking=false; }, 300);       //    ...then load the next card
+    }, 250);
   }, _PICK_PAUSE_MS);
 }
 function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
@@ -2347,12 +2349,8 @@ function clearFrontMona(){
   const pr=document.getElementById('progress-row'); if(pr) pr.classList.remove('pb-front');
   const k=_fsKnob(); if(k){ k.style.transition='none'; } _setKnobShown(true);   // Mona is visible on the back side
   resetFsKnob();
-  const b=document.getElementById('pb-bubble'); if(b){ b.classList.remove('show'); b.textContent=''; }
   clearTimeout(_backBubbleTimer);
-  _backBubbleTimer=setTimeout(()=>{
-    if(!cardAnswerShown) return;
-    const b2=document.getElementById('pb-bubble'); if(b2){ b2.textContent=_BACK_BUBBLE_TEXT; } _pbShow();
-  }, 1000);
+  const b=document.getElementById('pb-bubble'); if(b){ b.textContent=_BACK_BUBBLE_TEXT; b.style.left='50%'; } _pbShow();   // "Tiesitkö?" shown immediately on the back side
 }
 (function(){
   const cs=document.getElementById('card-screen'), knob=_fsKnob();
@@ -3454,7 +3452,8 @@ function shakeCard(){
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
   if(ca){ _syncCommentArea(); ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
   fitCardScale(); scrollToCard();   // re-lay out exactly like a fresh card load, leaving room for the buttons
-  const bub=_pbBubble(); if(bub){ bub.textContent='Paina Kyllä- tai Ei-nappia.'; bub.style.transition='opacity 0.4s ease'; bub.style.left='50%'; } _pbShow();   // Mona prompts for a button (only if she's visible)
+  const bub=_pbBubble(); if(bub){ bub.textContent='Paina Kyllä- tai Ei-nappia.'; bub.style.transition='opacity 0.4s ease'; bub.style.left='50%'; } _pbShow();   // Mona prompts for a button (only if she's visible)...
+  clearTimeout(_backBubbleTimer); _backBubbleTimer=setTimeout(()=>{ if(!cardAnswerShown) return; const b2=_pbBubble(); if(b2){ b2.textContent=_BACK_BUBBLE_TEXT; } _pbShow(); }, 1000);   // ...for 1s, then back to "Tiesitkö?"
   document.querySelectorAll('#progress-row .ball-btn').forEach(b=>{   // draw attention to the grade buttons
     b.classList.remove('btn-attention'); void b.offsetWidth; b.classList.add('btn-attention');
     setTimeout(()=>b.classList.remove('btn-attention'),700);
