@@ -399,12 +399,13 @@ body.dark-mode .progress-tube { background: #5a5148; }
 .progress-row.celebrating .ball-btn { display: none; }
 .progress-row.celebrating .progress-tube { overflow: visible; }
 .progress-row.celebrating .progress-fill { width: 100% !important; background: #3a7a52; box-shadow: 0 0 12px 3px rgba(110,200,150,0.55); }   /* the JS visualizer pulses this glow with the music */
-.ball-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, box-shadow 0.1s ease; }
+.ball-btn { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: none; background: transparent; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; transition: transform 0.1s ease, box-shadow 0.1s ease; }
+.ball-btn img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; border-radius: 50%; }
 .ball-btn:active { transform: scale(0.92); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
-.ball-btn.grade-correct { background: #9ab8a1; border-color: #9ab8a1; color: #ffffff; --glow: #9ab8a1; }
-body.dark-mode .ball-btn.grade-correct { background: #6f8f77; border-color: #6f8f77; --glow: #6f8f77; }
-.ball-btn.grade-again { background: #f5ab97; border-color: #f5ab97; color: #ffffff; --glow: #f5ab97; }
-body.dark-mode .ball-btn.grade-again { background: #e8a08b; border-color: #e8a08b; color: #ffffff; --glow: #e8a08b; }
+.ball-btn.grade-correct { --glow: #9ab8a1; }   /* PNG provides the look; --glow drives the expand/glow animations */
+body.dark-mode .ball-btn.grade-correct { --glow: #6f8f77; }
+.ball-btn.grade-again { --glow: #f5ab97; }
+body.dark-mode .ball-btn.grade-again { --glow: #e8a08b; }
 
 /* ── 8. VASTAUS- & ARVIOINTIPAINIKKEET ──────────────────── */
 .btn-row { display: flex; gap: 1rem; width: 100%; }
@@ -961,7 +962,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
   <div class="progress-row" id="progress-row" style="display:none">
     <button class="ball-btn grade-again" onclick="fsSliderPick(false)" onmouseenter="showGradeHint(false)" onmouseleave="hideGradeHint()" title="Vasen nuolinäppäin">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      <img src="ei.png" alt="Ei">
     </button>
     <div class="progress-tube" id="progress-tube">
       <div class="progress-fill" id="progress-fill"></div>
@@ -973,7 +974,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       </div>
     </div>
     <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" onmouseenter="showGradeHint(true)" onmouseleave="hideGradeHint()" title="Oikea nuolinäppäin">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <img src="kylla.png" alt="Kyllä">
     </button>
   </div>
 
