@@ -2236,12 +2236,19 @@ function _fsCursorActivity(){   // show the cursor, then fade it after 2s of sti
   if(document.fullscreenElement) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement) cs.classList.add('cursor-hidden'); }, 2000);
 }
 document.addEventListener('mousemove', _fsCursorActivity);
-(function(){ const w=document.getElementById('flashcard-wrap'); if(!w) return;
+(function(){ const w=document.getElementById('flashcard-wrap');
   const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Avaa opiskelunäkymässä'; document.body.appendChild(tip);
-  const moveTip=e=>{ tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; };   // sits just above the cursor
-  w.addEventListener('mouseenter',e=>{ _overCard=true; _fsCursorActivity(); if(!document.fullscreenElement){ moveTip(e); tip.style.display='block'; } });
-  w.addEventListener('mousemove',e=>{ if(!document.fullscreenElement && _overCard) moveTip(e); });
-  w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); tip.style.display='none'; });
+  if(w){
+    w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
+    w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); });
+  }
+  // "Avaa opiskelunäkymässä" hint follows the cursor over the right-hand card OR the highlighted grid card (both open the study view on click)
+  document.addEventListener('mousemove',e=>{
+    if(document.fullscreenElement){ if(tip.style.display!=='none') tip.style.display='none'; return; }
+    const t = e.target.closest ? e.target.closest('#flashcard-wrap, .overview-card.active') : null;
+    if(t){ tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; }
+    else if(tip.style.display!=='none'){ tip.style.display='none'; }
+  });
 })();
 function _playFsFlip(){   // FLIP: card is now full-screen; animate it from where it sat on the right up to full — a smooth expand
   const wrap=document.getElementById('flashcard-wrap'); if(!wrap||!_fsFlipRect){ _fsFlipRect=null; return; }
