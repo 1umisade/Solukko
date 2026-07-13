@@ -60,9 +60,9 @@ body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
-#home-mona { align-self: flex-start; display: flex; align-items: center; gap: 18px; margin: 4px 0 14px; }   /* Mona + site name/slogan at the left edge */
-#home-mona .site-brand { width: 110px; margin: 0; }
-.home-brand-block { text-align: left; }
+#home-mona { align-self: center; display: flex; align-items: center; gap: 18px; margin: 4px 0 10px; }   /* solukko.com | Mona | speech bubble */
+#home-mona .site-brand { width: 120px; margin: 0; }
+.home-brand-block { text-align: right; flex: 0 0 auto; }
 .home-name { font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1; color: #4a2c14; }
 .home-slogan-txt { font-family: 'Lora', serif; font-size: clamp(0.95rem, 2vw, 1.25rem); color: #a06a35; margin-top: 5px; }
 body.dark-mode .home-name { color: #eadfce; }
@@ -123,6 +123,8 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
   .sem-col { justify-content: center; }
   #home-mona { gap: 12px; }
   #home-mona .site-brand { width: 84px; }
+  .home-brand-block { display: none; }   /* hide the site-name block on mobile to keep Mona + bubble */
+  .home-greet { height: auto; overflow: visible; font-size: 0.9rem; max-width: 60vw; margin-left: 12px; padding: 0.6rem 0.8rem; }
   body.dark-mode .sem-col.spring { border-top-color: #6d5f52; }
 }
 .deck-btn { position: absolute; min-width: 0; width: min(240px, 52vw); aspect-ratio: 1 / 1.5; padding: 0; border: none; border-radius: 0; overflow: visible; background: none; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; transition: transform 0.3s ease; touch-action: pan-y; }   /* pan-y so a vertical drag scrolls the page instead of getting captured */
@@ -1973,10 +1975,15 @@ function buildDeckGrid(decks, list){
   const logo=document.getElementById('site-brand');
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
-  if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona at the left edge
-  const brand=document.createElement('div'); brand.className='home-brand-block';           // site name + slogan next to Mona
+  const brand=document.createElement('div'); brand.className='home-brand-block';           // site name + slogan in the empty space to Mona's LEFT
   brand.innerHTML='<div class="home-name">Solukko.com</div><div class="home-slogan-txt">Oppiminen saa olla helppoa</div>';
   header.appendChild(brand);
+  if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona
+  const greet=document.createElement('div'); greet.className='home-greet';                 // her speech bubble to the right (clicking Mona cycles it)
+  _greetIdx=0;
+  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES[HOME_BUBBLE_ORDER[0]]:'');
+  greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
+  header.appendChild(greet);
   if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks (desktop only)
   list.appendChild(header);
   const dl=document.createElement('div'); dl.id='decks-loading'; dl.textContent='Ladataan kursseja'; list.appendChild(dl);   // shown until the deck videos/images have loaded
