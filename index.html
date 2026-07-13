@@ -43,8 +43,9 @@ try{
 
 /* ── 1. RESET & BODY ─────────────────────────────────────── */
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-/* custom cursors (cursor inherits, so this is the default; buttons/inputs keep their own; Mona uses the grab hand) */
-html { cursor: url('cursor_normal.png') 4 2, auto; }
+/* custom cursors — forced everywhere (!important) so per-element cursor rules don't fall back to the OS pointer; Mona uses the grab hand */
+* { cursor: url('cursor_normal.png') 4 2, auto !important; }
+.pb-knob, .pb-knob * { cursor: url('cursor_grab.png') 22 24, grab !important; }
 body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 22 24, grabbing !important; }   /* while Mona is being dragged */
 body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
@@ -59,8 +60,13 @@ body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
-#home-mona { align-self: center; display: flex; align-items: center; margin: 4px 0 6px; }   /* Mona + greeting centered at the top (Mona left of the bubble) */
-#home-mona .site-brand { width: 140px; margin: 0; }
+#home-mona { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; margin: 6px 0 16px; }   /* text logo top-left, Mona top-right */
+#home-mona .site-brand { width: 130px; margin: 0; flex: 0 0 auto; }
+#home-brand-text { display: flex; flex-direction: column; gap: 6px; }
+.home-site-name { font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.9rem, 4.2vw, 2.8rem); line-height: 1; color: #1a1612; }
+.home-slogan { font-family: 'Lora', serif; font-size: clamp(1rem, 2.2vw, 1.3rem); color: #6b4423; }
+body.dark-mode .home-site-name { color: #eadfce; }
+body.dark-mode .home-slogan { color: #c9b48f; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
 .home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: 140px; box-sizing: border-box; display: flex; align-items: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.6rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
 .home-greet::after { content: ""; position: absolute; right: 100%; top: 50%; transform: translateY(-50%); border: 13px solid transparent; border-right-color: #fffef9; }
@@ -167,7 +173,7 @@ body.dark-mode #card-hover-tip { background: #3a312b; color: #eadfce; border-col
 body.dark-mode #card-loading .cl-spinner { border-color: rgba(217,196,150,0.25); border-top-color: #d9c496; }
 body.dark-mode #card-loading .cl-text { color: #eadfce; }
 /* Mona lives on the progress bar as a draggable knob, with a hint bubble beside her */
-.pb-knob { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin-top: -26px; margin-left: -26px; cursor: url('cursor_grab.png') 22 24, grab; touch-action: none; z-index: 3; }
+.pb-knob { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin-top: -26px; margin-left: -26px; cursor: default; touch-action: none; z-index: 3; }
 .pb-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
 .pb-bubble { position: absolute; left: 50%; bottom: calc(100% + 26px); transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(88vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
 .pb-bubble.show { opacity: 1; }
@@ -1919,13 +1925,11 @@ function buildDeckGrid(decks, list){
   const logo=document.getElementById('site-brand');
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
-  if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }   // Mona lives at the top-left now
-  const greet=document.createElement('div'); greet.className='home-greet';               // greeting to Mona's right; starts on Tervetuloa, clicking Mona cycles
-  _greetIdx=0;
-  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES[HOME_BUBBLE_ORDER[0]]:'');
-  greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
-  header.appendChild(greet);
-  if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks as the greeting appears (desktop only)
+  const brand=document.createElement('div'); brand.id='home-brand-text';                 // text logo top-left
+  brand.innerHTML='<div class="home-site-name">Solukko.com</div><div class="home-slogan">Oppiminen saa olla helppoa</div>';
+  header.appendChild(brand);
+  if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona top-right
+  if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks on load (desktop only)
   list.appendChild(header);
   const byYear={};
   decks.forEach(it=>{ const y=it.year||'?'; (byYear[y]=byYear[y]||{S:[],K:[],none:[]}); const s=(it.semester==='S'||it.semester==='K')?it.semester:'none'; byYear[y][s].push(it); });
@@ -2233,7 +2237,7 @@ function _fsCursorActivity(){   // show the cursor, then fade it after 2s of sti
 }
 document.addEventListener('mousemove', _fsCursorActivity);
 (function(){ const w=document.getElementById('flashcard-wrap'); if(!w) return;
-  const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Siirry opiskelunäkymään'; document.body.appendChild(tip);
+  const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Avaa opiskelunäkymässä'; document.body.appendChild(tip);
   const moveTip=e=>{ tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; };   // sits just above the cursor
   w.addEventListener('mouseenter',e=>{ _overCard=true; _fsCursorActivity(); if(!document.fullscreenElement){ moveTip(e); tip.style.display='block'; } });
   w.addEventListener('mousemove',e=>{ if(!document.fullscreenElement && _overCard) moveTip(e); });
@@ -2357,8 +2361,9 @@ function fsSliderPickNow(correct){   // double-click the button: skip the slide 
   fsHot(correct?'right':'wrong'); _gradeInstant=true; fsSliderGrade(correct); _picking=false;
 }
 function fsSliderGrade(correct){ _gradeInstant=true; gradeCard(correct); }   // every slider grade (click/drag/double-click) loads the next card instantly — no fly-out, no 1s "yes" flash
-function fsDragGrade(correct){   // dragging Mona onto a button: show the loading screen (spinner + blur) for ~1s, then load the new card
+function fsDragGrade(correct){   // dragging Mona onto a button: click sound, then the loading screen (spinner + blur) for ~1s, then load the new card
   if(_picking) return; _picking=true;
+  playKeyClick();
   clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);
   showCardLoading();
   _pickTO1=setTimeout(()=>{ hideCardLoading(); fsSliderGrade(correct); _picking=false; }, 1000);
