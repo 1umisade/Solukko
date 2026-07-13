@@ -812,9 +812,12 @@ body.is-mobile .comment-area { position: static; width: 100%; }
   display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.word-link { cursor: pointer; padding-bottom: 3px; }
-.word-link:hover { background-image: radial-gradient(circle, #2b211b 1.2px, transparent 1.6px); background-repeat: repeat-x; background-size: 8px 3px; background-position: 0 100%; }
-body.dark-mode .word-link:hover { background-image: radial-gradient(circle, #eadfce 1.2px, transparent 1.6px); }
+.word-link { position: relative; cursor: pointer; border-radius: 8px; transition: background-color 0.35s ease, box-shadow 0.35s ease; }
+.word-link::after { content: ''; position: absolute; left: 12px; top: 100%; border: 6px solid transparent; border-top-color: transparent; transition: border-top-color 0.35s ease; pointer-events: none; }   /* speech-bubble tail */
+.word-link.wl-show, .word-link:hover { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 4px 12px rgba(0,0,0,0.16); }   /* speech-bubble graphic: on card load (flashes) and on hover */
+.word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
+body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 4px 12px rgba(0,0,0,0.3); }
+body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after { border-top-color: #4a3f34; }
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(520px, calc(100vw - 24px)); max-width: min(520px, calc(100vw - 24px)); min-width: 180px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.75rem 1rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
@@ -2129,6 +2132,7 @@ async function renderCurrentCard(){
   dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
   applyWordLinks(document.getElementById('answer-content'));
+  flashWordLinkBubbles();   // new card loaded: flash the speech-bubble graphic on each linked word
   // Cards with a non-empty 3D field embed the external viewer at the bottom of the front, fed with that value
   { const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D']).replace(/<[^>]*>/g,'').trim();
     if(_3d){ const _qc=document.getElementById('question-content'); const _emb=document.createElement('div'); _emb.className='card-embed-3d';
@@ -3106,6 +3110,7 @@ function showAnswer(){
     clearTimeout(_revealFadeTimer);
     fitCardScale(); scrollToCard();   // re-lay out so the answer buttons show fully
     updateFsSlider();   // in fullscreen: reveal shows the grading slider
+    flashWordLinkBubbles();   // answer revealed: flash the speech-bubble graphic on its linked words
   };
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
@@ -3763,6 +3768,15 @@ function applyWordLinks(element){
   });
   const nodes=[]; let n; while((n=walker.nextNode())) nodes.push(n);
   nodes.forEach(_wrapTextNode);
+}
+
+let _wlFlashTO=null;
+function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-bubble graphic on each linked word, then fade it out after 1s
+  clearTimeout(_wlFlashTO);
+  const links=document.querySelectorAll('#question-content .word-link, #answer-content .word-link');
+  if(!links.length) return;
+  links.forEach(l=>l.classList.add('wl-show'));
+  _wlFlashTO=setTimeout(()=>{ links.forEach(l=>l.classList.remove('wl-show')); }, 1000);
 }
 
 (function initWordLinkTooltip(){
