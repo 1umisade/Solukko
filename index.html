@@ -966,7 +966,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-again" onclick="fsSliderPick(false)" title="Vasen nuolinäppäin">
+    <button class="ball-btn grade-again" onclick="fsSliderPick(false)" ondblclick="fsSliderPickNow(false)" title="Vasen nuolinäppäin">
       <img src="ei.png" alt="Ei">
     </button>
     <div class="progress-tube" id="progress-tube">
@@ -978,7 +978,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         <div class="logo-eye re"><span class="logo-pupil"></span></div>
       </div>
     </div>
-    <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" title="Oikea nuolinäppäin">
+    <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" ondblclick="fsSliderPickNow(true)" title="Oikea nuolinäppäin">
       <img src="kylla.png" alt="Kyllä">
     </button>
   </div>
@@ -2269,6 +2269,7 @@ function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min
 function _fsPct(){ const k=_fsKnob(); return k?(parseFloat(k.style.left)||50):50; }
 const _PICK_PAUSE_MS=1500;   // (click/arrow) pause after the bubble changes, before Mona slides to the button
 let _picking=false;          // guard so a second click during the pause can't advance two cards
+let _pickTO1=null, _pickTO2=null, _pickTO3=null;   // pending pick timers, so a double-click can cancel them and grade now
 function _knobShown(){ const k=_fsKnob(); return !!k && k.style.opacity!=='0'; }   // '' or '1' = Mona visible
 function _pbShow(){ const b=_pbBubble(); if(b && _knobShown()) b.classList.add('show'); }   // never show the bubble unless Mona is visible
 function _setKnobShown(vis){ const k=_fsKnob(); if(k) k.style.opacity=vis?'1':'0'; if(!vis){ const b=_pbBubble(); if(b) b.classList.remove('show'); } }   // hiding Mona also hides her bubble
@@ -2316,14 +2317,19 @@ function fsSliderPick(correct){   // click/arrow: keycap press + sound + bubble 
   clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);             // a pending reveal timer must not reset the bubble to "Tiesitkö?" mid-pick
   playKeyClick(); pressKeycap(correct);                                       // 1) up/down keycap animation + click sound
   const b=_pbBubble(); if(b){ b.textContent=correct?_SLIDE_YES_TEXT:_SLIDE_NO_TEXT; } _pbShow();  //    + change Mona's bubble immediately (Kyllä/Ei)
-  setTimeout(()=>{                                                            // 2) wait 1.5s
+  _pickTO1=setTimeout(()=>{                                                   // 2) wait 1.5s
     _pbBubbleX(correct?100:0, true);                                          // 3) slide Mona (and her bubble) to the button
     const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
-    setTimeout(()=>{                                                          // 4) she touches the button -> glow it...
+    _pickTO2=setTimeout(()=>{                                                 // 4) she touches the button -> glow it...
       fsHot(correct?'right':'wrong');
-      setTimeout(()=>{ fsSliderGrade(correct); _picking=false; }, 300);       //    ...then load the next card
+      _pickTO3=setTimeout(()=>{ fsSliderGrade(correct); _picking=false; }, 300);   //    ...then load the next card
     }, 250);
   }, _PICK_PAUSE_MS);
+}
+function fsSliderPickNow(correct){   // double-click the button: skip the pause/slide and load the next card immediately
+  clearTimeout(_pickTO1); clearTimeout(_pickTO2); clearTimeout(_pickTO3);
+  const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left=correct?'100%':'0%'; }
+  fsHot(correct?'right':'wrong'); fsSliderGrade(correct); _picking=false;
 }
 function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; } fsHot(null); }   // recentre Mona and her bubble
@@ -2340,8 +2346,9 @@ function showFrontMona(){
   pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
   const b=document.getElementById('pb-bubble'), k=_fsKnob();
   fsHot(null);   // clear any button glow left from grading the previous card
-  if(k){ k.style.transition='none'; k.style.left='50%'; } _setKnobShown(false);   // Mona hidden -> her bubble is hidden too
-  if(b){ b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; b.style.transition='opacity 0.4s ease'; b.style.left='50%'; }
+  if(k){ k.style.transition='none'; k.style.left='50%'; }
+  if(b){ b.style.transition='none'; b.classList.remove('show'); b.style.left='50%'; b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; void b.offsetWidth; b.style.transition='opacity 0.4s ease'; }   // hide the old bubble INSTANTLY so it can't linger showing the new card's hint before Mona appears
+  _setKnobShown(false);   // Mona hidden (bubble already hidden above)
   updateProgress();
   clearTimeout(_frontMonaTimer);
   _frontMonaTimer=setTimeout(()=>{
@@ -3178,7 +3185,7 @@ function renderCardOverview(){
         cov.innerHTML=
           '<div id="mona-top-peek">'+
             '<div class="mona-top-inner" onclick="_monaTopClick(event)"><img src="solukkologo_eyes.png" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div>'+
-            '<div class="mona-top-bubble" id="mona-top-bubble">Voit aloittaa opiskelun klikkaamalla ensimmäistä korttia.</div>'+
+            '<div class="mona-top-bubble" id="mona-top-bubble">Tervetuloa kurssille! Näät kysymyskortit vierittämällä sivua alaspäin. Voit aloittaa opiskelun klikkaamalla ensimmäistä korttia.</div>'+
             '<div class="mona-top-spacer"></div>'+
           '</div>'+
           '<div class="cover-title">'+_name+'</div><div class="cover-esittely">'+_es+'</div>';
