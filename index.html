@@ -234,7 +234,16 @@ body.deck-intro-anim #deck-welcome .welcome-mona { animation: introFade 0.6s eas
 body.deck-intro-anim #deck-welcome .welcome-bubble { animation: introFade 0.55s ease both; animation-delay: 2.3s; }
 body.deck-intro-anim #card-overview-grid { animation: introFade 0.6s ease both; animation-delay: 2.9s; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
-#grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; }
+#grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
+/* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
+@media (min-width: 901px) { body.reviewing #grid-col { direction: rtl; } body.reviewing #grid-col > * { direction: ltr; } }
+#grid-col::-webkit-scrollbar { width: 9px; }
+#grid-col::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }
+#grid-col::-webkit-scrollbar-thumb { background: #b5824a; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+#grid-col::-webkit-scrollbar-thumb:hover { background: #6b4423; }
+body.dark-mode #grid-col { scrollbar-color: #a97f4e transparent; }
+body.dark-mode #grid-col::-webkit-scrollbar-thumb { background: #a97f4e; }
+body.dark-mode #grid-col::-webkit-scrollbar-thumb:hover { background: #c99e64; }
 #card-col { flex: 0 0 clamp(300px, 34vw, 440px); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
 #card-stack { display: flex; flex-direction: column; align-items: center; }
 /* ── DESKTOP review: full viewport, no page scroll; 50/50 with a centre divider; card left + comments right ── */
