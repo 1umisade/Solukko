@@ -158,6 +158,9 @@ body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; b
 #flashcard.loading-blur { filter: blur(6px); }   /* blur the card content while the next one loads */
 @keyframes cardFocusIn { from { filter: blur(6px); } to { filter: blur(0); } }
 #flashcard.card-focus-in { animation: cardFocusIn 0.45s ease forwards; }   /* the freshly loaded card comes into focus */
+/* hover hint that follows the cursor over the right-hand card (non-fullscreen) */
+#card-hover-tip { position: fixed; z-index: 100; display: none; transform: translate(-50%, -100%); background: #fffef9; color: #56533c; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.4rem 0.75rem; font-family: 'Lora', serif; font-size: 0.85rem; line-height: 1; box-shadow: 0 4px 14px rgba(0,0,0,0.16); pointer-events: none; white-space: nowrap; }
+body.dark-mode #card-hover-tip { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #card-loading .cl-spinner { border-color: rgba(217,196,150,0.25); border-top-color: #d9c496; }
 body.dark-mode #card-loading .cl-text { color: #eadfce; }
 /* Mona lives on the progress bar as a draggable knob, with a hint bubble beside her */
@@ -2218,17 +2221,20 @@ function flashFsExitBtn(){   // show the exit button for ~1s (on entering fullsc
   clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>b.classList.remove('visible'),1000);
 }
 let _fsCursorTimer=null, _overCard=false;
-function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness (fullscreen, or while idling over the card)
+function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness — only in fullscreen (the right-hand card keeps its cursor + a hover hint instead)
   const cs=document.getElementById('card-screen'); if(!cs) return;
   cs.classList.remove('cursor-hidden');
   if(document.fullscreenElement) flashFsExitBtn();   // moving the mouse shows the exit button; it fades 1s after you stop
   clearTimeout(_fsCursorTimer);
-  if(document.fullscreenElement || _overCard) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement || _overCard) cs.classList.add('cursor-hidden'); }, 2000);
+  if(document.fullscreenElement) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement) cs.classList.add('cursor-hidden'); }, 2000);
 }
 document.addEventListener('mousemove', _fsCursorActivity);
 (function(){ const w=document.getElementById('flashcard-wrap'); if(!w) return;
-  w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
-  w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); });
+  const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Siirry opiskelunäkymään'; document.body.appendChild(tip);
+  const moveTip=e=>{ tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; };   // sits just above the cursor
+  w.addEventListener('mouseenter',e=>{ _overCard=true; _fsCursorActivity(); if(!document.fullscreenElement){ moveTip(e); tip.style.display='block'; } });
+  w.addEventListener('mousemove',e=>{ if(!document.fullscreenElement && _overCard) moveTip(e); });
+  w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); tip.style.display='none'; });
 })();
 function _playFsFlip(){   // FLIP: card is now full-screen; animate it from where it sat on the right up to full — a smooth expand
   const wrap=document.getElementById('flashcard-wrap'); if(!wrap||!_fsFlipRect){ _fsFlipRect=null; return; }
@@ -2253,7 +2259,7 @@ document.addEventListener('fullscreenchange',()=>{
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
   fitCardScale(); scrollToCard(); updateFsSlider();
   const b=document.getElementById('fs-exit-btn');
-  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); }   // smooth expand from the right; re-arm Mona's 2s delayed entrance so she doesn't pop in immediately
+  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // smooth expand from the right; re-arm Mona's 2s delayed entrance; drop the hover hint
   else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
     if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
     if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
