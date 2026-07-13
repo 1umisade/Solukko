@@ -74,14 +74,14 @@ body.dark-mode #decks-loading { color: #c9b48f; }
 @keyframes deckFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .deck-btn.deck-in { animation: deckFadeIn 0.5s ease both; }
 /* homepage hero: title + slogan + manifest, at the very top (scrolled out of view on load) */
-#home-hero { align-self: stretch; max-width: min(1600px, 96vw); margin: 0 auto; padding: 40px 1rem 24px; text-align: center; font-family: 'Lora', serif; }
+#home-hero { align-self: stretch; max-width: none; margin: 0; padding: 36px 0 24px; text-align: left; font-family: 'Lora', serif; }
 /* fake solukko.shop product embed, floated to the right of the manifest */
 .shop-embed { width: 100%; display: block; text-decoration: none; color: inherit; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.14); font-family: 'Lora', serif; transition: box-shadow 0.15s ease, transform 0.15s ease; }
 .shop-embed:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.22); transform: translateY(-2px); }
 .shop-embed-head { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 700; color: #56533c; padding: 0.5rem 0.7rem; border-bottom: 1px solid #ece6da; }
 .shop-embed-dot { width: 8px; height: 8px; border-radius: 50%; background: #2e5a3e; }
 .shop-embed-imgwrap { display: block; padding: 0.8rem; text-align: center; background: #faf6ee; }
-.shop-embed-imgwrap img { max-width: 90%; max-height: 200px; width: auto; height: auto; display: inline-block; vertical-align: middle; }
+.shop-embed-imgwrap img { max-width: 92%; max-height: 250px; width: auto; height: auto; display: inline-block; vertical-align: middle; }
 .shop-embed-name { display: block; font-size: 0.98rem; font-weight: 700; color: #1a1612; padding: 0.6rem 0.7rem 0; }
 .shop-embed-price { display: block; font-size: 1.15rem; font-weight: 800; color: #2e5a3e; padding: 0.1rem 0.7rem 0.55rem; }
 .shop-embed-buy { display: block; margin: 0 0.7rem 0.8rem; text-align: center; background: #2e5a3e; color: #fff; font-weight: 700; font-size: 0.9rem; padding: 0.5rem; border-radius: 10px; }
@@ -90,10 +90,10 @@ body.dark-mode .shop-embed-head { color: #eadfce; border-bottom-color: #4a4038; 
 body.dark-mode .shop-embed-imgwrap { background: #332b25; }
 body.dark-mode .shop-embed-name { color: #eadfce; }
 @media (max-width: 640px){ .shop-embed { width: 150px; margin-left: 1rem; } .shop-embed-imgwrap img { width: 104px; } }
-.hero-body { display: flex; justify-content: space-between; align-items: flex-start; gap: 3rem; margin-top: 2rem; text-align: left; }
-.hero-shop { flex: 0 0 500px; display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; align-items: start; }   /* right block: 2-column product grid */
-#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 1 1 auto; max-width: 900px; min-width: 0; margin: 0; text-align: justify; overflow: hidden; }   /* left block; justified; overflow:hidden contains the floated portrait */
-@media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { max-width: none; } }
+.hero-body { display: flex; align-items: flex-start; gap: 2rem; margin-top: 1.4rem; text-align: left; }
+.hero-shop { flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.4rem; align-items: start; }   /* fills the rest of the space */
+#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; aspect-ratio: 1 / 1; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* perfect square at the very left edge; overflow:hidden contains the floated portrait */
+@media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { aspect-ratio: auto; width: 100%; padding-right: 0; } }
 #home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 #home-hero .hero-link:hover { color: #7d5227; }
 body.dark-mode #home-hero .hero-link { color: #d9c496; }
