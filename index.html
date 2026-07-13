@@ -2241,7 +2241,7 @@ document.addEventListener('fullscreenchange',()=>{
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
   fitCardScale(); scrollToCard(); updateFsSlider();
   const b=document.getElementById('fs-exit-btn');
-  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); }   // smooth expand from the right
+  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); }   // smooth expand from the right; re-arm Mona's 2s delayed entrance so she doesn't pop in immediately
   else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
     if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
     if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
@@ -2282,6 +2282,7 @@ function _fsFullscreen(){ return document.fullscreenElement && document.fullscre
 function _hidePbBubble(){ const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
 function _fsStartDrag(e){
   const t=document.getElementById('progress-tube'); if(!t) return;
+  clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);   // a pending reveal timer must not reset the bubble while she slides
   const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; } _pbShow();   // bubble follows Mona while she slides (only if she's visible)
   _fsDrag=true; _fsTrackW=t.getBoundingClientRect().width||1; _fsStartX=e.clientX; _fsStartPct=_fsPct(); _fsSwipeMoved=false;
   const k=_fsKnob(); if(k) k.style.transition='none';
@@ -2307,6 +2308,7 @@ function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) 
 }
 function fsSliderPick(correct){   // click/arrow: keycap press + sound + bubble change, pause, then slide Mona onto the button and grade the moment she arrives
   if(_picking) return; _picking=true;
+  clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);             // a pending reveal timer must not reset the bubble to "Tiesitkö?" mid-pick
   playKeyClick(); pressKeycap(correct);                                       // 1) up/down keycap animation + click sound
   const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; } _pbShow();  //    + change Mona's bubble immediately
   setTimeout(()=>{                                                            // 2) wait 1.5s
