@@ -245,8 +245,9 @@ body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #c
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
 @keyframes monaFlyIn { from { transform: translateY(135px) scale(0.8); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-body.deck-intro-anim #mona-top-peek .mona-top-inner { animation: monaFlyIn 0.85s cubic-bezier(0.34, 1.45, 0.64, 1) 4s both; }   /* flies up from behind the title 4s in; 'both' keeps her hidden before and visible after */
-body.deck-intro-anim #mona-top-peek .mona-top-bubble { animation: introFade 0.5s ease 4.9s both; }   /* then her bubble */
+#mona-top-peek .mona-top-inner, #mona-top-peek .mona-top-bubble { opacity: 0; }   /* hidden until Mona flies in — 4s after the first card is shown on the right (flyInTopMona) */
+#mona-top-peek.flew-in .mona-top-inner { animation: monaFlyIn 0.85s cubic-bezier(0.34, 1.45, 0.64, 1) both; }   /* flies up from behind the title; 'both' keeps her visible after */
+#mona-top-peek.flew-in .mona-top-bubble { animation: introFade 0.5s ease 0.9s both; }   /* then her bubble */
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
@@ -2266,6 +2267,10 @@ function _pbBubbleX(pct, animate){   // move the speech bubble horizontally to f
 function _fsKnob(){ return document.getElementById('pb-knob'); }
 function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
 function _fsPct(){ const k=_fsKnob(); return k?(parseFloat(k.style.left)||50):50; }
+const _GRADE_HOLD_MS=2000;   // once Mona reaches a button, hold the view this long so the changed bubble is readable
+function _knobShown(){ const k=_fsKnob(); return !!k && k.style.opacity!=='0'; }   // '' or '1' = Mona visible
+function _pbShow(){ const b=_pbBubble(); if(b && _knobShown()) b.classList.add('show'); }   // never show the bubble unless Mona is visible
+function _setKnobShown(vis){ const k=_fsKnob(); if(k) k.style.opacity=vis?'1':'0'; if(!vis){ const b=_pbBubble(); if(b) b.classList.remove('show'); } }   // hiding Mona also hides her bubble
 function fsHot(which){   // expand + glow the button Mona is over ('wrong' | 'right' | null)
   const w=document.querySelector('.grade-again'), r=document.querySelector('.grade-correct');
   if(w) w.classList.toggle('fs-ans-hot', which==='wrong');
@@ -2275,7 +2280,7 @@ function _fsFullscreen(){ return document.fullscreenElement && document.fullscre
 function _hidePbBubble(){ const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
 function _fsStartDrag(e){
   const t=document.getElementById('progress-tube'); if(!t) return;
-  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; b.classList.add('show'); b.style.transition='opacity 0.4s ease'; }   // bubble follows Mona while she slides
+  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; } _pbShow();   // bubble follows Mona while she slides (only if she's visible)
   _fsDrag=true; _fsTrackW=t.getBoundingClientRect().width||1; _fsStartX=e.clientX; _fsStartPct=_fsPct(); _fsSwipeMoved=false;
   const k=_fsKnob(); if(k) k.style.transition='none';
 }
@@ -2291,8 +2296,8 @@ function _fsMove(e){ if(!_fsDrag) return;
   _fsSetPct(p); _pbBubbleX(p, false); fsHot(p<=15?'wrong':p>=85?'right':null);   // bubble tracks Mona
 }
 function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=_fsPct();
-  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); fsSliderGrade(false); }       // swiped onto the left (wrong) button
-  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); fsSliderGrade(true); } // swiped onto the right (correct) button
+  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); setTimeout(()=>fsSliderGrade(false), _GRADE_HOLD_MS); }       // swiped onto the left (wrong) button — hold so the bubble reads
+  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); setTimeout(()=>fsSliderGrade(true), _GRADE_HOLD_MS); } // swiped onto the right (correct) button
   else {   // snap back to centre -> bubble returns to "Tiesitkö?"
     fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210);
     _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
@@ -2300,11 +2305,11 @@ function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) 
 }
 function fsSliderPick(correct){   // arrow key / button click: press the keycap, slide Mona onto it, glow it, then grade
   playKeyClick(); pressKeycap(correct);
-  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; b.classList.add('show'); }   // bubble follows Mona to the button
+  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; } _pbShow();   // bubble follows Mona to the button (only if she's visible)
   _pbBubbleX(correct?100:0, true);
   const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
   setTimeout(()=>fsHot(correct?'right':'wrong'), 240);
-  setTimeout(()=>fsSliderGrade(correct), 430);
+  setTimeout(()=>fsSliderGrade(correct), 250 + _GRADE_HOLD_MS);   // slide (250ms) then hold so the changed bubble is readable
 }
 function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; } fsHot(null); }   // recentre Mona and her bubble
@@ -2319,27 +2324,26 @@ function showFrontMona(){
   pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
   const b=document.getElementById('pb-bubble'), k=_fsKnob();
   fsHot(null);   // clear any button glow left from grading the previous card
-  if(k){ k.style.transition='none'; k.style.left='50%'; k.style.opacity='0'; }
-  if(b){ b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; b.classList.remove('show'); b.style.transition='opacity 0.4s ease'; b.style.left='50%'; }
+  if(k){ k.style.transition='none'; k.style.left='50%'; } _setKnobShown(false);   // Mona hidden -> her bubble is hidden too
+  if(b){ b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; b.style.transition='opacity 0.4s ease'; b.style.left='50%'; }
   updateProgress();
   clearTimeout(_frontMonaTimer);
   _frontMonaTimer=setTimeout(()=>{
     if(cardAnswerShown) return;
-    const k2=_fsKnob(); if(k2){ k2.style.transition='opacity 0.45s ease'; k2.style.opacity='1'; }
-    const b2=document.getElementById('pb-bubble'); if(b2) b2.classList.add('show');
+    const k2=_fsKnob(); if(k2){ k2.style.transition='opacity 0.45s ease'; } _setKnobShown(true); _pbShow();   // Mona fades in, then (and only then) her bubble
   }, 2000);   // Mona fades in 2s after the card loads
 }
 // reveal: Mona + bar + buttons immediately; the "Tiesitkö…" bubble after 1s
 function clearFrontMona(){
   clearTimeout(_frontMonaTimer);
   const pr=document.getElementById('progress-row'); if(pr) pr.classList.remove('pb-front');
-  const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.opacity='1'; }
+  const k=_fsKnob(); if(k){ k.style.transition='none'; } _setKnobShown(true);   // Mona is visible on the back side
   resetFsKnob();
   const b=document.getElementById('pb-bubble'); if(b){ b.classList.remove('show'); b.textContent=''; }
   clearTimeout(_backBubbleTimer);
   _backBubbleTimer=setTimeout(()=>{
     if(!cardAnswerShown) return;
-    const b2=document.getElementById('pb-bubble'); if(b2){ b2.textContent=_BACK_BUBBLE_TEXT; b2.classList.add('show'); }
+    const b2=document.getElementById('pb-bubble'); if(b2){ b2.textContent=_BACK_BUBBLE_TEXT; } _pbShow();
   }, 1000);
 }
 (function(){
@@ -2418,11 +2422,16 @@ function showDeckLanding(){   // initial deck open: grid only; the first card hi
   const cc=document.getElementById('card-col'); if(cc) cc.classList.add('welcome');   // right side empty for now
   renderCardOverview();   // build the grid/cover, nothing highlighted yet
 }
+let _topMonaFlyTO=null;
 function landingReveal(){   // grid has faded in → highlight the first card, then show it on the right
   if(document.fullscreenElement || !reviewCards.length) return;
   currentOverviewIndex=0; currentCard=reviewCards[0];
   renderCardOverview();   // highlight the first card in the grid
-  setTimeout(()=>{ if(!document.fullscreenElement){ _previewIndex=-1; _doPreview(0); } }, 500);   // then reveal it on the right
+  setTimeout(()=>{ if(!document.fullscreenElement){ _previewIndex=-1; _doPreview(0); flyInTopMona(); } }, 500);   // then reveal it on the right, then bring Mona in 4s later
+}
+function flyInTopMona(){   // Mona flies in 4s after the first card is shown on the right
+  clearTimeout(_topMonaFlyTO);
+  _topMonaFlyTO=setTimeout(()=>{ const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); }, 4000);
 }
 function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
   if(document.fullscreenElement) return;
