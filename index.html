@@ -72,10 +72,9 @@ body.dark-mode #decks-loading { color: #c9b48f; }
 #home-hero { align-self: stretch; max-width: 720px; margin: 0 auto; padding: 40px 1rem 24px; text-align: center; font-family: 'Lora', serif; }
 #home-hero .hero-title { font-weight: 800; font-size: clamp(2.6rem, 7vw, 4.5rem); line-height: 1; color: #1a1612; letter-spacing: -0.01em; }
 #home-hero .hero-slogan { font-size: clamp(1.1rem, 3vw, 1.6rem); color: #a06a35; margin-top: 0.6rem; }
-.hero-manifest-row { display: flex; align-items: flex-start; gap: 1.6rem; max-width: 760px; margin: 2rem auto 0; text-align: left; }
-#aku-portrait { flex: 0 0 auto; width: 200px; height: auto; display: block; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); filter: grayscale(100%); }   /* black & white portrait */
-#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; margin: 0; }
-@media (max-width: 640px){ .hero-manifest-row { flex-direction: column; align-items: center; } #aku-portrait { width: 168px; } }
+#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; max-width: 640px; margin: 2rem auto 0; text-align: left; overflow: hidden; }   /* overflow:hidden contains the floated portrait */
+#aku-portrait { float: left; width: 170px; height: auto; margin: 5px 1.3rem 0.5rem 0; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); filter: grayscale(100%); }   /* rounded B&W portrait, top-left, text wraps around it */
+@media (max-width: 640px){ #aku-portrait { width: 130px; margin-right: 1rem; } }
 body.dark-mode #home-hero .hero-title { color: #eadfce; }
 body.dark-mode #home-hero .hero-slogan { color: #d9c496; }
 body.dark-mode #home-hero .hero-manifest { color: #cbb9a0; }
@@ -918,10 +917,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div id="home-hero">
     <div class="hero-title">Solukko.com</div>
     <div class="hero-slogan">Oppiminen saa olla helppoa</div>
-    <div class="hero-manifest-row">
-    <img id="aku-portrait" src="aku_bw.jpg" alt="Aku" width="200" height="267">
-    <p class="hero-manifest">Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on, etteivät monetkaan opittavat asiat ole niin vaikeita kuin luentodioissa esitetään. Tavoitteeni on tarjota tuleville tieteentekijöille ja tieteestä kiinnostuneille mahdollisimman selkokielinen ja helppokäyttöinen opiskelusivusto. Solukko.comissa opiskelu perustuu aktiiviseen muistamiseen eli kysymyskortteihin. Kokoan sivustolle sekä omia että käyttäjien ehdottamia kysymyskortteja, joita myös päivitetään käyttäjien kommenttien pohjalta.</p>
-    </div>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku_bw.png" alt="Aku" width="170"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on, etteivät monetkaan opittavat asiat ole niin vaikeita kuin luentodioissa esitetään. Tavoitteeni on tarjota tuleville tieteentekijöille ja tieteestä kiinnostuneille mahdollisimman selkokielinen ja helppokäyttöinen opiskelusivusto. Solukko.comissa opiskelu perustuu aktiiviseen muistamiseen eli kysymyskortteihin. Kokoan sivustolle sekä omia että käyttäjien ehdottamia kysymyskortteja, joita myös päivitetään käyttäjien kommenttien pohjalta.</p>
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div class="custom-import-wrap">
