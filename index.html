@@ -2325,7 +2325,7 @@ function _fsCursorActivity(){   // show the cursor, then fade it after 2s of sti
 }
 document.addEventListener('mousemove', _fsCursorActivity);
 (function(){ const w=document.getElementById('flashcard-wrap');
-  const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Avaa opiskelunäkymässä'; document.body.appendChild(tip);
+  const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Avaa opiskelunäkymässä'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
   if(w){
     w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
     w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); });
@@ -3829,7 +3829,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
 }
 
 (function initWordLinkTooltip(){
-  const tip=document.createElement('div'); tip.id='word-link-tooltip'; document.body.appendChild(tip);
+  const tip=document.createElement('div'); tip.id='word-link-tooltip'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
   let touchPinnedLink=null;
 
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
@@ -3877,7 +3877,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
 (function initStarTooltip(){
   const tip = document.createElement('div');
   tip.id = 'star-tooltip';
-  document.body.appendChild(tip);
+  (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
 
   function show(target){   // touch only — mouse hover uses the cursor-following #card-hover-tip
     const text = target.dataset.starMeaning;
