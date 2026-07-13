@@ -233,22 +233,20 @@ body.deck-intro-anim #deck-cover .cover-title { animation: introFade 0.6s ease b
 body.deck-intro-anim #deck-cover .cover-esittely { animation: introFade 0.6s ease both; animation-delay: 1s; }
 /* #card-overview-grid fades per-element via staggerGridIntro(): the first row of cards one-by-one, then the rest together */
 body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #card-overview-grid .overview-section > *:not(.overview-section-grid) { opacity: 0; }   /* start hidden so there's no flash before staggerGridIntro sets the staggered fade */
-/* Mona sits above the course title, upright + fully visible; she slides in from behind the top edge on load */
-#mona-top-peek { position: fixed; top: 12px; left: 25vw; width: 118px; z-index: 55; transform: translate(-50%, -175%); transition: transform 0.8s cubic-bezier(0.34, 1.5, 0.64, 1); display: none; }
-body.reviewing #mona-top-peek { display: block; }
-#mona-top-peek.peeking { transform: translate(-50%, 0); }   /* rests fully visible above the title */
-.mona-top-inner { position: relative; width: 118px; height: 118px; cursor: pointer; }
+/* Mona sits above the course title inside the cover (scrolls with the page); bubble centred on the title, Mona to its left */
+#mona-top-peek { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; margin-bottom: 1.6rem; }
+.mona-top-inner { flex: 0 0 118px; width: 118px; height: 118px; position: relative; cursor: pointer; }
 .mona-top-inner img { width: 100%; height: auto; display: block; }
 .mona-top-inner.shake { animation: topPeekShake 0.5s ease; }
 @keyframes topPeekShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-4px,2px) rotate(-4deg)} 40%{transform:translate(4px,-2px) rotate(4deg)} 60%{transform:translate(-3px,1px) rotate(-3deg)} 80%{transform:translate(2px,-1px) rotate(2deg)} }
-/* speech bubble to Mona's right */
-.mona-top-bubble { position: absolute; left: 128px; top: 50%; transform: translateY(-50%); width: max-content; max-width: 24ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; opacity: 0; transition: opacity 0.35s ease; pointer-events: none; }
-.mona-top-bubble.show { opacity: 1; }
+.mona-top-spacer { flex: 0 0 118px; visibility: hidden; }   /* balances Mona so the bubble stays centred on the title */
+.mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 26ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
 .mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
-@media (max-width: 900px) { #mona-top-peek { left: 50vw; } }
-#card-screen:fullscreen #mona-top-peek { display: none !important; }
+@keyframes monaDropIn { from { transform: translateY(-240px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+body.deck-intro-anim #mona-top-peek .mona-top-inner { animation: monaDropIn 0.75s cubic-bezier(0.34, 1.5, 0.64, 1) both; animation-delay: 0.4s; }   /* drops in from above on load */
+body.deck-intro-anim #mona-top-peek .mona-top-bubble { animation: introFade 0.5s ease both; animation-delay: 1.3s; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
@@ -919,15 +917,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
   </button>
-  <!-- Mona sits above the course title (grid half); slides in from behind the top edge; clickable like the homepage logo -->
-  <div id="mona-top-peek">
-    <div class="mona-top-bubble" id="mona-top-bubble"></div>
-    <div class="mona-top-inner" onclick="_monaTopClick(event)">
-      <img src="solukkologo_eyes.png" alt="">
-      <div class="logo-eye le"><span class="logo-pupil"></span></div>
-      <div class="logo-eye re"><span class="logo-pupil"></span></div>
-    </div>
-  </div>
   <div id="review-cols">
   <div id="grid-col">
   <div id="grid-header">
@@ -1977,7 +1966,6 @@ async function startDeck(deckName){
   setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5000);
   setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
   setTimeout(landingReveal, 3900);     // once the grid has faded in: highlight the first card, then show it on the right
-  startMonaTopPeek();   // Mona slides in from the top
   history.pushState({reviewing: true}, '');
 }
 
@@ -2434,8 +2422,8 @@ function _doPreview(index){
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCurrentCard();
 }
-// Mona slides in from behind the top of the page and rests above the course title (clickable, like the homepage logo)
-let _topPeekTimer=null, _topPeekTO=[], _topPeekEyeTO=null;
+// Mona lives in the cover above the title (scrolls with the page); drops in on load via CSS. Clickable like the homepage logo.
+let _topPeekEyeTO=null;
 function _monaTopScream(withSound){
   const inner=document.querySelector('#mona-top-peek .mona-top-inner'), img=document.querySelector('#mona-top-peek img');
   if(inner){ inner.classList.remove('shake'); void inner.offsetWidth; inner.classList.add('shake'); setTimeout(()=>inner.classList.remove('shake'),520); }
@@ -2443,20 +2431,6 @@ function _monaTopScream(withSound){
   if(withSound){ try{ playScream(); }catch(e){} }
 }
 function _monaTopClick(){ _monaTopScream(true); }   // clickable like the homepage: shake + scream
-function startMonaTopPeek(){
-  const el=document.getElementById('mona-top-peek'), bub=document.getElementById('mona-top-bubble');
-  if(!el) return;
-  stopMonaTopPeek();
-  if(bub) bub.textContent='Tervetuloa kurssille! Näät kysymyskortit vierittämällä sivua alaspäin. Aloita opiskelu klikkaamalla ensimmäistä korttia.';
-  _topPeekTO.push(setTimeout(()=>{ if(!document.fullscreenElement) el.classList.add('peeking'); }, 800));   // slide in from behind the top edge
-  _topPeekTO.push(setTimeout(()=>{ if(bub && !document.fullscreenElement) bub.classList.add('show'); }, 1600));   // then her bubble
-}
-function stopMonaTopPeek(){
-  clearInterval(_topPeekTimer); _topPeekTimer=null;
-  _topPeekTO.forEach(clearTimeout); _topPeekTO=[];
-  const el=document.getElementById('mona-top-peek'), bub=document.getElementById('mona-top-bubble');
-  if(el) el.classList.remove('peeking'); if(bub) bub.classList.remove('show');
-}
 function staggerGridIntro(){   // on deck load: fade the first row of cards in one-by-one, then everything else together
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
   const cards=[...grid.querySelectorAll('.overview-card')]; if(!cards.length) return;
@@ -3162,7 +3136,13 @@ function renderCardOverview(){
     if(cov){
       if(_deckIntro){
         const _es=(getField(_deckIntro,['Back','back'])||_deckIntro.answer||'');   // the intro card's back = course description
-        cov.innerHTML='<div class="cover-title">'+_name+'</div><div class="cover-esittely">'+_es+'</div>';
+        cov.innerHTML=
+          '<div id="mona-top-peek">'+
+            '<div class="mona-top-inner" onclick="_monaTopClick(event)"><img src="solukkologo_eyes.png" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div>'+
+            '<div class="mona-top-bubble" id="mona-top-bubble">Tervetuloa kurssille! Näät kysymyskortit vierittämällä sivua alaspäin. Aloita opiskelu klikkaamalla ensimmäistä korttia.</div>'+
+            '<div class="mona-top-spacer"></div>'+
+          '</div>'+
+          '<div class="cover-title">'+_name+'</div><div class="cover-esittely">'+_es+'</div>';
         cov.style.display='flex';
       } else { cov.innerHTML=''; cov.style.display='none'; }
     }
@@ -3355,7 +3335,6 @@ function showDecks(){
   _lastBuzzerDocs=[]; _lastMoneyDocs=[];
   document.getElementById('site-brand').style.display='';
   document.getElementById('peek-logo')?.classList.remove('peek-show','bubble-open');   // hide the peeker on the homepage
-  stopMonaTopPeek();   // stop Mona's top peek when leaving the deck
   document.getElementById('back-btn-fixed').style.display='none';
   document.getElementById('gear-btn-wrap').style.display='none';
   exitCardFullscreen(); document.getElementById('rotate-btn').style.display='none';
