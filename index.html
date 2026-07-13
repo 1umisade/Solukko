@@ -2139,9 +2139,14 @@ function restoreDefaultOrder(){   // back to the deck's original order, lectures
 }
 
 // Fullscreen mode: the whole review screen goes fullscreen (card + answer buttons)
+let _fsFlipRect=null;
+function _captureCardRect(){   // remember where the card is on the right, so it can smoothly expand from there into fullscreen
+  const w=document.getElementById('flashcard-wrap');
+  _fsFlipRect=(w && getComputedStyle(w).display!=='none' && w.getBoundingClientRect().width>1) ? w.getBoundingClientRect() : null;
+}
 function toggleCardFullscreen(){
   const cs=document.getElementById('card-screen'); if(!cs) return;
-  if(!document.fullscreenElement){ (cs.requestFullscreen?cs.requestFullscreen():Promise.reject()).catch(()=>{}); }
+  if(!document.fullscreenElement){ _captureCardRect(); (cs.requestFullscreen?cs.requestFullscreen():Promise.reject()).catch(()=>{}); }
   else { document.exitFullscreen&&document.exitFullscreen(); }
 }
 function exitCardFullscreen(){ if(document.fullscreenElement) document.exitFullscreen&&document.exitFullscreen(); }
@@ -2164,14 +2169,30 @@ document.addEventListener('mousemove', _fsCursorActivity);
   w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
   w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); });
 })();
+function _playFsFlip(){   // FLIP: card is now full-screen; animate it from where it sat on the right up to full — a smooth expand
+  const wrap=document.getElementById('flashcard-wrap'); if(!wrap||!_fsFlipRect){ _fsFlipRect=null; return; }
+  const last=wrap.getBoundingClientRect(); const first=_fsFlipRect; _fsFlipRect=null;
+  if(last.width<1||last.height<1){ return; }
+  const dx=first.left-last.left, dy=first.top-last.top, sx=first.width/last.width, sy=first.height/last.height;
+  wrap.style.transformOrigin='0 0';
+  wrap.style.transition='none';
+  wrap.style.transform='translate('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px) scale('+sx.toFixed(4)+','+sy.toFixed(4)+')';
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
+    wrap.style.transition='transform 0.5s cubic-bezier(0.16,1,0.3,1)';
+    wrap.style.transform='translate(0,0) scale(1,1)';
+  }); });
+  clearTimeout(_fsFlipTO); _fsFlipTO=setTimeout(()=>{ wrap.style.transition=''; wrap.style.transform=''; wrap.style.transformOrigin=''; }, 560);
+}
+let _fsFlipTO=null;
 document.addEventListener('fullscreenchange',()=>{
   const cs=document.getElementById('card-screen');
   const on = !!document.fullscreenElement && document.fullscreenElement===cs;
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
   fitCardScale(); scrollToCard(); updateFsSlider();
   const b=document.getElementById('fs-exit-btn');
-  if(on){ flashFsExitBtn(); _fsCursorActivity(); }
-  else { if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
+  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); }   // smooth expand from the right
+  else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
+    if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
     if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
 });
 document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
@@ -3082,6 +3103,7 @@ function fitDeckTitle(){
 
 function jumpToOverviewCard(index){   // clicking a grid card opens it for review in fullscreen
   clearTimeout(_previewTO); clearTimeout(_welcomeTO);
+  _captureCardRect();   // the previewed card (right side) is what expands into fullscreen
   const changed = currentCard!==reviewCards[index];
   currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1);
   if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
@@ -3277,6 +3299,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if(!currentCard) return;                               // celebration / done screen: no reveal or shake
     if(e.target.closest('.word-link')){ e.stopPropagation(); return; }
     if(!document.fullscreenElement){                        // pressing the card opens fullscreen; reviewing happens there
+      _captureCardRect();
       const cs=document.getElementById('card-screen'); if(cs&&cs.requestFullscreen) cs.requestFullscreen().catch(()=>{});
       return;
     }
