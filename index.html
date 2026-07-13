@@ -2267,7 +2267,6 @@ function _pbBubbleX(pct, animate){   // move the speech bubble horizontally to f
 function _fsKnob(){ return document.getElementById('pb-knob'); }
 function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
 function _fsPct(){ const k=_fsKnob(); return k?(parseFloat(k.style.left)||50):50; }
-const _GRADE_HOLD_MS=2000;   // (drag) once Mona reaches a button, hold the view this long so the changed bubble is readable
 const _PICK_PAUSE_MS=1500;   // (click/arrow) pause after the bubble changes, before Mona slides to the button
 let _picking=false;          // guard so a second click during the pause can't advance two cards
 function _knobShown(){ const k=_fsKnob(); return !!k && k.style.opacity!=='0'; }   // '' or '1' = Mona visible
@@ -2283,7 +2282,7 @@ function _hidePbBubble(){ const b=document.getElementById('pb-bubble'); if(b) b.
 function _fsStartDrag(e){
   const t=document.getElementById('progress-tube'); if(!t) return;
   clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);   // a pending reveal timer must not reset the bubble while she slides
-  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; } _pbShow();   // bubble follows Mona while she slides (only if she's visible)
+  const b=_pbBubble(); if(b){ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; } _pbShow();   // "Tiesitkö?" until she nears a button; _fsMove swaps to that button's text
   _fsDrag=true; _fsTrackW=t.getBoundingClientRect().width||1; _fsStartX=e.clientX; _fsStartPct=_fsPct(); _fsSwipeMoved=false;
   const k=_fsKnob(); if(k) k.style.transition='none';
 }
@@ -2296,11 +2295,17 @@ function _fsScreenDown(e){   // in fullscreen, a horizontal swipe on empty space
 function _fsMove(e){ if(!_fsDrag) return;
   if(Math.abs(e.clientX-_fsStartX)>4) _fsSwipeMoved=true;
   const p=_fsStartPct+(e.clientX-_fsStartX)/_fsTrackW*100;                     // relative to where the swipe began
-  _fsSetPct(p); _pbBubbleX(p, false); fsHot(p<=15?'wrong':p>=85?'right':null);   // bubble tracks Mona
+  _fsSetPct(p); _pbBubbleX(p, false);
+  const zone = p<=15?'wrong':p>=85?'right':null;                              // near a button?
+  fsHot(zone);
+  const b=_pbBubble(); if(b) b.textContent = zone==='wrong'?_SLIDE_NO_TEXT : zone==='right'?_SLIDE_YES_TEXT : _BACK_BUBBLE_TEXT;   // proper speech by which button she's near
+  if(_fsSwipeMoved && (p<=4 || p>=96)){                                       // she touches the button -> load the next card immediately
+    _fsDrag=false; const correct=p>=96; _fsSetPct(correct?100:0); fsHot(correct?'right':'wrong'); fsSliderGrade(correct);
+  }
 }
 function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=_fsPct();
-  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); setTimeout(()=>fsSliderGrade(false), _GRADE_HOLD_MS); }       // swiped onto the left (wrong) button — hold so the bubble reads
-  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); setTimeout(()=>fsSliderGrade(true), _GRADE_HOLD_MS); } // swiped onto the right (correct) button
+  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); fsSliderGrade(false); }       // released on the Ei button -> load next card immediately
+  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); fsSliderGrade(true); } // released on the Kyllä button -> load next card immediately
   else {   // snap back to centre -> bubble returns to "Tiesitkö?"
     fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210);
     _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
@@ -2310,7 +2315,7 @@ function fsSliderPick(correct){   // click/arrow: keycap press + sound + bubble 
   if(_picking) return; _picking=true;
   clearTimeout(_backBubbleTimer); clearTimeout(_frontMonaTimer);             // a pending reveal timer must not reset the bubble to "Tiesitkö?" mid-pick
   playKeyClick(); pressKeycap(correct);                                       // 1) up/down keycap animation + click sound
-  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; } _pbShow();  //    + change Mona's bubble immediately
+  const b=_pbBubble(); if(b){ b.textContent=correct?_SLIDE_YES_TEXT:_SLIDE_NO_TEXT; } _pbShow();  //    + change Mona's bubble immediately (Kyllä/Ei)
   setTimeout(()=>{                                                            // 2) wait 1.5s
     _pbBubbleX(correct?100:0, true);                                          // 3) slide Mona (and her bubble) to the button
     const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
@@ -2324,8 +2329,9 @@ function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the bu
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; } fsHot(null); }   // recentre Mona and her bubble
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 let _frontMonaTimer=null, _backBubbleTimer=null;
-const _BACK_BUBBLE_TEXT='Tiesitkö?';                       // resting: Mona only ever asks this
-const _SLIDE_BUBBLE_TEXT='Kysyn huomenna uudestaan.';      // while she slides toward a button
+const _BACK_BUBBLE_TEXT='Tiesitkö?';                       // resting: Mona asks this
+const _SLIDE_YES_TEXT='Kysyn huomenna uudestaan.';         // near/onto the Kyllä (right) button
+const _SLIDE_NO_TEXT='Kysyn kohta uudestaan.';             // near/onto the Ei (left) button
 // front side: no bar — Mona centred, bubble centred above her; both fade in after 1s
 function showFrontMona(){
   _picking=false;   // fresh card -> allow grading again
@@ -3172,7 +3178,7 @@ function renderCardOverview(){
         cov.innerHTML=
           '<div id="mona-top-peek">'+
             '<div class="mona-top-inner" onclick="_monaTopClick(event)"><img src="solukkologo_eyes.png" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div>'+
-            '<div class="mona-top-bubble" id="mona-top-bubble">Tervetuloa kurssille! Näät kysymyskortit vierittämällä sivua alaspäin. Aloita opiskelu klikkaamalla ensimmäistä korttia.</div>'+
+            '<div class="mona-top-bubble" id="mona-top-bubble">Voit aloittaa opiskelun klikkaamalla ensimmäistä korttia.</div>'+
             '<div class="mona-top-spacer"></div>'+
           '</div>'+
           '<div class="cover-title">'+_name+'</div><div class="cover-esittely">'+_es+'</div>';
