@@ -354,6 +354,7 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .card-content:has(img), .card-content:has(iframe) { width: 100%; }   /* image-occlusion / 3D-embed cards keep full width, not shrunk to the text */
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.answer-shown { display: flex; flex-direction: column; justify-content: safe center; }   /* back side: centre the content on the Y axis too (safe = still scrolls from the top when it overflows) */
+.flashcard:not(.front-basic):not(.answer-shown):not(.celebrating) { display: flex; flex-direction: column; justify-content: safe center; }   /* cloze / special fronts: centre on the Y axis too */
 .flashcard.front-basic #question-content { text-align: left; line-height: 1.25; }   /* fit-content + margin auto (from .card-content) centres it; short front text reads as centred */
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
 .card-embed-3d { width: 100%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; }   /* front: full size; wrapper clips the iframe so its rounded corners have no dark fringe */
@@ -1238,38 +1239,40 @@ const commentBoxWrap=document.querySelector('.comment-box');
 // appears below the card instead of pushing the card down
 (function(){ const ca=document.querySelector('.comment-area'), col=document.getElementById('comment-col'); if(ca&&col) col.appendChild(ca); })();   // comments live in the right half, next to the card
 (function(){ const dm=document.getElementById('darkmode-wrap'), gt=document.getElementById('grid-tools'); if(dm&&gt) gt.appendChild(dm); })();   // dark-mode toggle sits with the shuffle / reset tools under the grid
-// Elastic rubberband for the whole right half (desktop): over-scroll pulls the content and it springs back live
-(function(){
-  const col=document.getElementById('card-col');
-  const inner=()=>document.getElementById('card-stack');   // the whole right-side content (card + Mona + answer bar) bounces together
-  if(!col) return;
-  let offset=0, raf=null;
-  const MAX=120;
-  function apply(){ const el=inner(); if(el) el.style.transform = offset ? 'translateY('+offset.toFixed(1)+'px)' : ''; }
-  window._resetCardSpring=function(){ cancelAnimationFrame(raf); raf=null; offset=0; apply(); };
-  function tick(){                          // ALWAYS pulling back toward 0 (no "hold at max then release" — springs live while you scroll)
-    offset *= 0.86;
-    if(Math.abs(offset)<0.4){ offset=0; apply(); raf=null; return; }
-    apply(); raf=requestAnimationFrame(tick);
+// Elastic rubberband (desktop): over-scroll pulls the content and springs back smoothly. Used for both the right half and the grid.
+function makeRubberband(scrollEl, getTransformEl, resetName){
+  if(!scrollEl) return;
+  let offset=0, target=0, raf=null;
+  const MAX=110;
+  function apply(){ const el=getTransformEl(); if(el) el.style.transform = offset ? 'translate3d(0,'+offset.toFixed(1)+'px,0)' : ''; }
+  function loop(){                          // target springs back to 0; the visible offset eases toward the target → smooth, no jumpiness
+    target *= 0.88;
+    offset += (target-offset)*0.20;
+    if(Math.abs(offset)<0.15 && Math.abs(target)<0.15){ offset=0; target=0; apply(); raf=null; return; }
+    apply(); raf=requestAnimationFrame(loop);
   }
-  col.addEventListener('wheel', e=>{
-    if(document.fullscreenElement) return;                        // no bounce in fullscreen (would break the fixed slider)
-    if(window.matchMedia('(max-width: 900px)').matches) return;   // right-half rubberband is a desktop thing
-    // let any scrollable element (long card, comment feed, card-col) consume the wheel first
+  if(resetName) window[resetName]=function(){ cancelAnimationFrame(raf); raf=null; offset=0; target=0; apply(); };
+  scrollEl.addEventListener('wheel', e=>{
+    if(document.fullscreenElement) return;
+    if(window.matchMedia('(max-width: 900px)').matches) return;   // desktop only
+    // let any nested scrollable element (long card, comment feed) consume the wheel first
     let node=e.target;
-    while(node){
+    while(node && node!==scrollEl){
       if(node.scrollHeight>node.clientHeight+1 && /(auto|scroll)/.test(getComputedStyle(node).overflowY)){
         if((e.deltaY<0 && node.scrollTop>0) || (e.deltaY>0 && node.scrollTop+node.clientHeight<node.scrollHeight-1)) return;
       }
-      if(node===col) break;
       node=node.parentElement;
     }
-    e.preventDefault();               // nothing left to scroll -> rubberband
-    offset = Math.max(-MAX, Math.min(MAX, offset - e.deltaY*0.30));
-    apply();
-    if(!raf) raf=requestAnimationFrame(tick);   // keep the spring running so it decays every frame
+    // if the container itself can still scroll in this direction, let it scroll natively (and let any offset spring back)
+    const canUp=scrollEl.scrollTop>0, canDown=scrollEl.scrollTop+scrollEl.clientHeight<scrollEl.scrollHeight-1;
+    if((e.deltaY<0&&canUp)||(e.deltaY>0&&canDown)){ if((target||offset)&&!raf) raf=requestAnimationFrame(loop); return; }
+    e.preventDefault();               // at the boundary (or content fits) -> rubberband
+    target=Math.max(-MAX,Math.min(MAX,target-e.deltaY*0.32));
+    if(!raf) raf=requestAnimationFrame(loop);
   }, {passive:false});
-})();
+}
+makeRubberband(document.getElementById('card-col'), ()=>document.getElementById('card-stack'), '_resetCardSpring');   // right half: card + Mona + answer bar
+makeRubberband(document.getElementById('grid-col'), ()=>document.getElementById('grid-col'));                          // grid: bounce at the top/bottom scroll boundaries
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
 document.addEventListener('click',e=>{ if(!_commenting && !document.querySelector('.comment-area').contains(e.target) && !e.target.closest('#comment-btn')) document.querySelector('.comment-box').classList.remove('open'); });   // don't fight the comment-panel toggle
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
@@ -2243,7 +2246,7 @@ function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.s
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 // grade-button hover: show the hint bubble on Mona's corresponding side
 let _frontMonaTimer=null, _backBubbleTimer=null;
-const _BACK_BUBBLE_TEXT='Joko osasit? Paina Kyllä- tai Ei-nappia.';
+const _BACK_BUBBLE_TEXT='Tiesitkö? Paina Kyllä- tai Ei-nappia.';
 function showGradeHint(correct){   // grade-button hover: swap the centred bubble text to the button's function
   if(!cardAnswerShown) return;
   const b=document.getElementById('pb-bubble'); if(!b) return;
