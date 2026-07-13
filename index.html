@@ -63,6 +63,11 @@ body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; hei
 #home-mona { align-self: flex-start; display: flex; align-items: center; gap: 18px; margin: 4px 0 10px; }   /* solukko.com | Mona | speech bubble — at the left of the screen */
 #home-mona .site-brand { width: 120px; margin: 0; }
 .home-brand-block { text-align: right; flex: 0 0 auto; }
+/* wide screens: site name pinned left, Mona + bubble centered */
+@media (min-width: 1100px){
+  #home-mona { align-self: stretch; justify-content: center; position: relative; }
+  #home-mona .home-brand-block { position: absolute; left: 0; top: 50%; transform: translateY(-50%); text-align: left; }
+}
 .home-name { font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1; color: #4a2c14; }
 .home-slogan-txt { font-family: 'Lora', serif; font-size: clamp(0.95rem, 2vw, 1.25rem); color: #a06a35; margin-top: 5px; }
 body.dark-mode .home-name { color: #eadfce; }
