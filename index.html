@@ -2287,9 +2287,9 @@ function _fsStartDrag(e){
   const k=_fsKnob(); if(k) k.style.transition='none';
 }
 function _fsKnobDown(e){ if(!cardAnswerShown) return; _fsStartDrag(e); e.stopPropagation(); e.preventDefault(); }   // grab Mona directly (either mode)
-function _fsScreenDown(e){   // in fullscreen, a horizontal swipe ANYWHERE grabs Mona
+function _fsScreenDown(e){   // in fullscreen, a horizontal swipe on empty space grabs Mona
   if(!(_fsFullscreen() && cardAnswerShown)) return;
-  if(e.target.closest('.ball-btn')||e.target.closest('#fs-exit-btn')) return;
+  if(e.target.closest('.ball-btn')||e.target.closest('#fs-exit-btn')||e.target.closest('#flashcard')) return;   // don't hijack text selection on the card (grab Mona by the knob or empty space instead)
   _fsStartDrag(e);
 }
 function _fsMove(e){ if(!_fsDrag) return;
