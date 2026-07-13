@@ -231,9 +231,9 @@ body.reviewing #show-row { display: none !important; }   /* the answer is reveal
 @keyframes introFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 body.deck-intro-anim #deck-cover .cover-title { animation: introFade 0.6s ease both; }
 body.deck-intro-anim #deck-cover .cover-esittely { animation: introFade 0.6s ease both; animation-delay: 1s; }
-body.deck-intro-anim #deck-welcome .welcome-mona { animation: introFade 0.6s ease both; animation-delay: 1.7s; }
-body.deck-intro-anim #deck-welcome .welcome-bubble { animation: introFade 0.55s ease both; animation-delay: 2.3s; }
-body.deck-intro-anim #card-overview-grid { animation: introFade 0.6s ease both; animation-delay: 2.9s; }
+body.deck-intro-anim #card-overview-grid { animation: introFade 0.6s ease both; animation-delay: 2s; }
+body.deck-intro-anim #deck-welcome .welcome-mona { animation: introFade 0.6s ease both; animation-delay: 3s; }
+body.deck-intro-anim #deck-welcome .welcome-bubble { animation: introFade 0.6s ease both; animation-delay: 4s; }
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
@@ -915,8 +915,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
   <div class="grid-tools" id="grid-tools">
     <button class="grid-tool-btn" onclick="resetDeckProgress()" title="Merkitse kaikki kortit uusiksi">↺ Nollaa edistyminen</button>
-    <button class="grid-tool-btn" onclick="shuffleReviewOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
-    <button class="grid-tool-btn" onclick="restoreDefaultOrder()" title="Palauta alkuperäinen järjestys">↕ Oletusjärjestys</button>
+    <button id="shuffle-toggle-btn" class="grid-tool-btn" onclick="toggleShuffleOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
   </div>
   </div>
   <div id="card-col">
@@ -1539,9 +1538,23 @@ setInterval(()=>{
 // ════════════════════════════════════════════════════════════
 // ⑧ .APKG-LATAUS & SQLITE-PARSINTA
 // ════════════════════════════════════════════════════════════
+// Tiny IndexedDB key/value store — caches the parsed .apkg so reloads skip the 11 MB decompress + base64
+function _idbOpen(){ return new Promise((res,rej)=>{ let r; try{ r=indexedDB.open('solukko-apkg',1); }catch(e){ return rej(e); } r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('kv'); }catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function idbGet(key){ try{ const db=await _idbOpen(); return await new Promise(res=>{ const g=db.transaction('kv','readonly').objectStore('kv').get(key); g.onsuccess=()=>res(g.result); g.onerror=()=>res(null); }); }catch(e){ return null; } }
+async function idbSet(key,val){ try{ const db=await _idbOpen(); return await new Promise(res=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(val,key); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }catch(e){ return false; } }
 async function init(){
   show('loading');
   try {
+    // Fast path: reuse the previously parsed .apkg from IndexedDB if the file on the server hasn't changed
+    let _ver='';
+    try { const _h=await fetch('./'+APKG_FILE,{method:'HEAD',cache:'no-cache'}); _ver=(_h.headers.get('etag')||_h.headers.get('last-modified')||'')+'|'+(_h.headers.get('content-length')||''); } catch(e){}
+    if(_ver){
+      const _c=await idbGet('apkg');
+      if(_c && _c.ver===_ver && _c.allCards && _c.allCards.length){
+        allCards=_c.allCards; allDeckNames=_c.allDeckNames||[]; mediaMap=_c.mediaMap||{};
+        await loadDecks(); hide('loading'); return;
+      }
+    }
     const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
     const res = await fetch('./' + APKG_FILE);
     if (!res.ok) throw new Error(APKG_FILE + ' not found (' + res.status + ')');
@@ -1570,6 +1583,7 @@ async function init(){
     allCards = parseAnkiDB(db);
     allDeckNames = Object.values(JSON.parse(db.exec('SELECT decks FROM col')[0].values[0][0])).map(d => d.name).filter(Boolean);
     db.close();
+    if(_ver){ idbSet('apkg', { ver:_ver, allCards, allDeckNames, mediaMap }).catch(()=>{}); }   // cache the parse (fire-and-forget) so future reloads are instant
     await loadDecks();
   } catch(e) {
     const d = document.getElementById('conn-error');
@@ -1905,7 +1919,7 @@ async function startDeck(deckName){
   _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
   reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
   queue = reviewCards.slice();
-  shuffleMode=false; document.getElementById('shuffle-btn')?.classList.remove('active');
+  shuffleMode=false; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
@@ -1936,7 +1950,7 @@ async function startDeck(deckName){
   resetComment();   // fullscreen ⛶ + comment buttons stay hidden — reviewing happens in fullscreen, opened by clicking a card
   document.body.classList.add('reviewing');
   document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
-  setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 4200);
+  setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5000);
   history.pushState({reviewing: true}, '');
 }
 
@@ -2132,6 +2146,15 @@ function shuffleReviewOrder(){   // randomise the cards AND merge every lecture 
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
   renderCardOverview();
 }
+function toggleShuffleOrder(){   // one button toggles: Sekoita (shuffle) ⇄ Järjestä (restore the original order)
+  if(shuffleMode) restoreDefaultOrder(); else shuffleReviewOrder();
+  updateShuffleToggleBtn();
+}
+function updateShuffleToggleBtn(){
+  const btn=document.getElementById('shuffle-toggle-btn'); if(!btn) return;
+  btn.textContent = shuffleMode ? '↕ Järjestä' : '🔀 Sekoita';
+  btn.title = shuffleMode ? 'Palauta alkuperäinen järjestys' : 'Sekoita korttien järjestys';
+}
 function restoreDefaultOrder(){   // back to the deck's original order, lectures split out again
   shuffleMode=false;
   document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.remove('active'));
@@ -2165,6 +2188,7 @@ let _fsCursorTimer=null, _overCard=false;
 function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness (fullscreen, or while idling over the card)
   const cs=document.getElementById('card-screen'); if(!cs) return;
   cs.classList.remove('cursor-hidden');
+  if(document.fullscreenElement) flashFsExitBtn();   // moving the mouse shows the exit button; it fades 1s after you stop
   clearTimeout(_fsCursorTimer);
   if(document.fullscreenElement || _overCard) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement || _overCard) cs.classList.add('cursor-hidden'); }, 2000);
 }
