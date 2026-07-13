@@ -351,7 +351,7 @@ body.dark-mode .flashcard { scrollbar-color: #a97f4e #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb { background: #a97f4e; border-color: #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; text-align: left; }   /* block sized to the longest line, centred on the card; short text ends up centred, long text stays left-aligned from the longest line */
-.card-content:has(img), .card-content:has(iframe) { width: 100%; }   /* image-occlusion / 3D-embed cards keep full width, not shrunk to the text */
+.card-content:has(iframe) { width: 100%; }   /* only 3D-embed cards need full width (an iframe has no intrinsic width); images size the fit-content block naturally so the card still centres */
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.answer-shown { display: flex; flex-direction: column; justify-content: safe center; }   /* back side: centre the content on the Y axis too (safe = still scrolls from the top when it overflows) */
 .flashcard:not(.front-basic):not(.answer-shown):not(.celebrating) { display: flex; flex-direction: column; justify-content: safe center; }   /* cloze / special fronts: centre on the Y axis too */
