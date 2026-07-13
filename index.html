@@ -165,8 +165,8 @@ body.dark-mode .pb-bubble::after { border-top-color: #3a312b; }
 .progress-row.pb-front .progress-fill { display: none; }
 /* grade button expands + glows when Mona overlaps it */
 .ball-btn.fs-ans-hot { transform: scale(1.22); }
-.grade-again.fs-ans-hot { box-shadow: 0 0 24px 7px rgba(245,171,151,0.95); }
-.grade-correct.fs-ans-hot { box-shadow: 0 0 24px 7px rgba(154,184,161,0.95); }
+.grade-again.fs-ans-hot { filter: drop-shadow(0 0 7px rgba(245,171,151,0.95)) drop-shadow(0 0 15px rgba(245,171,151,0.7)); }   /* drop-shadow traces the keycap's alpha shape, not its square box */
+.grade-correct.fs-ans-hot { filter: drop-shadow(0 0 7px rgba(154,184,161,0.95)) drop-shadow(0 0 15px rgba(154,184,161,0.7)); }
 /* Top peeker: exact mirror of the bottom peeker, anchored at the card's TOP edge (same size, bubble centered, Mona on the right) */
 .card-peek-top { position: absolute; top: 0; left: 0; width: 100%; height: 0; pointer-events: none; opacity: 0; }   /* no z-index: Mona sits BEHIND the card (bubble is z-index 9999); no transition so it hides instantly on mouseleave */
 .card-peek-top.show { opacity: 1; }
@@ -757,8 +757,10 @@ body.dark-mode .group-card { background: #3a312b; border-color: #6d5f52; }
 .card-out-up { animation: cardSlideOutUp 0.26s ease forwards; pointer-events:none; }
 @keyframes cardShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-7px)} 80%{transform:translateX(5px)} }
 .card-shake { animation: cardShake 0.45s ease; }
-@keyframes btnAttention { 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(0,0,0,0.12); } 40%{ transform:scale(1.2); box-shadow:0 0 26px 7px var(--glow,#ffcd82), 0 4px 14px rgba(0,0,0,0.18); } }
+@keyframes btnAttention { 0%,100%{ transform:scale(1); filter:none; } 40%{ transform:scale(1.2); filter: drop-shadow(0 0 9px var(--glow,#ffcd82)) drop-shadow(0 0 4px var(--glow,#ffcd82)); } }
 .ball-btn.btn-attention { animation: btnAttention 0.7s ease; }
+@keyframes keycapPress { 0% { transform: translateY(0); } 40% { transform: translateY(5px); } 100% { transform: translateY(0); } }   /* keycap dips down and springs back on click */
+.ball-btn.keycap-press { animation: keycapPress 0.16s ease; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* ── 15. TIETOVISA-OVERLAY ──────────────────────────────── */
@@ -963,7 +965,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 
   <div class="progress-row" id="progress-row" style="display:none">
-    <button class="ball-btn grade-again" onclick="fsSliderPick(false)" onmouseenter="showGradeHint(false)" onmouseleave="hideGradeHint()" title="Vasen nuolinäppäin">
+    <button class="ball-btn grade-again" onclick="fsSliderPick(false)" title="Vasen nuolinäppäin">
       <img src="ei.png" alt="Ei">
     </button>
     <div class="progress-tube" id="progress-tube">
@@ -975,7 +977,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         <div class="logo-eye re"><span class="logo-pupil"></span></div>
       </div>
     </div>
-    <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" onmouseenter="showGradeHint(true)" onmouseleave="hideGradeHint()" title="Oikea nuolinäppäin">
+    <button class="ball-btn grade-correct" onclick="fsSliderPick(true)" title="Oikea nuolinäppäin">
       <img src="kylla.png" alt="Kyllä">
     </button>
   </div>
@@ -2247,6 +2249,20 @@ document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ fl
 
 // Grading slider — Mona rides the progress bar as a draggable knob between the two answer buttons
 let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false;
+let _clickSnd=null;
+function playKeyClick(){   // keyboard-keycap click sound on pressing an answer button
+  try{ if(!_clickSnd){ _clickSnd=new Audio('click.mp3'); _clickSnd.volume=0.45; _clickSnd.setAttribute('playsinline',''); } _clickSnd.currentTime=0; _clickSnd.play().catch(()=>{}); }catch(e){}
+}
+function pressKeycap(correct){   // dip the keycap down and spring it back
+  const btn=document.querySelector(correct?'.grade-correct':'.grade-again'); if(!btn) return;
+  btn.classList.remove('keycap-press'); void btn.offsetWidth; btn.classList.add('keycap-press'); setTimeout(()=>btn.classList.remove('keycap-press'),180);
+}
+function _pbBubble(){ return document.getElementById('pb-bubble'); }
+function _pbBubbleX(pct, animate){   // move the speech bubble horizontally to follow Mona
+  const b=_pbBubble(); if(!b) return;
+  b.style.transition = animate ? 'opacity 0.4s ease, left 0.25s ease' : 'opacity 0.4s ease';
+  b.style.left=Math.max(0,Math.min(100,pct))+'%';
+}
 function _fsKnob(){ return document.getElementById('pb-knob'); }
 function _fsSetPct(p){ const k=_fsKnob(); if(k) k.style.left=Math.max(0,Math.min(100,p))+'%'; }
 function _fsPct(){ const k=_fsKnob(); return k?(parseFloat(k.style.left)||50):50; }
@@ -2259,7 +2275,7 @@ function _fsFullscreen(){ return document.fullscreenElement && document.fullscre
 function _hidePbBubble(){ const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
 function _fsStartDrag(e){
   const t=document.getElementById('progress-tube'); if(!t) return;
-  _hidePbBubble();   // Mona is moving -> hide the speech bubble
+  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; b.classList.add('show'); b.style.transition='opacity 0.4s ease'; }   // bubble follows Mona while she slides
   _fsDrag=true; _fsTrackW=t.getBoundingClientRect().width||1; _fsStartX=e.clientX; _fsStartPct=_fsPct(); _fsSwipeMoved=false;
   const k=_fsKnob(); if(k) k.style.transition='none';
 }
@@ -2272,35 +2288,30 @@ function _fsScreenDown(e){   // in fullscreen, a horizontal swipe ANYWHERE grabs
 function _fsMove(e){ if(!_fsDrag) return;
   if(Math.abs(e.clientX-_fsStartX)>4) _fsSwipeMoved=true;
   const p=_fsStartPct+(e.clientX-_fsStartX)/_fsTrackW*100;                     // relative to where the swipe began
-  _fsSetPct(p); fsHot(p<=15?'wrong':p>=85?'right':null);
+  _fsSetPct(p); _pbBubbleX(p, false); fsHot(p<=15?'wrong':p>=85?'right':null);   // bubble tracks Mona
 }
 function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) return; const p=_fsPct();
-  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; fsHot('wrong'); fsSliderGrade(false); }       // swiped onto the left (wrong) button
-  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; fsHot('right'); fsSliderGrade(true); } // swiped onto the right (correct) button
-  else { fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210); }   // snap back to centre
+  if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); fsSliderGrade(false); }       // swiped onto the left (wrong) button
+  else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); fsSliderGrade(true); } // swiped onto the right (correct) button
+  else {   // snap back to centre -> bubble returns to "Tiesitkö?"
+    fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210);
+    _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
+  }
 }
-function fsSliderPick(correct){   // arrow key / button click: slide Mona onto the button, glow it, then grade
-  _hidePbBubble();   // Mona moving to the button -> hide the bubble
+function fsSliderPick(correct){   // arrow key / button click: press the keycap, slide Mona onto it, glow it, then grade
+  playKeyClick(); pressKeycap(correct);
+  const b=_pbBubble(); if(b){ b.textContent=_SLIDE_BUBBLE_TEXT; b.classList.add('show'); }   // bubble follows Mona to the button
+  _pbBubbleX(correct?100:0, true);
   const k=_fsKnob(); if(k){ k.style.transition='left 0.25s ease'; k.style.left=correct?'100%':'0%'; }
   setTimeout(()=>fsHot(correct?'right':'wrong'), 240);
   setTimeout(()=>fsSliderGrade(correct), 430);
 }
 function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
-function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } fsHot(null); }
+function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; } fsHot(null); }   // recentre Mona and her bubble
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
-// grade-button hover: show the hint bubble on Mona's corresponding side
 let _frontMonaTimer=null, _backBubbleTimer=null;
-const _BACK_BUBBLE_TEXT='Tiesitkö? Paina Kyllä- tai Ei-nappia.';
-function showGradeHint(correct){   // grade-button hover: swap the centred bubble text to the button's function
-  if(!cardAnswerShown) return;
-  const b=document.getElementById('pb-bubble'); if(!b) return;
-  b.textContent = correct ? 'Kysyn huomenna uudestaan' : 'Kysyn kohta uudestaan';
-  b.classList.add('show');
-}
-function hideGradeHint(){   // revert to the "Tiesitkö…" prompt
-  if(!cardAnswerShown) return;
-  const b=document.getElementById('pb-bubble'); if(b) b.textContent=_BACK_BUBBLE_TEXT;
-}
+const _BACK_BUBBLE_TEXT='Tiesitkö?';                       // resting: Mona only ever asks this
+const _SLIDE_BUBBLE_TEXT='Kysyn huomenna uudestaan.';      // while she slides toward a button
 // front side: no bar — Mona centred, bubble centred above her; both fade in after 1s
 function showFrontMona(){
   clearTimeout(_backBubbleTimer);
@@ -2309,7 +2320,7 @@ function showFrontMona(){
   const b=document.getElementById('pb-bubble'), k=_fsKnob();
   fsHot(null);   // clear any button glow left from grading the previous card
   if(k){ k.style.transition='none'; k.style.left='50%'; k.style.opacity='0'; }
-  if(b){ b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; b.classList.remove('show'); }
+  if(b){ b.textContent=_frontHintText||'Klikkaa korttia tarkistaaksesi vastauksen.'; b.classList.remove('show'); b.style.transition='opacity 0.4s ease'; b.style.left='50%'; }
   updateProgress();
   clearTimeout(_frontMonaTimer);
   _frontMonaTimer=setTimeout(()=>{
