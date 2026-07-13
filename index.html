@@ -218,7 +218,7 @@ body.dark-mode #deck-cover .cover-esittely { color: #cbbda8; }
 #deck-welcome .welcome-bubble::after { content: ''; position: absolute; left: 50%; bottom: -11px; transform: translateX(-50%); width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 12px solid #fffef9; }
 body.dark-mode #deck-welcome .welcome-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode #deck-welcome .welcome-bubble::after { border-top-color: #3a312b; }
-body.reviewing #card-col.welcome #deck-welcome { display: flex; }
+#deck-welcome { display: none !important; }   /* retired: Mona now lives at the top of the page, not a big welcome on the right */
 body.reviewing #card-col.welcome #flashcard-wrap,
 body.reviewing #card-col.welcome .card-extent,
 body.reviewing #card-col.welcome .top-bar,
@@ -233,19 +233,18 @@ body.deck-intro-anim #deck-cover .cover-title { animation: introFade 0.6s ease b
 body.deck-intro-anim #deck-cover .cover-esittely { animation: introFade 0.6s ease both; animation-delay: 1s; }
 /* #card-overview-grid fades per-element via staggerGridIntro(): the first row of cards one-by-one, then the rest together */
 body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #card-overview-grid .overview-section > *:not(.overview-section-grid) { opacity: 0; }   /* start hidden so there's no flash before staggerGridIntro sets the staggered fade */
-/* Mona peeks down from the top of the page, above the course title — upside down, ~40% of her visible */
-#mona-top-peek { position: fixed; top: 0; left: 25vw; width: 118px; z-index: 55; transform: translate(-50%, -100%); transition: transform 0.75s cubic-bezier(0.34, 1.4, 0.64, 1); pointer-events: none; display: none; }
+/* Mona sits above the course title, upright + fully visible; she slides in from behind the top edge on load */
+#mona-top-peek { position: fixed; top: 12px; left: 25vw; width: 118px; z-index: 55; transform: translate(-50%, -175%); transition: transform 0.8s cubic-bezier(0.34, 1.5, 0.64, 1); display: none; }
 body.reviewing #mona-top-peek { display: block; }
-#mona-top-peek.peeking { transform: translate(-50%, -60%); }   /* ~40% of Mona hangs down from the top edge */
-.mona-top-inner { position: relative; width: 118px; height: 118px; transform: rotate(180deg); }   /* upside down */
-.mona-top-inner .logo-eye { display: none; }   /* static drawn eyes (tracking eyes don't work upside down) */
+#mona-top-peek.peeking { transform: translate(-50%, 0); }   /* rests fully visible above the title */
+.mona-top-inner { position: relative; width: 118px; height: 118px; cursor: pointer; }
 .mona-top-inner img { width: 100%; height: auto; display: block; }
 .mona-top-inner.shake { animation: topPeekShake 0.5s ease; }
-@keyframes topPeekShake { 0%,100%{transform:rotate(180deg) translate(0,0)} 20%{transform:rotate(176deg) translate(4px,0)} 40%{transform:rotate(184deg) translate(-4px,0)} 60%{transform:rotate(178deg) translate(3px,0)} 80%{transform:rotate(182deg) translate(-2px,0)} }
-/* speech bubble to Mona's right (in the part of her that's visible below the top edge) */
-.mona-top-bubble { position: absolute; left: 126px; top: 74px; width: max-content; max-width: 24ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.65rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; opacity: 0; transition: opacity 0.35s ease; }
+@keyframes topPeekShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-4px,2px) rotate(-4deg)} 40%{transform:translate(4px,-2px) rotate(4deg)} 60%{transform:translate(-3px,1px) rotate(-3deg)} 80%{transform:translate(2px,-1px) rotate(2deg)} }
+/* speech bubble to Mona's right */
+.mona-top-bubble { position: absolute; left: 128px; top: 50%; transform: translateY(-50%); width: max-content; max-width: 24ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; opacity: 0; transition: opacity 0.35s ease; pointer-events: none; }
 .mona-top-bubble.show { opacity: 1; }
-.mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 16px; border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
+.mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
 @media (max-width: 900px) { #mona-top-peek { left: 50vw; } }
@@ -920,10 +919,10 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <button id="fs-exit-btn" onclick="exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
   </button>
-  <!-- Mona peeks down from the top of the page, above the course title -->
+  <!-- Mona sits above the course title (grid half); slides in from behind the top edge; clickable like the homepage logo -->
   <div id="mona-top-peek">
     <div class="mona-top-bubble" id="mona-top-bubble"></div>
-    <div class="mona-top-inner">
+    <div class="mona-top-inner" onclick="_monaTopClick(event)">
       <img src="solukkologo_eyes.png" alt="">
       <div class="logo-eye le"><span class="logo-pupil"></span></div>
       <div class="logo-eye re"><span class="logo-pupil"></span></div>
@@ -1958,7 +1957,7 @@ async function startDeck(deckName){
     localStorage.setItem('solukko-grades-'+deckName, JSON.stringify(cardGrades));
   }
   show('card-screen'); hide('loading');
-  showDeckWelcome();   // right half: welcome Mona + bubble; pick a card in the grid to review it in fullscreen
+  showDeckLanding();   // grid only; the first card highlights + shows on the right after the grid fades in
   { const _scrollHeaderOff=()=>{   // open scrolled past the header so the back button starts off-screen; the cover fills the view
       const _gc=document.getElementById('grid-col'); if(!_gc) return; _gc.scrollTop=0;
       const _cov=document.getElementById('deck-cover');
@@ -1977,7 +1976,8 @@ async function startDeck(deckName){
   document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
   setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5000);
   setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
-  startMonaTopPeek();   // Mona peeks from the top after the grid appears
+  setTimeout(landingReveal, 3900);     // once the grid has faded in: highlight the first card, then show it on the right
+  startMonaTopPeek();   // Mona slides in from the top
   history.pushState({reviewing: true}, '');
 }
 
@@ -2400,14 +2400,27 @@ async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard();
 // ── Deck landing: welcome Mona by default; hover a grid card to preview it; click to review it in fullscreen ──
 let _previewIndex=-1, _previewTO=null, _welcomeTO=null;
 function scheduleWelcome(){}   // the right side always shows a card now — no revert
-function showDeckWelcome(){   // deck landing: show a card on the right (the current one, or the first). Mona peeks from the top instead of a big welcome.
+function showDeckWelcome(){   // after fullscreen: show the current card on the right again
   if(document.fullscreenElement) return;
   clearTimeout(_previewTO); clearTimeout(_welcomeTO); _openingDeck=false;
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
-  renderCardOverview();   // builds the grid/cover and sets the deck title
+  renderCardOverview();
   if(!reviewCards.length) return;
   const idx=(currentOverviewIndex>=0 && reviewCards[currentOverviewIndex]) ? currentOverviewIndex : 0;
-  _previewIndex=-1; _doPreview(idx);   // first/current card on the right
+  _previewIndex=-1; _doPreview(idx);
+}
+function showDeckLanding(){   // initial deck open: grid only; the first card highlights + shows once the grid has faded in
+  if(document.fullscreenElement) return;
+  clearTimeout(_previewTO); clearTimeout(_welcomeTO); _openingDeck=false;
+  currentCard=null; currentOverviewIndex=-1; _previewIndex=-1;
+  const cc=document.getElementById('card-col'); if(cc) cc.classList.add('welcome');   // right side empty for now
+  renderCardOverview();   // build the grid/cover, nothing highlighted yet
+}
+function landingReveal(){   // grid has faded in → highlight the first card, then show it on the right
+  if(document.fullscreenElement || !reviewCards.length) return;
+  currentOverviewIndex=0; currentCard=reviewCards[0];
+  renderCardOverview();   // highlight the first card in the grid
+  setTimeout(()=>{ if(!document.fullscreenElement){ _previewIndex=-1; _doPreview(0); } }, 500);   // then reveal it on the right
 }
 function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
   if(document.fullscreenElement) return;
@@ -2421,7 +2434,7 @@ function _doPreview(index){
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCurrentCard();
 }
-// Mona peeks down (upside down) from the top of the page, shaking + screaming as she appears
+// Mona slides in from behind the top of the page and rests above the course title (clickable, like the homepage logo)
 let _topPeekTimer=null, _topPeekTO=[], _topPeekEyeTO=null;
 function _monaTopScream(withSound){
   const inner=document.querySelector('#mona-top-peek .mona-top-inner'), img=document.querySelector('#mona-top-peek img');
@@ -2429,18 +2442,14 @@ function _monaTopScream(withSound){
   if(img){ img.src='solukkologo_eyes_closed.png'; clearTimeout(_topPeekEyeTO); _topPeekEyeTO=setTimeout(()=>{ img.src='solukkologo_eyes.png'; },900); }
   if(withSound){ try{ playScream(); }catch(e){} }
 }
+function _monaTopClick(){ _monaTopScream(true); }   // clickable like the homepage: shake + scream
 function startMonaTopPeek(){
   const el=document.getElementById('mona-top-peek'), bub=document.getElementById('mona-top-bubble');
   if(!el) return;
   stopMonaTopPeek();
-  if(bub) bub.textContent='Kurssikuvauksen alla näet kysymyskortit. Klikkaa ensimmäistä kysymyskorttia aloittaaksesi opiskelun.';
-  _topPeekTO.push(setTimeout(()=>{ if(!document.fullscreenElement){ el.classList.add('peeking'); _monaTopScream(true); } }, 3000));   // peek in + shake/scream at 3s
-  _topPeekTO.push(setTimeout(()=>{ if(bub && !document.fullscreenElement) bub.classList.add('show'); }, 4000));   // her bubble at 4s
-  _topPeekTimer=setInterval(()=>{                       // then peek in / retract every ~7s
-    if(document.fullscreenElement) return;
-    if(el.classList.contains('peeking')){ el.classList.remove('peeking'); if(bub) bub.classList.remove('show'); }
-    else { el.classList.add('peeking'); _monaTopScream(false); if(bub) bub.classList.add('show'); }   // shake (no sound) on later peeks
-  }, 7000);
+  if(bub) bub.textContent='Tervetuloa kurssille! Näät kysymyskortit vierittämällä sivua alaspäin. Aloita opiskelu klikkaamalla ensimmäistä korttia.';
+  _topPeekTO.push(setTimeout(()=>{ if(!document.fullscreenElement) el.classList.add('peeking'); }, 800));   // slide in from behind the top edge
+  _topPeekTO.push(setTimeout(()=>{ if(bub && !document.fullscreenElement) bub.classList.add('show'); }, 1600));   // then her bubble
 }
 function stopMonaTopPeek(){
   clearInterval(_topPeekTimer); _topPeekTimer=null;
