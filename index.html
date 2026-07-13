@@ -156,6 +156,8 @@ body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; b
 #card-loading .cl-text { font-family: 'Lora', serif; font-size: 1.15rem; color: #6b4423; }
 @keyframes clSpin { to { transform: rotate(360deg); } }
 #flashcard.loading-blur { filter: blur(6px); }   /* blur the card content while the next one loads */
+@keyframes cardFocusIn { from { filter: blur(6px); } to { filter: blur(0); } }
+#flashcard.card-focus-in { animation: cardFocusIn 0.45s ease forwards; }   /* the freshly loaded card comes into focus */
 body.dark-mode #card-loading .cl-spinner { border-color: rgba(217,196,150,0.25); border-top-color: #d9c496; }
 body.dark-mode #card-loading .cl-text { color: #eadfce; }
 /* Mona lives on the progress bar as a draggable knob, with a hint bubble beside her */
@@ -2125,7 +2127,7 @@ async function renderCurrentCard(){
   fc.style.animation  = 'none';
   void fc.offsetWidth;
   fc.style.animation  = '';
-  if(_skipCardFade){ _skipCardFade=false; }                   // instant swap (click flow): no fade-in
+  if(_skipCardFade){ _skipCardFade=false; fc.classList.remove('loading-blur'); fc.classList.add('card-focus-in'); setTimeout(()=>fc.classList.remove('card-focus-in'),470); }   // click flow: the new card comes into focus (blur -> sharp)
   else { fc.classList.add('card-in-right'); setTimeout(()=>fc.classList.remove('card-in-right'),260); }   // drop it after the fade-in so a later shake can't re-trigger it (flicker)
   showFrontMona();                                            // Mona rides the bar on the front side too
   fitCardScale(); fitFrontText(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
