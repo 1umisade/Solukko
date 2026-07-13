@@ -350,10 +350,11 @@ body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 body.dark-mode .flashcard { scrollbar-color: #a97f4e #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb { background: #a97f4e; border-color: #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; }
-.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: 100%; text-align: center; }
+.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; text-align: left; }   /* block sized to the longest line, centred on the card; short text ends up centred, long text stays left-aligned from the longest line */
+.card-content:has(img), .card-content:has(iframe) { width: 100%; }   /* image-occlusion / 3D-embed cards keep full width, not shrunk to the text */
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.answer-shown { display: flex; flex-direction: column; justify-content: safe center; }   /* back side: centre the content on the Y axis too (safe = still scrolls from the top when it overflows) */
-.flashcard.front-basic #question-content { text-align: center; line-height: 1.25; }
+.flashcard.front-basic #question-content { text-align: left; line-height: 1.25; }   /* fit-content + margin auto (from .card-content) centres it; short front text reads as centred */
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
 .card-embed-3d { width: 100%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; }   /* front: full size; wrapper clips the iframe so its rounded corners have no dark fringe */
 .answer-shown .card-embed-3d { width: 100%; }   /* back: full width */
