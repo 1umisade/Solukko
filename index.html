@@ -45,7 +45,7 @@ try{
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 /* custom cursors — forced everywhere (!important) so per-element cursor rules don't fall back to the OS pointer; Mona uses the grab hand */
 * { cursor: url('cursor_normal.png') 4 2, auto !important; }
-.pb-knob, .pb-knob * { cursor: url('cursor_grab.png') 22 24, grab !important; }
+.progress-tube, .progress-tube * { cursor: url('cursor_grab.png') 22 24, grab !important; }   /* the whole grading slider shows the grab hand, not just the tiny knob */
 body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 22 24, grabbing !important; }   /* while Mona is being dragged */
 body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
@@ -60,13 +60,14 @@ body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
-#home-mona { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; margin: 6px 0 16px; }   /* text logo top-left, Mona top-right */
-#home-mona .site-brand { width: 130px; margin: 0; flex: 0 0 auto; }
-#home-brand-text { display: flex; flex-direction: column; gap: 6px; }
-.home-site-name { font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.9rem, 4.2vw, 2.8rem); line-height: 1; color: #1a1612; }
-.home-slogan { font-family: 'Lora', serif; font-size: clamp(1rem, 2.2vw, 1.3rem); color: #6b4423; }
-body.dark-mode .home-site-name { color: #eadfce; }
-body.dark-mode .home-slogan { color: #c9b48f; }
+#home-mona { align-self: center; display: flex; align-items: center; margin: 4px 0 6px; }   /* Mona centered at the top, speech bubble to her right */
+#home-mona .site-brand { width: 140px; margin: 0; }
+/* homepage decks: "Ladataan kursseja" until every deck's video/image has loaded, then the decks fade in one by one */
+#decks-loading { align-self: center; margin: 40px 0 20px; font-family: 'Lora', serif; font-size: 1.25rem; color: #6b4423; }
+body.dark-mode #decks-loading { color: #c9b48f; }
+.deck-list.decks-loading .year-section { opacity: 0; }
+@keyframes deckFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.deck-btn.deck-in { animation: deckFadeIn 0.5s ease both; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
 .home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: 140px; box-sizing: border-box; display: flex; align-items: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.6rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
 .home-greet::after { content: ""; position: absolute; right: 100%; top: 50%; transform: translateY(-50%); border: 13px solid transparent; border-right-color: #fffef9; }
@@ -1925,12 +1926,16 @@ function buildDeckGrid(decks, list){
   const logo=document.getElementById('site-brand');
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
-  const brand=document.createElement('div'); brand.id='home-brand-text';                 // text logo top-left
-  brand.innerHTML='<div class="home-site-name">Solukko.com</div><div class="home-slogan">Oppiminen saa olla helppoa</div>';
-  header.appendChild(brand);
-  if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona top-right
-  if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks on load (desktop only)
+  if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona centered at the top
+  const greet=document.createElement('div'); greet.className='home-greet';                 // speech bubble to Mona's right; clicking Mona cycles it
+  _greetIdx=0;
+  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES[HOME_BUBBLE_ORDER[0]]:'');
+  greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
+  header.appendChild(greet);
+  if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks (desktop only)
   list.appendChild(header);
+  const dl=document.createElement('div'); dl.id='decks-loading'; dl.textContent='Ladataan kursseja'; list.appendChild(dl);   // shown until the deck videos/images have loaded
+  list.classList.add('decks-loading');
   const byYear={};
   decks.forEach(it=>{ const y=it.year||'?'; (byYear[y]=byYear[y]||{S:[],K:[],none:[]}); const s=(it.semester==='S'||it.semester==='K')?it.semester:'none'; byYear[y][s].push(it); });
   const years=Object.keys(byYear).sort((a,b)=>{ if(a==='?')return 1; if(b==='?')return -1; return (+a)-(+b); });
@@ -1949,6 +1954,24 @@ function buildDeckGrid(decks, list){
     section.appendChild(row);
     list.appendChild(section);
   });
+  // wait for every deck's video/image to finish loading, then fade the decks in one by one
+  const _gen=String((parseInt(list.dataset.buildGen,10)||0)+1); list.dataset.buildGen=_gen;   // supersede any earlier build
+  const _media=[...list.querySelectorAll('video.deck-video, img.deck-video')];
+  _media.forEach(m=>{ if(m.tagName==='VIDEO'){ try{ m.load(); }catch(e){} } });
+  const _revealDecks=()=>{
+    if(list.dataset.buildGen!==_gen) return;   // a newer buildDeckGrid superseded this one
+    list.classList.remove('decks-loading');
+    const d=document.getElementById('decks-loading'); if(d) d.remove();
+    [...list.querySelectorAll('.deck-btn')].forEach((b,i)=>{ b.style.animationDelay=(i*0.06)+'s'; b.classList.add('deck-in'); });
+  };
+  const _waitMedia=el=>new Promise(res=>{
+    let done=false; const fin=()=>{ if(!done){ done=true; res(); } };
+    if(el.tagName==='VIDEO'){ if(el.readyState>=2) return fin(); el.addEventListener('loadeddata',fin,{once:true}); el.addEventListener('error',fin,{once:true}); }
+    else { if(el.complete && el.naturalWidth) return fin(); el.addEventListener('load',fin,{once:true}); el.addEventListener('error',fin,{once:true}); }
+    setTimeout(fin,6000);   // fallback so a slow/broken file can't block the whole grid
+  });
+  if(!_media.length) _revealDecks();
+  else Promise.all(_media.map(_waitMedia)).then(_revealDecks);
 }
 function layoutDecksRadial(){ /* homepage layout is CSS-driven (see buildDeckGrid); nothing to reposition on resize */ }
 
