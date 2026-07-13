@@ -240,13 +240,13 @@ body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #c
 .mona-top-inner.shake { animation: topPeekShake 0.5s ease; }
 @keyframes topPeekShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-4px,2px) rotate(-4deg)} 40%{transform:translate(4px,-2px) rotate(4deg)} 60%{transform:translate(-3px,1px) rotate(-3deg)} 80%{transform:translate(2px,-1px) rotate(2deg)} }
 .mona-top-spacer { flex: 0 0 118px; visibility: hidden; }   /* balances Mona so the bubble stays centred on the title */
-.mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 26ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
+.mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 36ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
 .mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
 @keyframes monaDropIn { from { transform: translateY(-240px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-body.deck-intro-anim #mona-top-peek .mona-top-inner { animation: monaDropIn 0.75s cubic-bezier(0.34, 1.5, 0.64, 1) both; animation-delay: 0.4s; }   /* drops in from above on load */
-body.deck-intro-anim #mona-top-peek .mona-top-bubble { animation: introFade 0.5s ease both; animation-delay: 1.3s; }
+body.deck-intro-anim #mona-top-peek .mona-top-inner { animation: monaDropIn 0.75s cubic-bezier(0.34, 1.5, 0.64, 1) both; animation-delay: 3.8s; }   /* drops in last, after the grid */
+body.deck-intro-anim #mona-top-peek .mona-top-bubble { animation: introFade 0.5s ease both; animation-delay: 4.7s; }   /* then her bubble */
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
 #grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
@@ -1963,7 +1963,7 @@ async function startDeck(deckName){
   resetComment();   // fullscreen ⛶ + comment buttons stay hidden — reviewing happens in fullscreen, opened by clicking a card
   document.body.classList.add('reviewing');
   document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
-  setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5000);
+  setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 5600);
   setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
   setTimeout(landingReveal, 3900);     // once the grid has faded in: highlight the first card, then show it on the right
   history.pushState({reviewing: true}, '');
