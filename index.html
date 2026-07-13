@@ -2345,7 +2345,7 @@ function fsSliderPickNow(correct){   // double-click the button: skip the slide 
   const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left=correct?'100%':'0%'; }
   fsHot(correct?'right':'wrong'); _gradeInstant=true; fsSliderGrade(correct); _picking=false;
 }
-function fsSliderGrade(correct){ gradeCard(correct); }   // Mona stays on the button; showFrontMona recentres her (hidden) when the next card loads
+function fsSliderGrade(correct){ _gradeInstant=true; gradeCard(correct); }   // every slider grade (click/drag/double-click) loads the next card instantly — no fly-out, no 1s "yes" flash
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; } fsHot(null); }   // recentre Mona and her bubble
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 let _frontMonaTimer=null, _backBubbleTimer=null;
