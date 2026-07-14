@@ -186,11 +186,12 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 #card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }
 @media (max-width: 900px) { #comment-btn { display: none !important; } }   /* mobile: comments show inline on reveal */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
-#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #efe7d8 url('site_bg.jpg') center/cover fixed; margin: 0 !important; }
-#card-screen:fullscreen::backdrop { background: #efe7d8 url('site_bg.jpg') center/cover fixed; }
-body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover fixed; }
-/* fullscreen only: darken the background toward the edges (vignette), behind the card */
-#review-bg { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #efe7d8; margin: 0 !important; }
+#card-screen:fullscreen::backdrop { background: #efe7d8; }
+body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
+/* fullscreen only: the site background image with the edges dimmed (vignette), behind the card. background-attachment:fixed doesn't render on a fullscreen element, so paint the image on this fixed layer instead. */
+#review-bg { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: url('site_bg.jpg') center/cover; }
+body.dark-mode #review-bg { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover; }
 #review-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(48,36,20,0) 40%, rgba(48,36,20,0.28) 76%, rgba(40,30,16,0.58) 100%); }
 #card-screen:fullscreen #review-bg { display: block; }
 #card-screen:fullscreen #review-cols { display: block; }
@@ -1971,10 +1972,10 @@ async function loadDecks(){
   const _pc=_p.get('solukko-card'), _pa=_p.get('solukko-answer');
   if(_pc){
     const _tc=allCards.find(c=>String(c.cardId)===_pc);
-    if(_tc){ const _topDeck=coursePathOf(_tc.deckName); if(names.includes(_topDeck)){ await startDeck(_topDeck); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
+    if(_tc){ const _topDeck=coursePathOf(_tc.deckName); if(names.includes(_topDeck)){ await startDeck(_topDeck, false); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
   }
   const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
-  if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
+  if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck, false); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
   show('deck-screen');
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display=devMode?'flex':'none'; }
   requestAnimationFrame(layoutDecksRadial);
@@ -2075,7 +2076,7 @@ function openShopOverlay(e){ if(e){ e.preventDefault(); } const o=document.getEl
 function closeShopOverlay(){ const o=document.getElementById('shop-overlay'); if(o) o.style.display='none'; }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); } });
 
-async function startDeck(deckName){
+async function startDeck(deckName, animate=true){   // animate=false (reload/deep-link restore) shows the landing at once, no fade-in
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
@@ -2113,10 +2114,17 @@ async function startDeck(deckName){
   document.getElementById('gear-btn-wrap').style.display='flex';
   resetComment();   // fullscreen ⛶ + comment buttons stay hidden — reviewing happens in fullscreen, opened by clicking a card
   document.body.classList.add('reviewing');
-  document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
-  setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 6000);
-  setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
-  setTimeout(landingReveal, 3900);     // once the grid has faded in: highlight the first card, then show it on the right
+  if(animate){
+    document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
+    setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 6000);
+    setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
+    setTimeout(landingReveal, 3900);     // once the grid has faded in: highlight the first card, then show it on the right
+  } else {   // reload / deep-link restore: no fade — reveal the grid, first card and Mona all at once
+    document.body.classList.remove('deck-intro-anim');
+    currentOverviewIndex=0; currentCard=reviewCards[0]||null; renderCardOverview();
+    if(currentCard){ _previewIndex=-1; _doPreview(0); }
+    const _mp=document.getElementById('mona-top-peek'); if(_mp) _mp.classList.add('flew-in');
+  }
   history.pushState({reviewing: true}, '');
 }
 
@@ -2487,6 +2495,7 @@ function fsSliderPick(correct){   // click/arrow: keycap press + sound, fast-sli
   const ease = 'transform 0.4s cubic-bezier(0.33,1,0.68,1)';                   // gentle ease-out
   const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; k.style.transform='translateX(0px)'; void k.offsetWidth; k.style.transition=ease; k.style.transform=`translateX(${dx}px)`; }
   const b=_pbBubble(); if(b){ b.textContent=correct?_SLIDE_YES_TEXT:_SLIDE_NO_TEXT; b.style.transition='none'; b.style.left='50%'; b.style.transform='translateX(-50%)'; void b.offsetWidth; b.style.transition='opacity 0.4s ease, '+ease; b.style.transform=`translateX(calc(-50% + ${dx}px))`; } _pbShow();
+  _pickTO2=setTimeout(()=>fsHot(correct?'right':'wrong'), 400);               // when Mona reaches the button (end of the 0.4s slide), the button glows + expands
   showCardLoading();                                                          // "Ladataan uutta korttia" + spinner (card blurred)
   _pickTO1=setTimeout(()=>{ hideCardLoading(); _gradeInstant=true; fsSliderGrade(correct); _picking=false; }, 1000);   // wait ~1s for the new card to "load", then swap it in
 }
@@ -2707,7 +2716,7 @@ async function openCardById(cardId){
   const tc=(allCards||[]).find(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(!tc){ alert('Korttia ei löytynyt.'); return; }
   const topDeck=coursePathOf(tc.deckName);
-  await startDeck(topDeck);
+  await startDeck(topDeck, false);
   const ci=reviewCards.findIndex(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(ci>=0) jumpToOverviewCard(ci);
 }
