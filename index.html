@@ -235,7 +235,7 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen #card-stack { max-height: none !important; width: 100% !important; }
 #card-screen:fullscreen #comment-col { display: none !important; }
 #card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
-#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg_wide.png?v=2'); box-shadow: inset 0 0 22vmin 6vmin rgba(30,22,10,0.5) !important; }   /* rotated widescreen texture + inset edge vignette */
+#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('site_bg.jpg'); box-shadow: inset 0 0 22vmin 6vmin rgba(30,22,10,0.5) !important; }   /* deck-review background + inset edge vignette */
 body.dark-mode #card-screen:fullscreen .flashcard { box-shadow: inset 0 0 22vmin 6vmin rgba(0,0,0,0.62) !important; }
 #card-screen:fullscreen .card-content { font-size: 1.5rem; }
 #card-screen:fullscreen .top-bar,
@@ -2787,7 +2787,8 @@ function clearFrontMona(){
 // grab hand over anything clickable
 const _CLICKABLE='a[href],button,[onclick],[role="button"],summary,label,select,.deck-btn,.overview-card,#flashcard-wrap,.ball-btn,.grade-btn,.show-btn,.grid-tool-btn,.pb-knob,.progress-tube,.card-stars,#site-brand,.mona-top-inner';
 document.addEventListener('mouseover',e=>{
-  const hit = e.target && e.target.closest && e.target.closest(_CLICKABLE);
+  let hit = e.target && e.target.closest && e.target.closest(_CLICKABLE);
+  if(hit && document.fullscreenElement && e.target.closest('#flashcard-wrap') && !e.target.closest('.word-link')) hit=null;   // fullscreen: the card itself isn't grabbable, only its word-links
   document.body.classList.toggle('hover-interactive', !!hit);
 });
 function showTopHint(){}   // top peeker removed
@@ -3955,9 +3956,9 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
     if(e.key==='n'||e.key==='N'){ document.body.classList.toggle('no-cursor-theme'); return; }   // debug: N toggles the custom cursor theme
     if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); return; }   // F toggles fullscreen anytime
-    if((e.key==='ArrowRight'||e.key==='ArrowLeft') && !document.fullscreenElement && document.body.classList.contains('reviewing') && currentCard){   // grid view: browse cards with the arrows
+    if((e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp') && !document.fullscreenElement && document.body.classList.contains('reviewing') && currentCard){   // grid view: browse cards with the arrows (left/up = prev, right/down = next)
       e.preventDefault();
-      const ni=currentOverviewIndex+(e.key==='ArrowRight'?1:-1);
+      const ni=currentOverviewIndex+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1);
       if(ni>=0 && ni<reviewCards.length) jumpToOverviewCard(ni);
       return;
     }
@@ -3966,7 +3967,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
       e.preventDefault();
       if(e.key==='ArrowRight') frontNavRight(); else frontNavLeft();   // front: Seuraava/Edellinen · back: Kyllä/Ei — with the keycap dip + sound
     }
-    if(e.key===' '&&currentCard){ e.preventDefault(); if(!cardAnswerShown) frontCheckReveal(); else shakeCard(); }   // space = press Tarkista (reveal), then shake
+    if((e.key===' '||e.key==='ArrowUp'||e.key==='ArrowDown')&&currentCard){ e.preventDefault(); if(!cardAnswerShown) frontCheckReveal(); else shakeCard(); }   // space / up / down = press Tarkista (reveal), then shake
     else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
   });
 })();
