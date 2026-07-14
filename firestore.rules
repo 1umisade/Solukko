@@ -24,10 +24,17 @@ service cloud.firestore {
                     && request.resource.data.userId == request.auth.uid    // can only post as yourself
                     && str(request.resource.data.text, 2000)
                     && str(request.resource.data.cardId, 200)
+                    && !('golden' in request.resource.data)                // users can't self-award the gold prize...
+                    && !('goldenCode' in request.resource.data)            // ...only the dev (admin) can, via update
                     && (!('imageData' in request.resource.data)
                         || (request.resource.data.imageData is string
                             && request.resource.data.imageData.size() <= 900000));   // ~0.9 MB cap
-      allow update, delete: if isOwner(resource.data.userId) || isAdmin();           // author (or dev) only
+      // author can edit their own text/image but NOT the gold status; only the dev paints a comment gold
+      allow update: if isAdmin()
+                    || ( isOwner(resource.data.userId)
+                         && request.resource.data.get('golden', false) == resource.data.get('golden', false)
+                         && request.resource.data.get('goldenCode', '') == resource.data.get('goldenCode', '') );
+      allow delete: if isOwner(resource.data.userId) || isAdmin();        // author (or dev) only
     }
 
     // ── Presence (online users); doc id == uid ──
