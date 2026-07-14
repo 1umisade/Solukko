@@ -241,7 +241,6 @@ body.dark-mode .tarkista-fill { background: #6f8f77; }
 .fc-bubble:empty { display: none; }
 .fc-bubble::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 9px solid transparent; border-top-color: #fffef9; }
 .fc-mona-clip:hover ~ .fc-bubble, .fc-bubble.show { opacity: 1; }   /* on hover, or forced visible (.show) while Mona prompts */
-.fc-nav.fc-expand { transform: scale(1.16); }   /* answer buttons expand when the card is shaken to prompt a grade */
 body.dark-mode .fc-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 /* exit-fullscreen button: top-right, flashed for ~1s on touch/click */
@@ -2628,7 +2627,7 @@ function frontCheckReveal(){
 function frontNavLeft(){ fsBtnPress(document.getElementById('fc-nav-left')); if(cardAnswerShown){ _gradeInstant=true; gradeCard(false); } else frontPrev(); }    // Ei (grade wrong) / Edellinen (previous)
 function frontNavRight(){ fsBtnPress(document.getElementById('fc-nav-right')); if(cardAnswerShown){ _gradeInstant=true; gradeCard(true); } else frontNext(); }     // Kyllä (grade right) / Seuraava (next)
 function _cardShakeOnly(){ const fc=document.getElementById('flashcard'); if(!fc) return; fc.classList.remove('card-in-right','card-in-left','card-shake'); void fc.offsetWidth; fc.classList.add('card-shake'); setTimeout(()=>fc.classList.remove('card-shake'),500); }
-let _fcBubbleTO=null, _fcExpandTO=null;
+let _fcBubbleTO=null;
 function _fcBubbleFlash(text){   // show Mona's fullscreen bubble with a message for ~1.6s, then restore the resting hint
   const bub=document.getElementById('fc-bubble'); if(!bub) return;
   bub.textContent=text; bub.classList.add('show');
@@ -3822,8 +3821,7 @@ function shakeCard(){
   shakeStars();
   if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
     _fcBubbleFlash('Tiesitkö? Paina Kyllä tai Ei-nappia.');   // Mona prompts for a grade
-    ['fc-nav-left','fc-nav-right'].forEach(id=>{ const b=document.getElementById(id); if(b){ b.classList.add('fc-expand'); } });   // expand the answer buttons
-    clearTimeout(_fcExpandTO); _fcExpandTO=setTimeout(()=>{ ['fc-nav-left','fc-nav-right'].forEach(id=>document.getElementById(id)?.classList.remove('fc-expand')); }, 1600);
+    fsBtnPress(document.getElementById('tarkista-btn'));       // "click" the centre button (dip + sound) — no answer-button expand
     return;
   }
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
