@@ -220,6 +220,7 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #front-check.back .fc-nav .nav-front { display: none; }
 #front-check.back .fc-nav .nav-back { display: block; }
 .fc-nav.keycap-press { animation: keycapPress 0.16s ease; }
+#card-screen:fullscreen button:focus, #card-screen:fullscreen button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
 .fc-mona-clip { width: 156px; height: 78px; overflow: hidden; position: relative; z-index: 1; cursor: pointer; }   /* shows the top ~50% of Mona; her lower half is clipped behind the button's top edge */
