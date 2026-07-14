@@ -186,14 +186,11 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 #card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }
 @media (max-width: 900px) { #comment-btn { display: none !important; } }   /* mobile: comments show inline on reveal */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
-#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #efe7d8; margin: 0 !important; }
-#card-screen:fullscreen::backdrop { background: #efe7d8; }
-body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
-/* fullscreen only: the site background image with the edges dimmed (vignette), behind the card. background-attachment:fixed doesn't render on a fullscreen element, so paint the image on this fixed layer instead. */
-#review-bg { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: url('site_bg.jpg') center/cover; }
-body.dark-mode #review-bg { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover; }
-#review-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(48,36,20,0) 40%, rgba(48,36,20,0.28) 76%, rgba(40,30,16,0.58) 100%); }
-#card-screen:fullscreen #review-bg { display: block; }
+/* fullscreen: the site background image + an edge vignette, painted as plain background layers directly on the fullscreen element (background-attachment:fixed and fixed-position child layers don't render on a fullscreen element in Chrome, so keep it as ordinary background layers here) */
+#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: radial-gradient(ellipse at center, rgba(48,36,20,0) 40%, rgba(48,36,20,0.28) 76%, rgba(40,30,16,0.6) 100%), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); margin: 0 !important; }
+#card-screen:fullscreen::backdrop { background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); }
+body.dark-mode #card-screen:fullscreen { background: radial-gradient(ellipse at center, rgba(20,12,4,0) 38%, rgba(20,12,4,0.5) 100%), linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
+body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
 #card-screen:fullscreen #review-cols { display: block; }
 #card-screen:fullscreen #grid-col { display: none !important; }
 /* fullscreen must not inherit the desktop 50/50 split: no title, no divider, card fills the screen */
@@ -696,6 +693,11 @@ body.dark-mode .overview-card.active { border-color: #d9c496 !important; box-sha
 body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .overview-card.known   { background: #303d35; border-color: #6f8f77; }
 body.dark-mode .overview-card.unknown { background: #3f3022; border-color: #b87a45; }
+/* the card on the right is painted the same colour as its grid card (known = green, unknown = orange) */
+.flashcard.graded-known   { background: #ebf1ed; border-color: #9ab8a1; }
+.flashcard.graded-unknown { background: #fce4d0; border-color: #ef9a5f; }
+body.dark-mode .flashcard.graded-known   { background: #303d35; border-color: #6f8f77; }
+body.dark-mode .flashcard.graded-unknown { background: #3f3022; border-color: #b87a45; }
 
 .card-stars { position: absolute; right: 1rem; bottom: 0.8rem; z-index: 3; font-size: 1.4rem; line-height: 1; color: #6b4423; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
@@ -1024,7 +1026,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
 <!-- ══ KORTTIRUUTU ════════════════════════════════════════════ -->
 <div id="card-screen">
-  <div id="review-bg" aria-hidden="true"></div>   <!-- per-course washed-sepia background (behind everything) -->
   <!-- "loading the next card" overlay, shown while Mona slides to a button -->
   <div id="card-loading" style="display:none;"><div class="cl-spinner"></div><div class="cl-text">Ladataan uutta korttia</div></div>
   <!-- exit-fullscreen: top-right, flashed for ~1s on touch/click -->
@@ -2266,6 +2267,8 @@ async function renderCurrentCard(){
   fc.style.transform  = '';
   fc.classList.remove('answer-shown');   // front side again: 3D embed non-interactive until the answer is shown
   fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
+  fc.classList.remove('graded-known','graded-unknown');   // paint the right card the same colour as its grid card
+  { const _g=currentCard?cardGrades[currentCard.cardId]:null; if(_g==='known') fc.classList.add('graded-known'); else if(_g==='unknown') fc.classList.add('graded-unknown'); }
   fc.style.animation  = 'none';
   void fc.offsetWidth;
   fc.style.animation  = '';
@@ -2381,9 +2384,19 @@ document.addEventListener('mousemove', _fsCursorActivity);
       tip.textContent=stars.dataset.starMeaning; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; tip.style.display='block'; return;
     }
     if(document.fullscreenElement){ if(tip.style.display!=='none') tip.style.display='none'; return; }
-    const t = e.target.closest ? e.target.closest('#flashcard-wrap, .overview-card.active') : null;
-    if(t){ tip.textContent='Avaa opiskelunäkymässä'; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; }
-    else if(tip.style.display!=='none'){ tip.style.display='none'; }
+    const card = e.target.closest ? e.target.closest('.overview-card, #flashcard-wrap') : null;
+    if(card){
+      let grade=null;
+      if(card.classList.contains('known')) grade='known';
+      else if(card.classList.contains('unknown')) grade='unknown';
+      else if(card.id==='flashcard-wrap' && currentCard) grade=cardGrades[currentCard.cardId]||null;
+      let txt=null;
+      if(grade==='known') txt='Kortti osattu tänään';
+      else if(grade==='unknown') txt='Kortti kertaamatta tältä päivältä';
+      else if(card.id==='flashcard-wrap' || card.classList.contains('active')) txt='Avaa opiskelunäkymässä';   // ungraded active/right card: keep the open hint
+      if(txt){ tip.textContent=txt; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; return; }
+    }
+    if(tip.style.display!=='none') tip.style.display='none';
   });
 })();
 function _playFsFlip(){   // FLIP: card is now full-screen; animate it from where it sat on the right up to full — a smooth expand
