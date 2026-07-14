@@ -232,8 +232,8 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
 #front-check.back .tarkista-btn .tk-back { display: block; }
-#front-check.back .tarkista-fill { -webkit-mask-image: url('tiesitko.png'); mask-image: url('tiesitko.png'); }   /* mask the progress fill to the back keycap's shape */
-.tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('tarkista.png') center/100% 100% no-repeat; mask: url('tarkista.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
+#front-check.back .tarkista-fill { -webkit-mask-image: url('space_back.png'); mask-image: url('space_back.png'); }   /* mask the progress fill to the back keycap's shape */
+.tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('space_front.png') center/100% 100% no-repeat; mask: url('space_front.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
 body.dark-mode .tarkista-fill { background: #6f8f77; }
 .tarkista-btn.keycap-press { animation: keycapPress 0.16s ease; }   /* same up/down dip as the answer buttons */
 .tarkista-btn:active { transform: translateY(2px); }
@@ -1161,8 +1161,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       </div>
       <div class="fc-bubble" id="fc-bubble"></div>
       <button id="tarkista-btn" class="tarkista-btn" onclick="frontCheckReveal()" title="Tarkista (välilyönti)">
-        <img class="tk-front" src="tarkista.png" alt="Tarkista">
-        <img class="tk-back" src="tiesitko.png" alt="Tiesitkö?">
+        <img class="tk-front" src="space_front.png" alt="Tarkista vastaus">
+        <img class="tk-back" src="space_back.png" alt="Tiesitkö vastauksen?">
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
