@@ -47,6 +47,7 @@ try{
 * { cursor: url('cursor_normal.png') 4 2, auto !important; }
 body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 20 12, grab !important; }   /* over anything clickable (toggled by JS) */
 body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 20 12, grabbing !important; }   /* while Mona is being dragged */
+body.no-cursor-theme, body.no-cursor-theme * { cursor: auto !important; }   /* debug: press N to turn the custom cursor theme off */
 body { font-family: 'Lora', Georgia, serif; background: #efe7d8 url('site_bg.jpg') center/cover fixed; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
 /* ── 2. VIRHEVIESTI-PALKKI ───────────────────────────────── */
@@ -187,7 +188,7 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
 #card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #efe7d8 url('site_bg.jpg') center/cover fixed; margin: 0 !important; }
 #card-screen:fullscreen::backdrop { background: #efe7d8 url('site_bg.jpg') center/cover fixed; }
-body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
+body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover fixed; }
 /* fullscreen only: darken the background toward the edges (vignette), behind the card */
 #review-bg { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 #review-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(48,36,20,0) 40%, rgba(48,36,20,0.28) 76%, rgba(40,30,16,0.58) 100%); }
@@ -496,7 +497,7 @@ body.dark-mode .ball-btn.grade-again { --glow: #e8a08b; }
 .btn-right { background: #498d65; }
 
 /* ── 9. TUMMATILA ────────────────────────────────────────── */
-body.dark-mode { background: #2b211b; color: #eadfce; }
+body.dark-mode { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover fixed; color: #eadfce; }   /* same image, exposure way down + brown wash */
 body.dark-mode .flashcard,
 body.dark-mode #card-comment,
 body.dark-mode .group-card,
@@ -3625,6 +3626,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
 
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
+    if(e.key==='n'||e.key==='N'){ document.body.classList.toggle('no-cursor-theme'); return; }   // debug: N toggles the custom cursor theme
     if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); return; }   // F toggles fullscreen anytime
     if(!document.fullscreenElement) return;                        // reveal/grade keys work only in fullscreen
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
