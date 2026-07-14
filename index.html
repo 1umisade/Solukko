@@ -1077,6 +1077,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="dev-screen" style="display:none">
   <div class="dev-screen-inner">
     <button class="dev-back-btn" onclick="closeDevScreen()">← Takaisin</button>
+    <div class="dev-section-title">Kehittäjän UID (liitä isAdmin()-sääntöön)</div>
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;">
+      <code id="dev-uid-text" onclick="copyDevUid()" title="Kopioi" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;background:#f0ebe0;padding:0.45rem 0.65rem;border-radius:8px;word-break:break-all;max-width:100%;cursor:pointer;">–</code>
+      <button onclick="copyDevUid()" style="background:#56533c;color:#f5f0e8;border:none;border-radius:8px;padding:0.5rem 0.9rem;cursor:pointer;font-family:'Lora',serif;">Kopioi UID</button>
+    </div>
     <div class="dev-section-title">Paikalla nyt</div>
     <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;"></div>
     <div class="dev-section-title">Kaikki kommentit</div>
@@ -2895,9 +2900,18 @@ async function openCardById(cardId){
   const ci=reviewCards.findIndex(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(ci>=0) jumpToOverviewCard(ci);
 }
+function _devUid(){ return (window.firebase&&firebase.auth&&firebase.auth().currentUser)?firebase.auth().currentUser.uid:''; }
+function copyDevUid(){
+  const uid=_devUid();
+  if(!uid){ alert('UID ei ole vielä valmis (kirjautuminen kesken). Yritä hetken kuluttua.'); return; }
+  const t=document.getElementById('dev-uid-text'); if(t) t.textContent=uid;
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(uid).then(()=>alert('UID kopioitu:\n'+uid)).catch(()=>prompt('Kopioi UID:',uid)); }
+  else prompt('Kopioi UID:',uid);
+}
 function showDevScreen(){
   hide('deck-screen'); hide('card-screen'); show('dev-screen');
   const b=document.getElementById('dev-screen-btn'); if(b) b.style.display='none';
+  { const t=document.getElementById('dev-uid-text'); if(t) t.textContent=_devUid()||'(kirjautuminen kesken…)'; }
   renderPresenceList(_lastPresenceUsers||[]);
   renderDevCommentsPanel();
 }
