@@ -3948,39 +3948,48 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   overlay.style.cssText='position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;z-index:10;transition:none;';
   fc.appendChild(overlay);
 
-  let pressT=0, sx=0, sy=0, swiped=false, _gDragActive=false, _gDragSide=null, _gDragProg=0;
+  let pressT=0, sx=0, sy=0, swiped=false, _gDragActive=false, _gDragSide=null, _gDragProg=0, _gLockVert=false, _gJustFired=false;
   const _gNavBtns=()=>[document.getElementById('fc-nav-left'), document.getElementById('fc-nav-right')];
   function _gDragReset(animate){ _gNavBtns().forEach(b=>{ if(b){ b.style.transition=animate?'transform 0.25s cubic-bezier(0.34,1.4,0.64,1)':''; b.style.transform=''; } }); _gDragActive=false; _gDragSide=null; _gDragProg=0; }
+  function _gGrade(side){ _gDragReset(true); swiped=true; _gJustFired=true; _gLockVert=true; if(side==='left') frontNavLeft(); else frontNavRight(); }   // Ei (wrong) / Kyllä (right)
+  const _gFireDist=()=>Math.max(36, window.innerWidth*0.05);   // "close enough to the edge" to register the grade
   fc.addEventListener('mousedown',e=>{ if(e.button===0) pressT=Date.now(); });
-  fc.addEventListener('touchstart',e=>{ pressT=Date.now(); const t=e.touches[0]; if(t){ sx=t.clientX; sy=t.clientY; } swiped=false; _gDragActive=false; _gDragSide=null; _gDragProg=0; },{passive:true});
-  fc.addEventListener('touchmove',e=>{                       // fullscreen back: dragging horizontally grows the Ei/Kyllä button; releasing at the viewport edge grades
+  fc.addEventListener('touchstart',e=>{ pressT=Date.now(); const t=e.touches[0]; if(t){ sx=t.clientX; sy=t.clientY; } swiped=false; _gDragActive=false; _gDragSide=null; _gDragProg=0; _gLockVert=false; _gJustFired=false; },{passive:true});
+  fc.addEventListener('touchmove',e=>{                       // fullscreen back: a HORIZONTAL drag grows the nearer Ei/Kyllä button by its closeness to the edge; close enough to the edge registers the grade
     if(!document.fullscreenElement || !cardAnswerShown) return;
     const t=e.touches[0]; if(!t) return;
     const dx=t.clientX-sx, dy=t.clientY-sy;
-    if(!_gDragActive){ if(Math.abs(dx)<18 || Math.abs(dx)<=Math.abs(dy)) return; _gDragActive=true; }   // wait for a clear horizontal intent
+    if(!_gDragActive){
+      if(_gLockVert || _gJustFired) return;                  // this touch was decided to be a vertical scroll / already graded
+      if(Math.abs(dx)<10 && Math.abs(dy)<10) return;         // wait for a clear direction first
+      if(Math.abs(dy)>=Math.abs(dx)){ _gLockVert=true; return; }   // vertical intent → let the card scroll, never grade
+      _gDragActive=true;                                     // horizontal intent → engage the grade-drag
+    }
     e.preventDefault();                                      // it's a horizontal grade-drag → don't scroll the card
     const vw=window.innerWidth;
-    _gDragSide = dx<0 ? 'left' : 'right';
-    _gDragProg = _gDragSide==='left' ? Math.min(1,(sx-t.clientX)/Math.max(1,sx*0.85)) : Math.min(1,(t.clientX-sx)/Math.max(1,(vw-sx)*0.85));
-    const btn=document.getElementById(_gDragSide==='left'?'fc-nav-left':'fc-nav-right');
-    const other=document.getElementById(_gDragSide==='left'?'fc-nav-right':'fc-nav-left');
+    const side = dx<0 ? 'left' : 'right';
+    const distToEdge = side==='left' ? Math.max(0,t.clientX) : Math.max(0, vw-t.clientX);
+    const prog = Math.max(0, Math.min(1, 1 - distToEdge/(vw*0.45)));   // expansion depends on how close the finger is to the edge
+    _gDragSide=side; _gDragProg=prog;
+    const btn=document.getElementById(side==='left'?'fc-nav-left':'fc-nav-right');
+    const other=document.getElementById(side==='left'?'fc-nav-right':'fc-nav-left');
     if(other){ other.style.transition='transform 0.12s ease'; other.style.transform='scale(0.9)'; }
-    if(btn){ btn.style.transition='transform 0.05s ease'; btn.style.transform='scale('+(1+_gDragProg*1.1).toFixed(3)+')'; }
+    if(btn){ btn.style.transition='transform 0.05s ease'; btn.style.transform='scale('+(1+prog*1.2).toFixed(3)+')'; }
+    if(distToEdge <= _gFireDist()) _gGrade(side);            // close enough to the edge → register the grade now (no release needed)
   },{passive:false});
-  fc.addEventListener('touchend',e=>{                       // edge-release grades (back) · horizontal swipe reveals the answer (front)
+  fc.addEventListener('touchend',e=>{                        // back: grade if the finger ended close to the edge · front: horizontal swipe reveals the answer
+    if(_gJustFired){ _gJustFired=false; _gDragActive=false; return; }   // already graded mid-drag → ignore the release
     const t=e.changedTouches[0]; if(!t) return;
-    if(_gDragActive){                                        // finish the grade-drag
-      const vw=window.innerWidth, EDGE=Math.max(44, vw*0.06);
-      const atEdge = _gDragSide==='left' ? (t.clientX<=EDGE) : (t.clientX>=vw-EDGE);
-      const side=_gDragSide, fire=(atEdge || _gDragProg>=0.92);
-      _gDragReset(true);
-      if(fire){ swiped=true; if(side==='left') frontNavLeft(); else frontNavRight(); }   // Ei (wrong) / Kyllä (right)
+    if(_gDragActive){                                        // released before reaching the edge → grade if close enough, else spring back
+      const vw=window.innerWidth, side=_gDragSide;
+      const distToEdge = side==='left' ? Math.max(0,t.clientX) : Math.max(0, vw-t.clientX);
+      if(distToEdge <= _gFireDist()) _gGrade(side); else _gDragReset(true);
       return;
     }
     const dx=t.clientX-sx, dy=t.clientY-sy;
     if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.2){
       swiped=true;
-      if(document.fullscreenElement && !cardAnswerShown && !e.target.closest('.word-link')) showAnswer();   // reviewing only in fullscreen
+      if(document.fullscreenElement && !cardAnswerShown && !e.target.closest('.word-link')) showAnswer();   // reviewing only in fullscreen (front)
     }
   },{passive:true});
 
