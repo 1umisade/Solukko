@@ -251,10 +251,16 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
 .fc-nav { width: min(75px, 14vw); height: min(75px, 14vw); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
-.fc-nav.fc-nav-armed img { animation: fcNavGlow 0.85s ease-in-out infinite; }   /* armed (>=150%): pulsing glow — release now to grade */
-@keyframes fcNavGlow {
-  0%,100% { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 12px rgba(255,224,130,0.9)) drop-shadow(0 0 22px rgba(255,193,60,0.6)); }
-  50%     { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 22px rgba(255,238,175,1)) drop-shadow(0 0 36px rgba(255,201,80,0.9)); }
+/* armed (>=150%): pulsing glow — release now to register. Left (Ei/Edellinen) = orange, right (Kyllä/Seuraava) = sage */
+#fc-nav-left.fc-nav-armed img  { animation: fcGlowOrange 0.85s ease-in-out infinite; }
+#fc-nav-right.fc-nav-armed img { animation: fcGlowSage 0.85s ease-in-out infinite; }
+@keyframes fcGlowOrange {
+  0%,100% { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 12px rgba(239,154,95,0.95)) drop-shadow(0 0 22px rgba(230,120,50,0.6)); }
+  50%     { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 22px rgba(255,182,112,1)) drop-shadow(0 0 36px rgba(240,140,60,0.9)); }
+}
+@keyframes fcGlowSage {
+  0%,100% { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 12px rgba(154,184,161,0.95)) drop-shadow(0 0 22px rgba(108,158,120,0.6)); }
+  50%     { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 22px rgba(192,216,197,1)) drop-shadow(0 0 36px rgba(128,180,140,0.9)); }
 }
 .fc-nav .nav-back { display: none; }   /* front side shows Edellinen/Seuraava; back side swaps to Ei/Kyllä — same position, just a different image */
 #front-check.back .fc-nav .nav-front { display: none; }
@@ -814,7 +820,7 @@ body.dark-mode .overview-card.unknown { background: #3f3022; border-color: #b87a
 body.dark-mode .flashcard.graded-known   { background: #303d35; border-color: #6f8f77; }
 body.dark-mode .flashcard.graded-unknown { background: #3f3022; border-color: #b87a45; }
 
-.card-stars { position: absolute; right: 1rem; bottom: 0.8rem; z-index: 3; font-size: 1.4rem; line-height: 1; color: #6b4423; letter-spacing: 0.08em; cursor: help; }
+.card-stars { position: absolute; left: 0; right: 0; top: 0.8rem; text-align: center; z-index: 3; font-size: 1.4rem; line-height: 1; color: #6b4423; letter-spacing: 0.08em; cursor: help; }
 .card-stars:empty { display: none; }
 @keyframes starsFade { from { opacity: 0; } to { opacity: 1; } }
 .card-stars.stars-fade { animation: starsFade 0.45s ease; }   /* re-fade the stars in whenever the card changes */
@@ -2550,11 +2556,15 @@ function toggleCardFullscreen(){
 }
 function exitCardFullscreen(){ if(document.fullscreenElement) document.exitFullscreen&&document.exitFullscreen(); }
 let _fsHideTimer=null;
-function flashFsExitBtn(){   // show the exit + comment buttons for ~1s (on entering fullscreen and on each move/touch)
+function _showFsButtons(ms){   // reveal the exit + comment buttons, then fade them after `ms`
   if(!document.fullscreenElement) return;
   const b=document.getElementById('fs-exit-btn'); if(b){ b.style.display='flex'; b.classList.add('visible'); }
   document.getElementById('fs-comment-btn')?.classList.add('visible');
-  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-exit-btn')?.classList.remove('visible'); document.getElementById('fs-comment-btn')?.classList.remove('visible'); },1000);
+  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-exit-btn')?.classList.remove('visible'); document.getElementById('fs-comment-btn')?.classList.remove('visible'); }, ms||1000);
+}
+function flashFsExitBtn(){   // desktop: flash the buttons on entering fullscreen and on each mouse move. Mobile: only a star tap reveals them (see the star tooltip handler)
+  if(document.body.classList.contains('is-mobile')) return;
+  _showFsButtons(1000);
 }
 let _fsCursorTimer=null, _overCard=false;
 function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness — only in fullscreen (the right-hand card keeps its cursor + a hover hint instead)
@@ -2734,8 +2744,8 @@ function _keycapDip(el){ if(!el) return; el.classList.remove('keycap-press'); vo
 function fsBtnPress(el){ _keycapDip(el); try{ playKeyClick(); }catch(e){} }   // EVERY fullscreen button: up/down dip + click sound
 // reveal the answer via the Tarkista button
 function frontCheckReveal(){
-  if(cardAnswerShown){ shakeCard(); return; }        // back side: clicking the space button shakes the card + click sound (prompts to grade)
-  fsBtnPress(document.getElementById('tarkista-btn'));
+  if(cardAnswerShown){ shakeCard(); return; }        // back side: clicking the space button shakes the card (silent) to prompt a grade
+  _keycapDip(document.getElementById('tarkista-btn'));   // dip the button; showAnswer plays the single click as it shakes the card open
   showAnswer();
 }
 // same button positions on both sides: LEFT/RIGHT swap image + action depending on the side
@@ -3552,6 +3562,7 @@ function showAnswer(){
     fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
     setTimeout(()=>fc.classList.remove('card-shake'),500);
     shakeStars();
+    try{ playKeyClick(); }catch(e){}   // the reveal-shake plays the click sound
     reveal();
     return;
   }
@@ -3958,8 +3969,8 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   function _gGrade(side){ _gDragReset(true); swiped=true; _gJustFired=true; _gLockVert=true; if(side==='left') frontNavLeft(); else frontNavRight(); }   // Ei (wrong) / Kyllä (right)
   fc.addEventListener('mousedown',e=>{ if(e.button===0) pressT=Date.now(); });
   fc.addEventListener('touchstart',e=>{ pressT=Date.now(); const t=e.touches[0]; if(t){ sx=t.clientX; sy=t.clientY; } swiped=false; _gDragActive=false; _gDragSide=null; _gDragProg=0; _gLockVert=false; _gJustFired=false; _gArmed=false; },{passive:true});
-  fc.addEventListener('touchmove',e=>{                       // fullscreen back: a HORIZONTAL drag grows the nearer Ei/Kyllä button; at >=150% it arms (glows) — releasing while armed grades
-    if(!document.fullscreenElement || !cardAnswerShown) return;
+  fc.addEventListener('touchmove',e=>{                       // fullscreen (front + back): a HORIZONTAL drag grows the nearer keycap; at >=150% it arms (glows) — releasing while armed navigates (front) / grades (back)
+    if(!document.fullscreenElement) return;
     const t=e.touches[0]; if(!t) return;
     const dx=t.clientX-sx, dy=t.clientY-sy;
     if(!_gDragActive){
@@ -3980,17 +3991,11 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if(other){ other.style.transition='transform 0.12s ease'; other.style.transform='scale(0.9)'; other.classList.remove('fc-nav-armed'); }
     if(btn){ btn.style.transition='transform 0.05s ease'; btn.style.transform='scale('+scale.toFixed(3)+')'; btn.classList.toggle('fc-nav-armed', armed); }
   },{passive:false});
-  fc.addEventListener('touchend',e=>{                        // back: grade only if released while armed (>=150%, not dragged back) · front: horizontal swipe reveals the answer
+  fc.addEventListener('touchend',e=>{                        // released while armed (>=150%, not dragged back) → navigate (front) / grade (back); a plain tap still reveals via the click handler
     if(_gJustFired){ _gJustFired=false; _gDragActive=false; return; }
-    const t=e.changedTouches[0]; if(!t) return;
-    if(_gDragActive){                                        // released → grade if still armed, else spring the button back
+    if(_gDragActive){                                        // released → act if still armed, else spring the button back
       if(_gArmed) _gGrade(_gDragSide); else _gDragReset(true);
       return;
-    }
-    const dx=t.clientX-sx, dy=t.clientY-sy;
-    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.2){
-      swiped=true;
-      if(document.fullscreenElement && !cardAnswerShown && !e.target.closest('.word-link')) showAnswer();   // reviewing only in fullscreen (front)
     }
   },{passive:true});
 
@@ -4292,16 +4297,24 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
   }
   requestAnimationFrame(updateTip);
 
-  let _lpTimer=null;                                          // mobile: only a long-press shows the bubble
+  let _wlTapLink=null, _wlSX=0, _wlSY=0, _wlMoved=false;      // mobile: a tap on a linked word opens/closes its definition
   document.addEventListener('touchstart', e=>{
-    const link=e.target.closest('.word-link'); if(!link) return;
-    _lpTimer=setTimeout(()=>{ touchPinnedLink=link; showTip(link); _lpTimer=null; }, 450);
+    _wlTapLink=e.target.closest('.word-link'); _wlMoved=false;
+    const t=e.touches[0]; if(t){ _wlSX=t.clientX; _wlSY=t.clientY; }
   }, {passive:true});
-  document.addEventListener('touchmove', ()=>{ if(_lpTimer){ clearTimeout(_lpTimer); _lpTimer=null; } }, {passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(!_wlTapLink) return; const t=e.touches[0]; if(!t) return;
+    if(Math.abs(t.clientX-_wlSX)>10 || Math.abs(t.clientY-_wlSY)>10) _wlMoved=true;   // a scroll/drag, not a tap
+  }, {passive:true});
   document.addEventListener('touchend', e=>{
-    if(_lpTimer){ clearTimeout(_lpTimer); _lpTimer=null; }    // released before the long-press → just a tap, ignore
     const link=e.target.closest('.word-link');
-    if(touchPinnedLink && link!==touchPinnedLink){ touchPinnedLink=null; tip.style.display='none'; }   // tap away closes it
+    if(link && link===_wlTapLink && !_wlMoved){              // a tap on a linked word → toggle its definition
+      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; }
+      else { touchPinnedLink=link; showTip(link); }
+    } else if(touchPinnedLink && !link){                     // tap anywhere else closes it
+      touchPinnedLink=null; tip.style.display='none';
+    }
+    _wlTapLink=null;
   }, {passive:true});
 })();
 
@@ -4338,6 +4351,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
     if(stars && stars.dataset.starMeaning){
       _tipPinned = !_tipPinned;
       if(_tipPinned) show(stars); else hide();
+      if(document.body.classList.contains('is-mobile') && document.fullscreenElement) _showFsButtons(4000);   // mobile: tapping the stars reveals the comment + minimise buttons
     } else if(_tipPinned){
       _tipPinned = false; hide();
     }
