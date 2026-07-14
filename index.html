@@ -1534,7 +1534,7 @@ const commentBoxWrap=document.querySelector('.comment-box');
 (function(){ const ca=document.querySelector('.comment-area'), col=document.getElementById('comment-col'); if(ca&&col) col.appendChild(ca); })();   // comments live in the right half, next to the card
 (function(){ const dm=document.getElementById('darkmode-wrap'), gt=document.getElementById('grid-tools'); if(dm&&gt) gt.appendChild(dm); })();   // dark-mode toggle sits with the shuffle / reset tools under the grid
 // Elastic rubberband (desktop): over-scroll pulls the content and springs back smoothly. Used for both the right half and the grid.
-function makeRubberband(scrollEl, getTransformEl, resetName){
+function makeRubberband(scrollEl, getTransformEl, resetName, allowFullscreen){
   if(!scrollEl) return;
   let offset=0, target=0, raf=null;
   const MAX=110;
@@ -1547,9 +1547,10 @@ function makeRubberband(scrollEl, getTransformEl, resetName){
   }
   if(resetName) window[resetName]=function(){ cancelAnimationFrame(raf); raf=null; offset=0; target=0; apply(); };
   scrollEl.addEventListener('wheel', e=>{
-    if(document.fullscreenElement) return;
-    if(window.matchMedia('(max-width: 900px)').matches) return;   // desktop only
-    if(getTransformEl()?.offsetParent===null) return;             // only when this rubberband's content is actually on screen (scopes the window-level homepage one)
+    const fs=document.fullscreenElement;
+    if(fs && !allowFullscreen) return;                            // in fullscreen only the card bounces (not the grid / homepage handlers)
+    if(!fs && window.matchMedia('(max-width: 900px)').matches) return;   // desktop only outside fullscreen
+    if(!fs && getTransformEl()?.offsetParent===null) return;      // only when this rubberband's content is actually on screen (scopes the window-level homepage one)
     // let any nested scrollable element (long card, comment feed) consume the wheel first
     let node=e.target;
     while(node && node!==scrollEl){
@@ -1566,7 +1567,7 @@ function makeRubberband(scrollEl, getTransformEl, resetName){
     if(!raf) raf=requestAnimationFrame(loop);
   }, {passive:false});
 }
-makeRubberband(document.getElementById('card-col'), ()=>document.getElementById('card-stack'), '_resetCardSpring');   // right half: card + Mona + answer bar
+makeRubberband(document.getElementById('card-col'), ()=>document.getElementById('card-stack'), '_resetCardSpring', true);   // right half: card + Mona + answer bar (also bounces in fullscreen)
 makeRubberband(document.getElementById('grid-col'), ()=>document.getElementById('grid-col'));                          // grid: bounce at the top/bottom scroll boundaries
 makeRubberband(document.scrollingElement, ()=>document.getElementById('deck-screen'), '_resetHomeSpring');            // homepage: elastic bounce at the top/bottom of the page
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
@@ -3945,11 +3946,35 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   overlay.style.cssText='position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;z-index:10;transition:none;';
   fc.appendChild(overlay);
 
-  let pressT=0, sx=0, sy=0, swiped=false;
+  let pressT=0, sx=0, sy=0, swiped=false, _gDragActive=false, _gDragSide=null, _gDragProg=0;
+  const _gNavBtns=()=>[document.getElementById('fc-nav-left'), document.getElementById('fc-nav-right')];
+  function _gDragReset(animate){ _gNavBtns().forEach(b=>{ if(b){ b.style.transition=animate?'transform 0.25s cubic-bezier(0.34,1.4,0.64,1)':''; b.style.transform=''; } }); _gDragActive=false; _gDragSide=null; _gDragProg=0; }
   fc.addEventListener('mousedown',e=>{ if(e.button===0) pressT=Date.now(); });
-  fc.addEventListener('touchstart',e=>{ pressT=Date.now(); const t=e.touches[0]; if(t){ sx=t.clientX; sy=t.clientY; } swiped=false; },{passive:true});
-  fc.addEventListener('touchend',e=>{                       // horizontal swipe reveals the answer
+  fc.addEventListener('touchstart',e=>{ pressT=Date.now(); const t=e.touches[0]; if(t){ sx=t.clientX; sy=t.clientY; } swiped=false; _gDragActive=false; _gDragSide=null; _gDragProg=0; },{passive:true});
+  fc.addEventListener('touchmove',e=>{                       // fullscreen back: dragging horizontally grows the Ei/Kyllä button; releasing at the viewport edge grades
+    if(!document.fullscreenElement || !cardAnswerShown) return;
+    const t=e.touches[0]; if(!t) return;
+    const dx=t.clientX-sx, dy=t.clientY-sy;
+    if(!_gDragActive){ if(Math.abs(dx)<18 || Math.abs(dx)<=Math.abs(dy)) return; _gDragActive=true; }   // wait for a clear horizontal intent
+    e.preventDefault();                                      // it's a horizontal grade-drag → don't scroll the card
+    const vw=window.innerWidth;
+    _gDragSide = dx<0 ? 'left' : 'right';
+    _gDragProg = _gDragSide==='left' ? Math.min(1,(sx-t.clientX)/Math.max(1,sx*0.85)) : Math.min(1,(t.clientX-sx)/Math.max(1,(vw-sx)*0.85));
+    const btn=document.getElementById(_gDragSide==='left'?'fc-nav-left':'fc-nav-right');
+    const other=document.getElementById(_gDragSide==='left'?'fc-nav-right':'fc-nav-left');
+    if(other){ other.style.transition='transform 0.12s ease'; other.style.transform='scale(0.9)'; }
+    if(btn){ btn.style.transition='transform 0.05s ease'; btn.style.transform='scale('+(1+_gDragProg*1.1).toFixed(3)+')'; }
+  },{passive:false});
+  fc.addEventListener('touchend',e=>{                       // edge-release grades (back) · horizontal swipe reveals the answer (front)
     const t=e.changedTouches[0]; if(!t) return;
+    if(_gDragActive){                                        // finish the grade-drag
+      const vw=window.innerWidth, EDGE=Math.max(44, vw*0.06);
+      const atEdge = _gDragSide==='left' ? (t.clientX<=EDGE) : (t.clientX>=vw-EDGE);
+      const side=_gDragSide, fire=(atEdge || _gDragProg>=0.92);
+      _gDragReset(true);
+      if(fire){ swiped=true; if(side==='left') frontNavLeft(); else frontNavRight(); }   // Ei (wrong) / Kyllä (right)
+      return;
+    }
     const dx=t.clientX-sx, dy=t.clientY-sy;
     if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.2){
       swiped=true;
