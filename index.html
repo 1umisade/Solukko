@@ -107,6 +107,24 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .shop-embed.shop-embed-big .shop-embed-price { font-size: 1.5rem; }
 #shop-overlay-close { position: fixed; top: 18px; right: 24px; z-index: 201; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 @media (max-width: 900px){ .shop-overlay-inner { flex-direction: column; gap: 1.4rem; } .shop-overlay-side { flex-direction: row; flex-wrap: wrap; justify-content: center; } .shop-embed.shop-embed-big { width: 300px; max-width: 300px; } }
+/* golden (winning) comment — painted gold only on the author's device */
+.comment-item.golden { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border: 2px solid #d4af37 !important; box-shadow: 0 0 14px rgba(212,175,55,0.55); }
+.comment-item.golden .comment-text { color: #5c4a12; font-weight: 700; }
+.comment-item.golden-flash { animation: goldenFlash 1.4s ease; }
+@keyframes goldenFlash { 0%,100%{ box-shadow: 0 0 14px rgba(212,175,55,0.55); } 45%{ box-shadow: 0 0 30px 10px rgba(212,175,55,0.95); } }
+.gold-toggle { float: right; background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 0; margin-left: 6px; line-height: 1; filter: grayscale(1) opacity(0.45); transition: filter 0.15s ease; }
+.gold-toggle.on, .gold-toggle:hover { filter: none; }
+/* winner celebration overlay */
+#golden-overlay { position: fixed; inset: 0; z-index: 300; background: radial-gradient(circle at 50% 38%, rgba(90,66,12,0.92), rgba(18,13,4,0.96)); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
+.golden-inner { max-width: 460px; text-align: center; background: linear-gradient(160deg, #fff8dd, #f4dd86 55%, #e3bf52); border: 3px solid #d4af37; border-radius: 22px; padding: 2.4rem 2rem; box-shadow: 0 0 46px rgba(212,175,55,0.65); font-family: 'Lora', serif; color: #4a3a10; }
+.golden-trophy { font-size: 4.2rem; line-height: 1; animation: goldenTrophy 1.6s ease-in-out infinite; }
+@keyframes goldenTrophy { 0%,100%{ transform: translateY(0) rotate(-4deg); } 50%{ transform: translateY(-8px) rotate(4deg); } }
+.golden-inner h2 { font-size: 1.9rem; margin: 0.5rem 0 0.7rem; color: #4a3a10; }
+.golden-inner p { line-height: 1.6; font-size: 1.02rem; }
+.golden-inner a { color: #6b4a10; font-weight: 700; }
+.golden-view-btn { margin-top: 1.5rem; background: #4a3a10; color: #f7e07a; border: none; border-radius: 12px; padding: 0.8rem 1.7rem; font-family: 'Lora', serif; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+.golden-view-btn:hover { background: #5c4915; }
+#golden-overlay-close { position: fixed; top: 18px; right: 24px; z-index: 301; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 .hero-body { display: flex; align-items: flex-start; justify-content: center; gap: 2.5rem; margin-top: 1.4rem; text-align: left; }   /* text block + shop side by side, tops aligned */
 .hero-shop { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }   /* shrink to the product, sits close to the text */
 #home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* fixed width; height grows to fit all the text (overflow:hidden just contains the floated portrait, no clipping) */
@@ -1043,6 +1061,16 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="shop-overlay-side">
       <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="lamp_web.jpg" alt="Lamppu"></span><span class="shop-embed-name">Lamppu</span><span class="shop-embed-price">24,90&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
     </div>
+  </div>
+</div>
+<!-- winner celebration: shown on the device whose comment was painted gold -->
+<div id="golden-overlay" style="display:none" onclick="if(event.target===this)closeGoldenOverlay()">
+  <button id="golden-overlay-close" onclick="closeGoldenOverlay()" aria-label="Sulje">&times;</button>
+  <div class="golden-inner">
+    <div class="golden-trophy">🏆</div>
+    <h2>Onneksi olkoon!</h2>
+    <p>Kommenttisi valittiin viikon voittajaksi ja maalattiin kultaiseksi! Lunasta 5&nbsp;&euro; lähettämällä kuvakaappaus kultaisesta kommentistasi osoitteeseen <a href="mailto:contact@solukko.com">contact@solukko.com</a>.</p>
+    <button class="golden-view-btn" onclick="viewGoldenComment()">Näytä kultainen kommenttini</button>
   </div>
 </div>
 <input type="file" id="apkg-import-input" accept=".apkg,application/octet-stream" style="display:none" onchange="importApkgFile(this.files&&this.files[0]); this.value='';">
@@ -2144,7 +2172,7 @@ function scrollPastHero(){   // start with the hero section just above the viewp
 }
 function openShopOverlay(e){ if(e){ e.preventDefault(); } const o=document.getElementById('shop-overlay'); if(o) o.style.display='flex'; }
 function closeShopOverlay(){ const o=document.getElementById('shop-overlay'); if(o) o.style.display='none'; }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); const g=document.getElementById('golden-overlay'); if(g && g.style.display!=='none') closeGoldenOverlay(); } });
 
 async function startDeck(deckName, animate=true){   // animate=false (reload/deep-link restore) shows the landing at once, no fade-in
   show('loading'); hide('deck-screen');
@@ -2848,7 +2876,10 @@ function loadFirestoreComments(){
     docs.forEach(doc=>{
       const d=doc.data(); const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=doc.id;
       const isOwn=d.userId&&d.userId===getUserId(); const canEdit=isOwn||devMode;
-      const btns=canEdit?`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`:'';
+      if(d.golden && isOwn) el.classList.add('golden');   // the win is painted gold only on the device that left the comment
+      let btns='';
+      if(devMode) btns+=`<button class="gold-toggle${d.golden?' on':''}" onclick="toggleGoldenComment('${doc.id}',${d.golden?'true':'false'})" title="Maalaa viikon voittajaksi (kultaiseksi)">🏆</button>`;
+      if(canEdit) btns+=`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`;
       const _safeImg=(typeof d.imageData==='string' && /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=\s]+$/.test(d.imageData)) ? d.imageData : '';   // only a real base64 image data-URL (no attribute break-out)
       const imgHtml=_safeImg?`<img src="${_safeImg}" style="max-width:100%;border-radius:8px;margin-top:6px;display:block;">`:'';
       el.innerHTML=`<div class="comment-text-wrap">${btns}<span class="comment-text">${escCmt(d.text)}</span>${imgHtml}</div>`;   // escape user text -> no HTML/script injection
@@ -3072,6 +3103,41 @@ function editComment(docId,btn){
 function saveEditComment(docId,btn){ const textarea=btn.closest('.comment-text-wrap').querySelector('textarea'); const newText=textarea.value.trim(); if(!newText) return; db.collection('comments').doc(docId).update({text:newText}).then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 function cancelEditComment(btn){ loadFirestoreComments(); }
 function deleteComment(docId){ if(!confirm('Poistetaanko kommentti?')) return; db.collection('comments').doc(docId).delete().then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
+// developer paints a comment gold (the weekly winner); the author's device then celebrates
+function toggleGoldenComment(docId, isGolden){ db.collection('comments').doc(docId).update({ golden: !isGolden, goldenAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Virhe: '+err.message)); }
+// watch this device's own comments; if one gets painted gold, show the winner celebration
+let _myGolden=null, _goldenShown=false, _goldenUnsub=null;
+function setupGoldenWatch(){
+  try{ const uid=getUserId(); if(!uid||!db) return;
+    if(_goldenUnsub){ _goldenUnsub(); _goldenUnsub=null; }
+    _goldenUnsub=db.collection('comments').where('userId','==',uid).onSnapshot(snap=>{
+      let g=null; snap.forEach(doc=>{ const d=doc.data(); if(d.golden===true) g={ id:doc.id, cardId:String(d.cardId||''), text:d.text||'' }; });
+      _myGolden=g;
+      if(g) maybeShowGoldenCelebration();
+    }, ()=>{});
+  }catch(e){}
+}
+function maybeShowGoldenCelebration(){
+  if(_goldenShown || !_myGolden) return;
+  const seen=JSON.parse(localStorage.getItem('solukko-golden-seen')||'[]');
+  if(seen.includes(_myGolden.id)) return;   // already dismissed on this device
+  _goldenShown=true;
+  const o=document.getElementById('golden-overlay'); if(o) o.style.display='flex';
+}
+function closeGoldenOverlay(){
+  const o=document.getElementById('golden-overlay'); if(o) o.style.display='none';
+  if(_myGolden){ const seen=JSON.parse(localStorage.getItem('solukko-golden-seen')||'[]'); if(!seen.includes(_myGolden.id)){ seen.push(_myGolden.id); localStorage.setItem('solukko-golden-seen',JSON.stringify(seen)); } }
+}
+async function viewGoldenComment(){
+  const g=_myGolden; closeGoldenOverlay(); if(!g||!g.cardId) return;
+  try{ await openCardById(g.cardId); }catch(e){ return; }
+  if(typeof toggleComment==='function' && !_commenting) toggleComment();   // open the comments panel
+  let tries=0; const iv=setInterval(()=>{ tries++;
+    const item=document.querySelector('#comment-feed .comment-item[data-doc-id="'+g.id+'"]');
+    if(item){ clearInterval(iv); item.scrollIntoView({behavior:'smooth',block:'center'}); item.classList.remove('golden-flash'); void item.offsetWidth; item.classList.add('golden-flash'); setTimeout(()=>item.classList.remove('golden-flash'),1400); }
+    else if(tries>25) clearInterval(iv);
+  }, 200);
+}
 
 
 // ════════════════════════════════════════════════════════════
@@ -4144,6 +4210,8 @@ applyDevMode();
 updateGroupUI();
 updateOverviewVisibility();
 initPresence();
+setupGoldenWatch();
+try{ firebase.auth().onAuthStateChanged(()=>setupGoldenWatch()); }catch(e){}   // re-bind with the real uid once anonymous auth completes
 initDarkmodeBtn();
 document.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());   // Mona's nickname for the user
 init();
