@@ -614,11 +614,20 @@ body.dark-mode #presence-list span { background: #3a312b !important; border-colo
 body.dark-mode .kuvaaja-btn { color: #eadfce !important; border-color: #6d5f52 !important; }
 body.dark-mode .kuvaaja-cancel { border-color: #c0392b !important; color: #c0392b !important; }
 body.dark-mode #loading { color: #eadfce; }
-#loading { position: fixed; inset: 0; z-index: 500; display: none; background: #efe7d8; }
+#loading { position: fixed; inset: 0; z-index: 9999; display: none; background: #efe7d8; }
 body.dark-mode #loading { background: #2b2622; }
 .loading-inner { position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
-.loading-mona { width: 120px; height: 120px; object-fit: contain; animation: loadingBounce 1.2s ease-in-out infinite; }
-@keyframes loadingBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.loading-mona-wrap { position: relative; width: 130px; height: 130px; }
+.loading-mona { width: 130px; height: 130px; object-fit: contain; animation: loadingSleep 3.2s ease-in-out infinite; }
+@keyframes loadingSleep { 0%,100% { transform: scale(1) rotate(-1.5deg); } 50% { transform: scale(1.05) rotate(1.5deg); } }
+/* Zzz drifting up from the sleeping Mona */
+.loading-zzz { position: absolute; top: 2px; right: -6px; width: 46px; height: 74px; pointer-events: none; }
+.loading-zzz span { position: absolute; left: 0; bottom: 0; font-family: 'Lora', serif; font-weight: 700; color: #6b4423; opacity: 0; animation: zFly 2.7s ease-in-out infinite; }
+.loading-zzz span:nth-child(1) { font-size: 0.85rem; animation-delay: 0s; }
+.loading-zzz span:nth-child(2) { font-size: 1.15rem; animation-delay: 0.9s; }
+.loading-zzz span:nth-child(3) { font-size: 1.5rem;  animation-delay: 1.8s; }
+@keyframes zFly { 0% { opacity: 0; transform: translate(0,0) rotate(-6deg); } 18% { opacity: 1; } 75% { opacity: 0.85; } 100% { opacity: 0; transform: translate(24px,-52px) rotate(16deg); } }
+body.dark-mode .loading-zzz span { color: #c9b48f; }
 .loading-text { font-family: 'Lora', serif; font-size: 1.5rem; color: #6b4423; }
 .loading-dots::after { content: '.'; animation: loadingDots 1.4s steps(1) infinite; }
 @keyframes loadingDots { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
@@ -1061,7 +1070,10 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 </div>
 
 <div id="loading"><div class="loading-inner">
-  <img class="loading-mona" src="solukkologo_eyes.png" alt="">
+  <div class="loading-mona-wrap">
+    <img class="loading-mona" src="sleeping_mona.png" alt="">
+    <div class="loading-zzz"><span>z</span><span>z</span><span>z</span></div>
+  </div>
   <div class="loading-text">Pieni hetki<span class="loading-dots"></span></div>
   <div class="loading-bar"><div class="loading-bar-fill"></div></div>
 </div></div>
@@ -1158,7 +1170,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ KORTTIRUUTU ════════════════════════════════════════════ -->
 <div id="card-screen">
   <!-- "loading the next card" overlay, shown while Mona slides to a button -->
-  <div id="card-loading" style="display:none;"><div class="cl-spinner"></div><div class="cl-text">Ladataan uutta korttia</div></div>
+  <div id="card-loading" style="display:none;"><div class="cl-spinner"></div></div>
   <!-- exit-fullscreen: top-right, flashed for ~1s on touch/click -->
   <button id="fs-exit-btn" onclick="fsBtnPress(this); exitCardFullscreen()" title="Poistu koko näytön tilasta">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
@@ -1829,6 +1841,13 @@ setInterval(()=>{
 function _idbOpen(){ return new Promise((res,rej)=>{ let r; try{ r=indexedDB.open('solukko-apkg',1); }catch(e){ return rej(e); } r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('kv'); }catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
 async function idbGet(key){ try{ const db=await _idbOpen(); return await new Promise(res=>{ const g=db.transaction('kv','readonly').objectStore('kv').get(key); g.onsuccess=()=>res(g.result); g.onerror=()=>res(null); }); }catch(e){ return null; } }
 async function idbSet(key,val){ try{ const db=await _idbOpen(); return await new Promise(res=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(val,key); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }catch(e){ return false; } }
+// The homepage grid resolves _decksReady once every deck's video/image has loaded; init keeps the
+// single loading Mona up until then so the homepage's own Monas (brand + edge peeker) never flash mid-load.
+let _decksReady=null, _decksReadyResolve=null;
+async function _finishLoading(){
+  try{ await Promise.race([ _decksReady||Promise.resolve(), new Promise(r=>setTimeout(r,4500)) ]); }catch(e){}
+  hide('loading');
+}
 async function init(){
   show('loading');
   try {
@@ -1839,7 +1858,7 @@ async function init(){
       const _c=await idbGet('apkg');
       if(_c && _c.ver===_ver && _c.allCards && _c.allCards.length){
         allCards=_c.allCards; allDeckNames=_c.allDeckNames||[]; mediaMap=_c.mediaMap||{};
-        await loadDecks(); hide('loading'); return;
+        await loadDecks(); await _finishLoading(); return;
       }
     }
     const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
@@ -1878,7 +1897,7 @@ async function init(){
     d.innerHTML = '<strong>Virhe ladattaessa kortteja.</strong><br><br>' + e.message;
     hide('loading'); return;
   }
-  hide('loading');
+  await _finishLoading();
 }
 
 function parseAnkiDB(db) {
@@ -2178,8 +2197,8 @@ function buildDeckGrid(decks, list){
   if(typeof renderGreet==='function') requestAnimationFrame(renderGreet);   // winners see the golden win bubble first
   if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks (desktop only)
   list.appendChild(header);
-  const dl=document.createElement('div'); dl.id='decks-loading'; dl.textContent='Ladataan kursseja'; list.appendChild(dl);   // shown until the deck videos/images have loaded
-  list.classList.add('decks-loading');
+  list.classList.add('decks-loading');   // sections stay hidden until every deck's video/image has loaded, then they fade in
+  _decksReady = new Promise(res=>{ _decksReadyResolve = res; });   // init keeps the loading Mona up until this resolves
   const byYear={};
   decks.forEach(it=>{ const y=it.year||'?'; (byYear[y]=byYear[y]||{S:[],K:[],none:[]}); const s=(it.semester==='S'||it.semester==='K')?it.semester:'none'; byYear[y][s].push(it); });
   const years=Object.keys(byYear).sort((a,b)=>{ if(a==='?')return 1; if(b==='?')return -1; return (+a)-(+b); });
@@ -2212,9 +2231,9 @@ function buildDeckGrid(decks, list){
   const _media=[...list.querySelectorAll('video.deck-video, img.deck-video')];
   _media.forEach(m=>{ if(m.tagName==='VIDEO'){ try{ m.load(); }catch(e){} } });
   const _revealDecks=()=>{
+    if(_decksReadyResolve){ _decksReadyResolve(); _decksReadyResolve=null; }   // let init lift the loading overlay
     if(list.dataset.buildGen!==_gen) return;   // a newer buildDeckGrid superseded this one
     list.classList.remove('decks-loading');
-    const d=document.getElementById('decks-loading'); if(d) d.remove();
     [...list.querySelectorAll('.deck-btn')].forEach((b,i)=>{ b.style.animationDelay=(i*0.06)+'s'; b.classList.add('deck-in'); });
   };
   const _waitMedia=el=>new Promise(res=>{
