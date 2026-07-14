@@ -1495,7 +1495,7 @@ const MONA_BUBBLES={
   shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
   comment:'Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
 };
-const HOME_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // cycle follows MONA_BUBBLES definition order — just add unique keys above
+const HOME_BUBBLE_ORDER=Object.keys(MONA_BUBBLES).filter(k=>k!=='shuffle'&&k!=='tietovisa4');   // cycle follows MONA_BUBBLES definition order (shuffle + tietovisa4 excluded from Mona's greeting cycle)
 const PEEK_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // edge-peeker retired; keys kept valid
 function buildMonaBubbles(){   // inject the bubble divs into both containers from the shared definitions
   const home=document.getElementById('site-brand');
