@@ -1076,12 +1076,12 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 </div>
 <!-- winner celebration: shown on the device whose comment was painted gold -->
-<div id="golden-overlay" style="display:none" onclick="if(event.target===this)closeGoldenOverlay()">
-  <button id="golden-overlay-close" onclick="closeGoldenOverlay()" aria-label="Sulje">&times;</button>
+<div id="golden-overlay" style="display:none">
   <div class="golden-inner">
     <div class="golden-trophy">🏆</div>
     <h2>Onneksi olkoon!</h2>
     <p id="golden-msg"></p>
+    <button class="golden-view-btn" onclick="closeGoldenOverlay()">Selvä!</button>
   </div>
 </div>
 <!-- dev password prompt (masked) -->
@@ -2204,7 +2204,7 @@ function scrollPastHero(){   // start with the hero section just above the viewp
 }
 function openShopOverlay(e){ if(e){ e.preventDefault(); } const o=document.getElementById('shop-overlay'); if(o) o.style.display='flex'; }
 function closeShopOverlay(){ const o=document.getElementById('shop-overlay'); if(o) o.style.display='none'; }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); const g=document.getElementById('golden-overlay'); if(g && g.style.display!=='none') closeGoldenOverlay(); } });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); } });   // golden overlay is intentionally not escapable (unskippable win view)
 
 async function startDeck(deckName, animate=true){   // animate=false (reload/deep-link restore) shows the landing at once, no fade-in
   show('loading'); hide('deck-screen');
@@ -2908,7 +2908,10 @@ function loadFirestoreComments(){
     docs.forEach(doc=>{
       const d=doc.data(); const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=doc.id;
       const isOwn=d.userId&&d.userId===getUserId(); const canEdit=isOwn||devMode;
-      if(d.golden && isOwn) el.classList.add('golden');   // the win is painted gold only on the device that left the comment
+      if(d.golden) el.classList.add('golden');   // the winning comment shows gold on every device
+      if(d.golden && isOwn && !_goldenShown){    // this device left the winning comment -> fetch the private code and celebrate (backup for the global prizes watch)
+        db.collection('prizes').doc(doc.id).get().then(p=>{ if(p.exists){ _myGolden={ id:doc.id, code:String((p.data()||{}).code||'') }; maybeShowGoldenCelebration(); } }).catch(()=>{});
+      }
       let btns='';
       if(devMode) btns+=`<button class="gold-toggle${d.golden?' on':''}" onclick="toggleGoldenComment('${doc.id}',${d.golden?'true':'false'})" title="Maalaa viikon voittajaksi (kultaiseksi)">🏆</button>`;
       if(canEdit) btns+=`<button onclick="editComment('${doc.id}',this)" style="float:right;background:none;border:none;color:#56533c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px;">✏️</button>`;
@@ -3175,9 +3178,7 @@ function setupGoldenWatch(){
 }
 function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function maybeShowGoldenCelebration(){
-  if(_goldenShown || !_myGolden) return;
-  const seen=JSON.parse(localStorage.getItem('solukko-golden-seen')||'[]');
-  if(seen.includes(_myGolden.id)) return;   // already dismissed on this device
+  if(_goldenShown || !_myGolden) return;   // once per session; it re-shows on the next visit until the dev removes the gold
   _goldenShown=true;
   const msg=document.getElementById('golden-msg');
   if(msg) msg.innerHTML='Olet voittanut 5&nbsp;&euro; jättämälläsi kommentilla! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja lunasta palkinto MobilePaylla.';
@@ -3185,7 +3186,6 @@ function maybeShowGoldenCelebration(){
 }
 function closeGoldenOverlay(){
   const o=document.getElementById('golden-overlay'); if(o) o.style.display='none';
-  if(_myGolden){ const seen=JSON.parse(localStorage.getItem('solukko-golden-seen')||'[]'); if(!seen.includes(_myGolden.id)){ seen.push(_myGolden.id); localStorage.setItem('solukko-golden-seen',JSON.stringify(seen)); } }
 }
 
 
