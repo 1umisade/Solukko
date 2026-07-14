@@ -235,7 +235,8 @@ body.dark-mode .tarkista-fill { background: #6f8f77; }
 .fc-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; width: max-content; max-width: min(80vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
 .fc-bubble:empty { display: none; }
 .fc-bubble::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 9px solid transparent; border-top-color: #fffef9; }
-.fc-mona-clip:hover ~ .fc-bubble { opacity: 1; }   /* bubble appears only when hovering Mona */
+.fc-mona-clip:hover ~ .fc-bubble, .fc-bubble.show { opacity: 1; }   /* on hover, or forced visible (.show) while Mona prompts */
+.fc-nav.fc-expand { transform: scale(1.16); }   /* answer buttons expand when the card is shaken to prompt a grade */
 body.dark-mode .fc-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 /* exit-fullscreen button: top-right, flashed for ~1s on touch/click */
@@ -1452,6 +1453,7 @@ function makeRubberband(scrollEl, getTransformEl, resetName){
   scrollEl.addEventListener('wheel', e=>{
     if(document.fullscreenElement) return;
     if(window.matchMedia('(max-width: 900px)').matches) return;   // desktop only
+    if(getTransformEl()?.offsetParent===null) return;             // only when this rubberband's content is actually on screen (scopes the window-level homepage one)
     // let any nested scrollable element (long card, comment feed) consume the wheel first
     let node=e.target;
     while(node && node!==scrollEl){
@@ -1470,6 +1472,7 @@ function makeRubberband(scrollEl, getTransformEl, resetName){
 }
 makeRubberband(document.getElementById('card-col'), ()=>document.getElementById('card-stack'), '_resetCardSpring');   // right half: card + Mona + answer bar
 makeRubberband(document.getElementById('grid-col'), ()=>document.getElementById('grid-col'));                          // grid: bounce at the top/bottom scroll boundaries
+makeRubberband(document.scrollingElement, ()=>document.getElementById('deck-screen'), '_resetHomeSpring');            // homepage: elastic bounce at the top/bottom of the page
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
 document.addEventListener('click',e=>{ if(!_commenting && !document.querySelector('.comment-area').contains(e.target) && !e.target.closest('#comment-btn')) document.querySelector('.comment-box').classList.remove('open'); });   // don't fight the comment-panel toggle
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
@@ -2617,9 +2620,18 @@ function frontCheckReveal(){
 // same button positions on both sides: LEFT/RIGHT swap image + action depending on the side
 function frontNavLeft(){ fsBtnPress(document.getElementById('fc-nav-left')); if(cardAnswerShown){ _gradeInstant=true; gradeCard(false); } else frontPrev(); }    // Ei (grade wrong) / Edellinen (previous)
 function frontNavRight(){ fsBtnPress(document.getElementById('fc-nav-right')); if(cardAnswerShown){ _gradeInstant=true; gradeCard(true); } else frontNext(); }     // Kyllä (grade right) / Seuraava (next)
+function _cardShakeOnly(){ const fc=document.getElementById('flashcard'); if(!fc) return; fc.classList.remove('card-in-right','card-in-left','card-shake'); void fc.offsetWidth; fc.classList.add('card-shake'); setTimeout(()=>fc.classList.remove('card-shake'),500); }
+let _fcBubbleTO=null, _fcExpandTO=null;
+function _fcBubbleFlash(text){   // show Mona's fullscreen bubble with a message for ~1.6s, then restore the resting hint
+  const bub=document.getElementById('fc-bubble'); if(!bub) return;
+  bub.textContent=text; bub.classList.add('show');
+  clearTimeout(_fcBubbleTO);
+  _fcBubbleTO=setTimeout(()=>{ bub.classList.remove('show'); bub.textContent = cardAnswerShown ? _BACK_BUBBLE_TEXT : ((typeof _frontHintText!=='undefined'?_frontHintText:'')||''); }, 1600);
+}
 // front-side navigation: skip to the next / previous card without grading (Seuraava / Edellinen)
 function frontGoTo(i){
-  if(i<0 || i>=reviewCards.length) return;
+  if(i<0){ _cardShakeOnly(); _fcBubbleFlash('Tämä on kurssin ensimmäinen kortti.'); return; }
+  if(i>=reviewCards.length){ _cardShakeOnly(); _fcBubbleFlash('Tämä on kurssin viimeinen kortti.'); return; }
   stopMonaNotes();
   currentOverviewIndex=i; currentCard=reviewCards[i]; queue=reviewCards.slice(i+1);
   if(shuffleMode){ for(let k=queue.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); const t=queue[k]; queue[k]=queue[j]; queue[j]=t; } }
@@ -3795,6 +3807,12 @@ function shakeCard(){
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
   shakeStars();
+  if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
+    _fcBubbleFlash('Tiesitkö? Paina Kyllä tai Ei-nappia.');   // Mona prompts for a grade
+    ['fc-nav-left','fc-nav-right'].forEach(id=>{ const b=document.getElementById(id); if(b){ b.classList.add('fc-expand'); } });   // expand the answer buttons
+    clearTimeout(_fcExpandTO); _fcExpandTO=setTimeout(()=>{ ['fc-nav-left','fc-nav-right'].forEach(id=>document.getElementById(id)?.classList.remove('fc-expand')); }, 1600);
+    return;
+  }
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
   if(pr){ pr.style.display='flex'; pr.classList.remove('reveal-fade'); pr.classList.add('shown'); }
   if(ca){ _syncCommentArea(); ca.classList.remove('reveal-fade'); ca.classList.add('shown'); }
