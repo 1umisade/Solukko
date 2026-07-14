@@ -107,9 +107,9 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .shop-embed.shop-embed-big .shop-embed-price { font-size: 1.5rem; }
 #shop-overlay-close { position: fixed; top: 18px; right: 24px; z-index: 201; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 @media (max-width: 900px){ .shop-overlay-inner { flex-direction: column; gap: 1.4rem; } .shop-overlay-side { flex-direction: row; flex-wrap: wrap; justify-content: center; } .shop-embed.shop-embed-big { width: 300px; max-width: 300px; } }
-.hero-body { display: flex; align-items: center; justify-content: center; gap: 2.5rem; margin-top: 1.4rem; text-align: left; }   /* centred group (space before the text); shop vertically centred on the square */
+.hero-body { display: flex; align-items: flex-start; justify-content: center; gap: 2.5rem; margin-top: 1.4rem; text-align: left; }   /* text block + shop side by side, tops aligned */
 .hero-shop { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }   /* shrink to the product, sits close to the text */
-#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; aspect-ratio: 1 / 1; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* perfect square at the very left edge; overflow:hidden contains the floated portrait */
+#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* fixed width; height grows to fit all the text (overflow:hidden just contains the floated portrait, no clipping) */
 @media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { aspect-ratio: auto; width: 100%; padding-right: 0; } }
 #home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 #home-hero .hero-link:hover { color: #7d5227; }
@@ -223,11 +223,7 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen button:focus, #card-screen:fullscreen button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
-.fc-mona-clip { width: min(156px, 29vw); height: min(78px, 14.5vw); overflow: hidden; position: relative; z-index: 1; cursor: pointer; }   /* shows the top ~50% of Mona; her lower half is clipped behind the button's top edge */
-.fc-mona { position: relative; width: min(156px, 29vw); height: min(156px, 29vw); transform: translateY(min(78px, 14.5vw)); }   /* starts fully hidden below the clip */
-.fc-mona.fc-peeked { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.34,1.4,0.64,1); }   /* peeks up so 50% shows — visible half matches the backside knob size */
-.fc-mona img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); }
-.tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; margin-top: -1px; cursor: pointer; overflow: hidden; }
+.tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; }
 .tarkista-btn img { height: min(75px, 14vw); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
@@ -240,7 +236,7 @@ body.dark-mode .tarkista-fill { background: #6f8f77; }
 .fc-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; width: max-content; max-width: min(80vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
 .fc-bubble:empty { display: none; }
 .fc-bubble::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 9px solid transparent; border-top-color: #fffef9; }
-.fc-mona-clip:hover ~ .fc-bubble, .fc-bubble.show { opacity: 1; }   /* on hover, or forced visible (.show) while Mona prompts */
+.fc-bubble.show { opacity: 1; }   /* Mona's bubble is gone; the prompt bubble shows only when forced (shake / first-last card) */
 body.dark-mode .fc-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 /* exit-fullscreen button: top-right, flashed for ~1s on touch/click */
@@ -1153,13 +1149,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div id="front-check">
     <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()"><img class="nav-front" src="edellinen.png" alt="Edellinen"><img class="nav-back" src="ei.png" alt="Ei"></button>
     <div class="tarkista-wrap">
-      <div class="fc-mona-clip" onclick="monaReactAt(document.getElementById('fc-mona'), true)">
-        <div class="fc-mona" id="fc-mona">
-          <img src="solukkologo_eyes.png" alt="">
-          <div class="logo-eye le"><span class="logo-pupil"></span></div>
-          <div class="logo-eye re"><span class="logo-pupil"></span></div>
-        </div>
-      </div>
       <div class="fc-bubble" id="fc-bubble"></div>
       <button id="tarkista-btn" class="tarkista-btn" onclick="frontCheckReveal()" title="Tarkista (välilyönti)">
         <img class="tk-front" src="space_front.png" alt="Tarkista vastaus">
