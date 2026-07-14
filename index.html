@@ -125,6 +125,18 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .golden-view-btn { margin-top: 1.5rem; background: #4a3a10; color: #f7e07a; border: none; border-radius: 12px; padding: 0.8rem 1.7rem; font-family: 'Lora', serif; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
 .golden-view-btn:hover { background: #5c4915; }
 #golden-overlay-close { position: fixed; top: 18px; right: 24px; z-index: 301; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+/* dev password prompt (masked input) */
+#devpw-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(24,18,12,0.55); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.devpw-box { width: min(340px, 92vw); background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 1.4rem 1.3rem; box-shadow: 0 10px 34px rgba(0,0,0,0.3); font-family: 'Lora', serif; color: #56533c; }
+body.dark-mode .devpw-box { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+.devpw-label { font-size: 1rem; margin-bottom: 0.7rem; text-align: center; }
+#devpw-input { width: 100%; box-sizing: border-box; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.65rem 0.8rem; font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; letter-spacing: 0.15em; background: #f5f0e8; color: #1a1612; }
+body.dark-mode #devpw-input { background: #2b2622; color: #eadfce; border-color: #6d5f52; }
+.devpw-actions { display: flex; gap: 8px; margin-top: 1rem; justify-content: flex-end; }
+.devpw-actions button { border: none; border-radius: 10px; padding: 0.55rem 1.1rem; font-family: 'Lora', serif; font-size: 0.95rem; cursor: pointer; }
+.devpw-cancel { background: none; border: 1px solid #d4cec4 !important; color: inherit; }
+.devpw-ok { background: #56533c; color: #f5f0e8; }
+body.dark-mode .devpw-ok { background: #eadfce; color: #2b211b; }
 .hero-body { display: flex; align-items: flex-start; justify-content: center; gap: 2.5rem; margin-top: 1.4rem; text-align: left; }   /* text block + shop side by side, tops aligned */
 .hero-shop { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }   /* shrink to the product, sits close to the text */
 #home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* fixed width; height grows to fit all the text (overflow:hidden just contains the floated portrait, no clipping) */
@@ -1072,6 +1084,17 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <p id="golden-msg"></p>
   </div>
 </div>
+<!-- dev password prompt (masked) -->
+<div id="devpw-overlay" style="display:none" onclick="if(event.target===this)closeDevPw()">
+  <div class="devpw-box">
+    <div class="devpw-label">Anna kehittäjätilan salasana:</div>
+    <input type="password" id="devpw-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();submitDevPw();}else if(event.key==='Escape'){closeDevPw();}">
+    <div class="devpw-actions">
+      <button class="devpw-cancel" onclick="closeDevPw()">Peruuta</button>
+      <button class="devpw-ok" onclick="submitDevPw()">OK</button>
+    </div>
+  </div>
+</div>
 <input type="file" id="apkg-import-input" accept=".apkg,application/octet-stream" style="display:none" onchange="importApkgFile(this.files&&this.files[0]); this.value='';">
 <button id="dev-screen-btn" onclick="showDevScreen()" title="Kehittäjänäkymä" style="display:none;position:fixed;top:14px;left:14px;width:44px;height:44px;border-radius:50%;border:1px solid #d4cec4;background:#fffef9;color:#56533c;font-size:1.2rem;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.14);z-index:50;align-items:center;justify-content:center;">🛠️</button>
 <div id="dev-screen" style="display:none">
@@ -1377,8 +1400,13 @@ function initDarkmodeBtn(){
 }
 
 function promptDevMode(){
-  const pw = prompt('Anna kehittäjätilan salasana:');
-  if(!pw) return;
+  const o=document.getElementById('devpw-overlay'), inp=document.getElementById('devpw-input');
+  if(!o||!inp){ const pw=prompt('Anna kehittäjätilan salasana:'); if(pw) _checkDevPw(pw); return; }   // fallback
+  inp.value=''; o.style.display='flex'; setTimeout(()=>{ inp.focus(); },50);
+}
+function closeDevPw(){ const o=document.getElementById('devpw-overlay'); if(o) o.style.display='none'; }
+function submitDevPw(){ const inp=document.getElementById('devpw-input'); const pw=inp?inp.value:''; closeDevPw(); if(pw) _checkDevPw(pw); }
+function _checkDevPw(pw){
   crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw))
     .then(buf=>{
       const hash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
