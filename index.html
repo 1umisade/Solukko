@@ -279,8 +279,9 @@ body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 #fs-exit-btn.visible { opacity: 1; pointer-events: auto; }
 body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 /* fullscreen comment button (bottom-left) + live comment count */
-#fs-comment-btn { display: none; position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; }
+#fs-comment-btn { display: none; position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
 #card-screen:fullscreen #fs-comment-btn { display: flex; }
+#fs-comment-btn.visible { opacity: 1; pointer-events: auto; }   /* shown on mouse-move / touch, then fades (like the exit button) */
 @media (max-width: 560px){ #fs-comment-btn { top: 16px; left: 16px; bottom: auto; width: 48px; height: 48px; } }   /* mobile: move to the top-left so it doesn't overlap the bottom button row */
 #fs-comment-btn.active { background: #56533c; color: #f5f0e8; border-color: #56533c; }
 body.dark-mode #fs-comment-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
@@ -2240,11 +2241,18 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
   }
   show('card-screen'); hide('loading');
   showDeckLanding();   // grid only; the first card highlights + shows on the right after the grid fades in
-  { const _scrollHeaderOff=()=>{   // open scrolled past the header so the back button starts off-screen; the cover fills the view
-      const _gc=document.getElementById('grid-col'); if(!_gc) return; _gc.scrollTop=0;
+  { const _scrollHeaderOff=()=>{   // open scrolled past the header so the back button starts off-screen; the cover (title + esittely) fills the view
       const _cov=document.getElementById('deck-cover');
       const _tgt=(_cov&&getComputedStyle(_cov).display!=='none')?_cov:document.getElementById('card-overview-grid');
-      if(_tgt){ const _d=_tgt.getBoundingClientRect().top-_gc.getBoundingClientRect().top; _gc.scrollTop=Math.max(0,_d-1); } };
+      if(!_tgt) return;
+      if(window.matchMedia && window.matchMedia('(max-width: 900px)').matches){   // mobile: the whole window scrolls
+        const _tb=document.getElementById('global-topbar');
+        const _tbH=(_tb && getComputedStyle(_tb).position==='fixed') ? _tb.offsetHeight : 0;
+        window.scrollTo(0, Math.max(0, _tgt.getBoundingClientRect().top + window.scrollY - _tbH - 4));
+        return;
+      }
+      const _gc=document.getElementById('grid-col'); if(!_gc) return; _gc.scrollTop=0;
+      const _d=_tgt.getBoundingClientRect().top-_gc.getBoundingClientRect().top; _gc.scrollTop=Math.max(0,_d-1); };
     requestAnimationFrame(_scrollHeaderOff); setTimeout(_scrollHeaderOff,120); setTimeout(_scrollHeaderOff,350);   // re-assert past any load-time reflow
   }
   sessionStorage.setItem('solukko-savedDeck', deckName);
@@ -2498,11 +2506,11 @@ function toggleCardFullscreen(){
 }
 function exitCardFullscreen(){ if(document.fullscreenElement) document.exitFullscreen&&document.exitFullscreen(); }
 let _fsHideTimer=null;
-function flashFsExitBtn(){   // show the exit button for ~1s (on entering fullscreen and on each touch/click)
+function flashFsExitBtn(){   // show the exit + comment buttons for ~1s (on entering fullscreen and on each move/touch)
   if(!document.fullscreenElement) return;
-  const b=document.getElementById('fs-exit-btn'); if(!b) return;
-  b.style.display='flex'; b.classList.add('visible');
-  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>b.classList.remove('visible'),1000);
+  const b=document.getElementById('fs-exit-btn'); if(b){ b.style.display='flex'; b.classList.add('visible'); }
+  document.getElementById('fs-comment-btn')?.classList.add('visible');
+  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-exit-btn')?.classList.remove('visible'); document.getElementById('fs-comment-btn')?.classList.remove('visible'); },1000);
 }
 let _fsCursorTimer=null, _overCard=false;
 function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness — only in fullscreen (the right-hand card keeps its cursor + a hover hint instead)
@@ -2521,6 +2529,7 @@ document.addEventListener('mousemove', _fsCursorActivity);
   }
   // cursor-following hint: star significance over the stars (both modes); "Avaa opiskelunäkymässä" over the right-hand/grid card (non-fullscreen)
   document.addEventListener('mousemove',e=>{
+    if(document.body.classList.contains('is-mobile')){ if(tip.style.display!=='none') tip.style.display='none'; return; }   // no hover tips on mobile (stars use tap instead)
     const stars = e.target.closest ? e.target.closest('#card-stars') : null;
     if(stars && stars.dataset.starMeaning){   // hovering the stars -> show their significance on the cursor
       tip.textContent=stars.dataset.starMeaning; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; tip.style.display='block'; return;
@@ -2773,6 +2782,7 @@ function hideTopHint(){}
 // Hovering a corner button (back / dark mode / fullscreen / comment) speaks the hint through Mona's bubble
 let _monaHintPrev=null;
 function showMonaHint(text){
+  if(document.body.classList.contains('is-mobile')) return;   // no hover hints on mobile
   const b=document.getElementById('pb-bubble'), k=_fsKnob(); if(!b) return;
   if(_monaHintPrev===null) _monaHintPrev={ text:b.textContent, show:b.classList.contains('show'), op:k?k.style.opacity:'' };
   b.textContent=text; b.classList.add('show'); if(k) k.style.opacity='1';   // make sure Mona is visible under her bubble
@@ -4196,7 +4206,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
   }
 
   function updateTip(){
-    const hovered=document.querySelector('.word-link:hover');
+    const hovered=document.body.classList.contains('is-mobile') ? null : document.querySelector('.word-link:hover');   // mobile: only long-press (touchPinnedLink), no hover
     if(touchPinnedLink){ showTip(touchPinnedLink); }
     else if(hovered){ showTip(hovered); }
     else { tip.style.display='none'; }
