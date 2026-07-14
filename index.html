@@ -1124,7 +1124,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div class="comment-area" style="display:none">
   <div class="comment-box" id="comment-box">
     <textarea id="card-comment"
-      placeholder="Löysitkö jotain parannettavaa? Jätä kommentti ja saatat voittaa 5€!"></textarea>
+      placeholder="Jätä kommentti ja osallistu 5€ arvontaan!"></textarea>
     <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
     <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
     <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
@@ -2680,7 +2680,7 @@ function _keycapDip(el){ if(!el) return; el.classList.remove('keycap-press'); vo
 function fsBtnPress(el){ _keycapDip(el); try{ playKeyClick(); }catch(e){} }   // EVERY fullscreen button: up/down dip + click sound
 // reveal the answer via the Tarkista button
 function frontCheckReveal(){
-  if(cardAnswerShown) return;                       // the centre button only reveals from the front
+  if(cardAnswerShown){ shakeCard(); return; }        // back side: clicking the space button shakes the card + click sound (prompts to grade)
   fsBtnPress(document.getElementById('tarkista-btn'));
   showAnswer();
 }
@@ -3192,7 +3192,7 @@ function setupGoldenWatch(){
   }catch(e){}
 }
 // the win text shown in Mona's golden speech bubbles
-function _goldenWinText(){ return _myGolden ? ('🏆 Voitit viikon 5&nbsp;&euro;! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b> ja lunasta MobilePaylla.') : ''; }
+function _goldenWinText(){ return _myGolden ? ('🏆 Voitit viikon 5&nbsp;&euro;! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja raha siirretään sinulle Mobilepaylla.') : ''; }
 // paint the winner's info into Mona's homepage greeting + review speech bubbles (and gold them); revert when there's no unpaid prize
 function _applyGoldenBubbles(){
   renderGreet();
@@ -3205,7 +3205,7 @@ function maybeShowGoldenCelebration(){
   if(_goldenShown || !_myGolden) return;   // once per session; it re-shows on the next visit until the dev removes the gold
   _goldenShown=true;
   const msg=document.getElementById('golden-msg');
-  if(msg) msg.innerHTML='Olet voittanut 5&nbsp;&euro; jättämälläsi kommentilla! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja lunasta palkinto MobilePaylla.';
+  if(msg) msg.innerHTML='Olet voittanut 5&nbsp;&euro; jättämälläsi kommentilla! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja raha siirretään sinulle Mobilepaylla.';
   const o=document.getElementById('golden-overlay'); if(o) o.style.display='flex';
 }
 function closeGoldenOverlay(){
