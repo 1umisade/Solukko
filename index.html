@@ -1031,7 +1031,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-body">
-    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Tavoitteeni tällä sivustolla onkin tarjota nuoremmille opiskelijoille ja kaikille tieteestä kiinnostuneille mahdollisimman selkokielinen ja helppokäyttöinen oppimateriaali. Opiskelu solukko.comissa perustuu suosikkimenetelmääni eli kysymyskortteihin, joiden olen todennut tuottavan parhaan tenttimenestyksen ja jäsentävän opiskelua verrattoman hyvin. Tällä hetkellä valikoimassa ovat Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille luonnontiedealoille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi ja jakaa niitä Solukkoon, voit lähettää kortti-ideasi tai Anki-tiedostosi osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksesi tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteystietolomake lähetetään laitteelle, jolla kommentti jätettiin. Onnea opintoihin!</p>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Tavoitteeni tällä sivustolla onkin tarjota nuoremmille opiskelijoille ja kaikille tieteestä kiinnostuneille mahdollisimman selkokielinen ja helppokäyttöinen oppimateriaali. Opiskelu solukko.comissa perustuu suosikkimenetelmääni eli kysymyskortteihin, joiden olen todennut tuottavan parhaan tenttimenestyksen ja jäsentävän opiskelua verrattoman hyvin. Tällä hetkellä valikoimassa ovat Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille luonnontiedealoille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi ja jakaa niitä Solukkoon, voit lähettää kortti-ideasi tai Anki-tiedostosi osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksesi tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteydenottopyyntö lähetetään laitteelle, jolla kommentti jätettiin. Onnea opintoihin!</p>
       <div class="hero-shop">
         <a class="shop-embed" href="#" onclick="openShopOverlay(event)"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
       </div>
@@ -1069,8 +1069,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="golden-inner">
     <div class="golden-trophy">🏆</div>
     <h2>Onneksi olkoon!</h2>
-    <p>Kommenttisi valittiin viikon voittajaksi ja maalattiin kultaiseksi! Lunasta 5&nbsp;&euro; lähettämällä kuvakaappaus kultaisesta kommentistasi osoitteeseen <a href="mailto:contact@solukko.com">contact@solukko.com</a>.</p>
-    <button class="golden-view-btn" onclick="viewGoldenComment()">Näytä kultainen kommenttini</button>
+    <p id="golden-msg"></p>
   </div>
 </div>
 <input type="file" id="apkg-import-input" accept=".apkg,application/octet-stream" style="display:none" onchange="importApkgFile(this.files&&this.files[0]); this.value='';">
@@ -3103,40 +3102,39 @@ function editComment(docId,btn){
 function saveEditComment(docId,btn){ const textarea=btn.closest('.comment-text-wrap').querySelector('textarea'); const newText=textarea.value.trim(); if(!newText) return; db.collection('comments').doc(docId).update({text:newText}).then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 function cancelEditComment(btn){ loadFirestoreComments(); }
 function deleteComment(docId){ if(!confirm('Poistetaanko kommentti?')) return; db.collection('comments').doc(docId).delete().then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
-// developer paints a comment gold (the weekly winner); the author's device then celebrates
-function toggleGoldenComment(docId, isGolden){ db.collection('comments').doc(docId).update({ golden: !isGolden, goldenAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Virhe: '+err.message)); }
+// developer paints a comment gold (the weekly winner); the author's device then gets a claim message
+function toggleGoldenComment(docId, isGolden){
+  if(isGolden){ db.collection('comments').doc(docId).update({ golden: false }).catch(err=>alert('Virhe: '+err.message)); return; }
+  const code=prompt('Anna palkintokoodi (tämän voittaja tekstaa lunastaakseen):');
+  if(code===null) return;                       // cancelled
+  if(!code.trim()){ alert('Koodi ei voi olla tyhjä.'); return; }
+  db.collection('comments').doc(docId).update({ golden: true, goldenCode: code.trim(), goldenAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Virhe: '+err.message));
+}
 // watch this device's own comments; if one gets painted gold, show the winner celebration
 let _myGolden=null, _goldenShown=false, _goldenUnsub=null;
 function setupGoldenWatch(){
   try{ const uid=getUserId(); if(!uid||!db) return;
     if(_goldenUnsub){ _goldenUnsub(); _goldenUnsub=null; }
     _goldenUnsub=db.collection('comments').where('userId','==',uid).onSnapshot(snap=>{
-      let g=null; snap.forEach(doc=>{ const d=doc.data(); if(d.golden===true) g={ id:doc.id, cardId:String(d.cardId||''), text:d.text||'' }; });
+      let g=null; snap.forEach(doc=>{ const d=doc.data(); if(d.golden===true) g={ id:doc.id, code:String(d.goldenCode||'') }; });
       _myGolden=g;
       if(g) maybeShowGoldenCelebration();
     }, ()=>{});
   }catch(e){}
 }
+function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function maybeShowGoldenCelebration(){
   if(_goldenShown || !_myGolden) return;
   const seen=JSON.parse(localStorage.getItem('solukko-golden-seen')||'[]');
   if(seen.includes(_myGolden.id)) return;   // already dismissed on this device
   _goldenShown=true;
+  const msg=document.getElementById('golden-msg');
+  if(msg) msg.innerHTML='Olet voittanut 5&nbsp;&euro; jättämälläsi kommentilla! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja lunasta palkinto MobilePaylla.';
   const o=document.getElementById('golden-overlay'); if(o) o.style.display='flex';
 }
 function closeGoldenOverlay(){
   const o=document.getElementById('golden-overlay'); if(o) o.style.display='none';
   if(_myGolden){ const seen=JSON.parse(localStorage.getItem('solukko-golden-seen')||'[]'); if(!seen.includes(_myGolden.id)){ seen.push(_myGolden.id); localStorage.setItem('solukko-golden-seen',JSON.stringify(seen)); } }
-}
-async function viewGoldenComment(){
-  const g=_myGolden; closeGoldenOverlay(); if(!g||!g.cardId) return;
-  try{ await openCardById(g.cardId); }catch(e){ return; }
-  if(typeof toggleComment==='function' && !_commenting) toggleComment();   // open the comments panel
-  let tries=0; const iv=setInterval(()=>{ tries++;
-    const item=document.querySelector('#comment-feed .comment-item[data-doc-id="'+g.id+'"]');
-    if(item){ clearInterval(iv); item.scrollIntoView({behavior:'smooth',block:'center'}); item.classList.remove('golden-flash'); void item.offsetWidth; item.classList.add('golden-flash'); setTimeout(()=>item.classList.remove('golden-flash'),1400); }
-    else if(tries>25) clearInterval(iv);
-  }, 200);
 }
 
 
