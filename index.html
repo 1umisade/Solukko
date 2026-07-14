@@ -228,6 +228,10 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 .fc-mona img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); }
 .tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; margin-top: -1px; cursor: pointer; overflow: hidden; }
 .tarkista-btn img { height: 75px; width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons (75px) */
+.tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
+#front-check.back .tarkista-btn .tk-front { display: none; }
+#front-check.back .tarkista-btn .tk-back { display: block; }
+#front-check.back .tarkista-fill { -webkit-mask-image: url('tiesitko.png'); mask-image: url('tiesitko.png'); }   /* mask the progress fill to the back keycap's shape */
 .tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('tarkista.png') center/100% 100% no-repeat; mask: url('tarkista.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
 body.dark-mode .tarkista-fill { background: #6f8f77; }
 .tarkista-btn.keycap-press { animation: keycapPress 0.16s ease; }   /* same up/down dip as the answer buttons */
@@ -1156,7 +1160,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       </div>
       <div class="fc-bubble" id="fc-bubble"></div>
       <button id="tarkista-btn" class="tarkista-btn" onclick="frontCheckReveal()" title="Tarkista (välilyönti)">
-        <img src="tarkista.png" alt="Tarkista">
+        <img class="tk-front" src="tarkista.png" alt="Tarkista">
+        <img class="tk-back" src="tiesitko.png" alt="Tiesitkö?">
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
@@ -3786,6 +3791,12 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
     if(e.key==='n'||e.key==='N'){ document.body.classList.toggle('no-cursor-theme'); return; }   // debug: N toggles the custom cursor theme
     if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); return; }   // F toggles fullscreen anytime
+    if((e.key==='ArrowRight'||e.key==='ArrowLeft') && !document.fullscreenElement && document.body.classList.contains('reviewing') && currentCard){   // grid view: browse cards with the arrows
+      e.preventDefault();
+      const ni=currentOverviewIndex+(e.key==='ArrowRight'?1:-1);
+      if(ni>=0 && ni<reviewCards.length) jumpToOverviewCard(ni);
+      return;
+    }
     if(!document.fullscreenElement) return;                        // reveal/grade keys work only in fullscreen
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
       e.preventDefault();
