@@ -316,6 +316,9 @@ body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #c
 .mona-top-inner img { width: 100%; height: auto; display: block; }
 .mona-top-inner.shake { animation: topPeekShake 0.5s ease; }
 @keyframes topPeekShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-4px,2px) rotate(-4deg)} 40%{transform:translate(4px,-2px) rotate(4deg)} 60%{transform:translate(-3px,1px) rotate(-3deg)} 80%{transform:translate(2px,-1px) rotate(2deg)} }
+/* generic Mona click shake — animates the img so it never fights a container's positioning transform (e.g. the slider knob) */
+@keyframes monaShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-4px,2px) rotate(-6deg)} 40%{transform:translate(4px,-2px) rotate(6deg)} 60%{transform:translate(-3px,1px) rotate(-4deg)} 80%{transform:translate(2px,-1px) rotate(3deg)} }
+.mona-shake img { animation: monaShake 0.5s ease; }
 .mona-top-spacer { flex: 0 0 118px; visibility: hidden; }   /* balances Mona so the bubble stays centred on the title */
 .mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 36ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
 .mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
@@ -432,7 +435,7 @@ body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 .reveal-fade { opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
 .reveal-fade.shown { opacity: 1; pointer-events: auto; }
 .flashcard img { pointer-events: none; -webkit-user-drag: none; user-drag: none; user-select: none; max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
-.flashcard { position: relative; z-index: 1; box-sizing: border-box; width: 100%; min-height: 0; --card-bg: url('new_bg.png'); background: var(--card-bg) center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-y: auto; overflow-x: hidden; overscroll-behavior: auto; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y pinch-zoom; will-change: transform; scrollbar-width: auto; scrollbar-color: #b5824a transparent; }
+.flashcard { position: relative; z-index: 1; box-sizing: border-box; width: 100%; min-height: 0; --card-bg: url('new_bg.png?v=2'); background: var(--card-bg) center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07); padding: 2.2rem 2rem; cursor: pointer; overflow-y: auto; overflow-x: hidden; overscroll-behavior: auto; scroll-margin-top: 8px; transform-origin: 50% 85%; touch-action: pan-y pinch-zoom; will-change: transform; scrollbar-width: auto; scrollbar-color: #b5824a transparent; }
 /* big, site-matching scrollbar (only appears when the card content overflows) */
 .flashcard::-webkit-scrollbar { width: 24px; }
 .flashcard::-webkit-scrollbar-track { background: transparent; margin: 10px 0; }
@@ -668,7 +671,7 @@ body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-colo
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
-.overview-card { background: url('new_bg.png') center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1 / 1.5; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }   /* vertical on all devices */
+.overview-card { background: url('new_bg.png?v=2') center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1 / 1.5; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }   /* vertical on all devices */
 
 /* ── STAR BADGE inside overview cards ─────────────────────  */
 .overview-card-stars {
@@ -688,8 +691,8 @@ body.dark-mode .overview-card-stars { color: #eadfce; }
 .subdeck-video-embed iframe { width: 100%; height: 100%; border: none; }
 .overview-card.active  { border: 3px solid #a06a35 !important; box-shadow: 0 0 0 4px rgba(160,106,53,0.5), 0 5px 16px rgba(0,0,0,0.18); }   /* thick brown highlight for the card being reviewed */
 body.dark-mode .overview-card.active { border-color: #d9c496 !important; box-shadow: 0 0 0 4px rgba(217,196,150,0.45), 0 5px 16px rgba(0,0,0,0.35); }   /* beige in dark mode */
-.overview-card.known   { background: linear-gradient(rgba(154,184,161,0.42), rgba(154,184,161,0.42)), url('new_bg.png') center/cover no-repeat; border-color: #9ab8a1; }
-.overview-card.unknown { background: linear-gradient(rgba(239,154,95,0.42), rgba(239,154,95,0.42)), url('new_bg.png') center/cover no-repeat; border-color: #ef9a5f; }   /* "En tiedä" cards tinted orange */
+.overview-card.known   { background: linear-gradient(rgba(154,184,161,0.42), rgba(154,184,161,0.42)), url('new_bg.png?v=2') center/cover no-repeat; border-color: #9ab8a1; }
+.overview-card.unknown { background: linear-gradient(rgba(239,154,95,0.42), rgba(239,154,95,0.42)), url('new_bg.png?v=2') center/cover no-repeat; border-color: #ef9a5f; }   /* "En tiedä" cards tinted orange */
 body.dark-mode .overview-card { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .overview-card.known   { background: #303d35; border-color: #6f8f77; }
 body.dark-mode .overview-card.unknown { background: #3f3022; border-color: #b87a45; }
@@ -1050,7 +1053,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div id="card-stack">
   <div id="deck-welcome">
     <div class="welcome-bubble" id="welcome-bubble"></div>
-    <div class="welcome-mona">
+    <div class="welcome-mona" onclick="monaReactAt(this, true)">
       <img src="solukkologo_eyes.png" alt="">
       <div class="logo-eye le"><span class="logo-pupil"></span></div>
       <div class="logo-eye re"><span class="logo-pupil"></span></div>
@@ -2430,7 +2433,7 @@ document.addEventListener('fullscreenchange',()=>{
 document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
 
 // Grading slider — Mona rides the progress bar as a draggable knob between the two answer buttons
-let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false;
+let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false, _fsGrabbedKnob=false;
 let _clickSnd=null;
 function playKeyClick(){   // keyboard-keycap click sound on pressing an answer button
   try{ if(!_clickSnd){ _clickSnd=new Audio('click.mp3'); _clickSnd.volume=0.45; _clickSnd.setAttribute('playsinline',''); } _clickSnd.currentTime=0; _clickSnd.play().catch(()=>{}); }catch(e){}
@@ -2473,10 +2476,15 @@ function _fsStartDrag(e){
   _fsDrag=true; _fsTrackW=t.getBoundingClientRect().width||1; _fsStartX=e.clientX; _fsStartPct=_fsPct(); _fsSwipeMoved=false;
   const k=_fsKnob(); if(k) k.style.transition='none';
 }
-function _fsKnobDown(e){ if(!cardAnswerShown) return; _fsStartDrag(e); e.stopPropagation(); e.preventDefault(); }   // grab Mona directly (either mode)
+function _fsKnobDown(e){   // grab Mona directly (either mode)
+  _fsGrabbedKnob=true;
+  if(!cardAnswerShown){ monaReactAt(_fsKnob(), true); e.stopPropagation(); return; }   // front side: no bar to drag yet, so a tap on Mona just makes her react
+  _fsStartDrag(e); e.stopPropagation(); e.preventDefault();
+}
 function _fsScreenDown(e){   // in fullscreen, a horizontal swipe on empty space grabs Mona
   if(!(_fsFullscreen() && cardAnswerShown)) return;
   if(e.target.closest('.ball-btn')||e.target.closest('#fs-exit-btn')||e.target.closest('#flashcard')) return;   // don't hijack text selection on the card (grab Mona by the knob or empty space instead)
+  _fsGrabbedKnob=false;   // grabbing empty space is not a click on Mona
   _fsStartDrag(e);
 }
 function _fsMove(e){ if(!_fsDrag) return;
@@ -2494,6 +2502,7 @@ function _fsUp(){ if(!_fsDrag) return; _fsDrag=false; const k=_fsKnob(); if(!k) 
   if(_fsSwipeMoved && p<=15){ k.style.left='0%'; _pbBubbleX(0,true); fsHot('wrong'); fsDragGrade(false); }       // released on the Ei button -> loading screen for ~1s, then the next card
   else if(_fsSwipeMoved && p>=85){ k.style.left='100%'; _pbBubbleX(100,true); fsHot('right'); fsDragGrade(true); } // released on the Kyllä button -> loading screen for ~1s, then the next card
   else {   // snap back to centre -> bubble returns to "Tiesitkö?"
+    if(_fsGrabbedKnob && !_fsSwipeMoved) monaReactAt(k, true);   // a tap on Mona (no swipe) -> she reacts
     fsHot(null); k.style.transition='left 0.2s ease'; k.style.left='50%'; setTimeout(()=>{ if(k) k.style.transition=''; },210);
     _pbBubbleX(50,true); const b=_pbBubble(); if(b) setTimeout(()=>{ b.textContent=_BACK_BUBBLE_TEXT; b.style.transition='opacity 0.4s ease'; },210);
   }
@@ -2668,16 +2677,19 @@ function _doPreview(index){
 }
 // Mona lives in the cover above the title (scrolls with the page); flies in on load via CSS. Clickable like the homepage logo.
 let _topPeekEyeTO=null;
-function monaClick(withSound){   // unified Mona reaction: shake + eyes-closed png + hide the moving dots (+ optional scream) — mirrors homepage siteBrandReact
-  const inner=document.querySelector('#mona-top-peek .mona-top-inner'), img=inner&&inner.querySelector('img');
-  if(inner){
-    inner.classList.remove('shake'); void inner.offsetWidth; inner.classList.add('shake'); setTimeout(()=>inner.classList.remove('shake'),520);
-    inner.classList.add('eyes-closed');   // hide the moving pupils while she screams
-  }
-  if(img){ img.src='solukkologo_eyes_closed.png'; clearTimeout(_topPeekEyeTO); _topPeekEyeTO=setTimeout(()=>{ img.src='solukkologo_eyes.png'; if(inner) inner.classList.remove('eyes-closed'); },900); }
-  if(withSound){ try{ playScream(); }catch(e){} }
+// THE single Mona click reaction. All four always fire together and never separately: scream + shake + eyes shut + dots hidden.
+function monaReactAt(el, withSound){
+  if(!el) return;
+  const img=el.querySelector('img');
+  el.classList.remove('mona-shake'); void el.offsetWidth; el.classList.add('mona-shake');   // shake
+  clearTimeout(el._monaShakeTO); el._monaShakeTO=setTimeout(()=>el.classList.remove('mona-shake'),500);
+  el.classList.add('eyes-closed');                                                          // dots disappear
+  if(img) img.src='solukkologo_eyes_closed.png';                                            // eyes shut
+  clearTimeout(el._monaEyeTO); el._monaEyeTO=setTimeout(()=>{ if(img) img.src='solukkologo_eyes.png'; el.classList.remove('eyes-closed'); },900);
+  if(withSound!==false){ try{ playScream(); }catch(e){} }                                    // scream
 }
-function _monaTopClick(){ monaClick(true); }   // clickable like the homepage: shake + scream + eyes closed
+function monaClick(withSound){ monaReactAt(document.querySelector('#mona-top-peek .mona-top-inner'), withSound); }
+function _monaTopClick(){ monaClick(true); }   // top peeker uses the one reaction, like every other Mona
 function staggerGridIntro(){   // on deck load: fade the first row of cards in one-by-one, then everything else together
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
   const cards=[...grid.querySelectorAll('.overview-card')]; if(!cards.length) return;
