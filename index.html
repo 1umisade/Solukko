@@ -213,9 +213,13 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 /* fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] — shown only when #front-check is .active */
 #front-check { display: none; }
 #card-screen:fullscreen #front-check.active { display: flex; align-items: center; justify-content: center; gap: 20px; position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 96; }
-#card-screen:fullscreen.front-side #progress-row { display: none !important; }   /* front side: hide the Ei/Kyllä grading bar; the front has its own controls */
-.fc-nav { width: 75px; height: 75px; flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; }   /* white Edellinen/Seuraava keycaps, same size as the backside Ei/Kyllä buttons */
+#card-screen:fullscreen #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
+.fc-nav { width: 75px; height: 75px; flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; }   /* side keycaps, same size as the backside Ei/Kyllä buttons */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
+.fc-nav .nav-back { display: none; }   /* front side shows Edellinen/Seuraava; back side swaps to Ei/Kyllä — same position, just a different image */
+#front-check.back .fc-nav .nav-front { display: none; }
+#front-check.back .fc-nav .nav-back { display: block; }
+.fc-nav.keycap-press { animation: keycapPress 0.16s ease; }
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
 .fc-mona-clip { width: 156px; height: 78px; overflow: hidden; position: relative; z-index: 1; cursor: pointer; }   /* shows the top ~50% of Mona; her lower half is clipped behind the button's top edge */
@@ -327,7 +331,7 @@ body.reviewing #card-col.welcome #card-stars { display: none !important; }
 body.reviewing #show-row { display: none !important; }   /* the answer is revealed by clicking the card — no "Tarkista" button */
 /* reviewing happens only in fullscreen: no answer bar or corner buttons in the non-fullscreen right half */
 @media (min-width: 901px) { body.reviewing #progress-row, body.reviewing #rotate-btn, body.reviewing #comment-btn { display: none !important; } }
-#card-screen:fullscreen #progress-row { display: flex !important; }
+/* (progress-row is hidden in fullscreen — see the #front-check rules; the Tarkista button replaces it) */
 /* staggered fade-in on deck load: title → esittely → card grid + videos → (Mona peeks from the top at 3s, her bubble at 4s — driven by JS) */
 @keyframes introFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 body.deck-intro-anim #deck-cover .cover-title { animation: introFade 0.6s ease both; }
@@ -1121,7 +1125,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 
   <!-- fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] -->
   <div id="front-check">
-    <button class="fc-nav" onclick="frontPrev()" title="Edellinen (vasen nuoli)"><img src="edellinen.png" alt="Edellinen"></button>
+    <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()"><img class="nav-front" src="edellinen.png" alt="Edellinen"><img class="nav-back" src="ei.png" alt="Ei"></button>
     <div class="tarkista-wrap">
       <div class="fc-mona-clip" onclick="monaReactAt(document.getElementById('fc-mona'), true)">
         <div class="fc-mona" id="fc-mona">
@@ -1136,7 +1140,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
-    <button class="fc-nav" onclick="frontNext()" title="Seuraava (oikea nuoli)"><img src="seuraava.png" alt="Seuraava"></button>
+    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="kylla.png" alt="Kyllä"></button>
   </div>
 
   <div class="btn-row" id="show-row">
@@ -2468,8 +2472,9 @@ document.addEventListener('fullscreenchange',()=>{
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
   fitCardScale(); scrollToCard(); updateFsSlider();
   const b=document.getElementById('fs-exit-btn');
-  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // smooth expand from the right; re-arm Mona's 2s delayed entrance; drop the hover hint
+  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); else clearFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // enter fullscreen: show the front OR back button row
   else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
+    { const fchk=document.getElementById('front-check'); if(fchk){ fchk.classList.remove('active','back'); } const m=document.getElementById('fc-mona'); if(m) m.classList.remove('fc-peeked'); }   // drop the fullscreen button row on exit
     if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
     if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
 });
@@ -2525,11 +2530,8 @@ function _fsKnobDown(e){   // grab Mona directly (either mode)
   if(!cardAnswerShown){ monaReactAt(_fsKnob(), true); e.stopPropagation(); return; }   // front side: no bar to drag yet, so a tap on Mona just makes her react
   _fsStartDrag(e); e.stopPropagation(); e.preventDefault();
 }
-function _fsScreenDown(e){   // in fullscreen, a horizontal swipe on empty space grabs Mona
-  if(!(_fsFullscreen() && cardAnswerShown)) return;
-  if(e.target.closest('.ball-btn')||e.target.closest('#fs-exit-btn')||e.target.closest('#flashcard')) return;   // don't hijack text selection on the card (grab Mona by the knob or empty space instead)
-  _fsGrabbedKnob=false;   // grabbing empty space is not a click on Mona
-  _fsStartDrag(e);
+function _fsScreenDown(e){   // (retired) grading is now via the Ei/Kyllä buttons, not a swipe on the hidden knob
+  return;
 }
 function _fsMove(e){ if(!_fsDrag) return;
   if(Math.abs(e.clientX-_fsStartX)>4) _fsSwipeMoved=true;
@@ -2585,12 +2587,21 @@ const _BACK_BUBBLE_TEXT='Tiesitkö?';                       // resting: Mona ask
 const _SLIDE_YES_TEXT='Hyvä sinä ❤️ Kysyn huomenna uudestaan.';   // near/onto the Kyllä (right) button
 const _SLIDE_NO_TEXT='Ei hätää! Kysyn kohta uudestaan.';          // near/onto the Ei (left) button
 // front side: no bar — Mona centred, bubble centred above her; both fade in after 1s
+function _keycapDip(el){ if(!el) return; el.classList.remove('keycap-press'); void el.offsetWidth; el.classList.add('keycap-press'); setTimeout(()=>el.classList.remove('keycap-press'),180); }
 // reveal the answer via the Tarkista button: keycap up/down dip + click sound, then show the answer
 function frontCheckReveal(){
-  const btn=document.getElementById('tarkista-btn');
-  if(btn){ btn.classList.remove('keycap-press'); void btn.offsetWidth; btn.classList.add('keycap-press'); setTimeout(()=>btn.classList.remove('keycap-press'),180); }
+  if(cardAnswerShown) return;                       // the centre button only reveals from the front
+  _keycapDip(document.getElementById('tarkista-btn'));
   playKeyClick();
   showAnswer();
+}
+// same button positions on both sides: LEFT/RIGHT swap image + action depending on the side
+function frontNavLeft(){ if(cardAnswerShown) gradeBack(false); else frontPrev(); }    // Ei (grade wrong) / Edellinen (previous)
+function frontNavRight(){ if(cardAnswerShown) gradeBack(true); else frontNext(); }     // Kyllä (grade right) / Seuraava (next)
+function gradeBack(correct){                          // back-side grade: keycap dip + click sound, then grade & advance
+  _keycapDip(document.getElementById(correct?'fc-nav-right':'fc-nav-left'));
+  playKeyClick();
+  _gradeInstant=true; gradeCard(correct);
 }
 // front-side navigation: skip to the next / previous card without grading (Seuraava / Edellinen)
 function frontGoTo(i){
@@ -2602,14 +2613,12 @@ function frontGoTo(i){
 }
 function frontNext(){ frontGoTo(currentOverviewIndex+1); }
 function frontPrev(){ frontGoTo(currentOverviewIndex-1); }
-function _frontCheckShow(){   // fullscreen front: Tarkista button + Mona peeking 50% from behind it, 1s after the card loads
-  document.getElementById('card-screen')?.classList.add('front-side');   // hides the grading bar (front shows only Tarkista + Mona)
-  const pr=document.getElementById('progress-row'); if(pr){ pr.style.display='none'; pr.classList.remove('shown','pb-front'); }
+function _frontCheckShow(){   // fullscreen FRONT: [Edellinen] [Tarkista + peeking Mona] [Seuraava]
   _setKnobShown(false);
   const fchk=document.getElementById('front-check'), mona=document.getElementById('fc-mona'), fcb=document.getElementById('fc-bubble');
+  if(fchk){ fchk.classList.add('active'); fchk.classList.remove('back'); }   // front images (Edellinen/Seuraava)
   if(fcb) fcb.textContent=(typeof _frontHintText!=='undefined'?_frontHintText:'')||'';
   if(mona) mona.classList.remove('fc-peeked');
-  if(fchk) fchk.classList.add('active');
   clearTimeout(_frontMonaTimer);
   _frontMonaTimer=setTimeout(()=>{ if(cardAnswerShown) return; const m=document.getElementById('fc-mona'); if(m) m.classList.add('fc-peeked'); }, 1000);   // peek up 1s after the card loads
   updateProgress();
@@ -2632,16 +2641,21 @@ function showFrontMona(){
     const k2=_fsKnob(); if(k2){ k2.style.transition='opacity 0.45s ease'; } _setKnobShown(true); _pbShow();   // Mona fades in, then (and only then) her bubble
   }, 2000);   // Mona fades in 2s after the card loads
 }
-// reveal: Mona + bar + buttons immediately; the "Tiesitkö…" bubble after 1s
+// flip to the back: same button row stays put, side buttons swap to Ei/Kyllä
 function clearFrontMona(){
   clearTimeout(_frontMonaTimer);
-  document.getElementById('card-screen')?.classList.remove('front-side');   // back side: the grading bar shows again
-  { const fchk=document.getElementById('front-check'); if(fchk) fchk.classList.remove('active'); const m=document.getElementById('fc-mona'); if(m) m.classList.remove('fc-peeked'); }   // drop the Tarkista button + peeking Mona
+  if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
+    const fchk=document.getElementById('front-check'); if(fchk){ fchk.classList.add('active'); fchk.classList.add('back'); }   // back images (Ei/Kyllä)
+    const mona=document.getElementById('fc-mona'); if(mona) mona.classList.add('fc-peeked');   // Mona keeps peeking on the back too
+    const fcb=document.getElementById('fc-bubble'); if(fcb) fcb.textContent=_BACK_BUBBLE_TEXT;   // "Tiesitkö?" on hover
+    return;
+  }
+  // non-fullscreen (mobile): original back bar with the draggable knob
   const pr=document.getElementById('progress-row'); if(pr) pr.classList.remove('pb-front');
-  const k=_fsKnob(); if(k){ k.style.transition='none'; } _setKnobShown(true);   // Mona is visible on the back side
+  const k=_fsKnob(); if(k){ k.style.transition='none'; } _setKnobShown(true);
   resetFsKnob();
   clearTimeout(_backBubbleTimer);
-  const b=document.getElementById('pb-bubble'); if(b){ b.textContent=_BACK_BUBBLE_TEXT; b.style.left='50%'; } _pbShow();   // "Tiesitkö?" shown immediately on the back side
+  const b=document.getElementById('pb-bubble'); if(b){ b.textContent=_BACK_BUBBLE_TEXT; b.style.left='50%'; } _pbShow();
 }
 (function(){
   const cs=document.getElementById('card-screen'), knob=_fsKnob();
@@ -3742,7 +3756,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
       e.preventDefault();
       if(!cardAnswerShown){ if(e.key==='ArrowRight') frontNext(); else frontPrev(); }   // front: Seuraava / Edellinen (skip / previous)
-      else fsSliderPick(e.key==='ArrowRight');                     // back: Mona slides to the button (which glows), then grades
+      else gradeBack(e.key==='ArrowRight');                        // back: Ei / Kyllä (grade)
     }
     if(e.key===' '&&currentCard){ e.preventDefault(); if(!cardAnswerShown) frontCheckReveal(); else shakeCard(); }   // space = press Tarkista (reveal), then shake
     else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
