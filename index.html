@@ -442,12 +442,15 @@ body.dark-mode #grid-col::-webkit-scrollbar-thumb:hover { background: #c99e64; }
   body.reviewing #comment-col textarea { max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }   /* keep comment content inside the narrow panel */
   body.reviewing #flashcard-wrap { margin-top: 0; }
 }
-@media (max-width: 900px) {   /* narrow: single column, card on top, grid below (unchanged) */
+@media (max-width: 900px) {   /* mobile (portrait): review shows ONLY the grid + course title + esittely — no card preview, no Mona */
   #deck-title-bar { font-size: 1.4rem; }
   #grid-header { padding: 4px 2px 10px; }
-  #review-cols { flex-direction: column; align-items: center; gap: 1.4rem; }
-  #grid-col { order: 2; position: static; max-height: none; overflow: visible; width: 100%; padding: 0; }
-  #card-col { order: 1; position: static; height: auto; flex: none; width: 100%; }
+  #review-cols { flex-direction: column; align-items: center; gap: 0; }
+  #grid-col { order: 1; position: static; max-height: none; overflow: visible; width: 100%; padding: 0; }
+  #card-col { order: 2; position: static; height: auto; flex: none; width: 100%; }
+  body.reviewing #card-col { display: none !important; }            /* no card preview / Mona on the right */
+  #card-screen:fullscreen #card-col { display: flex !important; }   /* except in fullscreen, where the card IS the view */
+  body.reviewing #mona-top-peek { display: none !important; }       /* no top-peek Mona in mobile review */
 }
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
@@ -1116,7 +1119,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div class="comment-area" style="display:none">
   <div class="comment-box" id="comment-box">
     <textarea id="card-comment"
-      placeholder="Auta kehittämään Solukkoa! Lähetä kommentti ja voit voittaa 5€!&#10;&#10;Arvonta joka kuukauden 15. päivä Turun Yliopiston Orbitaalilla klo 14:00.&#10;&#10;Kommentissasi voit esim.&#10;• Parantaa kortin tietoja&#10;• Pyytää uutta korttia&#10;• Ilmoittaa bugista sivustolla"></textarea>
+      placeholder="Löysitkö jotain parannettavaa? Jätä kommentti ja saatat voittaa 5€!"></textarea>
     <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
     <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
     <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
@@ -3683,9 +3686,15 @@ function fitDeckTitle(){
   el.style.fontSize=Math.min(64,100*W/natural).toFixed(1)+'px';
 }
 
-function jumpToOverviewCard(index){   // 1st click: highlight the card + show it on the right; 2nd click (same card): review it fullscreen
+function jumpToOverviewCard(index){   // desktop: 1st click previews, 2nd click (same card) → fullscreen. Mobile: any tap → fullscreen
+  const mobile = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;   // matches the CSS: card-col hidden at ≤900px
   const isCurrent = (currentOverviewIndex===index && currentCard===reviewCards[index]);
-  if(isCurrent && !document.fullscreenElement){   // click the already-shown card again → fullscreen
+  if((mobile || isCurrent) && !document.fullscreenElement){   // mobile always, or clicking the already-shown card → fullscreen
+    clearTimeout(_previewTO); clearTimeout(_welcomeTO);
+    currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1);
+    if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
+    document.getElementById('card-col')?.classList.remove('welcome');
+    _previewIndex=-1; _doPreview(index);   // render the card so fullscreen has content
     _captureCardRect();
     const cs=document.getElementById('card-screen');
     if(cs && cs.requestFullscreen){ cs.requestFullscreen().catch(()=>{}); }
