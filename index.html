@@ -79,7 +79,7 @@ body.dark-mode #decks-loading { color: #c9b48f; }
 @keyframes deckFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .deck-btn.deck-in { animation: deckFadeIn 0.5s ease both; }
 /* homepage hero: title + slogan + manifest, at the very top (scrolled out of view on load) */
-#home-hero { align-self: center; width: min(1200px, 92vw); max-width: none; margin: 0; padding: 36px 1rem 24px; text-align: left; font-family: 'Lora', serif; }
+#home-hero { order: 99; align-self: center; width: min(1200px, 92vw); max-width: none; margin: 0; padding: 48px 1rem 24px; text-align: left; font-family: 'Lora', serif; }   /* order:99 -> at the bottom of the page */
 /* fake solukko.shop product embed, floated to the right of the manifest */
 .shop-embed { width: 100%; max-width: 190px; display: block; text-decoration: none; color: inherit; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.14); font-family: 'Lora', serif; transition: box-shadow 0.15s ease, transform 0.15s ease; }
 .shop-embed:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.22); transform: translateY(-2px); }
@@ -1971,7 +1971,6 @@ async function loadDecks(){
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
   show('deck-screen');
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display=devMode?'flex':'none'; }
-  scrollPastHero();   // the hero section starts scrolled out of view above the fold
   requestAnimationFrame(layoutDecksRadial);
   setTimeout(layoutDecksRadial, 140); setTimeout(layoutDecksRadial, 450);   // re-run once the packs have settled to their final size
 }
@@ -2003,9 +2002,6 @@ function buildDeckGrid(decks, list){
   const logo=document.getElementById('site-brand');
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
-  const brand=document.createElement('div'); brand.className='home-brand-block';           // site name + slogan in the empty space to Mona's LEFT
-  brand.innerHTML='<div class="home-name">Solukko.com</div>';
-  header.appendChild(brand);
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona
   const greet=document.createElement('div'); greet.className='home-greet';                 // her speech bubble to the right (clicking Mona cycles it)
   _greetIdx=0;
