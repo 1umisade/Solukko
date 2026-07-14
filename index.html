@@ -45,8 +45,8 @@ try{
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 /* custom cursors — forced everywhere (!important) so per-element cursor rules don't fall back to the OS pointer; Mona uses the grab hand */
 * { cursor: url('cursor_normal.png') 4 2, auto !important; }
-body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 20 24, grab !important; }   /* over anything clickable (toggled by JS) */
-body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 20 24, grabbing !important; }   /* while Mona is being dragged */
+body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 20 12, grab !important; }   /* over anything clickable (toggled by JS) */
+body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 20 12, grabbing !important; }   /* while Mona is being dragged */
 body { font-family: 'Lora', Georgia, serif; background: #f5f0e8; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
 /* ── 2. VIRHEVIESTI-PALKKI ───────────────────────────────── */
@@ -95,6 +95,17 @@ body.dark-mode .shop-embed-head { color: #eadfce; border-bottom-color: #4a4038; 
 body.dark-mode .shop-embed-imgwrap { background: #332b25; }
 body.dark-mode .shop-embed-name { color: #eadfce; }
 @media (max-width: 640px){ .shop-embed { width: 150px; margin-left: 1rem; } .shop-embed-imgwrap img { width: 104px; } }
+/* solukko.shop overlay */
+#shop-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(24,18,12,0.66); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
+.shop-overlay-inner { display: flex; align-items: center; justify-content: center; gap: 2.2rem; }
+.shop-overlay-side { display: flex; flex-direction: column; gap: 1.6rem; flex: 0 0 auto; }
+.shop-overlay-side .shop-embed { max-width: 210px; width: 210px; }
+.shop-embed.shop-embed-big { max-width: 420px; width: 420px; }
+.shop-embed.shop-embed-big .shop-embed-imgwrap img { max-height: 340px; }
+.shop-embed.shop-embed-big .shop-embed-name { font-size: 1.3rem; }
+.shop-embed.shop-embed-big .shop-embed-price { font-size: 1.5rem; }
+#shop-overlay-close { position: fixed; top: 18px; right: 24px; z-index: 201; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+@media (max-width: 900px){ .shop-overlay-inner { flex-direction: column; gap: 1.4rem; } .shop-overlay-side { flex-direction: row; flex-wrap: wrap; justify-content: center; } .shop-embed.shop-embed-big { width: 300px; max-width: 300px; } }
 .hero-body { display: flex; align-items: flex-start; gap: 2rem; margin-top: 1.4rem; text-align: left; }
 .hero-shop { flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.2rem; align-items: start; justify-items: center; }   /* fills the rest; smaller product cards */
 #home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; aspect-ratio: 1 / 1; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* perfect square at the very left edge; overflow:hidden contains the floated portrait */
@@ -850,7 +861,7 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
 body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 4px 12px rgba(0,0,0,0.3); }
 body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after { border-top-color: #4a3f34; }
-#word-link-tooltip { position: fixed; z-index: 99999; width: min(520px, calc(100vw - 24px)); max-width: min(520px, calc(100vw - 24px)); min-width: 180px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.75rem 1rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
+#word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.55; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
@@ -948,10 +959,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div class="hero-body">
     <p class="hero-manifest"><img id="aku-portrait" src="aku_bw.jpg" alt="Aku" width="170"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monet opetettavat asiat ole niin vaikeita kuin ne luentodioissa esitetään. Tämän sivuston tavoite on tarjota tuleville tieteentekijöille ja kaikille tieteestä kiinnostuneille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali. Opiskelu solukko.comissa perustuu suosikkimenetelmääni eli kysymyskortteihin, joiden olen todennut tuottavan parhaan tenttimenestyksen ja pysyvimmän muistijäljen. Tällä hetkellä valikoimassa ovat Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille luonnontiedealoille. Jos haluat luoda kysymyskortteja omasta tutkinnostasi, otathan yhteyttä osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi sillä laitteella, jolla kommentti jätettiin. Lunasta palkinto lähettämällä kuvakaappaus kultaisesta kommentistasi osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Onnea opintoihisi!</p>
       <div class="hero-shop">
-        <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
-        <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="solusota_web.jpg" alt="Solusota"></span><span class="shop-embed-name">Solusota &ndash; korttipeli</span><span class="shop-embed-price">19,90&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
-        <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="poster_web.jpg" alt="Juliste"></span><span class="shop-embed-name">Juliste</span><span class="shop-embed-price">15,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
-        <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="lamp_web.jpg" alt="Lamppu"></span><span class="shop-embed-name">Lamppu</span><span class="shop-embed-price">24,90&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
+        <a class="shop-embed" href="#" onclick="openShopOverlay(event)"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
       </div>
     </div>
   </div>
@@ -965,6 +973,20 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
         </div>
       </div>
     </button>
+  </div>
+</div>
+<!-- solukko.shop overlay: opened from the hero Haalarimerkki; enlarged product in the centre, the rest on the sides -->
+<div id="shop-overlay" style="display:none" onclick="if(event.target===this)closeShopOverlay()">
+  <button id="shop-overlay-close" onclick="closeShopOverlay()" aria-label="Sulje">&times;</button>
+  <div class="shop-overlay-inner">
+    <div class="shop-overlay-side">
+      <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="solusota_web.jpg" alt="Solusota"></span><span class="shop-embed-name">Solusota &ndash; korttipeli</span><span class="shop-embed-price">19,90&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
+      <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="poster_web.jpg" alt="Juliste"></span><span class="shop-embed-name">Juliste</span><span class="shop-embed-price">15,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
+    </div>
+    <a class="shop-embed shop-embed-big" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
+    <div class="shop-overlay-side">
+      <a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="lamp_web.jpg" alt="Lamppu"></span><span class="shop-embed-name">Lamppu</span><span class="shop-embed-price">24,90&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
+    </div>
   </div>
 </div>
 <input type="file" id="apkg-import-input" accept=".apkg,application/octet-stream" style="display:none" onchange="importApkgFile(this.files&&this.files[0]); this.value='';">
@@ -2038,6 +2060,9 @@ function scrollPastHero(){   // start with the hero section just above the viewp
   requestAnimationFrame(doScroll);
   setTimeout(doScroll, 120); setTimeout(doScroll, 400);   // again once the deck layout has settled
 }
+function openShopOverlay(e){ if(e){ e.preventDefault(); } const o=document.getElementById('shop-overlay'); if(o) o.style.display='flex'; }
+function closeShopOverlay(){ const o=document.getElementById('shop-overlay'); if(o) o.style.display='none'; }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); } });
 
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
@@ -3839,7 +3864,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-b
     const card=reviewCards[idx]; if(!card) return;
     const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
     const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
-    tip.innerHTML='<div style="font-weight:700;margin-bottom:0.6rem;">'+prepareTooltipHtml(front)+'</div><div>'+prepareTooltipHtml(back)+'</div>';
+    tip.innerHTML=prepareTooltipHtml(back||front);   // only the definition (no front/term field)
     tip.style.display='block'; tip.style.width='min(520px, calc(100vw - 24px))';
     const r=target.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
     let l=r.left, t=r.bottom+8;
