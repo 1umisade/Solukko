@@ -212,9 +212,9 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen .pb-knob { width: 78px; height: 78px; margin-top: -39px; margin-left: -39px; }
 /* fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] — shown only when #front-check is .active */
 #front-check { display: none; }
-#card-screen:fullscreen #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: 20px; position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; }   /* bottoms aligned so all three keycaps sit on the same line; ~1/25 vh from the page bottom */
+#card-screen:fullscreen #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: min(20px, 3.8vw); position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; max-width: 100vw; }   /* bottoms aligned so all three keycaps sit on the same line; scales down to fit narrow (mobile) screens */
 #card-screen:fullscreen #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
-.fc-nav { width: 75px; height: 75px; flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; }   /* side keycaps, same size as the backside Ei/Kyllä buttons */
+.fc-nav { width: min(75px, 14vw); height: min(75px, 14vw); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
 .fc-nav .nav-back { display: none; }   /* front side shows Edellinen/Seuraava; back side swaps to Ei/Kyllä — same position, just a different image */
 #front-check.back .fc-nav .nav-front { display: none; }
@@ -223,12 +223,12 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen button:focus, #card-screen:fullscreen button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
-.fc-mona-clip { width: 156px; height: 78px; overflow: hidden; position: relative; z-index: 1; cursor: pointer; }   /* shows the top ~50% of Mona; her lower half is clipped behind the button's top edge */
-.fc-mona { position: relative; width: 156px; height: 156px; transform: translateY(78px); }   /* starts fully hidden below the clip */
+.fc-mona-clip { width: min(156px, 29vw); height: min(78px, 14.5vw); overflow: hidden; position: relative; z-index: 1; cursor: pointer; }   /* shows the top ~50% of Mona; her lower half is clipped behind the button's top edge */
+.fc-mona { position: relative; width: min(156px, 29vw); height: min(156px, 29vw); transform: translateY(min(78px, 14.5vw)); }   /* starts fully hidden below the clip */
 .fc-mona.fc-peeked { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.34,1.4,0.64,1); }   /* peeks up so 50% shows — visible half matches the backside knob size */
 .fc-mona img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); }
 .tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; margin-top: -1px; cursor: pointer; overflow: hidden; }
-.tarkista-btn img { height: 75px; width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons (75px) */
+.tarkista-btn img { height: min(75px, 14vw); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
 #front-check.back .tarkista-btn .tk-back { display: block; }
@@ -250,6 +250,7 @@ body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; b
 /* fullscreen comment button (bottom-left) + live comment count */
 #fs-comment-btn { display: none; position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; }
 #card-screen:fullscreen #fs-comment-btn { display: flex; }
+@media (max-width: 560px){ #fs-comment-btn { top: 16px; left: 16px; bottom: auto; width: 48px; height: 48px; } }   /* mobile: move to the top-left so it doesn't overlap the bottom button row */
 #fs-comment-btn.active { background: #56533c; color: #f5f0e8; border-color: #56533c; }
 body.dark-mode #fs-comment-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #fs-comment-btn.active { background: #eadfce; color: #2b211b; border-color: #eadfce; }
