@@ -212,7 +212,7 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen .pb-knob { width: 78px; height: 78px; margin-top: -39px; margin-left: -39px; }
 /* fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] — shown only when #front-check is .active */
 #front-check { display: none; }
-#card-screen:fullscreen #front-check.active { display: flex; align-items: center; justify-content: center; gap: 20px; position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 96; }
+#card-screen:fullscreen #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: 20px; position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; }   /* bottoms aligned so all three keycaps sit on the same line; ~1/25 vh from the page bottom */
 #card-screen:fullscreen #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
 .fc-nav { width: 75px; height: 75px; flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; }   /* side keycaps, same size as the backside Ei/Kyllä buttons */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
