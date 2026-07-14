@@ -47,7 +47,7 @@ try{
 * { cursor: url('cursor_normal.png') 4 2, auto !important; }
 body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 20 12, grab !important; }   /* over anything clickable (toggled by JS) */
 body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 20 12, grabbing !important; }   /* while Mona is being dragged */
-body { font-family: 'Lora', Georgia, serif; background: #ece0c6 url('paper_bg.jpg') center/cover fixed; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
+body { font-family: 'Lora', Georgia, serif; background: #efe7d8 url('site_bg.jpg') center/cover fixed; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
 /* ── 2. VIRHEVIESTI-PALKKI ───────────────────────────────── */
 #conn-error { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 1.2rem 1.6rem; max-width: 480px; font-size: 0.9rem; line-height: 1.7; display: none; }
@@ -185,14 +185,13 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 #card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }
 @media (max-width: 900px) { #comment-btn { display: none !important; } }   /* mobile: comments show inline on reveal */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
-#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #ece0c6 url('paper_bg.jpg') center/cover fixed; margin: 0 !important; }
-#card-screen:fullscreen::backdrop { background: #ece0c6 url('paper_bg.jpg') center/cover fixed; }
+#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: #efe7d8 url('site_bg.jpg') center/cover fixed; margin: 0 !important; }
+#card-screen:fullscreen::backdrop { background: #efe7d8 url('site_bg.jpg') center/cover fixed; }
 body.dark-mode #card-screen:fullscreen, body.dark-mode #card-screen:fullscreen::backdrop { background: #2b2622; }
-/* per-course review background: a washed-out sepia illustration behind the card, edges dimmed. Shown in normal review and fullscreen. */
-#review-bg { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-image: var(--course-bg, none); background-size: cover; background-position: center; }
-#review-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(238,228,206,0) 34%, rgba(74,56,34,0.34) 78%, rgba(48,36,20,0.62) 100%); }
-#card-screen.has-course-bg #review-bg { display: block; }
-#card-screen.has-course-bg:fullscreen, #card-screen.has-course-bg:fullscreen::backdrop { background: transparent; }
+/* fullscreen only: darken the background toward the edges (vignette), behind the card */
+#review-bg { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+#review-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(48,36,20,0) 40%, rgba(48,36,20,0.28) 76%, rgba(40,30,16,0.58) 100%); }
+#card-screen:fullscreen #review-bg { display: block; }
 #card-screen:fullscreen #review-cols { display: block; }
 #card-screen:fullscreen #grid-col { display: none !important; }
 /* fullscreen must not inherit the desktop 50/50 split: no title, no divider, card fills the screen */
@@ -2075,22 +2074,9 @@ function openShopOverlay(e){ if(e){ e.preventDefault(); } const o=document.getEl
 function closeShopOverlay(){ const o=document.getElementById('shop-overlay'); if(o) o.style.display='none'; }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); } });
 
-// map a deck/course to its review background image (null = default paper theme)
-function courseBgUrl(deckName){
-  const short=(deckName||'').split('::').pop().toLowerCase();
-  if(short.includes('biomolekyylit')) return 'course_bg_solu.jpg';
-  return null;
-}
-function applyCourseBg(deckName){
-  const cs=document.getElementById('card-screen'); if(!cs) return;
-  const url=courseBgUrl(deckName);
-  if(url){ cs.style.setProperty('--course-bg', "url('"+url+"')"); cs.classList.add('has-course-bg'); }
-  else { cs.classList.remove('has-course-bg'); cs.style.removeProperty('--course-bg'); }
-}
 async function startDeck(deckName){
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
-  applyCourseBg(deckName);
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
@@ -3591,7 +3577,6 @@ function showDecks(){
   groups.forEach(g=>g.score=0); selectedGroup=null;
   document.getElementById('site-brand')?.classList.remove('flipped');
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';
-  applyCourseBg('');   // drop the per-course review background back to the paper theme
   stopMonaNotes(); saveGroups(); updateGroupUI(); hide('card-screen'); loadDecks();
   renderDevCommentsPanel();
 }
