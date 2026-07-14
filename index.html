@@ -235,7 +235,8 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen #card-stack { max-height: none !important; width: 100% !important; }
 #card-screen:fullscreen #comment-col { display: none !important; }
 #card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
-#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg_wide.png?v=2'); }   /* rotated widescreen card texture in fullscreen */
+#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg_wide.png?v=2'); box-shadow: inset 0 0 22vmin 6vmin rgba(30,22,10,0.5) !important; }   /* rotated widescreen texture + inset edge vignette */
+body.dark-mode #card-screen:fullscreen .flashcard { box-shadow: inset 0 0 22vmin 6vmin rgba(0,0,0,0.62) !important; }
 #card-screen:fullscreen .card-content { font-size: 1.5rem; }
 #card-screen:fullscreen .top-bar,
 #card-screen:fullscreen .comment-area,
@@ -3189,17 +3190,20 @@ function toggleGoldenComment(docId, isGolden){
 // after paying the winner, mark the prize paid -> removes the golden win bubbles from the winner's Mona (the gold comment stays as a record)
 function markPrizePaid(docId){ if(!confirm('Merkitäänkö palkinto maksetuksi? Voittoviesti poistuu voittajan Monalta.')) return; db.collection('prizes').doc(docId).update({ paid: true, paidAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Virhe: '+err.message)); }
 // watch this device's own comments; if one gets painted gold, show the winner celebration
-let _myGolden=null, _goldenShown=false, _goldenUnsub=null;
+let _myGolden=null, _goldenShown=false, _goldenUnsub=null, _goldenRetry=null;
 function setupGoldenWatch(){
-  try{ const u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); const uid=u?u.uid:null; if(!uid||!db) return;   // signed-in only: the prizes read rule requires the authed uid
+  clearTimeout(_goldenRetry);
+  try{
+    const u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); const uid=u?u.uid:null;
+    if(!uid||!db){ _goldenRetry=setTimeout(setupGoldenWatch, 800); return; }   // sign-in not ready yet -> keep trying so the listener always comes up
     if(_goldenUnsub){ _goldenUnsub(); _goldenUnsub=null; }
-    _goldenUnsub=db.collection('prizes').where('userId','==',uid).onSnapshot(snap=>{
+    _goldenUnsub=db.collection('prizes').where('userId','==',uid).onSnapshot(snap=>{   // real-time: fires the instant the dev paints a comment gold
       let g=null; snap.forEach(doc=>{ const d=doc.data(); if(!d.paid) g={ id:doc.id, code:String(d.code||'') }; });   // ignore prizes already paid out
       _myGolden=g;
       _applyGoldenBubbles();
       if(g) maybeShowGoldenCelebration();
-    }, ()=>{});
-  }catch(e){}
+    }, err=>{ _goldenUnsub=null; _goldenRetry=setTimeout(setupGoldenWatch, 3000); });   // stream errored -> re-establish
+  }catch(e){ _goldenRetry=setTimeout(setupGoldenWatch, 3000); }
 }
 // the win text shown in Mona's golden speech bubbles
 function _goldenWinText(){ return _myGolden ? ('🏆 Voitit viikon 5&nbsp;&euro;! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja raha siirretään sinulle Mobilepaylla.') : ''; }
