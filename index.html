@@ -614,6 +614,20 @@ body.dark-mode #presence-list span { background: #3a312b !important; border-colo
 body.dark-mode .kuvaaja-btn { color: #eadfce !important; border-color: #6d5f52 !important; }
 body.dark-mode .kuvaaja-cancel { border-color: #c0392b !important; color: #c0392b !important; }
 body.dark-mode #loading { color: #eadfce; }
+#loading { position: fixed; inset: 0; z-index: 500; display: none; background: #efe7d8; }
+body.dark-mode #loading { background: #2b2622; }
+.loading-inner { position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+.loading-mona { width: 120px; height: 120px; object-fit: contain; animation: loadingBounce 1.2s ease-in-out infinite; }
+@keyframes loadingBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.loading-text { font-family: 'Lora', serif; font-size: 1.5rem; color: #6b4423; }
+.loading-dots::after { content: '.'; animation: loadingDots 1.4s steps(1) infinite; }
+@keyframes loadingDots { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+.loading-bar { width: 200px; max-width: 60vw; height: 8px; border-radius: 999px; background: rgba(107,68,35,0.18); overflow: hidden; }
+.loading-bar-fill { width: 40%; height: 100%; border-radius: 999px; background: #6b4423; animation: loadingBar 1.2s ease-in-out infinite; }
+@keyframes loadingBar { 0% { transform: translateX(-110%); } 100% { transform: translateX(360%); } }
+body.dark-mode .loading-text { color: #c9b48f; }
+body.dark-mode .loading-bar { background: rgba(201,180,143,0.22); }
+body.dark-mode .loading-bar-fill { background: #c9b48f; }
 body.dark-mode .deck-header-name { color: #eadfce; }
 body.dark-mode .deck-header-code  { color: #cbbda8; }
 
@@ -1046,7 +1060,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 </div>
 
-<div id="loading">ladataan…</div>
+<div id="loading"><div class="loading-inner">
+  <img class="loading-mona" src="solukkologo_eyes.png" alt="">
+  <div class="loading-text">Pieni hetki<span class="loading-dots"></span></div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+</div></div>
 <div id="conn-error"></div>
 
 <!-- ══ PAKKAVALINNANÄYTTÖ ════════════════════════════════════ -->
@@ -2699,12 +2717,7 @@ function frontNavLeft(){ fsBtnPress(document.getElementById('fc-nav-left')); if(
 function frontNavRight(){ fsBtnPress(document.getElementById('fc-nav-right')); if(cardAnswerShown){ _gradeInstant=true; gradeCard(true); } else frontNext(); }     // Kyllä (grade right) / Seuraava (next)
 function _cardShakeOnly(){ const fc=document.getElementById('flashcard'); if(!fc) return; fc.classList.remove('card-in-right','card-in-left','card-shake'); void fc.offsetWidth; fc.classList.add('card-shake'); setTimeout(()=>fc.classList.remove('card-shake'),500); }
 let _fcBubbleTO=null;
-function _fcBubbleFlash(text){   // show Mona's fullscreen bubble with a message for ~1.6s, then restore the resting hint
-  const bub=document.getElementById('fc-bubble'); if(!bub) return;
-  bub.textContent=text; bub.classList.add('show');
-  clearTimeout(_fcBubbleTO);
-  _fcBubbleTO=setTimeout(()=>{ bub.classList.remove('show'); bub.textContent = cardAnswerShown ? _BACK_BUBBLE_TEXT : ((typeof _frontHintText!=='undefined'?_frontHintText:'')||''); }, 1600);
-}
+function _fcBubbleFlash(text){ /* Mona is not shown in fullscreen, so never show her bubble there (shake/bounce just move the card) */ }
 // front-side navigation: skip to the next / previous card without grading (Seuraava / Edellinen)
 function frontGoTo(i){
   if(i<0){ _cardShakeOnly(); _fcBubbleFlash('Tämä on kurssin ensimmäinen kortti.'); return; }
@@ -4070,6 +4083,10 @@ function scrollToCard(smooth){
   if(!fc||!cs) return;
   if(!window.matchMedia('(max-width: 900px)').matches){   // desktop: card column is fixed/centred, the grid scrolls on its own
     cs.style.marginTop=''; const g=document.getElementById('card-overview-grid'); if(g) g.style.marginTop=''; positionCommentArea(); return;
+  }
+  const _cc=document.getElementById('card-col');
+  if(_cc && getComputedStyle(_cc).display==='none'){   // mobile review shows only the grid (no card preview) — don't reserve/centre space for a hidden card
+    cs.style.marginTop=''; const g=document.getElementById('card-overview-grid'); if(g) g.style.marginTop=''; return;
   }
   const vpH=cardViewportH(), fcH=fc.getBoundingClientRect().height;
   const fcOffsetInCS=fc.getBoundingClientRect().top-cs.getBoundingClientRect().top;
