@@ -3102,21 +3102,30 @@ function editComment(docId,btn){
 function saveEditComment(docId,btn){ const textarea=btn.closest('.comment-text-wrap').querySelector('textarea'); const newText=textarea.value.trim(); if(!newText) return; db.collection('comments').doc(docId).update({text:newText}).then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 function cancelEditComment(btn){ loadFirestoreComments(); }
 function deleteComment(docId){ if(!confirm('Poistetaanko kommentti?')) return; db.collection('comments').doc(docId).delete().then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
-// developer paints a comment gold (the weekly winner); the author's device then gets a claim message
+// developer paints a comment gold (the weekly winner); the claim code goes to a PRIVATE prizes doc
 function toggleGoldenComment(docId, isGolden){
-  if(isGolden){ db.collection('comments').doc(docId).update({ golden: false }).catch(err=>alert('Virhe: '+err.message)); return; }
+  const cref=db.collection('comments').doc(docId), pref=db.collection('prizes').doc(docId);
+  if(isGolden){                                  // un-paint: drop the gold + the private code
+    cref.update({ golden: false }).catch(err=>alert('Virhe: '+err.message));
+    pref.delete().catch(()=>{});
+    return;
+  }
   const code=prompt('Anna palkintokoodi (tämän voittaja tekstaa lunastaakseen):');
-  if(code===null) return;                       // cancelled
+  if(code===null) return;                        // cancelled
   if(!code.trim()){ alert('Koodi ei voi olla tyhjä.'); return; }
-  db.collection('comments').doc(docId).update({ golden: true, goldenCode: code.trim(), goldenAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Virhe: '+err.message));
+  cref.get().then(doc=>{
+    const d=doc.data()||{};
+    cref.update({ golden: true, goldenAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Virhe: '+err.message));
+    pref.set({ userId: d.userId||'', cardId: String(d.cardId||''), code: code.trim(), createdAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Koodin tallennus: '+err.message));
+  }).catch(err=>alert('Virhe: '+err.message));
 }
 // watch this device's own comments; if one gets painted gold, show the winner celebration
 let _myGolden=null, _goldenShown=false, _goldenUnsub=null;
 function setupGoldenWatch(){
-  try{ const uid=getUserId(); if(!uid||!db) return;
+  try{ const u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); const uid=u?u.uid:null; if(!uid||!db) return;   // signed-in only: the prizes read rule requires the authed uid
     if(_goldenUnsub){ _goldenUnsub(); _goldenUnsub=null; }
-    _goldenUnsub=db.collection('comments').where('userId','==',uid).onSnapshot(snap=>{
-      let g=null; snap.forEach(doc=>{ const d=doc.data(); if(d.golden===true) g={ id:doc.id, code:String(d.goldenCode||'') }; });
+    _goldenUnsub=db.collection('prizes').where('userId','==',uid).onSnapshot(snap=>{
+      let g=null; snap.forEach(doc=>{ const d=doc.data(); g={ id:doc.id, code:String(d.code||'') }; });
       _myGolden=g;
       if(g) maybeShowGoldenCelebration();
     }, ()=>{});
