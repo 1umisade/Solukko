@@ -250,7 +250,7 @@ body.dark-mode #card-screen:fullscreen .flashcard { box-shadow: inset 0 0 22vmin
 #front-check { display: none; }
 #card-screen:fullscreen #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: min(20px, 3.8vw); position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; max-width: 100vw; }   /* bottoms aligned so all three keycaps sit on the same line; scales down to fit narrow (mobile) screens */
 #card-screen:fullscreen #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
-.fc-nav { width: min(75px, 14vw); height: min(75px, 14vw); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens */
+.fc-nav { width: min(75px, 14vw); height: min(75px, 14vw); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
 .fc-nav .nav-back { display: none; }   /* front side shows Edellinen/Seuraava; back side swaps to Ei/Kyllä — same position, just a different image */
 #front-check.back .fc-nav .nav-front { display: none; }
@@ -259,7 +259,7 @@ body.dark-mode #card-screen:fullscreen .flashcard { box-shadow: inset 0 0 22vmin
 #card-screen:fullscreen button:focus, #card-screen:fullscreen button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
-.tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; }
+.tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; touch-action: manipulation; }
 .tarkista-btn img { height: min(75px, 14vw); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
@@ -1591,11 +1591,12 @@ function clickLogoHome(){
 let _logoTimer=null;
 // Decode the sound clips up front so a random one fires with zero delay on click
 const _soundFiles=['frog1.mp3','frog2.mp3','frog3.mp3','frog4.mp3'];
-const _soundBufs=[]; let _audioCtx=null;
+const _soundBufs=[]; let _audioCtx=null, _clickBuf=null;
 const _soundEls=_soundFiles.map(f=>{ const a=new Audio(f); a.preload='auto'; a.volume=0.125; a.setAttribute('playsinline',''); return a; });
 function _decodeFrogs(){   // decode the clips into buffers for zero-delay playback (needs a context)
   if(!_audioCtx) return;
   _soundFiles.forEach((f,i)=>{ if(_soundBufs[i]) return; fetch(f).then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _soundBufs[i]=buf; }).catch(()=>{}); });
+  if(!_clickBuf) fetch('click.mp3').then(r=>r.arrayBuffer()).then(b=>_audioCtx.decodeAudioData(b)).then(buf=>{ _clickBuf=buf; }).catch(()=>{});   // low-latency keycap click (iOS HTMLAudio replays with a delay)
 }
 // Warm up on the first user gesture. iOS only unlocks Web Audio when the context is created/resumed
 // inside a gesture, so we create it here (not at load) and also unlock the HTMLAudio fallbacks.
@@ -2621,6 +2622,7 @@ document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ fl
 let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false, _fsGrabbedKnob=false;
 let _clickSnd=null;
 function playKeyClick(){   // keyboard-keycap click sound on pressing an answer button
+  if(_clickBuf && _audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_clickBuf; const g=_audioCtx.createGain(); g.gain.value=0.45; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }   // Web Audio = no iOS replay delay
   try{ if(!_clickSnd){ _clickSnd=new Audio('click.mp3'); _clickSnd.volume=0.45; _clickSnd.setAttribute('playsinline',''); } _clickSnd.currentTime=0; _clickSnd.play().catch(()=>{}); }catch(e){}
 }
 function pressKeycap(correct){   // dip the keycap down and spring it back
