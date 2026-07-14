@@ -2389,14 +2389,11 @@ document.addEventListener('mousemove', _fsCursorActivity);
     if(document.fullscreenElement){ if(tip.style.display!=='none') tip.style.display='none'; return; }
     const card = e.target.closest ? e.target.closest('.overview-card, #flashcard-wrap') : null;
     if(card){
-      let grade=null;
-      if(card.classList.contains('known')) grade='known';
-      else if(card.classList.contains('unknown')) grade='unknown';
-      else if(card.id==='flashcard-wrap' && currentCard) grade=cardGrades[currentCard.cardId]||null;
       let txt=null;
-      if(grade==='known') txt='Kortti osattu tänään';
-      else if(grade==='unknown') txt='Korttia ei osattu tänään';
-      else if(card.id==='flashcard-wrap' || card.classList.contains('active')) txt='Avaa opiskelunäkymässä';   // ungraded active/right card: keep the open hint
+      if(card.id==='flashcard-wrap'){ txt='Avaa opiskelunäkymässä'; }   // the right-hand card always shows the open hint (never the grade status)
+      else if(card.classList.contains('known')) txt='Kortti osattu tänään';   // grid card grade status
+      else if(card.classList.contains('unknown')) txt='Korttia ei osattu tänään';
+      else if(card.classList.contains('active')) txt='Avaa opiskelunäkymässä';
       if(txt){ tip.textContent=txt; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; return; }
     }
     if(tip.style.display!=='none') tip.style.display='none';
