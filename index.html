@@ -45,8 +45,8 @@ try{
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 /* custom cursors — forced everywhere (!important) so per-element cursor rules don't fall back to the OS pointer; Mona uses the grab hand */
 * { cursor: url('cursor_normal.png') 4 2, auto !important; }
-body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 20 12, grab !important; }   /* over anything clickable (toggled by JS) */
-body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 20 12, grabbing !important; }   /* while Mona is being dragged */
+body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 16 1, grab !important; }   /* hotspot on the fingertip (16,0), matching the pointer's pointy end */
+body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 16 1, grabbing !important; }   /* while Mona is being dragged */
 body.no-cursor-theme, body.no-cursor-theme * { cursor: auto !important; }   /* debug: press N to turn the custom cursor theme off */
 body { font-family: 'Lora', Georgia, serif; background: #efe7d8 url('site_bg.jpg') center/cover fixed; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
@@ -200,7 +200,7 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen #card-stack { max-height: none !important; width: 100% !important; }
 #card-screen:fullscreen #comment-col { display: none !important; }
 #card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
-#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; }   /* same new_bg.png, cover-scaled (light centre, darkened side edges = widescreen vignette) */
+#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg_wide.png?v=2'); }   /* rotated widescreen card texture in fullscreen */
 #card-screen:fullscreen .card-content { font-size: 1.5rem; }
 #card-screen:fullscreen .top-bar,
 #card-screen:fullscreen .comment-area,
@@ -2305,7 +2305,8 @@ async function renderCurrentCard(){
   fc.style.animation  = 'none';
   void fc.offsetWidth;
   fc.style.animation  = '';
-  if(_skipCardFade){ _skipCardFade=false; fc.classList.remove('loading-blur'); fc.classList.add('card-focus-in'); setTimeout(()=>fc.classList.remove('card-focus-in'),470); }   // click flow: the new card comes into focus (blur -> sharp)
+  if(_instantCard){ _instantCard=false; fc.classList.remove('loading-blur','card-focus-in','card-in-right','card-in-left'); }   // exit-fullscreen etc.: show the card at once, no fade
+  else if(_skipCardFade){ _skipCardFade=false; fc.classList.remove('loading-blur'); fc.classList.add('card-focus-in'); setTimeout(()=>fc.classList.remove('card-focus-in'),470); }   // click flow: the new card comes into focus (blur -> sharp)
   else { fc.classList.add('card-in-right'); setTimeout(()=>fc.classList.remove('card-in-right'),260); }   // drop it after the fade-in so a later shake can't re-trigger it (flicker)
   showFrontMona();                                            // Mona rides the bar on the front side too
   fitCardScale(); fitFrontText(); scrollToCard(); fitDeckTitle();   // position synchronously (before paint) to avoid a load jump
@@ -2483,6 +2484,7 @@ let _picking=false;          // guard so a second click during the slide can't a
 let _pickTO1=null, _pickTO2=null;   // pending pick timers, so a double-click can cancel them and grade now
 let _gradeInstant=false;     // set for the click flow: grade with no fly-out / no fade-in (instant card swap)
 let _skipCardFade=false;     // consumed by renderCurrentCard to skip the fade-in on that instant swap
+let _instantCard=false;      // consumed by renderCurrentCard to show the card with NO animation (e.g. returning from fullscreen)
 function showCardLoading(){ const el=document.getElementById('card-loading'); if(el) el.style.display='flex'; const fc=document.getElementById('flashcard'); if(fc) fc.classList.add('loading-blur'); }   // "Ladataan uutta korttia" spinner + blur the card behind it
 function hideCardLoading(){ const el=document.getElementById('card-loading'); if(el) el.style.display='none'; const fc=document.getElementById('flashcard'); if(fc) fc.classList.remove('loading-blur'); }
 function _knobShown(){ const k=_fsKnob(); return !!k && k.style.opacity!=='0'; }   // '' or '1' = Mona visible
@@ -2690,7 +2692,7 @@ function showDeckWelcome(){   // after fullscreen: show the current card on the 
   renderCardOverview();
   if(!reviewCards.length) return;
   const idx=(currentOverviewIndex>=0 && reviewCards[currentOverviewIndex]) ? currentOverviewIndex : 0;
-  _previewIndex=-1; _doPreview(idx);
+  _previewIndex=-1; _instantCard=true; _doPreview(idx);   // returning from fullscreen: no card fade-in
 }
 function showDeckLanding(){   // initial deck open: grid only; the first card highlights + shows once the grid has faded in
   if(document.fullscreenElement) return;
