@@ -2729,6 +2729,9 @@ function scheduleWelcome(){}   // the right side always shows a card now — no 
 function showDeckWelcome(){   // after fullscreen: show the current card on the right again
   if(document.fullscreenElement) return;
   clearTimeout(_previewTO); clearTimeout(_welcomeTO); _openingDeck=false;
+  // the grid's intro-fade animations otherwise REPLAY when the grid un-hides on fullscreen exit — clear them so it shows at once
+  document.body.classList.remove('deck-intro-anim');
+  document.querySelectorAll('#card-overview-grid .overview-card, #card-overview-grid .overview-section > *:not(.overview-section-grid)').forEach(el=>{ el.style.animation='none'; });
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCardOverview();
   if(!reviewCards.length) return;
