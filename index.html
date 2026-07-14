@@ -106,8 +106,8 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .shop-embed.shop-embed-big .shop-embed-price { font-size: 1.5rem; }
 #shop-overlay-close { position: fixed; top: 18px; right: 24px; z-index: 201; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 @media (max-width: 900px){ .shop-overlay-inner { flex-direction: column; gap: 1.4rem; } .shop-overlay-side { flex-direction: row; flex-wrap: wrap; justify-content: center; } .shop-embed.shop-embed-big { width: 300px; max-width: 300px; } }
-.hero-body { display: flex; align-items: flex-start; gap: 2rem; margin-top: 1.4rem; text-align: left; }
-.hero-shop { flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.2rem; align-items: start; justify-items: center; }   /* fills the rest; smaller product cards */
+.hero-body { display: flex; align-items: center; justify-content: center; gap: 2.5rem; margin-top: 1.4rem; text-align: left; }   /* centred group (space before the text); shop vertically centred on the square */
+.hero-shop { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }   /* shrink to the product, sits close to the text */
 #home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; aspect-ratio: 1 / 1; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* perfect square at the very left edge; overflow:hidden contains the floated portrait */
 @media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { aspect-ratio: auto; width: 100%; padding-right: 0; } }
 #home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
@@ -1493,7 +1493,7 @@ const MONA_BUBBLES={
 
   darkmode:'Testaa dark-modea!<button class="peek-act-btn peek-dark-btn" onclick="toggleDarkModeFromSwitch()" title="Vaihda tummatila">🌙</button>',
   shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
-  comment:'Kommentoimalla voit voittaa 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
+  comment:'Kommentoijien kesken arvotaan 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
 };
 const HOME_BUBBLE_ORDER=Object.keys(MONA_BUBBLES).filter(k=>k!=='shuffle'&&k!=='tietovisa4');   // cycle follows MONA_BUBBLES definition order (shuffle + tietovisa4 excluded from Mona's greeting cycle)
 const PEEK_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // edge-peeker retired; keys kept valid
@@ -2004,7 +2004,7 @@ function buildDeckGrid(decks, list){
   list.innerHTML='';
   const header=document.createElement('div'); header.id='home-mona';
   const brand=document.createElement('div'); brand.className='home-brand-block';           // site name + slogan in the empty space to Mona's LEFT
-  brand.innerHTML='<div class="home-name">Solukko.com</div><div class="home-slogan-txt">Oppiminen saa olla helppoa</div>';
+  brand.innerHTML='<div class="home-name">Solukko.com</div>';
   header.appendChild(brand);
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona
   const greet=document.createElement('div'); greet.className='home-greet';                 // her speech bubble to the right (clicking Mona cycles it)
