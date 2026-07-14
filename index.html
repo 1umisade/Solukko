@@ -444,7 +444,7 @@ body.dark-mode .mona-bubble::after { border-top-color: #3a312b; }
 body.dark-mode .flashcard { scrollbar-color: #a97f4e #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb { background: #a97f4e; border-color: #3a312b; }
 body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; }
-.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; text-align: center; }   /* plain single-paragraph text (questions, short answers) is centred */
+.card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; text-align: center; font-weight: 700; letter-spacing: 0.04em; }   /* plain single-paragraph text (questions, short answers) is centred, bold, slightly spaced */
 /* multi-line / list content: centre the block on the longest line, keep the rows left-aligned from there */
 .card-content:has(br), .card-content:has(li), .card-content:has(ul), .card-content:has(ol), .card-content:has(> * ~ *) { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; text-align: left; }
 .card-content:has(iframe) { width: 100%; }   /* 3D-embed cards keep full width (an iframe has no intrinsic width) */
@@ -2395,7 +2395,7 @@ document.addEventListener('mousemove', _fsCursorActivity);
       else if(card.id==='flashcard-wrap' && currentCard) grade=cardGrades[currentCard.cardId]||null;
       let txt=null;
       if(grade==='known') txt='Kortti osattu tänään';
-      else if(grade==='unknown') txt='Kortti kertaamatta tältä päivältä';
+      else if(grade==='unknown') txt='Korttia ei osattu tänään';
       else if(card.id==='flashcard-wrap' || card.classList.contains('active')) txt='Avaa opiskelunäkymässä';   // ungraded active/right card: keep the open hint
       if(txt){ tip.textContent=txt; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; return; }
     }
