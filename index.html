@@ -222,9 +222,9 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 @media (max-width: 900px) { #comment-btn { display: none !important; } }   /* mobile: comments show inline on reveal */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
 /* fullscreen: the site background image + an edge vignette, painted as plain background layers directly on the fullscreen element (background-attachment:fixed and fixed-position child layers don't render on a fullscreen element in Chrome, so keep it as ordinary background layers here) */
-#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: radial-gradient(ellipse at center, rgba(48,36,20,0) 40%, rgba(48,36,20,0.28) 76%, rgba(40,30,16,0.6) 100%), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); margin: 0 !important; }
+#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); margin: 0 !important; }
 #card-screen:fullscreen::backdrop { background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); }
-body.dark-mode #card-screen:fullscreen { background: radial-gradient(ellipse at center, rgba(20,12,4,0) 38%, rgba(20,12,4,0.5) 100%), linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
+body.dark-mode #card-screen:fullscreen { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
 body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
 #card-screen:fullscreen #review-cols { display: block; }
 #card-screen:fullscreen #grid-col { display: none !important; }
@@ -235,8 +235,7 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen #card-stack { max-height: none !important; width: 100% !important; }
 #card-screen:fullscreen #comment-col { display: none !important; }
 #card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
-#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg.png?v=2'); box-shadow: inset 0 0 22vmin 6vmin rgba(30,22,10,0.5) !important; }   /* old card paper background + inset edge vignette */
-body.dark-mode #card-screen:fullscreen .flashcard { box-shadow: inset 0 0 22vmin 6vmin rgba(0,0,0,0.62) !important; }
+#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg.png?v=2'); box-shadow: none !important; }   /* old card paper background, no vignette */
 #card-screen:fullscreen .card-content { font-size: 1.5rem; }
 #card-screen:fullscreen .top-bar,
 #card-screen:fullscreen .comment-area,
@@ -4040,7 +4039,7 @@ function shakeCard(){
   shakeStars();
   if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
     _fcBubbleFlash('Tiesitkö? Paina Kyllä tai Ei-nappia.');   // Mona prompts for a grade
-    fsBtnPress(document.getElementById('tarkista-btn'));       // "click" the centre button (dip + sound) — no answer-button expand
+    _keycapDip(document.getElementById('tarkista-btn'));       // dip the centre button — no click sound on a shake
     return;
   }
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
