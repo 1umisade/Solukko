@@ -4048,10 +4048,9 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
       const cs=document.getElementById('card-screen'); if(cs&&cs.requestFullscreen) cs.requestFullscreen().catch(()=>{});
       return;
     }
-    if(_fsSwipeMoved){ _fsSwipeMoved=false; return; }      // a fullscreen Mona-swipe already handled this — don't also shake
-    if(swiped){ swiped=false; return; }                    // swipe already handled the reveal
-    if(!cardAnswerShown){ showAnswer(); return; }          // front: tap reveals the answer
-    if(Date.now()-pressT<=400) shakeCard();                // back: quick tap shakes; long press does nothing
+    if(_fsSwipeMoved){ _fsSwipeMoved=false; return; }      // a fullscreen Mona-swipe already handled this
+    if(swiped){ swiped=false; return; }                    // a grade-drag already handled this
+    frontCheckReveal();                                    // clicking the card = pressing space / the Tarkista button (reveal on the front, back-to-front on the back)
   });
 
   document.addEventListener('keydown',e=>{
@@ -4085,6 +4084,7 @@ function shakeCard(){
   fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
   setTimeout(()=>fc.classList.remove('card-shake'),500);
   shakeStars();
+  flashWordLinkBubbles();   // shaking re-highlights the linked words for 2s
   if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
     _fcBubbleFlash('Tiesitkö? Paina Kyllä tai Ei-nappia.');   // Mona prompts for a grade
     _keycapDip(document.getElementById('tarkista-btn'));       // dip the centre button — no click sound on a shake
@@ -4301,12 +4301,12 @@ function applyWordLinks(element){
 }
 
 let _wlFlashTO=null;
-function flashWordLinkBubbles(){   // when a card/answer loads: pop the speech-bubble graphic on each linked word, then fade it out after 1s
+function flashWordLinkBubbles(){   // when a card/answer loads (or the card is shaken): pop the speech-bubble graphic on each linked word, then fade it out after 2s
   clearTimeout(_wlFlashTO);
   const links=document.querySelectorAll('#question-content .word-link, #answer-content .word-link');
   if(!links.length) return;
   links.forEach(l=>l.classList.add('wl-show'));
-  _wlFlashTO=setTimeout(()=>{ links.forEach(l=>l.classList.remove('wl-show')); }, 1000);
+  _wlFlashTO=setTimeout(()=>{ links.forEach(l=>l.classList.remove('wl-show')); }, 2000);
 }
 
 (function initWordLinkTooltip(){
