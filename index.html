@@ -2258,11 +2258,28 @@ async function loadDecks(){
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
+  const _htmlTextParser = new DOMParser();   // parse card HTML to text WITHOUT loading its <img>/gif resources (for the pack-back previews)
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
-    // Every deck (mobile + desktop) uses one static construction.png. The homepage used to render ~40 <video>
-    // deck backgrounds, all decoded at once — heavy compositing that lagged badly, worst on Firefox. Static = none.
-    btn.innerHTML=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+    // Deck cover is a single static construction.png (mobile + desktop). The homepage used to render ~40 <video>
+    // backgrounds decoded at once — heavy compositing that lagged, worst on Firefox; a static image has none.
+    const _packTop=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+    if(!isMobile() && item.hasCards){   // desktop real decks: real card backsides fan out behind the cover on hover (the pack-back flare) — no video
+      const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
+      const _tops=_dc.map(c=>{ const _d=_htmlTextParser.parseFromString(extractBody(c.answer||'').body,'text/html'); return (_d.body.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (text only, no image loads)
+      const _bk=(cls,i)=>`<div class="pack-back ${cls}">${_tops[i]?`<div class="pack-back-content">${escCmt(_tops[i].slice(0,600))}</div>`:''}</div>`;
+      btn.innerHTML=`${_bk('pack-back-4',3)}${_bk('pack-back-3',2)}${_bk('pack-back-2',1)}${_bk('pack-back-1',0)}`+_packTop;
+      btn.addEventListener('mouseenter',()=>{   // natural scattered flare, fresh each hover (each card drifts a random direction)
+        btn.querySelectorAll('.pack-back').forEach((bk)=>{
+          const ang=Math.random()*Math.PI*2, dist=7+Math.random()*10;
+          const tx=(Math.cos(ang)*dist).toFixed(1), ty=(Math.sin(ang)*dist-2).toFixed(1), rot=((Math.random()*2-1)*16).toFixed(1);
+          bk.style.transform='translate('+tx+'%,'+ty+'%) rotate('+rot+'deg)';
+        });
+      });
+      btn.addEventListener('mouseleave',()=>{ btn.querySelectorAll('.pack-back').forEach(bk=>{ bk.style.transform=''; }); });
+    } else {   // mobile + empty placeholder decks: just the cover
+      btn.innerHTML=_packTop;
+    }
     if(item.hasCards) btn.onclick=()=>startDeck(item.deck);
     item.btn=btn;
   });
