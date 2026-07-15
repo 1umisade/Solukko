@@ -131,9 +131,14 @@ body.has-golden.reviewing #golden-comment { display: none; }
 .gc-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
 .gc-text { font-size: 0.92rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
 /* winner's fullscreen award button (only points them to the homepage) + a small "prize is on the homepage" toast */
-#fs-award-btn { display: none; position: fixed; top: 18px; left: 50%; margin-left: -24px; z-index: 100; width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6); font-size: 1.4rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
+/* the winner's award button lives top-right in EVERY view. Two elements so it survives fullscreen's top layer:
+   #award-btn (outside #card-screen) covers the homepage + review; #fs-award-btn (inside #card-screen) covers fullscreen. Both stay until the dev marks the prize paid (then has-golden drops). */
+#award-btn, #fs-award-btn { display: none; position: fixed; top: 16px; right: 16px; z-index: 260; width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6), 0 2px 8px rgba(0,0,0,0.25); font-size: 1.4rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
+body.has-golden #award-btn { display: flex; }
 body.has-golden #card-screen:fullscreen #fs-award-btn { display: flex; }
-#golden-toast { display: none; position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 101; max-width: min(90vw, 420px); background: linear-gradient(135deg, #fff8dd, #f4dd86 55%, #e3bf52); border: 2px solid #d4af37; border-radius: 14px; padding: 0.75rem 1.1rem; font-family: 'Lora', serif; font-size: 1rem; color: #4a3a10; text-align: center; box-shadow: 0 6px 22px rgba(0,0,0,0.35); }
+/* the celebration bubble shown when the award button is tapped in review / fullscreen (inside #card-screen so it shows over the fullscreen top layer). On the homepage the celebration is Mona's own golden bubble instead. */
+#golden-toast { display: none; position: fixed; top: 74px; right: 16px; z-index: 261; max-width: min(90vw, 320px); background: linear-gradient(135deg, #fff8dd, #f4dd86 55%, #e3bf52); border: 2px solid #d4af37; border-radius: 16px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.4; color: #4a3a10; text-align: left; box-shadow: 0 6px 22px rgba(0,0,0,0.35); }
+#golden-toast b { color: #6b4a10; }
 /* dev password prompt (masked input) */
 #devpw-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(24,18,12,0.55); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
 .devpw-box { width: min(340px, 92vw); background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 1.4rem 1.3rem; box-shadow: 0 10px 34px rgba(0,0,0,0.3); font-family: 'Lora', serif; color: #56533c; }
@@ -294,10 +299,7 @@ body.dark-mode .tarkista-fill { background: #6f8f77; }
 .fc-bubble.show { opacity: 1; }   /* Mona's bubble is gone; the prompt bubble shows only when forced (shake / first-last card) */
 body.dark-mode .fc-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
-/* exit-fullscreen button: top-right, flashed for ~1s on touch/click */
-#fs-exit-btn { display: none; position: fixed; top: 18px; right: 18px; z-index: 100; width: 50px; height: 50px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
-#fs-exit-btn.visible { opacity: 1; pointer-events: auto; }
-body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
+/* (exit-fullscreen button removed — double-tap the card to leave fullscreen) */
 /* fullscreen comment button (bottom-left) + live comment count */
 #fs-comment-btn { display: none; position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
 #card-screen:fullscreen #fs-comment-btn { display: flex; }
@@ -306,7 +308,7 @@ body.dark-mode #fs-exit-btn { background: rgba(58,49,43,0.94); color: #eadfce; b
 #fs-comment-btn.active { background: #56533c; color: #f5f0e8; border-color: #56533c; }
 body.dark-mode #fs-comment-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #fs-comment-btn.active { background: #eadfce; color: #2b211b; border-color: #eadfce; }
-#fs-comment-btn.keycap-press, #fs-exit-btn.keycap-press { animation: keycapPress 0.16s ease; }
+#fs-comment-btn.keycap-press { animation: keycapPress 0.16s ease; }
 .fs-comment-count { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 11px; background: #c0392b; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
 .fs-comment-count.has { display: flex; }
 /* fullscreen: the comments open as a panel sliding in from the LEFT with the writing field */
@@ -1148,6 +1150,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     </div>
   </div>
 </div>
+<!-- winner's award button (top-right, homepage + review); its fullscreen twin #fs-award-btn lives inside #card-screen -->
+<button id="award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
 <!-- winner's golden comment, top-right of the homepage; clicking opens its card in fullscreen with comments -->
 <div id="golden-comment" onclick="openGoldenComment()" title="Avaa kommenttisi"></div>
 <!-- dev password prompt (masked) -->
@@ -1197,10 +1201,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="card-screen">
   <!-- "loading the next card" overlay, shown while Mona slides to a button -->
   <div id="card-loading" style="display:none;"><div class="cl-spinner"></div></div>
-  <!-- exit-fullscreen: top-right, flashed for ~1s on touch/click -->
-  <button id="fs-exit-btn" onclick="fsBtnPress(this); exitCardFullscreen()" title="Poistu koko näytön tilasta">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
-  </button>
+  <!-- (exit-fullscreen button removed — double-tap the card to leave fullscreen) -->
   <!-- fullscreen bottom-left: comment button (opens the comments + writing field on the left), with a live comment count -->
   <button id="fs-comment-btn" onclick="fsBtnPress(this); toggleComment()" title="Kommentit">
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
@@ -2627,13 +2628,12 @@ function toggleCardFullscreen(){
 }
 function exitCardFullscreen(){ if(document.fullscreenElement) document.exitFullscreen&&document.exitFullscreen(); }
 let _fsHideTimer=null;
-function _showFsButtons(ms){   // reveal the exit + comment buttons, then fade them after `ms`
+function _showFsButtons(ms){   // reveal the comment button, then fade it after `ms`
   if(!document.fullscreenElement) return;
-  const b=document.getElementById('fs-exit-btn'); if(b){ b.style.display='flex'; b.classList.add('visible'); }
   document.getElementById('fs-comment-btn')?.classList.add('visible');
-  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-exit-btn')?.classList.remove('visible'); document.getElementById('fs-comment-btn')?.classList.remove('visible'); }, ms||1000);
+  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); }, ms||1000);
 }
-function flashFsExitBtn(){   // desktop: flash the buttons on entering fullscreen and on each mouse move. Mobile: only a star tap reveals them (see the star tooltip handler)
+function flashFsExitBtn(){   // desktop: flash the comment button on entering fullscreen and on each mouse move. Mobile: only a star tap reveals it (see the star tooltip handler)
   if(document.body.classList.contains('is-mobile')) return;
   _showFsButtons(1000);
 }
@@ -2694,13 +2694,12 @@ document.addEventListener('fullscreenchange',()=>{
   const on = !!document.fullscreenElement && document.fullscreenElement===cs;
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
   fitCardScale(); scrollToCard(); updateFsSlider();
-  const b=document.getElementById('fs-exit-btn');
   if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); else clearFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // enter fullscreen: show the front OR back button row
   else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
     const _touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     if(_touch && _commenting && document.activeElement && document.activeElement.id==='card-comment'){ _fsCommentExit=true; return; }   // iOS keyboard dropped fullscreen while commenting → keep the card/state; _reenterFsAfterComment() brings us back
     { const fchk=document.getElementById('front-check'); if(fchk){ fchk.classList.remove('active','back'); } const m=document.getElementById('fc-mona'); if(m) m.classList.remove('fc-peeked'); }   // drop the fullscreen button row on exit
-    if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
+    document.getElementById('fs-comment-btn')?.classList.remove('visible'); clearTimeout(_fsHideTimer); clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
     if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
 });
 document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
@@ -3379,12 +3378,18 @@ async function openGoldenComment(){
   else openComments();
 }
 let _goldenToastTO=null;
-function _showGoldenToast(){   // brief "your prize is on the homepage" hint
+function _showGoldenToast(){   // the golden celebration bubble (win message) shown in review / fullscreen (it lives inside #card-screen so it clears the fullscreen top layer)
   const t=document.getElementById('golden-toast'); if(!t) return;
-  t.style.display='block'; clearTimeout(_goldenToastTO); _goldenToastTO=setTimeout(()=>{ t.style.display='none'; }, 3500);
+  t.innerHTML=_goldenWinText();
+  t.style.display='block'; clearTimeout(_goldenToastTO); _goldenToastTO=setTimeout(()=>{ t.style.display='none'; }, 9000);
 }
-function goldenAwardClick(){   // in fullscreen there's no golden comment card → point the winner to the homepage
-  if(document.fullscreenElement) _showGoldenToast();
+function goldenAwardClick(){   // tapping the award button = celebrate IN PLACE (never send the user to the homepage)
+  if(!_myGolden) return;
+  if(document.fullscreenElement || document.body.classList.contains('reviewing')){ _showGoldenToast(); return; }
+  // homepage: scroll up to Mona and show her golden celebration bubble
+  try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0,0); }
+  const order=_greetOrder(); const gi=order.indexOf('__golden__'); if(gi>=0){ _greetIdx=gi; renderGreet(); }
+  try{ siteBrandReact(); }catch(e){}
 }
 
 
@@ -3862,7 +3867,7 @@ function renderCardOverview(){
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       const starCount=cardStarCount(card);
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
-      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onclick="jumpToOverviewCard(${index})">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
+      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
@@ -3883,25 +3888,17 @@ function fitDeckTitle(){
   el.style.fontSize=Math.min(64,100*W/natural).toFixed(1)+'px';
 }
 
-function jumpToOverviewCard(index){   // desktop: 1st click previews, 2nd click (same card) → fullscreen. Mobile: any tap → fullscreen
-  const mobile = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;   // matches the CSS: card-col hidden at ≤900px
-  const isCurrent = (currentOverviewIndex===index && currentCard===reviewCards[index]);
-  if((mobile || isCurrent) && !document.fullscreenElement){   // mobile always, or clicking the already-shown card → fullscreen
-    clearTimeout(_previewTO); clearTimeout(_welcomeTO);
-    currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1);
-    if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
-    document.getElementById('card-col')?.classList.remove('welcome');
-    _previewIndex=-1; _doPreview(index);   // render the card so fullscreen has content
-    _captureCardRect();
-    const cs=document.getElementById('card-screen');
-    if(cs && cs.requestFullscreen){ cs.requestFullscreen().catch(()=>{}); }
-    return;
-  }
+function jumpToOverviewCard(index, toFullscreen){   // a grid-card CLICK passes toFullscreen=true → open it in fullscreen; programmatic calls (restore, keyboard browse) omit it → just show it on the right
   clearTimeout(_previewTO); clearTimeout(_welcomeTO);
   currentOverviewIndex=index; currentCard=reviewCards[index]; queue=reviewCards.slice(index+1);
   if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
   document.getElementById('card-col')?.classList.remove('welcome');
-  _previewIndex=-1; _doPreview(index);   // highlight + show on the right (no fullscreen)
+  _previewIndex=-1; _doPreview(index);   // render the card (so fullscreen has content, and the right-hand preview updates)
+  if(toFullscreen && !document.fullscreenElement){
+    _captureCardRect();
+    const cs=document.getElementById('card-screen');
+    if(cs && cs.requestFullscreen){ cs.requestFullscreen().catch(()=>{}); }
+  }
 }
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2')?.checked??true; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
@@ -4075,7 +4072,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   overlay.style.cssText='position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0;z-index:10;transition:none;';
   fc.appendChild(overlay);
 
-  let pressT=0, sx=0, sy=0, swiped=false, _gDragActive=false, _gDragSide=null, _gDragProg=0, _gLockVert=false, _gJustFired=false, _gArmed=false;
+  let pressT=0, sx=0, sy=0, swiped=false, _gDragActive=false, _gDragSide=null, _gDragProg=0, _gLockVert=false, _gJustFired=false, _gArmed=false, _lastFsCardTap=0;
   const _gNavBtns=()=>[document.getElementById('fc-nav-left'), document.getElementById('fc-nav-right')];
   function _gDragReset(animate){ _gNavBtns().forEach(b=>{ if(b){ b.classList.remove('fc-nav-armed'); b.style.transition=animate?'transform 0.25s cubic-bezier(0.34,1.4,0.64,1)':''; b.style.transform=''; } }); _gDragActive=false; _gDragSide=null; _gDragProg=0; _gArmed=false; }
   function _gGrade(side){ _gDragReset(true); swiped=true; _gJustFired=true; _gLockVert=true; if(side==='left') frontNavLeft(); else frontNavRight(); }   // Ei (wrong) / Kyllä (right)
@@ -4121,6 +4118,9 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     }
     if(_fsSwipeMoved){ _fsSwipeMoved=false; return; }      // a fullscreen Mona-swipe already handled this
     if(swiped){ swiped=false; return; }                    // a grade-drag already handled this
+    const _tapNow=Date.now();
+    if(_tapNow-_lastFsCardTap<320){ _lastFsCardTap=0; exitCardFullscreen(); return; }   // double-tap the card → leave fullscreen
+    _lastFsCardTap=_tapNow;
     if(!cardAnswerShown){ showAnswer(); return; }          // front: tapping the card reveals the answer
     if(Date.now()-pressT<=400) shakeCard();                // back: tapping the card only shakes (silent) — no flip, no sound; only the Tarkista button/space flips back to the front
   });
