@@ -58,7 +58,7 @@ body { font-family: 'Lora', Georgia, serif; background: #efe7d8 url('site_bg.jpg
 #conn-error strong { color: #c0392b; }
 #conn-error code { font-family: 'JetBrains Mono', monospace; background: #f9e8e8; padding: 0.1em 0.4em; border-radius: 3px; font-size: 0.85em; }
 
-/* ── 3. PAKKAVALINNANÄYTTÖ ───────────────────────────────── */
+/* ── 3. HOMEPAGE (#deck-screen) — course-deck picker ─────── */
 #deck-screen { width: 100%; display: none; flex-direction: column; justify-content: flex-start; align-items: center; padding-top: 1.5rem; gap: 2rem; overflow-x: hidden; }
 body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none; }   /* hide the scrollbar on the mobile homepage */
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
@@ -389,7 +389,7 @@ body.dark-mode .gear-btn { background: #3a312b; color: #f5f0e8; border-color: #6
 .iphone-toggle-wrap input:checked + .iphone-toggle::before { transform: translateX(20px); }
 body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 
-/* ── 6. KORTTIRUUTU & FLASHCARD ─────────────────────────── */
+/* ── 6. REVIEW PAGE + STUDY PAGE (#card-screen) & FLASHCARD ─ */
 :root { --side-card-gap: 50px; }
 #card-screen { position: relative; width: 100%; max-width: 1180px; min-width: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; margin-top: 0; }
 #grid-header { display: flex; align-items: center; gap: 12px; width: 100%; }
@@ -1137,7 +1137,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 </div></div>
 <div id="conn-error"></div>
 
-<!-- ══ PAKKAVALINNANÄYTTÖ ════════════════════════════════════ -->
+<!-- ══ HOMEPAGE (#deck-screen) — the course-deck picker ══════ -->
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-body">
@@ -1231,7 +1231,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="comment-feed" id="comment-feed"></div>
 </div>
 
-<!-- ══ KORTTIRUUTU ════════════════════════════════════════════ -->
+<!-- ══ REVIEW PAGE + STUDY PAGE (#card-screen) — split screen; goes fullscreen (.card-fs-on) into the study page ══ -->
 <div id="card-screen">
   <!-- "loading the next card" overlay, shown while Mona slides to a button -->
   <div id="card-loading" style="display:none;"><div class="cl-spinner"></div></div>
@@ -1353,10 +1353,18 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 //
 //  WHAT IT DOES, in one breath:
 //    On load it downloads SOLUKKO.apkg (an Anki deck), unzips + parses it into the
-//    `allCards` array, then shows a homepage of course "decks". Click a deck → a
-//    review view (grid of cards). Click a card → fullscreen study mode (reveal the
+//    `allCards` array, then shows the HOMEPAGE of course "decks". Click a deck → the
+//    REVIEW PAGE (the split screen: card grid on the left + a card preview on the right).
+//    Click a card → the STUDY PAGE (the same #card-screen made fullscreen: reveal the
 //    answer, grade it, comment). Comments, who's-online, and the weekly 5 € prize
 //    all live in Firebase (Firestore). Mona (the cell blob) is the mascot/guide.
+//
+//  THE THREE PAGES (the words used throughout the comments):
+//    • HOMEPAGE    = #deck-screen   — the course-deck picker.
+//    • REVIEW PAGE = #card-screen   — the split screen (grid + right-hand card preview).
+//    • STUDY PAGE  = #card-screen with the class .card-fs-on.faux-fs — the SAME element
+//                    lifted to a fullscreen overlay; native fullscreen is requested on top
+//                    where the device allows it. (see enterCardFs / exitCardFs / inFullscreen)
 //
 //  THE JAVASCRIPT BELOW IS IN NUMBERED SECTIONS — jump by searching "① ".. "⑮ ":
 //    ①  KONFIGURAATIO & TILA ......... config constants + global state variables
@@ -1369,7 +1377,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 //    ⑦  LOGO-ANIMAATIO .............. Mona: greeting bubbles, blinking eyes, reactions
 //    ⑧  .APKG-LATAUS & SQLITE ....... download + unzip + parse the Anki deck
 //    ⑨  PAKKOJEN LATAAMINEN ......... build the homepage grid of course decks
-//    ⑩  KORTIN RENDERÖINTI .......... render a card; reveal answer; fullscreen; grading
+//    ⑩  KORTIN RENDERÖINTI .......... render a card; reveal answer; review page ↔ study page; grading
 //    ⑪  KOMMENTIT .................. comments: load / post / edit / delete + golden prize
 //    ⑫  TIETOVISA / BUZZER ......... the live Friday quiz game
 //    ⑬  KORTTIARVIOINTI ............ exam-probability stars + the golden-winner watch
@@ -2490,7 +2498,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
 
 
 // ════════════════════════════════════════════════════════════
-// ⑩ KORTIN RENDERÖINTI   (the heart: show a card, reveal the answer, enter/leave fullscreen, the Tarkista/Ei/Kyllä buttons, grading)
+// ⑩ KORTIN RENDERÖINTI   (the heart: show a card, reveal the answer, review page ↔ study page, the Tarkista/Ei/Kyllä buttons, grading)
 // ════════════════════════════════════════════════════════════
 async function fixImages(html){
   return html.replace(/(<img[^>]+src\s*=\s*["'])([^"']+)(["'])/gi,(match,pre,src,post)=>{
@@ -2721,7 +2729,7 @@ function _captureCardRect(){   // remember where the card is on the right, so it
   const w=document.getElementById('flashcard-wrap');
   _fsFlipRect=(w && getComputedStyle(w).display!=='none' && w.getBoundingClientRect().width>1) ? w.getBoundingClientRect() : null;
 }
-// ── Fullscreen = ALWAYS the CSS overlay "page" (#card-screen.card-fs-on.faux-fs). On devices that support it we ALSO request native fullscreen, purely to hide the browser chrome. inFullscreen() = the page is up. ──
+// ── STUDY PAGE = ALWAYS the CSS overlay (#card-screen.card-fs-on.faux-fs) lifted over the review page. On devices that support it we ALSO request native fullscreen, purely to hide the browser chrome. inFullscreen() = the study page is up. ──
 function _nativeFsSupported(){ const cs=document.getElementById('card-screen'); return !!(cs && cs.requestFullscreen) && document['fullscreenEnabled']!==false; }
 function inFullscreen(){ const cs=document.getElementById('card-screen'); return !!cs && cs.classList.contains('card-fs-on'); }
 function enterCardFs(){
@@ -2861,7 +2869,6 @@ function fsHot(which){   // expand + glow the button Mona is over ('wrong' | 'ri
   if(w) w.classList.toggle('fs-ans-hot', which==='wrong');
   if(r) r.classList.toggle('fs-ans-hot', which==='right');
 }
-function _fsFullscreen(){ return inFullscreen(); }
 function _hidePbBubble(){ const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
 function _fsStartDrag(e){
   const t=document.getElementById('progress-tube'); if(!t) return;
@@ -2954,12 +2961,10 @@ function frontCheckReveal(){
 function frontNavLeft(){ fsBtnPress(document.getElementById('fc-nav-left')); if(cardAnswerShown){ _gradeInstant=true; gradeCard(false); } else frontPrev(); }    // Ei (grade wrong) / Edellinen (previous)
 function frontNavRight(){ fsBtnPress(document.getElementById('fc-nav-right')); if(cardAnswerShown){ _gradeInstant=true; gradeCard(true); } else frontNext(); }     // Kyllä (grade right) / Seuraava (next)
 function _cardShakeOnly(){ const fc=document.getElementById('flashcard'); if(!fc) return; fc.classList.remove('card-in-right','card-in-left','card-shake'); void fc.offsetWidth; fc.classList.add('card-shake'); setTimeout(()=>fc.classList.remove('card-shake'),500); }
-let _fcBubbleTO=null;
-function _fcBubbleFlash(text){ /* Mona is not shown in fullscreen, so never show her bubble there (shake/bounce just move the card) */ }
-// front-side navigation: skip to the next / previous card without grading (Seuraava / Edellinen)
+// study-page navigation: skip to the next / previous card without grading (Seuraava / Edellinen)
 function frontGoTo(i){
-  if(i<0){ _cardShakeOnly(); _fcBubbleFlash('Tämä on kurssin ensimmäinen kortti.'); return; }
-  if(i>=reviewCards.length){ _cardShakeOnly(); _fcBubbleFlash('Tämä on kurssin viimeinen kortti.'); return; }
+  if(i<0){ _cardShakeOnly(); return; }                       // already the first card — just a shake (Mona isn't shown on the study page)
+  if(i>=reviewCards.length){ _cardShakeOnly(); return; }     // already the last card
   stopMonaNotes();
   currentOverviewIndex=i; currentCard=reviewCards[i]; queue=reviewCards.slice(i+1);
   if(shuffleMode){ for(let k=queue.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); const t=queue[k]; queue[k]=queue[j]; queue[j]=t; } }
@@ -3090,8 +3095,7 @@ async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard();
 
 // ── Deck landing: welcome Mona by default; hover a grid card to preview it; click to review it in fullscreen ──
 let _previewIndex=-1, _previewTO=null, _welcomeTO=null;
-function scheduleWelcome(){}   // the right side always shows a card now — no revert
-function showDeckWelcome(){   // after fullscreen: show the current card on the right again
+function showDeckWelcome(){   // after the study page: show the current card on the right of the review page again
   if(inFullscreen()) return;
   clearTimeout(_previewTO); clearTimeout(_welcomeTO); _openingDeck=false;
   // the grid's intro-fade animations otherwise REPLAY when the grid un-hides on fullscreen exit — clear them so it shows at once
@@ -3118,8 +3122,7 @@ function landingReveal(){   // highlight the first card in the grid AND show it 
   renderCardOverview();   // highlight the first card in the grid
   _previewIndex=-1; _doPreview(0);   // and reveal it on the right at the same moment as Mona
 }
-function flyInTopMona(){ /* Mona now flies in from staggerGridIntro, timed with the last card of the top row */ }
-function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
+function previewCard(index){   // review page: hovering a grid card shows it (front only) on the right — no buttons, no answer bar
   if(inFullscreen()) return;
   clearTimeout(_welcomeTO); clearTimeout(_previewTO);
   _previewTO=setTimeout(()=>_doPreview(index), 90);
@@ -4289,7 +4292,6 @@ function shakeCard(){
   shakeStars();
   flashWordLinkBubbles();   // shaking re-highlights the linked words for 2s
   if(inFullscreen()){
-    _fcBubbleFlash('Tiesitkö? Paina Kyllä tai Ei-nappia.');   // Mona prompts for a grade
     _keycapDip(document.getElementById('tarkista-btn'));       // dip the centre button — no click sound on a shake
     return;
   }
