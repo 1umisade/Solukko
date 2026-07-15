@@ -15,7 +15,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="mona_with_eyes.png?v=1">
 <link rel="shortcut icon" type="image/png" href="mona_with_eyes.png?v=1">
-<title>Solukko</title>
+<title>Solukko.com</title>
 <meta name="description" content="Kysymyskortteja biokemisteille">   <!-- slogan: shown in Google search results, not on the page -->
 <meta property="og:description" content="Kysymyskortteja biokemisteille">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -673,8 +673,7 @@ body.dark-mode .loading-zzz span { color: #c9b48f; }
 .loading-dots::after { content: '.'; animation: loadingDots 1.4s steps(1) infinite; }
 @keyframes loadingDots { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
 .loading-bar { width: 200px; max-width: 60vw; height: 8px; border-radius: 999px; background: rgba(107,68,35,0.18); overflow: hidden; }
-.loading-bar-fill { width: 40%; height: 100%; border-radius: 999px; background: #6b4423; animation: loadingBar 1.2s ease-in-out infinite; }
-@keyframes loadingBar { 0% { transform: translateX(-110%); } 100% { transform: translateX(360%); } }
+.loading-bar-fill { width: 0%; height: 100%; border-radius: 999px; background: #6b4423; transition: width 0.3s ease; }   /* real progress: JS sets the width (see _setLoadBar) */
 body.dark-mode .loading-text { color: #c9b48f; }
 body.dark-mode .loading-bar { background: rgba(201,180,143,0.22); }
 body.dark-mode .loading-bar-fill { background: #c9b48f; }
@@ -1982,9 +1981,11 @@ async function idbSet(key,val){ try{ const db=await _idbOpen(); return await new
 // The apkg-parse overlay lifts as soon as the homepage is built; the deck grid then keeps loading BEHIND
 // the homepage, where Mona sleeps and her bubble shows a progress bar until _revealDecks (_setHomeMonaLoading).
 let _decksReady=null, _decksReadyResolve=null;
-async function _finishLoading(){ hide('loading'); }
+// Drive the #loading overlay's real progress bar: set its fill to pct% (0..100). The greet-bubble bar is driven separately (deck-media count in buildDeckGrid).
+function _setLoadBar(pct){ pct=Math.max(0,Math.min(100,pct)); const f=document.querySelector('#loading .loading-bar-fill'); if(f) f.style.width=pct+'%'; }
+async function _finishLoading(){ _setLoadBar(100); hide('loading'); }
 async function init(){
-  show('loading');
+  show('loading'); _setLoadBar(0);
   try {
     // Fast path: reuse the previously parsed .apkg from IndexedDB if the file on the server hasn't changed
     let _ver='';
@@ -1993,6 +1994,7 @@ async function init(){
       const _c=await idbGet('apkg');
       if(_c && _c.ver===_ver && _c.allCards && _c.allCards.length){
         allCards=_c.allCards; allDeckNames=_c.allDeckNames||[]; mediaMap=_c.mediaMap||{};
+        _setLoadBar(80);   // cache hit: the heavy parse is skipped, so jump most of the way
         await loadDecks(); await _finishLoading(); return;
       }
     }
@@ -2000,19 +2002,25 @@ async function init(){
     const res = await fetch('./' + APKG_FILE);
     if (!res.ok) throw new Error(APKG_FILE + ' not found (' + res.status + ')');
     const buf = await res.arrayBuffer();
+    _setLoadBar(25);   // .apkg downloaded
     const zip = await JSZip.loadAsync(buf);
+    _setLoadBar(40);   // unzipped
 
     const mediaFile = zip.file('media');
     if (mediaFile) {
       let mediaJson; try { mediaJson = await mediaFile.async('string'); } catch(e) {}
       if (mediaJson) {
         let mediaIndex = {}; try { mediaIndex = JSON.parse(mediaJson); } catch(e) {}
-        await Promise.all(Object.entries(mediaIndex).map(async ([num, name]) => {
-          const f = zip.file(num); if (!f) return;
-          const b64  = await f.async('base64');
-          const ext  = name.split('.').pop().toLowerCase();
-          const mime = {png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',svg:'image/svg+xml',webp:'image/webp'}[ext] || 'application/octet-stream';
-          mediaMap[name] = `data:${mime};base64,${b64}`;
+        const _ment = Object.entries(mediaIndex); let _mdone = 0;   // encoding every image is the bulk of the wait — count it for real progress
+        await Promise.all(_ment.map(async ([num, name]) => {
+          const f = zip.file(num);
+          if (f) {
+            const b64  = await f.async('base64');
+            const ext  = name.split('.').pop().toLowerCase();
+            const mime = {png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',svg:'image/svg+xml',webp:'image/webp'}[ext] || 'application/octet-stream';
+            mediaMap[name] = `data:${mime};base64,${b64}`;
+          }
+          _mdone++; _setLoadBar(40 + Math.round(_mdone/_ment.length*40));   // 40 -> 80 as media finishes
         }));
       }
     }
@@ -2022,6 +2030,7 @@ async function init(){
     const dbBuf = await dbFile.async('arraybuffer');
     const db    = new SQL.Database(new Uint8Array(dbBuf));
     allCards = parseAnkiDB(db);
+    _setLoadBar(90);   // cards parsed
     allDeckNames = Object.values(JSON.parse(db.exec('SELECT decks FROM col')[0].values[0][0])).map(d => d.name).filter(Boolean);
     db.close();
     if(_ver){ idbSet('apkg', { ver:_ver, allCards, allDeckNames, mediaMap }).catch(()=>{}); }   // cache the parse (fire-and-forget) so future reloads are instant
@@ -2417,8 +2426,10 @@ function buildDeckGrid(decks, list){
     else { if(el.complete && el.naturalWidth) return fin(); el.addEventListener('load',fin,{once:true}); el.addEventListener('error',fin,{once:true}); }
     setTimeout(fin,6000);   // fallback so a slow/broken file can't block the whole grid
   });
+  let _mLoaded=0;   // fill Mona's speech-bubble bar as each deck's video/image finishes preloading
+  const _bumpGreet=()=>{ _mLoaded++; const gf=document.querySelector('.home-greet .loading-bar-fill'); if(gf) gf.style.width=Math.round(_mLoaded/_media.length*100)+'%'; };
   if(!_media.length) _revealDecks();
-  else Promise.all(_media.map(_waitMedia)).then(_revealDecks);
+  else Promise.all(_media.map(m=>_waitMedia(m).then(_bumpGreet))).then(_revealDecks);
 }
 function layoutDecksRadial(){ /* homepage layout is CSS-driven (see buildDeckGrid); nothing to reposition on resize */ }
 if('scrollRestoration' in history) history.scrollRestoration='manual';   // don't let the browser restore scroll to 0 and cover the hero-hiding scroll
