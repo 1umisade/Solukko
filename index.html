@@ -2258,101 +2258,13 @@ async function loadDecks(){
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
   document.documentElement.style.setProperty('--deck-card-width',finalCardWidth+'px');
-  let _playingDeckVideo = null;
-  const _htmlTextParser = new DOMParser();   // parse card HTML to text WITHOUT loading its <img>/gif resources
-  const EMPTY_DECK_GIFS = { 'Kemian peruskurssi I': 'Kemian peruskurssi I.gif' };   // placeholder decks that use an animated gif instead of a video
-
   decks.forEach(item=>{
     const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
-    if(isMobile()){   // mobile: a single static construction.png for every deck (no videos/gifs/backsides — keeps the phone homepage light)
-      btn.innerHTML=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
-      if(item.hasCards) btn.onclick=()=>startDeck(item.deck);
-      item.btn=btn; return;
-    }
-    if(!item.hasCards){   // placeholder course: its own gif/named video if it has one, else the generic immunologia still (no backsides/hover/click)
-      const _gif=EMPTY_DECK_GIFS[item.cleanName];
-      const _media=_gif
-        ? `<img class="deck-video" src="${_gif}" alt="">`
-        : `<video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="video_immunologia.mp4" type="video/mp4"><source src="default.mp4" type="video/mp4"></video>`;
-      btn.innerHTML=`<div class="pack-top">${_media}<div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
-      const _pv=btn.querySelector('video.deck-video');
-      if(_pv) _pv.addEventListener('loadeddata',()=>{ try{ const d=_pv.duration||2; _pv.currentTime=Math.min(Math.max(0.8,d*0.25),d-0.05); }catch(e){} },{once:true});
-      if(_gif){   // gif animates only while hovered: freeze a static first-frame poster, swap to the live gif on hover
-        const _img=btn.querySelector('img.deck-video');
-        _img.addEventListener('load',()=>{
-          const _cv=document.createElement('canvas'); _cv.className='deck-video';
-          _cv.width=_img.naturalWidth||480; _cv.height=_img.naturalHeight||480;
-          try{ _cv.getContext('2d').drawImage(_img,0,0); }catch(e){}
-          _img.after(_cv); _img.style.display='none'; _img.removeAttribute('src');   // stop the gif, show the frozen poster
-          btn.addEventListener('mouseenter',()=>{ _img.src=_gif; _img.style.display=''; _cv.style.display='none'; });   // play from the start
-          btn.addEventListener('mouseleave',()=>{ _cv.style.display=''; _img.style.display='none'; _img.removeAttribute('src'); });   // freeze again
-        },{once:true});
-      }
-      item.btn=btn; return;
-    }
-    const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
-    const _tops=_dc.map(c=>{ const _d=_htmlTextParser.parseFromString(extractBody(c.answer||'').body,'text/html'); return (_d.body.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (text only, no image loads)
-    const _bk=(cls,i)=>`<div class="pack-back ${cls}">${_tops[i]?`<div class="pack-back-content">${escCmt(_tops[i].slice(0,600))}</div>`:''}</div>`;
-    btn.innerHTML=`${_bk('pack-back-4',3)}${_bk('pack-back-3',2)}${_bk('pack-back-2',1)}${_bk('pack-back-1',0)}<div class="pack-top"><video class="deck-video" muted playsinline preload="auto"><source src="${item.bgVideo}" type="video/mp4"><source src="video_immunologia.mp4" type="video/mp4"><source src="default.mp4" type="video/mp4"></video><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div><div class="deck-code">${item.courseCode}</div></div>`;
-    if(!isMobile() && item.hasCards){
-      btn.addEventListener('mouseenter',()=>{   // natural scattered flare, fresh each hover (each card drifts a random direction)
-        btn.querySelectorAll('.pack-back').forEach((bk)=>{
-          const ang=Math.random()*Math.PI*2, dist=7+Math.random()*10;
-          const tx=(Math.cos(ang)*dist).toFixed(1), ty=(Math.sin(ang)*dist-2).toFixed(1), rot=((Math.random()*2-1)*16).toFixed(1);
-          bk.style.transform='translate('+tx+'%,'+ty+'%) rotate('+rot+'deg)';
-        });
-      });
-      btn.addEventListener('mouseleave',()=>{ btn.querySelectorAll('.pack-back').forEach(bk=>{ bk.style.transform=''; }); });
-    }
-    const video=btn.querySelector('.deck-video');
-
-    function fitVideo(){
-      const bw=btn.offsetWidth, bh=btn.offsetHeight;
-      if(!bw||!bh||!video.videoWidth) return;
-      const scale=bh/video.videoHeight;                  // match the deck height exactly
-      const vw=video.videoWidth*scale, vh=bh;
-      video.style.width=vw+'px'; video.style.height=vh+'px';
-      video.style.left=((bw-vw)/2)+'px'; video.style.top='0px';   // centered horizontally, full deck height
-      video.style.position='absolute';
-    }
-    function _stillTime(){ const d=video.duration||2; return Math.min(Math.max(0.8, d*0.25), d-0.05); }   // resting preview frame: ~25% in, past any black fade-in
-    video.addEventListener('loadedmetadata', fitVideo, {once:true});
-    video.addEventListener('loadeddata', ()=>{ fitVideo(); if(!isMobile()) video.currentTime=_stillTime(); },{once:true});
-
-    let _rafId=null, _lastTs=null, _going=false;
-    function _stopReverse(){ if(_rafId){ cancelAnimationFrame(_rafId); _rafId=null; } _lastTs=null; }
-    function _reverseStep(ts){
-      if(_lastTs===null) _lastTs=ts;
-      const elapsed=(ts-_lastTs)/1000;
-      if(elapsed<0.028){ _rafId=requestAnimationFrame(_reverseStep); return; }
-      _lastTs=ts;
-      const newTime=video.currentTime-elapsed;
-      if(newTime<=0.02){ video.currentTime=0; _stopReverse(); if(_going) video.play().catch(()=>{}); }
-      else { video.currentTime=Math.max(0,newTime); _rafId=requestAnimationFrame(_reverseStep); }
-    }
-    video.addEventListener('ended',()=>{ if(!_going) return; _stopReverse(); _lastTs=null; _rafId=requestAnimationFrame(_reverseStep); });
-    function _start(){ _going=true; _stopReverse(); video.currentTime=0; video.play().catch(()=>{}); }
-    function _stop(){ _going=false; _stopReverse(); video.pause(); video.currentTime=_stillTime(); }   // rest on the content frame, not the (maybe black) start
-
-    if(!isMobile()){   // desktop: clickable courses ping-pong the video on hover; empty ones just rest on the still frame
-      if(item.hasCards){ btn.addEventListener('mouseenter', _start); btn.addEventListener('mouseleave', _stop); }
-    } else {   // mobile: no playback — freeze on the 15th frame as a still (looping video was eating the first scroll swipe)
-      video.loop=false; video.muted=true; video.setAttribute('muted',''); video.setAttribute('playsinline','');
-      let _frozen=false;
-      const _freeze=()=>{ if(_frozen) return; _frozen=true; try{ video.pause(); video.currentTime=_stillTime(); }catch(e){} };   // after decoding, jump to the content frame (skips a black intro)
-      if('requestVideoFrameCallback' in HTMLVideoElement.prototype){
-        let _fc=0;
-        const _tick=()=>{ if(_frozen) return; if(++_fc>=15){ _freeze(); return; } video.requestVideoFrameCallback(_tick); };   // stop on the 15th presented frame
-        video.requestVideoFrameCallback(_tick);
-      } else {
-        const _onTU=()=>{ if(video.currentTime>=0.5){ video.removeEventListener('timeupdate',_onTU); _freeze(); } };   // fallback: ~15th frame at 30fps
-        video.addEventListener('timeupdate',_onTU);
-      }
-      const p=video.play(); if(p&&p.catch) p.catch(()=>{});   // play muted just long enough to decode the still, then freeze (iOS won't decode frames otherwise)
-    }
-    if(item.hasCards) btn.onclick=()=>startDeck(item.deck);   // empty placeholders aren't clickable
+    // Every deck (mobile + desktop) uses one static construction.png. The homepage used to render ~40 <video>
+    // deck backgrounds, all decoded at once — heavy compositing that lagged badly, worst on Firefox. Static = none.
+    btn.innerHTML=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+    if(item.hasCards) btn.onclick=()=>startDeck(item.deck);
     item.btn=btn;
-    if(!isMobile()) video.addEventListener('loadeddata',()=>{ video.currentTime=_stillTime(); },{once:true});
   });
   buildDeckGrid(decks, list);
   updateSoluvisaCircle();
