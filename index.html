@@ -150,7 +150,7 @@ body.dark-mode .devpw-ok { background: #eadfce; color: #2b211b; }
 .hero-shop { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }   /* shrink to the product, sits close to the text */
 #home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; margin: 0; padding-right: 1.6rem; text-align: justify; -webkit-hyphens: auto; hyphens: auto; overflow: hidden; }   /* fixed width; height grows to fit all the text (overflow:hidden just contains the floated portrait, no clipping). hyphens:auto + <html lang="fi"> = proper Finnish syllable breaks so justify doesn't leave big gaps */
 @media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { aspect-ratio: auto; width: 100%; padding-right: 0; } }
-#home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+#home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; -webkit-hyphens: none; hyphens: none; white-space: nowrap; }   /* never hyphenate/split the email or shop link across lines */
 #home-hero .hero-link:hover { color: #7d5227; }
 body.dark-mode #home-hero .hero-link { color: #d9c496; }
 body.dark-mode #home-hero .hero-link:hover { color: #eadfce; }
@@ -1116,7 +1116,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-body">
-    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Meillä opiskelijoilla onkin jotain, mikä juuri kokeneilta opettajilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian hallitsee hyvin, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite onkin tarjota nuoremmille opiskelijoille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali, jonka muut opiskelijat ovat tehneet. Opiskelu sivustolla tapahtuu omalla suosikkimenetelmälläni eli kysymyskorteilla, joiden olen todennut tuottavan parhaan tenttimenestyksen ja muistijäljen. Valikoimassa ovat tällä hetkellä Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille aloille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi, voit lähettää ideoitasi tai Anki-tiedoston osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteydenottopyyntö tulee näkyviin sillä laitteella, jolla kommentti lähetettiin. Kenties tulevaisuudessa voin tarjota korvauksen useammallekin apukädelle, mutta opiskelijabudjetilla voin toistaiseksi vain kiittää heitä, jotka haluavat tasoittaa muiden koulupolkua ja rakentaa yhdessä oppimateriaalia, jota olisimme itse kaivanneet opintojen alussa.<br><br>Onnea opintoihisi! Sivuston käytössä voit kääntyä Monan puoleen → <img class="mona-inline" src="mona_with_eyes.png" alt="Mona"></p>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Meillä opiskelijoilla onkin jotain, mikä juuri kokeneilta opettajilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian hallitsee hyvin, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite onkin tarjota nuoremmille opiskelijoille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali, jonka muut opiskelijat ovat tehneet. Opiskelu sivustolla tapahtuu omalla suosikkimenetelmälläni eli kysymyskorteilla, joiden olen todennut tuottavan parhaan tenttimenestyksen ja muistijäljen. Valikoimassa ovat tällä hetkellä Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille aloille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi, voit lähettää ideoitasi tai Anki-tiedoston osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteydenottopyyntö tulee näkyviin sillä laitteella, jolla kommentti lähetettiin. Kenties tulevaisuudessa voin tarjota korvauksen useammallekin apukädelle, mutta opiskelijabudjetilla voin toistaiseksi vain kiittää heitä, jotka haluavat tasoittaa muiden koulupolkua ja rakentaa yhdessä oppimateriaalia, jota olisimme itse kaivanneet opintojen alussa.<br><br>Onnea opintoihisi! Sivuston käytössä voit kääntyä Monan puoleen → <img class="mona-inline" src="mona_with_eyes.png" alt="Mona" onclick="heroMonaClick()" style="cursor:pointer"></p>
       <div class="hero-shop">
         <a class="shop-embed" href="#" onclick="openShopOverlay(event)"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
       </div>
@@ -1307,9 +1307,49 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
      JAVASCRIPT
      ══════════════════════════════════════════════════════════ -->
 <script>
+// ════════════════════════════════════════════════════════════════════════════
+//  SOLUKKO — HOW THIS FILE IS ORGANIZED   (new here? read this first)
+// ────────────────────────────────────────────────────────────────────────────
+//  The ENTIRE site is this one file, index.html, in three parts, top to bottom:
+//    1) <head>   — page title, favicon, fonts, and the Firebase SDK <script> tags.
+//    2) <style>  — ALL the CSS: colours, layout, animations, dark mode, mobile.
+//    3) <script> — ALL the JavaScript (the app logic). You are here.
+//
+//  WHAT IT DOES, in one breath:
+//    On load it downloads SOLUKKO.apkg (an Anki deck), unzips + parses it into the
+//    `allCards` array, then shows a homepage of course "decks". Click a deck → a
+//    review view (grid of cards). Click a card → fullscreen study mode (reveal the
+//    answer, grade it, comment). Comments, who's-online, and the weekly 5 € prize
+//    all live in Firebase (Firestore). Mona (the cell blob) is the mascot/guide.
+//
+//  THE JAVASCRIPT BELOW IS IN NUMBERED SECTIONS — jump by searching "① ".. "⑮ ":
+//    ①  KONFIGURAATIO & TILA ......... config constants + global state variables
+//    ②  KÄYTTÄJÄN IDENTITEETTI ....... who the user is (getUserId / getUserWord)
+//    ③  TUMMATILA & KEHITTÄJÄTILA .... dark mode + developer mode; then Firebase
+//                                      init, the first-card swipe hint, dark-mode button
+//    ④  VIEWPORT-ZOOM ............... pinch / zoom handling
+//    ⑤  ÄÄNIEFEKTIT ................. sound effects (frog scream, keycap click)
+//    ⑥  KOMMENTTILAATIKON UI ........ the comment box open / close / submit UI
+//    ⑦  LOGO-ANIMAATIO .............. Mona: greeting bubbles, blinking eyes, reactions
+//    ⑧  .APKG-LATAUS & SQLITE ....... download + unzip + parse the Anki deck
+//    ⑨  PAKKOJEN LATAAMINEN ......... build the homepage grid of course decks
+//    ⑩  KORTIN RENDERÖINTI .......... render a card; reveal answer; fullscreen; grading
+//    ⑪  KOMMENTIT .................. comments: load / post / edit / delete + golden prize
+//    ⑫  TIETOVISA / BUZZER ......... the live Friday quiz game
+//    ⑬  KORTTIARVIOINTI ............ exam-probability stars + the golden-winner watch
+//    ⑭  YLEISKATSAUSRUUDUKKO ....... the deck's card overview grid; then KUVAAJAREKISTERI
+//    ⑮  RYHMÄT & TIETOVISA-PISTEET . quiz teams + scoreboard; then KÄYTTÄJÄLÄSNÄOLO (online)
+//    ── the very BOTTOM of <script> is STARTUP: init(), initPresence(), setupGoldenWatch()…
+//
+//  FIREBASE collections: comments, prizes, presence, gamestate, buzzers,
+//    joukkueet (teams), kuvaajat. Security rules are in the file firestore.rules.
+//  DEPLOY: `git push origin main` → GitHub Pages serves solukko.com. Any NEW image/
+//    audio file must be `git add`-ed or it 404s on the live site (works locally only).
+//  A dated backup of this whole file is in the  archive/  folder.
+// ════════════════════════════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════════════
-// ① KONFIGURAATIO & TILA
+// ① KONFIGURAATIO & TILA   (config constants + global state variables)
 // ════════════════════════════════════════════════════════════
 const APKG_FILE = 'SOLUKKO.apkg';
 const EMBED_3D_BASE = 'https://geneesi.com/?model=';   // cards with a non-empty 3D field embed this on the front; the field value is appended. Swap for the real viewer URL.
@@ -1681,16 +1721,21 @@ function logoScream(ev){
   siteBrandReact();
   if(typeof HOME_BUBBLE_ORDER!=='undefined'){ _greetIdx=_greetIdx+1; renderGreet(); }   // advance Mona's greeting cycle
 }
-function _greetOrder(){ return HOME_BUBBLE_ORDER; }
-function renderGreet(){   // render the homepage greeting; a winner always sees the golden win bubble (with an award button that opens the award screen)
+// A winner gets one extra bubble ('__golden__', the win message) at the FRONT of the cycle — shown first on load, then clicking Mona cycles through it like any other.
+function _greetOrder(){ return (typeof _myGolden!=='undefined' && _myGolden) ? ['__golden__'].concat(HOME_BUBBLE_ORDER) : HOME_BUBBLE_ORDER; }
+function renderGreet(){   // render the current homepage greeting bubble (its index in _greetOrder())
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
-  if(typeof _myGolden!=='undefined' && _myGolden){
-    greet.innerHTML=_goldenWinText();
-    greet.classList.add('golden-bubble'); return;
-  }
-  greet.classList.remove('golden-bubble');
   const order=_greetOrder(); const key=order[((_greetIdx%order.length)+order.length)%order.length];
-  greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
+  if(key==='__golden__'){ greet.classList.add('golden-bubble'); greet.innerHTML=_goldenWinText(); }
+  else { greet.classList.remove('golden-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
+}
+// the tiny Mona in the hero text: scroll up to the big Mona, greet with the "Tervetuloa" bubble, and make her react (scream + shake)
+function heroMonaClick(){
+  try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0,0); }
+  const order=_greetOrder(); const i=order.indexOf('homepage1'); _greetIdx = i>=0 ? i : 0;   // homepage1 = the "Tervetuloa Solukkoon!" bubble
+  renderGreet();
+  try{ playScream(); }catch(e){}
+  siteBrandReact();
 }
 
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
