@@ -1018,6 +1018,10 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 }
 
 .word-link { position: relative; cursor: pointer; border-radius: 8px; transition: background-color 0.35s ease, box-shadow 0.35s ease; }
+/* front side (answer not yet shown): linked words look like plain text and aren't interactive — word-links only appear once the answer is revealed */
+.flashcard:not(.answer-shown) .word-link { pointer-events: none; cursor: text; }
+.flashcard:not(.answer-shown) .word-link.wl-show, .flashcard:not(.answer-shown) .word-link:hover { background: none; box-shadow: none; }
+.flashcard:not(.answer-shown) .word-link::after { display: none; }
 .word-link::after { content: ''; position: absolute; left: 12px; top: 100%; border: 6px solid transparent; border-top-color: transparent; transition: border-top-color 0.35s ease; pointer-events: none; }   /* speech-bubble tail */
 .word-link.wl-show, .word-link:hover { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 0 0 6px #a06a35, 0 4px 12px rgba(0,0,0,0.16); }   /* speech-bubble graphic (cream fill + darker outline): on card load (flashes) and on hover */
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
@@ -4347,7 +4351,7 @@ function scrollToCard(smooth){
 // ════════════════════════════════════════════════════════════
 // SANALINKIT   (WORD-LINKS — highlighted terms inside a card; hover/tap one to pop the linked card's definition in a tooltip)
 // ════════════════════════════════════════════════════════════
-let _wordLinks=[];
+let _wordLinks=[], _curCardFrontLower='';   // the current card's own front term (cleaned, lowercased) — used to never link a word back to itself
 function _escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
 function buildWordLinks(){
@@ -4399,7 +4403,8 @@ function _wrapTextNode(textNode){
   const text=textNode.textContent;
   const matches=[];
   _wordLinks.forEach(link=>{
-    if(link.cardIndex===currentOverviewIndex) return;
+    if(link.cardIndex===currentOverviewIndex) return;                 // don't link to the card being shown
+    if(link.lower && link.lower===_curCardFrontLower) return;         // don't link a word back to a same-term card (e.g. a duplicate) — i.e. never link the word to itself
     const re=new RegExp('(?<![\\wäöåÄÖÅ-])'+_escapeReg(link.text)+'(?![\\wäöåÄÖÅ-])','gi');
     let m; while((m=re.exec(text))!==null) matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:link.cardIndex});
   });
@@ -4434,6 +4439,8 @@ function dimParentheses(element){
 
 function applyWordLinks(element){
   if(!_wordLinks.length||!element) return;
+  const _c=reviewCards[currentOverviewIndex];   // this card's own front term, so its content never links back to a same-term card
+  _curCardFrontLower = _c ? ((getField(_c,['Front','front','Question','question','Text','text','Content','content'])||_c.question||'').replace(/<[^>]*>/g,' ').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/&[a-z]+;/gi,' ').replace(/\s+/g,' ').trim().toLowerCase()) : '';
   const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT,{
     acceptNode(node){ let p=node.parentElement; while(p&&p!==element){ if(p.classList&&(p.classList.contains('word-link')||p.classList.contains('cloze-blank'))) return NodeFilter.FILTER_REJECT; p=p.parentElement; } return node.textContent.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }
   });
