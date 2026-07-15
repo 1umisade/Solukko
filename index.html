@@ -2721,20 +2721,19 @@ function _captureCardRect(){   // remember where the card is on the right, so it
   const w=document.getElementById('flashcard-wrap');
   _fsFlipRect=(w && getComputedStyle(w).display!=='none' && w.getBoundingClientRect().width>1) ? w.getBoundingClientRect() : null;
 }
-// ── Fullscreen abstraction: use the native Fullscreen API where the device allows it, otherwise an identical CSS "faux" fullscreen (a position:fixed overlay). inFullscreen() is true for either. ──
+// ── Fullscreen = ALWAYS the CSS overlay "page" (#card-screen.card-fs-on.faux-fs). On devices that support it we ALSO request native fullscreen, purely to hide the browser chrome. inFullscreen() = the page is up. ──
 function _nativeFsSupported(){ const cs=document.getElementById('card-screen'); return !!(cs && cs.requestFullscreen) && document['fullscreenEnabled']!==false; }
-function inFullscreen(){ const cs=document.getElementById('card-screen'); return !!cs && (document['fullscreenElement']===cs || cs.classList.contains('faux-fs')); }
+function inFullscreen(){ const cs=document.getElementById('card-screen'); return !!cs && cs.classList.contains('card-fs-on'); }
 function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
-  if(_nativeFsSupported()){ cs.requestFullscreen().catch(()=>_enterFauxFs()); }   // request rejected (e.g. iOS) → fall back to faux
-  else _enterFauxFs();
+  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the fullscreen page — always
+  if(_nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }     // ...plus native fullscreen where supported (best-effort; just hides the browser chrome)
 }
-function _enterFauxFs(){ const cs=document.getElementById('card-screen'); if(!cs) return; cs.classList.add('card-fs-on','faux-fs'); _onFsEnter(); }
 function exitCardFs(){
-  const cs=document.getElementById('card-screen'); if(!cs) return;
-  if(document['fullscreenElement']){ document['exitFullscreen'] && document.exitFullscreen(); return; }   // native → the fullscreenchange handler runs _onFsExit()
-  if(cs.classList.contains('faux-fs')){ cs.classList.remove('card-fs-on','faux-fs'); _onFsExit(); }
+  const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
+  cs.classList.remove('card-fs-on','faux-fs'); _onFsExit();             // leave the page
+  if(document['fullscreenElement']){ document['exitFullscreen'] && document.exitFullscreen(); }   // ...and native fullscreen if it engaged
 }
 function toggleCardFullscreen(){ if(inFullscreen()) exitCardFs(); else enterCardFs(); }
 function exitCardFullscreen(){ exitCardFs(); }
@@ -2819,10 +2818,10 @@ function _onFsExit(){
   document.getElementById('fs-comment-btn')?.classList.remove('visible'); clearTimeout(_fsHideTimer); clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
   if(document.body.classList.contains('reviewing')) showDeckWelcome();   // leaving fullscreen returns to the welcome
 }
-document.addEventListener('fullscreenchange',()=>{   // native only; the faux path calls _onFsEnter/_onFsExit directly
+document.addEventListener('fullscreenchange',()=>{   // enter/exit of the PAGE is driven by enterCardFs/exitCardFs; this only reacts to the native layer engaging/leaving
   const cs=document.getElementById('card-screen'); if(!cs) return;
-  if(document['fullscreenElement']===cs){ cs.classList.add('card-fs-on'); _onFsEnter(); }
-  else { cs.classList.remove('card-fs-on'); _onFsExit(); }
+  if(document['fullscreenElement']===cs){ fitCardScale(); scrollToCard(); updateFsSlider(); _fsCursorActivity(); }   // native fullscreen engaged → re-fit to the now-larger viewport (chrome hidden)
+  else if(cs.classList.contains('card-fs-on')){ exitCardFs(); }   // left native fullscreen (Esc / swipe) while the page is still up → exit the page too
 });
 document.addEventListener('pointerdown',()=>{ if(inFullscreen()){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
 
