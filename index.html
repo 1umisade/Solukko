@@ -216,7 +216,12 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-construction { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
 /* "review from your own device" — a deck-looking button that opens a file picker */
 .custom-import-wrap { display: none; }   /* the custom deck is cloned into the grid as the last deck (see buildDeckGrid) */
+.dev-deck-wrap { display: none; }        /* template for the dev-only "All Decks" deck (cloned into the grid) */
 .deck-btn.custom-deck-btn { position: relative; left: auto; top: auto; width: 160px; }
+.deck-btn.dev-deck-btn { display: none; }                       /* the clone is hidden for everyone... */
+body.devmode-on .deck-btn.dev-deck-btn { display: inline-block; }   /* ...and shown only to the developer */
+.dev-deck-btn .pack-top { background: #4a3f34; }   /* dark tile so the dev deck stands out */
+.dev-deck-btn .custom-deck-icon { color: #f6dd7f; }
 .deck-btn.custom-deck-btn .pack-top { background: linear-gradient(155deg, #6b8f7a 0%, #3a5c4c 55%, #2b3f38 100%); }
 .custom-deck-icon { font-size: 3.6rem; line-height: 0.9; font-weight: 300; margin-bottom: 10px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
 /* Rotate-card button (top middle in review) + the 90° card rotation */
@@ -1138,6 +1143,17 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       </div>
     </button>
   </div>
+  <!-- dev-only "All Decks" deck (every card, unsorted); cloned into the grid by buildDeckGrid, shown only in dev mode via body.devmode-on -->
+  <div class="dev-deck-wrap">
+    <button class="deck-btn custom-deck-btn dev-deck-btn" onclick="loadAllDecksDev()" title="Kaikki kortit lajittelemattomana (vain kehittäjä)">
+      <div class="pack-top">
+        <div class="deck-label">
+          <div class="custom-deck-icon">🗂️</div>
+          <div class="deck-title">Kaikki kortit (dev)</div>
+        </div>
+      </div>
+    </button>
+  </div>
 </div>
 <!-- solukko.shop overlay: opened from the hero Haalarimerkki; enlarged product in the centre, the rest on the sides -->
 <div id="shop-overlay" style="display:none" onclick="if(event.target===this)closeShopOverlay()">
@@ -1422,6 +1438,7 @@ function applyDevMode(){
   if(typeof renderDevCommentsPanel==='function') renderDevCommentsPanel();
   const dsb=document.getElementById('dev-screen-btn');
   if(dsb) dsb.style.display = (devMode && document.getElementById('deck-screen').style.display==='flex') ? 'flex' : 'none';
+  document.body.classList.toggle('devmode-on', !!devMode);   // reveals the dev-only "All Decks" deck in the homepage grid (CSS)
 }
 
 function exitDevMode(){
@@ -2072,6 +2089,44 @@ async function importApkgFile(file){
   }
 }
 
+// dev-only: fetch the big unsorted "All Decks.apkg" and review it as one massive deck. Parsed on first use, then cached in memory.
+let _allDecksLoaded=false;
+async function loadAllDecksDev(){
+  const deckName='DEV::Kaikki kortit';
+  if(_allDecksLoaded){ startDeck(deckName); return; }
+  show('loading');
+  try{
+    const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
+    const res = await fetch('./All Decks.apkg'); if(!res.ok) throw new Error('All Decks.apkg (' + res.status + ')');
+    const zip = await JSZip.loadAsync(await res.arrayBuffer());
+    const mediaFile = zip.file('media');
+    if(mediaFile){ let mediaJson; try{ mediaJson = await mediaFile.async('string'); }catch(e){}
+      if(mediaJson){ let mediaIndex={}; try{ mediaIndex=JSON.parse(mediaJson); }catch(e){}
+        await Promise.all(Object.entries(mediaIndex).map(async ([num,name])=>{
+          const f=zip.file(num); if(!f) return;
+          const b64=await f.async('base64'); const ext=name.split('.').pop().toLowerCase();
+          const mime={png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',svg:'image/svg+xml',webp:'image/webp'}[ext]||'application/octet-stream';
+          mediaMap[name]=`data:${mime};base64,${b64}`;
+        }));
+      }
+    }
+    const dbFile = zip.file('collection.anki21') || zip.file('collection.anki2');
+    if(!dbFile) throw new Error('collection.anki21/anki2 puuttuu.');
+    const db = new SQL.Database(new Uint8Array(await dbFile.async('arraybuffer')));
+    let cards = parseAnkiDB(db); db.close();
+    if(!cards.length) throw new Error('Ei kortteja.');
+    cards.forEach(c=>{ c.deckName=deckName; });   // flatten every card into the one unsorted deck
+    allCards = allCards.filter(c=>c.deckName!==deckName).concat(cards);
+    if(typeof allDeckNames!=='undefined' && !allDeckNames.includes(deckName)) allDeckNames.push(deckName);
+    _allDecksLoaded=true;
+    hide('loading');
+    startDeck(deckName);
+  }catch(e){
+    hide('loading');
+    alert('"Kaikki kortit" -lataus epäonnistui: '+((e&&e.message)||e));
+  }
+}
+
 
 // ════════════════════════════════════════════════════════════
 // ⑨ PAKKOJEN LATAAMINEN   (build the homepage grid of course "decks" from allCards; open a deck → the review view)
@@ -2319,7 +2374,10 @@ function buildDeckGrid(decks, list){
   if(_customBtn && _lastSection){
     const _cols=[..._lastSection.querySelectorAll('.sem-col:not(.sem-empty)')];
     const _col=_cols[_cols.length-1] || _lastSection.querySelector('.sem-col');
-    if(_col) _col.appendChild(_customBtn.cloneNode(true));
+    if(_col){ _col.appendChild(_customBtn.cloneNode(true));
+      const _devBtn=document.querySelector('.dev-deck-wrap .dev-deck-btn');   // dev-only "All Decks" deck, hidden for non-devs via CSS
+      if(_devBtn) _col.appendChild(_devBtn.cloneNode(true));
+    }
   }
   // wait for every deck's video/image to finish loading, then fade the decks in one by one
   const _gen=String((parseInt(list.dataset.buildGen,10)||0)+1); list.dataset.buildGen=_gen;   // supersede any earlier build
@@ -2653,14 +2711,13 @@ function flashFsExitBtn(){   // desktop: flash the comment button on entering fu
   _showFsButtons(1000);
 }
 let _fsCursorTimer=null, _overCard=false;
-function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness — only in fullscreen (the right-hand card keeps its cursor + a hover hint instead)
+function _fsCursorActivity(){   // show the cursor, then fade it after 2s of stillness — only in fullscreen (the right-hand card keeps its cursor + a hover hint instead). Does NOT reveal the comment button, so entering fullscreen keeps it hidden.
   const cs=document.getElementById('card-screen'); if(!cs) return;
   cs.classList.remove('cursor-hidden');
-  if(document.fullscreenElement) flashFsExitBtn();   // moving the mouse shows the exit button; it fades 1s after you stop
   clearTimeout(_fsCursorTimer);
   if(document.fullscreenElement) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement) cs.classList.add('cursor-hidden'); }, 2000);
 }
-document.addEventListener('mousemove', _fsCursorActivity);
+document.addEventListener('mousemove', ()=>{ _fsCursorActivity(); flashFsExitBtn(); });   // moving the mouse (desktop) reveals the comment button; entering fullscreen does not
 (function(){ const w=document.getElementById('flashcard-wrap');
   const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Avaa opiskelunäkymässä'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
   if(w){
@@ -2709,7 +2766,7 @@ document.addEventListener('fullscreenchange',()=>{
   const on = !!document.fullscreenElement && document.fullscreenElement===cs;
   document.getElementById('rotate-btn')?.classList.toggle('active',on);
   fitCardScale(); scrollToCard(); updateFsSlider();
-  if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); else clearFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // enter fullscreen: show the front OR back button row
+  if(on){ document.getElementById('fs-comment-btn')?.classList.remove('visible'); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); else clearFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // enter fullscreen: comment button starts hidden (reveal it later via mouse-move / star tap)
   else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
     const _touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     if(_touch && _commenting && document.activeElement && document.activeElement.id==='card-comment'){ _fsCommentExit=true; return; }   // iOS keyboard dropped fullscreen while commenting → keep the card/state; _reenterFsAfterComment() brings us back
