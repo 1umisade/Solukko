@@ -118,10 +118,10 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .gold-toggle { float: right; background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 0; margin-left: 6px; line-height: 1; filter: grayscale(1) opacity(0.45); transition: filter 0.15s ease; }
 .gold-toggle.on, .gold-toggle:hover { filter: none; }
 /* winner: gold win bubble on the homepage greeting + a trophy award button inside it; the review back button turns gold too (still goes back) */
-.home-greet.golden-bubble { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border-color: #d4af37 !important; color: #4a3a10 !important; box-shadow: 0 0 16px rgba(212,175,55,0.55) !important; }
+.home-greet.golden-bubble { display: block; height: auto; overflow: visible; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border-color: #d4af37 !important; color: #4a3a10 !important; box-shadow: 0 0 16px rgba(212,175,55,0.55) !important; }   /* block + auto height so the long win text wraps like the normal greeting bubbles */
 .home-greet.golden-bubble::after { border-right-color: #f6dd7f !important; }
 .golden-bubble b { color: #6b4a10; }
-.bubble-award-wrap { display: flex; justify-content: center; margin-top: 0.55rem; }
+.bubble-award-wrap { float: right; margin: 0 0 6px 14px; }   /* trophy sits top-right; the text wraps around it */
 .bubble-award-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fffaea, #f6dd7f 55%, #e0b93e); box-shadow: 0 3px 12px rgba(212,175,55,0.65), 0 1px 4px rgba(0,0,0,0.25); font-size: 1.35rem; line-height: 1; cursor: pointer; animation: goldenPulse 1.6s ease-in-out infinite; }
 #back-btn-fixed.golden-back { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border-color: #d4af37 !important; box-shadow: 0 4px 16px rgba(212,175,55,0.6) !important; animation: goldenPulse 1.8s ease-in-out infinite; }
 @keyframes goldenPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
@@ -1687,7 +1687,7 @@ function _greetOrder(){ return HOME_BUBBLE_ORDER; }
 function renderGreet(){   // render the homepage greeting; a winner always sees the golden win bubble (with an award button that opens the award screen)
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
   if(typeof _myGolden!=='undefined' && _myGolden){
-    greet.innerHTML=_goldenWinText()+'<div class="bubble-award-wrap"><button class="bubble-award-btn" onclick="showGoldenAward()" title="Palkintosi">🏆</button></div>';
+    greet.innerHTML='<div class="bubble-award-wrap"><button class="bubble-award-btn" onclick="showGoldenAward()" title="Palkintosi">🏆</button></div>'+_goldenWinText();
     greet.classList.add('golden-bubble'); return;
   }
   greet.classList.remove('golden-bubble');
