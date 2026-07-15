@@ -716,8 +716,12 @@ body.dark-mode .dev-comments-title { color: #eadfce; }
 body.dark-mode .dev-comment-row { border-top-color: #4a4038; }
 body.dark-mode .dev-comment-row:hover { background: #362c25; }
 .dev-comment-deck { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: #a09080; flex-shrink: 0; max-width: 34%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dev-comment-snip { font-family: 'Lora', serif; font-size: 0.8rem; color: #56533c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dev-comment-snip { font-family: 'Lora', serif; font-size: 0.8rem; color: #56533c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; }
 body.dark-mode .dev-comment-snip { color: #eadfce; }
+.dev-comment-actions { flex-shrink: 0; display: flex; gap: 3px; margin-left: auto; }
+.dca-btn { border: none; background: none; cursor: pointer; font-size: 0.85rem; line-height: 1; padding: 3px 4px; border-radius: 6px; opacity: 0.75; }
+.dca-btn:hover { opacity: 1; background: rgba(0,0,0,0.06); }
+.dca-btn.dca-del:hover { background: rgba(192,57,43,0.15); }
 #card-comment { width: 100%; min-height: 360px; height: auto; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }
 .comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
@@ -3204,9 +3208,31 @@ function renderDevCommentsPanel(){
     docs.sort((a,b)=>((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)-((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0));
     let html='<div class="dev-comments-title">Kaikki kommentit ('+docs.length+')</div>';
     if(!docs.length) html+='<div style="opacity:0.6;font-size:0.8rem;">Ei kommentteja.</div>';
-    docs.forEach(c=>{ const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('SOLUKKO::','')); const cid=escCmt(String(c.cardId||'')); html+='<div class="dev-comment-row'+(c.golden?' golden':'')+'" onclick="openCardById(\''+cid+'\')">'+(c.golden?'<span class="dev-comment-gold">🏆</span>':'')+'<span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span></div>'; });
+    docs.forEach(c=>{
+      const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('SOLUKKO::','')); const cid=escCmt(String(c.cardId||'')); const id=escCmt(c.id);
+      let acts='<span class="dev-comment-actions">';
+      acts+='<button class="dca-btn" title="'+(c.golden?'Poista kulta':'Maalaa viikon voittajaksi')+'" onclick="event.stopPropagation(); toggleGoldenComment(\''+id+'\','+(c.golden?'true':'false')+'); _refreshDevComments();">🏆</button>';
+      if(c.golden) acts+='<button class="dca-btn" title="Merkitse maksetuksi" onclick="event.stopPropagation(); markPrizePaid(\''+id+'\'); _refreshDevComments();">💸</button>';
+      acts+='<button class="dca-btn" title="Muokkaa" onclick="event.stopPropagation(); devEditComment(\''+id+'\')">✎</button>';
+      acts+='<button class="dca-btn dca-del" title="Poista" onclick="event.stopPropagation(); devDeleteComment(\''+id+'\')">🗑</button>';
+      acts+='</span>';
+      html+='<div class="dev-comment-row'+(c.golden?' golden':'')+'" onclick="openCardById(\''+cid+'\')"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span>'+acts+'</div>';
+    });
     panel.innerHTML=html;
   }).catch(err=>{ panel.innerHTML='<div class="dev-comments-title">Kaikki kommentit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+err.message+'</div>'; });
+}
+function _refreshDevComments(){ setTimeout(renderDevCommentsPanel, 700); }   // re-render the dev list after a Firestore write settles
+function devEditComment(id){   // dev: edit any comment's text from the dev list
+  db.collection('comments').doc(id).get().then(doc=>{
+    if(!doc.exists){ alert('Kommenttia ei löytynyt.'); return; }
+    const t=prompt('Muokkaa kommenttia:', (doc.data()||{}).text||'');
+    if(t===null) return;
+    db.collection('comments').doc(id).update({ text:t }).then(()=>{ renderDevCommentsPanel(); if(typeof loadFirestoreComments==='function') loadFirestoreComments(); }).catch(err=>alert('Virhe: '+err.message));
+  }).catch(err=>alert('Virhe: '+err.message));
+}
+function devDeleteComment(id){   // dev: delete any comment from the dev list
+  if(!confirm('Poistetaanko kommentti pysyvästi?')) return;
+  db.collection('comments').doc(id).delete().then(()=>{ renderDevCommentsPanel(); if(typeof loadFirestoreComments==='function') loadFirestoreComments(); }).catch(err=>alert('Virhe: '+err.message));
 }
 
 
@@ -3883,13 +3909,12 @@ function shuffleAllCards(){   // one button: scramble every section's cards, ani
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
 
-  if(grid.dataset.deckName===currentDeck){
-    deckGroups.forEach(group=>{
-      group.cards.forEach(card=>{
-        const index=reviewCards.indexOf(card);
-        const el=grid.querySelector(`[data-card-index="${index}"]`);
-        if(el) el.className=`overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}`.trim();
-      });
+  if(grid.dataset.deckName===currentDeck){   // same deck: grid already built → just refresh the highlight/grade classes
+    if(document.fullscreenElement) return;   // the grid is hidden in fullscreen; it re-syncs on exit (showDeckWelcome). Skipping this here is what stops big decks from lagging while you browse in fullscreen.
+    grid.querySelectorAll('.overview-card[data-card-index]').forEach(el=>{   // O(n) pass, no reviewCards.indexOf() (that made it O(n²))
+      const index=+el.dataset.cardIndex; const card=reviewCards[index]; if(!card) return;
+      const cls=`overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}`.trim();
+      if(el.className!==cls) el.className=cls;   // only touch the DOM when the class actually changed (no needless style recalc)
     });
     const showCeleb = reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known');   // all cards osattu -> show the celebration card
     const ex=document.getElementById('grid-celeb');
@@ -4356,6 +4381,7 @@ function _escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
 function buildWordLinks(){
   _wordLinks=[];
+  if(reviewCards.length>500) return;   // huge decks (e.g. the dev "All Decks"): skip word-links — thousands of terms would make every card render run thousands of regexes
   const seen=new Set();
 
   // Pass 0: explicit "references" field — words the card author chose to link to this card (highest priority)
