@@ -3992,9 +3992,9 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     e.preventDefault();                                      // it's a horizontal grade-drag → don't scroll the card
     const vw=window.innerWidth;
     const side = dx<0 ? 'left' : 'right';
-    const prog = Math.max(0, Math.min(1, Math.abs(dx)/(vw*0.5)));   // 0..1 over the first half of a swipe
+    const prog = Math.max(0, Math.min(1, Math.abs(dx)/(vw*0.16)));   // very sensitive: full size after only ~16% of the width
     const scale = 1 + prog*1.2;                             // grows from 1x up to ~2.2x
-    const armed = scale >= 1.25;                            // reached 125% → armed (glows); release while armed to register
+    const armed = scale >= 1.25;                            // reached 125% → armed (glows) after only ~3-4% of drag; release while armed to register
     _gDragSide=side; _gDragProg=prog; _gArmed=armed;
     const btn=document.getElementById(side==='left'?'fc-nav-left':'fc-nav-right');
     const other=document.getElementById(side==='left'?'fc-nav-right':'fc-nav-left');
