@@ -117,8 +117,13 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 @keyframes goldenFlash { 0%,100%{ box-shadow: 0 0 14px rgba(212,175,55,0.55); } 45%{ box-shadow: 0 0 30px 10px rgba(212,175,55,0.95); } }
 .gold-toggle { float: right; background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 0; margin-left: 6px; line-height: 1; filter: grayscale(1) opacity(0.45); transition: filter 0.15s ease; }
 .gold-toggle.on, .gold-toggle:hover { filter: none; }
-/* winner's award button — top-left, shown only to the winner; opens the award screen */
-#golden-award-btn { position: fixed; top: 14px; left: 14px; z-index: 250; width: 46px; height: 46px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6), 0 2px 8px rgba(0,0,0,0.25); font-size: 1.5rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
+/* winner: gold win bubble on the homepage greeting + a trophy award button inside it; the review back button turns gold too (still goes back) */
+.home-greet.golden-bubble { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border-color: #d4af37 !important; color: #4a3a10 !important; box-shadow: 0 0 16px rgba(212,175,55,0.55) !important; }
+.home-greet.golden-bubble::after { border-right-color: #f6dd7f !important; }
+.golden-bubble b { color: #6b4a10; }
+.bubble-award-wrap { display: flex; justify-content: center; margin-top: 0.55rem; }
+.bubble-award-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fffaea, #f6dd7f 55%, #e0b93e); box-shadow: 0 3px 12px rgba(212,175,55,0.65), 0 1px 4px rgba(0,0,0,0.25); font-size: 1.35rem; line-height: 1; cursor: pointer; animation: goldenPulse 1.6s ease-in-out infinite; }
+#back-btn-fixed.golden-back { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border-color: #d4af37 !important; box-shadow: 0 4px 16px rgba(212,175,55,0.6) !important; animation: goldenPulse 1.8s ease-in-out infinite; }
 @keyframes goldenPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
 /* winner celebration overlay */
 #golden-overlay { position: fixed; inset: 0; z-index: 300; background: radial-gradient(circle at 50% 38%, rgba(90,66,12,0.92), rgba(18,13,4,0.96)); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
@@ -1142,7 +1147,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 </div>
 <!-- winner celebration: shown on the device whose comment was painted gold -->
-<button id="golden-award-btn" onclick="showGoldenAward()" title="Palkintosi" style="display:none">🏆</button>
 <div id="golden-overlay" style="display:none">
   <div class="golden-inner">
     <div class="golden-trophy">🏆</div>
@@ -1680,8 +1684,13 @@ function logoScream(ev){
   if(typeof HOME_BUBBLE_ORDER!=='undefined'){ _greetIdx=_greetIdx+1; renderGreet(); }   // advance Mona's greeting cycle
 }
 function _greetOrder(){ return HOME_BUBBLE_ORDER; }
-function renderGreet(){   // render the current homepage greeting (no golden bubble — the win shows via the top-left award button)
+function renderGreet(){   // render the homepage greeting; a winner always sees the golden win bubble (with an award button that opens the award screen)
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
+  if(typeof _myGolden!=='undefined' && _myGolden){
+    greet.innerHTML=_goldenWinText()+'<div class="bubble-award-wrap"><button class="bubble-award-btn" onclick="showGoldenAward()" title="Palkintosi">🏆</button></div>';
+    greet.classList.add('golden-bubble'); return;
+  }
+  greet.classList.remove('golden-bubble');
   const order=_greetOrder(); const key=order[((_greetIdx%order.length)+order.length)%order.length];
   greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
 }
@@ -3300,14 +3309,18 @@ function setupGoldenWatch(){
   }catch(e){ _goldenRetry=setTimeout(setupGoldenWatch, 3000); }
 }
 function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-// show/hide the winner's top-left award button (the comment itself is gold on every device; this button is the winner's private claim)
+function _goldenWinText(){ return _myGolden ? ('Voitit 5&nbsp;&euro;! Lunasta palkinto lähettämällä koodi <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, tai nouda se käteisenä Turun yliopiston Orbitaalilta päivystysaikaan.') : ''; }
+// winner styling: the review back button turns into the gold award button (still goes back); the homepage Mona bubble shows the win + an award button (via renderGreet)
 function _applyGolden(){
-  const btn=document.getElementById('golden-award-btn'); if(btn) btn.style.display=_myGolden?'flex':'none';
+  const back=document.getElementById('back-btn-fixed');
+  if(back){ if(_myGolden){ if(back.dataset.orig===undefined) back.dataset.orig=back.innerHTML; back.classList.add('golden-back'); back.innerHTML='🏆'; }
+            else if(back.dataset.orig!==undefined){ back.classList.remove('golden-back'); back.innerHTML=back.dataset.orig; } }
+  if(typeof renderGreet==='function') renderGreet();   // refresh the homepage greeting (golden win bubble ↔ normal)
 }
-function showGoldenAward(){   // the award screen — opened by tapping the trophy, and auto-popped the instant the dev awards it
+function showGoldenAward(){   // the award screen — opened from the bubble's trophy, and auto-popped the instant the dev awards it
   if(!_myGolden) return;
   const msg=document.getElementById('golden-msg');
-  if(msg) msg.innerHTML='Olet voittanut 5&nbsp;&euro; jättämälläsi kommentilla! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja raha siirretään sinulle Mobilepaylla.';
+  if(msg) msg.innerHTML=_goldenWinText();
   const o=document.getElementById('golden-overlay'); if(o) o.style.display='flex';
 }
 function maybeShowGoldenCelebration(){   // auto-pop once per session — fires the instant the dev paints the comment gold (via the real-time watch)
