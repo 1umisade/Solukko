@@ -251,9 +251,14 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #card-screen:fullscreen #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
 .fc-nav { width: min(75px, 14vw); height: min(75px, 14vw); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
-/* armed (>=150%): pulsing glow — release now to register. Left (Ei/Edellinen) = orange, right (Kyllä/Seuraava) = sage */
-#fc-nav-left.fc-nav-armed img  { animation: fcGlowOrange 0.85s ease-in-out infinite; }
-#fc-nav-right.fc-nav-armed img { animation: fcGlowSage 0.85s ease-in-out infinite; }
+/* armed (>=125%): pulsing glow — release now to register. Front (Edellinen/Seuraava) = beige on both; back answer buttons = orange (Ei) / sage (Kyllä) */
+#front-check:not(.back) .fc-nav.fc-nav-armed img { animation: fcGlowBeige 0.85s ease-in-out infinite; }
+#front-check.back #fc-nav-left.fc-nav-armed img  { animation: fcGlowOrange 0.85s ease-in-out infinite; }
+#front-check.back #fc-nav-right.fc-nav-armed img { animation: fcGlowSage 0.85s ease-in-out infinite; }
+@keyframes fcGlowBeige {
+  0%,100% { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 12px rgba(226,210,170,0.95)) drop-shadow(0 0 22px rgba(198,178,132,0.6)); }
+  50%     { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 22px rgba(240,228,198,1)) drop-shadow(0 0 36px rgba(212,192,150,0.9)); }
+}
 @keyframes fcGlowOrange {
   0%,100% { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 12px rgba(239,154,95,0.95)) drop-shadow(0 0 22px rgba(230,120,50,0.6)); }
   50%     { filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)) drop-shadow(0 0 22px rgba(255,182,112,1)) drop-shadow(0 0 36px rgba(240,140,60,0.9)); }
@@ -624,7 +629,7 @@ body.dark-mode #presence-list span { background: #3a312b !important; border-colo
 body.dark-mode .kuvaaja-btn { color: #eadfce !important; border-color: #6d5f52 !important; }
 body.dark-mode .kuvaaja-cancel { border-color: #c0392b !important; color: #c0392b !important; }
 body.dark-mode #loading { color: #eadfce; }
-#loading { position: fixed; inset: 0; z-index: 9999; display: none; background: #efe7d8; }
+#loading { position: fixed; inset: 0; z-index: 100000; display: none; background: #efe7d8; }   /* above #site-brand (z 9999) so the homepage brand Mona never shows through while loading */
 body.dark-mode #loading { background: #2b2622; }
 .loading-inner { position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
 .loading-mona-wrap { position: relative; width: 130px; height: 130px; }
@@ -2907,10 +2912,7 @@ function landingReveal(){   // grid has faded in → highlight the first card, t
   renderCardOverview();   // highlight the first card in the grid
   setTimeout(()=>{ if(!document.fullscreenElement){ _previewIndex=-1; _doPreview(0); flyInTopMona(); } }, 500);   // then reveal it on the right, then bring Mona in 4s later
 }
-function flyInTopMona(){   // Mona flies in 4s after the first card is shown on the right
-  clearTimeout(_topMonaFlyTO);
-  _topMonaFlyTO=setTimeout(()=>{ const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); }, 4000);
-}
+function flyInTopMona(){ /* Mona now flies in from staggerGridIntro, timed with the last card of the top row */ }
 function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
   if(document.fullscreenElement) return;
   clearTimeout(_welcomeTO); clearTimeout(_previewTO);
@@ -2947,6 +2949,9 @@ function staggerGridIntro(){   // on deck load: fade the first row of cards in o
   firstRow.forEach((c,i)=>{ c.style.animation='introFade 0.5s ease both'; c.style.animationDelay=(2+i*0.12).toFixed(2)+'s'; });
   rest.forEach(c=>{ c.style.animation='introFade 0.5s ease both'; c.style.animationDelay=restTime.toFixed(2)+'s'; });
   grid.querySelectorAll('.overview-section > *:not(.overview-section-grid)').forEach(v=>{ v.style.animation='introFade 0.5s ease both'; v.style.animationDelay=restTime.toFixed(2)+'s'; });
+  const monaDelay = 2 + Math.max(0, firstRow.length-1)*0.12;   // same base as the first-row stagger → Mona flies in with the last card of the top row
+  clearTimeout(_topMonaFlyTO);
+  _topMonaFlyTO = setTimeout(()=>{ if(document.fullscreenElement) return; const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); }, monaDelay*1000);
 }
 
 
@@ -3984,7 +3989,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     const side = dx<0 ? 'left' : 'right';
     const prog = Math.max(0, Math.min(1, Math.abs(dx)/(vw*0.5)));   // 0..1 over the first half of a swipe
     const scale = 1 + prog*1.2;                             // grows from 1x up to ~2.2x
-    const armed = scale >= 1.5;                             // reached 150% → armed (glows); release while armed to grade
+    const armed = scale >= 1.25;                            // reached 125% → armed (glows); release while armed to register
     _gDragSide=side; _gDragProg=prog; _gArmed=armed;
     const btn=document.getElementById(side==='left'?'fc-nav-left':'fc-nav-right');
     const other=document.getElementById(side==='left'?'fc-nav-right':'fc-nav-left');
