@@ -13,8 +13,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="tab_logo.png?v=2">
+<link rel="icon" type="image/png" href="mona_with_eyes.png?v=1">
+<link rel="shortcut icon" type="image/png" href="mona_with_eyes.png?v=1">
 <title>Solukko</title>
+<meta name="description" content="Mutkatonta opiskelua">   <!-- slogan: shown in Google search results, not on the page -->
+<meta property="og:description" content="Mutkatonta opiskelua">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -746,9 +749,8 @@ body.dark-mode .peek-act-btn { background: #2b211b; border-color: #6d5f52; }
 .logo-eye.re { left: 72.5%; top: 43.5%; }
 .site-brand { cursor: pointer; }
 .eyes-closed .logo-eye { display: none; }
-/* minuscule inline Mona (in the hero text) — her pupils follow the cursor via initLogoEyes */
-.mona-inline { display: inline-block; position: relative; width: 1.5em; height: 1.5em; vertical-align: -0.42em; }
-.mona-inline .brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
+/* minuscule inline Mona (in the hero text) — static with-eyes image */
+.mona-inline { display: inline-block; width: 1.5em; height: 1.5em; vertical-align: -0.42em; object-fit: contain; }
 .site-brand.twitch { animation: logoTwitch 0.45s ease; }
 .peek-logo-shake { animation: logoTwitch 0.45s ease; }
 @keyframes logoTwitch {
@@ -1072,7 +1074,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- Peeking Mona: slides in from a screen edge (during review, and the mobile homepage). Bubbles injected by buildMonaBubbles(). -->
 <div id="peek-logo">
   <div class="peek-inner">
-    <img src="solukkologo_eyes.png" alt="" class="brand-logo-img">
+    <img src="mona_no_eyes.png" alt="" class="brand-logo-img">
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
@@ -1081,7 +1083,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <!-- ══ SOLUKKO-LOGO (homepage) — bubbles injected by buildMonaBubbles() ══ -->
 <div class="site-brand" id="site-brand" onclick="logoScream(event)">
   <div class="brand-inner">
-    <img src="solukkologo_eyes.png" alt="Solukko" class="brand-logo-img">
+    <img src="mona_no_eyes.png" alt="Solukko" class="brand-logo-img">
     <div class="logo-eye le"><span class="logo-pupil"></span></div>
     <div class="logo-eye re"><span class="logo-pupil"></span></div>
   </div>
@@ -1101,7 +1103,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-body">
-    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Meillä opiskelijoilla onkin jotain, mikä juuri kokeneilta opettajilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian hallitsee hyvin, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite onkin tarjota nuoremmille opiskelijoille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali, jonka muut opiskelijat ovat tehneet. Opiskelu sivustolla tapahtuu omalla suosikkimenetelmälläni eli kysymyskorteilla, joiden olen todennut tuottavan parhaan tenttimenestyksen ja muistijäljen. Valikoimassa ovat tällä hetkellä Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille aloille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi, voit lähettää ideoitasi tai Anki-tiedoston osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteydenottopyyntö tulee näkyviin sillä laitteella, jolla kommentti lähetettiin. Kenties tulevaisuudessa voin tarjota korvauksen useammallekin apukädelle, mutta opiskelijabudjetilla voin toistaiseksi vain kiittää heitä, jotka auttavat tekemään tiedosta saavutettavampaa.<br><br>Onnea opintoihisi! Sivuston käytössä voit kääntyä Monan puoleen <span class="mona-inline"><img class="brand-logo-img" src="solukkologo_eyes.png" alt="Mona"><span class="logo-eye le"><span class="logo-pupil"></span></span><span class="logo-eye re"><span class="logo-pupil"></span></span></span></p>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Meillä opiskelijoilla onkin jotain, mikä juuri kokeneilta opettajilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian hallitsee hyvin, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite onkin tarjota nuoremmille opiskelijoille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali, jonka muut opiskelijat ovat tehneet. Opiskelu sivustolla tapahtuu omalla suosikkimenetelmälläni eli kysymyskorteilla, joiden olen todennut tuottavan parhaan tenttimenestyksen ja muistijäljen. Valikoimassa ovat tällä hetkellä Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille aloille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi, voit lähettää ideoitasi tai Anki-tiedoston osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteydenottopyyntö tulee näkyviin sillä laitteella, jolla kommentti lähetettiin. Kenties tulevaisuudessa voin tarjota korvauksen useammallekin apukädelle, mutta opiskelijabudjetilla voin toistaiseksi vain kiittää heitä, jotka auttavat tekemään tiedosta saavutettavampaa.<br><br>Onnea opintoihisi! Sivuston käytössä voit kääntyä Monan puoleen <img class="mona-inline" src="mona_with_eyes.png" alt="Mona"></p>
       <div class="hero-shop">
         <a class="shop-embed" href="#" onclick="openShopOverlay(event)"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
       </div>
@@ -1217,7 +1219,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div id="deck-welcome">
     <div class="welcome-bubble" id="welcome-bubble"></div>
     <div class="welcome-mona" onclick="monaReactAt(this, true)">
-      <img src="solukkologo_eyes.png" alt="">
+      <img src="mona_no_eyes.png" alt="">
       <div class="logo-eye le"><span class="logo-pupil"></span></div>
       <div class="logo-eye re"><span class="logo-pupil"></span></div>
     </div>
@@ -1248,7 +1250,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
       <div class="progress-fill" id="progress-fill"></div>
       <div class="pb-bubble" id="pb-bubble"></div>
       <div class="pb-knob" id="pb-knob">
-        <img src="solukkologo_eyes.png" alt="">
+        <img src="mona_no_eyes.png" alt="">
         <div class="logo-eye le"><span class="logo-pupil"></span></div>
         <div class="logo-eye re"><span class="logo-pupil"></span></div>
       </div>
@@ -1658,7 +1660,7 @@ function siteBrandReact(){   // Mona shakes and blinks (used on the homepage gre
     img.src='solukkologo_eyes_closed.png';
     logo.classList.add('eyes-closed');            // hide the moving eyes
     clearTimeout(_logoTimer);
-    _logoTimer=setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },1000);
+    _logoTimer=setTimeout(()=>{ img.src='mona_no_eyes.png'; logo.classList.remove('eyes-closed'); },1000);
   }
 }
 function logoScream(ev){
@@ -1776,7 +1778,7 @@ let _homeHoverOpened=false, _greetIdx=0;
       setTimeout(()=>pkImg.classList.remove('peek-logo-shake'),500);
       pkImg.src='solukkologo_eyes_closed.png'; pk.classList.add('eyes-closed');
       clearTimeout(pkBlinkTimer);
-      pkBlinkTimer=setTimeout(()=>{ pkImg.src='solukkologo_eyes.png'; pk.classList.remove('eyes-closed'); },1000);
+      pkBlinkTimer=setTimeout(()=>{ pkImg.src='mona_no_eyes.png'; pk.classList.remove('eyes-closed'); },1000);
     }
   });
   setInterval(()=>{
@@ -1810,7 +1812,7 @@ function wireCardPeeker(peekId, bubbleId){
     playScream();
     if(bubble){ bubble.textContent=PEEK_SPEECHES[idx%PEEK_SPEECHES.length]; idx++; requestAnimationFrame(()=>positionPeekMona(peek)); }
     if(inner){ inner.classList.remove('peek-logo-shake'); void inner.offsetWidth; inner.classList.add('peek-logo-shake'); setTimeout(()=>inner.classList.remove('peek-logo-shake'),500); }
-    if(img){ img.src='solukkologo_eyes_closed.png'; peek.classList.add('eyes-closed'); clearTimeout(blinkT); blinkT=setTimeout(()=>{ img.src='solukkologo_eyes.png'; peek.classList.remove('eyes-closed'); },1000); }
+    if(img){ img.src='solukkologo_eyes_closed.png'; peek.classList.add('eyes-closed'); clearTimeout(blinkT); blinkT=setTimeout(()=>{ img.src='mona_no_eyes.png'; peek.classList.remove('eyes-closed'); },1000); }
   });
 }
 wireCardPeeker('card-peek','card-peek-bubble');
@@ -1847,10 +1849,10 @@ setInterval(()=>{
   const logo=document.getElementById('site-brand'); if(!logo) return;
   const img=logo.querySelector('.brand-logo-img'); if(!img) return;
   if(logo.classList.contains('eyes-closed')) return;            // skip if already closed (e.g. scream click)
-  if((img.getAttribute('src')||'').indexOf('solukkologo_eyes.png')<0) return;
+  if((img.getAttribute('src')||'').indexOf('mona_no_eyes.png')<0) return;
   img.src='blink.png';
   logo.classList.add('eyes-closed');
-  setTimeout(()=>{ img.src='solukkologo_eyes.png'; logo.classList.remove('eyes-closed'); },300);
+  setTimeout(()=>{ img.src='mona_no_eyes.png'; logo.classList.remove('eyes-closed'); },300);
 },10000);
 
 
@@ -2938,7 +2940,7 @@ function monaReactAt(el, withSound){
   clearTimeout(el._monaShakeTO); el._monaShakeTO=setTimeout(()=>el.classList.remove('mona-shake'),500);
   el.classList.add('eyes-closed');                                                          // dots disappear
   if(img) img.src='solukkologo_eyes_closed.png';                                            // eyes shut
-  clearTimeout(el._monaEyeTO); el._monaEyeTO=setTimeout(()=>{ if(img) img.src='solukkologo_eyes.png'; el.classList.remove('eyes-closed'); },900);
+  clearTimeout(el._monaEyeTO); el._monaEyeTO=setTimeout(()=>{ if(img) img.src='mona_no_eyes.png'; el.classList.remove('eyes-closed'); },900);
   if(withSound!==false){ try{ playScream(); }catch(e){} }                                    // scream
 }
 function monaClick(withSound){ monaReactAt(document.querySelector('#mona-top-peek .mona-top-inner'), withSound); }
@@ -3450,7 +3452,7 @@ function celebrationEnd(){   // song finished: stop the party, prompt to enrol f
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   sing.classList.remove('playing','intro','eyes-closed');
   clearMonaNotes(); stopCelebViz(); stopMonaBounce(true);   // ease Mona back to the middle
-  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
+  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='mona_no_eyes.png');
   const sl=document.querySelector('#progress-row .mona-vol'); if(sl) sl.style.display='none';
   const bub=sing.querySelector('.mona-bubble'); if(bub){ bub.textContent='Tsemppiä tenttiin!'; bub.style.display=''; }   // song over: switch the bubble to the exam send-off
   _celebEnded=true;   // after this, clicking Mona still reacts but the bubble stays "Tsemppiä tenttiin!"
@@ -3472,7 +3474,7 @@ function monaReact(){   // the lively "as if clicked" reaction: twitch, squeak, 
   body.classList.remove('peek-logo-shake'); void body.offsetWidth; body.classList.add('peek-logo-shake');   // twitch
   setTimeout(()=>body.classList.remove('peek-logo-shake'),500);
   const img=body.querySelector('.brand-logo-img');
-  if(img){ img.src='solukkologo_eyes_closed.png'; sing.classList.add('eyes-closed'); clearTimeout(_monaBlinkT); _monaBlinkT=setTimeout(()=>{ img.src='solukkologo_eyes.png'; sing.classList.remove('eyes-closed'); },1000); }
+  if(img){ img.src='solukkologo_eyes_closed.png'; sing.classList.add('eyes-closed'); clearTimeout(_monaBlinkT); _monaBlinkT=setTimeout(()=>{ img.src='mona_no_eyes.png'; sing.classList.remove('eyes-closed'); },1000); }
 }
 function monaCelebClick(ev){   // after the song: clicking Mona just reacts (shake + squeak); the bubble text is left as-is
   if(!_celebEnded) return;
@@ -3491,7 +3493,7 @@ function showCelebration(){
   _celebrationAudio=null; _celebAnalyser=null; _celebGain=null;   // rebuild the graph for the freshly picked track
   _celebTrack=CELEB_TRACKS[Math.floor(Math.random()*CELEB_TRACKS.length)];
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
-  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-rover"><div class="mona-bubble">Koko kurssi opiskeltu!</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="solukkologo_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
+  document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-rover"><div class="mona-bubble">Koko kurssi opiskeltu!</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="mona_no_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
   document.getElementById('answer-content').innerHTML='';
   ['answer-section','show-row','grade-row','card-peek'].forEach(id=>document.getElementById(id).style.display='none');
   document.querySelector('.comment-area').style.display='none';   // no comments on the celebration card
@@ -3531,7 +3533,7 @@ function celebrationDrop(){   // after the intro: lights, notes, closed eyes (vi
 function reopenCelebEyes(){   // ~40s: eyes pop back open (main Mona + friends)
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   sing.classList.remove('eyes-closed');
-  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes.png');
+  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='mona_no_eyes.png');
 }
 function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
@@ -3738,7 +3740,7 @@ function renderCardOverview(){
         const _es=(getField(_deckIntro,['Back','back'])||_deckIntro.answer||'');   // the intro card's back = course description
         cov.innerHTML=
           '<div id="mona-top-peek">'+
-            '<div class="mona-top-inner" onclick="_monaTopClick(event)"><img src="solukkologo_eyes.png" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div>'+
+            '<div class="mona-top-inner" onclick="_monaTopClick(event)"><img src="mona_no_eyes.png" alt=""><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div>'+
             '<div class="mona-top-bubble" id="mona-top-bubble">Tervetuloa kurssille! Näät kysymyskortit vierittämällä sivua alaspäin. Voit aloittaa opiskelun klikkaamalla ensimmäistä korttia.</div>'+
             '<div class="mona-top-spacer"></div>'+
           '</div>'+
