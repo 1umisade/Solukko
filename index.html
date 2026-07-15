@@ -795,7 +795,7 @@ body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-colo
 .overview-card { transition: transform 0.16s ease, box-shadow 0.16s ease; }   /* no will-change: it would put all ~130 cards on their own GPU layers and make the whole page sluggish */
 .overview-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.15); will-change: transform; }   /* promote only the card being hovered */
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
-.overview-section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 28px; }   /* fit as many small cards as the width allows — ultrawides show more per row */
+.overview-section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 18px 16px; }   /* same spacing as the homepage deck tiles (.sem-col) */
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
