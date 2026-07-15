@@ -2427,7 +2427,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
   _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
   reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
   queue = reviewCards.slice();
-  shuffleMode=false; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
+  shuffleMode=false; _reviewCardsOriginal=null; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
@@ -2667,13 +2667,24 @@ function resetDeckProgress(){   // mark every card "new" again
   updateProgress();
   renderCardOverview();
 }
-function shuffleReviewOrder(){   // randomise the cards AND merge every lecture into one lump in the grid
+let _reviewCardsOriginal=null;   // the deck's default card order, saved before the first shuffle so 'Järjestä' can restore it
+// After reordering reviewCards in place: keep pointing at the same card, rebuild the queue + word-link indices, and re-render the current card
+function _syncReviewOrder(cur){
+  currentOverviewIndex = cur ? reviewCards.indexOf(cur) : (currentOverviewIndex>=0?currentOverviewIndex:0);
+  if(currentOverviewIndex<0) currentOverviewIndex=0;
+  currentCard = reviewCards[currentOverviewIndex] || currentCard;
+  queue = reviewCards.slice(currentOverviewIndex+1);
+  if(typeof buildWordLinks==='function') buildWordLinks();                       // word-link cardIndex values are reviewCards positions → recompute
+  if(currentCard && !document.fullscreenElement){ _previewIndex=-1; _doPreview(currentOverviewIndex); }   // re-render the shown card with fresh links
+}
+function shuffleReviewOrder(){   // shuffle the REAL review order (reviewCards) so the grid, navigation (Seuraava/Edellinen) and grading all follow the shuffle
   shuffleMode=true;
   document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.add('active'));
-  for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; }
-  const all=reviewCards.slice();                                 // one shuffled pile — no lecture sections/videos
-  for(let i=all.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=all[i]; all[i]=all[j]; all[j]=t; }
-  deckGroups=[{name:'Pääpakka', link:null, cards:all}];
+  if(!_reviewCardsOriginal) _reviewCardsOriginal=reviewCards.slice();            // remember the default order once
+  const cur=currentCard;
+  for(let i=reviewCards.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=reviewCards[i]; reviewCards[i]=reviewCards[j]; reviewCards[j]=t; }
+  _syncReviewOrder(cur);
+  deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.slice()}];          // grid = one pile in the (now shuffled) review order
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
   renderCardOverview();
 }
@@ -2689,8 +2700,8 @@ function updateShuffleToggleBtn(){
 function restoreDefaultOrder(){   // back to the deck's original order, lectures split out again
   shuffleMode=false;
   document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.remove('active'));
-  const ci=currentCard?reviewCards.indexOf(currentCard):-1;
-  queue=reviewCards.slice(ci+1);
+  if(_reviewCardsOriginal){ reviewCards.length=0; _reviewCardsOriginal.forEach(c=>reviewCards.push(c)); }   // restore the default order in place
+  _syncReviewOrder(currentCard);
   deckGroups=buildDeckGroups(reviewCards,currentDeck);           // restore the per-lecture grouping
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render in default order
   renderCardOverview();
@@ -2787,9 +2798,9 @@ document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ fl
 // Grading slider — Mona rides the progress bar as a draggable knob between the two answer buttons
 let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false, _fsGrabbedKnob=false;
 let _clickSnd=null;
-function playKeyClick(){   // keyboard-keycap click sound on pressing an answer button
-  if(_clickBuf && _audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_clickBuf; const g=_audioCtx.createGain(); g.gain.value=0.45; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }   // Web Audio = no iOS replay delay
-  try{ if(!_clickSnd){ _clickSnd=new Audio('click.mp3'); _clickSnd.volume=0.45; _clickSnd.setAttribute('playsinline',''); } _clickSnd.currentTime=0; _clickSnd.play().catch(()=>{}); }catch(e){}
+function playKeyClick(){   // keyboard-keycap click sound on pressing an answer button (volume 0.225 = half of the old 0.45)
+  if(_clickBuf && _audioCtx){ try{ if(_audioCtx.state==='suspended') _audioCtx.resume(); const s=_audioCtx.createBufferSource(); s.buffer=_clickBuf; const g=_audioCtx.createGain(); g.gain.value=0.225; s.connect(g); g.connect(_audioCtx.destination); s.start(0); return; }catch(e){} }   // Web Audio = no iOS replay delay
+  try{ if(!_clickSnd){ _clickSnd=new Audio('click.mp3'); _clickSnd.setAttribute('playsinline',''); } _clickSnd.volume=0.225; _clickSnd.currentTime=0; _clickSnd.play().catch(()=>{}); }catch(e){}
 }
 function pressKeycap(correct){   // dip the keycap down and spring it back
   const btn=document.querySelector(correct?'.grade-correct':'.grade-again'); if(!btn) return;
