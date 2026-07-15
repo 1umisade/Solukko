@@ -1748,7 +1748,7 @@ function siteBrandReact(){   // Mona shakes and blinks (used on the homepage gre
   if(inner){ inner.classList.remove('twitch'); void inner.offsetWidth; inner.classList.add('twitch'); setTimeout(()=>inner.classList.remove('twitch'),500); }
   const img=logo.querySelector('.brand-logo-img');
   if(img){
-    img.src='solukkologo_eyes_closed.png';
+    img.src='mona_scream.png';
     logo.classList.add('eyes-closed');            // hide the moving eyes
     clearTimeout(_logoTimer);
     _logoTimer=setTimeout(()=>{ img.src='mona_no_eyes.png'; logo.classList.remove('eyes-closed'); },1000);
@@ -1892,7 +1892,7 @@ let _homeHoverOpened=false, _greetIdx=0;
     if(pkImg){                                                // shake + blink like the homepage logo
       pkImg.classList.remove('peek-logo-shake'); void pkImg.offsetWidth; pkImg.classList.add('peek-logo-shake');
       setTimeout(()=>pkImg.classList.remove('peek-logo-shake'),500);
-      pkImg.src='solukkologo_eyes_closed.png'; pk.classList.add('eyes-closed');
+      pkImg.src='mona_scream.png'; pk.classList.add('eyes-closed');
       clearTimeout(pkBlinkTimer);
       pkBlinkTimer=setTimeout(()=>{ pkImg.src='mona_no_eyes.png'; pk.classList.remove('eyes-closed'); },1000);
     }
@@ -1928,7 +1928,7 @@ function wireCardPeeker(peekId, bubbleId){
     playScream();
     if(bubble){ bubble.textContent=PEEK_SPEECHES[idx%PEEK_SPEECHES.length]; idx++; requestAnimationFrame(()=>positionPeekMona(peek)); }
     if(inner){ inner.classList.remove('peek-logo-shake'); void inner.offsetWidth; inner.classList.add('peek-logo-shake'); setTimeout(()=>inner.classList.remove('peek-logo-shake'),500); }
-    if(img){ img.src='solukkologo_eyes_closed.png'; peek.classList.add('eyes-closed'); clearTimeout(blinkT); blinkT=setTimeout(()=>{ img.src='mona_no_eyes.png'; peek.classList.remove('eyes-closed'); },1000); }
+    if(img){ img.src='mona_scream.png'; peek.classList.add('eyes-closed'); clearTimeout(blinkT); blinkT=setTimeout(()=>{ img.src='mona_no_eyes.png'; peek.classList.remove('eyes-closed'); },1000); }
   });
 }
 wireCardPeeker('card-peek','card-peek-bubble');
@@ -1960,13 +1960,13 @@ function scheduleCardPeekRetract(){ clearTimeout(_peekRetractTimer); _peekAutoRe
   p.addEventListener('mouseleave',()=>{ if(_peekAutoRetract && getComputedStyle(p).visibility!=='hidden') scheduleCardPeekRetract(); });
 })();
 
-// Blink by swapping in blink.png for 0.3s every 10s (pupils hidden while blinking)
+// Blink by swapping in mona_blink.png for 0.3s every 10s (pupils hidden while blinking)
 setInterval(()=>{
   const logo=document.getElementById('site-brand'); if(!logo) return;
   const img=logo.querySelector('.brand-logo-img'); if(!img) return;
   if(logo.classList.contains('eyes-closed')) return;            // skip if already closed (e.g. scream click)
   if((img.getAttribute('src')||'').indexOf('mona_no_eyes.png')<0) return;
-  img.src='blink.png';
+  img.src='mona_blink.png';
   logo.classList.add('eyes-closed');
   setTimeout(()=>{ img.src='mona_no_eyes.png'; logo.classList.remove('eyes-closed'); },300);
 },10000);
@@ -3139,7 +3139,7 @@ function monaReactAt(el, withSound){
   el.classList.remove('mona-shake'); void el.offsetWidth; el.classList.add('mona-shake');   // shake
   clearTimeout(el._monaShakeTO); el._monaShakeTO=setTimeout(()=>el.classList.remove('mona-shake'),500);
   el.classList.add('eyes-closed');                                                          // dots disappear
-  if(img) img.src='solukkologo_eyes_closed.png';                                            // eyes shut
+  if(img) img.src='mona_scream.png';                                            // eyes shut
   clearTimeout(el._monaEyeTO); el._monaEyeTO=setTimeout(()=>{ if(img) img.src='mona_no_eyes.png'; el.classList.remove('eyes-closed'); },900);
   if(withSound!==false){ try{ playScream(); }catch(e){} }                                    // scream
 }
@@ -3714,7 +3714,7 @@ function monaReact(){   // the lively "as if clicked" reaction: twitch, squeak, 
   body.classList.remove('peek-logo-shake'); void body.offsetWidth; body.classList.add('peek-logo-shake');   // twitch
   setTimeout(()=>body.classList.remove('peek-logo-shake'),500);
   const img=body.querySelector('.brand-logo-img');
-  if(img){ img.src='solukkologo_eyes_closed.png'; sing.classList.add('eyes-closed'); clearTimeout(_monaBlinkT); _monaBlinkT=setTimeout(()=>{ img.src='mona_no_eyes.png'; sing.classList.remove('eyes-closed'); },1000); }
+  if(img){ img.src='mona_scream.png'; sing.classList.add('eyes-closed'); clearTimeout(_monaBlinkT); _monaBlinkT=setTimeout(()=>{ img.src='mona_no_eyes.png'; sing.classList.remove('eyes-closed'); },1000); }
 }
 function monaCelebClick(ev){   // after the song: clicking Mona just reacts (shake + squeak); the bubble text is left as-is
   if(!_celebEnded) return;
@@ -3767,7 +3767,7 @@ function startCelebrationMusic(){   // start the music; Mona swings (open eyes) 
 function celebrationDrop(){   // after the intro: lights, notes, closed eyes (viz already running)
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   sing.classList.add('playing'); sing.classList.add('eyes-closed');
-  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes_closed.png');
+  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='mona_scream.png');
   startMonaNotes();
 }
 function reopenCelebEyes(){   // ~40s: eyes pop back open (main Mona + friends)
@@ -3778,7 +3778,7 @@ function reopenCelebEyes(){   // ~40s: eyes pop back open (main Mona + friends)
 function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
   const sing=document.querySelector('.mona-sing'); if(!sing) return;
   sing.classList.add('eyes-closed');
-  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='solukkologo_eyes_closed.png');
+  sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='mona_scream.png');
 }
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
