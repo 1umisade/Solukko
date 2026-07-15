@@ -135,7 +135,7 @@ body.has-golden.reviewing #golden-comment { display: none; }
    #award-btn (outside #card-screen) covers the homepage + review; #fs-award-btn (inside #card-screen) covers fullscreen. Both stay until the dev marks the prize paid (then has-golden drops). */
 #award-btn, #fs-award-btn { display: none; position: fixed; top: 16px; right: 16px; z-index: 260; width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6), 0 2px 8px rgba(0,0,0,0.25); font-size: 1.4rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
 body.has-golden #award-btn { display: flex; }
-body.has-golden #card-screen:fullscreen #fs-award-btn { display: flex; }
+body.has-golden #card-screen.card-fs-on #fs-award-btn { display: flex; }
 /* the celebration bubble shown when the award button is tapped in review / fullscreen (inside #card-screen so it shows over the fullscreen top layer). On the homepage the celebration is Mona's own golden bubble instead. */
 #golden-toast { display: none; position: fixed; top: 74px; right: 16px; z-index: 261; max-width: min(90vw, 320px); background: linear-gradient(135deg, #fff8dd, #f4dd86 55%, #e3bf52); border: 2px solid #d4af37; border-radius: 16px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.4; color: #4a3a10; text-align: left; box-shadow: 0 6px 22px rgba(0,0,0,0.35); }
 #golden-toast b { color: #6b4a10; }
@@ -234,38 +234,40 @@ body.reviewing #card-col.commenting #comment-btn, body.reviewing #card-col.comme
 #rotate-btn.active, #comment-btn.active { background: #56533c !important; color: #f5f0e8 !important; border-color: #56533c !important; }
 body.dark-mode #rotate-btn, body.dark-mode #comment-btn { background: rgba(58,49,43,0.92); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
-#card-screen:fullscreen #rotate-btn, #card-screen:fullscreen #comment-btn { display: none !important; }   /* in fullscreen the exit button (top-right) handles it */
+#card-screen.card-fs-on #rotate-btn, #card-screen.card-fs-on #comment-btn { display: none !important; }   /* in fullscreen the exit button (top-right) handles it */
 #card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }
 @media (max-width: 900px) { #comment-btn { display: none !important; } }   /* mobile: comments show inline on reveal */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
 /* fullscreen: the site background image + an edge vignette, painted as plain background layers directly on the fullscreen element (background-attachment:fixed and fixed-position child layers don't render on a fullscreen element in Chrome, so keep it as ordinary background layers here) */
-#card-screen:fullscreen { width: 100vw; height: 100vh; justify-content: center; background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); margin: 0 !important; }
-#card-screen:fullscreen::backdrop { background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); }
-body.dark-mode #card-screen:fullscreen { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
-body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
-#card-screen:fullscreen #review-cols { display: block; }
-#card-screen:fullscreen #grid-col { display: none !important; }
+#card-screen.card-fs-on { width: 100vw; height: 100vh; justify-content: center; background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); margin: 0 !important; }
+/* faux fullscreen (devices where the native Fullscreen API isn't available, e.g. iPhone Safari): a fixed overlay filling the viewport, identical to the native fullscreen layout above */
+#card-screen.card-fs-on.faux-fs { position: fixed; inset: 0; left: 0; top: 0; z-index: 9990; overflow: hidden; }
+#card-screen.card-fs-on::backdrop { background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); }
+body.dark-mode #card-screen.card-fs-on { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
+body.dark-mode #card-screen.card-fs-on::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
+#card-screen.card-fs-on #review-cols { display: block; }
+#card-screen.card-fs-on #grid-col { display: none !important; }
 /* fullscreen must not inherit the desktop 50/50 split: no title, no divider, card fills the screen */
-#card-screen:fullscreen #deck-title-bar, #card-screen:fullscreen #grid-header { display: none !important; }
-#card-screen:fullscreen #card-col { position: static; height: 100vh; width: 100vw !important; max-width: 100vw !important; flex: none; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 0 !important; gap: 0 !important; overflow: visible !important; }
-#card-screen:fullscreen #card-col::before { display: none !important; }
-#card-screen:fullscreen #card-stack { max-height: none !important; width: 100% !important; }
-#card-screen:fullscreen #comment-col { display: none !important; }
-#card-screen:fullscreen #flashcard-wrap { margin: 0 !important; }
-#card-screen:fullscreen .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg.png?v=2'); box-shadow: none !important; }   /* old card paper background, no vignette */
-#card-screen:fullscreen .card-content { font-size: 1.5rem; }
-#card-screen:fullscreen .top-bar,
-#card-screen:fullscreen .comment-area,
-#card-screen:fullscreen .group-tools,
-#card-screen:fullscreen #group-scoreboard { display: none !important; }
+#card-screen.card-fs-on #deck-title-bar, #card-screen.card-fs-on #grid-header { display: none !important; }
+#card-screen.card-fs-on #card-col { position: static; height: 100vh; width: 100vw !important; max-width: 100vw !important; flex: none; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 0 !important; gap: 0 !important; overflow: visible !important; }
+#card-screen.card-fs-on #card-col::before { display: none !important; }
+#card-screen.card-fs-on #card-stack { max-height: none !important; width: 100% !important; }
+#card-screen.card-fs-on #comment-col { display: none !important; }
+#card-screen.card-fs-on #flashcard-wrap { margin: 0 !important; }
+#card-screen.card-fs-on .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg.png?v=2'); box-shadow: none !important; }   /* old card paper background, no vignette */
+#card-screen.card-fs-on .card-content { font-size: 1.5rem; }
+#card-screen.card-fs-on .top-bar,
+#card-screen.card-fs-on .comment-area,
+#card-screen.card-fs-on .group-tools,
+#card-screen.card-fs-on #group-scoreboard { display: none !important; }
 /* the progress bar becomes a big fixed slider at the bottom in fullscreen */
-#card-screen:fullscreen .progress-row { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); width: min(760px, 92vw); margin: 0; z-index: 95; }
-#card-screen:fullscreen .ball-btn { width: 75px; height: 75px; }
-#card-screen:fullscreen .pb-knob { width: 78px; height: 78px; margin-top: -39px; margin-left: -39px; }
+#card-screen.card-fs-on .progress-row { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); width: min(760px, 92vw); margin: 0; z-index: 95; }
+#card-screen.card-fs-on .ball-btn { width: 75px; height: 75px; }
+#card-screen.card-fs-on .pb-knob { width: 78px; height: 78px; margin-top: -39px; margin-left: -39px; }
 /* fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] — shown only when #front-check is .active */
 #front-check { display: none; }
-#card-screen:fullscreen #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: min(20px, 3.8vw); position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; max-width: 100vw; }   /* bottoms aligned so all three keycaps sit on the same line; scales down to fit narrow (mobile) screens */
-#card-screen:fullscreen #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
+#card-screen.card-fs-on #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: min(20px, 3.8vw); position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; max-width: 100vw; }   /* bottoms aligned so all three keycaps sit on the same line; scales down to fit narrow (mobile) screens */
+#card-screen.card-fs-on #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
 .fc-nav { width: min(75px, 14vw); height: min(75px, 14vw); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
 /* armed (>=125%): pulsing glow — release now to register. Front (Edellinen/Seuraava) = beige on both; back answer buttons = orange (Ei) / sage (Kyllä) */
@@ -288,7 +290,7 @@ body.dark-mode #card-screen:fullscreen::backdrop { background: linear-gradient(r
 #front-check.back .fc-nav .nav-front { display: none; }
 #front-check.back .fc-nav .nav-back { display: block; }
 .fc-nav.keycap-press { animation: keycapPress 0.16s ease; }
-#card-screen:fullscreen button:focus, #card-screen:fullscreen button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
+#card-screen.card-fs-on button:focus, #card-screen.card-fs-on button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
 .tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; touch-action: manipulation; }
@@ -310,7 +312,7 @@ body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 /* (exit-fullscreen button removed — double-tap the card to leave fullscreen) */
 /* fullscreen comment button (bottom-left) + live comment count */
 #fs-comment-btn { display: none; position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-#card-screen:fullscreen #fs-comment-btn { display: flex; }
+#card-screen.card-fs-on #fs-comment-btn { display: flex; }
 #fs-comment-btn.visible { opacity: 1; pointer-events: auto; }   /* shown on mouse-move / touch, then fades (like the exit button) */
 @media (max-width: 560px){ #fs-comment-btn { top: 16px; left: 16px; bottom: auto; width: 48px; height: 48px; } }   /* mobile: move to the top-left so it doesn't overlap the bottom button row */
 #fs-comment-btn.active { background: #56533c; color: #f5f0e8; border-color: #56533c; }
@@ -321,10 +323,10 @@ body.dark-mode #fs-comment-btn.active { background: #eadfce; color: #2b211b; bor
 .fs-comment-count.has { display: flex; }
 /* fullscreen: the comments open as a panel sliding in from the LEFT with the writing field */
 /* fullscreen comments: no separate bar — just unhide the comments (they float over the left of the card; each box has its own background) */
-#card-screen:fullscreen #card-col.commenting #comment-col { display: block !important; position: fixed; left: 0; top: 0; bottom: 0; width: min(400px, 92vw); overflow-y: auto; padding: 6vh 1.4rem 2rem; z-index: 97; }
-#card-screen:fullscreen #card-col.commenting #comment-col .comment-area { display: flex !important; width: 100%; box-sizing: border-box; }
-#card-screen:fullscreen #card-col.commenting #comment-col .comment-box { width: 100%; }   /* the "Jätä kommentti" field fills the overlay */
-#card-screen:fullscreen #card-col.commenting #comment-col .comment-box, #card-screen:fullscreen #card-col.commenting #comment-col textarea, #card-screen:fullscreen #card-col.commenting #comment-col .comment-item, #card-screen:fullscreen #card-col.commenting #comment-col .comment-feed { max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
+#card-screen.card-fs-on #card-col.commenting #comment-col { display: block !important; position: fixed; left: 0; top: 0; bottom: 0; width: min(400px, 92vw); overflow-y: auto; padding: 6vh 1.4rem 2rem; z-index: 97; }
+#card-screen.card-fs-on #card-col.commenting #comment-col .comment-area { display: flex !important; width: 100%; box-sizing: border-box; }
+#card-screen.card-fs-on #card-col.commenting #comment-col .comment-box { width: 100%; }   /* the "Jätä kommentti" field fills the overlay */
+#card-screen.card-fs-on #card-col.commenting #comment-col .comment-box, #card-screen.card-fs-on #card-col.commenting #comment-col textarea, #card-screen.card-fs-on #card-col.commenting #comment-col .comment-item, #card-screen.card-fs-on #card-col.commenting #comment-col .comment-feed { max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
 /* "loading the next card" overlay, centred while Mona slides to a button */
 #card-loading { position: fixed; inset: 0; z-index: 96; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; pointer-events: none; }
 #card-loading .cl-spinner { width: 46px; height: 46px; border: 4px solid rgba(160,106,53,0.25); border-top-color: #a06a35; border-radius: 50%; animation: clSpin 0.8s linear infinite; }
@@ -485,7 +487,7 @@ body.dark-mode #grid-col::-webkit-scrollbar-thumb:hover { background: #c99e64; }
   #grid-col { order: 1; position: static; max-height: none; overflow: visible; width: 100%; padding: 0; }
   #card-col { order: 2; position: static; height: auto; flex: none; width: 100%; }
   body.reviewing #card-col { display: none !important; }            /* no card preview / Mona on the right */
-  #card-screen:fullscreen #card-col { display: flex !important; }   /* except in fullscreen, where the card IS the view */
+  #card-screen.card-fs-on #card-col { display: flex !important; }   /* except in fullscreen, where the card IS the view */
   /* mobile: show Mona centered between the back button and the deck name; her bubble only appears (above her) on tap */
   body.reviewing #mona-top-peek { display: flex !important; justify-content: center; width: 100%; margin: 0.2rem 0 0.7rem; position: relative; }
   #mona-top-peek .mona-top-spacer { display: none; }
@@ -1645,7 +1647,7 @@ function makeRubberband(scrollEl, getTransformEl, resetName, allowFullscreen){
   }
   if(resetName) window[resetName]=function(){ cancelAnimationFrame(raf); raf=null; offset=0; target=0; apply(); };
   scrollEl.addEventListener('wheel', e=>{
-    const fs=document.fullscreenElement;
+    const fs=inFullscreen();
     if(fs && !allowFullscreen) return;                            // in fullscreen only the card bounces (not the grid / homepage handlers)
     if(!fs && window.matchMedia('(max-width: 900px)').matches) return;   // desktop only outside fullscreen
     if(!fs && getTransformEl()?.offsetParent===null) return;      // only when this rubberband's content is actually on screen (scopes the window-level homepage one)
@@ -2675,7 +2677,7 @@ function _syncReviewOrder(cur){
   currentCard = reviewCards[currentOverviewIndex] || currentCard;
   queue = reviewCards.slice(currentOverviewIndex+1);
   if(typeof buildWordLinks==='function') buildWordLinks();                       // word-link cardIndex values are reviewCards positions → recompute
-  if(currentCard && !document.fullscreenElement){ _previewIndex=-1; _doPreview(currentOverviewIndex); }   // re-render the shown card with fresh links
+  if(currentCard && !inFullscreen()){ _previewIndex=-1; _doPreview(currentOverviewIndex); }   // re-render the shown card with fresh links
 }
 function shuffleReviewOrder(){   // shuffle the REAL review order (reviewCards) so the grid, navigation (Seuraava/Edellinen) and grading all follow the shuffle
   shuffleMode=true;
@@ -2713,15 +2715,26 @@ function _captureCardRect(){   // remember where the card is on the right, so it
   const w=document.getElementById('flashcard-wrap');
   _fsFlipRect=(w && getComputedStyle(w).display!=='none' && w.getBoundingClientRect().width>1) ? w.getBoundingClientRect() : null;
 }
-function toggleCardFullscreen(){
-  const cs=document.getElementById('card-screen'); if(!cs) return;
-  if(!document.fullscreenElement){ _captureCardRect(); (cs.requestFullscreen?cs.requestFullscreen():Promise.reject()).catch(()=>{}); }
-  else { document.exitFullscreen&&document.exitFullscreen(); }
+// ── Fullscreen abstraction: use the native Fullscreen API where the device allows it, otherwise an identical CSS "faux" fullscreen (a position:fixed overlay). inFullscreen() is true for either. ──
+function _nativeFsSupported(){ const cs=document.getElementById('card-screen'); return !!(cs && cs.requestFullscreen) && document['fullscreenEnabled']!==false; }
+function inFullscreen(){ const cs=document.getElementById('card-screen'); return !!cs && (document['fullscreenElement']===cs || cs.classList.contains('faux-fs')); }
+function enterCardFs(){
+  const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
+  _captureCardRect();
+  if(_nativeFsSupported()){ cs.requestFullscreen().catch(()=>_enterFauxFs()); }   // request rejected (e.g. iOS) → fall back to faux
+  else _enterFauxFs();
 }
-function exitCardFullscreen(){ if(document.fullscreenElement) document.exitFullscreen&&document.exitFullscreen(); }
+function _enterFauxFs(){ const cs=document.getElementById('card-screen'); if(!cs) return; cs.classList.add('card-fs-on','faux-fs'); _onFsEnter(); }
+function exitCardFs(){
+  const cs=document.getElementById('card-screen'); if(!cs) return;
+  if(document['fullscreenElement']){ document['exitFullscreen'] && document.exitFullscreen(); return; }   // native → the fullscreenchange handler runs _onFsExit()
+  if(cs.classList.contains('faux-fs')){ cs.classList.remove('card-fs-on','faux-fs'); _onFsExit(); }
+}
+function toggleCardFullscreen(){ if(inFullscreen()) exitCardFs(); else enterCardFs(); }
+function exitCardFullscreen(){ exitCardFs(); }
 let _fsHideTimer=null;
 function _showFsButtons(ms){   // reveal the comment button, then fade it after `ms`
-  if(!document.fullscreenElement) return;
+  if(!inFullscreen()) return;
   document.getElementById('fs-comment-btn')?.classList.add('visible');
   clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); }, ms||1000);
 }
@@ -2734,14 +2747,14 @@ function _fsCursorActivity(){   // show the cursor, then fade it after 2s of sti
   const cs=document.getElementById('card-screen'); if(!cs) return;
   cs.classList.remove('cursor-hidden');
   clearTimeout(_fsCursorTimer);
-  if(document.fullscreenElement) _fsCursorTimer=setTimeout(()=>{ if(document.fullscreenElement) cs.classList.add('cursor-hidden'); }, 2000);
+  if(inFullscreen()) _fsCursorTimer=setTimeout(()=>{ if(inFullscreen()) cs.classList.add('cursor-hidden'); }, 2000);
 }
 document.addEventListener('mousemove', ()=>{ _fsCursorActivity(); flashFsExitBtn(); });   // moving the mouse (desktop) reveals the comment button; entering fullscreen does not
 (function(){ const w=document.getElementById('flashcard-wrap');
   const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Avaa opiskelunäkymässä'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
   if(w){
     w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
-    w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!document.fullscreenElement) cs.classList.remove('cursor-hidden'); });
+    w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!inFullscreen()) cs.classList.remove('cursor-hidden'); });
   }
   // cursor-following hint: star significance over the stars (both modes); "Avaa opiskelunäkymässä" over the right-hand/grid card (non-fullscreen)
   document.addEventListener('mousemove',e=>{
@@ -2750,7 +2763,7 @@ document.addEventListener('mousemove', ()=>{ _fsCursorActivity(); flashFsExitBtn
     if(stars && stars.dataset.starMeaning){   // hovering the stars -> show their significance on the cursor
       tip.textContent=stars.dataset.starMeaning; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; tip.style.display='block'; return;
     }
-    if(document.fullscreenElement){ if(tip.style.display!=='none') tip.style.display='none'; return; }
+    if(inFullscreen()){ if(tip.style.display!=='none') tip.style.display='none'; return; }
     const card = e.target.closest ? e.target.closest('.overview-card, #flashcard-wrap') : null;
     if(card){
       let txt=null;
@@ -2780,20 +2793,32 @@ function _playFsFlip(){   // FLIP: card is now full-screen; animate it from wher
   clearTimeout(_fsFlipTO); _fsFlipTO=setTimeout(()=>{ wrap.style.transition=''; wrap.style.transform=''; wrap.style.transformOrigin=''; }, 560);
 }
 let _fsFlipTO=null;
-document.addEventListener('fullscreenchange',()=>{
-  const cs=document.getElementById('card-screen');
-  const on = !!document.fullscreenElement && document.fullscreenElement===cs;
-  document.getElementById('rotate-btn')?.classList.toggle('active',on);
+// shared enter/exit logic, run by BOTH native fullscreenchange and the faux path
+function _onFsEnter(){
+  document.getElementById('rotate-btn')?.classList.add('active');
   fitCardScale(); scrollToCard(); updateFsSlider();
-  if(on){ document.getElementById('fs-comment-btn')?.classList.remove('visible'); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); else clearFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // enter fullscreen: comment button starts hidden (reveal it later via mouse-move / star tap)
-  else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
-    const _touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    if(_touch && _commenting && document.activeElement && document.activeElement.id==='card-comment'){ _fsCommentExit=true; return; }   // iOS keyboard dropped fullscreen while commenting → keep the card/state; _reenterFsAfterComment() brings us back
-    { const fchk=document.getElementById('front-check'); if(fchk){ fchk.classList.remove('active','back'); } const m=document.getElementById('fc-mona'); if(m) m.classList.remove('fc-peeked'); }   // drop the fullscreen button row on exit
-    document.getElementById('fs-comment-btn')?.classList.remove('visible'); clearTimeout(_fsHideTimer); clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
-    if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
+  document.getElementById('fs-comment-btn')?.classList.remove('visible');   // comment button starts hidden (reveal via mouse-move / star tap)
+  _fsCursorActivity(); _playFsFlip();
+  if(!cardAnswerShown) showFrontMona(); else clearFrontMona();
+  const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none';
+}
+function _onFsExit(){
+  const cs=document.getElementById('card-screen');
+  document.getElementById('rotate-btn')?.classList.remove('active');
+  fitCardScale(); scrollToCard(); updateFsSlider();
+  const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
+  const _touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  if(_touch && _commenting && document.activeElement && document.activeElement.id==='card-comment'){ _fsCommentExit=true; return; }   // iOS keyboard dropped fullscreen while commenting → keep the card/state; _reenterFsAfterComment() brings us back
+  { const fchk=document.getElementById('front-check'); if(fchk){ fchk.classList.remove('active','back'); } const m=document.getElementById('fc-mona'); if(m) m.classList.remove('fc-peeked'); }   // drop the fullscreen button row on exit
+  document.getElementById('fs-comment-btn')?.classList.remove('visible'); clearTimeout(_fsHideTimer); clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
+  if(document.body.classList.contains('reviewing')) showDeckWelcome();   // leaving fullscreen returns to the welcome
+}
+document.addEventListener('fullscreenchange',()=>{   // native only; the faux path calls _onFsEnter/_onFsExit directly
+  const cs=document.getElementById('card-screen'); if(!cs) return;
+  if(document['fullscreenElement']===cs){ cs.classList.add('card-fs-on'); _onFsEnter(); }
+  else { cs.classList.remove('card-fs-on'); _onFsExit(); }
 });
-document.addEventListener('pointerdown',()=>{ if(document.fullscreenElement){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
+document.addEventListener('pointerdown',()=>{ if(inFullscreen()){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
 
 // Grading slider — Mona rides the progress bar as a draggable knob between the two answer buttons
 let _fsDrag=false, _fsTrackW=1, _fsStartX=0, _fsStartPct=50, _fsSwipeMoved=false, _fsGrabbedKnob=false;
@@ -2831,7 +2856,7 @@ function fsHot(which){   // expand + glow the button Mona is over ('wrong' | 'ri
   if(w) w.classList.toggle('fs-ans-hot', which==='wrong');
   if(r) r.classList.toggle('fs-ans-hot', which==='right');
 }
-function _fsFullscreen(){ return document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen'); }
+function _fsFullscreen(){ return inFullscreen(); }
 function _hidePbBubble(){ const b=document.getElementById('pb-bubble'); if(b) b.classList.remove('show'); }
 function _fsStartDrag(e){
   const t=document.getElementById('progress-tube'); if(!t) return;
@@ -2950,7 +2975,7 @@ function _frontCheckShow(){   // fullscreen FRONT: [Edellinen] [Tarkista + peeki
 function showFrontMona(){
   _picking=false;   // fresh card -> allow grading again
   clearTimeout(_backBubbleTimer);
-  if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){ _frontCheckShow(); return; }   // fullscreen uses the Tarkista button + peeking Mona
+  if(inFullscreen()){ _frontCheckShow(); return; }   // fullscreen uses the Tarkista button + peeking Mona
   const pr=document.getElementById('progress-row'); if(!pr) return;
   pr.style.display='flex'; pr.classList.add('pb-front'); pr.classList.remove('reveal-fade'); pr.classList.add('shown');
   const b=document.getElementById('pb-bubble'), k=_fsKnob();
@@ -2968,7 +2993,7 @@ function showFrontMona(){
 // flip to the back: same button row stays put, side buttons swap to Ei/Kyllä
 function clearFrontMona(){
   clearTimeout(_frontMonaTimer);
-  if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
+  if(inFullscreen()){
     const fchk=document.getElementById('front-check'); if(fchk){ fchk.classList.add('active'); fchk.classList.add('back'); }   // back images (Ei/Kyllä)
     const mona=document.getElementById('fc-mona'); if(mona) mona.classList.add('fc-peeked');   // Mona keeps peeking on the back too
     const fcb=document.getElementById('fc-bubble'); if(fcb) fcb.textContent=_BACK_BUBBLE_TEXT;   // "Tiesitkö?" on hover
@@ -2996,7 +3021,7 @@ function clearFrontMona(){
 const _CLICKABLE='a[href],button,[onclick],[role="button"],summary,label,select,.deck-btn,.overview-card,#flashcard-wrap,.ball-btn,.grade-btn,.show-btn,.grid-tool-btn,.pb-knob,.progress-tube,.card-stars,#site-brand,.mona-top-inner';
 document.addEventListener('mouseover',e=>{
   let hit = e.target && e.target.closest && e.target.closest(_CLICKABLE);
-  if(hit && document.fullscreenElement && e.target.closest('#flashcard-wrap') && !e.target.closest('.word-link')) hit=null;   // fullscreen: the card itself isn't grabbable, only its word-links
+  if(hit && inFullscreen() && e.target.closest('#flashcard-wrap') && !e.target.closest('.word-link')) hit=null;   // fullscreen: the card itself isn't grabbable, only its word-links
   document.body.classList.toggle('hover-interactive', !!hit);
 });
 function showTopHint(){}   // top peeker removed
@@ -3023,8 +3048,7 @@ let _commenting=false;
 let _fsCommentExit=false;
 function _reenterFsAfterComment(){   // MUST be called inside the submit/close tap so requestFullscreen still has user activation
   if(!_fsCommentExit) return; _fsCommentExit=false;
-  const cs=document.getElementById('card-screen');
-  if(cs && cs.requestFullscreen && !document.fullscreenElement && document.body.classList.contains('reviewing')) cs.requestFullscreen().catch(()=>{});
+  if(!inFullscreen() && document.body.classList.contains('reviewing')) enterCardFs();
 }
 function _syncCommentArea(){   // desktop: comments only when toggled open; mobile: always after the answer shows
   const ca=document.querySelector('.comment-area'); if(!ca) return;
@@ -3063,7 +3087,7 @@ async function nextCardFromCurrent(){ if(currentCard) await renderCurrentCard();
 let _previewIndex=-1, _previewTO=null, _welcomeTO=null;
 function scheduleWelcome(){}   // the right side always shows a card now — no revert
 function showDeckWelcome(){   // after fullscreen: show the current card on the right again
-  if(document.fullscreenElement) return;
+  if(inFullscreen()) return;
   clearTimeout(_previewTO); clearTimeout(_welcomeTO); _openingDeck=false;
   // the grid's intro-fade animations otherwise REPLAY when the grid un-hides on fullscreen exit — clear them so it shows at once
   document.body.classList.remove('deck-intro-anim');
@@ -3075,7 +3099,7 @@ function showDeckWelcome(){   // after fullscreen: show the current card on the 
   _previewIndex=-1; _instantCard=true; _doPreview(idx);   // returning from fullscreen: no card fade-in
 }
 function showDeckLanding(){   // initial deck open: grid only; the first card highlights + shows once the grid has faded in
-  if(document.fullscreenElement) return;
+  if(inFullscreen()) return;
   clearTimeout(_previewTO); clearTimeout(_welcomeTO); _openingDeck=false;
   currentCard=null; currentOverviewIndex=-1; _previewIndex=-1;
   const cc=document.getElementById('card-col'); if(cc) cc.classList.add('welcome');   // right side empty for now
@@ -3083,7 +3107,7 @@ function showDeckLanding(){   // initial deck open: grid only; the first card hi
 }
 let _topMonaFlyTO=null, _landed=false;
 function landingReveal(){   // highlight the first card in the grid AND show it on the right — fired together with Mona (from staggerGridIntro)
-  if(document.fullscreenElement || !reviewCards.length || _landed) return;
+  if(inFullscreen() || !reviewCards.length || _landed) return;
   _landed=true;
   currentOverviewIndex=0; currentCard=reviewCards[0];
   renderCardOverview();   // highlight the first card in the grid
@@ -3091,12 +3115,12 @@ function landingReveal(){   // highlight the first card in the grid AND show it 
 }
 function flyInTopMona(){ /* Mona now flies in from staggerGridIntro, timed with the last card of the top row */ }
 function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
-  if(document.fullscreenElement) return;
+  if(inFullscreen()) return;
   clearTimeout(_welcomeTO); clearTimeout(_previewTO);
   _previewTO=setTimeout(()=>_doPreview(index), 90);
 }
 function _doPreview(index){
-  if(document.fullscreenElement) return;
+  if(inFullscreen()) return;
   if(index===_previewIndex && currentCard===reviewCards[index]) return;
   _previewIndex=index; currentOverviewIndex=index; currentCard=reviewCards[index];
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
@@ -3131,7 +3155,7 @@ function staggerGridIntro(){   // on deck load: fade the first row of cards in o
   grid.querySelectorAll('.overview-section > *:not(.overview-section-grid)').forEach(v=>{ v.style.animation='introFade 0.5s ease both'; v.style.animationDelay=restTime.toFixed(2)+'s'; });
   const monaDelay = 2 + Math.max(0, firstRow.length-1)*0.12;   // same base as the first-row stagger → Mona flies in with the last card of the top row
   clearTimeout(_topMonaFlyTO);
-  _topMonaFlyTO = setTimeout(()=>{ if(document.fullscreenElement) return; const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); landingReveal(); }, monaDelay*1000);   // the right-hand card preview appears at the same moment as Mona
+  _topMonaFlyTO = setTimeout(()=>{ if(inFullscreen()) return; const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); landingReveal(); }, monaDelay*1000);   // the right-hand card preview appears at the same moment as Mona
 }
 
 
@@ -3491,13 +3515,13 @@ function _popGoldenBubble(){
 }
 function goldenAwardClick(){   // review/fullscreen → point the winner to the homepage; already on the homepage → pop Mona's golden bubble
   if(!_myGolden) return;
-  if(document.fullscreenElement || document.body.classList.contains('reviewing')) _showGoldenToast();
+  if(inFullscreen() || document.body.classList.contains('reviewing')) _showGoldenToast();
   else _popGoldenBubble();
 }
 // clicking the golden comment takes the winner to the homepage celebration (the golden comment only ever renders for the winner, via has-golden)
 function openGoldenComment(){
   if(!_myGolden) return;
-  if(document.fullscreenElement && document.exitFullscreen){ document.exitFullscreen(); }
+  if(inFullscreen()) exitCardFs();
   if(document.body.classList.contains('reviewing') && typeof showDecks==='function'){ showDecks(); setTimeout(_popGoldenBubble, 350); return; }
   _popGoldenBubble();
 }
@@ -3783,7 +3807,7 @@ function showAnswer(){
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
   if(_pk){ _pk.classList.remove('peek-in'); const cr=fc.getBoundingClientRect(), pr=_pk.getBoundingClientRect(); _pk.style.transformOrigin=((cr.left+cr.width/2)-pr.left)+'px 50%'; }
-  if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){   // fullscreen: no spin — shake, then swap the content
+  if(inFullscreen()){   // fullscreen: no spin — shake, then swap the content
     fc.classList.remove('card-in-right','card-in-left');   // clear the fade-in so removing the shake can't re-run it (flicker)
     fc.classList.remove('card-shake'); void fc.offsetWidth; fc.classList.add('card-shake');
     setTimeout(()=>fc.classList.remove('card-shake'),500);
@@ -3921,7 +3945,7 @@ function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
 
   if(grid.dataset.deckName===currentDeck){   // same deck: grid already built → just refresh the highlight/grade classes
-    if(document.fullscreenElement) return;   // the grid is hidden in fullscreen; it re-syncs on exit (showDeckWelcome). Skipping this here is what stops big decks from lagging while you browse in fullscreen.
+    if(inFullscreen()) return;   // the grid is hidden in fullscreen; it re-syncs on exit (showDeckWelcome). Skipping this here is what stops big decks from lagging while you browse in fullscreen.
     grid.querySelectorAll('.overview-card[data-card-index]').forEach(el=>{   // O(n) pass, no reviewCards.indexOf() (that made it O(n²))
       const index=+el.dataset.cardIndex; const card=reviewCards[index]; if(!card) return;
       const cls=`overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}`.trim();
@@ -4003,11 +4027,7 @@ function jumpToOverviewCard(index, toFullscreen){   // a grid-card CLICK passes 
   if(shuffleMode){ for(let i=queue.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=queue[i]; queue[i]=queue[j]; queue[j]=t; } }
   document.getElementById('card-col')?.classList.remove('welcome');
   _previewIndex=-1; _doPreview(index);   // render the card (so fullscreen has content, and the right-hand preview updates)
-  if(toFullscreen && !document.fullscreenElement){
-    _captureCardRect();
-    const cs=document.getElementById('card-screen');
-    if(cs && cs.requestFullscreen){ cs.requestFullscreen().catch(()=>{}); }
-  }
+  if(toFullscreen && !inFullscreen()) enterCardFs();   // native or faux fullscreen
 }
 function toggleOverviewGridFromSwitch(){ overviewGridVisible=document.getElementById('overview-toggle-input2')?.checked??true; localStorage.setItem('anki-overview-visible',JSON.stringify(overviewGridVisible)); updateOverviewVisibility(); }
 function updateOverviewVisibility(){ const grid=document.getElementById('card-overview-grid'); if(grid) grid.style.display='flex'; }
@@ -4143,6 +4163,7 @@ document.addEventListener('click',e=>{
 // ⑯ UTILITY
 // ════════════════════════════════════════════════════════════
 function showDecks(){
+  { const cs=document.getElementById('card-screen'); if(cs) cs.classList.remove('card-fs-on','faux-fs'); }   // clear any faux fullscreen when returning to the homepage
   sessionStorage.removeItem('solukko-savedDeck'); sessionStorage.removeItem('solukko-savedCardIdx');
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   if(kuvaajatUnsubscribe){ kuvaajatUnsubscribe(); kuvaajatUnsubscribe=null; }
@@ -4188,7 +4209,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.addEventListener('mousedown',e=>{ if(e.button===0) pressT=Date.now(); });
   fc.addEventListener('touchstart',e=>{ pressT=Date.now(); const t=e.touches[0]; if(t){ sx=t.clientX; sy=t.clientY; } swiped=false; _gDragActive=false; _gDragSide=null; _gDragProg=0; _gLockVert=false; _gJustFired=false; _gArmed=false; },{passive:true});
   fc.addEventListener('touchmove',e=>{                       // fullscreen (front + back): a HORIZONTAL drag grows the nearer keycap; at >=150% it arms (glows) — releasing while armed navigates (front) / grades (back)
-    if(!document.fullscreenElement) return;
+    if(!inFullscreen()) return;
     const t=e.touches[0]; if(!t) return;
     const dx=t.clientX-sx, dy=t.clientY-sy;
     if(!_gDragActive){
@@ -4220,11 +4241,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
   fc.addEventListener('click',e=>{
     if(!currentCard) return;                               // celebration / done screen: no reveal or shake
     if(e.target.closest('.word-link')){ e.stopPropagation(); return; }
-    if(!document.fullscreenElement){                        // pressing the card opens fullscreen; reviewing happens there
-      _captureCardRect();
-      const cs=document.getElementById('card-screen'); if(cs&&cs.requestFullscreen) cs.requestFullscreen().catch(()=>{});
-      return;
-    }
+    if(!inFullscreen()){ enterCardFs(); return; }   // pressing the card opens (native or faux) fullscreen; reviewing happens there
     if(_fsSwipeMoved){ _fsSwipeMoved=false; return; }      // a fullscreen Mona-swipe already handled this
     if(swiped){ swiped=false; return; }                    // a grade-drag already handled this
     const _tapNow=Date.now();
@@ -4238,13 +4255,13 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
     if(e.key==='n'||e.key==='N'){ document.body.classList.toggle('no-cursor-theme'); return; }   // debug: N toggles the custom cursor theme
     if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); return; }   // F toggles fullscreen anytime
-    if((e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp') && !document.fullscreenElement && document.body.classList.contains('reviewing') && currentCard){   // grid view: browse cards with the arrows (left/up = prev, right/down = next)
+    if((e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp') && !inFullscreen() && document.body.classList.contains('reviewing') && currentCard){   // grid view: browse cards with the arrows (left/up = prev, right/down = next)
       e.preventDefault();
       const ni=currentOverviewIndex+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1);
       if(ni>=0 && ni<reviewCards.length) jumpToOverviewCard(ni);
       return;
     }
-    if(!document.fullscreenElement) return;                        // reveal/grade keys work only in fullscreen
+    if(!inFullscreen()) return;                        // reveal/grade keys work only in fullscreen
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
       e.preventDefault();
       if(e.key==='ArrowRight') frontNavRight(); else frontNavLeft();   // front: Seuraava/Edellinen · back: Kyllä/Ei — with the keycap dip + sound
@@ -4266,7 +4283,7 @@ function shakeCard(){
   setTimeout(()=>fc.classList.remove('card-shake'),500);
   shakeStars();
   flashWordLinkBubbles();   // shaking re-highlights the linked words for 2s
-  if(document.fullscreenElement && document.fullscreenElement===document.getElementById('card-screen')){
+  if(inFullscreen()){
     _fcBubbleFlash('Tiesitkö? Paina Kyllä tai Ei-nappia.');   // Mona prompts for a grade
     _keycapDip(document.getElementById('tarkista-btn'));       // dip the centre button — no click sound on a shake
     return;
@@ -4325,7 +4342,7 @@ function fitCardScale(){
   wrap.style.transform=''; wrap.style.marginBottom=''; wrap.style.maxWidth=''; wrap.style.marginTop='';
   const pr=document.getElementById('progress-row'); if(pr) pr.style.maxWidth='';   // reset; the answer bar matches the card width below
   const cs=document.getElementById('card-screen');
-  if(document.fullscreenElement && document.fullscreenElement===cs){   // fullscreen: the card fills the whole screen
+  if(inFullscreen()){   // fullscreen: the card fills the whole screen
     wrap.style.maxWidth='none'; wrap.style.marginTop='0';
     wrap.style.width=window.innerWidth+'px';
     fc.style.height=window.innerHeight+'px';
@@ -4353,7 +4370,7 @@ function fitFrontText(){
 
 let _openingDeck=false, _deckIntro=null;
 function scrollGridToActive(){   // keep the current card visible in the left grid, without moving the window/card
-  if(!document.fullscreenElement) return;   // don't scroll the grid on hover-preview (grid is hidden in fullscreen anyway)
+  if(!inFullscreen()) return;   // don't scroll the grid on hover-preview (grid is hidden in fullscreen anyway)
   const gridCol=document.getElementById('grid-col'); if(!gridCol) return;
   if(_openingDeck){ _openingDeck=false; gridCol.scrollTop=0; return; }   // fresh deck: start at the top
   const active=gridCol.querySelector('.overview-card.active'); if(!active) return;
@@ -4577,7 +4594,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     if(stars && stars.dataset.starMeaning){
       _tipPinned = !_tipPinned;
       if(_tipPinned) show(stars); else hide();
-      if(document.body.classList.contains('is-mobile') && document.fullscreenElement) _showFsButtons(4000);   // mobile: tapping the stars reveals the comment + minimise buttons
+      if(document.body.classList.contains('is-mobile') && inFullscreen()) _showFsButtons(4000);   // mobile: tapping the stars reveals the comment + minimise buttons
     } else if(_tipPinned){
       _tipPinned = false; hide();
     }
