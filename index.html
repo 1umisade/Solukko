@@ -699,6 +699,10 @@ body.dark-mode #dev-comments-panel { background: #2b211b; border-color: #6d5f52;
 body.dark-mode .dev-comments-title { color: #eadfce; }
 .dev-comment-row { display: flex; gap: 8px; align-items: baseline; padding: 0.45rem 0.3rem; border-top: 1px solid #ece7dd; cursor: pointer; }
 .dev-comment-row:hover { background: #f5f1e8; border-radius: 8px; }
+.dev-comment-row.golden { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border-radius: 8px; border-top-color: transparent; }
+.dev-comment-row.golden .dev-comment-deck { color: #7a5a12; }
+.dev-comment-row.golden .dev-comment-snip { color: #4a3a10; font-weight: 600; }
+.dev-comment-gold { flex-shrink: 0; }
 body.dark-mode .dev-comment-row { border-top-color: #4a4038; }
 body.dark-mode .dev-comment-row:hover { background: #362c25; }
 .dev-comment-deck { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: #a09080; flex-shrink: 0; max-width: 34%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -3080,7 +3084,7 @@ function renderDevCommentsPanel(){
     docs.sort((a,b)=>((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)-((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0));
     let html='<div class="dev-comments-title">Kaikki kommentit ('+docs.length+')</div>';
     if(!docs.length) html+='<div style="opacity:0.6;font-size:0.8rem;">Ei kommentteja.</div>';
-    docs.forEach(c=>{ const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('SOLUKKO::','')); const cid=escCmt(String(c.cardId||'')); html+='<div class="dev-comment-row" onclick="openCardById(\''+cid+'\')"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span></div>'; });
+    docs.forEach(c=>{ const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('SOLUKKO::','')); const cid=escCmt(String(c.cardId||'')); html+='<div class="dev-comment-row'+(c.golden?' golden':'')+'" onclick="openCardById(\''+cid+'\')">'+(c.golden?'<span class="dev-comment-gold">🏆</span>':'')+'<span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span></div>'; });
     panel.innerHTML=html;
   }).catch(err=>{ panel.innerHTML='<div class="dev-comments-title">Kaikki kommentit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+err.message+'</div>'; });
 }
@@ -3893,15 +3897,17 @@ function countKnownCards(){   // total cards marked "osasin" (known) across all 
   }
   return n;
 }
-function initPresence(){
-  const uid=getUserId(), word=getUserWord();
-  const ref=db.collection('presence').doc(uid);
-  let lastInteractionTime=Date.now();
-  ['mousedown','keydown','touchstart','click'].forEach(ev=>window.addEventListener(ev,()=>{ lastInteractionTime=Date.now(); },{passive:true,capture:true}));
-  ref.set({ userId:uid, word, known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
-  setInterval(()=>{ ref.set({ userId:uid, word, known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(lastInteractionTime) },{merge:true}).catch(()=>{}); },30000);
-  const deletePresenceUrl='https://firestore.googleapis.com/v1/projects/solukko/databases/(default)/documents/presence/'+uid+'?key=AIzaSyAeWTSjX8-M_-Xs780nnC_0o9d1YmYroGo';
-  window.addEventListener('pagehide',()=>{ fetch(deletePresenceUrl,{method:'DELETE',keepalive:true}).catch(()=>{}); });
+let _presenceInterval=null, _presenceBound=false, _lastInteractionTime=Date.now();
+function initPresence(){   // called on load AND again once anonymous auth completes — the write must use the real auth uid (Firestore rules require presence doc id == request.auth.uid), so read getUserId() fresh on every write
+  if(!db) return;
+  if(!_presenceBound){
+    _presenceBound=true;
+    ['mousedown','keydown','touchstart','click'].forEach(ev=>window.addEventListener(ev,()=>{ _lastInteractionTime=Date.now(); },{passive:true,capture:true}));
+    window.addEventListener('pagehide',()=>{ const u=getUserId(); fetch('https://firestore.googleapis.com/v1/projects/solukko/databases/(default)/documents/presence/'+u+'?key=AIzaSyAeWTSjX8-M_-Xs780nnC_0o9d1YmYroGo',{method:'DELETE',keepalive:true}).catch(()=>{}); });
+  }
+  const write=()=>{ const u=getUserId(); db.collection('presence').doc(u).set({ userId:u, word:getUserWord(), known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(_lastInteractionTime) },{merge:true}).catch(()=>{}); };
+  write();
+  clearInterval(_presenceInterval); _presenceInterval=setInterval(write, 30000);
   listenToPresence();
 }
 let _lastPresenceUsers=[];
@@ -4455,7 +4461,7 @@ updateGroupUI();
 updateOverviewVisibility();
 initPresence();
 setupGoldenWatch();
-try{ firebase.auth().onAuthStateChanged(()=>setupGoldenWatch()); }catch(e){}   // re-bind with the real uid once anonymous auth completes
+try{ firebase.auth().onAuthStateChanged(()=>{ setupGoldenWatch(); initPresence(); }); }catch(e){}   // re-bind with the real uid once anonymous auth completes (presence writes are denied under the fallback id)
 initDarkmodeBtn();
 document.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());   // Mona's nickname for the user
 init();
