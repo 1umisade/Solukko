@@ -117,11 +117,9 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 @keyframes goldenFlash { 0%,100%{ box-shadow: 0 0 14px rgba(212,175,55,0.55); } 45%{ box-shadow: 0 0 30px 10px rgba(212,175,55,0.95); } }
 .gold-toggle { float: right; background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 0; margin-left: 6px; line-height: 1; filter: grayscale(1) opacity(0.45); transition: filter 0.15s ease; }
 .gold-toggle.on, .gold-toggle:hover { filter: none; }
-/* Mona's golden win bubbles (homepage greeting + review top-peek bubble) */
-.home-greet.golden-bubble, .mona-top-bubble.golden-bubble { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border-color: #d4af37 !important; color: #4a3a10 !important; box-shadow: 0 0 16px rgba(212,175,55,0.55) !important; }
-.home-greet.golden-bubble::after { border-right-color: #f6dd7f !important; }
-.mona-top-bubble.golden-bubble::before { border-right-color: #f6dd7f !important; }
-.golden-bubble b { color: #6b4a10; }
+/* winner's award button — top-left, shown only to the winner; opens the award screen */
+#golden-award-btn { position: fixed; top: 14px; left: 14px; z-index: 250; width: 46px; height: 46px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6), 0 2px 8px rgba(0,0,0,0.25); font-size: 1.5rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
+@keyframes goldenPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
 /* winner celebration overlay */
 #golden-overlay { position: fixed; inset: 0; z-index: 300; background: radial-gradient(circle at 50% 38%, rgba(90,66,12,0.92), rgba(18,13,4,0.96)); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
 .golden-inner { max-width: 460px; text-align: center; background: linear-gradient(160deg, #fff8dd, #f4dd86 55%, #e3bf52); border: 3px solid #d4af37; border-radius: 22px; padding: 2.4rem 2rem; box-shadow: 0 0 46px rgba(212,175,55,0.65); font-family: 'Lora', serif; color: #4a3a10; }
@@ -475,7 +473,15 @@ body.dark-mode #grid-col::-webkit-scrollbar-thumb:hover { background: #c99e64; }
   #card-col { order: 2; position: static; height: auto; flex: none; width: 100%; }
   body.reviewing #card-col { display: none !important; }            /* no card preview / Mona on the right */
   #card-screen:fullscreen #card-col { display: flex !important; }   /* except in fullscreen, where the card IS the view */
-  body.reviewing #mona-top-peek { display: none !important; }       /* no top-peek Mona in mobile review */
+  /* mobile: show Mona centered between the back button and the deck name; her bubble only appears (above her) on tap */
+  body.reviewing #mona-top-peek { display: flex !important; justify-content: center; width: 100%; margin: 0.2rem 0 0.7rem; position: relative; }
+  #mona-top-peek .mona-top-spacer { display: none; }
+  #mona-top-peek .mona-top-inner { flex: 0 0 92px; width: 92px; height: 92px; }
+  #mona-top-peek .mona-top-bubble { position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); max-width: min(82vw, 34ch); z-index: 5; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+  #mona-top-peek.flew-in .mona-top-bubble { animation: none; }        /* don't auto-fade the bubble in on mobile */
+  #mona-top-peek.bubble-open .mona-top-bubble { opacity: 1; pointer-events: auto; }
+  #mona-top-peek .mona-top-bubble::before { left: 50%; top: 100%; bottom: auto; transform: translateX(-50%); border: 10px solid transparent; border-top-color: #fffef9; border-bottom: 0; }   /* tail points down at Mona */
+  body.dark-mode #mona-top-peek .mona-top-bubble::before { border-top-color: #3a312b; }
 }
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
@@ -1136,6 +1142,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </div>
 </div>
 <!-- winner celebration: shown on the device whose comment was painted gold -->
+<button id="golden-award-btn" onclick="showGoldenAward()" title="Palkintosi" style="display:none">🏆</button>
 <div id="golden-overlay" style="display:none">
   <div class="golden-inner">
     <div class="golden-trophy">🏆</div>
@@ -1595,6 +1602,7 @@ document.addEventListener('click',e=>{ if(!_commenting && !document.querySelecto
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
   const sb=document.getElementById('site-brand'); if(sb && !sb.contains(e.target)) sb.classList.remove('home-bubble-open');
   const pk=document.getElementById('peek-logo');  if(pk && !pk.contains(e.target)) pk.classList.remove('bubble-open');
+  const mp=document.getElementById('mona-top-peek'); if(mp && !mp.contains(e.target)) mp.classList.remove('bubble-open');   // tap away closes the mobile Mona bubble
 });
 
 
@@ -1671,12 +1679,11 @@ function logoScream(ev){
   siteBrandReact();
   if(typeof HOME_BUBBLE_ORDER!=='undefined'){ _greetIdx=_greetIdx+1; renderGreet(); }   // advance Mona's greeting cycle
 }
-function _greetOrder(){ return (typeof _myGolden!=='undefined' && _myGolden) ? ['__golden__'].concat(HOME_BUBBLE_ORDER) : HOME_BUBBLE_ORDER; }
-function renderGreet(){   // render the current homepage greeting; winners see a golden win bubble first in the cycle
+function _greetOrder(){ return HOME_BUBBLE_ORDER; }
+function renderGreet(){   // render the current homepage greeting (no golden bubble — the win shows via the top-left award button)
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
   const order=_greetOrder(); const key=order[((_greetIdx%order.length)+order.length)%order.length];
-  if(key==='__golden__'){ greet.innerHTML=_goldenWinText(); greet.classList.add('golden-bubble'); }
-  else { greet.innerHTML=MONA_BUBBLES[key]||''; greet.classList.remove('golden-bubble'); greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
+  greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
 }
 
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
@@ -2967,7 +2974,10 @@ function monaReactAt(el, withSound){
   if(withSound!==false){ try{ playScream(); }catch(e){} }                                    // scream
 }
 function monaClick(withSound){ monaReactAt(document.querySelector('#mona-top-peek .mona-top-inner'), withSound); }
-function _monaTopClick(){ monaClick(true); }   // top peeker uses the one reaction, like every other Mona
+function _monaTopClick(){   // top peeker uses the one reaction; on mobile a tap also toggles her speech bubble (shown above her)
+  if(document.body.classList.contains('is-mobile')){ const p=document.getElementById('mona-top-peek'); if(p) p.classList.toggle('bubble-open'); }
+  monaClick(true);
+}
 function staggerGridIntro(){   // on deck load: fade the first row of cards in one-by-one, then everything else together
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
   const cards=[...grid.querySelectorAll('.overview-card')]; if(!cards.length) return;
@@ -3284,27 +3294,25 @@ function setupGoldenWatch(){
     _goldenUnsub=db.collection('prizes').where('userId','==',uid).onSnapshot(snap=>{   // real-time: fires the instant the dev paints a comment gold
       let g=null; snap.forEach(doc=>{ const d=doc.data(); if(!d.paid) g={ id:doc.id, code:String(d.code||'') }; });   // ignore prizes already paid out
       _myGolden=g;
-      _applyGoldenBubbles();
-      if(g) maybeShowGoldenCelebration();
+      _applyGolden();                       // show/hide the top-left award button
+      if(g) maybeShowGoldenCelebration();   // real-time: pops the award screen the instant the dev awards it
     }, err=>{ _goldenUnsub=null; _goldenRetry=setTimeout(setupGoldenWatch, 3000); });   // stream errored -> re-establish
   }catch(e){ _goldenRetry=setTimeout(setupGoldenWatch, 3000); }
 }
-// the win text shown in Mona's golden speech bubbles
-function _goldenWinText(){ return _myGolden ? ('🏆 Voitit viikon 5&nbsp;&euro;! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja raha siirretään sinulle Mobilepaylla.') : ''; }
-// paint the winner's info into Mona's homepage greeting + review speech bubbles (and gold them); revert when there's no unpaid prize
-function _applyGoldenBubbles(){
-  renderGreet();
-  const tb=document.getElementById('mona-top-bubble');
-  if(tb){ if(_myGolden){ if(tb.dataset.orig===undefined) tb.dataset.orig=tb.innerHTML; tb.innerHTML=_goldenWinText(); tb.classList.add('golden-bubble'); }
-          else if(tb.dataset.orig!==undefined){ tb.innerHTML=tb.dataset.orig; tb.classList.remove('golden-bubble'); } }
-}
 function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function maybeShowGoldenCelebration(){
-  if(_goldenShown || !_myGolden) return;   // once per session; it re-shows on the next visit until the dev removes the gold
-  _goldenShown=true;
+// show/hide the winner's top-left award button (the comment itself is gold on every device; this button is the winner's private claim)
+function _applyGolden(){
+  const btn=document.getElementById('golden-award-btn'); if(btn) btn.style.display=_myGolden?'flex':'none';
+}
+function showGoldenAward(){   // the award screen — opened by tapping the trophy, and auto-popped the instant the dev awards it
+  if(!_myGolden) return;
   const msg=document.getElementById('golden-msg');
   if(msg) msg.innerHTML='Olet voittanut 5&nbsp;&euro; jättämälläsi kommentilla! Tekstaa <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, ja raha siirretään sinulle Mobilepaylla.';
   const o=document.getElementById('golden-overlay'); if(o) o.style.display='flex';
+}
+function maybeShowGoldenCelebration(){   // auto-pop once per session — fires the instant the dev paints the comment gold (via the real-time watch)
+  if(_goldenShown || !_myGolden) return;
+  _goldenShown=true; showGoldenAward();
 }
 function closeGoldenOverlay(){
   const o=document.getElementById('golden-overlay'); if(o) o.style.display='none';
@@ -3770,7 +3778,6 @@ function renderCardOverview(){
           '</div>'+
           '<div class="cover-title">'+_name+'</div><div class="cover-esittely">'+_es+'</div>';
         cov.style.display='flex';
-        if(typeof _applyGoldenBubbles==='function') _applyGoldenBubbles();   // winner: paint the review Mona bubble golden with the win info
       } else { cov.innerHTML=''; cov.style.display='none'; }
     }
   }
