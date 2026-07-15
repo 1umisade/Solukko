@@ -64,7 +64,7 @@ body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
-#home-mona { align-self: flex-start; display: flex; align-items: center; gap: 18px; margin: 4px 0 10px; }   /* solukko.com | Mona | speech bubble — at the left of the screen */
+#home-mona { align-self: flex-start; display: flex; align-items: flex-start; gap: 18px; margin: 4px 0 10px; }   /* Mona anchored to the TOP so she never moves as the bubble grows/shrinks between greetings */
 #home-mona .site-brand { width: 120px; margin: 0; }
 .home-brand-block { text-align: right; flex: 0 0 auto; }
 /* wide screens: site name pinned left, Mona + bubble centered */
@@ -163,8 +163,10 @@ body.dark-mode #home-hero .hero-link:hover { color: #eadfce; }
 @media (max-width: 640px){ #aku-portrait { width: 163px; margin-right: 1rem; } }
 body.dark-mode #home-hero .hero-manifest { color: #cbb9a0; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
-.home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: 140px; box-sizing: border-box; display: flex; align-items: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.6rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }
-.home-greet::after { content: ""; position: absolute; right: 100%; top: 50%; transform: translateY(-50%); border: 13px solid transparent; border-right-color: #fffef9; }
+.home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: auto; box-sizing: border-box; display: block; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }   /* height:auto = the bubble always wraps snugly around its text */
+.home-greet::after { content: ""; position: absolute; right: 100%; top: 47px; border: 13px solid transparent; border-right-color: #fffef9; }   /* tail fixed near Mona's centre (she's anchored top), not the bubble's centre */
+.home-greet.greet-loading { padding: 1.15rem 1.6rem; }   /* while the decks load: a progress bar sits where the greeting text will go */
+.home-greet.greet-loading .loading-bar { margin: 2px auto; }
 body.dark-mode .home-greet { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .year-section { width: 100%; }
@@ -184,6 +186,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
   .sem-col { justify-content: center; }
   #home-mona { gap: 12px; }
   #home-mona .site-brand { width: 84px; }
+  .home-greet::after { top: 30px; }   /* smaller Mona on mobile → point the tail higher, at her centre */
   .home-brand-block { display: none; }   /* hide the site-name block on mobile to keep Mona + bubble */
   .home-greet { height: auto; overflow: visible; font-size: 0.9rem; max-width: 60vw; margin-left: 12px; padding: 0.6rem 0.8rem; }
   body.dark-mode .sem-col.spring { border-top-color: #6d5f52; }
@@ -1118,7 +1121,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-body">
-    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Meillä opiskelijoilla onkin jotain, mikä juuri kokeneilta opettajilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian hallitsee hyvin, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite onkin tarjota nuoremmille opiskelijoille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali, jonka muut opiskelijat ovat tehneet. Opiskelu sivustolla tapahtuu omalla suosikkimenetelmälläni eli kysymyskorteilla, joiden olen todennut tuottavan parhaan tenttimenestyksen ja muistijäljen. Valikoimassa ovat tällä hetkellä Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille aloille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi, voit lähettää ideoitasi tai Anki-tiedoston osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteydenottopyyntö tulee näkyviin sillä laitteella, jolla kommentti lähetettiin. Kenties tulevaisuudessa voin tarjota korvauksen useammallekin apukädelle, mutta opiskelijabudjetilla voin toistaiseksi vain kiittää heitä, jotka haluavat tasoittaa muiden koulupolkua ja rakentaa yhdessä oppimateriaalia, jota olisimme itse kaivanneet opintojen alussa.<br><br>Onnea opintoihisi! Sivuston käytössä voit kääntyä Monan puoleen → <img class="mona-inline" src="mona_with_eyes.png" alt="Mona" onclick="heroMonaClick()" style="cursor:pointer"></p>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan opittavat asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Meillä opiskelijoilla onkin jotain, mikä juuri kokeneilta opettajilta usein puuttuu: muisto siitä, miltä tietämättömyys tuntui. Kun asian hallitsee hyvin, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite onkin tarjota nuoremmille opiskelijoille mahdollisimman selkokielinen, kuvitettu ja helppokäyttöinen oppimateriaali, jonka muut opiskelijat ovat tehneet. Opiskelu sivustolla tapahtuu omalla suosikkimenetelmälläni eli kysymyskorteilla, joiden olen todennut tuottavan parhaan tenttimenestyksen ja muistijäljen. Valikoimassa ovat tällä hetkellä Turun yliopiston biokemian kandikurssit, mutta sisältöä on tarkoitus laajentaa myös muille aloille. Jos haluaisit luoda kysymyskortteja omasta tutkinnostasi, voit lähettää ideoitasi tai Anki-tiedoston osoitteeseen <a class="hero-link" href="mailto:contact@solukko.com">contact@solukko.com</a>. Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla parannusehdotuksia tai ostamalla haalarimerkin <a class="hero-link" href="https://solukko.shop" target="_blank" rel="noopener noreferrer">solukko.shopista</a>. Kiitoksena korttitietojen kehittämisestä, arvon kommentoijien kesken myös 5&nbsp;&euro; joka perjantai klo 14:00. Voittajan kommentti maalautuu kultaiseksi ja yhteydenottopyyntö tulee näkyviin sillä laitteella, jolla kommentti lähetettiin. Kenties tulevaisuudessa voin tarjota korvauksen useammallekin apukädelle, mutta opiskelijabudjetilla voin toistaiseksi vain kiittää heitä, jotka haluavat tasoittaa muiden koulupolkua ja rakentaa yhdessä oppimateriaalia, jota olisimme itse kaivanneet opintojen alussa.<br><br>Onnea opintoihisi! Sivuston käytössä voit kääntyä Monan puoleen → <img class="mona-inline" src="mona_with_eyes.png" alt="Mona" onclick="heroMonaClick()" style="cursor:pointer"></p>
       <div class="hero-shop">
         <a class="shop-embed" href="#" onclick="openShopOverlay(event)"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
       </div>
@@ -1730,6 +1733,22 @@ function renderGreet(){   // render the current homepage greeting bubble (its in
   if(key==='__golden__'){ greet.classList.add('golden-bubble'); greet.innerHTML=_goldenWinText(); }
   else { greet.classList.remove('golden-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
 }
+// homepage loading state: while the decks load, Mona sleeps and her speech bubble shows a progress bar; on reveal she wakes and the greeting returns
+function _setHomeMonaLoading(on){
+  const logo=document.getElementById('site-brand');
+  const greet=document.querySelector('#home-mona .home-greet');
+  const img=logo&&logo.querySelector('.brand-logo-img');
+  if(on){
+    if(img) img.src='sleeping_mona.png';
+    if(logo) logo.classList.add('eyes-closed');                  // hide the moving pupils while she sleeps
+    if(greet){ greet.classList.remove('golden-bubble'); greet.classList.add('greet-loading'); greet.innerHTML='<div class="loading-bar"><div class="loading-bar-fill"></div></div>'; }
+  } else {
+    if(img) img.src='mona_no_eyes.png';
+    if(logo) logo.classList.remove('eyes-closed');
+    if(greet) greet.classList.remove('greet-loading');
+    if(typeof renderGreet==='function') renderGreet();           // wake up → the greeting (or the winner's golden bubble) returns
+  }
+}
 // the tiny Mona in the hero text: scroll up to the big Mona, greet with the "Tervetuloa" bubble, and make her react (scream + shake)
 function heroMonaClick(){
   try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0,0); }
@@ -1742,7 +1761,7 @@ function heroMonaClick(){
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
-  homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Oletko uusi täällä? Minä olen Mona ja toimin oppaana sivuston käyttäjille. Klikkaa minua niin kerron lisää.</span>',
+  homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Oletko uusi täällä? Nimeni on Mona ja toimin oppaana sivuston käyttäjille. Klikkaa minua niin kerron lisää.</span>',
   homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
   homepage3:'Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko™-tietovisoista!',
 
@@ -1923,13 +1942,10 @@ setInterval(()=>{
 function _idbOpen(){ return new Promise((res,rej)=>{ let r; try{ r=indexedDB.open('solukko-apkg',1); }catch(e){ return rej(e); } r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('kv'); }catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
 async function idbGet(key){ try{ const db=await _idbOpen(); return await new Promise(res=>{ const g=db.transaction('kv','readonly').objectStore('kv').get(key); g.onsuccess=()=>res(g.result); g.onerror=()=>res(null); }); }catch(e){ return null; } }
 async function idbSet(key,val){ try{ const db=await _idbOpen(); return await new Promise(res=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(val,key); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }catch(e){ return false; } }
-// The homepage grid resolves _decksReady once every deck's video/image has loaded; init keeps the
-// single loading Mona up until then so the homepage's own Monas (brand + edge peeker) never flash mid-load.
+// The apkg-parse overlay lifts as soon as the homepage is built; the deck grid then keeps loading BEHIND
+// the homepage, where Mona sleeps and her bubble shows a progress bar until _revealDecks (_setHomeMonaLoading).
 let _decksReady=null, _decksReadyResolve=null;
-async function _finishLoading(){
-  try{ await Promise.race([ _decksReady||Promise.resolve(), new Promise(r=>setTimeout(r,4500)) ]); }catch(e){}
-  hide('loading');
-}
+async function _finishLoading(){ hide('loading'); }
 async function init(){
   show('loading');
   try {
@@ -2273,12 +2289,9 @@ function buildDeckGrid(decks, list){
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona
   const greet=document.createElement('div'); greet.className='home-greet';                 // her speech bubble to the right (clicking Mona cycles it)
   _greetIdx=0;
-  greet.innerHTML=(typeof MONA_BUBBLES!=='undefined'?MONA_BUBBLES[HOME_BUBBLE_ORDER[0]]:'');
-  greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());
   header.appendChild(greet);
-  if(typeof renderGreet==='function') requestAnimationFrame(renderGreet);   // winners see the golden win bubble first
-  if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // Mona shakes & blinks (desktop only)
   list.appendChild(header);
+  _setHomeMonaLoading(true);              // Mona sleeps + her bubble shows a progress bar until the decks are in
   list.classList.add('decks-loading');   // sections stay hidden until every deck's video/image has loaded, then they fade in
   _decksReady = new Promise(res=>{ _decksReadyResolve = res; });   // init keeps the loading Mona up until this resolves
   const byYear={};
@@ -2316,6 +2329,8 @@ function buildDeckGrid(decks, list){
     if(_decksReadyResolve){ _decksReadyResolve(); _decksReadyResolve=null; }   // let init lift the loading overlay
     if(list.dataset.buildGen!==_gen) return;   // a newer buildDeckGrid superseded this one
     list.classList.remove('decks-loading');
+    _setHomeMonaLoading(false);   // decks are in → Mona wakes up and her greeting bubble returns
+    if(!isMobile()) requestAnimationFrame(()=>siteBrandReact());   // a little shake/blink as she wakes (desktop only)
     [...list.querySelectorAll('.deck-btn')].forEach((b,i)=>{ b.style.animationDelay=(i*0.06)+'s'; b.classList.add('deck-in'); });
   };
   const _waitMedia=el=>new Promise(res=>{
@@ -3363,33 +3378,30 @@ function _loadGoldenComment(){   // fetch the winning comment's own text (for th
   const id=_myGolden.id;
   db.collection('comments').doc(id).get().then(c=>{ if(_myGolden && _myGolden.id===id && c.exists){ _myGolden.text=String((c.data()||{}).text||''); _applyGolden(); } }).catch(()=>{});
 }
-// clicking the golden comment opens its card in fullscreen with the comment section
-async function openGoldenComment(){
-  if(!_myGolden || !_myGolden.cardId || typeof allCards==='undefined') return;
-  const card=allCards.find(c=>String(c.cardId)===String(_myGolden.cardId));
-  if(!card || typeof coursePathOf!=='function') return;
-  await startDeck(coursePathOf(card.deckName), false);
-  const idx=reviewCards.findIndex(c=>String(c.cardId)===String(_myGolden.cardId));
-  if(idx<0) return;
-  currentOverviewIndex=idx; currentCard=reviewCards[idx]; queue=reviewCards.slice(idx+1); _previewIndex=-1; _doPreview(idx); _captureCardRect();
-  const cs=document.getElementById('card-screen');
-  const openComments=()=>{ setTimeout(()=>{ if(!_commenting) toggleComment(); }, 350); };   // show the comment panel once the card is up
-  if(cs && cs.requestFullscreen && !document.fullscreenElement){ cs.requestFullscreen().then(openComments).catch(openComments); }
-  else openComments();
-}
 let _goldenToastTO=null;
-function _showGoldenToast(){   // the golden celebration bubble (win message) shown in review / fullscreen (it lives inside #card-screen so it clears the fullscreen top layer)
+function _showGoldenToast(){   // review/fullscreen hint pointing the winner to the homepage — deliberately NO code/private info (safe even though only winners see the button)
   const t=document.getElementById('golden-toast'); if(!t) return;
-  t.innerHTML=_goldenWinText();
-  t.style.display='block'; clearTimeout(_goldenToastTO); _goldenToastTO=setTimeout(()=>{ t.style.display='none'; }, 9000);
+  t.innerHTML='🏆 Palkintosi ja lunastusohjeet löytyvät etusivulta!';
+  t.style.display='block'; clearTimeout(_goldenToastTO); _goldenToastTO=setTimeout(()=>{ t.style.display='none'; }, 4500);
 }
-function goldenAwardClick(){   // tapping the award button = celebrate IN PLACE (never send the user to the homepage)
+// The winner's homepage celebration: scroll to Mona and pop her golden bubble. ONLY the winner's device has _myGolden (the prizes rule lets you read only your own), so no other user can ever trigger or see this bubble.
+function _popGoldenBubble(){
   if(!_myGolden) return;
-  if(document.fullscreenElement || document.body.classList.contains('reviewing')){ _showGoldenToast(); return; }
-  // homepage: scroll up to Mona and show her golden celebration bubble
   try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){ window.scrollTo(0,0); }
   const order=_greetOrder(); const gi=order.indexOf('__golden__'); if(gi>=0){ _greetIdx=gi; renderGreet(); }
   try{ siteBrandReact(); }catch(e){}
+}
+function goldenAwardClick(){   // review/fullscreen → point the winner to the homepage; already on the homepage → pop Mona's golden bubble
+  if(!_myGolden) return;
+  if(document.fullscreenElement || document.body.classList.contains('reviewing')) _showGoldenToast();
+  else _popGoldenBubble();
+}
+// clicking the golden comment takes the winner to the homepage celebration (the golden comment only ever renders for the winner, via has-golden)
+function openGoldenComment(){
+  if(!_myGolden) return;
+  if(document.fullscreenElement && document.exitFullscreen){ document.exitFullscreen(); }
+  if(document.body.classList.contains('reviewing') && typeof showDecks==='function'){ showDecks(); setTimeout(_popGoldenBubble, 350); return; }
+  _popGoldenBubble();
 }
 
 
