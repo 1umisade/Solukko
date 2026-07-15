@@ -2756,7 +2756,7 @@ function _keycapDip(el){ if(!el) return; el.classList.remove('keycap-press'); vo
 function fsBtnPress(el){ _keycapDip(el); try{ playKeyClick(); }catch(e){} }   // EVERY fullscreen button: up/down dip + click sound
 // reveal the answer via the Tarkista button
 function frontCheckReveal(){
-  if(cardAnswerShown){ shakeCard(); return; }        // back side: clicking the space button shakes the card (silent) to prompt a grade
+  if(cardAnswerShown){ _keycapDip(document.getElementById('tarkista-btn')); renderCurrentCard(); return; }   // back side: pressing Tarkista again flips back to the front (and its Edellinen/Seuraava buttons)
   _keycapDip(document.getElementById('tarkista-btn'));   // dip the button; showAnswer plays the single click as it shakes the card open
   showAnswer();
 }
@@ -4050,7 +4050,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
       e.preventDefault();
       if(e.key==='ArrowRight') frontNavRight(); else frontNavLeft();   // front: Seuraava/Edellinen · back: Kyllä/Ei — with the keycap dip + sound
     }
-    if((e.key===' '||e.key==='ArrowUp'||e.key==='ArrowDown')&&currentCard){ e.preventDefault(); if(!cardAnswerShown) frontCheckReveal(); else shakeCard(); }   // space / up / down = press Tarkista (reveal), then shake
+    if((e.key===' '||e.key==='ArrowUp'||e.key==='ArrowDown')&&currentCard){ e.preventDefault(); frontCheckReveal(); }   // space / up / down = press Tarkista: reveal on the front, flip back to the front from the back
     else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
   });
 })();
