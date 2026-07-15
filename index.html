@@ -136,9 +136,6 @@ body.has-golden.reviewing #golden-comment { display: none; }
 #award-btn, #fs-award-btn { display: none; position: fixed; top: 16px; right: 16px; z-index: 260; width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6), 0 2px 8px rgba(0,0,0,0.25); font-size: 1.4rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
 body.has-golden #award-btn { display: flex; }
 body.has-golden #card-screen.card-fs-on #fs-award-btn { display: flex; }
-/* the celebration bubble shown when the award button is tapped in review / fullscreen (inside #card-screen so it shows over the fullscreen top layer). On the homepage the celebration is Mona's own golden bubble instead. */
-#golden-toast { display: none; position: fixed; top: 74px; right: 16px; z-index: 261; max-width: min(90vw, 320px); background: linear-gradient(135deg, #fff8dd, #f4dd86 55%, #e3bf52); border: 2px solid #d4af37; border-radius: 16px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.4; color: #4a3a10; text-align: left; box-shadow: 0 6px 22px rgba(0,0,0,0.35); }
-#golden-toast b { color: #6b4a10; }
 /* dev password prompt (masked input) */
 #devpw-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(24,18,12,0.55); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
 .devpw-box { width: min(340px, 92vw); background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 1.4rem 1.3rem; box-shadow: 0 10px 34px rgba(0,0,0,0.3); font-family: 'Lora', serif; color: #56533c; }
@@ -1244,7 +1241,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </button>
   <!-- fullscreen award button (winner only) — just points to the homepage where the prize info lives -->
   <button id="fs-award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
-  <div id="golden-toast">🏆 Lunasta palkintosi etusivulta!</div>
   <div id="review-cols">
   <div id="grid-col">
   <div id="grid-header">
@@ -3508,12 +3504,6 @@ function _loadGoldenComment(){   // fetch the winning comment's own text (for th
   const id=_myGolden.id;
   db.collection('comments').doc(id).get().then(c=>{ if(_myGolden && _myGolden.id===id && c.exists){ _myGolden.text=String((c.data()||{}).text||''); _applyGolden(); } }).catch(()=>{});
 }
-let _goldenToastTO=null;
-function _showGoldenToast(){   // review/fullscreen hint pointing the winner to the homepage — deliberately NO code/private info (safe even though only winners see the button)
-  const t=document.getElementById('golden-toast'); if(!t) return;
-  t.innerHTML='🏆 Palkintosi ja lunastusohjeet löytyvät etusivulta!';
-  t.style.display='block'; clearTimeout(_goldenToastTO); _goldenToastTO=setTimeout(()=>{ t.style.display='none'; }, 4500);
-}
 // The winner's homepage celebration: scroll to Mona and pop her golden bubble. ONLY the winner's device has _myGolden (the prizes rule lets you read only your own), so no other user can ever trigger or see this bubble.
 function _popGoldenBubble(){
   if(!_myGolden) return;
@@ -3521,10 +3511,12 @@ function _popGoldenBubble(){
   const order=_greetOrder(); const gi=order.indexOf('__golden__'); if(gi>=0){ _greetIdx=gi; renderGreet(); }
   try{ siteBrandReact(); }catch(e){}
 }
-function goldenAwardClick(){   // review/fullscreen → point the winner to the homepage; already on the homepage → pop Mona's golden bubble
+// the award button ALWAYS takes the winner to the homepage and pops Mona's golden award bubble (from the study/review page it leaves them first)
+function goldenAwardClick(){
   if(!_myGolden) return;
-  if(inFullscreen() || document.body.classList.contains('reviewing')) _showGoldenToast();
-  else _popGoldenBubble();
+  if(inFullscreen()) exitCardFs();
+  if(document.body.classList.contains('reviewing') && typeof showDecks==='function'){ showDecks(); setTimeout(_popGoldenBubble, 350); return; }
+  _popGoldenBubble();
 }
 // clicking the golden comment takes the winner to the homepage celebration (the golden comment only ever renders for the winner, via has-golden)
 function openGoldenComment(){
