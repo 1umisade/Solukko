@@ -4191,8 +4191,9 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     const vw=window.innerWidth;
     const side = dx<0 ? 'left' : 'right';
     const prog = Math.max(0, Math.min(1, Math.abs(dx)/(vw*0.16)));   // very sensitive: full size after only ~16% of the width
-    const scale = 1 + prog*1.2;                             // grows from 1x up to ~2.2x
-    const armed = scale >= 1.25;                            // reached 125% → armed (glows) after only ~3-4% of drag; release while armed to register
+    const eased = 1 - (1-prog)*(1-prog);                   // ease-out: the button grows fast at first, then progressively slower as it gets bigger
+    const scale = 1 + eased*1.2;                           // grows from 1x up to ~2.2x, decelerating toward the top
+    const armed = scale >= 1.25;                            // reached 125% → armed (glows); release while armed to register
     _gDragSide=side; _gDragProg=prog; _gArmed=armed;
     const btn=document.getElementById(side==='left'?'fc-nav-left':'fc-nav-right');
     const other=document.getElementById(side==='left'?'fc-nav-right':'fc-nav-left');
