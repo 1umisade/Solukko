@@ -124,6 +124,12 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .bubble-award-wrap { float: right; margin: 0 0 6px 14px; }   /* trophy sits top-right; the text wraps around it */
 .bubble-award-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fffaea, #f6dd7f 55%, #e0b93e); box-shadow: 0 3px 12px rgba(212,175,55,0.65), 0 1px 4px rgba(0,0,0,0.25); font-size: 1.35rem; line-height: 1; cursor: pointer; animation: goldenPulse 1.6s ease-in-out infinite; }
 @keyframes goldenPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+/* winner's golden comment card — top-right of the homepage; hidden during review/fullscreen */
+#golden-comment { display: none; position: fixed; top: 70px; right: 14px; z-index: 90; width: min(78vw, 280px); background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border: 2px solid #d4af37; border-radius: 16px; padding: 0.7rem 0.9rem; box-shadow: 0 6px 22px rgba(212,175,55,0.5), 0 2px 8px rgba(0,0,0,0.2); font-family: 'Lora', serif; color: #4a3a10; cursor: pointer; }
+body.has-golden #golden-comment { display: block; }
+body.has-golden.reviewing #golden-comment { display: none; }
+.gc-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
+.gc-text { font-size: 0.92rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
 /* winner's fullscreen award button (only points them to the homepage) + a small "prize is on the homepage" toast */
 #fs-award-btn { display: none; position: fixed; top: 18px; left: 50%; margin-left: -24px; z-index: 100; width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6); font-size: 1.4rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
 body.has-golden #card-screen:fullscreen #fs-award-btn { display: flex; }
@@ -1138,6 +1144,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     </div>
   </div>
 </div>
+<!-- winner's golden comment, top-right of the homepage; clicking opens its card in fullscreen with comments -->
+<div id="golden-comment" onclick="openGoldenComment()" title="Avaa kommenttisi"></div>
 <!-- dev password prompt (masked) -->
 <div id="devpw-overlay" style="display:none" onclick="if(event.target===this)closeDevPw()">
   <div class="devpw-box">
@@ -1673,7 +1681,7 @@ function _greetOrder(){ return HOME_BUBBLE_ORDER; }
 function renderGreet(){   // render the homepage greeting; a winner always sees the golden win bubble (with an award button that opens the award screen)
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
   if(typeof _myGolden!=='undefined' && _myGolden){
-    greet.innerHTML='<div class="bubble-award-wrap"><button class="bubble-award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button></div>'+_goldenWinText();
+    greet.innerHTML=_goldenWinText();
     greet.classList.add('golden-bubble'); return;
   }
   greet.classList.remove('golden-bubble');
@@ -3019,8 +3027,8 @@ function loadFirestoreComments(){
       const d=doc.data(); const el=document.createElement('div'); el.className='comment-item'; el.dataset.docId=doc.id;
       const isOwn=d.userId&&d.userId===getUserId(); const canEdit=isOwn||devMode;
       if(d.golden) el.classList.add('golden');   // the winning comment shows gold on every device
-      if(d.golden && isOwn && !_myGolden){    // this device left the winning comment -> fetch the private code (backup for the global prizes watch)
-        db.collection('prizes').doc(doc.id).get().then(p=>{ if(p.exists){ _myGolden={ id:doc.id, code:String((p.data()||{}).code||'') }; _applyGolden(); } }).catch(()=>{});
+      if(d.golden && isOwn && !_myGolden){    // this device left the winning comment -> fetch the private code (backup for the global prizes watch); we already have the comment text here
+        db.collection('prizes').doc(doc.id).get().then(p=>{ if(p.exists){ const pd=p.data()||{}; _myGolden={ id:doc.id, code:String(pd.code||''), cardId:String(pd.cardId||''), text:String(d.text||'') }; _applyGolden(); } }).catch(()=>{});
       }
       let btns='';
       if(devMode) btns+=`<button class="gold-toggle${d.golden?' on':''}" onclick="toggleGoldenComment('${doc.id}',${d.golden?'true':'false'})" title="Maalaa viikon voittajaksi (kultaiseksi)">🏆</button>`;
@@ -3287,25 +3295,46 @@ function setupGoldenWatch(){
     if(!uid||!db){ _goldenRetry=setTimeout(setupGoldenWatch, 800); return; }   // sign-in not ready yet -> keep trying so the listener always comes up
     if(_goldenUnsub){ _goldenUnsub(); _goldenUnsub=null; }
     _goldenUnsub=db.collection('prizes').where('userId','==',uid).onSnapshot(snap=>{   // real-time: fires the instant the dev paints a comment gold
-      let g=null; snap.forEach(doc=>{ const d=doc.data(); if(!d.paid) g={ id:doc.id, code:String(d.code||'') }; });   // ignore prizes already paid out
+      let g=null; snap.forEach(doc=>{ const d=doc.data(); if(!d.paid) g={ id:doc.id, code:String(d.code||''), cardId:String(d.cardId||'') }; });   // ignore prizes already paid out
       _myGolden=g;
-      _applyGolden();   // real-time: the instant the dev awards it, the homepage bubble + fullscreen award button appear
+      _applyGolden(); _loadGoldenComment();   // real-time: the instant the dev awards it, the golden comment (top-right) + bubble appear
     }, err=>{ _goldenUnsub=null; _goldenRetry=setTimeout(setupGoldenWatch, 3000); });   // stream errored -> re-establish
   }catch(e){ _goldenRetry=setTimeout(setupGoldenWatch, 3000); }
 }
 function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function _goldenWinText(){ return _myGolden ? ('Voitit 5&nbsp;&euro;! Lunasta palkinto lähettämällä koodi <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, tai nouda se käteisenä Turun yliopiston Orbitaalilta päivystysaikaan.') : ''; }
-// winner: body.has-golden shows the fullscreen award button; the homepage Mona bubble shows the win text + a trophy (via renderGreet)
+function _goldenWinText(){ return _myGolden ? ('Kommenttisi voitti 5&nbsp;&euro; tämän viikon arvonnassa! Lunasta palkinto lähettämällä koodi <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, tai nouda seteli Turun yliopiston Orbitaalilta päivystysaikaan.') : ''; }
+// winner: body.has-golden shows the fullscreen award button + the golden winning comment (top-right of the homepage); the Mona bubble shows the win text (renderGreet)
 function _applyGolden(){
   document.body.classList.toggle('has-golden', !!_myGolden);
+  const gc=document.getElementById('golden-comment');
+  if(gc) gc.innerHTML = _myGolden ? ('<div class="gc-label">🏆 Voittajakommenttisi</div><div class="gc-text">'+_esc(_myGolden.text||'')+'</div>') : '';
   if(typeof renderGreet==='function') renderGreet();   // refresh the homepage greeting (golden win bubble ↔ normal)
+}
+function _loadGoldenComment(){   // fetch the winning comment's own text (for the golden card) if we only have the prize
+  if(!_myGolden || _myGolden.text!==undefined || !db) return;
+  const id=_myGolden.id;
+  db.collection('comments').doc(id).get().then(c=>{ if(_myGolden && _myGolden.id===id && c.exists){ _myGolden.text=String((c.data()||{}).text||''); _applyGolden(); } }).catch(()=>{});
+}
+// clicking the golden comment opens its card in fullscreen with the comment section
+async function openGoldenComment(){
+  if(!_myGolden || !_myGolden.cardId || typeof allCards==='undefined') return;
+  const card=allCards.find(c=>String(c.cardId)===String(_myGolden.cardId));
+  if(!card || typeof coursePathOf!=='function') return;
+  await startDeck(coursePathOf(card.deckName), false);
+  const idx=reviewCards.findIndex(c=>String(c.cardId)===String(_myGolden.cardId));
+  if(idx<0) return;
+  currentOverviewIndex=idx; currentCard=reviewCards[idx]; queue=reviewCards.slice(idx+1); _previewIndex=-1; _doPreview(idx); _captureCardRect();
+  const cs=document.getElementById('card-screen');
+  const openComments=()=>{ setTimeout(()=>{ if(!_commenting) toggleComment(); }, 350); };   // show the comment panel once the card is up
+  if(cs && cs.requestFullscreen && !document.fullscreenElement){ cs.requestFullscreen().then(openComments).catch(openComments); }
+  else openComments();
 }
 let _goldenToastTO=null;
 function _showGoldenToast(){   // brief "your prize is on the homepage" hint
   const t=document.getElementById('golden-toast'); if(!t) return;
   t.style.display='block'; clearTimeout(_goldenToastTO); _goldenToastTO=setTimeout(()=>{ t.style.display='none'; }, 3500);
 }
-function goldenAwardClick(){   // in fullscreen there's no bubble → point the winner to the homepage; on the homepage the info is already in Mona's bubble
+function goldenAwardClick(){   // in fullscreen there's no golden comment card → point the winner to the homepage
   if(document.fullscreenElement) _showGoldenToast();
 }
 
