@@ -313,6 +313,11 @@ body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 /* fullscreen comment button (bottom-left) + live comment count */
 #fs-comment-btn { display: none; position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
 #card-screen.card-fs-on #fs-comment-btn { display: flex; }
+/* pseudo (faux) fullscreen back button — top-left, always visible; returns to the deck review. Only shown in faux mode (native fullscreen exits by double-tap). */
+#faux-fs-back { display: none; position: fixed; top: 16px; left: 16px; z-index: 262; width: 48px; height: 48px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; font-size: 1.5rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; }
+#card-screen.faux-fs #faux-fs-back { display: flex; }
+body.dark-mode #faux-fs-back { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
+@media (max-width: 560px){ #card-screen.faux-fs #fs-comment-btn { left: 74px; } }   /* make room for the back button at top-left */
 #fs-comment-btn.visible { opacity: 1; pointer-events: auto; }   /* shown on mouse-move / touch, then fades (like the exit button) */
 @media (max-width: 560px){ #fs-comment-btn { top: 16px; left: 16px; bottom: auto; width: 48px; height: 48px; } }   /* mobile: move to the top-left so it doesn't overlap the bottom button row */
 #fs-comment-btn.active { background: #56533c; color: #f5f0e8; border-color: #56533c; }
@@ -1230,7 +1235,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
 <div id="card-screen">
   <!-- "loading the next card" overlay, shown while Mona slides to a button -->
   <div id="card-loading" style="display:none;"><div class="cl-spinner"></div></div>
-  <!-- (exit-fullscreen button removed — double-tap the card to leave fullscreen) -->
+  <!-- native fullscreen: double-tap the card to leave. Pseudo (faux) fullscreen: this back button returns to the deck review -->
+  <button id="faux-fs-back" onclick="exitCardFs()" title="Takaisin kertausnäkymään"><span style="margin-top:-3px;display:inline-block;">←</span></button>
   <!-- fullscreen bottom-left: comment button (opens the comments + writing field on the left), with a live comment count -->
   <button id="fs-comment-btn" onclick="fsBtnPress(this); toggleComment()" title="Kommentit">
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
