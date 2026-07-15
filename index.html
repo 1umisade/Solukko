@@ -1379,7 +1379,7 @@ let _frontHintText='';   // "Vastauksen laajuus … · Klikkaa korttia" — show
 
 
 // ════════════════════════════════════════════════════════════
-// ② KÄYTTÄJÄN IDENTITEETTI
+// ② KÄYTTÄJÄN IDENTITEETTI   (who the user is: their Firebase anonymous uid + a random nickname "word")
 // ════════════════════════════════════════════════════════════
 function getUserId(){
   const au = (window.firebase && firebase.auth && firebase.auth().currentUser) ? firebase.auth().currentUser.uid : null;   // real anonymous-auth uid (what the Firestore rules verify)
@@ -1391,7 +1391,7 @@ function getUserId(){
 
 
 // ════════════════════════════════════════════════════════════
-// ③ TUMMATILA & KEHITTÄJÄTILA
+// ③ TUMMATILA & KEHITTÄJÄTILA   (dark mode toggle + developer mode: password unlock, dev screen)
 // ════════════════════════════════════════════════════════════
 
 function applyDarkMode(){
@@ -1553,7 +1553,7 @@ function toggleGroupModeFromButton(){
 
 
 // ════════════════════════════════════════════════════════════
-// ④ VIEWPORT-ZOOM
+// ④ VIEWPORT-ZOOM   (pinch / double-tap zoom handling for the card)
 // ════════════════════════════════════════════════════════════
 function updatePageZoomScale(){
   const vv=window.visualViewport;
@@ -1567,7 +1567,7 @@ updatePageZoomScale();
 
 
 // ════════════════════════════════════════════════════════════
-// ⑤ ÄÄNIEFEKTIT
+// ⑤ ÄÄNIEFEKTIT   (sound effects: Mona's frog "scream" + the keycap click, via Web Audio)
 // ════════════════════════════════════════════════════════════
 let audioCtx=null;
 
@@ -1595,7 +1595,7 @@ function playLogoClickSound(){
 
 
 // ════════════════════════════════════════════════════════════
-// ⑥ KOMMENTTILAATIKON UI
+// ⑥ KOMMENTTILAATIKON UI   (the "Jätä kommentti" box: open/close, image attach, submit — see also ⑪ for the data)
 // ════════════════════════════════════════════════════════════
 const commentBoxWrap=document.querySelector('.comment-box');
 // Move the comment area inside the card screen (before the overview grid) so revealing it
@@ -1649,7 +1649,7 @@ document.addEventListener('click',e=>{                      // click away closes
 
 
 // ════════════════════════════════════════════════════════════
-// ⑦ LOGO-ANIMAATIO
+// ⑦ LOGO-ANIMAATIO   (Mona the mascot: her greeting speech bubbles + cycle, blinking/moving eyes, click reactions)
 // ════════════════════════════════════════════════════════════
 let _brandAngle = 0;
 function clickLogoHome(){
@@ -1916,7 +1916,7 @@ setInterval(()=>{
 
 
 // ════════════════════════════════════════════════════════════
-// ⑧ .APKG-LATAUS & SQLITE-PARSINTA
+// ⑧ .APKG-LATAUS & SQLITE-PARSINTA   (download SOLUKKO.apkg, unzip it, read its SQLite DB → fill the `allCards` array; cached in IndexedDB)
 // ════════════════════════════════════════════════════════════
 // Tiny IndexedDB key/value store — caches the parsed .apkg so reloads skip the 11 MB decompress + base64
 function _idbOpen(){ return new Promise((res,rej)=>{ let r; try{ r=indexedDB.open('solukko-apkg',1); }catch(e){ return rej(e); } r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('kv'); }catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
@@ -2057,7 +2057,7 @@ async function importApkgFile(file){
 
 
 // ════════════════════════════════════════════════════════════
-// ⑨ PAKKOJEN LATAAMINEN
+// ⑨ PAKKOJEN LATAAMINEN   (build the homepage grid of course "decks" from allCards; open a deck → the review view)
 // ════════════════════════════════════════════════════════════
 // A "course" is a reviewable deck. Two layouts are supported:
 //   • hierarchy (new): SOLUKKO::"N. LUKUVUOSI"::"N.M SYKSY|KEVÄT"::Course[::lecture…] — year/sem from the path
@@ -2400,7 +2400,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
 
 
 // ════════════════════════════════════════════════════════════
-// ⑩ KORTIN RENDERÖINTI
+// ⑩ KORTIN RENDERÖINTI   (the heart: show a card, reveal the answer, enter/leave fullscreen, the Tarkista/Ei/Kyllä buttons, grading)
 // ════════════════════════════════════════════════════════════
 async function fixImages(html){
   return html.replace(/(<img[^>]+src\s*=\s*["'])([^"']+)(["'])/gi,(match,pre,src,post)=>{
@@ -3046,7 +3046,7 @@ function staggerGridIntro(){   // on deck load: fade the first row of cards in o
 
 
 // ════════════════════════════════════════════════════════════
-// ⑪ KOMMENTIT
+// ⑪ KOMMENTIT   (comment data in Firestore: load/post/edit/delete, live count, dev list, + the golden weekly-winner prize)
 // ════════════════════════════════════════════════════════════
 function commentKey(c){ return `anki-card-comment-${c.cardId||c.noteId}`; }
 function _setCommentCount(n){ const el=document.getElementById('fs-comment-count'); if(!el) return; el.textContent = n>99?'99+':String(n); el.classList.toggle('has', n>0); }
@@ -3136,7 +3136,7 @@ function renderDevCommentsPanel(){
 
 
 // ════════════════════════════════════════════════════════════
-// ⑫ TIETOVISA / BUZZER
+// ⑫ TIETOVISA / BUZZER   (the live Friday quiz: dev hosts, teams buzz in via Firestore 'buzzers'/'gamestate')
 // ════════════════════════════════════════════════════════════
 const BIOKEMIA_WORDS = ['ATP','NAD','FAD','CoA','GTP','cAMP','AMP','NADH','FADH2','Aktiini','Myosiini','Tubuliini','Kollageen','Hemoglobiini','Myoglobiini','Insuliini','Glukagon','Adrenaliini','Kortisoli','Testosteroni','Estrogeeni','Ribosomi','Mitoosi','Meioosi','Mitokondrio','Kloroplasti','Sentrioli','Entsyymi','Substraatti','Inhibiittori','Kofaktori','Koentsyymi','Aminohappo','Peptidi','Proteiini','Lipidi','Fosfolipidi','Triglyseridi','Nukleotidi','Nukleosidi','Puriini','Pyrimidiini','Glykolyysi','Glukoneogeneesi','Katalaasi','Peroksidaasi','Lipaasi','Proteaasi','Kinase','Fosfataasi','Ubikitiini','Ferritiini','Transferriini','Albumiini','Fibriini','Trombiini','Seriini','Treoniini','Kysteiini','Metioniini','Proliini','Fenyylialaniini','Tryptofaani','Histidiini','Lysiini','Arginiini','Asparagiini','Glutamiini'];
 let buzzerUnsubscribe=null, gamestateUnsubscribe=null, joukkueetUnsubscribe=null, currentGameCardId=null;
@@ -3389,7 +3389,7 @@ function goldenAwardClick(){   // in fullscreen there's no golden comment card �
 
 
 // ════════════════════════════════════════════════════════════
-// ⑬ KORTTIARVIOINTI
+// ⑬ KORTTIARVIOINTI   (exam-probability ★ stars on cards + the real-time watch that detects if YOU won the golden prize)
 // ════════════════════════════════════════════════════════════
 // Exam-probability stars: read the "propability" field (★ chars or a 1–5 number); fall back to old ★ tags.
 function cardStarCount(card){
@@ -3752,7 +3752,7 @@ function gradeCard(correct){
 
 
 // ════════════════════════════════════════════════════════════
-// ⑭ YLEISKATSAUSRUUDUKKO
+// ⑭ YLEISKATSAUSRUUDUKKO   (the deck's grid of all cards: build it, highlight/jump to a card, staggered intro animation)
 // ════════════════════════════════════════════════════════════
 function getSubdeckName(card,parentDeck){
   const deck=card.deckName||'';
@@ -3908,7 +3908,7 @@ function updateOverviewVisibility(){ const grid=document.getElementById('card-ov
 
 
 // ════════════════════════════════════════════════════════════
-// KUVAAJAREKISTERI
+// KUVAAJAREKISTERI   (lecture "photographer" sign-up — students volunteer to photograph a lecture; Firestore 'kuvaajat')
 // ════════════════════════════════════════════════════════════
 function listenToKuvaajat(){
   if(kuvaajatUnsubscribe){ kuvaajatUnsubscribe(); kuvaajatUnsubscribe=null; }
@@ -3930,7 +3930,7 @@ function peruutaKuvaaja(name){ const uid=getUserId(); db.collection('kuvaajat').
 
 
 // ════════════════════════════════════════════════════════════
-// KÄYTTÄJÄLÄSNÄOLO
+// KÄYTTÄJÄLÄSNÄOLO   (PRESENCE — who's online right now; written by every device, shown on the dev screen; Firestore 'presence')
 // ════════════════════════════════════════════════════════════
 function countKnownCards(){   // total cards marked "osasin" (known) across all decks
   let n=0;
@@ -3975,7 +3975,7 @@ function renderPresenceList(users){
 
 
 // ════════════════════════════════════════════════════════════
-// ⑮ RYHMÄT & TIETOVISA-PISTEET
+// ⑮ RYHMÄT & TIETOVISA-PISTEET   (quiz teams + their money scoreboard, Firestore 'joukkueet')
 // ════════════════════════════════════════════════════════════
 function updateGroupUI(){
   const board=document.getElementById('group-scoreboard'), addBtn=document.querySelector('.group-tools');
@@ -4066,7 +4066,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
 
 
 // ════════════════════════════════════════════════════════════
-// SWIPE & TAP
+// SWIPE & TAP   (touch/click gestures on the fullscreen card: tap to reveal, horizontal drag-to-grade, keyboard shortcuts)
 // ════════════════════════════════════════════════════════════
 (function initCardTap(){
   const fc=document.getElementById('flashcard');
@@ -4176,7 +4176,7 @@ function shakeCard(){
 
 
 // ════════════════════════════════════════════════════════════
-// KOMMENTTIASETTELU & SCROLL
+// KOMMENTTIASETTELU & SCROLL   (layout math: scale the card to fit the viewport, and scroll it into the right position)
 // ════════════════════════════════════════════════════════════
 function positionCommentArea(){   // comment area sits in-flow under the buttons on every device
   const ca=document.querySelector('.comment-area');
@@ -4276,7 +4276,7 @@ function scrollToCard(smooth){
 
 
 // ════════════════════════════════════════════════════════════
-// SANALINKIT
+// SANALINKIT   (WORD-LINKS — highlighted terms inside a card; hover/tap one to pop the linked card's definition in a tooltip)
 // ════════════════════════════════════════════════════════════
 let _wordLinks=[];
 function _escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
@@ -4498,7 +4498,7 @@ db.collection('gamestate').doc('devOwner').onSnapshot(doc=>{
 
 
 // ════════════════════════════════════════════════════════════
-// ALUSTUS
+// ALUSTUS   (STARTUP — everything that runs once on page load: init() parses the deck, then the presence/golden/dark-mode setup)
 // ════════════════════════════════════════════════════════════
 applyDarkMode();
 applyDevMode();
