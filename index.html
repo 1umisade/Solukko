@@ -51,6 +51,9 @@ try{
 body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 16 1, grab !important; }   /* hotspot on the fingertip (16,0), matching the pointer's pointy end */
 body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 16 1, grabbing !important; }   /* while Mona is being dragged */
 body.no-cursor-theme, body.no-cursor-theme * { cursor: auto !important; }   /* debug: press N to turn the custom cursor theme off */
+/* middle-button autoscroll: the green anchor sits where you middle-clicked; move the mouse up/down to scroll (see the autoscroll IIFE) */
+#autoscroll-anchor { position: fixed; width: 46px; height: 46px; transform: translate(-50%,-50%); z-index: 2147483000; pointer-events: none; display: none; background: url('scroll_cursor.png') center/contain no-repeat; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); }
+body.autoscrolling, body.autoscrolling * { cursor: ns-resize !important; }
 body { font-family: 'Lora', Georgia, serif; background: #efe7d8 url('site_bg.jpg') center/cover fixed; color: #1a1612; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 1rem 2.5rem; position: relative; }
 
 /* ── 2. VIRHEVIESTI-PALKKI ───────────────────────────────── */
@@ -1969,6 +1972,32 @@ setInterval(()=>{
   logo.classList.add('eyes-closed');
   setTimeout(()=>{ img.src='mona_no_eyes.png'; logo.classList.remove('eyes-closed'); },300);
 },10000);
+
+// Middle-button autoscroll: middle-click drops the green anchor (scroll_cursor.png) where you clicked;
+// move the mouse away from it (vertically) to scroll — faster the farther you go. Any click/key/blur stops it.
+(function(){
+  let scrolling=false, anchorY=0, curY=0, raf=null, anchor=null;
+  function ensure(){ if(anchor) return anchor; anchor=document.createElement('div'); anchor.id='autoscroll-anchor'; (document.body||document.documentElement).appendChild(anchor); return anchor; }
+  function step(){
+    if(!scrolling){ raf=null; return; }
+    const dy=curY-anchorY, dead=14;                 // small dead-zone around the anchor = no scroll
+    if(Math.abs(dy)>dead){
+      const mag=Math.abs(dy)-dead;
+      window.scrollBy(0, Math.sign(dy)*Math.pow(mag/9, 1.35));   // accelerate with distance
+    }
+    raf=requestAnimationFrame(step);
+  }
+  function start(e){ scrolling=true; anchorY=curY=e.clientY; const a=ensure(); a.style.left=e.clientX+'px'; a.style.top=e.clientY+'px'; a.style.display='block'; document.body.classList.add('autoscrolling'); if(!raf) raf=requestAnimationFrame(step); }
+  function stop(){ if(!scrolling) return; scrolling=false; if(anchor) anchor.style.display='none'; document.body.classList.remove('autoscrolling'); if(raf){ cancelAnimationFrame(raf); raf=null; } }
+  document.addEventListener('mousedown', e=>{
+    if(e.button===1){ e.preventDefault(); if(scrolling) stop(); else start(e); }   // middle button toggles autoscroll
+    else if(scrolling) stop();                                                       // any other click exits
+  }, true);
+  document.addEventListener('mousemove', e=>{ if(scrolling) curY=e.clientY; });
+  document.addEventListener('keydown', ()=>{ if(scrolling) stop(); });
+  document.addEventListener('auxclick', e=>{ if(e.button===1) e.preventDefault(); });   // suppress native middle-click autoscroll/paste
+  window.addEventListener('blur', stop);
+})();
 
 
 // ════════════════════════════════════════════════════════════
