@@ -4050,7 +4050,8 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     }
     if(_fsSwipeMoved){ _fsSwipeMoved=false; return; }      // a fullscreen Mona-swipe already handled this
     if(swiped){ swiped=false; return; }                    // a grade-drag already handled this
-    frontCheckReveal();                                    // clicking the card = pressing space / the Tarkista button (reveal on the front, back-to-front on the back)
+    if(!cardAnswerShown){ showAnswer(); return; }          // front: tapping the card reveals the answer
+    if(Date.now()-pressT<=400) shakeCard();                // back: tapping the card only shakes (silent) — no flip, no sound; only the Tarkista button/space flips back to the front
   });
 
   document.addEventListener('keydown',e=>{
