@@ -144,7 +144,7 @@ body.dark-mode #devpw-input { background: #2b2622; color: #eadfce; border-color:
 body.dark-mode .devpw-ok { background: #eadfce; color: #2b211b; }
 .hero-body { display: flex; align-items: flex-start; justify-content: center; gap: 2.5rem; margin-top: 1.4rem; text-align: left; }   /* text block + shop side by side, tops aligned */
 .hero-shop { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }   /* shrink to the product, sits close to the text */
-#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; margin: 0; padding-right: 1.6rem; text-align: justify; overflow: hidden; }   /* fixed width; height grows to fit all the text (overflow:hidden just contains the floated portrait, no clipping) */
+#home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; margin: 0; padding-right: 1.6rem; text-align: justify; -webkit-hyphens: auto; hyphens: auto; overflow: hidden; }   /* fixed width; height grows to fit all the text (overflow:hidden just contains the floated portrait, no clipping). hyphens:auto + <html lang="fi"> = proper Finnish syllable breaks so justify doesn't leave big gaps */
 @media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { aspect-ratio: auto; width: 100%; padding-right: 0; } }
 #home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 #home-hero .hero-link:hover { color: #7d5227; }
