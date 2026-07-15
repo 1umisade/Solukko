@@ -2324,11 +2324,13 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
   resetComment();   // fullscreen ⛶ + comment buttons stay hidden — reviewing happens in fullscreen, opened by clicking a card
   document.body.classList.add('reviewing');
   if(animate){
+    _landed=false;                       // new open: let landingReveal fire again (staggerGridIntro fires it in sync with Mona)
     document.body.classList.remove('deck-intro-anim'); void document.body.offsetWidth; document.body.classList.add('deck-intro-anim');   // play the load-in sequence
     setTimeout(()=>document.body.classList.remove('deck-intro-anim'), 6000);
-    setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest (after the grid render settles)
-    setTimeout(landingReveal, 3900);     // once the grid has faded in: highlight the first card, then show it on the right
+    setTimeout(staggerGridIntro, 300);   // first row of cards one-by-one, then the rest; also flies Mona + reveals the right card together
+    setTimeout(landingReveal, 3900);     // fallback: reveal the first card if staggerGridIntro didn't (guarded by _landed, so it won't double-fire)
   } else {   // reload / deep-link restore: no fade — reveal the grid, first card and Mona all at once
+    _landed=true;
     document.body.classList.remove('deck-intro-anim');
     currentOverviewIndex=0; currentCard=reviewCards[0]||null; renderCardOverview();
     if(currentCard){ _previewIndex=-1; _doPreview(0); }
@@ -2756,7 +2758,16 @@ function _keycapDip(el){ if(!el) return; el.classList.remove('keycap-press'); vo
 function fsBtnPress(el){ _keycapDip(el); try{ playKeyClick(); }catch(e){} }   // EVERY fullscreen button: up/down dip + click sound
 // reveal the answer via the Tarkista button
 function frontCheckReveal(){
-  if(cardAnswerShown){ _keycapDip(document.getElementById('tarkista-btn')); renderCurrentCard(); return; }   // back side: pressing Tarkista again flips back to the front (and its Edellinen/Seuraava buttons)
+  if(cardAnswerShown){                                          // back → front: same as the front→back flip — shake + click, no fly-in slide
+    _keycapDip(document.getElementById('tarkista-btn'));
+    const fc=document.getElementById('flashcard');
+    if(fc){ fc.classList.remove('card-in-right','card-in-left','card-shake'); void fc.offsetWidth; fc.classList.add('card-shake'); setTimeout(()=>fc.classList.remove('card-shake'),500); }
+    shakeStars();
+    try{ playKeyClick(); }catch(e){}
+    _instantCard=true;                                          // renderCurrentCard shows the front at once (no fly-in)
+    renderCurrentCard();
+    return;
+  }
   _keycapDip(document.getElementById('tarkista-btn'));   // dip the button; showAnswer plays the single click as it shakes the card open
   showAnswer();
 }
@@ -2921,12 +2932,13 @@ function showDeckLanding(){   // initial deck open: grid only; the first card hi
   const cc=document.getElementById('card-col'); if(cc) cc.classList.add('welcome');   // right side empty for now
   renderCardOverview();   // build the grid/cover, nothing highlighted yet
 }
-let _topMonaFlyTO=null;
-function landingReveal(){   // grid has faded in → highlight the first card, then show it on the right
-  if(document.fullscreenElement || !reviewCards.length) return;
+let _topMonaFlyTO=null, _landed=false;
+function landingReveal(){   // highlight the first card in the grid AND show it on the right — fired together with Mona (from staggerGridIntro)
+  if(document.fullscreenElement || !reviewCards.length || _landed) return;
+  _landed=true;
   currentOverviewIndex=0; currentCard=reviewCards[0];
   renderCardOverview();   // highlight the first card in the grid
-  setTimeout(()=>{ if(!document.fullscreenElement){ _previewIndex=-1; _doPreview(0); flyInTopMona(); } }, 500);   // then reveal it on the right, then bring Mona in 4s later
+  _previewIndex=-1; _doPreview(0);   // and reveal it on the right at the same moment as Mona
 }
 function flyInTopMona(){ /* Mona now flies in from staggerGridIntro, timed with the last card of the top row */ }
 function previewCard(index){   // hovering a grid card shows it (front only) on the right — no buttons, no answer bar
@@ -2967,7 +2979,7 @@ function staggerGridIntro(){   // on deck load: fade the first row of cards in o
   grid.querySelectorAll('.overview-section > *:not(.overview-section-grid)').forEach(v=>{ v.style.animation='introFade 0.5s ease both'; v.style.animationDelay=restTime.toFixed(2)+'s'; });
   const monaDelay = 2 + Math.max(0, firstRow.length-1)*0.12;   // same base as the first-row stagger → Mona flies in with the last card of the top row
   clearTimeout(_topMonaFlyTO);
-  _topMonaFlyTO = setTimeout(()=>{ if(document.fullscreenElement) return; const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); }, monaDelay*1000);
+  _topMonaFlyTO = setTimeout(()=>{ if(document.fullscreenElement) return; const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); landingReveal(); }, monaDelay*1000);   // the right-hand card preview appears at the same moment as Mona
 }
 
 
