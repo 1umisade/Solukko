@@ -2636,6 +2636,8 @@ document.addEventListener('fullscreenchange',()=>{
   const b=document.getElementById('fs-exit-btn');
   if(on){ flashFsExitBtn(); _fsCursorActivity(); _playFsFlip(); if(!cardAnswerShown) showFrontMona(); else clearFrontMona(); const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none'; }   // enter fullscreen: show the front OR back button row
   else { const w=document.getElementById('flashcard-wrap'); if(w){ clearTimeout(_fsFlipTO); w.style.transition=''; w.style.transform=''; w.style.transformOrigin=''; } _fsFlipRect=null;
+    const _touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    if(_touch && _commenting && document.activeElement && document.activeElement.id==='card-comment'){ _fsCommentExit=true; return; }   // iOS keyboard dropped fullscreen while commenting → keep the card/state; _reenterFsAfterComment() brings us back
     { const fchk=document.getElementById('front-check'); if(fchk){ fchk.classList.remove('active','back'); } const m=document.getElementById('fc-mona'); if(m) m.classList.remove('fc-peeked'); }   // drop the fullscreen button row on exit
     if(b){ b.classList.remove('visible'); b.style.display='none'; clearTimeout(_fsHideTimer); } clearTimeout(_fsCursorTimer); cs&&cs.classList.remove('cursor-hidden');
     if(document.body.classList.contains('reviewing')) showDeckWelcome(); }   // leaving fullscreen returns to the welcome
@@ -2856,6 +2858,14 @@ function hideMonaHint(){
 
 // Comment panel — the card sits centred in the right half; clicking the bubble button slides it left and opens comments
 let _commenting=false;
+// iOS Safari force-exits native fullscreen the moment the comment box takes focus (the soft keyboard needs the screen).
+// We can't prevent that, but we can hop straight back into fullscreen on the same card once the comment is written/closed.
+let _fsCommentExit=false;
+function _reenterFsAfterComment(){   // MUST be called inside the submit/close tap so requestFullscreen still has user activation
+  if(!_fsCommentExit) return; _fsCommentExit=false;
+  const cs=document.getElementById('card-screen');
+  if(cs && cs.requestFullscreen && !document.fullscreenElement && document.body.classList.contains('reviewing')) cs.requestFullscreen().catch(()=>{});
+}
 function _syncCommentArea(){   // desktop: comments only when toggled open; mobile: always after the answer shows
   const ca=document.querySelector('.comment-area'); if(!ca) return;
   const mobile=window.matchMedia('(max-width: 900px)').matches;
@@ -2870,9 +2880,10 @@ function toggleComment(){
   if(box) box.classList.toggle('open', _commenting);   // the small button expands into the comment field ("Auta...")
   _syncCommentArea();
   fitCardScale(); scrollToCard();   // the card resizes as the comment panel takes/returns its width
+  if(!_commenting) _reenterFsAfterComment();   // closing the comment → hop back into fullscreen if the keyboard had dropped us
 }
 function resetComment(){   // each new card starts centred with comments closed
-  _commenting=false;
+  _commenting=false; _fsCommentExit=false;
   document.getElementById('card-col')?.classList.remove('commenting');
   document.getElementById('comment-btn')?.classList.remove('active');
   document.getElementById('comment-box')?.classList.remove('open');
@@ -3221,6 +3232,7 @@ function submitComment(e){
   formData.append('entry.1785235392',text||'[kuva]'); formData.append('entry.1676323203',String(currentCard?.cardId||currentCard?.noteId||'')); formData.append('entry.1452183303',currentDeck||'');
   fetch('https://docs.google.com/forms/d/1a1eLAkk_gj1tK6rlXHAI5Ar0czBCqdWEG9CqKz8zg2w/formResponse',{method:'POST',mode:'no-cors',body:formData});
   document.getElementById('card-comment').value=''; clearCommentImage(); document.querySelector('.comment-box').classList.remove('open');
+  _reenterFsAfterComment();   // iOS: hop back into fullscreen if the keyboard had dropped us
 }
 
 function editComment(docId,btn){
