@@ -50,7 +50,6 @@ try{
 * { cursor: url('cursor_normal.png') 4 2, auto !important; }
 body.hover-interactive, body.hover-interactive * { cursor: url('cursor_grab.png') 16 1, grab !important; }   /* hotspot on the fingertip (16,0), matching the pointer's pointy end */
 body.grabbing-mona, body.grabbing-mona * { cursor: url('cursor_grab.png') 16 1, grabbing !important; }   /* while Mona is being dragged */
-body.no-cursor-theme, body.no-cursor-theme * { cursor: auto !important; }   /* debug: press N to turn the custom cursor theme off */
 /* middle-button autoscroll: the green anchor sits where you middle-clicked; move the mouse up/down to scroll (see the autoscroll IIFE) */
 #autoscroll-anchor { position: fixed; width: 46px; height: 46px; transform: translate(-50%,-50%); z-index: 2147483000; pointer-events: none; display: none; background: url('scroll_cursor.png') center/contain no-repeat; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35)); }
 body.autoscrolling, body.autoscrolling * { cursor: ns-resize !important; }
@@ -69,7 +68,7 @@ body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; hei
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
 #home-mona { align-self: flex-start; display: flex; align-items: flex-start; gap: 18px; margin: 4px 0 10px; position: relative; }   /* Mona anchored to the TOP; on desktop the greeting bubble is absolute (below) so its size never shifts the decks */
 #home-mona .site-brand { width: 120px; margin: 0; }
-@media (min-width: 901px) { #home-mona .home-greet { position: absolute; left: 158px; top: 0; margin: 0; } }   /* out of flow: cycling greetings of different heights no longer moves the deck grid */
+@media (min-width: 901px) { #home-mona { height: 120px; } }   /* fixed to Mona's height: a taller/shorter greeting bubble overflows instead of shifting the deck grid */
 .home-brand-block { text-align: right; flex: 0 0 auto; }
 /* wide screens: site name pinned left, Mona + bubble centered */
 @media (min-width: 1100px){
@@ -155,7 +154,7 @@ body.dark-mode .devpw-ok { background: #eadfce; color: #2b211b; }
 .hero-body { display: flex; align-items: flex-start; justify-content: center; gap: 2.5rem; margin-top: 1.4rem; text-align: left; }   /* text block + shop side by side, tops aligned */
 .hero-shop { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }   /* shrink to the product, sits close to the text */
 #home-hero .hero-manifest { font-size: 1.05rem; line-height: 1.75; color: #56533c; flex: 0 0 620px; width: 620px; margin: 0; padding-right: 1.6rem; text-align: justify; -webkit-hyphens: auto; hyphens: auto; overflow: hidden; }   /* fixed width; height grows to fit all the text (overflow:hidden just contains the floated portrait, no clipping). hyphens:auto + <html lang="fi"> = proper Finnish syllable breaks so justify doesn't leave big gaps */
-@media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { aspect-ratio: auto; width: 100%; padding-right: 0; } }
+@media (max-width: 1080px){ .hero-body { flex-direction: column; } .hero-shop { flex: none; align-self: stretch; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); } #home-hero .hero-manifest { flex: none; aspect-ratio: auto; width: 100%; height: auto; padding-right: 0; } }   /* flex:none + height:auto so the manifest grows to fit all text (was clipped to a fixed 620px) */
 #home-hero .hero-link { color: #a06a35; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; -webkit-hyphens: none; hyphens: none; white-space: nowrap; }   /* never hyphenate/split the email or shop link across lines */
 #home-hero .hero-link:hover { color: #7d5227; }
 body.dark-mode #home-hero .hero-link { color: #d9c496; }
@@ -215,6 +214,11 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-btn.deck-empty:hover { transform: none; }
 .deck-btn.deck-empty:hover .pack-top { box-shadow: 0 10px 26px rgba(0,0,0,0.32); }   /* no hover lift */
 .deck-construction { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
+/* Homepage decks are BRIGHT: light paper cover, dark-brown title with a slight bright shadow (the custom "+" and dev decks keep their own look) */
+.deck-btn:not(.custom-deck-btn):not(.dev-deck-btn) .pack-top { background: #f2e8d5 url('new_bg.png?v=2') center/cover; }
+.deck-btn:not(.custom-deck-btn):not(.dev-deck-btn) .deck-construction, .deck-btn:not(.custom-deck-btn):not(.dev-deck-btn) .deck-overlay { display: none; }
+.deck-btn:not(.custom-deck-btn):not(.dev-deck-btn) .deck-title { color: #3a2410; text-shadow: 0 1px 2px rgba(255,255,255,0.9); }
+.deck-btn:not(.custom-deck-btn):not(.dev-deck-btn) .deck-code { color: #4a3418; text-shadow: 0 1px 2px rgba(255,255,255,0.85); }
 /* "review from your own device" — a deck-looking button that opens a file picker */
 .custom-import-wrap { display: none; }   /* the custom deck is cloned into the grid as the last deck (see buildDeckGrid) */
 .dev-deck-wrap { display: none; }        /* template for the dev-only "All Decks" deck (cloned into the grid) */
@@ -488,11 +492,11 @@ body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
   body.reviewing #mona-top-peek { display: flex !important; justify-content: center; width: 100%; margin: 0.2rem 0 0.7rem; position: relative; }
   #mona-top-peek .mona-top-spacer { display: none; }
   #mona-top-peek .mona-top-inner { flex: 0 0 92px; width: 92px; height: 92px; }
-  #mona-top-peek .mona-top-bubble { position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); max-width: min(82vw, 34ch); z-index: 5; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+  #mona-top-peek .mona-top-bubble { position: absolute; left: 50%; top: calc(100% + 12px); bottom: auto; transform: translateX(-50%); width: min(86vw, 320px); max-width: none; z-index: 5; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }   /* BELOW Mona (above went off-screen on mobile); fixed readable width */
   #mona-top-peek.flew-in .mona-top-bubble { animation: none; }        /* don't auto-fade the bubble in on mobile */
   #mona-top-peek.bubble-open .mona-top-bubble { opacity: 1; pointer-events: auto; }
-  #mona-top-peek .mona-top-bubble::before { left: 50%; top: 100%; bottom: auto; transform: translateX(-50%); border: 10px solid transparent; border-top-color: #fffef9; border-bottom: 0; }   /* tail points down at Mona */
-  body.dark-mode #mona-top-peek .mona-top-bubble::before { border-top-color: #3a312b; }
+  #mona-top-peek .mona-top-bubble::before { left: 50%; top: auto; bottom: 100%; transform: translateX(-50%); border: 10px solid transparent; border-bottom-color: #fffef9; border-top: 0; }   /* tail points UP at Mona */
+  body.dark-mode #mona-top-peek .mona-top-bubble::before { border-bottom-color: #3a312b; }
 }
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
@@ -845,6 +849,7 @@ body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
 .grid-tool-btn:hover { background: #f5f0e8; }
 .grid-tool-btn:active { transform: scale(0.96); }
 body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-color: #6d5f52; }
+body.all-decks-deck #grid-tools > *:not(#shuffle-toggle-btn) { display: none !important; }   /* dev "Kaikki kortit" deck: only the shuffle button */
 .overview-card { transition: transform 0.16s ease, box-shadow 0.16s ease; }   /* no will-change: it would put all ~130 cards on their own GPU layers and make the whole page sluggish */
 .overview-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.15); will-change: transform; }   /* promote only the card being hovered */
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
@@ -2432,6 +2437,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document
 async function startDeck(deckName, animate=true){   // animate=false (reload/deep-link restore) shows the landing at once, no fade-in
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
+  document.body.classList.toggle('all-decks-deck', deckName==='DEV::Kaikki kortit');   // the dev "Kaikki kortit" deck shows only the shuffle button in the tools
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
@@ -3014,12 +3020,7 @@ function hideTopHint(){}
 
 // Hovering a corner button (back / dark mode / fullscreen / comment) speaks the hint through Mona's bubble
 let _monaHintPrev=null;
-function showMonaHint(text){
-  if(document.body.classList.contains('is-mobile')) return;   // no hover hints on mobile
-  const b=document.getElementById('pb-bubble'), k=_fsKnob(); if(!b) return;
-  if(_monaHintPrev===null) _monaHintPrev={ text:b.textContent, show:b.classList.contains('show'), op:k?k.style.opacity:'' };
-  b.textContent=text; b.classList.add('show'); if(k) k.style.opacity='1';   // make sure Mona is visible under her bubble
-}
+function showMonaHint(text){ return; }   // obsolete: corner-button hover hints removed
 function hideMonaHint(){
   const b=document.getElementById('pb-bubble'), k=_fsKnob(); if(!b||_monaHintPrev===null) return;
   b.textContent=_monaHintPrev.text; b.classList.toggle('show', _monaHintPrev.show); if(k) k.style.opacity=_monaHintPrev.op;
@@ -4345,7 +4346,6 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
 
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
-    if(e.key==='n'||e.key==='N'){ document.body.classList.toggle('no-cursor-theme'); return; }   // debug: N toggles the custom cursor theme
     if((e.key==='f'||e.key==='F')&&currentCard){ e.preventDefault(); toggleCardFullscreen(); return; }   // F toggles fullscreen anytime
     if((e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp') && !inFullscreen() && document.body.classList.contains('reviewing') && currentCard){   // grid view: browse cards with the arrows (left/up = prev, right/down = next)
       e.preventDefault();
