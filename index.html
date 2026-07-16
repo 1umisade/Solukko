@@ -488,15 +488,14 @@ body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
   #card-col { order: 2; position: static; height: auto; flex: none; width: 100%; }
   body.reviewing #card-col { display: none !important; }            /* no card preview / Mona on the right */
   #card-screen.card-fs-on #card-col { display: flex !important; }   /* except in fullscreen, where the card IS the view */
-  /* mobile: show Mona centered between the back button and the deck name; her bubble only appears (above her) on tap */
-  body.reviewing #mona-top-peek { display: flex !important; justify-content: center; width: 100%; margin: 0.2rem 0 0.7rem; position: relative; }
+  /* mobile: bubble on top, Mona centred directly under it (a vertical stack, all in flow so nothing goes off-screen) */
+  body.reviewing #mona-top-peek { display: flex !important; flex-direction: column-reverse; align-items: center; justify-content: center; width: 100%; margin: 0.2rem 0 0.9rem; position: relative; gap: 10px; }
   #mona-top-peek .mona-top-spacer { display: none; }
   #mona-top-peek .mona-top-inner { flex: 0 0 92px; width: 92px; height: 92px; }
-  #mona-top-peek .mona-top-bubble { position: absolute; left: 50%; top: calc(100% + 12px); bottom: auto; transform: translateX(-50%); width: min(86vw, 320px); max-width: none; z-index: 5; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }   /* BELOW Mona (above went off-screen on mobile); fixed readable width */
-  #mona-top-peek.flew-in .mona-top-bubble { animation: none; }        /* don't auto-fade the bubble in on mobile */
-  #mona-top-peek.bubble-open .mona-top-bubble { opacity: 1; pointer-events: auto; }
-  #mona-top-peek .mona-top-bubble::before { left: 50%; top: auto; bottom: 100%; transform: translateX(-50%); border: 10px solid transparent; border-bottom-color: #fffef9; border-top: 0; }   /* tail points UP at Mona */
-  body.dark-mode #mona-top-peek .mona-top-bubble::before { border-bottom-color: #3a312b; }
+  #mona-top-peek .mona-top-bubble { position: static; left: auto; top: auto; bottom: auto; transform: none; width: min(86vw, 320px); max-width: none; margin: 0; }
+  #mona-top-peek.flew-in .mona-top-bubble { animation: none; opacity: 1; pointer-events: auto; }   /* appears with Mona (no tap needed) */
+  #mona-top-peek .mona-top-bubble::before { left: 50%; top: 100%; bottom: auto; transform: translateX(-50%); border: 10px solid transparent; border-top-color: #fffef9; border-bottom: 0; border-right: 0; }   /* tail points DOWN at Mona */
+  body.dark-mode #mona-top-peek .mona-top-bubble::before { border-top-color: #3a312b; }
 }
 .top-bar { width: 100%; display: flex; justify-content: flex-end; align-items: center; }
 .back-btn { display: none; }
@@ -1835,7 +1834,7 @@ function heroMonaClick(){
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
-  homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Oletko uusi täällä? Nimeni on Mona ja toimin oppaana sivuston käyttäjille. Klikkaa minua niin kerron lisää.</span>',
+  homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiit kysymyskortit biokemian opiskeluun. Jos olet uusi täällä, nimeni on Mona ja klikkaamalla minua opastan sinua sivuston käytössä.</span>',
   homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
   homepage3:'Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko™-tietovisoista!',
 
@@ -3110,6 +3109,17 @@ function _doPreview(index){
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCurrentCard();
 }
+// Unite the review-page scroll: wheeling over the RIGHT side (card preview) scrolls the LEFT grid too — one scroll for the whole page.
+(function(){
+  const cc=document.getElementById('card-col'); if(!cc) return;
+  cc.addEventListener('wheel', e=>{
+    if(inFullscreen() || !document.body.classList.contains('reviewing')) return;   // study page / homepage: leave scroll as-is
+    if(window.matchMedia && window.matchMedia('(max-width: 900px)').matches) return;   // mobile is already a single column
+    if(e.target.closest && e.target.closest('#comment-col')) return;                    // let the comment panel scroll itself
+    const g=document.getElementById('grid-col'); if(!g) return;
+    g.scrollTop += e.deltaY; e.preventDefault();
+  }, { passive:false });
+})();
 // Mona lives in the cover above the title (scrolls with the page); flies in on load via CSS. Clickable like the homepage logo.
 let _topPeekEyeTO=null;
 // THE single Mona click reaction. All four always fire together and never separately: scream + shake + eyes shut + dots hidden.
@@ -3964,9 +3974,12 @@ function _injectUserCards(cur){   // make reviewCards end with exactly the curre
   if(_reviewCardsOriginal){ for(let i=_reviewCardsOriginal.length-1;i>=0;i--) if(_reviewCardsOriginal[i]._userCard) _reviewCardsOriginal.splice(i,1); _userCards.forEach(c=>_reviewCardsOriginal.push(c)); }
   if(shuffleMode) deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.slice()}];   // shuffled: one pile (sections are merged)
   else deckGroups=buildDeckGroups(reviewCards, currentDeck);                               // regroup by subdeck so each user card sits in its own lecture section
+  const _mp=document.getElementById('mona-top-peek'); const _wasFlew=!!(_mp&&_mp.classList.contains('flew-in'));   // the cover rebuild would drop Mona's flew-in
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
-  _syncReviewOrder(cur||currentCard);
+  if(_landed) _syncReviewOrder(cur||currentCard);   // already landed → keep the shown card in sync (and re-preview)
+  else { queue=reviewCards.slice(); if(typeof buildWordLinks==='function') buildWordLinks(); }   // still landing → don't reveal a card yet (staggerGridIntro reveals it with Mona)
   renderCardOverview();
+  if(_wasFlew){ const p=document.getElementById('mona-top-peek'); if(p) p.classList.add('flew-in'); }   // keep Mona visible across the cover rebuild
 }
 // the add/edit card: a plain editable flashcard + a flip icon; no title/save/cancel — it auto-saves when you click away
 function _ucShowFront(){ const fc=document.getElementById('ucard-flashcard'), ans=document.getElementById('ucard-answer'), btn=document.getElementById('ucard-flip-btn');
@@ -4377,6 +4390,7 @@ function shakeCard(){
   flashWordLinkBubbles();   // shaking re-highlights the linked words for 2s
   if(inFullscreen()){
     _keycapDip(document.getElementById('tarkista-btn'));       // dip the centre button — no click sound on a shake
+    if(document.body.classList.contains('is-mobile') && cardAnswerShown) document.getElementById('fs-comment-btn')?.classList.add('visible');   // mobile: shaking the ANSWER side (tap after reveal) surfaces the comment button
     return;
   }
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
