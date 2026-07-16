@@ -83,7 +83,7 @@ body.dark-mode .home-slogan-txt { color: #d9c496; }
 #decks-loading { align-self: center; margin: 40px 0 20px; font-family: 'Lora', serif; font-size: 1.25rem; color: #6b4423; }
 body.dark-mode #decks-loading { color: #c9b48f; }
 .deck-list.decks-loading .year-section { opacity: 0; }
-@keyframes deckFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes deckFadeIn { from { opacity: 0; translate: 0 12px; } to { opacity: 1; translate: 0 0; } }   /* slide-in uses the individual `translate` property so fill-mode:both doesn't pin `transform` and block the :hover scale(1.04) */
 .deck-btn.deck-in { animation: deckFadeIn 0.5s ease both; }
 /* homepage hero: title + slogan + manifest, at the very top (scrolled out of view on load) */
 #home-hero { order: 99; align-self: center; width: min(1200px, 92vw); max-width: none; margin: 0; padding: 48px 1rem 24px; text-align: left; font-family: 'Lora', serif; }   /* order:99 -> at the bottom of the page */
