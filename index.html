@@ -342,8 +342,6 @@ body.dark-mode #fs-comment-btn.active { background: #eadfce; color: #2b211b; bor
 @keyframes cardFocusIn { from { filter: blur(6px); } to { filter: blur(0); } }
 #flashcard.card-focus-in { animation: cardFocusIn 0.45s ease forwards; }   /* the freshly loaded card comes into focus */
 /* hover hint that follows the cursor over the right-hand card (non-fullscreen) */
-#card-hover-tip { position: fixed; z-index: 100; display: none; transform: translate(-50%, -100%); background: #fffef9; color: #56533c; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.4rem 0.75rem; font-family: 'Lora', serif; font-size: 0.85rem; line-height: 1; box-shadow: 0 4px 14px rgba(0,0,0,0.16); pointer-events: none; white-space: nowrap; }
-body.dark-mode #card-hover-tip { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #card-loading .cl-spinner { border-color: rgba(217,196,150,0.25); border-top-color: #d9c496; }
 body.dark-mode #card-loading .cl-text { color: #eadfce; }
 /* Mona lives on the progress bar as a draggable knob, with a hint bubble beside her */
@@ -2831,31 +2829,11 @@ function _fsCursorActivity(){   // show the cursor, then fade it after 2s of sti
   if(inFullscreen()) _fsCursorTimer=setTimeout(()=>{ if(inFullscreen()) cs.classList.add('cursor-hidden'); }, 2000);
 }
 document.addEventListener('mousemove', ()=>{ _fsCursorActivity(); flashFsExitBtn(); });   // moving the mouse (desktop) reveals the comment button; entering fullscreen does not
-(function(){ const w=document.getElementById('flashcard-wrap');
-  const tip=document.createElement('div'); tip.id='card-hover-tip'; tip.textContent='Avaa opiskelunäkymässä'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
+(function(){ const w=document.getElementById('flashcard-wrap');   // cursor-following hover tooltip removed; keep only the card mouseenter/leave (drives the fullscreen cursor-fade, not a bubble)
   if(w){
     w.addEventListener('mouseenter',()=>{ _overCard=true; _fsCursorActivity(); });
     w.addEventListener('mouseleave',()=>{ _overCard=false; clearTimeout(_fsCursorTimer); const cs=document.getElementById('card-screen'); if(cs&&!inFullscreen()) cs.classList.remove('cursor-hidden'); });
   }
-  // cursor-following hint: star significance over the stars (both modes); "Avaa opiskelunäkymässä" over the right-hand/grid card (non-fullscreen)
-  document.addEventListener('mousemove',e=>{
-    if(document.body.classList.contains('is-mobile')){ if(tip.style.display!=='none') tip.style.display='none'; return; }   // no hover tips on mobile (stars use tap instead)
-    const stars = e.target.closest ? e.target.closest('#card-stars') : null;
-    if(stars && stars.dataset.starMeaning){   // hovering the stars -> show their significance on the cursor
-      tip.textContent=stars.dataset.starMeaning; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; tip.style.display='block'; return;
-    }
-    if(inFullscreen()){ if(tip.style.display!=='none') tip.style.display='none'; return; }
-    const card = e.target.closest ? e.target.closest('.overview-card, #flashcard-wrap') : null;
-    if(card){
-      let txt=null;
-      if(card.id==='flashcard-wrap'){ txt='Avaa opiskelunäkymässä'; }   // the right-hand card always shows the open hint (never the grade status)
-      else if(card.classList.contains('known')) txt='Kortti osattu tänään';   // grid card grade status
-      else if(card.classList.contains('unknown')) txt='Korttia ei osattu tänään';
-      else if(card.classList.contains('active')) txt='Avaa opiskelunäkymässä';
-      if(txt){ tip.textContent=txt; tip.style.left=e.clientX+'px'; tip.style.top=(e.clientY-14)+'px'; if(tip.style.display!=='block') tip.style.display='block'; return; }
-    }
-    if(tip.style.display!=='none') tip.style.display='none';
-  });
 })();
 function _playFsFlip(){   // FLIP: card is now full-screen; animate it from where it sat on the right up to full — a smooth expand
   const wrap=document.getElementById('flashcard-wrap'); if(!wrap||!_fsFlipRect){ _fsFlipRect=null; return; }
