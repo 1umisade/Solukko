@@ -196,7 +196,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 /* course = a pack of cards: a top card (video) with several cards behind that flare out a little on hover */
 .pack-top { position: absolute; inset: 0; z-index: 5; border-radius: 16px; overflow: hidden; border: 3px solid #ebe3cf; background: #111; box-shadow: 0 10px 26px rgba(0,0,0,0.32); }
 .deck-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; pointer-events: none; }
-.deck-overlay { position: absolute; inset: 0; z-index: 1; background: rgba(0,0,0,0.5); pointer-events: none; }   /* 50% black layer over the video */
+.deck-overlay { position: absolute; inset: 0; z-index: 1; background: none; pointer-events: none; }   /* no darkening layer — the deck image shows at full brightness (title stays legible via its text-shadow) */
 .deck-label { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 14px; }
 .deck-code { position: absolute; left: 12px; bottom: 10px; z-index: 2; font-size: 14px; font-weight: 600; opacity: 0.92; color: #fff; text-shadow: 0 1px 5px rgba(0,0,0,0.85); pointer-events: none; }
 .pack-back { position: absolute; inset: 0; border-radius: 16px; background: #fffef9; border: 3px solid #ebe3cf; box-shadow: 0 6px 16px rgba(0,0,0,0.22); overflow: hidden; transition: transform 0.34s cubic-bezier(0.34, 1.4, 0.64, 1); }
