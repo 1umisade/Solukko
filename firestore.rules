@@ -74,6 +74,23 @@ service cloud.firestore {
       allow update, delete: if signedIn();
     }
 
+    // ── User-added cards (students' own flashcards added to a deck) ──
+    // Visible only to the creator's device (owner) and the dev (admin). A normal user
+    // must query with where('userId','==', their uid); the dev may read a whole deck.
+    match /userCards/{id} {
+      allow read:   if isOwner(resource.data.userId) || isAdmin();
+      allow create: if signedIn()
+                    && request.resource.data.userId == request.auth.uid   // can only add as yourself
+                    && str(request.resource.data.deck, 300)
+                    && str(request.resource.data.front, 4000)
+                    && str(request.resource.data.back, 4000);
+      allow update: if (isOwner(resource.data.userId) || isAdmin())
+                    && request.resource.data.userId == resource.data.userId   // owner can't be reassigned
+                    && str(request.resource.data.front, 4000)
+                    && str(request.resource.data.back, 4000);
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
     // Everything else is denied.
     match /{document=**} { allow read, write: if false; }
   }
