@@ -824,37 +824,27 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 .add-card-label { font-family: 'Lora', serif; font-size: 0.72rem; }
 body.dark-mode .add-card-tile { border-color: #a97f4e; color: #d9c496; }
 .overview-card.user-card { position: relative; }
-.ucard-tools { position: absolute; top: 3px; right: 3px; display: none; gap: 2px; }
-.overview-card.user-card:hover .ucard-tools { display: flex; }
-.ucard-tools button { background: rgba(255,255,255,0.92); border: 1px solid #d4cec4; border-radius: 6px; width: 20px; height: 20px; line-height: 1; padding: 0; font-size: 0.72rem; cursor: pointer; }
+.ucard-tools { position: absolute; top: 3px; right: 3px; display: flex; gap: 2px; z-index: 2; }   /* always visible so it works on touch too */
+.ucard-tools button { background: rgba(255,255,255,0.92); border: 1px solid #d4cec4; border-radius: 6px; width: 22px; height: 22px; line-height: 1; padding: 0; font-size: 0.78rem; cursor: pointer; }
 .ucard-tools button:hover { background: #fff; border-color: #b5824a; }
-/* the add/edit form: right column on desktop, full overlay on mobile */
-#usercard-form { display: none; flex-direction: column; gap: 0.5rem; box-sizing: border-box; }
+body.dark-mode .ucard-tools button { background: rgba(42,38,32,0.92); border-color: #5a5148; color: #ece5d8; }
+/* the add/edit card: just a plain editable flashcard + a flip icon (no title/save/cancel). Right column on desktop, overlay on mobile. */
+#usercard-form { display: none; box-sizing: border-box; }
 body.adding-usercard #usercard-form { display: flex; }
-#ucard-form-title { font-family: 'Lora', serif; font-size: 1.3rem; font-weight: 600; color: #56533c; margin-bottom: 0.3rem; }
-body.dark-mode #ucard-form-title { color: #ece5d8; }
-#ucard-card-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
-#ucard-flashcard { cursor: default; }   /* the editable card isn't clickable like a study card */
+#ucard-card-wrap { position: relative; width: 100%; max-width: 440px; margin: 0 auto; }
+#ucard-flashcard { cursor: text; }   /* click anywhere on the card to write */
 .ucard-editable { min-height: 1.4em; outline: none; cursor: text; white-space: pre-wrap; }   /* pre-wrap keeps the line breaks the user types */
 .ucard-editable:empty::before { content: attr(data-ph); color: #a89a86; font-weight: 400; letter-spacing: normal; }   /* placeholder while empty */
 body.dark-mode .ucard-editable:empty::before { color: #8a7d6a; }
-.ucard-flip { background: #efe7d7; color: #6b4423; }
-.ucard-flip:hover { background: #e6dcc6; }
-body.dark-mode .ucard-flip { background: #3a332b; color: #d9c496; border-color: #5a5148; }
-.ucard-actions-gap { flex: 1; }
-.ucard-form-actions { display: flex; align-items: center; gap: 0.6rem; margin-top: 1rem; }
-.ucard-btn { font-family: 'Lora', serif; font-size: 0.9rem; padding: 0.5rem 1.1rem; border-radius: 999px; border: 1px solid #d4cec4; cursor: pointer; }
-.ucard-cancel { background: none; color: #6b5f57; }
-.ucard-save { background: #6b4423; color: #fff; border-color: #6b4423; }
-.ucard-save:hover { background: #7d5230; }
-.ucard-save:disabled { opacity: 0.6; cursor: default; }
-@media (min-width: 901px) {   /* desktop: the form sits in the right half, replacing the card preview while adding */
+#ucard-flip-btn { position: absolute; right: 12px; bottom: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,255,255,0.92); color: #6b4423; font-size: 1.35rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; z-index: 3; }
+#ucard-flip-btn:hover { background: #fff; border-color: #b5824a; }
+body.dark-mode #ucard-flip-btn { background: rgba(42,38,32,0.94); color: #d9c496; border-color: #5a5148; }
+@media (min-width: 901px) {   /* desktop: the card sits in the right half, replacing the preview while adding */
   body.adding-usercard.reviewing #card-stack { display: none; }
-  body.adding-usercard #usercard-form { position: fixed; right: 0; top: 0; width: 50vw; height: 100vh; justify-content: center; padding: 2rem clamp(1.2rem, 4vw, 3rem); z-index: 90; }
+  body.adding-usercard #usercard-form { position: fixed; right: 0; top: 0; width: 50vw; height: 100vh; align-items: center; justify-content: center; padding: 2rem clamp(1.2rem, 4vw, 3rem); z-index: 90; }
 }
 @media (max-width: 900px) {   /* mobile: full-screen overlay (there is no right column) */
-  body.adding-usercard #usercard-form { position: fixed; inset: 0; justify-content: center; padding: 1.4rem; z-index: 200; background: rgba(20,18,14,0.55); }
-  body.adding-usercard #usercard-form > * { max-width: 460px; width: 100%; margin-left: auto; margin-right: auto; }
+  body.adding-usercard #usercard-form { position: fixed; inset: 0; align-items: center; justify-content: center; padding: 1.4rem; z-index: 200; background: rgba(20,18,14,0.55); }
 }
 .overview-section { width: 100%; }
 .grid-shuffle-btn { position: absolute; right: 0; bottom: 0.7rem; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
@@ -1286,21 +1276,15 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <button id="fs-award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
   <div id="review-cols">
   <div id="grid-scrollbar" title="Vieritä ruudukkoa"><div id="grid-scrollbar-thumb"></div></div>   <!-- the centre divider doubles as the left grid's draggable scrollbar (desktop review) -->
-  <div id="usercard-form">   <!-- add/edit an own card: an editable copy of a real flashcard (front + back) with a flip button -->
-    <div id="ucard-form-title">Uusi kortti</div>
+  <div id="usercard-form">   <!-- add/edit an own card: just a plain editable flashcard + a flip icon. Auto-saves when you click away; delete from the grid. -->
     <div id="ucard-card-wrap">
-      <div class="flashcard front-basic" id="ucard-flashcard">
+      <div class="flashcard front-basic" id="ucard-flashcard" onmousedown="ucardCardMousedown(event)">
         <div class="card-content ucard-editable" id="ucard-front" contenteditable="true" data-ph="Kirjoita etupuoli…" spellcheck="false"></div>
         <div class="answer-section" id="ucard-answer">
           <div class="card-content ucard-editable" id="ucard-back" contenteditable="true" data-ph="Kirjoita takapuoli…" spellcheck="false"></div>
         </div>
       </div>
-    </div>
-    <div class="ucard-form-actions">
-      <button type="button" class="ucard-btn ucard-flip" id="ucard-flip-btn" onclick="flipUserCard()">Näytä takapuoli</button>
-      <span class="ucard-actions-gap"></span>
-      <button type="button" class="ucard-btn ucard-cancel" onclick="closeUserCardForm()">Peruuta</button>
-      <button type="button" class="ucard-btn ucard-save" id="ucard-save-btn" onclick="saveUserCard()">Tallenna</button>
+      <button type="button" id="ucard-flip-btn" onclick="flipUserCard()" title="Käännä kortti">↻</button>
     </div>
   </div>
   <div id="grid-col">
@@ -4076,48 +4060,55 @@ function _injectUserCards(cur){   // make reviewCards end with exactly the curre
   _syncReviewOrder(cur||currentCard);
   renderCardOverview();
 }
-// the add/edit form: an editable copy of a real flashcard (front + back) with a flip button
-function _ucSetTitle(t){ const el=document.getElementById('ucard-form-title'); if(el) el.textContent=t; }
+// the add/edit card: a plain editable flashcard + a flip icon; no title/save/cancel — it auto-saves when you click away
 function _ucShowFront(){ const fc=document.getElementById('ucard-flashcard'), ans=document.getElementById('ucard-answer'), btn=document.getElementById('ucard-flip-btn');
-  if(fc) fc.classList.remove('answer-shown'); if(ans) ans.style.display='none'; if(btn) btn.textContent='Näytä takapuoli'; }
+  if(fc) fc.classList.remove('answer-shown'); if(ans) ans.style.display='none'; if(btn) btn.title='Käännä kortti (etupuoli)'; }
 function flipUserCard(){   // flip the editable card front<->back (reveals the answer below, exactly like studying a real card)
   const fc=document.getElementById('ucard-flashcard'), ans=document.getElementById('ucard-answer'), btn=document.getElementById('ucard-flip-btn'); if(!fc||!ans) return;
   const showBack=(ans.style.display==='none' || !ans.style.display);
-  if(showBack){ ans.style.display='block'; fc.classList.add('answer-shown'); if(btn) btn.textContent='Näytä etupuoli'; const b=document.getElementById('ucard-back'); if(b) b.focus(); }
-  else { ans.style.display='none'; fc.classList.remove('answer-shown'); if(btn) btn.textContent='Näytä takapuoli'; const f=document.getElementById('ucard-front'); if(f) f.focus(); }
+  if(showBack){ ans.style.display='block'; fc.classList.add('answer-shown'); if(btn) btn.title='Käännä kortti (takapuoli)'; const b=document.getElementById('ucard-back'); if(b) b.focus(); }
+  else { ans.style.display='none'; fc.classList.remove('answer-shown'); if(btn) btn.title='Käännä kortti (etupuoli)'; const f=document.getElementById('ucard-front'); if(f) f.focus(); }
+}
+function ucardCardMousedown(e){   // clicking the card (its padding, not directly on the text) drops the cursor into the visible side
+  if(e.target.classList.contains('ucard-editable') || (e.target.id||'')==='ucard-flip-btn') return;
+  const backShown=document.getElementById('ucard-flashcard').classList.contains('answer-shown');
+  const el=document.getElementById(backShown?'ucard-back':'ucard-front');
+  if(el){ e.preventDefault(); el.focus(); try{ const r=document.createRange(); r.selectNodeContents(el); r.collapse(false); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }catch(_){} }
 }
 function openAddCardForm(groupIndex){   // add a card to the lecture section whose + tile was clicked
-  _editingDocId=null;
+  commitUserCardForm();   // save any card already open
   const grp=(typeof groupIndex==='number' && deckGroups[groupIndex]) ? deckGroups[groupIndex] : null;
   const rep=grp ? (grp.cards.find(c=>!c._userCard) || grp.cards[0]) : null;   // a real card in that section carries the section's deckName
-  _addTargetSubdeck=rep ? rep.deckName : currentDeck;
-  _fillUserCardForm('',''); _ucSetTitle('Uusi kortti'); _ucShowFront(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60);
+  _editingDocId=null; _addTargetSubdeck=rep ? rep.deckName : currentDeck;
+  _fillUserCardForm('',''); _ucShowFront(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60);
 }
-function openEditCardForm(docId){ const c=_userCards.find(x=>x._docId===docId); if(!c) return; _editingDocId=docId; _fillUserCardForm(c._front||'', c._back||''); _ucSetTitle('Muokkaa korttia'); _ucShowFront(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60); }
+function openEditCardForm(docId){ const c=_userCards.find(x=>x._docId===docId); if(!c) return; commitUserCardForm(); _editingDocId=docId; _addTargetSubdeck=c._subdeck||currentDeck; _fillUserCardForm(c._front||'', c._back||''); _ucShowFront(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60); }
 function _fillUserCardForm(front,back){ const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back'); if(f) f.textContent=front||''; if(b) b.textContent=back||''; }
 function closeUserCardForm(){ document.body.classList.remove('adding-usercard'); _editingDocId=null; }
-async function saveUserCard(){
-  const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back');
-  const front=(f?f.innerText:'').replace(/ /g,' ').trim(), back=(b?b.innerText:'').replace(/ /g,' ').trim();
-  if(!front && !back){ closeUserCardForm(); return; }
-  const btn=document.getElementById('ucard-save-btn'); if(btn){ btn.disabled=true; btn.textContent='Tallennetaan…'; }
+function _ucCollect(){ const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back'); const norm=s=>String(s||'').replace(/ /g,' ').replace(/[ \t]+(\n|$)/g,'$1').trim(); return { front:norm(f&&f.innerText), back:norm(b&&b.innerText) }; }
+function commitUserCardForm(){   // auto-save on dismiss: persist if there's text, then close (there is no Save button)
+  if(!document.body.classList.contains('adding-usercard')) return;
+  const {front,back}=_ucCollect(); const docId=_editingDocId, subdeck=_addTargetSubdeck||currentDeck;
+  closeUserCardForm();
+  if(front||back) _ucPersist(docId, subdeck, front, back);   // new + empty -> discard
+}
+async function _ucPersist(docId, subdeck, front, back){
   const uid=getUserId(), deck=currentDeck;
   try{
-    const subdeck=_addTargetSubdeck||deck;
-    if(_editingDocId){
-      await db.collection('userCards').doc(_editingDocId).update({ front, back });
-      const c=_userCards.find(x=>x._docId===_editingDocId);
+    if(docId){
+      await db.collection('userCards').doc(docId).update({ front, back });
+      const c=_userCards.find(x=>x._docId===docId);
       if(c){ c._front=front; c._back=back; const fh=_ucHtml(front), bh=_ucHtml(back); c.question=fh; c.answer=bh; c.fields.Front.value=fh; c.fields.Back.value=bh; }
     } else {
       const ref=await db.collection('userCards').add({ userId:uid, deck, subdeck, front, back, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
       _userCards.push(_userCardObj(ref.id, { userId:uid, deck, subdeck, front, back }));
     }
     _injectUserCards(currentCard);
-    closeUserCardForm();
-  }catch(e){
-    alert('Kortin tallennus epäonnistui: '+((e&&(e.code||e.message))||'tuntematon virhe')+'\n\n(Firestoren säännöt on ehkä julkaistava uudelleen — ks. firestore.rules.)');
-  }finally{ if(btn){ btn.disabled=false; btn.textContent='Tallenna'; } }
+  }catch(e){ alert('Kortin tallennus epäonnistui: '+((e&&(e.code||e.message))||'tuntematon virhe')+'\n\n(Firestoren säännöt on ehkä julkaistava — ks. firestore.rules.)'); }
 }
+// dismiss (auto-save) when you click outside the card, or press Escape
+document.addEventListener('mousedown', e=>{ if(!document.body.classList.contains('adding-usercard')) return; const t=e.target; if(!t || !t.closest || !t.closest('#ucard-card-wrap')) commitUserCardForm(); }, true);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.body.classList.contains('adding-usercard')){ e.preventDefault(); commitUserCardForm(); } });
 async function deleteUserCard(docId){
   const c=_userCards.find(x=>x._docId===docId); if(!c) return;
   if(!confirm('Poistetaanko tämä kortti?')) return;
