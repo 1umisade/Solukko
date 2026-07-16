@@ -247,6 +247,7 @@ body.dark-mode #card-screen.card-fs-on { background: linear-gradient(rgba(38,26,
 body.dark-mode #card-screen.card-fs-on::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
 #card-screen.card-fs-on #review-cols { display: block; }
 #card-screen.card-fs-on #grid-col { display: none !important; }
+#card-screen.card-fs-on #grid-scrollbar { display: none !important; }   /* no grid scrollbar in the study/fullscreen view */
 /* fullscreen must not inherit the desktop 50/50 split: no title, no divider, card fills the screen */
 #card-screen.card-fs-on #deck-title-bar, #card-screen.card-fs-on #grid-header { display: none !important; }
 #card-screen.card-fs-on #card-col { position: static; height: 100vh; width: 100vw !important; max-width: 100vw !important; flex: none; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 0 !important; gap: 0 !important; overflow: visible !important; }
@@ -447,17 +448,11 @@ body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
 #mona-top-peek.flew-in .mona-top-inner { animation: monaFlyIn 0.85s cubic-bezier(0.34, 1.45, 0.64, 1) both; }   /* flies up from behind the title; 'both' keeps her visible after */
 #mona-top-peek.flew-in .mona-top-bubble { animation: introFade 0.5s ease 0.9s both; }   /* then her bubble */
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
-#grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: thin; scrollbar-color: #b5824a transparent; }
+#grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: none; }   /* native scrollbar hidden — the centre divider (#grid-scrollbar) is the grid's scrollbar */
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
-@media (min-width: 901px) { body.reviewing #grid-col { direction: rtl; } body.reviewing #grid-col > * { direction: ltr; } }
-#grid-col::-webkit-scrollbar { width: 9px; }
-#grid-col::-webkit-scrollbar-track { background: transparent; margin: 6px 0; }
-#grid-col::-webkit-scrollbar-thumb { background: #b5824a; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
-#grid-col::-webkit-scrollbar-thumb:hover { background: #6b4423; }
-body.dark-mode #grid-col { scrollbar-color: #a97f4e transparent; }
-body.dark-mode #grid-col::-webkit-scrollbar-thumb { background: #a97f4e; }
-body.dark-mode #grid-col::-webkit-scrollbar-thumb:hover { background: #c99e64; }
+#grid-col::-webkit-scrollbar { width: 0; height: 0; display: none; }   /* native scrollbar hidden; #grid-scrollbar (the divider) replaces it */
 #card-col { flex: 0 0 clamp(300px, 34vw, 440px); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
+#grid-scrollbar { display: none; }   /* shown only on desktop review (min-width:901px rule below); the grid's draggable scrollbar */
 #card-stack { display: flex; flex-direction: column; align-items: center; }
 /* ── DESKTOP review: full viewport, no page scroll; 50/50 with a centre divider; card left + comments right ── */
 @media (min-width: 901px) {
@@ -465,14 +460,21 @@ body.dark-mode #grid-col::-webkit-scrollbar-thumb:hover { background: #c99e64; }
   body.reviewing #global-topbar { position: fixed; top: 0; left: 0; right: 0; width: 100%; max-width: none; margin: 0; padding: 10px 16px 0; z-index: 60; pointer-events: none; }
   body.reviewing #global-topbar > * { pointer-events: auto; }
   body.reviewing #card-screen { max-width: none; width: 100vw; height: 100vh; overflow: hidden; }
-  body.reviewing #review-cols { flex: 1 1 auto; min-height: 0; align-items: stretch; gap: 0; }
+  body.reviewing #review-cols { flex: 1 1 auto; min-height: 0; align-items: stretch; gap: 0; position: relative; }
   /* deck title + back button live at the top of the grid and scroll away with it */
   body.reviewing #grid-header { padding: 8px 2px 14px; }
   body.reviewing #deck-title-bar { font-size: clamp(1.6rem, 2.9vw, 2.4rem); }
   body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 0.6rem 1.2rem 1.4rem; }
   body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; overflow-y: auto; overscroll-behavior: auto; }   /* right side scrolls/rubberbands like the grid */
-  body.reviewing #card-col::before { content: ''; position: absolute; left: 0; top: 8%; bottom: 8%; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, transparent, #d4cec4 14%, #d4cec4 86%, transparent); }
-  body.dark-mode.reviewing #card-col::before { background: linear-gradient(to bottom, transparent, #6d5f52 14%, #6d5f52 86%, transparent); }
+  /* the centre divider IS the left grid's scrollbar: a faint full-height track (::before) + a draggable thumb sized to the grid content (positioned by JS) */
+  body.reviewing #grid-scrollbar { display: block; position: absolute; left: 50%; margin-left: -8px; top: 8%; height: 84%; width: 16px; z-index: 8; }
+  body.reviewing #grid-scrollbar::before { content: ''; position: absolute; left: 50%; margin-left: -1px; top: 0; bottom: 0; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, transparent, #d4cec4 14%, #d4cec4 86%, transparent); }
+  body.dark-mode.reviewing #grid-scrollbar::before { background: linear-gradient(to bottom, transparent, #6d5f52 14%, #6d5f52 86%, transparent); }
+  body.reviewing #grid-scrollbar-thumb { position: absolute; left: 50%; margin-left: -3px; width: 6px; height: 40px; border-radius: 3px; background: #b5824a; cursor: grab; box-shadow: 0 0 0 1px rgba(255,255,255,0.4); transition: background 0.15s ease; }
+  body.reviewing #grid-scrollbar-thumb:hover { background: #6b4423; }
+  body.reviewing #grid-scrollbar.dragging #grid-scrollbar-thumb { cursor: grabbing; background: #6b4423; }
+  body.dark-mode.reviewing #grid-scrollbar-thumb { background: #a97f4e; }
+  body.dark-mode.reviewing #grid-scrollbar-thumb:hover { background: #c99e64; }
   body.reviewing #card-stack { flex: 1 1 0; min-width: 0; max-height: 100%; justify-content: center; gap: 0.5rem; }
   body.reviewing #comment-col { display: none; flex: 0 0 clamp(200px, 42%, 320px); min-width: 0; align-self: stretch; overflow-y: auto; overscroll-behavior: auto; padding: 1rem 0; }
   body.reviewing #card-col.commenting #comment-col { display: block; }   /* comments appear only after the comment button is clicked */
@@ -1244,6 +1246,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- fullscreen award button (winner only) — just points to the homepage where the prize info lives -->
   <button id="fs-award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
   <div id="review-cols">
+  <div id="grid-scrollbar" title="Vieritä ruudukkoa"><div id="grid-scrollbar-thumb"></div></div>   <!-- the centre divider doubles as the left grid's draggable scrollbar (desktop review) -->
   <div id="grid-col">
   <div id="grid-header">
     <button id="back-btn-fixed" onclick="showDecks()" onmouseenter="showMonaHint('Takaisin pakat-näkymään')" onmouseleave="hideMonaHint()" style="display:none;"><span style="margin-top:-5px;display:inline-block;">←</span></button>
@@ -1997,6 +2000,65 @@ setInterval(()=>{
   document.addEventListener('keydown', ()=>{ if(scrolling) stop(); });
   document.addEventListener('auxclick', e=>{ if(e.button===1) e.preventDefault(); });   // suppress native middle-click autoscroll/paste
   window.addEventListener('blur', stop);
+})();
+
+// The centre divider (#grid-scrollbar) works as the LEFT grid's scrollbar (desktop review): the thumb is sized
+// to visible/total and tracks scroll position; dragging it (or clicking the track) scrolls #grid-col.
+(function(){
+  const bar=document.getElementById('grid-scrollbar');
+  const thumb=document.getElementById('grid-scrollbar-thumb');
+  const gridEl=()=>document.getElementById('grid-col');
+  if(!bar||!thumb) return;
+  let raf=null;
+  function sync(){
+    raf=null;
+    const g=gridEl(); if(!g) return;
+    const trackH=bar.clientHeight;
+    if(trackH<=0) return;                                   // bar hidden (mobile / not reviewing / fullscreen) → nothing to do
+    const visible=g.clientHeight, total=g.scrollHeight;
+    if(total<=visible+1){ thumb.style.display='none'; return; }   // grid fits → no thumb
+    thumb.style.display='';
+    const thumbH=Math.max(24, Math.round(trackH*visible/total));
+    const maxScroll=total-visible, maxThumb=trackH-thumbH;
+    thumb.style.height=thumbH+'px';
+    thumb.style.top=(maxScroll>0 ? Math.round((g.scrollTop/maxScroll)*maxThumb) : 0)+'px';
+  }
+  function schedule(){ if(!raf) raf=requestAnimationFrame(sync); }
+  document.addEventListener('scroll', e=>{ if(e.target && e.target.id==='grid-col') schedule(); }, true);   // scroll doesn't bubble → capture
+  window.addEventListener('resize', schedule);
+  const gc=gridEl();
+  if(gc && 'ResizeObserver' in window) new ResizeObserver(schedule).observe(gc);                     // grid resized (layout / review opens)
+  const ov=document.getElementById('card-overview-grid');
+  if(ov && 'MutationObserver' in window) new MutationObserver(schedule).observe(ov,{childList:true,subtree:true});   // grid rebuilt (deck open / shuffle / filter)
+  schedule();
+
+  // drag the thumb
+  let dragging=false, startY=0, startScroll=0;
+  thumb.addEventListener('pointerdown', e=>{
+    const g=gridEl(); if(!g) return;
+    dragging=true; startY=e.clientY; startScroll=g.scrollTop; bar.classList.add('dragging');
+    try{ thumb.setPointerCapture(e.pointerId); }catch(_){}
+    e.preventDefault(); e.stopPropagation();
+  });
+  document.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const g=gridEl(); if(!g) return;
+    const thumbH=thumb.offsetHeight, maxThumb=bar.clientHeight-thumbH, maxScroll=g.scrollHeight-g.clientHeight;
+    g.scrollTop = startScroll + (maxThumb>0 ? ((e.clientY-startY)/maxThumb)*maxScroll : 0);
+  });
+  const endDrag=()=>{ if(dragging){ dragging=false; bar.classList.remove('dragging'); } };
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
+  // click the track (not the thumb) → jump the thumb centre to that spot
+  bar.addEventListener('pointerdown', e=>{
+    if(e.target===thumb) return;
+    const g=gridEl(); if(!g) return;
+    const thumbH=thumb.offsetHeight, trackH=bar.clientHeight;
+    const clickY=e.clientY-bar.getBoundingClientRect().top;
+    const targetTop=Math.max(0, Math.min(trackH-thumbH, clickY-thumbH/2));
+    const maxThumb=trackH-thumbH, maxScroll=g.scrollHeight-g.clientHeight;
+    g.scrollTop = maxThumb>0 ? (targetTop/maxThumb)*maxScroll : 0;
+  });
 })();
 
 
@@ -4190,7 +4252,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     e.preventDefault();                                      // it's a horizontal grade-drag → don't scroll the card
     const vw=window.innerWidth;
     const side = dx<0 ? 'left' : 'right';
-    const prog = Math.max(0, Math.min(1, Math.abs(dx)/(vw*0.16)));   // very sensitive: full size after only ~16% of the width
+    const prog = Math.max(0, Math.min(1, Math.abs(dx)/(vw*0.30)));   // full size after ~30% of the width (less sensitive — needs a more deliberate swipe)
     const eased = 1 - (1-prog)*(1-prog);                   // ease-out: the button grows fast at first, then progressively slower as it gets bigger
     const scale = 1 + eased*1.2;                           // grows from 1x up to ~2.2x, decelerating toward the top
     const armed = scale >= 1.25;                            // reached 125% → armed (glows); release while armed to register
