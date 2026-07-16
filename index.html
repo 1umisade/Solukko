@@ -831,8 +831,8 @@ body.dark-mode .ucard-tools button { background: rgba(42,38,32,0.92); border-col
 /* the add/edit card: just a plain editable flashcard + a flip icon (no title/save/cancel). Right column on desktop, overlay on mobile. */
 #usercard-form { display: none; box-sizing: border-box; }
 body.adding-usercard #usercard-form { display: flex; }
-#ucard-card-wrap { position: relative; width: 100%; max-width: 440px; margin: 0 auto; }
-#ucard-flashcard { cursor: text; }   /* click anywhere on the card to write */
+#ucard-card-wrap { position: relative; width: 100%; max-width: 500px; margin: 0 auto; }
+#ucard-flashcard { min-height: min(84vh, 750px); cursor: text; }   /* full card height (like a real flashcard), not shrunk to the text; click anywhere to write */
 .ucard-editable { min-height: 1.4em; outline: none; cursor: text; white-space: pre-wrap; }   /* pre-wrap keeps the line breaks the user types */
 .ucard-editable:empty::before { content: attr(data-ph); color: #a89a86; font-weight: 400; letter-spacing: normal; }   /* placeholder while empty */
 body.dark-mode .ucard-editable:empty::before { color: #8a7d6a; }
