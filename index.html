@@ -468,11 +468,11 @@ body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
   body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; overflow-y: auto; overscroll-behavior: auto; }   /* right side scrolls/rubberbands like the grid */
   /* the centre divider IS the left grid's scrollbar: a faint full-height track (::before) + a draggable thumb sized to the grid content (positioned by JS) */
   body.reviewing #grid-scrollbar { display: block; position: absolute; left: 50%; margin-left: -8px; top: 8%; height: 84%; width: 16px; z-index: 8; }
-  body.reviewing #grid-scrollbar::before { content: ''; position: absolute; left: 50%; margin-left: -1px; top: 0; bottom: 0; width: 2px; border-radius: 2px; background: linear-gradient(to bottom, transparent, #d4cec4 14%, #d4cec4 86%, transparent); }
-  body.dark-mode.reviewing #grid-scrollbar::before { background: linear-gradient(to bottom, transparent, #6d5f52 14%, #6d5f52 86%, transparent); }
-  body.reviewing #grid-scrollbar-thumb { position: absolute; left: 50%; margin-left: -3px; width: 6px; height: 40px; border-radius: 3px; background: #b5824a; cursor: grab; box-shadow: 0 0 0 1px rgba(255,255,255,0.4); transition: background 0.15s ease; }
+  body.reviewing #grid-scrollbar::before { content: ''; position: absolute; left: 50%; margin-left: -2.5px; top: 0; bottom: 0; width: 5px; border-radius: 3px; background: linear-gradient(to bottom, transparent, #cdb488 9%, #cdb488 91%, transparent); }   /* the divider track: a prominent full-height bar so the thumb reads as a segment of it, not a lone knob */
+  body.dark-mode.reviewing #grid-scrollbar::before { background: linear-gradient(to bottom, transparent, #7a6a58 9%, #7a6a58 91%, transparent); }
+  body.reviewing #grid-scrollbar-thumb { position: absolute; left: 50%; margin-left: -2.5px; width: 5px; height: 40px; border-radius: 3px; background: #b5824a; cursor: grab; transition: width 0.14s ease, margin-left 0.14s ease, background 0.15s ease; }   /* same width as the track — a darker segment marking the scroll position */
   body.reviewing #grid-scrollbar-thumb:hover { background: #6b4423; }
-  body.reviewing #grid-scrollbar.dragging #grid-scrollbar-thumb { cursor: grabbing; background: #6b4423; }
+  body.reviewing #grid-scrollbar.dragging #grid-scrollbar-thumb { cursor: grabbing; background: #6b4423; width: 11px; margin-left: -5.5px; }   /* grows wider while being dragged */
   body.dark-mode.reviewing #grid-scrollbar-thumb { background: #a97f4e; }
   body.dark-mode.reviewing #grid-scrollbar-thumb:hover { background: #c99e64; }
   body.reviewing #card-stack { flex: 1 1 0; min-width: 0; max-height: 100%; justify-content: center; gap: 0.5rem; }
