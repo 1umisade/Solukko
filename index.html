@@ -817,9 +817,7 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 
 /* ── 12. OVERVIEW GRID ───────────────────────────────────── */
 #card-overview-grid { width: 100%; display: flex; flex-direction: column; gap: 2.5rem; margin-top: 0; }
-/* ── User-added cards: the "Omat kortit" section, the + tile, edit/delete tools, and the add/edit form ── */
-.overview-section-title { width: 100%; font-family: 'Lora', serif; font-size: 1.05rem; font-weight: 600; color: #6b4423; margin: 0 0 0.6rem; }
-body.dark-mode .overview-section-title { color: #d9c496; }
+/* ── User-added cards: the per-section + tile, edit/delete tools, and the add/edit flashcard form ── */
 .add-card-tile { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none !important; border: 2px dashed #b5824a; color: #6b4423; box-shadow: none; cursor: pointer; -webkit-line-clamp: unset; }
 .add-card-tile:hover { border-color: #6b4423; background: rgba(181,130,74,0.08) !important; }
 .add-card-plus { font-size: 1.7rem; line-height: 1; }
@@ -2786,7 +2784,7 @@ function shuffleReviewOrder(){   // shuffle the REAL review order (reviewCards) 
   const cur=currentCard;
   for(let i=reviewCards.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=reviewCards[i]; reviewCards[i]=reviewCards[j]; reviewCards[j]=t; }
   _syncReviewOrder(cur);
-  deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.filter(c=>!c._userCard)}];   // grid = one pile in the (now shuffled) review order; user cards stay in their own section
+  deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.slice()}];   // grid = one pile in the (now shuffled) review order (user cards included)
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
   renderCardOverview();
 }
@@ -4037,18 +4035,20 @@ function shuffleAllCards(){   // one button: scramble every section's cards, ani
 // uid — shown ONLY on the creating device and to the dev (admin), per
 // the security rules. They study/grade exactly like the deck's cards.
 // ══════════════════════════════════════════════════════════════════
-let _userCards=[];        // card objects for the CURRENT deck (the same refs also live in reviewCards)
-let _editingDocId=null;   // doc id being edited (null = adding a new card)
+let _userCards=[];         // card objects for the CURRENT deck (the same refs also live in reviewCards)
+let _editingDocId=null;    // doc id being edited (null = adding a new card)
+let _addTargetSubdeck=null; // deckName of the lecture section a new card is being added to (from the section's + tile)
 
 function _ucEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function _ucHtml(s){ return _ucEsc(s).replace(/\r?\n/g,'<br>'); }   // user text -> safe display HTML (escaped, line breaks kept). Escaping matters: the dev views everyone's cards.
 function _userCardObj(docId,d){   // a Firestore doc -> a card object the render/study/grade pipeline understands
   const front=d.front||'', back=d.back||'';
   const fh=_ucHtml(front), bh=_ucHtml(back);
-  return { cardId:'user:'+docId, noteId:'user:'+docId, deckName:d.deck||currentDeck, modelName:'UserCard',
+  const sub=d.subdeck||d.deck||currentDeck;   // deckName = the section it was created in, so buildDeckGroups files it into that lecture section
+  return { cardId:'user:'+docId, noteId:'user:'+docId, deckName:sub, modelName:'UserCard',
            tags:['omat'], fields:{ Front:{value:fh,order:0}, Back:{value:bh,order:1} },
            question:fh, answer:bh, due:0, type:0, queue:0, ord:0,
-           _userCard:true, _docId:docId, _owner:d.userId||'', _front:front, _back:back };
+           _userCard:true, _docId:docId, _owner:d.userId||'', _front:front, _back:back, _subdeck:sub, _deck:d.deck||currentDeck };
 }
 async function loadUserCards(deckName){   // load this deck's user cards (dev: everyone's, user: own) and inject them into the grid
   _userCards=[];
@@ -4066,11 +4066,13 @@ async function loadUserCards(deckName){   // load this deck's user cards (dev: e
   }catch(e){ console.warn('userCards load failed:', e&&(e.code||e.message)); }
   _injectUserCards(currentCard);
 }
-function _injectUserCards(cur){   // make reviewCards end with exactly the current _userCards, then re-render the grid
+function _injectUserCards(cur){   // make reviewCards end with exactly the current _userCards, regroup so they land in their section, and re-render
   for(let i=reviewCards.length-1;i>=0;i--) if(reviewCards[i]&&reviewCards[i]._userCard) reviewCards.splice(i,1);
   _userCards.forEach(c=>reviewCards.push(c));
   if(_reviewCardsOriginal){ for(let i=_reviewCardsOriginal.length-1;i>=0;i--) if(_reviewCardsOriginal[i]._userCard) _reviewCardsOriginal.splice(i,1); _userCards.forEach(c=>_reviewCardsOriginal.push(c)); }
-  const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render (the Omat kortit section changed)
+  if(shuffleMode) deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.slice()}];   // shuffled: one pile (sections are merged)
+  else deckGroups=buildDeckGroups(reviewCards, currentDeck);                               // regroup by subdeck so each user card sits in its own lecture section
+  const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
   _syncReviewOrder(cur||currentCard);
   renderCardOverview();
 }
@@ -4084,7 +4086,13 @@ function flipUserCard(){   // flip the editable card front<->back (reveals the a
   if(showBack){ ans.style.display='block'; fc.classList.add('answer-shown'); if(btn) btn.textContent='Näytä etupuoli'; const b=document.getElementById('ucard-back'); if(b) b.focus(); }
   else { ans.style.display='none'; fc.classList.remove('answer-shown'); if(btn) btn.textContent='Näytä takapuoli'; const f=document.getElementById('ucard-front'); if(f) f.focus(); }
 }
-function openAddCardForm(){ _editingDocId=null; _fillUserCardForm('',''); _ucSetTitle('Uusi kortti'); _ucShowFront(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60); }
+function openAddCardForm(groupIndex){   // add a card to the lecture section whose + tile was clicked
+  _editingDocId=null;
+  const grp=(typeof groupIndex==='number' && deckGroups[groupIndex]) ? deckGroups[groupIndex] : null;
+  const rep=grp ? (grp.cards.find(c=>!c._userCard) || grp.cards[0]) : null;   // a real card in that section carries the section's deckName
+  _addTargetSubdeck=rep ? rep.deckName : currentDeck;
+  _fillUserCardForm('',''); _ucSetTitle('Uusi kortti'); _ucShowFront(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60);
+}
 function openEditCardForm(docId){ const c=_userCards.find(x=>x._docId===docId); if(!c) return; _editingDocId=docId; _fillUserCardForm(c._front||'', c._back||''); _ucSetTitle('Muokkaa korttia'); _ucShowFront(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60); }
 function _fillUserCardForm(front,back){ const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back'); if(f) f.textContent=front||''; if(b) b.textContent=back||''; }
 function closeUserCardForm(){ document.body.classList.remove('adding-usercard'); _editingDocId=null; }
@@ -4095,13 +4103,14 @@ async function saveUserCard(){
   const btn=document.getElementById('ucard-save-btn'); if(btn){ btn.disabled=true; btn.textContent='Tallennetaan…'; }
   const uid=getUserId(), deck=currentDeck;
   try{
+    const subdeck=_addTargetSubdeck||deck;
     if(_editingDocId){
       await db.collection('userCards').doc(_editingDocId).update({ front, back });
       const c=_userCards.find(x=>x._docId===_editingDocId);
-      if(c){ c.question=front; c.answer=back; c.fields.Front.value=front; c.fields.Back.value=back; }
+      if(c){ c._front=front; c._back=back; const fh=_ucHtml(front), bh=_ucHtml(back); c.question=fh; c.answer=bh; c.fields.Front.value=fh; c.fields.Back.value=bh; }
     } else {
-      const ref=await db.collection('userCards').add({ userId:uid, deck, front, back, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-      _userCards.push(_userCardObj(ref.id, { userId:uid, deck, front, back }));
+      const ref=await db.collection('userCards').add({ userId:uid, deck, subdeck, front, back, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      _userCards.push(_userCardObj(ref.id, { userId:uid, deck, subdeck, front, back }));
     }
     _injectUserCards(currentCard);
     closeUserCardForm();
@@ -4166,41 +4175,32 @@ function renderCardOverview(){
     }
   }
 
+  const _uid=getUserId();
   grid.innerHTML=deckGroups.map((group,groupIndex)=>{
     const isPaapakka = group.name === 'Pääpakka';
     const embedUrl = (!isPaapakka && group.link) ? getYouTubeEmbedUrl(group.link) : null;
     const videoHtml = isPaapakka ? '' : makeVideoEmbed(embedUrl, group.name);
 
-    const cardsHtml=group.cards.filter(c=>!c._userCard).map(card=>{   // user-added cards render in their own "Omat kortit" section, never inside a normal group
+    const cardsHtml=group.cards.map(card=>{
       const index=reviewCards.indexOf(card);
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
+      if(card._userCard){   // own card: same tile look + edit/delete tools, sitting in its own lecture section
+        const canEdit=devMode||card._owner===_uid;
+        const tools=canEdit?`<span class="ucard-tools"><button type="button" onclick="event.stopPropagation();openEditCardForm('${card._docId}')" title="Muokkaa">✎</button><button type="button" onclick="event.stopPropagation();deleteUserCard('${card._docId}')" title="Poista">🗑</button></span>`:'';
+        return `<div class="overview-card user-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${tools}</div>`;
+      }
       const starCount=cardStarCount(card);
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
+    const addTile=`<div class="overview-card add-card-tile" onclick="openAddCardForm(${groupIndex})" title="Lisää oma kortti tähän osioon"><span class="add-card-plus">＋</span><span class="add-card-label">Lisää kortti</span></div>`;
 
-    return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}</div></div>`;
+    return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}${addTile}</div></div>`;
   }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>')
-  + _userSectionHtml()
   + ((reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known')) ? CELEB_GRID_HTML : '');
   listenToKuvaajat();
   fitDeckTitle();
-}
-// The "Omat kortit" grid section: the user's own cards for this deck + the "+ Lisää kortti" tile.
-function _userSectionHtml(){
-  const uid=getUserId();
-  const mine=reviewCards.filter(c=>c._userCard);
-  const cards=mine.map(card=>{
-    const index=reviewCards.indexOf(card);
-    const q=getField(card,['Front','front'])||extractBody(card.question||'').body;
-    const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
-    const canEdit=devMode||card._owner===uid;
-    const tools=canEdit?`<span class="ucard-tools"><button type="button" onclick="event.stopPropagation();openEditCardForm('${card._docId}')" title="Muokkaa">✎</button><button type="button" onclick="event.stopPropagation();deleteUserCard('${card._docId}')" title="Poista">🗑</button></span>`:'';
-    return `<div class="overview-card user-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${tools}</div>`;
-  }).join('');
-  const addTile=`<div class="overview-card add-card-tile" onclick="openAddCardForm()" title="Lisää oma kortti"><span class="add-card-plus">＋</span><span class="add-card-label">Lisää kortti</span></div>`;
-  return `<div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section user-section"><div class="overview-section-title">➕ Omat kortit</div><div class="overview-section-grid">${cards}${addTile}</div></div>`;
 }
 
 // Scale the deck title so it spans the full width of the card grid
