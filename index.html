@@ -67,8 +67,9 @@ body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
 .deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
-#home-mona { align-self: flex-start; display: flex; align-items: flex-start; gap: 18px; margin: 4px 0 10px; }   /* Mona anchored to the TOP so she never moves as the bubble grows/shrinks between greetings */
+#home-mona { align-self: flex-start; display: flex; align-items: flex-start; gap: 18px; margin: 4px 0 10px; position: relative; }   /* Mona anchored to the TOP; on desktop the greeting bubble is absolute (below) so its size never shifts the decks */
 #home-mona .site-brand { width: 120px; margin: 0; }
+@media (min-width: 901px) { #home-mona .home-greet { position: absolute; left: 158px; top: 0; margin: 0; } }   /* out of flow: cycling greetings of different heights no longer moves the deck grid */
 .home-brand-block { text-align: right; flex: 0 0 auto; }
 /* wide screens: site name pinned left, Mona + bubble centered */
 @media (min-width: 1100px){
@@ -247,7 +248,6 @@ body.dark-mode #card-screen.card-fs-on { background: linear-gradient(rgba(38,26,
 body.dark-mode #card-screen.card-fs-on::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
 #card-screen.card-fs-on #review-cols { display: block; }
 #card-screen.card-fs-on #grid-col { display: none !important; }
-#card-screen.card-fs-on #grid-scrollbar { display: none !important; }   /* no grid scrollbar in the study/fullscreen view */
 /* fullscreen must not inherit the desktop 50/50 split: no title, no divider, card fills the screen */
 #card-screen.card-fs-on #deck-title-bar, #card-screen.card-fs-on #grid-header { display: none !important; }
 #card-screen.card-fs-on #card-col { position: static; height: 100vh; width: 100vw !important; max-width: 100vw !important; flex: none; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: 0 !important; gap: 0 !important; overflow: visible !important; }
@@ -446,11 +446,10 @@ body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
 #mona-top-peek.flew-in .mona-top-inner { animation: monaFlyIn 0.85s cubic-bezier(0.34, 1.45, 0.64, 1) both; }   /* flies up from behind the title; 'both' keeps her visible after */
 #mona-top-peek.flew-in .mona-top-bubble { animation: introFade 0.5s ease 0.9s both; }   /* then her bubble */
 #review-cols { display: flex; flex-direction: row; align-items: flex-start; gap: 2rem; width: 100%; }
-#grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: none; }   /* native scrollbar hidden — the centre divider (#grid-scrollbar) is the grid's scrollbar */
+#grid-col { flex: 1 1 0; min-width: 0; position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow-y: auto; overflow-x: hidden; padding: 0.5rem 0.4rem 2rem; scrollbar-width: none; }   /* scrollbar hidden (no divider); the grid scrolls with wheel/touch/drag */
 /* slim themed scrollbar for the grid, moved to the LEFT edge via the direction:rtl trick (content stays LTR) */
-#grid-col::-webkit-scrollbar { width: 0; height: 0; display: none; }   /* native scrollbar hidden; #grid-scrollbar (the divider) replaces it */
+#grid-col::-webkit-scrollbar { width: 0; height: 0; display: none; }   /* no scrollbar/divider; the grid scrolls with wheel/touch/drag */
 #card-col { flex: 0 0 clamp(300px, 34vw, 440px); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
-#grid-scrollbar { display: none; }   /* shown only on desktop review (min-width:901px rule below); the grid's draggable scrollbar */
 #card-stack { display: flex; flex-direction: column; align-items: center; }
 /* ── DESKTOP review: full viewport, no page scroll; 50/50 with a centre divider; card left + comments right ── */
 @media (min-width: 901px) {
@@ -465,14 +464,6 @@ body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
   body.reviewing #grid-col { flex: 0 0 50%; max-width: 50%; position: static; top: auto; height: 100%; max-height: none; padding: 0.6rem 1.2rem 1.4rem; }
   body.reviewing #card-col { flex: 0 0 50%; max-width: 50%; position: relative; height: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 1.2rem; padding: 0 1.2rem; box-sizing: border-box; overflow-y: auto; overscroll-behavior: auto; }   /* right side scrolls/rubberbands like the grid */
   /* the centre divider IS the left grid's scrollbar: a faint full-height track (::before) + a draggable thumb sized to the grid content (positioned by JS) */
-  body.reviewing #grid-scrollbar { display: block; position: absolute; left: 50%; margin-left: -8px; top: 8%; height: 84%; width: 16px; z-index: 8; }
-  body.reviewing #grid-scrollbar::before { content: ''; position: absolute; left: 50%; margin-left: -2.5px; top: 0; bottom: 0; width: 5px; border-radius: 3px; background: linear-gradient(to bottom, transparent, #cdb488 9%, #cdb488 91%, transparent); }   /* the divider track: a prominent full-height bar so the thumb reads as a segment of it, not a lone knob */
-  body.dark-mode.reviewing #grid-scrollbar::before { background: linear-gradient(to bottom, transparent, #7a6a58 9%, #7a6a58 91%, transparent); }
-  body.reviewing #grid-scrollbar-thumb { position: absolute; left: 50%; margin-left: -2.5px; width: 5px; height: 40px; border-radius: 3px; background: #b5824a; cursor: grab; transition: width 0.14s ease, margin-left 0.14s ease, background 0.15s ease; }   /* same width as the track — a darker segment marking the scroll position */
-  body.reviewing #grid-scrollbar-thumb:hover { background: #6b4423; }
-  body.reviewing #grid-scrollbar.dragging #grid-scrollbar-thumb { cursor: grabbing; background: #6b4423; width: 11px; margin-left: -5.5px; }   /* grows wider while being dragged */
-  body.dark-mode.reviewing #grid-scrollbar-thumb { background: #a97f4e; }
-  body.dark-mode.reviewing #grid-scrollbar-thumb:hover { background: #c99e64; }
   body.reviewing #card-stack { flex: 1 1 0; min-width: 0; max-height: 100%; justify-content: center; gap: 0.5rem; }
   body.reviewing #comment-col { display: none; flex: 0 0 clamp(200px, 42%, 320px); min-width: 0; align-self: stretch; overflow-y: auto; overscroll-behavior: auto; padding: 1rem 0; }
   body.reviewing #card-col.commenting #comment-col { display: block; }   /* comments appear only after the comment button is clicked */
@@ -822,7 +813,7 @@ body.dark-mode .brand-back > div, body.dark-mode .brand-back > div > * { color: 
 .add-card-label { font-family: 'Lora', serif; font-size: 0.72rem; }
 body.dark-mode .add-card-tile { border-color: #a97f4e; color: #d9c496; }
 .overview-card.user-card { position: relative; }
-.ucard-tools { position: absolute; top: 3px; right: 3px; display: flex; gap: 2px; z-index: 2; }   /* always visible so it works on touch too */
+.ucard-tools { position: absolute; bottom: 3px; right: 3px; display: flex; gap: 2px; z-index: 2; }   /* bottom-right; always visible so it works on touch too */
 .ucard-tools button { background: rgba(255,255,255,0.92); border: 1px solid #d4cec4; border-radius: 6px; width: 22px; height: 22px; line-height: 1; padding: 0; font-size: 0.78rem; cursor: pointer; }
 .ucard-tools button:hover { background: #fff; border-color: #b5824a; }
 body.dark-mode .ucard-tools button { background: rgba(42,38,32,0.92); border-color: #5a5148; color: #ece5d8; }
@@ -1273,7 +1264,6 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <!-- fullscreen award button (winner only) — just points to the homepage where the prize info lives -->
   <button id="fs-award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
   <div id="review-cols">
-  <div id="grid-scrollbar" title="Vieritä ruudukkoa"><div id="grid-scrollbar-thumb"></div></div>   <!-- the centre divider doubles as the left grid's draggable scrollbar (desktop review) -->
   <div id="usercard-form">   <!-- add/edit an own card: just a plain editable flashcard + a flip icon. Auto-saves when you click away; delete from the grid. -->
     <div id="ucard-card-wrap">
       <div class="flashcard front-basic" id="ucard-flashcard" onmousedown="ucardCardMousedown(event)">
@@ -1291,12 +1281,11 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div id="deck-title-bar"></div>
   </div>
   <div id="deck-cover"></div>   <!-- intro card: title + esittely, fills the grid-half; scroll down to reveal the cards -->
-  <div id="card-overview-grid"></div>
-
-  <div class="grid-tools" id="grid-tools">
+  <div class="grid-tools" id="grid-tools">   <!-- tools at the TOP of the grid (above the cards) -->
     <button class="grid-tool-btn" onclick="resetDeckProgress()" title="Merkitse kaikki kortit uusiksi">↺ Nollaa edistyminen</button>
     <button id="shuffle-toggle-btn" class="grid-tool-btn" onclick="toggleShuffleOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
   </div>
+  <div id="card-overview-grid"></div>
   </div>
   <div id="card-col">
   <div id="card-stack">
@@ -2039,66 +2028,6 @@ setInterval(()=>{
   document.addEventListener('auxclick', e=>{ if(e.button===1) e.preventDefault(); });   // suppress native middle-click autoscroll/paste
   window.addEventListener('blur', stop);
 })();
-
-// The centre divider (#grid-scrollbar) works as the LEFT grid's scrollbar (desktop review): the thumb is sized
-// to visible/total and tracks scroll position; dragging it (or clicking the track) scrolls #grid-col.
-(function(){
-  const bar=document.getElementById('grid-scrollbar');
-  const thumb=document.getElementById('grid-scrollbar-thumb');
-  const gridEl=()=>document.getElementById('grid-col');
-  if(!bar||!thumb) return;
-  let raf=null;
-  function sync(){
-    raf=null;
-    const g=gridEl(); if(!g) return;
-    const trackH=bar.clientHeight;
-    if(trackH<=0) return;                                   // bar hidden (mobile / not reviewing / fullscreen) → nothing to do
-    const visible=g.clientHeight, total=g.scrollHeight;
-    if(total<=visible+1){ thumb.style.display='none'; return; }   // grid fits → no thumb
-    thumb.style.display='';
-    const thumbH=Math.max(24, Math.round(trackH*visible/total));
-    const maxScroll=total-visible, maxThumb=trackH-thumbH;
-    thumb.style.height=thumbH+'px';
-    thumb.style.top=(maxScroll>0 ? Math.round((g.scrollTop/maxScroll)*maxThumb) : 0)+'px';
-  }
-  function schedule(){ if(!raf) raf=requestAnimationFrame(sync); }
-  document.addEventListener('scroll', e=>{ if(e.target && e.target.id==='grid-col') schedule(); }, true);   // scroll doesn't bubble → capture
-  window.addEventListener('resize', schedule);
-  const gc=gridEl();
-  if(gc && 'ResizeObserver' in window) new ResizeObserver(schedule).observe(gc);                     // grid resized (layout / review opens)
-  const ov=document.getElementById('card-overview-grid');
-  if(ov && 'MutationObserver' in window) new MutationObserver(schedule).observe(ov,{childList:true,subtree:true});   // grid rebuilt (deck open / shuffle / filter)
-  schedule();
-
-  // drag the thumb
-  let dragging=false, startY=0, startScroll=0;
-  thumb.addEventListener('pointerdown', e=>{
-    const g=gridEl(); if(!g) return;
-    dragging=true; startY=e.clientY; startScroll=g.scrollTop; bar.classList.add('dragging');
-    try{ thumb.setPointerCapture(e.pointerId); }catch(_){}
-    e.preventDefault(); e.stopPropagation();
-  });
-  document.addEventListener('pointermove', e=>{
-    if(!dragging) return;
-    const g=gridEl(); if(!g) return;
-    const thumbH=thumb.offsetHeight, maxThumb=bar.clientHeight-thumbH, maxScroll=g.scrollHeight-g.clientHeight;
-    g.scrollTop = startScroll + (maxThumb>0 ? ((e.clientY-startY)/maxThumb)*maxScroll : 0);
-  });
-  const endDrag=()=>{ if(dragging){ dragging=false; bar.classList.remove('dragging'); } };
-  document.addEventListener('pointerup', endDrag);
-  document.addEventListener('pointercancel', endDrag);
-  // click the track (not the thumb) → jump the thumb centre to that spot
-  bar.addEventListener('pointerdown', e=>{
-    if(e.target===thumb) return;
-    const g=gridEl(); if(!g) return;
-    const thumbH=thumb.offsetHeight, trackH=bar.clientHeight;
-    const clickY=e.clientY-bar.getBoundingClientRect().top;
-    const targetTop=Math.max(0, Math.min(trackH-thumbH, clickY-thumbH/2));
-    const maxThumb=trackH-thumbH, maxScroll=g.scrollHeight-g.clientHeight;
-    g.scrollTop = maxThumb>0 ? (targetTop/maxThumb)*maxScroll : 0;
-  });
-})();
-
 
 // ════════════════════════════════════════════════════════════
 // ⑧ .APKG-LATAUS & SQLITE-PARSINTA   (download SOLUKKO.apkg, unzip it, read its SQLite DB → fill the `allCards` array; cached in IndexedDB)
