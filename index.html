@@ -4391,7 +4391,10 @@ function shakeCard(){
   flashWordLinkBubbles();   // shaking re-highlights the linked words for 2s
   if(inFullscreen()){
     _keycapDip(document.getElementById('tarkista-btn'));       // dip the centre button — no click sound on a shake
-    if(document.body.classList.contains('is-mobile') && cardAnswerShown) document.getElementById('fs-comment-btn')?.classList.add('visible');   // mobile: shaking the ANSWER side (tap after reveal) surfaces the comment button
+    if(document.body.classList.contains('is-mobile') && cardAnswerShown){   // mobile: shaking the ANSWER side (tap after reveal) surfaces the comment button, then it fades after 1s
+      const _cb=document.getElementById('fs-comment-btn');
+      if(_cb){ _cb.classList.add('visible'); clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>_cb.classList.remove('visible'), 1000); }
+    }
     return;
   }
   const pr=document.getElementById('progress-row'), ca=document.querySelector('.comment-area');   // make sure the answer buttons show
