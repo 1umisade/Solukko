@@ -321,8 +321,9 @@ body:not(.is-mobile) #card-screen.faux-fs #faux-fs-back.visible { opacity: 1; po
 body.dark-mode #faux-fs-back { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 /* desktop study view: bottom-right Mona whose bubble shows the answer's extent; fades with the mouse like the other buttons */
 #fs-scope-mona { display: none; }
-body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona { display: block; position: fixed; right: 22px; bottom: 3.5vh; z-index: 98; width: 88px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona.visible { opacity: 1; pointer-events: auto; }
+body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona { display: block; position: fixed; right: 22px; bottom: 3.5vh; z-index: 98; width: 56px; cursor: pointer; opacity: 1; pointer-events: auto; transition: opacity 0.2s ease; }
+body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona.bubble-off { opacity: 0; pointer-events: none; }   /* bubble dismissed → fade with the mouse like the other buttons */
+body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona.bubble-off.visible { opacity: 1; pointer-events: auto; }
 #fs-scope-mona img { width: 100%; height: auto; display: block; -webkit-user-drag: none; user-select: none; }
 #fs-scope-bubble { position: absolute; bottom: calc(100% + 6px); right: 4px; max-width: 240px; width: max-content; background: #fffef9; color: #56533c; border: 1px solid #d4cec4; border-radius: 14px; padding: 0.5rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.35; box-shadow: 0 4px 16px rgba(0,0,0,0.16); text-align: left; }
 #fs-scope-bubble::after { content: ''; position: absolute; top: 100%; right: 26px; border: 9px solid transparent; border-top-color: #fffef9; border-bottom: 0; }   /* tail points down at Mona */
@@ -1274,7 +1275,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   </button>
   <!-- fullscreen award button (winner only) — just points to the homepage where the prize info lives -->
   <!-- desktop study view: a Mona bottom-right whose bubble shows the answer's extent (vastauksen laajuus); click her to dismiss the bubble; she fades with the mouse like the other buttons -->
-  <div id="fs-scope-mona" onclick="dismissScopeBubble(event)" title="Vastauksen laajuus"><div id="fs-scope-bubble"></div><img src="mona_with_eyes.png" alt="Mona"></div>
+  <div id="fs-scope-mona" onclick="dismissScopeBubble(event)" title="Vastauksen laajuus"><div id="fs-scope-bubble"></div><img src="mona_no_eyes.png" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div>
   <div id="review-cols">
   <div id="usercard-form">   <!-- add/edit an own card: just a plain editable flashcard + a flip icon. Auto-saves when you click away; delete from the grid. -->
     <div id="ucard-card-wrap">
@@ -2767,7 +2768,7 @@ function _showFsButtons(ms){   // reveal the comment + back buttons + scope Mona
   clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); document.getElementById('faux-fs-back')?.classList.remove('visible'); document.getElementById('fs-scope-mona')?.classList.remove('visible'); }, ms||1000);
 }
 function updateScopeMona(){ const b=document.getElementById('fs-scope-bubble'); if(b) b.textContent = (typeof _scopeText==='string' ? _scopeText : ''); }
-function dismissScopeBubble(e){ if(e) e.stopPropagation(); document.getElementById('fs-scope-mona')?.classList.toggle('bubble-off'); }   // clicking Mona toggles her bubble off/on
+function dismissScopeBubble(e){ if(e) e.stopPropagation(); const m=document.getElementById('fs-scope-mona'); if(!m) return; if(typeof monaReactAt==='function') monaReactAt(m, true); m.classList.toggle('bubble-off'); }   // clicking Mona always reacts (shake+scream+eyes) and toggles her bubble off/on
 function flashFsExitBtn(){   // desktop: flash the comment button on entering fullscreen and on each mouse move. Mobile: only a star tap reveals it (see the star tooltip handler)
   if(document.body.classList.contains('is-mobile')) return;
   _showFsButtons(1000);
