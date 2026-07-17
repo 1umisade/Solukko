@@ -675,7 +675,7 @@ body.dark-mode .deck-header-name { color: #eadfce; }
 body.dark-mode .deck-header-code  { color: #cbbda8; }
 
 /* ── DARK MODE: new top-bar buttons ─────────────────────── */
-body.dark-mode #darkmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
+body.dark-mode #darkmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; color: #cbb89b; }
 body.dark-mode #deploy-timestamp-pill { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color: #6d5f52 !important; }
 
@@ -891,25 +891,26 @@ body.dark-mode .flashcard.graded-unknown { background: #3f3022; border-color: #b
 body.dark-mode .card-stars { color: #eadfce; }
 
 /* ── SUN/MOON DARKMODE BUTTON ────────────────────────────── */
-#darkmode-btn {
-  width: 46px;
-  height: 46px;
+#darkmode-btn {   /* pill styled like the other grid tools, reading "Teema" */
   touch-action: manipulation;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #6b6055;
   background: #fffef9;
   border: 1px solid #d4cec4;
-  border-radius: 50%;
+  border-radius: 999px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-  padding: 0;
-  display: flex;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0.5rem 0.9rem;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
+  gap: 0.4rem;
   line-height: 1;
   user-select: none;
   -webkit-user-select: none;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
+#darkmode-icon { font-size: 0.95rem; line-height: 1; }
 #darkmode-btn.pressing {
   transform: scale(0.92);
   box-shadow: 0 2px 6px rgba(0,0,0,0.18);
@@ -1122,8 +1123,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
           style="opacity:0;"
         />
       </svg>
-      <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila" onmouseenter="showMonaHint('Tumma teema')" onmouseleave="hideMonaHint()">
-        <span id="darkmode-icon">☀️</span>
+      <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila">
+        <span id="darkmode-icon">☀️</span>Teema
       </button>
     </div>
   </div>
@@ -1282,11 +1283,12 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <div id="deck-title-bar"></div>
   </div>
   <div id="deck-cover"></div>   <!-- intro card: title + esittely, fills the grid-half; scroll down to reveal the cards -->
-  <div class="grid-tools" id="grid-tools">   <!-- tools at the TOP of the grid (above the cards) -->
+  <div id="card-overview-grid"></div>
+
+  <div class="grid-tools" id="grid-tools">   <!-- under the grid by default; startDeck lifts it above the cards for the dev "Kaikki kortit" deck -->
     <button class="grid-tool-btn" onclick="resetDeckProgress()" title="Merkitse kaikki kortit uusiksi">↺ Nollaa edistyminen</button>
     <button id="shuffle-toggle-btn" class="grid-tool-btn" onclick="toggleShuffleOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
   </div>
-  <div id="card-overview-grid"></div>
   </div>
   <div id="card-col">
   <div id="card-stack">
@@ -2433,7 +2435,10 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document
 async function startDeck(deckName, animate=true){   // animate=false (reload/deep-link restore) shows the landing at once, no fade-in
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
-  document.body.classList.toggle('all-decks-deck', deckName==='DEV::Kaikki kortit');   // the dev "Kaikki kortit" deck shows only the shuffle button in the tools
+  const _allDecks = deckName==='DEV::Kaikki kortit';
+  document.body.classList.toggle('all-decks-deck', _allDecks);   // the dev "Kaikki kortit" deck shows only the shuffle button in the tools
+  { const _gt=document.getElementById('grid-tools'), _gc=document.getElementById('grid-col'), _cog=document.getElementById('card-overview-grid');
+    if(_gt&&_gc&&_cog) _allDecks ? _gc.insertBefore(_gt,_cog) : _gc.appendChild(_gt); }   // dev deck: tools ABOVE the cards; every other deck: back under the grid
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
