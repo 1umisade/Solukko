@@ -319,6 +319,16 @@ body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 body:not(.is-mobile) #card-screen.faux-fs #faux-fs-back { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }   /* desktop: hide when the mouse is still, like the comment button */
 body:not(.is-mobile) #card-screen.faux-fs #faux-fs-back.visible { opacity: 1; pointer-events: auto; }
 body.dark-mode #faux-fs-back { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
+/* desktop study view: bottom-right Mona whose bubble shows the answer's extent; fades with the mouse like the other buttons */
+#fs-scope-mona { display: none; }
+body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona { display: block; position: fixed; right: 22px; bottom: 3.5vh; z-index: 98; width: 88px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona.visible { opacity: 1; pointer-events: auto; }
+#fs-scope-mona img { width: 100%; height: auto; display: block; -webkit-user-drag: none; user-select: none; }
+#fs-scope-bubble { position: absolute; bottom: calc(100% + 6px); right: 4px; max-width: 240px; width: max-content; background: #fffef9; color: #56533c; border: 1px solid #d4cec4; border-radius: 14px; padding: 0.5rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.35; box-shadow: 0 4px 16px rgba(0,0,0,0.16); text-align: left; }
+#fs-scope-bubble::after { content: ''; position: absolute; top: 100%; right: 26px; border: 9px solid transparent; border-top-color: #fffef9; border-bottom: 0; }   /* tail points down at Mona */
+#fs-scope-bubble:empty, #fs-scope-mona.bubble-off #fs-scope-bubble { display: none; }   /* no bubble when empty or dismissed */
+body.dark-mode #fs-scope-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
+body.dark-mode #fs-scope-bubble::after { border-top-color: #3a312b; }
 @media (max-width: 560px){ #card-screen.faux-fs #fs-comment-btn { left: 74px; } }   /* make room for the back button at top-left */
 #fs-comment-btn.visible { opacity: 1; pointer-events: auto; }   /* shown on mouse-move / touch, then fades (like the exit button) */
 @media (max-width: 560px){ #fs-comment-btn { top: 16px; left: 16px; bottom: auto; width: 48px; height: 48px; } }   /* mobile: move to the top-left so it doesn't overlap the bottom button row */
@@ -1263,7 +1273,8 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
     <span class="fs-comment-count" id="fs-comment-count"></span>
   </button>
   <!-- fullscreen award button (winner only) — just points to the homepage where the prize info lives -->
-  <button id="fs-award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
+  <!-- desktop study view: a Mona bottom-right whose bubble shows the answer's extent (vastauksen laajuus); click her to dismiss the bubble; she fades with the mouse like the other buttons -->
+  <div id="fs-scope-mona" onclick="dismissScopeBubble(event)" title="Vastauksen laajuus"><div id="fs-scope-bubble"></div><img src="mona_with_eyes.png" alt="Mona"></div>
   <div id="review-cols">
   <div id="usercard-form">   <!-- add/edit an own card: just a plain editable flashcard + a flip icon. Auto-saves when you click away; delete from the grid. -->
     <div id="ucard-card-wrap">
@@ -1450,6 +1461,7 @@ let cardAnswerShown=false;
 let commentsUnsubscribe=null;
 let kuvaajatUnsubscribe=null;
 let _frontHintText='';   // "Vastauksen laajuus … · Klikkaa korttia" — shown in Mona's front bubble
+let _scopeText='';       // "Vastauksen laajuus … sanaa" — shown in the bottom-right study Mona's bubble
 
 
 // ════════════════════════════════════════════════════════════
@@ -2605,6 +2617,7 @@ async function renderCurrentCard(){
   const _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus '+_words+' sanaa') : ('Vastauksen laajuus noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
   const _frontText = (_laajuusText ? (_laajuusText+'. ') : '') + 'Klikkaa korttia tarkistaaksesi.';   // laajuus + click prompt
   _frontHintText = _frontText;   // Mona's front bubble shows this
+  _scopeText = _laajuusText; if(typeof updateScopeMona==='function') updateScopeMona();   // the bottom-right study-view Mona shows the answer's extent
   if(_bub) _bub.textContent=_frontText;
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
@@ -2746,12 +2759,15 @@ function exitCardFs(){
 function toggleCardFullscreen(){ if(inFullscreen()) exitCardFs(); else enterCardFs(); }
 function exitCardFullscreen(){ exitCardFs(); }
 let _fsHideTimer=null;
-function _showFsButtons(ms){   // reveal the comment + back buttons, then fade them after `ms`
+function _showFsButtons(ms){   // reveal the comment + back buttons + scope Mona, then fade them after `ms`
   if(!inFullscreen()) return;
   document.getElementById('fs-comment-btn')?.classList.add('visible');
   document.getElementById('faux-fs-back')?.classList.add('visible');
-  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); document.getElementById('faux-fs-back')?.classList.remove('visible'); }, ms||1000);
+  document.getElementById('fs-scope-mona')?.classList.add('visible');
+  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); document.getElementById('faux-fs-back')?.classList.remove('visible'); document.getElementById('fs-scope-mona')?.classList.remove('visible'); }, ms||1000);
 }
+function updateScopeMona(){ const b=document.getElementById('fs-scope-bubble'); if(b) b.textContent = (typeof _scopeText==='string' ? _scopeText : ''); }
+function dismissScopeBubble(e){ if(e) e.stopPropagation(); document.getElementById('fs-scope-mona')?.classList.toggle('bubble-off'); }   // clicking Mona toggles her bubble off/on
 function flashFsExitBtn(){   // desktop: flash the comment button on entering fullscreen and on each mouse move. Mobile: only a star tap reveals it (see the star tooltip handler)
   if(document.body.classList.contains('is-mobile')) return;
   _showFsButtons(1000);
