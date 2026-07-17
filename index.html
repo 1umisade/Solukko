@@ -845,7 +845,6 @@ body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
 .grid-tool-btn:hover { background: #f5f0e8; }
 .grid-tool-btn:active { transform: scale(0.96); }
 body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-color: #6d5f52; }
-body.all-decks-deck #grid-tools > *:not(#shuffle-toggle-btn) { display: none !important; }   /* dev "Kaikki kortit" deck: only the shuffle button */
 .overview-card { transition: transform 0.16s ease, box-shadow 0.16s ease; }   /* no will-change: it would put all ~130 cards on their own GPU layers and make the whole page sluggish */
 .overview-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.15); will-change: transform; }   /* promote only the card being hovered */
 .overview-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #6b6055; margin-bottom: 0.45rem; padding-bottom: 0.25rem; border-bottom: 1px solid #d4cec4; }
@@ -2435,10 +2434,9 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document
 async function startDeck(deckName, animate=true){   // animate=false (reload/deep-link restore) shows the landing at once, no fade-in
   show('loading'); hide('deck-screen');
   currentDeck=deckName;
-  const _allDecks = deckName==='DEV::Kaikki kortit';
-  document.body.classList.toggle('all-decks-deck', _allDecks);   // the dev "Kaikki kortit" deck shows only the shuffle button in the tools
-  { const _gt=document.getElementById('grid-tools'), _gc=document.getElementById('grid-col'), _cog=document.getElementById('card-overview-grid');
-    if(_gt&&_gc&&_cog) _allDecks ? _gc.insertBefore(_gt,_cog) : _gc.appendChild(_gt); }   // dev deck: tools ABOVE the cards; every other deck: back under the grid
+  { const _allDecks = deckName==='DEV::Kaikki kortit';
+    const _gt=document.getElementById('grid-tools'), _gc=document.getElementById('grid-col'), _cog=document.getElementById('card-overview-grid');
+    if(_gt&&_gc&&_cog) _allDecks ? _gc.insertBefore(_gt,_cog) : _gc.appendChild(_gt); }   // dev "Kaikki kortit" deck: all tools ABOVE the cards; every other deck: back under the grid
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
