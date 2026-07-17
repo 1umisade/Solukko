@@ -4725,6 +4725,12 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
       _tipPinned = false; hide();
     }
   }, {passive:true});
+
+  // desktop hover: show the star significance while the mouse is over the stars
+  document.addEventListener('mouseover', e => { const s=e.target.closest && e.target.closest('#card-stars'); if(s && !document.body.classList.contains('is-mobile') && s.dataset.starMeaning) show(s); });
+  document.addEventListener('mouseout',  e => { const s=e.target.closest && e.target.closest('#card-stars'); if(s && !_tipPinned) hide(); });
+  // clicking the stars on the review preview opens the study view, just like clicking the card
+  document.addEventListener('click', e => { const s=e.target.closest && e.target.closest('#card-stars'); if(!s || inFullscreen() || !currentCard) return; e.stopPropagation(); enterCardFs(); });
 })();
 
 
