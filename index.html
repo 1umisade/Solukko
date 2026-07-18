@@ -1691,7 +1691,7 @@ const commentBoxWrap=document.querySelector('.comment-box');
 (function(){ const ca=document.querySelector('.comment-area'), col=document.getElementById('comment-col'); if(ca&&col) col.appendChild(ca); })();   // comments live in the right half, next to the card
 (function(){ const dm=document.getElementById('darkmode-wrap'), gt=document.getElementById('grid-tools'); if(dm&&gt) gt.appendChild(dm); })();   // dark-mode toggle sits with the shuffle / reset tools under the grid
 // Elastic rubberband (desktop): over-scroll pulls the content and springs back smoothly. Used for both the right half and the grid.
-function makeRubberband(scrollEl, getTransformEl, resetName, allowFullscreen){
+function makeRubberband(scrollEl, getTransformEl, resetName, allowFullscreen, fullscreenOnly){
   if(!scrollEl) return;
   let offset=0, target=0, raf=null;
   const MAX=110;
@@ -1706,6 +1706,7 @@ function makeRubberband(scrollEl, getTransformEl, resetName, allowFullscreen){
   scrollEl.addEventListener('wheel', e=>{
     const fs=inFullscreen();
     if(fs && !allowFullscreen) return;                            // in fullscreen only the card bounces (not the grid / homepage handlers)
+    if(fullscreenOnly && !fs) return;                             // this rubberband bounces ONLY in fullscreen (the review-preview right half no longer rubberbands — it scrolls the grid)
     if(!fs && window.matchMedia('(max-width: 900px)').matches) return;   // desktop only outside fullscreen
     if(!fs && getTransformEl()?.offsetParent===null) return;      // only when this rubberband's content is actually on screen (scopes the window-level homepage one)
     // let any nested scrollable element (long card, comment feed) consume the wheel first
@@ -1724,7 +1725,7 @@ function makeRubberband(scrollEl, getTransformEl, resetName, allowFullscreen){
     if(!raf) raf=requestAnimationFrame(loop);
   }, {passive:false});
 }
-makeRubberband(document.getElementById('card-col'), ()=>document.getElementById('card-stack'), '_resetCardSpring', true);   // right half: card + Mona + answer bar (also bounces in fullscreen)
+makeRubberband(document.getElementById('card-col'), ()=>document.getElementById('card-stack'), '_resetCardSpring', true, true);   // fullscreen study card only — the review-preview right half no longer rubberbands (it scrolls the grid)
 makeRubberband(document.getElementById('grid-col'), ()=>document.getElementById('grid-col'));                          // grid: bounce at the top/bottom scroll boundaries
 makeRubberband(document.scrollingElement, ()=>document.getElementById('deck-screen'), '_resetHomeSpring');            // homepage: elastic bounce at the top/bottom of the page
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
