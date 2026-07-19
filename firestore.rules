@@ -83,11 +83,20 @@ service cloud.firestore {
                     && request.resource.data.userId == request.auth.uid   // can only add as yourself
                     && str(request.resource.data.deck, 300)
                     && str(request.resource.data.front, 4000)
-                    && str(request.resource.data.back, 4000);
+                    && str(request.resource.data.back, 4000)
+                    && !('approved' in request.resource.data)             // can't self-award on create...
+                    && !('approvedCode' in request.resource.data)
+                    && !('paid' in request.resource.data);
+      // Owner may edit their card and flag it `suggested`; only the dev (admin) may set approved / approvedCode / paid.
       allow update: if (isOwner(resource.data.userId) || isAdmin())
                     && request.resource.data.userId == resource.data.userId   // owner can't be reassigned
                     && str(request.resource.data.front, 4000)
-                    && str(request.resource.data.back, 4000);
+                    && str(request.resource.data.back, 4000)
+                    && ( isAdmin() || (
+                           request.resource.data.get('approved', false) == resource.data.get('approved', false)
+                        && request.resource.data.get('approvedCode', '') == resource.data.get('approvedCode', '')
+                        && request.resource.data.get('paid', false) == resource.data.get('paid', false)
+                    ) );
       allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
 

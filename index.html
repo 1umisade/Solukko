@@ -131,6 +131,13 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 #golden-comment { display: none; position: fixed; top: 70px; right: 14px; z-index: 90; width: min(78vw, 280px); background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border: 2px solid #d4af37; border-radius: 16px; padding: 0.7rem 0.9rem; box-shadow: 0 6px 22px rgba(212,175,55,0.5), 0 2px 8px rgba(0,0,0,0.2); font-family: 'Lora', serif; color: #4a3a10; cursor: pointer; }
 body.has-golden #golden-comment { display: block; }
 body.has-golden.reviewing #golden-comment { display: none; }
+/* creator's card-suggestion award note (green), homepage only; sits below the golden note if both are showing */
+#card-award-note { display: none; position: fixed; top: 70px; right: 14px; z-index: 90; width: min(78vw, 250px); background: linear-gradient(135deg, #eaf7ee, #c9e9d4 60%, #a6d8b7); border: 2px solid #6fae83; border-radius: 16px; padding: 0.7rem 0.9rem; box-shadow: 0 6px 22px rgba(80,150,100,0.4), 0 2px 8px rgba(0,0,0,0.18); font-family: 'Lora', serif; color: #24502f; cursor: pointer; }
+body.has-card-award #card-award-note { display: block; }
+body.has-card-award.reviewing #card-award-note { display: none; }
+body.has-golden #card-award-note { top: 178px; }
+#card-award-note .can-label { font-weight: 700; font-size: 0.9rem; }
+#card-award-note .can-sub { font-size: 0.76rem; opacity: 0.85; margin-top: 2px; }
 .gc-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
 .gc-text { font-size: 0.92rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
 /* winner's fullscreen award button (only points them to the homepage) + a small "prize is on the homepage" toast */
@@ -339,6 +346,14 @@ body.dark-mode #fs-scope-bubble::after { border-top-color: #3a312b; }
 body.dark-mode #fs-comment-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #fs-comment-btn.active { background: #eadfce; color: #2b211b; border-color: #eadfce; }
 #fs-comment-btn.keycap-press { animation: keycapPress 0.16s ease; }
+/* fullscreen (desktop, OWN card only): the "Ehdota" button sits exactly where the comment button would and fades the same way */
+#fs-suggest-btn { position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #cdbf9a; background: rgba(255,254,249,0.94); color: #7a5a12; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+#fs-suggest-btn.visible { opacity: 1; pointer-events: auto; }
+#fs-suggest-btn.suggested { background: #b5824a; color: #fff; border-color: #b5824a; }
+#fs-suggest-btn.approved { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); color: #6b4a10; border-color: #d4af37; }
+body.dark-mode #fs-suggest-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
+/* review page: the add-card hover preview shows plain info text — hide the star/extent/peek chrome */
+#card-col.add-info #card-stars, #card-col.add-info .card-extent, #card-col.add-info #card-peek { display: none !important; }
 .fs-comment-count { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 11px; background: #c0392b; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
 .fs-comment-count.has { display: flex; }
 /* fullscreen: the comments open as a panel sliding in from the LEFT with the writing field */
@@ -739,6 +754,11 @@ body.dark-mode .dev-comment-snip { color: #eadfce; }
 .dca-btn { border: none; background: none; cursor: pointer; font-size: 0.85rem; line-height: 1; padding: 3px 4px; border-radius: 6px; opacity: 0.75; }
 .dca-btn:hover { opacity: 1; background: rgba(0,0,0,0.06); }
 .dca-btn.dca-del:hover { background: rgba(192,57,43,0.15); }
+/* dev "Käyttäjien kortit" status badges */
+.uc-badge { flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; padding: 2px 6px; border-radius: 999px; background: #ece7dd; color: #7a6f60; white-space: nowrap; }
+.uc-badge.suggested { background: #f6e2c2; color: #8a5a12; }
+.uc-badge.approved { background: linear-gradient(135deg,#fff7d6,#f0d878); color: #6b4a10; }
+.uc-badge.paid { background: #d7ecdd; color: #2f6b45; }
 #card-comment { width: 100%; min-height: 52px; height: auto; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }   /* auto-grows from ~1 line as you type (see autoGrowComment) */
 .comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
@@ -1228,6 +1248,8 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 <button id="award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
 <!-- winner's golden comment, top-right of the homepage; clicking opens its card in fullscreen with comments -->
 <div id="golden-comment" onclick="openGoldenComment()" title="Avaa kommenttisi"></div>
+<!-- creator's card-suggestion award note (homepage only); clicking shows the 0,25 € claim code -->
+<div id="card-award-note" onclick="cardAwardNoteClick()" title="Näytä palkintokoodi"></div>
 <!-- dev password prompt (masked) -->
 <div id="devpw-overlay" style="display:none" onclick="if(event.target===this)closeDevPw()">
   <div class="devpw-box">
@@ -1253,6 +1275,8 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
     <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;"></div>
     <div class="dev-section-title">Kaikki kommentit</div>
     <div id="dev-comments-panel" style="display:none"></div>
+    <div class="dev-section-title">Käyttäjien kortit &amp; ehdotukset</div>
+    <div id="dev-usercards-panel" style="display:none"></div>
   </div>
 </div>
 
@@ -1281,6 +1305,10 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
   <button id="fs-comment-btn" onclick="fsBtnPress(this); toggleComment()" title="Kommentit">
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
     <span class="fs-comment-count" id="fs-comment-count"></span>
+  </button>
+  <!-- fullscreen (desktop, OWN card only): shows in place of the comment button — suggest this card as an official course card -->
+  <button id="fs-suggest-btn" onclick="fsBtnPress(this); suggestCurrentCard()" title="Ehdota korttia viralliseksi" style="display:none">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"></path><path d="M7 8l5-5 5 5"></path><path d="M5 21h14"></path></svg>
   </button>
   <!-- fullscreen award button (winner only) — just points to the homepage where the prize info lives -->
   <!-- desktop study view: a Mona bottom-right whose bubble shows the answer's extent (vastauksen laajuus); click her to dismiss the bubble; she fades with the mouse like the other buttons -->
@@ -1512,6 +1540,7 @@ function applyDevMode(){
   if(xb) xb.style.display = devMode ? 'flex' : 'none';
   if(typeof renderPresenceList==='function') renderPresenceList(_lastPresenceUsers||[]);   // refresh the dev presence list
   if(typeof renderDevCommentsPanel==='function') renderDevCommentsPanel();
+  if(typeof renderDevUserCardsPanel==='function') renderDevUserCardsPanel();
   const dsb=document.getElementById('dev-screen-btn');
   if(dsb) dsb.style.display = (devMode && document.getElementById('deck-screen').style.display==='flex') ? 'flex' : 'none';
   document.body.classList.toggle('devmode-on', !!devMode);   // reveals the dev-only "All Decks" deck in the homepage grid (CSS)
@@ -2635,6 +2664,7 @@ async function renderCurrentCard(){
   const _frontText = (_laajuusText ? (_laajuusText+'. ') : '') + 'Klikkaa korttia tarkistaaksesi.';   // laajuus + click prompt
   _frontHintText = _frontText;   // Mona's front bubble shows this
   _scopeText = _laajuusText; if(typeof updateScopeMona==='function') updateScopeMona();   // the bottom-right study-view Mona shows the answer's extent
+  if(typeof updateFsCardButtons==='function') updateFsCardButtons();   // own card in fullscreen (desktop) → Ehdota button instead of the comment button
   if(_bub) _bub.textContent=_frontText;
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
@@ -2766,11 +2796,13 @@ function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
   cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — it stays a page even if native fullscreen isn't available or gets dropped
+  if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // own card → Ehdota button instead of the comment button
   if(_nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }     // best-effort: also request native fullscreen to hide the browser chrome (works from the grid-card tap's user activation). If it drops (iOS keyboard / Esc) we stay on the page.
 }
 function exitCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
   cs.classList.remove('card-fs-on','faux-fs'); _onFsExit();             // leave the page
+  if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // reset the fs buttons (hides the Ehdota button off the study view)
   if(document['fullscreenElement']){ document['exitFullscreen'] && document.exitFullscreen(); }   // ...and native fullscreen if it engaged
 }
 function toggleCardFullscreen(){ if(inFullscreen()) exitCardFs(); else enterCardFs(); }
@@ -2779,9 +2811,10 @@ let _fsHideTimer=null;
 function _showFsButtons(ms){   // reveal the comment + back buttons + scope Mona, then fade them after `ms`
   if(!inFullscreen()) return;
   document.getElementById('fs-comment-btn')?.classList.add('visible');
+  document.getElementById('fs-suggest-btn')?.classList.add('visible');
   document.getElementById('faux-fs-back')?.classList.add('visible');
   document.getElementById('fs-scope-mona')?.classList.add('visible');
-  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); document.getElementById('faux-fs-back')?.classList.remove('visible'); document.getElementById('fs-scope-mona')?.classList.remove('visible'); }, ms||1000);
+  clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); document.getElementById('fs-suggest-btn')?.classList.remove('visible'); document.getElementById('faux-fs-back')?.classList.remove('visible'); document.getElementById('fs-scope-mona')?.classList.remove('visible'); }, ms||1000);
 }
 function updateScopeMona(){ const b=document.getElementById('fs-scope-bubble'); if(b) b.textContent = (typeof _scopeText==='string' ? _scopeText : ''); }
 function dismissScopeBubble(e){ if(e) e.stopPropagation(); const m=document.getElementById('fs-scope-mona'); if(!m) return; if(typeof monaReactAt==='function') monaReactAt(m, true); m.classList.toggle('bubble-off'); }   // clicking Mona always reacts (shake+scream+eyes) and toggles her bubble off/on
@@ -3256,6 +3289,7 @@ function showDevScreen(){
   { const t=document.getElementById('dev-uid-text'); if(t) t.textContent=_devUid()||'(kirjautuminen kesken…)'; }
   renderPresenceList(_lastPresenceUsers||[]);
   renderDevCommentsPanel();
+  renderDevUserCardsPanel();
 }
 function closeDevScreen(){
   hide('dev-screen'); show('deck-screen');
@@ -3985,7 +4019,8 @@ function _userCardObj(docId,d){   // a Firestore doc -> a card object the render
   return { cardId:'user:'+docId, noteId:'user:'+docId, deckName:sub, modelName:'UserCard',
            tags:['omat'], fields:{ Front:{value:fh,order:0}, Back:{value:bh,order:1} },
            question:fh, answer:bh, due:0, type:0, queue:0, ord:0,
-           _userCard:true, _docId:docId, _owner:d.userId||'', _front:front, _back:back, _subdeck:sub, _deck:d.deck||currentDeck };
+           _userCard:true, _docId:docId, _owner:d.userId||'', _front:front, _back:back, _subdeck:sub, _deck:d.deck||currentDeck,
+           _suggested:!!d.suggested, _approved:!!d.approved, _approvedCode:String(d.approvedCode||''), _paid:!!d.paid };   // suggestion / dev-award state
 }
 async function loadUserCards(deckName){   // load this deck's user cards (dev: everyone's, user: own) and inject them into the grid
   _userCards=[];
@@ -4074,6 +4109,110 @@ async function deleteUserCard(docId){
   _injectUserCards(nextCur);
 }
 
+// ════════════════════════════════════════════════════════════
+// KORTTIEHDOTUKSET   (a user suggests an OWN card as an official course card; the dev awards a golden-style claim code worth 0,25 €)
+// ════════════════════════════════════════════════════════════
+const ADD_CARD_INFO_HTML='<div style="font-weight:700;margin-bottom:0.6rem;">Haluatko luoda oman kortin?</div>'
+  +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin. Voit ehdottaa korttiasi viralliseksi, jolloin ylläpito tarkistaa sen ja saattaa lisätä sen osaksi kurssia kaikille käyttäjille. Hyväksytystä korttiehdotuksesta maksamme 0,25&nbsp;€, jolloin yhteydenottopyyntö lähetetään sille laitteelle, jolla korttia ehdotettiin.</div>';
+let _addInfoOn=false;
+function previewAddCardInfo(){   // hovering a "+ Lisää kortti" tile shows this info card on the right (review page, desktop preview)
+  if(inFullscreen()) return;
+  clearTimeout(_previewTO); clearTimeout(_welcomeTO);
+  const cc=document.getElementById('card-col'); if(!cc) return;
+  cc.classList.remove('welcome'); cc.classList.add('add-info'); _addInfoOn=true;
+  document.getElementById('flashcard')?.classList.remove('answer-shown');
+  const qc=document.getElementById('question-content'); if(qc){ qc.className='card-content left-align'; qc.innerHTML=ADD_CARD_INFO_HTML; }
+  const ans=document.getElementById('answer-content'); if(ans) ans.innerHTML='';
+}
+function previewRestore(){   // mouse leaves the tile → restore the real card preview
+  const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('add-info');
+  if(!_addInfoOn) return; _addInfoOn=false;
+  if(inFullscreen()) return;
+  if(currentCard) renderCurrentCard(); else if(cc) cc.classList.add('welcome');   // nothing previewed yet → back to the empty welcome state
+}
+// which button shows in the fullscreen study view: the Ehdota button (desktop + OWN card) shows IN PLACE OF the comment button
+function updateFsCardButtons(){
+  const suggest=document.getElementById('fs-suggest-btn'), comment=document.getElementById('fs-comment-btn');
+  const own=!!(currentCard && currentCard._userCard && (devMode || currentCard._owner===getUserId()));
+  const showSuggest=own && inFullscreen() && !document.body.classList.contains('is-mobile');
+  if(suggest) suggest.style.display=showSuggest?'flex':'none';
+  if(comment) comment.style.display=showSuggest?'none':'';   // '' → CSS default (#card-screen.card-fs-on #fs-comment-btn { display:flex })
+  if(showSuggest) updateSuggestBtnState();
+}
+function updateSuggestBtnState(){
+  const b=document.getElementById('fs-suggest-btn'); if(!b||!currentCard) return;
+  b.classList.toggle('suggested', !!currentCard._suggested && !currentCard._approved);
+  b.classList.toggle('approved', !!currentCard._approved);
+  b.title=currentCard._approved?'Hyväksytty! Näytä palkintokoodi':(currentCard._suggested?'Ehdotettu — odottaa tarkistusta':'Ehdota korttia viralliseksi');
+}
+function suggestCurrentCard(){
+  if(!currentCard||!currentCard._userCard) return;
+  const docId=currentCard._docId;
+  if(currentCard._approved){ showCardAwardCodeStr(currentCard._approvedCode); return; }
+  if(currentCard._suggested){ alert('Tämä kortti on jo ehdotettu. Ylläpito tarkistaa sen pian.'); return; }
+  if(!confirm('Ehdota tätä korttia viralliseksi kurssikortiksi?\n\nYlläpito tarkistaa sen. Hyväksytystä ehdotuksesta maksetaan 0,25 €.')) return;
+  db.collection('userCards').doc(docId).update({ suggested:true, suggestedAt: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(()=>{ currentCard._suggested=true; const c=_userCards.find(x=>x._docId===docId); if(c) c._suggested=true; updateSuggestBtnState(); alert('Kiitos! Ehdotuksesi on lähetetty tarkistettavaksi.'); })
+    .catch(e=>alert('Ehdotus epäonnistui: '+((e&&(e.code||e.message))||'')+'\n\n(Firestoren säännöt on ehkä julkaistava — ks. firestore.rules.)'));
+}
+function showCardAwardCodeStr(code){ alert('Korttiehdotuksesi hyväksyttiin! 🎉\n\nLunasta 0,25 € tekstaamalla koodi '+(code||'')+' numeroon 045 234 2001.'); }
+function cardAwardNoteClick(){ if(_cardAward) showCardAwardCodeStr(_cardAward.code); }
+// creator's real-time watch: if the dev awards one of THIS device's cards, show the green award note (golden-code style)
+let _cardAward=null, _cardAwardUnsub=null, _cardAwardRetry=null;
+function setupCardAwardWatch(){
+  clearTimeout(_cardAwardRetry);
+  try{
+    const u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); const uid=u?u.uid:null;
+    if(!uid||!db){ _cardAwardRetry=setTimeout(setupCardAwardWatch,800); return; }
+    if(_cardAwardUnsub){ _cardAwardUnsub(); _cardAwardUnsub=null; }
+    _cardAwardUnsub=db.collection('userCards').where('userId','==',uid).onSnapshot(snap=>{
+      let a=null; snap.forEach(doc=>{ const d=doc.data(); if(d.approved && !d.paid) a={ id:doc.id, code:String(d.approvedCode||'') }; });
+      _cardAward=a; renderCardAwardNote();
+    }, err=>{ _cardAwardUnsub=null; _cardAwardRetry=setTimeout(setupCardAwardWatch,3000); });
+  }catch(e){ _cardAwardRetry=setTimeout(setupCardAwardWatch,3000); }
+}
+function renderCardAwardNote(){
+  const el=document.getElementById('card-award-note'); if(!el) return;
+  document.body.classList.toggle('has-card-award', !!_cardAward);
+  if(_cardAward) el.innerHTML='<div class="can-label">✅ Korttiehdotuksesi hyväksyttiin!</div><div class="can-sub">Napauta lunastaaksesi 0,25 €</div>';
+}
+// dev: list every user card (all devices) with award / paid actions (needs your UID in isAdmin() + rules published)
+function renderDevUserCardsPanel(){
+  const panel=document.getElementById('dev-usercards-panel'); if(!panel) return;
+  if(!devMode){ panel.style.display='none'; panel.innerHTML=''; return; }
+  panel.style.display='block';
+  panel.innerHTML='<div class="dev-comments-title">Käyttäjien kortit</div><div style="opacity:0.6;font-size:0.8rem;">Ladataan…</div>';
+  db.collection('userCards').get().then(snap=>{
+    const rows=snap.docs.map(dc=>({id:dc.id,d:dc.data()}));
+    const rank=d=> d.paid?3 : (d.approved?1 : (d.suggested?0:2));
+    rows.sort((a,b)=>rank(a.d)-rank(b.d));
+    let html='<div class="dev-comments-title">Käyttäjien kortit ('+rows.length+')</div>';
+    if(!rows.length) html+='<div style="opacity:0.6;font-size:0.8rem;">Ei kortteja.</div>';
+    rows.forEach(r=>{ const d=r.d;
+      const front=_esc(String(d.front||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,60))||'(tyhjä)';
+      const deck=_esc(String(d.subdeck||d.deck||'').replace('SOLUKKO::',''));
+      let badge='<span class="uc-badge">yksityinen</span>', acts='';
+      if(d.paid){ badge='<span class="uc-badge paid">Maksettu</span>'; }
+      else if(d.approved){ badge='<span class="uc-badge approved">Koodi '+_esc(String(d.approvedCode||''))+'</span>'; acts='<button class="dca-btn" title="Merkitse maksetuksi" onclick="markUserCardPaid(\''+r.id+'\')">💶</button>'; }
+      else if(d.suggested){ badge='<span class="uc-badge suggested">Ehdotettu</span>'; acts='<button class="dca-btn" title="Palkitse (anna koodi)" onclick="awardUserCard(\''+r.id+'\')">🏅</button>'; }
+      html+='<div class="dev-comment-row"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+front+'</span>'+badge+'<span class="dev-comment-actions">'+acts+'</span></div>';
+    });
+    panel.innerHTML=html;
+  }).catch(e=>{ panel.innerHTML='<div class="dev-comments-title">Käyttäjien kortit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+_esc(e.code||e.message||'')+'<br>Aseta oma UID isAdmin()-sääntöön ja julkaise firestore.rules.</div>'; });
+}
+function _refreshDevUserCards(){ setTimeout(renderDevUserCardsPanel, 700); }
+function awardUserCard(docId){
+  const code=prompt('Anna palkintokoodi (kortin tekijä tekstaa sen lunastaakseen 0,25 €):');
+  if(code===null) return; if(!code.trim()){ alert('Koodi ei voi olla tyhjä.'); return; }
+  db.collection('userCards').doc(docId).update({ approved:true, approvedCode:code.trim(), approvedAt: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(_refreshDevUserCards).catch(e=>alert('Virhe: '+e.message));
+}
+function markUserCardPaid(docId){
+  if(!confirm('Merkitäänkö palkinto maksetuksi? Ilmoitus poistuu tekijän laitteelta.')) return;
+  db.collection('userCards').doc(docId).update({ paid:true, paidAt: firebase.firestore.FieldValue.serverTimestamp() })
+    .then(_refreshDevUserCards).catch(e=>alert('Virhe: '+e.message));
+}
+
 function renderCardOverview(){
   const grid=document.getElementById('card-overview-grid'); if(!grid) return;
 
@@ -4141,7 +4280,7 @@ function renderCardOverview(){
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
       return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
     }).join('');
-    const addTile=`<div class="overview-card add-card-tile" onclick="openAddCardForm(${groupIndex})" title="Lisää oma kortti tähän osioon"><span class="add-card-plus">＋</span><span class="add-card-label">Lisää kortti</span></div>`;
+    const addTile=`<div class="overview-card add-card-tile" onclick="openAddCardForm(${groupIndex})" onmouseenter="previewAddCardInfo()" onmouseleave="previewRestore()" title="Lisää oma kortti tähän osioon"><span class="add-card-plus">＋</span><span class="add-card-label">Lisää kortti</span></div>`;
 
     return `<div class="overview-section">${videoHtml}<div class="overview-section-grid">${cardsHtml}${addTile}</div></div>`;
   }).join('<div style="width:100%;border-top:1px solid #d4cec4;"></div>')
@@ -4785,7 +4924,8 @@ updateGroupUI();
 updateOverviewVisibility();
 initPresence();
 setupGoldenWatch();
-try{ firebase.auth().onAuthStateChanged(()=>{ setupGoldenWatch(); initPresence(); }); }catch(e){}   // re-bind with the real uid once anonymous auth completes (presence writes are denied under the fallback id)
+setupCardAwardWatch();
+try{ firebase.auth().onAuthStateChanged(()=>{ setupGoldenWatch(); setupCardAwardWatch(); initPresence(); }); }catch(e){}   // re-bind with the real uid once anonymous auth completes (presence writes are denied under the fallback id)
 initDarkmodeBtn();
 document.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord());   // Mona's nickname for the user
 init();
