@@ -361,6 +361,9 @@ body.dark-mode #fs-suggest-btn { background: rgba(58,49,43,0.94); color: #eadfce
 /* fullscreen comments: no separate bar — just unhide the comments (they float over the left of the card; each box has its own background) */
 #card-screen.card-fs-on #card-col.commenting #comment-col { display: block !important; position: fixed; left: 0; top: 0; bottom: 0; width: min(400px, 92vw); overflow-y: auto; padding: 6vh 1.4rem 2rem; z-index: 97; }
 #card-screen.card-fs-on #card-col.commenting #comment-col .comment-area { display: flex !important; width: 100%; box-sizing: border-box; }
+/* desktop study view: the writing box + comments stack ABOVE the comment button — box on top, existing comments between the box and the button */
+body:not(.is-mobile) #card-screen.card-fs-on #card-col.commenting #comment-col { top: auto; bottom: calc(4vh + 76px); max-height: calc(100dvh - 4vh - 92px); padding: 0 1.4rem 0.4rem; }
+body:not(.is-mobile) #card-screen.card-fs-on #card-col.commenting #comment-col .comment-area { margin-top: 0; }
 #card-screen.card-fs-on #card-col.commenting #comment-col .comment-box { width: 100%; }   /* the "Jätä kommentti" field fills the overlay */
 #card-screen.card-fs-on #card-col.commenting #comment-col .comment-box, #card-screen.card-fs-on #card-col.commenting #comment-col textarea, #card-screen.card-fs-on #card-col.commenting #comment-col .comment-item, #card-screen.card-fs-on #card-col.commenting #comment-col .comment-feed { max-width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
 /* "loading the next card" overlay, centred while Mona slides to a button */
@@ -2845,8 +2848,9 @@ function inFullscreen(){ const cs=document.getElementById('card-screen'); return
 function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
-  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — a plain page, NO native fullscreen (that added an OS transition + a second fitCardScale on every card-open, which felt sluggish); the browser chrome just stays visible
+  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — it stays a page even if native fullscreen isn't available or gets dropped
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // own card → Ehdota button instead of the comment button
+  if(!document.body.classList.contains('is-mobile') && _nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }   // desktop: best-effort native fullscreen to hide the browser chrome (needs the grid-card click's user activation). Mobile stays a plain page.
 }
 function exitCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
@@ -3317,10 +3321,20 @@ async function openCardById(cardId){
   const cid=String(cardId);
   const tc=(allCards||[]).find(c=>String(c.cardId)===cid||String(c.noteId)===cid);
   if(!tc){ alert('Korttia ei löytynyt.'); return; }
+  hide('dev-screen');                                                       // leave the dev screen so it doesn't overlap the deck
+  { const b=document.getElementById('dev-screen-btn'); if(b) b.style.display='none'; }
   const topDeck=coursePathOf(tc.deckName);
   await startDeck(topDeck, false);
   const ci=reviewCards.findIndex(c=>String(c.cardId)===cid||String(c.noteId)===cid);
-  if(ci>=0) jumpToOverviewCard(ci);
+  if(ci>=0) jumpToOverviewCard(ci, true);   // open the card in the study view (fullscreen); closing it drops back to the grid at that card
+}
+async function openUserCardInFs(deck, docId){   // dev: open a user-made card in the study view (fullscreen)
+  hide('dev-screen');
+  { const b=document.getElementById('dev-screen-btn'); if(b) b.style.display='none'; }
+  await startDeck(coursePathOf(deck||currentDeck), false);
+  try{ await loadUserCards(currentDeck); }catch(e){}                 // make sure this deck's user cards are injected
+  const ci=reviewCards.findIndex(c=>String(c.cardId)==='user:'+docId);
+  if(ci>=0) jumpToOverviewCard(ci, true); else alert('Korttia ei voitu avata näkymään.');
 }
 function _devUid(){ return (window.firebase&&firebase.auth&&firebase.auth().currentUser)?firebase.auth().currentUser.uid:''; }
 function copyDevUid(){
@@ -4252,9 +4266,9 @@ function renderDevUserCardsPanel(){
       const name=_esc(_devWordFor(d));
       let badge='<span class="uc-badge">yksityinen</span>', acts='';
       if(d.paid){ badge='<span class="uc-badge paid">Maksettu</span>'; }
-      else if(d.approved){ badge='<span class="uc-badge approved">Koodi '+_esc(String(d.approvedCode||''))+'</span>'; acts='<button class="dca-btn" title="Merkitse maksetuksi" onclick="markUserCardPaid(\''+r.id+'\')">💶</button>'; }
-      else if(d.suggested){ badge='<span class="uc-badge suggested">Ehdotettu</span>'; acts='<button class="dca-btn" title="Palkitse (anna koodi)" onclick="awardUserCard(\''+r.id+'\')">🏅</button>'; }
-      html+='<div class="dev-comment-row">'
+      else if(d.approved){ badge='<span class="uc-badge approved">Koodi '+_esc(String(d.approvedCode||''))+'</span>'; acts='<button class="dca-btn" title="Merkitse maksetuksi" onclick="event.stopPropagation();markUserCardPaid(\''+r.id+'\')">💶</button>'; }
+      else if(d.suggested){ badge='<span class="uc-badge suggested">Ehdotettu</span>'; acts='<button class="dca-btn" title="Palkitse (anna koodi)" onclick="event.stopPropagation();awardUserCard(\''+r.id+'\')">🏅</button>'; }
+      html+='<div class="dev-comment-row" onclick="openUserCardInFs(\''+_esc(String(d.deck||'')).replace(/\x27/g,"\\\x27")+'\',\''+r.id+'\')">'
         +'<div class="dev-row-head"><span class="dev-row-name">'+name+'</span><span class="dev-comment-deck">'+deck+'</span><span class="dev-row-right">'+badge+'<span class="dev-comment-actions">'+acts+'</span></span></div>'
         +'<div class="dev-comment-snip">'+front+'</div>'
       +'</div>';
