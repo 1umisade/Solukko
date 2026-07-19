@@ -861,11 +861,13 @@ body.dark-mode .ucard-tools button { background: rgba(42,38,32,0.92); border-col
 /* the add/edit card: just a plain editable flashcard + a flip icon (no title/save/cancel). Right column on desktop, overlay on mobile. */
 #usercard-form { display: none; box-sizing: border-box; }
 body.adding-usercard #usercard-form { display: flex; }
-#ucard-card-wrap { position: relative; width: 100%; max-width: 500px; margin: 0 auto; }
-#ucard-flashcard { min-height: min(84vh, 750px); max-height: min(84vh, 750px); overflow-y: auto; cursor: text; }   /* fixed card height (like a real flashcard); scrolls internally when you write past the bottom */
-#ucard-answer { display: block; }   /* both sides are always shown (front + back), separated by the answer-section divider — no flip */
-.ucard-editable { min-height: 1.4em; outline: none; cursor: text; white-space: pre-wrap; }   /* pre-wrap keeps the line breaks the user types */
-.ucard-editable:empty::before { content: attr(data-ph); color: #a89a86; font-weight: 400; letter-spacing: normal; }   /* placeholder while empty */
+#ucard-card-wrap { position: relative; width: 100%; max-width: 500px; margin: 0 auto; align-self: stretch; }   /* stretch = fill the form's full height */
+#ucard-flashcard { height: 100%; overflow-y: auto; cursor: text; }   /* as tall as the viewport; scrolls internally when you write past the bottom */
+#ucard-answer { display: block; border-top: none; position: relative; }   /* both sides always shown (front + back); divider drawn by ::before so it can fade at the edges */
+#ucard-answer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, #d4cec4 18%, #d4cec4 82%, transparent); }   /* faded-edge divider */
+body.dark-mode #ucard-answer::before { background: linear-gradient(90deg, transparent, #6d5f52 18%, #6d5f52 82%, transparent); }
+.ucard-editable { position: relative; min-height: 1.4em; outline: none; cursor: text; white-space: pre-wrap; }   /* pre-wrap keeps the line breaks the user types */
+.ucard-editable:empty::before { content: attr(data-ph); position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; color: #a89a86; font-weight: 400; letter-spacing: normal; }   /* placeholder OUT of flow, so the centred caret sits where the text will appear (not shoved left) */
 body.dark-mode .ucard-editable:empty::before { color: #8a7d6a; }
 @media (min-width: 901px) {   /* desktop: the card sits in the right half, replacing the preview while adding */
   body.adding-usercard.reviewing #card-stack { display: none; }
