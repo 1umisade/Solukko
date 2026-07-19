@@ -692,13 +692,17 @@ body.dark-mode #exit-devmode-btn { background: #3a312b !important; border-color:
 
 /* ── 10. KOMMENTTILAATIKKO ───────────────────────────────── */
 .comment-area { display: flex; flex-direction: column; gap: 8px; margin-top: 2.2rem; align-items: center; }   /* centered boxes */
-.comment-box { position: relative; width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.4s ease; }
-body:not(.is-mobile) .comment-box { width: 50%; }   /* half size on desktop */
-.comment-box::before { content: "💬  Jätä kommentti"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 1rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; text-align: center; transition: opacity 0.2s ease; pointer-events: none; }
-.comment-box.open { max-height: 600px; overflow: visible; cursor: default; padding-bottom: 52px; }
-.comment-box.open::before { opacity: 0; pointer-events: none; }
-.comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #498d65; border: none; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.comment-box { position: relative; width: fit-content; max-width: 100%; max-height: 64px; border: 1px solid #d4cec4; border-radius: 16px; background: #fffef9; box-shadow: 0 3px 12px rgba(0,0,0,0.12); overflow: hidden; cursor: pointer; transition: max-height 0.4s ease; }   /* closed: hugs the "Jätä kommentti" text */
+.comment-box.open { width: 100%; max-height: 600px; overflow: visible; cursor: default; padding-bottom: 52px; }   /* opens up for typing */
+body:not(.is-mobile) .comment-box.open { width: 50%; }   /* half width on desktop when open */
+.comment-box::before { content: "💬  Jätä kommentti"; display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.4rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; white-space: nowrap; transition: opacity 0.2s ease; pointer-events: none; }   /* IN-FLOW so the closed pill wraps to this text */
+.comment-box.open::before { display: none; }
+.comment-box:not(.open) #card-comment { position: absolute; inset: 0; }   /* keep the hidden textarea from widening the closed pill */
+.comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #b5824a; border: none; border-radius: 50%; color: white; font-size: 1.1rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
+.comment-submit-btn::before { content: "\2715"; }                        /* before writing: an X (close) button (tan) */
+.comment-box.has-text .comment-submit-btn { background: #498d65; }        /* once there's text: green submit... */
+.comment-box.has-text .comment-submit-btn::before { content: "\2713"; }   /* ...shown as a check mark */
 .comment-box.open .comment-img-btn { display: flex; align-items: center; justify-content: center; }
 .comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
 .comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; align-items: center; }   /* centered comment boxes */
@@ -1252,7 +1256,7 @@ body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; 
   <div class="comment-box" id="comment-box">
     <textarea id="card-comment"
       placeholder="Jätä kommentti ja osallistu 5€ arvontaan!"></textarea>
-    <button class="comment-submit-btn" onclick="submitComment(event)">✓</button>
+    <button class="comment-submit-btn" onclick="commentActionBtn(event)" aria-label="Sulje / lähetä"></button>
     <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
     <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
     <div class="comment-status" id="comment-status"></div>
@@ -1728,7 +1732,12 @@ function makeRubberband(scrollEl, getTransformEl, resetName, allowFullscreen, fu
 makeRubberband(document.getElementById('card-col'), ()=>document.getElementById('card-stack'), '_resetCardSpring', true, true);   // fullscreen study card only — the review-preview right half no longer rubberbands (it scrolls the grid)
 makeRubberband(document.getElementById('grid-col'), ()=>document.getElementById('grid-col'));                          // grid: bounce at the top/bottom scroll boundaries
 makeRubberband(document.scrollingElement, ()=>document.getElementById('deck-screen'), '_resetHomeSpring');            // homepage: elastic bounce at the top/bottom of the page
-commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); document.getElementById('card-comment').focus(); });
+commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); const ta=document.getElementById('card-comment'); if(ta) ta.focus(); updateCommentBtnState(); });
+// The corner button is an X (close) until there's text, then a green check (submit).
+function updateCommentBtnState(){ const ta=document.getElementById('card-comment'); document.getElementById('comment-box')?.classList.toggle('has-text', !!(ta && ta.value.trim())); }
+function commentActionBtn(e){ const ta=document.getElementById('card-comment'); if(ta && ta.value.trim()) submitComment(e); else closeCommentBox(e); }
+function closeCommentBox(e){ if(e) e.stopPropagation(); const ta=document.getElementById('card-comment'); if(ta) ta.blur(); if(_commenting && typeof toggleComment==='function') toggleComment(); else document.getElementById('comment-box')?.classList.remove('open'); }
+document.getElementById('card-comment')?.addEventListener('input', updateCommentBtnState);
 document.addEventListener('click',e=>{ if(!_commenting && !document.querySelector('.comment-area').contains(e.target) && !e.target.closest('#comment-btn')) document.querySelector('.comment-box').classList.remove('open'); });   // don't fight the comment-panel toggle
 document.addEventListener('click',e=>{                      // click away closes the speech bubbles
   const sb=document.getElementById('site-brand'); if(sb && !sb.contains(e.target)) sb.classList.remove('home-bubble-open');
@@ -2750,7 +2759,8 @@ function inFullscreen(){ const cs=document.getElementById('card-screen'); return
 function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
-  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — NO native fullscreen, so the browser search bar / chrome stay visible and the iOS keyboard can't drop it
+  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — it stays a page even if native fullscreen isn't available or gets dropped
+  if(_nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }     // best-effort: also request native fullscreen to hide the browser chrome (works from the grid-card tap's user activation). If it drops (iOS keyboard / Esc) we stay on the page.
 }
 function exitCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
@@ -2827,11 +2837,7 @@ function _onFsExit(){
 document.addEventListener('fullscreenchange',()=>{   // enter/exit of the PAGE is driven by enterCardFs/exitCardFs; this only reacts to the native layer engaging/leaving
   const cs=document.getElementById('card-screen'); if(!cs) return;
   if(document['fullscreenElement']===cs){ fitCardScale(); scrollToCard(); updateFsSlider(); _fsCursorActivity(); }   // native fullscreen engaged → re-fit to the now-larger viewport (chrome hidden)
-  else if(cs.classList.contains('card-fs-on')){
-    const _kbDrop=(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) && document.activeElement && document.activeElement.id==='card-comment';
-    if(_kbDrop){ _fsCommentExit=true; fitCardScale(); scrollToCard(); return; }   // iOS dropped native fullscreen for the comment keyboard → STAY on the faux-fullscreen page (same view + answer buttons), don't tear it down
-    exitCardFs();   // a real exit (Esc / swipe) → leave the page too
-  }
+  else if(cs.classList.contains('card-fs-on')){ fitCardScale(); scrollToCard(); }   // native fullscreen dropped (Esc / iOS keyboard) → STAY on the page; the browser chrome just becomes visible. Leaving the study view is only via the back button / double-tap.
 });
 document.addEventListener('pointerdown',()=>{ if(inFullscreen()){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
 
@@ -3053,7 +3059,11 @@ let _commenting=false;
 // iOS Safari force-exits native fullscreen the moment the comment box takes focus (the soft keyboard needs the screen).
 // We can't prevent that, but we can hop straight back into fullscreen on the same card once the comment is written/closed.
 let _fsCommentExit=false;
-function _reenterFsAfterComment(){ _fsCommentExit=false; }   // no native fullscreen any more — the study view is a plain page, so commenting never drops it; nothing to re-enter
+function _reenterFsAfterComment(){   // after commenting: re-hide the browser chrome by re-requesting native fullscreen (must run inside the close tap for user activation)
+  _fsCommentExit=false;
+  const cs=document.getElementById('card-screen');
+  if(cs && cs.classList.contains('card-fs-on') && _nativeFsSupported() && !document['fullscreenElement']) cs.requestFullscreen().catch(()=>{});
+}
 function _syncCommentArea(){   // desktop: comments only when toggled open; mobile: always after the answer shows
   const ca=document.querySelector('.comment-area'); if(!ca) return;
   const mobile=window.matchMedia('(max-width: 900px)').matches;
