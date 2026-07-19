@@ -950,6 +950,15 @@ body.dark-mode .flashcard.graded-unknown { background: #3f3022; border-color: #b
 @keyframes starsFade { from { opacity: 0; } to { opacity: 1; } }
 .card-stars.stars-fade { animation: starsFade 0.45s ease; }   /* re-fade the stars in whenever the card changes */
 body.dark-mode .card-stars { color: #eadfce; }
+/* Explanation field → a collapsible "Selitys" dropdown at the end of the answer */
+.card-explanation { margin-top: 1.6rem; text-align: left; }
+.card-explanation-toggle { cursor: pointer; list-style: none; text-align: center; font-family: 'Lora', serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.03em; color: #6b4423; padding: 0.55rem 0; border-top: 1px solid #d4cec4; }
+.card-explanation-toggle::-webkit-details-marker { display: none; }
+.card-explanation-toggle::after { content: ' \25BE'; opacity: 0.7; }
+.card-explanation[open] .card-explanation-toggle::after { content: ' \25B4'; }
+.card-explanation-body { text-align: left; font-family: 'Lora', serif; font-weight: 400; font-size: 0.82em; line-height: 1.6; letter-spacing: 0.02em; color: #1a1612; padding-top: 0.5rem; }
+body.dark-mode .card-explanation-toggle { color: #d9b892; border-top-color: #6d5f52; }
+body.dark-mode .card-explanation-body { color: #eadfce; }
 
 /* ── SUN/MOON DARKMODE BUTTON ────────────────────────────── */
 #darkmode-btn {   /* pill styled like the other grid tools, reading "Teema" */
@@ -2700,6 +2709,17 @@ async function renderCurrentCard(){
   dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
   applyWordLinks(document.getElementById('answer-content'));
+  // Explanation field → a collapsible "Selitys" dropdown at the very end of the answer (hidden until opened)
+  { const _exp=getField(card,['Explanation','explanation','Selitys','selitys']);
+    if(_exp && _exp.replace(/<[^>]*>/g,'').trim()){
+      const _expHtml=await fixImages(_exp);
+      const _d=document.createElement('details'); _d.className='card-explanation';
+      _d.innerHTML='<summary class="card-explanation-toggle">Selitys</summary><div class="card-explanation-body"></div>';
+      const _body=_d.querySelector('.card-explanation-body'); _body.innerHTML=_expHtml;
+      document.getElementById('answer-content').appendChild(_d);
+      dimParentheses(_body); applyWordLinks(_body);
+    }
+  }
   flashWordLinkBubbles();   // new card loaded: flash the speech-bubble graphic on each linked word
   // Cards with a non-empty 3D field embed the external viewer at the bottom of the front, fed with that value
   { const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D']).replace(/<[^>]*>/g,'').trim();
@@ -3668,9 +3688,9 @@ function openGoldenComment(){
 function cardStarCount(card){
   const f=String(getField(card,['propability','probability','Probability','tenttitodennäköisyys','Tenttitodennäköisyys'])||'').replace(/<[^>]*>/g,'').trim();
   const stars=(f.match(/★/g)||[]).length;
-  if(stars) return Math.min(stars,3);
+  if(stars) return Math.min(stars,5);
   const num=parseInt(f,10);
-  if(num>=1 && num<=3) return num;
+  if(num>=1) return Math.min(num,5);                                    // propability is now a plain number → that many stars (capped at 5)
   return Math.min(((card.tags||[]).join(' ').match(/★/g)||[]).length,3);
 }
 function renderCardStars(){
