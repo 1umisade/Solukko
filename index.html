@@ -739,7 +739,7 @@ body.dark-mode .dev-comment-snip { color: #eadfce; }
 .dca-btn { border: none; background: none; cursor: pointer; font-size: 0.85rem; line-height: 1; padding: 3px 4px; border-radius: 6px; opacity: 0.75; }
 .dca-btn:hover { opacity: 1; background: rgba(0,0,0,0.06); }
 .dca-btn.dca-del:hover { background: rgba(192,57,43,0.15); }
-#card-comment { width: 100%; min-height: 360px; height: auto; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }
+#card-comment { width: 100%; min-height: 52px; height: auto; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }   /* auto-grows from ~1 line as you type (see autoGrowComment) */
 .comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
@@ -1739,7 +1739,8 @@ makeRubberband(document.getElementById('grid-col'), ()=>document.getElementById(
 makeRubberband(document.scrollingElement, ()=>document.getElementById('deck-screen'), '_resetHomeSpring');            // homepage: elastic bounce at the top/bottom of the page
 commentBoxWrap.addEventListener('click',()=>{ commentBoxWrap.classList.add('open'); const ta=document.getElementById('card-comment'); if(ta) ta.focus(); updateCommentBtnState(); });
 // The corner button is an X (close) until there's text, then a green check (submit).
-function updateCommentBtnState(){ const ta=document.getElementById('card-comment'); document.getElementById('comment-box')?.classList.toggle('has-text', !!(ta && ta.value.trim())); }
+function autoGrowComment(){ const ta=document.getElementById('card-comment'); if(!ta) return; ta.style.height='auto'; const h=ta.scrollHeight; ta.style.height=Math.min(h,520)+'px'; ta.style.overflowY=h>520?'auto':'hidden'; }   /* box hugs one line when empty, grows with the text (capped at 520, then the textarea scrolls) */
+function updateCommentBtnState(){ const ta=document.getElementById('card-comment'); document.getElementById('comment-box')?.classList.toggle('has-text', !!(ta && ta.value.trim())); autoGrowComment(); }
 function commentActionBtn(e){ const ta=document.getElementById('card-comment'); if(ta && ta.value.trim()) submitComment(e); else closeCommentBox(e); }
 function closeCommentBox(e){ if(e) e.stopPropagation(); const ta=document.getElementById('card-comment'); if(ta) ta.blur(); if(_commenting && typeof toggleComment==='function') toggleComment(); else document.getElementById('comment-box')?.classList.remove('open'); }
 document.getElementById('card-comment')?.addEventListener('input', updateCommentBtnState);
