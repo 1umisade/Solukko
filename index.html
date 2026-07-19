@@ -1109,7 +1109,7 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
 body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
 body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after { border-top-color: #4a3f34; }
-#word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.55; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
+#word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
@@ -4813,17 +4813,21 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
 (function initWordLinkTooltip(){
   const tip=document.createElement('div'); tip.id='word-link-tooltip'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
-  let touchPinnedLink=null;
+  let touchPinnedLink=null, _tipTarget=null;
 
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
 
   function showTip(target){
     const idx=parseInt(target.dataset.cardIndex); if(isNaN(idx)) return;
     const card=reviewCards[idx]; if(!card) return;
-    const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
-    const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
-    tip.innerHTML=prepareTooltipHtml(back||front);   // only the definition (no front/term field)
-    const cc=target.closest('.card-content'); if(cc){ const fs=parseFloat(getComputedStyle(cc).fontSize); if(fs) tip.style.fontSize=(fs*0.8).toFixed(2)+'px'; }   // tooltip text is always 20% smaller than the card text it sits in
+    if(target!==_tipTarget){                          // rebuild content only when the hovered word changes (not every frame)
+      _tipTarget=target;
+      const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
+      const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
+      tip.innerHTML=prepareTooltipHtml(back||front);   // only the definition (no front/term field)
+      dimParentheses(tip);                             // dim the parentheses like the card text
+      const cc=target.closest('.card-content'); if(cc){ const fs=parseFloat(getComputedStyle(cc).fontSize); if(fs) tip.style.fontSize=(fs*0.8).toFixed(2)+'px'; }   // tooltip text is always 20% smaller than the card text it sits in
+    }
     tip.style.display='block'; tip.style.width='min(520px, calc(100vw - 24px))';
     const r=target.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
     let l=r.left, t=r.bottom+8;
@@ -4836,7 +4840,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const hovered=document.body.classList.contains('is-mobile') ? null : document.querySelector('.word-link:hover');   // mobile: only long-press (touchPinnedLink), no hover
     if(touchPinnedLink){ showTip(touchPinnedLink); }
     else if(hovered){ showTip(hovered); }
-    else { tip.style.display='none'; }
+    else { tip.style.display='none'; _tipTarget=null; }
     requestAnimationFrame(updateTip);
   }
   requestAnimationFrame(updateTip);
@@ -4853,10 +4857,10 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
   document.addEventListener('touchend', e=>{
     const link=e.target.closest('.word-link');
     if(link && link===_wlTapLink && !_wlMoved){              // a tap on a linked word → toggle its definition
-      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; }
+      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; }
       else { touchPinnedLink=link; showTip(link); }
     } else if(touchPinnedLink && !link){                     // tap anywhere else closes it
-      touchPinnedLink=null; tip.style.display='none';
+      touchPinnedLink=null; tip.style.display='none'; _tipTarget=null;
     }
     _wlTapLink=null;
   }, {passive:true});
