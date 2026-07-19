@@ -256,6 +256,7 @@ body.dark-mode #card-screen.card-fs-on::backdrop { background: linear-gradient(r
 #card-screen.card-fs-on #flashcard-wrap { margin: 0 !important; }
 #card-screen.card-fs-on .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg.png?v=2'); box-shadow: none !important; }   /* old card paper background, no vignette */
 #card-screen.card-fs-on .card-content { font-size: 1.5rem; }
+body.is-mobile #card-screen.card-fs-on .card-content { font-size: 0.75rem; }   /* mobile: half-size card text */
 #card-screen.card-fs-on .top-bar,
 #card-screen.card-fs-on .comment-area,
 #card-screen.card-fs-on .group-tools,
@@ -533,6 +534,8 @@ body.dark-mode .card-peek-bubble::after { border-left-color: #3a312b; }
 body.is-mobile .card-peek { --slideD: 28px; }
 body.is-mobile .card-peek-inner { width: 46px; height: 46px; top: -10px; left: calc(50% - 23px); }
 body.is-mobile .card-peek-bubble { font-size: 0.8rem; padding: 0.35rem 0.6rem; }
+/* mobile study view: no Mona peeker and no "Vastauksen laajuus…" bubbles at all */
+body.is-mobile #card-peek, body.is-mobile #card-peek-top, body.is-mobile #card-peek-bottom, body.is-mobile #fc-bubble { display: none !important; }
 body.is-mobile #flashcard-wrap { margin-top: 34px; }
 /* deck finished: Mona dances on a disco floor (1.5:1 card, same as review cards) */
 .flashcard.celebrating { aspect-ratio: 1 / 1.5; min-height: 0; padding: 0; overflow: hidden; }   /* same 1.5:1 as the review cards (fitCardScale sizes it) */
