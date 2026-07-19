@@ -451,6 +451,7 @@ body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #c
 .mona-shake img { animation: monaShake 0.5s ease; }
 .mona-top-spacer { flex: 0 0 118px; visibility: hidden; }   /* balances Mona so the bubble stays centred on the title */
 .mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 36ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
+@media (min-width: 901px) { #mona-top-peek .mona-top-bubble { flex: 1 1 auto; max-width: none; } #mona-top-peek .mona-top-spacer { display: none; } }   /* desktop review cover: bubble fills the grid width to the RIGHT of Mona (Mona stays on the left, not covered) */
 .mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
