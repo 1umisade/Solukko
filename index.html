@@ -263,7 +263,7 @@ body.dark-mode #card-screen.card-fs-on::backdrop { background: linear-gradient(r
 #card-screen.card-fs-on #flashcard-wrap { margin: 0 !important; }
 #card-screen.card-fs-on .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg.png?v=2'); box-shadow: none !important; }   /* old card paper background, no vignette */
 #card-screen.card-fs-on .card-content { font-size: 1.5rem; }
-body.is-mobile #card-screen.card-fs-on .card-content { font-size: 0.75rem; }   /* mobile: half-size card text */
+body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }   /* mobile study-view card text (35% bigger than the previous 0.75rem) */
 #card-screen.card-fs-on .top-bar,
 #card-screen.card-fs-on .comment-area,
 #card-screen.card-fs-on .group-tools,
@@ -276,7 +276,7 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 0.75rem; }   /
 #front-check { display: none; }
 #card-screen.card-fs-on #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: min(20px, 3.8vw); position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; max-width: 100vw; }   /* bottoms aligned so all three keycaps sit on the same line; scales down to fit narrow (mobile) screens */
 #card-screen.card-fs-on #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
-.fc-nav { width: min(75px, 14vw); height: min(75px, 14vw); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
+.fc-nav { width: min(75px, 14vw, calc(100dvh / 7)); height: min(75px, 14vw, calc(100dvh / 7)); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
 /* armed (>=125%): pulsing glow — release now to register. Front (Edellinen/Seuraava) = beige on both; back answer buttons = orange (Ei) / sage (Kyllä) */
 #front-check:not(.back) .fc-nav.fc-nav-armed img { animation: fcGlowBeige 0.85s ease-in-out infinite; }
@@ -302,7 +302,7 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 0.75rem; }   /
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
 .tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; touch-action: manipulation; }
-.tarkista-btn img { height: min(75px, 14vw); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
+.tarkista-btn img { height: min(75px, 14vw, calc(100dvh / 7)); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
 #front-check.back .tarkista-btn .tk-back { display: block; }
@@ -326,6 +326,7 @@ body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 #card-screen.faux-fs #faux-fs-back { display: flex; }
 body:not(.is-mobile) #card-screen.faux-fs #faux-fs-back { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }   /* desktop: hide when the mouse is still, like the comment button */
 body:not(.is-mobile) #card-screen.faux-fs #faux-fs-back.visible { opacity: 1; pointer-events: auto; }
+body.is-mobile #card-screen.faux-fs #faux-fs-back { display: none; }   /* mobile: no back button — double-tap the card to leave the study view */
 body.dark-mode #faux-fs-back { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 /* desktop study view: bottom-right Mona whose bubble shows the answer's extent; fades with the mouse like the other buttons */
 #fs-scope-mona { display: none; }
