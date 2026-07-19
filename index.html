@@ -2750,8 +2750,7 @@ function inFullscreen(){ const cs=document.getElementById('card-screen'); return
 function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
-  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the fullscreen page — always
-  if(_nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }     // ...plus native fullscreen where supported (best-effort; just hides the browser chrome)
+  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — NO native fullscreen, so the browser search bar / chrome stay visible and the iOS keyboard can't drop it
 }
 function exitCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
@@ -3054,12 +3053,7 @@ let _commenting=false;
 // iOS Safari force-exits native fullscreen the moment the comment box takes focus (the soft keyboard needs the screen).
 // We can't prevent that, but we can hop straight back into fullscreen on the same card once the comment is written/closed.
 let _fsCommentExit=false;
-function _reenterFsAfterComment(){   // MUST be called inside the submit/close tap so requestFullscreen still has user activation
-  if(!_fsCommentExit) return; _fsCommentExit=false;
-  const cs=document.getElementById('card-screen');
-  if(cs && cs.classList.contains('card-fs-on')){ if(_nativeFsSupported() && !document['fullscreenElement']) cs.requestFullscreen().catch(()=>{}); fitCardScale(); scrollToCard(); return; }   // still on the faux page → just re-hide the browser chrome now the keyboard is gone
-  if(!inFullscreen() && document.body.classList.contains('reviewing')) enterCardFs();   // fallback (older path): fully re-enter
-}
+function _reenterFsAfterComment(){ _fsCommentExit=false; }   // no native fullscreen any more — the study view is a plain page, so commenting never drops it; nothing to re-enter
 function _syncCommentArea(){   // desktop: comments only when toggled open; mobile: always after the answer shows
   const ca=document.querySelector('.comment-area'); if(!ca) return;
   const mobile=window.matchMedia('(max-width: 900px)').matches;
