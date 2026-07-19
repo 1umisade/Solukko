@@ -861,8 +861,10 @@ body.dark-mode .ucard-tools button { background: rgba(42,38,32,0.92); border-col
 /* the add/edit card: just a plain editable flashcard + a flip icon (no title/save/cancel). Right column on desktop, overlay on mobile. */
 #usercard-form { display: none; box-sizing: border-box; }
 body.adding-usercard #usercard-form { display: flex; }
-#ucard-card-wrap { position: relative; width: 100%; margin: 0 auto; }
-#ucard-flashcard { aspect-ratio: 1 / 1.5; width: min(100%, calc((100dvh - 4rem) / 1.5)); height: auto; max-height: calc(100dvh - 4rem); overflow-y: auto; cursor: text; margin: 0 auto; }   /* biggest 1:1.5 card that fits: as tall as the viewport allows, width derived from the height; scrolls internally when overfilled */
+#ucard-card-wrap { position: relative; width: min(100%, calc((100dvh - 4rem) / 1.5)); margin: 0 auto; }   /* sized to the card so the ✓ button sits at the card's corner */
+#ucard-flashcard { aspect-ratio: 1 / 1.5; width: 100%; height: auto; max-height: calc(100dvh - 4rem); overflow-y: auto; cursor: text; }   /* biggest 1:1.5 card that fits: as tall as the viewport allows, width derived from the height; scrolls internally when overfilled */
+#ucard-save-btn { position: absolute; right: 12px; bottom: 12px; width: 44px; height: 44px; border-radius: 50%; border: none; background: #498d65; color: #fff; font-size: 1.35rem; line-height: 1; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.22); display: flex; align-items: center; justify-content: center; z-index: 3; }   /* add the card once written */
+#ucard-save-btn:hover { background: #3f7d59; }
 #ucard-answer { display: block; border-top: none; position: relative; }   /* both sides always shown (front + back); divider drawn by ::before so it can fade at the edges */
 #ucard-answer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, #d4cec4 18%, #d4cec4 82%, transparent); }   /* faded-edge divider */
 body.dark-mode #ucard-answer::before { background: linear-gradient(90deg, transparent, #6d5f52 18%, #6d5f52 82%, transparent); }
@@ -875,7 +877,8 @@ body.dark-mode .ucard-editable:empty::before { color: #8a7d6a; }
 }
 @media (max-width: 900px) {   /* mobile: full-screen overlay (there is no right column) */
   body.adding-usercard #usercard-form { position: fixed; inset: 0; align-items: center; justify-content: center; padding: 1.4rem; z-index: 200; background: rgba(20,18,14,0.55); }
-  #ucard-flashcard { width: min(100%, calc((100dvh - 2.8rem) / 1.5)); max-height: calc(100dvh - 2.8rem); }   /* mobile overlay uses 1.4rem padding */
+  #ucard-card-wrap { width: min(100%, calc((100dvh - 2.8rem) / 1.5)); }   /* mobile overlay uses 1.4rem padding */
+  #ucard-flashcard { max-height: calc(100dvh - 2.8rem); }
 }
 .overview-section { width: 100%; }
 .grid-shuffle-btn { position: absolute; right: 0; bottom: 0.7rem; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #d4cec4; background: #fffef9; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); padding: 0; transition: transform 0.1s ease; }
@@ -1324,6 +1327,7 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
           <div class="card-content ucard-editable" id="ucard-back" contenteditable="true" data-ph="Kirjoita takapuoli…" spellcheck="false"></div>
         </div>
       </div>
+      <button type="button" id="ucard-save-btn" onclick="commitUserCardForm()" title="Lisää kortti">✓</button>
     </div>
   </div>
   <div id="grid-col">
@@ -4116,7 +4120,7 @@ async function deleteUserCard(docId){
 // KORTTIEHDOTUKSET   (a user suggests an OWN card as an official course card; the dev awards a golden-style claim code worth 0,25 €)
 // ════════════════════════════════════════════════════════════
 const ADD_CARD_INFO_HTML='<div style="font-weight:700;margin-bottom:0.6rem;">Haluatko luoda oman kortin?</div>'
-  +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin. Voit myös lähettää korttisi ylläpidon luettavaksi painamalla &quot;Ehdota&quot;-painiketta. Hyväksytystä korttiehdotuksesta maksamme 0,25&nbsp;€, jolloin yhteydenottopyyntö lähetetään sille laitteelle, jolla korttia ehdotettiin.</div>';
+  +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin. Voit myös lähettää korttisi ylläpidon luettavaksi painamalla ”Ehdota”-painiketta. Hyväksytty korttiehdotus lisätään osaksi kurssia kaikille käyttäjille. Solukko.com palkitsee 0,25&nbsp;€ jokaisesta hyväksytystä korttiehdotuksesta, jolloin yhteydenottopyyntö lähetetään sille laitteelle, jolla korttia ehdotettiin.</div>';
 let _addInfoOn=false;
 function previewAddCardInfo(){   // hovering a "+ Lisää kortti" tile shows this info card on the right (review page, desktop preview)
   if(inFullscreen()) return;
