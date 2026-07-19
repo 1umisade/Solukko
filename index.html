@@ -2828,7 +2828,11 @@ function _onFsExit(){
 document.addEventListener('fullscreenchange',()=>{   // enter/exit of the PAGE is driven by enterCardFs/exitCardFs; this only reacts to the native layer engaging/leaving
   const cs=document.getElementById('card-screen'); if(!cs) return;
   if(document['fullscreenElement']===cs){ fitCardScale(); scrollToCard(); updateFsSlider(); _fsCursorActivity(); }   // native fullscreen engaged → re-fit to the now-larger viewport (chrome hidden)
-  else if(cs.classList.contains('card-fs-on')){ exitCardFs(); }   // left native fullscreen (Esc / swipe) while the page is still up → exit the page too
+  else if(cs.classList.contains('card-fs-on')){
+    const _kbDrop=(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) && document.activeElement && document.activeElement.id==='card-comment';
+    if(_kbDrop){ _fsCommentExit=true; fitCardScale(); scrollToCard(); return; }   // iOS dropped native fullscreen for the comment keyboard → STAY on the faux-fullscreen page (same view + answer buttons), don't tear it down
+    exitCardFs();   // a real exit (Esc / swipe) → leave the page too
+  }
 });
 document.addEventListener('pointerdown',()=>{ if(inFullscreen()){ flashFsExitBtn(); _fsCursorActivity(); } }, true);
 
@@ -3052,7 +3056,9 @@ let _commenting=false;
 let _fsCommentExit=false;
 function _reenterFsAfterComment(){   // MUST be called inside the submit/close tap so requestFullscreen still has user activation
   if(!_fsCommentExit) return; _fsCommentExit=false;
-  if(!inFullscreen() && document.body.classList.contains('reviewing')) enterCardFs();
+  const cs=document.getElementById('card-screen');
+  if(cs && cs.classList.contains('card-fs-on')){ if(_nativeFsSupported() && !document['fullscreenElement']) cs.requestFullscreen().catch(()=>{}); fitCardScale(); scrollToCard(); return; }   // still on the faux page → just re-hide the browser chrome now the keyboard is gone
+  if(!inFullscreen() && document.body.classList.contains('reviewing')) enterCardFs();   // fallback (older path): fully re-enter
 }
 function _syncCommentArea(){   // desktop: comments only when toggled open; mobile: always after the answer shows
   const ca=document.querySelector('.comment-area'); if(!ca) return;
