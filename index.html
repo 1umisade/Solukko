@@ -2809,9 +2809,8 @@ function inFullscreen(){ const cs=document.getElementById('card-screen'); return
 function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
-  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — it stays a page even if native fullscreen isn't available or gets dropped
+  cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — a plain page, NO native fullscreen (that added an OS transition + a second fitCardScale on every card-open, which felt sluggish); the browser chrome just stays visible
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // own card → Ehdota button instead of the comment button
-  if(_nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }     // best-effort: also request native fullscreen to hide the browser chrome (works from the grid-card tap's user activation). If it drops (iOS keyboard / Esc) we stay on the page.
 }
 function exitCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
@@ -3112,10 +3111,8 @@ let _commenting=false;
 // iOS Safari force-exits native fullscreen the moment the comment box takes focus (the soft keyboard needs the screen).
 // We can't prevent that, but we can hop straight back into fullscreen on the same card once the comment is written/closed.
 let _fsCommentExit=false;
-function _reenterFsAfterComment(){   // after commenting: re-hide the browser chrome by re-requesting native fullscreen (must run inside the close tap for user activation)
+function _reenterFsAfterComment(){   // study view is a plain page now (no native fullscreen), so there's nothing to re-enter after commenting
   _fsCommentExit=false;
-  const cs=document.getElementById('card-screen');
-  if(cs && cs.classList.contains('card-fs-on') && _nativeFsSupported() && !document['fullscreenElement']) cs.requestFullscreen().catch(()=>{});
 }
 function _syncCommentArea(){   // desktop: comments only when toggled open; mobile: always after the answer shows
   const ca=document.querySelector('.comment-area'); if(!ca) return;
