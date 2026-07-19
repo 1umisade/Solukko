@@ -857,14 +857,20 @@ body.dark-mode .add-card-tile { border-color: #a97f4e; color: #d9c496; }
 .ucard-tools { position: absolute; bottom: 3px; right: 3px; display: flex; gap: 2px; z-index: 2; }   /* bottom-right; always visible so it works on touch too */
 .ucard-tools button { background: rgba(255,255,255,0.92); border: 1px solid #d4cec4; border-radius: 6px; width: 22px; height: 22px; line-height: 1; padding: 0; font-size: 0.78rem; cursor: pointer; }
 .ucard-tools button:hover { background: #fff; border-color: #b5824a; }
+.ucard-tools button.ucard-suggest { font-weight: 800; color: #b5824a; }                 /* "!" = ehdota (suggest official) */
+.ucard-tools button.ucard-suggest.suggested { color: #498d65; border-color: #498d65; }   /* already suggested */
+.ucard-tools button.ucard-suggest.approved { color: #b8860b; border-color: #e0b93e; background: linear-gradient(135deg, #fff7d6, #f6dd7f); }   /* approved (has a code) */
 body.dark-mode .ucard-tools button { background: rgba(42,38,32,0.92); border-color: #5a5148; color: #ece5d8; }
 /* the add/edit card: just a plain editable flashcard + a flip icon (no title/save/cancel). Right column on desktop, overlay on mobile. */
 #usercard-form { display: none; box-sizing: border-box; }
 body.adding-usercard #usercard-form { display: flex; }
 #ucard-card-wrap { position: relative; width: min(100%, calc((100dvh - 4rem) / 1.5)); margin: 0 auto; }   /* sized to the card so the ✓ button sits at the card's corner */
 #ucard-flashcard { aspect-ratio: 1 / 1.5; width: 100%; height: auto; max-height: calc(100dvh - 4rem); overflow-y: auto; cursor: text; }   /* biggest 1:1.5 card that fits: as tall as the viewport allows, width derived from the height; scrolls internally when overfilled */
-#ucard-save-btn { position: absolute; right: 12px; bottom: 12px; width: 44px; height: 44px; border-radius: 50%; border: none; background: #498d65; color: #fff; font-size: 1.35rem; line-height: 1; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.22); display: flex; align-items: center; justify-content: center; z-index: 3; }   /* add the card once written */
-#ucard-save-btn:hover { background: #3f7d59; }
+#ucard-save-btn { position: absolute; right: 12px; bottom: 12px; width: 44px; height: 44px; border-radius: 50%; border: none; background: #b5824a; color: #fff; font-size: 1.3rem; line-height: 1; cursor: pointer; box-shadow: 0 3px 12px rgba(0,0,0,0.22); display: flex; align-items: center; justify-content: center; z-index: 3; }
+#ucard-save-btn::before { content: "\2715"; }                  /* before any text: an X (cancel) — hides the card template */
+#ucard-save-btn.has-text { background: #498d65; }              /* once written: green add button... */
+#ucard-save-btn.has-text::before { content: "\2713"; }         /* ...shown as a check mark */
+#ucard-save-btn:hover { filter: brightness(0.94); }
 #ucard-answer { display: block; border-top: none; position: relative; }   /* both sides always shown (front + back); divider drawn by ::before so it can fade at the edges */
 #ucard-answer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, #d4cec4 18%, #d4cec4 82%, transparent); }   /* faded-edge divider */
 body.dark-mode #ucard-answer::before { background: linear-gradient(90deg, transparent, #6d5f52 18%, #6d5f52 82%, transparent); }
@@ -1322,12 +1328,12 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
   <div id="usercard-form">   <!-- add/edit an own card: a plain editable flashcard showing BOTH sides (etupuoli + takapuoli). Auto-saves when you click away; delete from the grid. -->
     <div id="ucard-card-wrap">
       <div class="flashcard answer-shown" id="ucard-flashcard" onmousedown="ucardCardMousedown(event)">
-        <div class="card-content ucard-editable" id="ucard-front" contenteditable="true" data-ph="Kirjoita etupuoli…" spellcheck="false"></div>
+        <div class="card-content ucard-editable" id="ucard-front" contenteditable="true" data-ph="Kirjoita etupuoli…" spellcheck="false" oninput="updateUcardSaveBtn()"></div>
         <div class="answer-section" id="ucard-answer">
-          <div class="card-content ucard-editable" id="ucard-back" contenteditable="true" data-ph="Kirjoita takapuoli…" spellcheck="false"></div>
+          <div class="card-content ucard-editable" id="ucard-back" contenteditable="true" data-ph="Kirjoita takapuoli…" spellcheck="false" oninput="updateUcardSaveBtn()"></div>
         </div>
       </div>
-      <button type="button" id="ucard-save-btn" onclick="commitUserCardForm()" title="Lisää kortti">✓</button>
+      <button type="button" id="ucard-save-btn" onclick="ucardSaveOrCancel()" title="Sulje / lisää kortti"></button>
     </div>
   </div>
   <div id="grid-col">
@@ -4078,8 +4084,11 @@ function openAddCardForm(groupIndex){   // add a card to the lecture section who
   _fillUserCardForm('',''); _ucShowBoth(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60);
 }
 function openEditCardForm(docId){ const c=_userCards.find(x=>x._docId===docId); if(!c) return; commitUserCardForm(); _editingDocId=docId; _addTargetSubdeck=c._subdeck||currentDeck; _fillUserCardForm(c._front||'', c._back||''); _ucShowBoth(); document.body.classList.add('adding-usercard'); setTimeout(()=>{ const f=document.getElementById('ucard-front'); if(f) f.focus(); },60); }
-function _fillUserCardForm(front,back){ const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back'); if(f) f.textContent=front||''; if(b) b.textContent=back||''; }
+function _fillUserCardForm(front,back){ const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back'); if(f) f.textContent=front||''; if(b) b.textContent=back||''; updateUcardSaveBtn(); }
 function closeUserCardForm(){ document.body.classList.remove('adding-usercard'); _editingDocId=null; }
+function _ucHasText(){ const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back'); return !!((f&&f.innerText.trim())||(b&&b.innerText.trim())); }
+function updateUcardSaveBtn(){ const btn=document.getElementById('ucard-save-btn'); if(btn) btn.classList.toggle('has-text', _ucHasText()); }   // X (cancel/hide) until there's text, then ✓ (add)
+function ucardSaveOrCancel(){ if(_ucHasText()) commitUserCardForm(); else closeUserCardForm(); }   // ✓ adds the card; X just hides the template (nothing written → discard)
 function _ucCollect(){ const f=document.getElementById('ucard-front'), b=document.getElementById('ucard-back'); const norm=s=>String(s||'').replace(/ /g,' ').replace(/[ \t]+(\n|$)/g,'$1').trim(); return { front:norm(f&&f.innerText), back:norm(b&&b.innerText) }; }
 function commitUserCardForm(){   // auto-save on dismiss: persist if there's text, then close (there is no Save button)
   if(!document.body.classList.contains('adding-usercard')) return;
@@ -4149,16 +4158,16 @@ function updateSuggestBtnState(){
   b.classList.toggle('approved', !!currentCard._approved);
   b.title=currentCard._approved?'Hyväksytty! Näytä palkintokoodi':(currentCard._suggested?'Ehdotettu — odottaa tarkistusta':'Ehdota korttia viralliseksi');
 }
-function suggestCurrentCard(){
-  if(!currentCard||!currentCard._userCard) return;
-  const docId=currentCard._docId;
-  if(currentCard._approved){ showCardAwardCodeStr(currentCard._approvedCode); return; }
-  if(currentCard._suggested){ alert('Tämä kortti on jo ehdotettu. Ylläpito tarkistaa sen pian.'); return; }
+function suggestUserCard(docId){   // suggest a specific own card (grid "!" button or the fullscreen Ehdota button)
+  const c=_userCards.find(x=>x._docId===docId); if(!c) return;
+  if(c._approved){ showCardAwardCodeStr(c._approvedCode); return; }
+  if(c._suggested){ alert('Tämä kortti on jo ehdotettu. Ylläpito tarkistaa sen pian.'); return; }
   if(!confirm('Ehdota tätä korttia viralliseksi kurssikortiksi?\n\nYlläpito tarkistaa sen. Hyväksytystä ehdotuksesta maksetaan 0,25 €.')) return;
   db.collection('userCards').doc(docId).update({ suggested:true, suggestedAt: firebase.firestore.FieldValue.serverTimestamp() })
-    .then(()=>{ currentCard._suggested=true; const c=_userCards.find(x=>x._docId===docId); if(c) c._suggested=true; updateSuggestBtnState(); alert('Kiitos! Ehdotuksesi on lähetetty tarkistettavaksi.'); })
+    .then(()=>{ c._suggested=true; if(currentCard && currentCard._docId===docId) currentCard._suggested=true; if(typeof updateSuggestBtnState==='function') updateSuggestBtnState(); const g=document.getElementById('card-overview-grid'); if(g) g.dataset.deckName=''; if(typeof renderCardOverview==='function') renderCardOverview(); alert('Kiitos! Ehdotuksesi on lähetetty tarkistettavaksi.'); })
     .catch(e=>alert('Ehdotus epäonnistui: '+((e&&(e.code||e.message))||'')+'\n\n(Firestoren säännöt on ehkä julkaistava — ks. firestore.rules.)'));
 }
+function suggestCurrentCard(){ if(currentCard && currentCard._userCard) suggestUserCard(currentCard._docId); }   // fullscreen Ehdota button → suggest the shown card
 function showCardAwardCodeStr(code){ alert('Korttiehdotuksesi hyväksyttiin! 🎉\n\nLunasta 0,25 € tekstaamalla koodi '+(code||'')+' numeroon 045 234 2001.'); }
 function cardAwardNoteClick(){ if(_cardAward) showCardAwardCodeStr(_cardAward.code); }
 // creator's real-time watch: if the dev awards one of THIS device's cards, show the green award note (golden-code style)
@@ -4277,7 +4286,9 @@ function renderCardOverview(){
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
       if(card._userCard){   // own card: same tile look + edit/delete tools, sitting in its own lecture section
         const canEdit=devMode||card._owner===_uid;
-        const tools=canEdit?`<span class="ucard-tools"><button type="button" onclick="event.stopPropagation();openEditCardForm('${card._docId}')" title="Muokkaa">✎</button><button type="button" onclick="event.stopPropagation();deleteUserCard('${card._docId}')" title="Poista">🗑</button></span>`:'';
+        const _sugCls = card._approved ? 'ucard-suggest approved' : (card._suggested ? 'ucard-suggest suggested' : 'ucard-suggest');
+        const _sugTitle = card._approved ? 'Hyväksytty — näytä palkintokoodi' : (card._suggested ? 'Ehdotettu (odottaa tarkistusta)' : 'Ehdota viralliseksi');
+        const tools=canEdit?`<span class="ucard-tools"><button type="button" class="${_sugCls}" onclick="event.stopPropagation();suggestUserCard('${card._docId}')" title="${_sugTitle}">!</button><button type="button" onclick="event.stopPropagation();openEditCardForm('${card._docId}')" title="Muokkaa">✎</button><button type="button" onclick="event.stopPropagation();deleteUserCard('${card._docId}')" title="Poista">🗑</button></span>`:'';
         return `<div class="overview-card user-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${tools}</div>`;
       }
       const starCount=cardStarCount(card);
