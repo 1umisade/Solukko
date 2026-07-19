@@ -122,7 +122,7 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .gold-toggle.on, .gold-toggle:hover { filter: none; }
 /* winner: gold win bubble on the homepage greeting + a trophy award button inside it; the review back button turns gold too (still goes back) */
 .home-greet.win-bubble { display: block; height: auto; overflow: visible; }   /* winner's bubble: normal colours (NOT painted gold) — just block + auto height so the win text + comment fit */
-.win-golden-comment { margin-top: 0.6rem; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border: 1px solid #d4af37; border-radius: 12px; padding: 0.5rem 0.7rem; color: #4a3a10; box-shadow: 0 2px 8px rgba(212,175,55,0.4); }   /* the golden comment shown INSIDE the bubble */
+.win-golden-comment { width: fit-content; max-width: 100%; margin-top: 0.6rem; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border: 1px solid #d4af37; border-radius: 12px; padding: 0.5rem 0.7rem; color: #4a3a10; box-shadow: 0 2px 8px rgba(212,175,55,0.4); }   /* the golden comment shown INSIDE the bubble — sized to its own content, not the bubble width */
 .win-golden-comment b { color: #6b4a10; }
 .bubble-award-wrap { float: right; margin: 0 0 6px 14px; }   /* trophy sits top-right; the text wraps around it */
 .bubble-award-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fffaea, #f6dd7f 55%, #e0b93e); box-shadow: 0 3px 12px rgba(212,175,55,0.65), 0 1px 4px rgba(0,0,0,0.25); font-size: 1.35rem; line-height: 1; cursor: pointer; animation: goldenPulse 1.6s ease-in-out infinite; }
