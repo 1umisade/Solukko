@@ -236,6 +236,7 @@ body.dark-mode #rotate-btn, body.dark-mode #comment-btn { background: rgba(58,49
 body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { background: #eadfce !important; color: #2b211b !important; border-color: #eadfce !important; }
 #card-screen.card-fs-on #rotate-btn, #card-screen.card-fs-on #comment-btn { display: none !important; }   /* in fullscreen the exit button (top-right) handles it */
 #card-screen.cursor-hidden, #card-screen.cursor-hidden * { cursor: none !important; }
+#card-screen.cursor-hidden .word-link, #card-screen.cursor-hidden .word-link * { cursor: url('cursor_normal.png') 4 2, auto !important; }   /* keep the normal cursor visible over glossary word-links even when it's auto-hidden */
 @media (max-width: 900px) { #comment-btn { display: none !important; } }   /* mobile: comments show inline on reveal */
 /* fullscreen mode: the whole review screen goes fullscreen, showing just the card + the progress bar */
 /* fullscreen: the site background image + an edge vignette, painted as plain background layers directly on the fullscreen element (background-attachment:fixed and fixed-position child layers don't render on a fullscreen element in Chrome, so keep it as ordinary background layers here) */
@@ -451,7 +452,7 @@ body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #c
 .mona-shake img { animation: monaShake 0.5s ease; }
 .mona-top-spacer { flex: 0 0 118px; visibility: hidden; }   /* balances Mona so the bubble stays centred on the title */
 .mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 36ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
-@media (min-width: 901px) { #mona-top-peek .mona-top-bubble { flex: 1 1 auto; max-width: none; } #mona-top-peek .mona-top-spacer { display: none; } }   /* desktop review cover: bubble fills the grid width to the RIGHT of Mona (Mona stays on the left, not covered) */
+@media (min-width: 901px) { #mona-top-peek { font-family: 'Lora', serif; font-size: clamp(1rem, 1.5vw, 1.2rem); max-width: 46ch; } #mona-top-peek .mona-top-bubble { flex: 1 1 auto; max-width: none; } #mona-top-peek .mona-top-spacer { display: none; } }   /* desktop review cover: Mona + bubble span the same 46ch as the esittely text (font matched so 46ch resolves identically), centred by the cover; bubble fills to the RIGHT of Mona */
 .mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
@@ -1072,13 +1073,13 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 .flashcard:not(.answer-shown) .word-link { pointer-events: none; cursor: text; }
 .flashcard:not(.answer-shown) .word-link.wl-show, .flashcard:not(.answer-shown) .word-link:hover { background: none; box-shadow: none; }
 .flashcard:not(.answer-shown) .word-link::after { display: none; }
-.word-link::after { content: ''; position: absolute; left: 12px; top: 100%; border: 6px solid transparent; border-top-color: transparent; transition: border-top-color 0.35s ease; pointer-events: none; }   /* speech-bubble tail */
+.word-link::after { display: none; }   /* tail arrow removed */
 .word-link.wl-show, .word-link:hover { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 0 0 6px #a06a35, 0 4px 12px rgba(0,0,0,0.16); }   /* speech-bubble graphic (cream fill + darker outline): on card load (flashes) and on hover */
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
 body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
 body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after { border-top-color: #4a3f34; }
-#word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.55; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
-body.dark-mode #word-link-tooltip { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
+#word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.55; color: #56533c; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
+body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center/cover no-repeat; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
