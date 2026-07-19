@@ -914,7 +914,7 @@ body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-colo
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
-.overview-card { background: url('new_bg.png?v=2') center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1 / 1.5; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }   /* vertical on all devices */
+.overview-card { background: url('new_bg.png?v=2') center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1 / 1.5; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; -webkit-box-pack: center; text-align: center; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }   /* text centred (h + v) like the real card; vertical on all devices */
 
 /* ── STAR BADGE inside overview cards ─────────────────────  */
 .overview-card-stars {
@@ -3200,6 +3200,7 @@ function showDeckWelcome(){   // after the study page: show the current card on 
   if(!reviewCards.length) return;
   const idx=(currentOverviewIndex>=0 && reviewCards[currentOverviewIndex]) ? currentOverviewIndex : 0;
   _previewIndex=-1; _instantCard=true; _doPreview(idx);   // returning from fullscreen: no card fade-in
+  requestAnimationFrame(()=>{ if(typeof scrollGridToActiveNow==='function') scrollGridToActiveNow(); });   // bring the just-studied card into view in the grid
 }
 function showDeckLanding(){   // initial deck open: grid only; the first card highlights + shows once the grid has faded in
   if(inFullscreen()) return;
@@ -4731,6 +4732,14 @@ function fitFrontText(){
 }
 
 let _openingDeck=false, _deckIntro=null;
+function scrollGridToActiveNow(){   // centre the active card in the grid regardless of fullscreen (used when returning to the review grid)
+  const gridCol=document.getElementById('grid-col');
+  const active=(gridCol||document).querySelector('.overview-card.active'); if(!active) return;
+  if(gridCol && gridCol.scrollHeight>gridCol.clientHeight+4){
+    const gr=gridCol.getBoundingClientRect(), ar=active.getBoundingClientRect();
+    gridCol.scrollTop += (ar.top-gr.top) - gridCol.clientHeight/2 + active.offsetHeight/2;
+  } else { try{ active.scrollIntoView({block:'center'}); }catch(e){ active.scrollIntoView(); } }
+}
 function scrollGridToActive(){   // keep the current card visible in the left grid, without moving the window/card
   if(!inFullscreen()) return;   // don't scroll the grid on hover-preview (grid is hidden in fullscreen anyway)
   const gridCol=document.getElementById('grid-col'); if(!gridCol) return;
