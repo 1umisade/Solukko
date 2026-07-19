@@ -121,16 +121,15 @@ body.dark-mode .shop-embed-name { color: #eadfce; }
 .gold-toggle { float: right; background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 0; margin-left: 6px; line-height: 1; filter: grayscale(1) opacity(0.45); transition: filter 0.15s ease; }
 .gold-toggle.on, .gold-toggle:hover { filter: none; }
 /* winner: gold win bubble on the homepage greeting + a trophy award button inside it; the review back button turns gold too (still goes back) */
-.home-greet.golden-bubble { display: block; height: auto; overflow: visible; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border-color: #d4af37 !important; color: #4a3a10 !important; box-shadow: 0 0 16px rgba(212,175,55,0.55) !important; }   /* block + auto height so the long win text wraps like the normal greeting bubbles */
-.home-greet.golden-bubble::after { border-right-color: #f6dd7f !important; }
-.golden-bubble b { color: #6b4a10; }
+.home-greet.win-bubble { display: block; height: auto; overflow: visible; }   /* winner's bubble: normal colours (NOT painted gold) — just block + auto height so the win text + comment fit */
+.win-golden-comment { margin-top: 0.6rem; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border: 1px solid #d4af37; border-radius: 12px; padding: 0.5rem 0.7rem; color: #4a3a10; box-shadow: 0 2px 8px rgba(212,175,55,0.4); }   /* the golden comment shown INSIDE the bubble */
+.win-golden-comment b { color: #6b4a10; }
 .bubble-award-wrap { float: right; margin: 0 0 6px 14px; }   /* trophy sits top-right; the text wraps around it */
 .bubble-award-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fffaea, #f6dd7f 55%, #e0b93e); box-shadow: 0 3px 12px rgba(212,175,55,0.65), 0 1px 4px rgba(0,0,0,0.25); font-size: 1.35rem; line-height: 1; cursor: pointer; animation: goldenPulse 1.6s ease-in-out infinite; }
 @keyframes goldenPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
 /* winner's golden comment card — top-right of the homepage; hidden during review/fullscreen */
 #golden-comment { display: none; position: fixed; top: 70px; right: 14px; z-index: 90; width: min(78vw, 280px); background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border: 2px solid #d4af37; border-radius: 16px; padding: 0.7rem 0.9rem; box-shadow: 0 6px 22px rgba(212,175,55,0.5), 0 2px 8px rgba(0,0,0,0.2); font-family: 'Lora', serif; color: #4a3a10; cursor: pointer; }
-body.has-golden #golden-comment { display: block; }
-body.has-golden.reviewing #golden-comment { display: none; }
+/* the winner's comment now shows INSIDE Mona's bubble (.win-golden-comment), so the separate top-right card stays hidden */
 /* creator's card-suggestion award note (green), homepage only; sits below the golden note if both are showing */
 #card-award-note { display: none; position: fixed; top: 70px; right: 14px; z-index: 90; width: min(78vw, 250px); background: linear-gradient(135deg, #eaf7ee, #c9e9d4 60%, #a6d8b7); border: 2px solid #6fae83; border-radius: 16px; padding: 0.7rem 0.9rem; box-shadow: 0 6px 22px rgba(80,150,100,0.4), 0 2px 8px rgba(0,0,0,0.18); font-family: 'Lora', serif; color: #24502f; cursor: pointer; }
 body.has-card-award #card-award-note { display: block; }
@@ -144,7 +143,7 @@ body.has-golden #card-award-note { top: 178px; }
 /* the winner's award button lives top-right in EVERY view. Two elements so it survives fullscreen's top layer:
    #award-btn (outside #card-screen) covers the homepage + review; #fs-award-btn (inside #card-screen) covers fullscreen. Both stay until the dev marks the prize paid (then has-golden drops). */
 #award-btn, #fs-award-btn { display: none; position: fixed; top: 16px; right: 16px; z-index: 260; width: 48px; height: 48px; border-radius: 50%; border: none; background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); box-shadow: 0 4px 16px rgba(212,175,55,0.6), 0 2px 8px rgba(0,0,0,0.25); font-size: 1.4rem; line-height: 1; cursor: pointer; align-items: center; justify-content: center; animation: goldenPulse 1.6s ease-in-out infinite; }
-body.has-golden #award-btn { display: flex; }
+/* homepage/review award button (#award-btn) removed on request — the win bubble carries the prize info */
 body.has-golden #card-screen.card-fs-on #fs-award-btn { display: flex; }
 /* dev password prompt (masked input) */
 #devpw-overlay { position: fixed; inset: 0; z-index: 400; background: rgba(24,18,12,0.55); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
@@ -1870,8 +1869,8 @@ function _greetOrder(){ return (typeof _myGolden!=='undefined' && _myGolden) ? [
 function renderGreet(){   // render the current homepage greeting bubble (its index in _greetOrder())
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
   const order=_greetOrder(); const key=order[((_greetIdx%order.length)+order.length)%order.length];
-  if(key==='__golden__'){ greet.classList.add('golden-bubble'); greet.innerHTML=_goldenWinText(); }
-  else { greet.classList.remove('golden-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
+  if(key==='__golden__'){ greet.classList.add('win-bubble'); greet.innerHTML=_goldenWinText(); }
+  else { greet.classList.remove('win-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
 }
 // homepage loading state: while the decks load, Mona sleeps and her speech bubble shows a progress bar; on reveal she wakes and the greeting returns
 function _setHomeMonaLoading(on){
@@ -1881,7 +1880,7 @@ function _setHomeMonaLoading(on){
   if(on){
     if(img) img.src='sleeping_mona.png';
     if(logo) logo.classList.add('eyes-closed');                  // hide the moving pupils while she sleeps
-    if(greet){ greet.classList.remove('golden-bubble'); greet.classList.add('greet-loading'); greet.innerHTML='<div class="loading-bar"><div class="loading-bar-fill"></div></div>'; }
+    if(greet){ greet.classList.remove('win-bubble'); greet.classList.add('greet-loading'); greet.innerHTML='<div class="loading-bar"><div class="loading-bar-fill"></div></div>'; }
   } else {
     if(img) img.src='mona_no_eyes.png';
     if(logo) logo.classList.remove('eyes-closed');
@@ -3567,7 +3566,7 @@ function setupGoldenWatch(){
   }catch(e){ _goldenRetry=setTimeout(setupGoldenWatch, 3000); }
 }
 function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function _goldenWinText(){ return _myGolden ? ('Kommenttisi voitti 5&nbsp;&euro; tämän viikon arvonnassa! Lunasta palkinto lähettämällä koodi <b>'+_esc(_myGolden.code)+'</b> numeroon <b>045&nbsp;234&nbsp;2001</b>, tai nouda seteli Turun yliopiston Orbitaalilta päivystysaikaan.') : ''; }
+function _goldenWinText(){ return _myGolden ? ('Kommenttisi voitti 5&nbsp;&euro; tämän viikon arvonnassa! Nouda palkinto Turun yliopiston Orbitaalilta päivystysaikaan.<div class="win-golden-comment"><div class="gc-label">🏆 Voittajakommenttisi</div><div class="gc-text">'+_esc(_myGolden.text||'')+'</div></div>') : ''; }
 // winner: body.has-golden shows the fullscreen award button + the golden winning comment (top-right of the homepage); the Mona bubble shows the win text (renderGreet)
 function _applyGolden(){
   document.body.classList.toggle('has-golden', !!_myGolden);
