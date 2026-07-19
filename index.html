@@ -731,27 +731,35 @@ body:not(.is-mobile) .comment-box.open { width: 50%; }   /* half width on deskto
 .comment-item-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #a09080; margin-top: 4px; }
 /* separate dev screen: online activity + every comment */
 #dev-screen { display: none; width: 100%; }
-.dev-screen-inner { width: 100%; max-width: 620px; margin: 0 auto; padding: 4.5rem 1rem 2rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.dev-screen-inner { width: 100%; max-width: 1000px; margin: 0 auto; padding: 4.5rem 1rem 2rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.dev-two-col { display: flex; gap: 1.2rem; align-items: flex-start; width: 100%; }   /* comments left, user cards right */
+.dev-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+@media (max-width: 760px){ .dev-two-col { flex-direction: column; } }
 .dev-back-btn { align-self: flex-start; background: none; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.4rem 0.9rem; cursor: pointer; font-family: 'Lora', serif; color: #56533c; margin-bottom: 0.5rem; }
 .dev-section-title { font-family: 'Lora', serif; font-weight: 700; font-size: 1.05rem; margin-top: 1rem; color: #56533c; }
 body.dark-mode .dev-section-title, body.dark-mode .dev-back-btn { color: #eadfce; border-color: #6d5f52; }
 /* dev-only: every comment, click to open its card */
-#dev-comments-panel { width: min(92vw, 560px); margin: 0 auto; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; padding: 0.8rem 1rem; box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
-body.dark-mode #dev-comments-panel { background: #2b211b; border-color: #6d5f52; }
+#dev-comments-panel, #dev-usercards-panel { width: 100%; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; padding: 0.7rem 0.85rem; box-shadow: 0 3px 12px rgba(0,0,0,0.1); }
+body.dark-mode #dev-comments-panel, body.dark-mode #dev-usercards-panel { background: #2b211b; border-color: #6d5f52; }
 .dev-comments-title { font-family: 'Lora', serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px; color: #56533c; }
 body.dark-mode .dev-comments-title { color: #eadfce; }
-.dev-comment-row { display: flex; gap: 8px; align-items: baseline; padding: 0.45rem 0.3rem; border-top: 1px solid #ece7dd; cursor: pointer; }
+/* readable rows: name + deck (+badge/actions) on top, the full comment/card text below */
+.dev-comment-row { display: block; padding: 0.5rem 0.5rem; border-top: 1px solid #ece7dd; cursor: pointer; }
 .dev-comment-row:hover { background: #f5f1e8; border-radius: 8px; }
 .dev-comment-row.golden { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a); border-radius: 8px; border-top-color: transparent; }
 .dev-comment-row.golden .dev-comment-deck { color: #7a5a12; }
 .dev-comment-row.golden .dev-comment-snip { color: #4a3a10; font-weight: 600; }
-.dev-comment-gold { flex-shrink: 0; }
+.dev-comment-row.golden .dev-row-name { color: #6b4a10; }
 body.dark-mode .dev-comment-row { border-top-color: #4a4038; }
 body.dark-mode .dev-comment-row:hover { background: #362c25; }
-.dev-comment-deck { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: #a09080; flex-shrink: 0; max-width: 34%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dev-comment-snip { font-family: 'Lora', serif; font-size: 0.8rem; color: #56533c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; }
+.dev-row-head { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.dev-row-name { font-family: 'Lora', serif; font-weight: 700; font-size: 0.75rem; color: #6b4423; flex-shrink: 0; }   /* the user's biochem name */
+body.dark-mode .dev-row-name { color: #d9b892; }
+.dev-comment-deck { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; color: #a09080; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.dev-row-right { margin-left: auto; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.dev-comment-snip { font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.4; color: #1a1612; white-space: normal; overflow-wrap: anywhere; }
 body.dark-mode .dev-comment-snip { color: #eadfce; }
-.dev-comment-actions { flex-shrink: 0; display: flex; gap: 3px; margin-left: auto; }
+.dev-comment-actions { flex-shrink: 0; display: flex; gap: 3px; }
 .dca-btn { border: none; background: none; cursor: pointer; font-size: 0.85rem; line-height: 1; padding: 3px 4px; border-radius: 6px; opacity: 0.75; }
 .dca-btn:hover { opacity: 1; background: rgba(0,0,0,0.06); }
 .dca-btn.dca-del:hover { background: rgba(192,57,43,0.15); }
@@ -1284,10 +1292,16 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
     </div>
     <div class="dev-section-title">Paikalla nyt</div>
     <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;"></div>
-    <div class="dev-section-title">Kaikki kommentit</div>
-    <div id="dev-comments-panel" style="display:none"></div>
-    <div class="dev-section-title">Käyttäjien kortit &amp; ehdotukset</div>
-    <div id="dev-usercards-panel" style="display:none"></div>
+    <div class="dev-two-col">
+      <div class="dev-col">
+        <div class="dev-section-title">Kommentit</div>
+        <div id="dev-comments-panel" style="display:none"></div>
+      </div>
+      <div class="dev-col">
+        <div class="dev-section-title">Käyttäjien kortit &amp; ehdotukset</div>
+        <div id="dev-usercards-panel" style="display:none"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1644,6 +1658,22 @@ function initDarkmodeBtn(){
   btn.addEventListener('pointercancel',() => cancelPress(false));
   btn.addEventListener('click', e => e.stopPropagation());
 }
+
+// Hold Mona (homepage logo #site-brand OR the review-page peeker .mona-top-inner) for 5 s → dev password prompt
+(function initMonaDevHold(){
+  let t=null, fired=false, sx=0, sy=0;
+  const isMona = el => el && el.closest && el.closest('#site-brand, .mona-top-inner');
+  const cancel = () => { clearTimeout(t); t=null; };
+  document.addEventListener('pointerdown', e=>{
+    if(!isMona(e.target)) return;
+    fired=false; sx=e.clientX; sy=e.clientY; clearTimeout(t);
+    t=setTimeout(()=>{ fired=true; if(typeof promptDevMode==='function') promptDevMode(); }, 5000);
+  }, true);
+  document.addEventListener('pointermove', e=>{ if(t && (Math.abs(e.clientX-sx)>12 || Math.abs(e.clientY-sy)>12)) cancel(); }, true);   // a drag (e.g. dragging Mona) cancels the hold
+  document.addEventListener('pointerup', cancel, true);
+  document.addEventListener('pointercancel', cancel, true);
+  document.addEventListener('click', e=>{ if(fired && isMona(e.target)){ e.stopPropagation(); e.preventDefault(); } fired=false; }, true);   // swallow the click that ends a long-press so Mona doesn't also react
+})();
 
 function promptDevMode(){
   const o=document.getElementById('devpw-overlay'), inp=document.getElementById('devpw-input');
@@ -3313,6 +3343,15 @@ function closeDevScreen(){
   const b=document.getElementById('dev-screen-btn'); if(b) b.style.display=devMode?'flex':'none';
   requestAnimationFrame(layoutDecksRadial); setTimeout(layoutDecksRadial,140);
 }
+// the user's biochem name for a comment/card doc: its own `word`, else a remembered/presence word, else a short uid
+let _devWordMap={};
+function _devWordFor(d){
+  if(d && d.word){ if(d.userId) _devWordMap[d.userId]=d.word; return String(d.word); }
+  const uid=d && d.userId;
+  if(uid && _devWordMap[uid]) return _devWordMap[uid];
+  if(uid && Array.isArray(_lastPresenceUsers)){ const p=_lastPresenceUsers.find(u=>u.userId===uid); if(p&&p.word){ _devWordMap[uid]=p.word; return p.word; } }
+  return uid ? ('#'+String(uid).slice(-4)) : '?';
+}
 function renderDevCommentsPanel(){
   const panel=document.getElementById('dev-comments-panel'); if(!panel) return;
   if(!devMode){ panel.style.display='none'; panel.innerHTML=''; return; }
@@ -3323,15 +3362,19 @@ function renderDevCommentsPanel(){
     docs.sort((a,b)=>((b.timestamp&&b.timestamp.toMillis&&b.timestamp.toMillis())||0)-((a.timestamp&&a.timestamp.toMillis&&a.timestamp.toMillis())||0));
     let html='<div class="dev-comments-title">Kaikki kommentit ('+docs.length+')</div>';
     if(!docs.length) html+='<div style="opacity:0.6;font-size:0.8rem;">Ei kommentteja.</div>';
+    docs.forEach(c=>{ if(c.word&&c.userId) _devWordMap[c.userId]=c.word; });   // first pass: remember every name
     docs.forEach(c=>{
-      const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('SOLUKKO::','')); const cid=escCmt(String(c.cardId||'')); const id=escCmt(c.id);
+      const snip=escCmt(c.text||'[kuva]'); const deck=escCmt((c.deck||'').replace('SOLUKKO::','')); const cid=escCmt(String(c.cardId||'')); const id=escCmt(c.id); const name=escCmt(_devWordFor(c));
       let acts='<span class="dev-comment-actions">';
       acts+='<button class="dca-btn" title="'+(c.golden?'Poista kulta':'Maalaa viikon voittajaksi')+'" onclick="event.stopPropagation(); toggleGoldenComment(\''+id+'\','+(c.golden?'true':'false')+'); _refreshDevComments();">🏆</button>';
       if(c.golden) acts+='<button class="dca-btn" title="Merkitse maksetuksi" onclick="event.stopPropagation(); markPrizePaid(\''+id+'\'); _refreshDevComments();">💸</button>';
       acts+='<button class="dca-btn" title="Muokkaa" onclick="event.stopPropagation(); devEditComment(\''+id+'\')">✎</button>';
       acts+='<button class="dca-btn dca-del" title="Poista" onclick="event.stopPropagation(); devDeleteComment(\''+id+'\')">🗑</button>';
       acts+='</span>';
-      html+='<div class="dev-comment-row'+(c.golden?' golden':'')+'" onclick="openCardById(\''+cid+'\')"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+snip+'</span>'+acts+'</div>';
+      html+='<div class="dev-comment-row'+(c.golden?' golden':'')+'" onclick="openCardById(\''+cid+'\')">'
+        +'<div class="dev-row-head"><span class="dev-row-name">'+name+'</span><span class="dev-comment-deck">'+deck+'</span><span class="dev-row-right">'+acts+'</span></div>'
+        +'<div class="dev-comment-snip">'+snip+'</div>'
+      +'</div>';
     });
     panel.innerHTML=html;
   }).catch(err=>{ panel.innerHTML='<div class="dev-comments-title">Kaikki kommentit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+err.message+'</div>'; });
@@ -3515,7 +3558,7 @@ function submitComment(e){
   if(e) e.stopPropagation();
   const text=document.getElementById('card-comment').value.trim();
   if(!text&&!pendingCommentImage) return;
-  const payload={ text:text||'', cardId:String(currentCard?.cardId||currentCard?.noteId||''), deck:currentDeck||'', userId:getUserId(), timestamp:firebase.firestore.FieldValue.serverTimestamp() };
+  const payload={ text:text||'', cardId:String(currentCard?.cardId||currentCard?.noteId||''), deck:currentDeck||'', userId:getUserId(), word:getUserWord(), timestamp:firebase.firestore.FieldValue.serverTimestamp() };
   if(pendingCommentImage) payload.imageData=pendingCommentImage;
   db.collection('comments').add(payload).then(()=>setTimeout(loadFirestoreComments,500)).catch(()=>{});
   const formData=new FormData();
@@ -4104,7 +4147,7 @@ async function _ucPersist(docId, subdeck, front, back){
       const c=_userCards.find(x=>x._docId===docId);
       if(c){ c._front=front; c._back=back; const fh=_ucHtml(front), bh=_ucHtml(back); c.question=fh; c.answer=bh; c.fields.Front.value=fh; c.fields.Back.value=bh; }
     } else {
-      const ref=await db.collection('userCards').add({ userId:uid, deck, subdeck, front, back, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      const ref=await db.collection('userCards').add({ userId:uid, word:getUserWord(), deck, subdeck, front, back, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
       _userCards.push(_userCardObj(ref.id, { userId:uid, deck, subdeck, front, back }));
     }
     _injectUserCards(currentCard);
@@ -4202,14 +4245,19 @@ function renderDevUserCardsPanel(){
     rows.sort((a,b)=>rank(a.d)-rank(b.d));
     let html='<div class="dev-comments-title">Käyttäjien kortit ('+rows.length+')</div>';
     if(!rows.length) html+='<div style="opacity:0.6;font-size:0.8rem;">Ei kortteja.</div>';
+    rows.forEach(r=>{ if(r.d.word&&r.d.userId) _devWordMap[r.d.userId]=r.d.word; });   // first pass: remember every name
     rows.forEach(r=>{ const d=r.d;
-      const front=_esc(String(d.front||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,60))||'(tyhjä)';
+      const front=_esc(String(d.front||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,80))||'(tyhjä)';
       const deck=_esc(String(d.subdeck||d.deck||'').replace('SOLUKKO::',''));
+      const name=_esc(_devWordFor(d));
       let badge='<span class="uc-badge">yksityinen</span>', acts='';
       if(d.paid){ badge='<span class="uc-badge paid">Maksettu</span>'; }
       else if(d.approved){ badge='<span class="uc-badge approved">Koodi '+_esc(String(d.approvedCode||''))+'</span>'; acts='<button class="dca-btn" title="Merkitse maksetuksi" onclick="markUserCardPaid(\''+r.id+'\')">💶</button>'; }
       else if(d.suggested){ badge='<span class="uc-badge suggested">Ehdotettu</span>'; acts='<button class="dca-btn" title="Palkitse (anna koodi)" onclick="awardUserCard(\''+r.id+'\')">🏅</button>'; }
-      html+='<div class="dev-comment-row"><span class="dev-comment-deck">'+deck+'</span><span class="dev-comment-snip">'+front+'</span>'+badge+'<span class="dev-comment-actions">'+acts+'</span></div>';
+      html+='<div class="dev-comment-row">'
+        +'<div class="dev-row-head"><span class="dev-row-name">'+name+'</span><span class="dev-comment-deck">'+deck+'</span><span class="dev-row-right">'+badge+'<span class="dev-comment-actions">'+acts+'</span></span></div>'
+        +'<div class="dev-comment-snip">'+front+'</div>'
+      +'</div>';
     });
     panel.innerHTML=html;
   }).catch(e=>{ panel.innerHTML='<div class="dev-comments-title">Käyttäjien kortit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+_esc(e.code||e.message||'')+'<br>Aseta oma UID isAdmin()-sääntöön ja julkaise firestore.rules.</div>'; });
