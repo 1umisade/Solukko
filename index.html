@@ -729,7 +729,7 @@ body:not(.is-mobile) .comment-box.open { width: 50%; }   /* half width on deskto
 .comment-box.has-text .comment-submit-btn::before { content: "\2713"; }   /* ...shown as a check mark */
 .comment-box.open .comment-img-btn { display: flex; align-items: center; justify-content: center; }
 .comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
-.comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; align-items: center; }   /* centered comment boxes */
+.comment-feed { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; align-items: flex-start; align-self: stretch; }   /* left-aligned comment boxes */
 .comment-item { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 6px rgba(0,0,0,0.06); width: max-content; max-width: 100%; text-align: left; }   /* as wide as the comment; text left */
 .comment-item-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #a09080; margin-top: 4px; }
 /* separate dev screen: online activity + every comment */
