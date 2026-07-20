@@ -3645,12 +3645,12 @@ function setupGoldenWatch(){
   }catch(e){ _goldenRetry=setTimeout(setupGoldenWatch, 3000); }
 }
 function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function _goldenWinText(){ return _myGolden ? ('Kommenttisi voitti 5&nbsp;&euro; tämän viikon arvonnassa! Nouda palkinto Turun yliopiston Orbitaalilta päivystysaikaan.<div class="win-golden-comment"><div class="gc-label">🏆 Voittajakommenttisi</div><div class="gc-text">'+_esc(_myGolden.text||'')+'</div></div>') : ''; }
+function _goldenWinText(){ return _myGolden ? ('Kommenttisi voitti 5&nbsp;&euro; tämän viikon arvonnassa! Nouda palkinto Turun yliopiston Orbitaalilta päivystysaikaan.<div class="win-golden-comment"><div class="gc-text">'+_esc(_myGolden.text||'')+'</div></div>') : ''; }
 // winner: body.has-golden shows the fullscreen award button + the golden winning comment (top-right of the homepage); the Mona bubble shows the win text (renderGreet)
 function _applyGolden(){
   document.body.classList.toggle('has-golden', !!_myGolden);
   const gc=document.getElementById('golden-comment');
-  if(gc) gc.innerHTML = _myGolden ? ('<div class="gc-label">🏆 Voittajakommenttisi</div><div class="gc-text">'+_esc(_myGolden.text||'')+'</div>') : '';
+  if(gc) gc.innerHTML = _myGolden ? ('<div class="gc-text">'+_esc(_myGolden.text||'')+'</div>') : '';
   if(typeof renderGreet==='function') renderGreet();   // refresh the homepage greeting (golden win bubble ↔ normal)
 }
 function _loadGoldenComment(){   // fetch the winning comment's own text (for the golden card) if we only have the prize
