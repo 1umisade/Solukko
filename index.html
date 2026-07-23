@@ -222,7 +222,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-construction { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
 .deck-empty .deck-construction { filter: brightness(0); }   /* unavailable decks: the art goes black */
 .deck-empty .pack-top { background: #000; }
-.deck-unavailable { position: absolute; top: 0; left: 0; right: 0; z-index: 4; padding: 0.55rem 0.4rem; text-align: center; font-family: 'Lora', serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.02em; color: #fff; }   /* "Ei vielä saatavilla" at the top, inside the deck image */
+.deck-unavailable { position: absolute; top: 0; left: 0; right: 0; z-index: 4; padding: 0.55rem 0.4rem; text-align: center; font-family: 'Lora', serif; font-weight: 400; font-size: 0.78rem; letter-spacing: 0.03em; color: rgba(255,255,255,0.42); }   /* "Ei vielä saatavilla" — faint grey, at the top inside the deck image */
 /* "review from your own device" — a deck-looking button that opens a file picker */
 .custom-import-wrap { display: none; }   /* the custom deck is cloned into the grid as the last deck (see buildDeckGrid) */
 .dev-deck-wrap { display: none; }        /* template for the dev-only "All Decks" deck (cloned into the grid) */
