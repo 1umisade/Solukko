@@ -191,10 +191,12 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
   .sem-col.spring { border-left: none; padding-left: 0; border-top: 1px dashed #cfc8bc; padding-top: 16px; }
   .sem-col { justify-content: center; }
   .year-row .deck-btn { width: min(160px, calc(50% - 8px)); }   /* always at least 2 decks per row on mobile */
-  #home-mona { gap: 12px; }
-  #home-mona .site-brand { width: 84px; }
+  #home-mona { flex-direction: column-reverse; align-items: center; justify-content: center; align-self: stretch; gap: 10px; height: auto; margin: 8px 0 14px; }   /* bubble on top, Mona below, centred — same as the review page */
+  #home-mona .site-brand { width: 92px; }
   .home-brand-block { display: none; }   /* hide the site-name block on mobile to keep Mona + bubble */
-  .home-greet { height: auto; overflow: visible; font-size: 0.9rem; max-width: 60vw; margin-left: 12px; padding: 0.6rem 0.8rem; }
+  .home-greet { position: relative; height: auto; overflow: visible; font-size: 0.95rem; width: min(86vw, 320px); max-width: none; margin: 0; padding: 0.7rem 1rem; }
+  .home-greet::after { left: 50%; top: 100%; right: auto; transform: translateX(-50%); border: 10px solid transparent; border-top-color: #fffef9; border-bottom-width: 0; }   /* tail points DOWN at Mona */
+  body.dark-mode .home-greet::after { border-top-color: #3a312b; }
   body.dark-mode .sem-col.spring { border-top-color: #6d5f52; }
 }
 .deck-btn { position: absolute; min-width: 0; width: min(240px, 52vw); aspect-ratio: 1 / 1.5; padding: 0; border: none; border-radius: 0; overflow: visible; background: none; cursor: pointer; font-family: 'Lora', serif; text-align: center; color: white; transition: transform 0.3s ease; touch-action: pan-y; }   /* pan-y so a vertical drag scrolls the page instead of getting captured */
