@@ -170,7 +170,7 @@ body.dark-mode #home-hero .hero-link:hover { color: #eadfce; }
 body.dark-mode #home-hero .hero-manifest { color: #cbb9a0; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
 .home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: auto; box-sizing: border-box; display: block; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }   /* height:auto = the bubble always wraps snugly around its text */
-.home-greet::after { content: ""; position: absolute; right: 100%; top: 47px; border: 13px solid transparent; border-right-color: #fffef9; }   /* tail fixed near Mona's centre (she's anchored top), not the bubble's centre */
+.home-greet::after { content: ""; position: absolute; right: 100%; top: var(--greet-tail-top, 47px); border: 13px solid transparent; border-right-color: #fffef9; }   /* tail Y set by positionGreetTail() so it always points at Mona's centre, whatever the viewport */
 .home-greet.greet-loading { padding: 1.15rem 1.6rem; }   /* while the decks load: a progress bar sits where the greeting text will go */
 .home-greet.greet-loading .loading-bar { margin: 2px auto; }
 body.dark-mode .home-greet { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
@@ -187,12 +187,12 @@ body.dark-mode .year-heading { color: #eadfce; border-bottom-color: #6d5f52; }
 body.dark-mode .sem-label { color: #eadfce; }
 body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 @media (max-width: 760px) {   /* narrow / mobile: single column by year, autumn then spring stacked */
-  .year-row { flex-direction: column; gap: 18px; }
+  .year-row { flex-direction: column; gap: 18px; align-items: stretch; }   /* semester columns fill the width so the 2-per-row decks are full size */
   .sem-col.spring { border-left: none; padding-left: 0; border-top: 1px dashed #cfc8bc; padding-top: 16px; }
   .sem-col { justify-content: center; }
+  .year-row .deck-btn { width: min(160px, calc(50% - 8px)); }   /* always at least 2 decks per row on mobile */
   #home-mona { gap: 12px; }
   #home-mona .site-brand { width: 84px; }
-  .home-greet::after { top: 30px; }   /* smaller Mona on mobile → point the tail higher, at her centre */
   .home-brand-block { display: none; }   /* hide the site-name block on mobile to keep Mona + bubble */
   .home-greet { height: auto; overflow: visible; font-size: 0.9rem; max-width: 60vw; margin-left: 12px; padding: 0.6rem 0.8rem; }
   body.dark-mode .sem-col.spring { border-top-color: #6d5f52; }
@@ -220,6 +220,9 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
 .deck-btn.deck-empty:hover { transform: none; }
 .deck-btn.deck-empty:hover .pack-top { box-shadow: 0 10px 26px rgba(0,0,0,0.32); }   /* no hover lift */
 .deck-construction { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
+.deck-empty .deck-construction { filter: brightness(0); }   /* unavailable decks: the art goes black */
+.deck-empty .pack-top { background: #000; }
+.deck-unavailable { position: absolute; top: 0; left: 0; right: 0; z-index: 4; padding: 0.55rem 0.4rem; text-align: center; font-family: 'Lora', serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.02em; color: #fff; }   /* "Ei vielä saatavilla" at the top, inside the deck image */
 /* "review from your own device" — a deck-looking button that opens a file picker */
 .custom-import-wrap { display: none; }   /* the custom deck is cloned into the grid as the last deck (see buildDeckGrid) */
 .dev-deck-wrap { display: none; }        /* template for the dev-only "All Decks" deck (cloned into the grid) */
@@ -1909,12 +1912,22 @@ function logoScream(ev){
 }
 // A winner gets one extra bubble ('__golden__', the win message) at the FRONT of the cycle — shown first on load, then clicking Mona cycles through it like any other.
 function _greetOrder(){ return (typeof _myGolden!=='undefined' && _myGolden) ? ['__golden__'].concat(HOME_BUBBLE_ORDER) : HOME_BUBBLE_ORDER; }
+function positionGreetTail(){   // point the bubble's tail at Mona's vertical centre, whatever the viewport (bubble/Mona shift)
+  const mona=document.querySelector('#home-mona .site-brand');
+  const greet=document.querySelector('#home-mona .home-greet');
+  if(!mona||!greet) return;
+  const mr=mona.getBoundingClientRect(), gr=greet.getBoundingClientRect();
+  if(!mr.height||!gr.height) return;
+  greet.style.setProperty('--greet-tail-top', Math.round((mr.top+mr.height/2)-gr.top-13)+'px');   // Mona's centre − the tail's half-height
+}
 function renderGreet(){   // render the current homepage greeting bubble (its index in _greetOrder())
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
   const order=_greetOrder(); const key=order[((_greetIdx%order.length)+order.length)%order.length];
   if(key==='__golden__'){ greet.classList.add('win-bubble'); greet.innerHTML=_goldenWinText(); }
   else { greet.classList.remove('win-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
+  requestAnimationFrame(positionGreetTail);   // re-point the tail after the bubble's new height settles
 }
+window.addEventListener('resize', ()=>{ if(typeof positionGreetTail==='function') positionGreetTail(); }, {passive:true});
 // homepage loading state: while the decks load, Mona sleeps and her speech bubble shows a progress bar; on reveal she wakes and the greeting returns
 function _setHomeMonaLoading(on){
   const logo=document.getElementById('site-brand');
@@ -2414,7 +2427,8 @@ async function loadDecks(){
     const btn=document.createElement('button'); btn.className='deck-btn'+(item.hasCards?'':' deck-empty');
     // Deck cover is a single static construction.png (mobile + desktop). The homepage used to render ~40 <video>
     // backgrounds decoded at once — heavy compositing that lagged, worst on Firefox; a static image has none.
-    const _packTop=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div><div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
+    const _unavail = item.hasCards ? '' : `<div class="deck-unavailable">Ei vielä saatavilla</div>`;   // black tile + this label at the top
+    const _packTop=`<div class="pack-top"><img class="deck-construction" src="construction.png" alt=""><div class="deck-overlay"></div>${_unavail}<div class="deck-label"><div class="deck-title">${item.cleanName}</div></div>${item.courseCode?`<div class="deck-code">${item.courseCode}</div>`:''}</div>`;
     if(!isMobile() && item.hasCards){   // desktop real decks: real card backsides fan out behind the cover on hover (the pack-back flare) — no video
       const _dc=(allCards||[]).filter(c=>c.deckName===item.deck || (c.deckName||'').startsWith(item.deck+'::'));   // real cards from this deck
       const _tops=_dc.map(c=>{ const _d=_htmlTextParser.parseFromString(extractBody(c.answer||'').body,'text/html'); return (_d.body.textContent||'').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/\s+/g,' ').trim(); }).filter(t=>t.length>0).sort((a,b)=>b.length-a.length).slice(0,4);   // the four longest backsides (text only, no image loads)
