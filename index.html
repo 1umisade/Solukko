@@ -2729,7 +2729,7 @@ async function renderCurrentCard(){
     if(_exp && _exp.replace(/<[^>]*>/g,'').trim()){
       const _expHtml=await fixImages(_exp);
       const _d=document.createElement('details'); _d.className='card-explanation';
-      _d.innerHTML='<summary class="card-explanation-toggle">Selitys</summary><div class="card-explanation-body"></div>';
+      _d.innerHTML='<summary class="card-explanation-toggle">Lisätietoa</summary><div class="card-explanation-body"></div>';
       const _body=_d.querySelector('.card-explanation-body'); _body.innerHTML=_expHtml;
       document.getElementById('answer-content').appendChild(_d);
       dimParentheses(_body); applyWordLinks(_body);
@@ -3892,8 +3892,12 @@ function monaCelebClick(ev){   // after the song: clicking Mona just reacts (sha
   if(!clickInCircle(ev, body.querySelector('.mona-scale')||body)) return;   // circular hitbox
   monaReact();   // shake + squeak; the bubble text ("Tsemppiä tenttiin!") stays
 }
-function openCelebration(){   // clicked from the grid: the celebration needs the (fullscreen) card view, which the landing collapses
-  if(!inFullscreen()) enterCardFs();
+function previewCelebration(){   // hover/tap the grid celebration card: play it in the RIGHT preview panel (Mona dancing + music), never fullscreen on desktop
+  if(inFullscreen()) return;
+  clearTimeout(_welcomeTO); clearTimeout(_previewTO);
+  const cc=document.getElementById('card-col');
+  if(cc && getComputedStyle(cc).display==='none'){ enterCardFs(); showCelebration(); return; }   // mobile/narrow: no side preview panel -> fall back to fullscreen
+  if(cc) cc.classList.remove('welcome');   // desktop: reveal the right panel (landing collapses it) and play there
   showCelebration();
 }
 function showCelebration(){
@@ -3908,8 +3912,8 @@ function showCelebration(){
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
   document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-rover"><div class="mona-bubble">Koko kurssi opiskeltu!</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="mona_no_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
   document.getElementById('answer-content').innerHTML='';
-  ['answer-section','show-row','grade-row','card-peek'].forEach(id=>document.getElementById(id).style.display='none');
-  document.querySelector('.comment-area').style.display='none';   // no comments on the celebration card
+  ['answer-section','show-row','grade-row','card-peek'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  { const _ca=document.querySelector('.comment-area'); if(_ca) _ca.style.display='none'; }   // no comments on the celebration card
   const pr=document.getElementById('progress-row'); pr.style.display='flex'; pr.classList.add('celebrating');   // full green glowing bar = the volume slider
   let vsl=pr.querySelector('.mona-vol');
   if(!vsl){ vsl=document.createElement('input'); vsl.type='range'; vsl.className='mona-vol'; vsl.min=0; vsl.max=1000; vsl.step=1; vsl.title='Äänenvoimakkuus'; vsl.setAttribute('aria-label','Äänenvoimakkuus'); vsl.setAttribute('oninput','onCelebVolume(this.value)'); vsl.setAttribute('onpointerdown','startCelebOnTouch()'); pr.appendChild(vsl); }
@@ -4101,7 +4105,7 @@ function makeVideoEmbed(embedUrl,name){
   return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0 0 2.5rem;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);"><iframe src="'+embedUrl+'" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe><div class="video-overlay" onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;"><span style="'+nameStyle+'">'+name+'</span><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'+playBtn('#56533c','80px')+'</div><div></div></div></div>';
 }
 
-const CELEB_GRID_HTML='<div id="grid-celeb"><div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onclick="openCelebration()">🎉 Koko kurssi opiskeltu!</div></div></div></div>';
+const CELEB_GRID_HTML='<div id="grid-celeb"><div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onmouseenter="previewCelebration()" onclick="previewCelebration()">🎉 Koko kurssi opiskeltu!</div></div></div></div>';
 // FLIP-animate a grid into a new order of its card nodes
 function flipReorderGrid(grid, newOrder){
   if(!grid) return;
