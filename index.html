@@ -1946,7 +1946,7 @@ function heroMonaClick(){
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
   home_start:'Aloita klikkaamalla haluamaasi korttipakkaa.',
-  home_decks:'Alla näet hirmuisen määrän korttipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko-tietovisoista!',
+  home_decks:'Alla näet hirmuisen määrän korttipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen.',
   home_quiz:'Tietovisoja joka maanantai Aurumin TEK Loungessa klo 16:00. Tietovisoissa kerrataan edellisviikon luentojen asiat ja jaossa on pieniä palkintoja kaikille oikein vastaaville. Vapaa pääsy! Ei ilmoittautumista!',
   homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiita kysymyskortteja yliopistokursseja varten! Jos olet uusi täällä, nimeni on Mona ja klikkaamalla minua opastan sinua sivuston käytössä.</span>',
   homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
@@ -1962,7 +1962,7 @@ const MONA_BUBBLES={
   shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
   comment:'Kommentoijien kesken arvotaan 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
 };
-const HOME_BUBBLE_ORDER=['home_start','home_decks','home_quiz'];   // homepage bubbles Mona cycles through
+const HOME_BUBBLE_ORDER=['home_decks','home_quiz','home_start'];   // homepage bubbles Mona cycles through
 const PEEK_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // edge-peeker retired; keys kept valid
 function buildMonaBubbles(){   // inject the bubble divs into both containers from the shared definitions
   const home=document.getElementById('site-brand');
