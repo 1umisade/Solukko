@@ -2726,7 +2726,7 @@ async function renderCurrentCard(){
   applyWordLinks(document.getElementById('question-content'));
   applyWordLinks(document.getElementById('answer-content'));
   // Explanation field → a collapsible "Selitys" dropdown at the very end of the answer (hidden until opened)
-  { const _exp=getField(card,['Explanation','explanation','Selitys','selitys']);
+  { const _exp=getField(card,['Explanation','explanation','Selitys','selitys','lisätietoa','Lisätietoa','lisatietoa']);
     if(_exp && _exp.replace(/<[^>]*>/g,'').trim()){
       const _expHtml=await fixImages(_exp);
       const _d=document.createElement('details'); _d.className='card-explanation';
@@ -2738,7 +2738,7 @@ async function renderCurrentCard(){
   }
   flashWordLinkBubbles();   // new card loaded: flash the speech-bubble graphic on each linked word
   // Cards with a non-empty 3D field embed the external viewer at the bottom of the front, fed with that value
-  { const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D']).replace(/<[^>]*>/g,'').trim();
+  { const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D','3D-malli','3D-Malli']).replace(/<[^>]*>/g,'').trim();
     if(_3d){ const _qc=document.getElementById('question-content'); const _emb=document.createElement('div'); _emb.className='card-embed-3d';
       _emb.innerHTML='<iframe class="embed-3d-frame" src="'+EMBED_3D_BASE+encodeURIComponent(_3d)+'" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>';
       _qc.appendChild(_emb); }
@@ -4821,7 +4821,7 @@ function buildWordLinks(){
 
   // Pass 0: explicit "references" field — words the card author chose to link to this card (highest priority)
   reviewCards.forEach((card,idx)=>{
-    const ref=(getField(card,['references','References'])||'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/&[a-z]+;/gi,' ');
+    const ref=(getField(card,['references','References','sanalinkit','Sanalinkit'])||'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/&[a-z]+;/gi,' ');
     ref.split(/[\n,;]+/).forEach(part=>{
       const clean=part.replace(/\s+/g,' ').trim();
       if(!clean||clean.length<2) return;
