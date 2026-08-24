@@ -305,6 +305,15 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 .fc-nav.keycap-press { animation: keycapPress 0.16s ease; }
 #card-screen.card-fs-on button:focus, #card-screen.card-fs-on button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
+/* persistent right/wrong tally: a small badge on the grade thumbs, shown only in grade mode (#front-check.back) when the count > 0 */
+.grade-count { position: absolute; bottom: -3px; right: -3px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; font-family: 'Lora', serif; font-size: 0.74rem; line-height: 20px; text-align: center; color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.35); z-index: 3; display: none; pointer-events: none; }
+#front-check.back #fc-nav-left  .grade-count.has,
+#front-check.back #fc-nav-right .grade-count.has { display: block; }
+#fc-nav-left  .grade-count { background: #c47a4a; }   /* En tiennyt — orange */
+#fc-nav-right .grade-count { background: #5c8a6a; }   /* Tiesin — sage */
+/* mouse-following hint over the grade thumbs */
+.grade-hint { position: fixed; z-index: 9999; background: #2b3f38; color: #fffef9; padding: 5px 11px; border-radius: 9px; font-family: 'Lora', serif; font-size: 0.82rem; pointer-events: none; box-shadow: 0 3px 12px rgba(0,0,0,0.4); white-space: nowrap; opacity: 0; transition: opacity 0.12s ease; }
+.grade-hint.show { opacity: 1; }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
 .tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; touch-action: manipulation; }
 .tarkista-btn img { height: min(75px, 14vw, calc(100dvh / 7)); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
@@ -1415,7 +1424,7 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 
   <!-- fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] -->
   <div id="front-check">
-    <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()"><img class="nav-front" src="edellinen.png" alt="Edellinen"><img class="nav-back" src="ei.png" alt="Ei"></button>
+    <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()" onmouseenter="showGradeHint(event,'En tiennyt')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="edellinen.png" alt="Edellinen"><img class="nav-back" src="ei.png" alt="Ei"><span class="grade-count" id="gc-nav-left"></span></button>
     <div class="tarkista-wrap">
       <div class="fc-bubble" id="fc-bubble"></div>
       <button id="tarkista-btn" class="tarkista-btn" onclick="frontCheckReveal()" title="Tarkista (välilyönti)">
@@ -1424,8 +1433,9 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
-    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="kylla.png" alt="Kyllä"></button>
+    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()" onmouseenter="showGradeHint(event,'Tiesin')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="kylla.png" alt="Kyllä"><span class="grade-count" id="gc-nav-right"></span></button>
   </div>
+  <div id="grade-hint" class="grade-hint"></div>
 
   <div class="btn-row" id="show-row">
     <button class="show-btn" id="show-btn" onclick="handleShowButton()">Tarkista</button>
@@ -2579,6 +2589,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
     reviewCards.forEach((c,i)=>{ if(i!==_skip) cardGrades[c.cardId]='known'; });
     localStorage.setItem('solukko-grades-'+deckName, JSON.stringify(cardGrades));
   }
+  updateGradeCounts();   // set the persistent right/wrong tally on the grade thumbs for this deck
   show('card-screen'); hide('loading');
   showDeckLanding();   // grid only; the first card highlights + shows on the right after the grid fades in
   loadUserCards(deckName);   // async: pull this device's own cards for the deck (dev: everyone's) and inject them into the grid
@@ -4003,9 +4014,20 @@ function showAnswer(){
 }
 
 let _celebratedDeck=false;   // auto-show the celebration only once per deck session
+// ── grade thumbs: mouse-following "Tiesin"/"En tiennyt" hint + persistent right/wrong tally ──
+function showGradeHint(e,txt){ const fc=document.getElementById('front-check'); if(!fc||!fc.classList.contains('back')) return; const h=document.getElementById('grade-hint'); if(!h) return; h.textContent=txt; h.classList.add('show'); moveGradeHint(e); }
+function moveGradeHint(e){ const h=document.getElementById('grade-hint'); if(!h||!h.classList.contains('show')) return; h.style.left=(e.clientX+14)+'px'; h.style.top=(e.clientY+16)+'px'; }
+function hideGradeHint(){ const h=document.getElementById('grade-hint'); if(h) h.classList.remove('show'); }
+function updateGradeCounts(){   // persistent per-deck tally: known -> Tiesin thumb, unknown -> En tiennyt thumb
+  let known=0,unknown=0;
+  for(const k in cardGrades){ const v=cardGrades[k]; if(v==='known') known++; else if(v==='unknown') unknown++; }
+  const r=document.getElementById('gc-nav-right'), w=document.getElementById('gc-nav-left');
+  if(r){ r.textContent=known; r.classList.toggle('has', known>0); }
+  if(w){ w.textContent=unknown; w.classList.toggle('has', unknown>0); }
+}
 function gradeCard(correct){
   if(coinAnimating) return;
-  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); }
+  if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); updateGradeCounts(); }
   if(!correct){ _celebratedDeck=false; }   // marking a card "unknown" re-arms the celebration, so re-completing the deck shows it again
   const _allKnownNow = correct && reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known');   // did this "known" complete the deck?
   const fc=document.getElementById('flashcard');
