@@ -3633,7 +3633,7 @@ function toggleGoldenComment(docId, isGolden){
   }).catch(err=>alert('Virhe: '+err.message));
 }
 // after paying the winner, mark the prize paid -> removes the golden win bubbles from the winner's Mona (the gold comment stays as a record)
-function markPrizePaid(docId){ if(!confirm('Merkitäänkö palkinto maksetuksi? Voittoviesti poistuu voittajan Monalta.')) return; db.collection('prizes').doc(docId).update({ paid: true, paidAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(err=>alert('Virhe: '+err.message)); }
+function markPrizePaid(docId){ if(!confirm('Merkitäänkö palkinto maksetuksi? Voittoviesti poistuu voittajan Monalta.')) return; db.collection('prizes').doc(docId).set({ paid: true, paidAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).then(()=>alert('Merkitty maksetuksi ✓ — voittoviesti poistui voittajan Monalta.')).catch(err=>alert('Virhe: '+err.message)); }
 // watch this device's own comments; if one gets painted gold, show the winner celebration
 let _myGolden=null, _goldenShown=false, _goldenUnsub=null, _goldenRetry=null;
 function setupGoldenWatch(){
@@ -3650,7 +3650,7 @@ function setupGoldenWatch(){
   }catch(e){ _goldenRetry=setTimeout(setupGoldenWatch, 3000); }
 }
 function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function _goldenWinText(){ return _myGolden ? ('Kommenttisi voitti 5&nbsp;&euro; tämän viikon arvonnassa! Nouda palkinto Turun yliopiston Orbitaalilta päivystysaikaan.<div class="win-golden-comment"><div class="gc-text">'+_esc(_myGolden.text||'')+'</div></div>') : ''; }
+function _goldenWinText(){ return _myGolden ? ('Kommenttisi voitti 5&nbsp;&euro; tämän viikon arvonnassa! Nouda palkinto Aurumin TEK Loungesta maanantaisin klo 16:00&ndash;18:00.<div class="win-golden-comment"><div class="gc-text">'+_esc(_myGolden.text||'')+'</div></div>') : ''; }
 // winner: body.has-golden shows the fullscreen award button + the golden winning comment (top-right of the homepage); the Mona bubble shows the win text (renderGreet)
 function _applyGolden(){
   document.body.classList.toggle('has-golden', !!_myGolden);
