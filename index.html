@@ -1237,20 +1237,10 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-body">
-    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Usein parhaan selityksen kuulikin kurssikaverin esitelmästä tai kysymällä vanhemmalta opiskelijalta. Meillä opiskelijoilla onkin jotain, mikä pitkään luennoineilta tutkijoilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian on osannut vuosikymmeniä, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite on luoda mahdollisimman selkokielinen ja saavutettava oppimateriaali, jota kehitetään opiskelijavoimin. Opiskelu sivustolla tapahtuu kysymyskorteilla, joissa käyttäjä vastaa etupuolen kysymykseen ja tarkistaa vastauksen kääntöpuolelta.<br>&emsp;&emsp;Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla kortteja tai ostamalla labravihon tietovisojen yhteydessä. Kiitoksena korttitietojen kehittämisestä, kommentoijien kesken arvotaan viikottain 5&nbsp;&euro;. Voittajan kommentti maalautuu kultaiseksi ja Mona onnittelee käyttäjää sillä laitteella, jolla kommentti lähetettiin. Palkinnon voi noutaa Aurumin TEK Loungesta maanantaisin klo 16:00&ndash;18:00.<br>&emsp;&emsp;Toivottavasti Solukko tekee opiskelustasi hieman helpompaa ja erityiskiitos heille, jotka kommenteillaan rakentavat parempia oppimateriaaleja meille kaikille!</p>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Usein parhaan selityksen kuulikin kurssikaverin esitelmästä tai kysymällä vanhemmalta opiskelijalta. Meillä opiskelijoilla onkin jotain, mikä pitkään luennoineilta tutkijoilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian on osannut vuosikymmeniä, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite on luoda mahdollisimman selkokielinen ja saavutettava oppimateriaali, jota kehitetään opiskelijavoimin. Opiskelu sivustolla tapahtuu kysymyskorteilla, joissa käyttäjä vastaa etupuolen kysymykseen ja tarkistaa vastauksen kääntöpuolelta. Kortit, jotka käyttäjä on osannut, maalautuvat vihreällä värillä.<br>&emsp;&emsp;Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla kortteja tai ostamalla labravihon tietovisojen yhteydessä. Kiitoksena korttitietojen kehittämisestä, kommentoijien kesken arvotaan viikottain 5&nbsp;&euro;. Voittajan kommentti maalautuu kultaiseksi ja Mona onnittelee käyttäjää sillä laitteella, jolla kommentti lähetettiin. Palkinnon voi noutaa Aurumin TEK Loungesta maanantaisin klo 16:00&ndash;18:00.<br>&emsp;&emsp;Toivottavasti Solukko tekee opiskelustasi hieman helpompaa ja erityiskiitos heille, jotka kommenteillaan rakentavat parempia oppimateriaaleja meille kaikille!</p>
     </div>
   </div>
   <div class="deck-list" id="deck-list"></div>
-  <div class="custom-import-wrap">
-    <button class="deck-btn custom-deck-btn" onclick="document.getElementById('apkg-import-input').click()" title="Avaa .apkg-tiedosto laitteeltasi">
-      <div class="pack-top">
-        <div class="deck-label">
-          <div class="custom-deck-icon">+</div>
-          <div class="deck-title">Kertaa oman laitteesi kortteja</div>
-        </div>
-      </div>
-    </button>
-  </div>
   <!-- dev-only "All Decks" deck (every card, unsorted); cloned into the grid by buildDeckGrid, shown only in dev mode via body.devmode-on -->
   <div class="dev-deck-wrap">
     <button class="deck-btn custom-deck-btn dev-deck-btn" onclick="loadAllDecksDev()" title="Kaikki kortit lajittelemattomana (vain kehittäjä)">
@@ -2521,14 +2511,13 @@ function buildDeckGrid(decks, list){
     section.appendChild(row);
     list.appendChild(section);
   });
-  // place the "own cards" (+) deck as the last deck, next to the last real deck in the grid
-  const _customBtn=document.querySelector('.custom-import-wrap .custom-deck-btn');
+  // place the dev-only "All Decks" deck as the last deck, next to the last real deck in the grid
   const _sections=list.querySelectorAll('.year-section');
   const _lastSection=_sections[_sections.length-1];
-  if(_customBtn && _lastSection){
+  if(_lastSection){
     const _cols=[..._lastSection.querySelectorAll('.sem-col:not(.sem-empty)')];
     const _col=_cols[_cols.length-1] || _lastSection.querySelector('.sem-col');
-    if(_col){ _col.appendChild(_customBtn.cloneNode(true));
+    if(_col){
       const _devBtn=document.querySelector('.dev-deck-wrap .dev-deck-btn');   // dev-only "All Decks" deck, hidden for non-devs via CSS
       if(_devBtn) _col.appendChild(_devBtn.cloneNode(true));
     }
