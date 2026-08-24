@@ -4237,7 +4237,8 @@ async function deleteUserCard(docId){
 // KORTTIEHDOTUKSET   (a user suggests an OWN card as an official course card; the dev awards a golden-style claim code worth 0,25 €)
 // ════════════════════════════════════════════════════════════
 const ADD_CARD_INFO_HTML='<div style="font-weight:700;margin-bottom:0.6rem;">Haluatko luoda oman kortin?</div>'
-  +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin. Voit myös lähettää korttisi ylläpidon luettavaksi painamalla ”Ehdota”-painiketta. Hyväksytty korttiehdotus lisätään osaksi kurssia kaikille käyttäjille. Solukko.com palkitsee 0,25&nbsp;€ jokaisesta hyväksytystä korttiehdotuksesta, jolloin yhteydenottopyyntö lähetetään sille laitteelle, jolla korttia ehdotettiin.</div>';
+  +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin. Voit myös lähettää korttisi ylläpidon luettavaksi painamalla ”Ehdota”-painiketta. Hyväksytty korttiehdotus lisätään osaksi kurssia kaikille käyttäjille. Solukko.com palkitsee 0,25&nbsp;€ jokaisesta hyväksytystä korttiehdotuksesta, jolloin yhteydenottopyyntö lähetetään sille laitteelle, jolla korttia ehdotettiin.</div>'
+  +'<img src="mona_wow.png" alt="Mona" style="display:block;margin:1.4rem auto 0;width:150px;max-width:55%;">';
 let _addInfoOn=false;
 function previewAddCardInfo(){   // hovering a "+ Lisää kortti" tile shows this info card on the right (review page, desktop preview)
   if(inFullscreen()) return;
