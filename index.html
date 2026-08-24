@@ -3214,7 +3214,7 @@ function resetComment(){   // each new card starts centred with comments closed
 }
 
 async function nextCard(){
-  if(!queue.length){ showCelebration(); return; }
+  if(!queue.length){ exitCardFs(); showDeckLanding(); return; }   // deck done: no auto-celebration — drop to the grid where the celebration card is clickable
   stopMonaNotes();
   currentCard=queue.shift();
   currentOverviewIndex=reviewCards.indexOf(currentCard);
@@ -3892,6 +3892,10 @@ function monaCelebClick(ev){   // after the song: clicking Mona just reacts (sha
   if(!clickInCircle(ev, body.querySelector('.mona-scale')||body)) return;   // circular hitbox
   monaReact();   // shake + squeak; the bubble text ("Tsemppiä tenttiin!") stays
 }
+function openCelebration(){   // clicked from the grid: the celebration needs the (fullscreen) card view, which the landing collapses
+  if(!inFullscreen()) enterCardFs();
+  showCelebration();
+}
 function showCelebration(){
   currentCard=null;
   clearTimeout(_cardPeekTimer); clearTimeout(_bottomPeekTimer);   // keep the peeker hidden
@@ -4034,7 +4038,7 @@ function gradeCard(correct){
   const doNext=()=>{
     fc.classList.remove('card-out-left','card-out-right','card-out-up');
     if(ov){ ov.style.transition='none'; ov.style.opacity='0'; }
-    if(_allKnownNow && !_celebratedDeck){ _celebratedDeck=true; showCelebration(); return; }   // deck just finished -> auto-show the celebration once
+    // deck completion no longer auto-plays the celebration; the celebration card in the grid (CELEB_GRID_HTML, onclick=showCelebration) is the manual trigger
     if(correct&&groupMode){
       if(selectedGroup===null){ alert('Valitse ensin ryhmä, joka vastasi oikein.'); return; }
       const wg=selectedGroup; coinAnimating=true;
@@ -4097,7 +4101,7 @@ function makeVideoEmbed(embedUrl,name){
   return '<div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:0 0 2.5rem;position:relative;border:1px solid #d4cec4;box-shadow:0 4px 18px rgba(0,0,0,0.12);"><iframe src="'+embedUrl+'" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen loading="lazy"></iframe><div class="video-overlay" onclick="this.previousElementSibling.src=this.previousElementSibling.src+\'&autoplay=1\';this.style.display=\'none\';" style="position:absolute;inset:0;background:#fffef9;display:flex;flex-direction:column;justify-content:space-between;padding:1.1rem 1.5rem 1.3rem;cursor:pointer;border-radius:16px;"><span style="'+nameStyle+'">'+name+'</span><div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0.4rem 0;">'+playBtn('#56533c','80px')+'</div><div></div></div></div>';
 }
 
-const CELEB_GRID_HTML='<div id="grid-celeb"><div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onclick="showCelebration()">🎉 Koko kurssi opiskeltu!</div></div></div></div>';
+const CELEB_GRID_HTML='<div id="grid-celeb"><div style="width:100%;border-top:1px solid #d4cec4;"></div><div class="overview-section"><div class="overview-section-grid"><div class="overview-card celebration-card" onclick="openCelebration()">🎉 Koko kurssi opiskeltu!</div></div></div></div>';
 // FLIP-animate a grid into a new order of its card nodes
 function flipReorderGrid(grid, newOrder){
   if(!grid) return;
