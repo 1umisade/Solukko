@@ -1237,10 +1237,7 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 <div id="deck-screen">
   <div id="home-hero">
     <div class="hero-body">
-    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Usein parhaan selityksen kuulikin kurssikaverin esitelmästä tai kysymällä vanhemmalta opiskelijalta. Meillä opiskelijoilla onkin jotain, mikä pitkään luennoineilta tutkijoilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian on osannut vuosikymmeniä, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite on luoda mahdollisimman selkokielinen ja saavutettava oppimateriaali, jota kehitetään opiskelijavoimin. Opiskelu sivustolla tapahtuu kysymyskorteilla, joissa käyttäjä vastaa etupuolen kysymykseen ja tarkistaa vastauksen kääntöpuolelta.<br><br>Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla kortteja tai ostamalla vihon tai haalarimerkin tietovisojen yhteydessä maanantaisin klo 16:00. Kiitoksena korttitietojen kehittämisestä, kommentoijien kesken arvotaan myös 5&nbsp;&euro;. Voittajan kommentti maalautuu kultaiseksi sillä laitteella, jolla kommentti lähetettiin. Palkinnon voi noutaa Aurumin TEK Loungesta. Toivottavasti sivustosta on sinulle hyötyä ja iso kiitos kommentoijille, jotka auttavat helpottamaan muiden koulupolkua!</p>
-      <div class="hero-shop">
-        <a class="shop-embed" href="#" onclick="openShopOverlay(event)"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="merkki_web.png" alt="Haalarimerkki"></span><span class="shop-embed-name">Haalarimerkki</span><span class="shop-embed-price">5,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a>
-      </div>
+    <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Usein parhaan selityksen kuulikin kurssikaverin esitelmästä tai kysymällä vanhemmalta opiskelijalta. Meillä opiskelijoilla onkin jotain, mikä pitkään luennoineilta tutkijoilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian on osannut vuosikymmeniä, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite on luoda mahdollisimman selkokielinen ja saavutettava oppimateriaali, jota kehitetään opiskelijavoimin. Opiskelu sivustolla tapahtuu kysymyskorteilla, joissa käyttäjä vastaa etupuolen kysymykseen ja tarkistaa vastauksen kääntöpuolelta.<br><br>Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla kortteja tai ostamalla labravihon tietovisojen yhteydessä. Kiitoksena korttitietojen kehittämisestä, kommentoijien kesken arvotaan viikottain 5&nbsp;&euro;. Voittajan kommentti maalautuu kultaiseksi ja Mona onnittelee käyttäjää sillä laitteella, jolla kommentti lähetettiin. Palkinnon voi noutaa Aurumin TEK Loungesta maanantaisin klo 16:00&ndash;18:00.<br><br>Toivottavasti Solukko tekee opiskelustasi hieman helpompaa ja erityiskiitos heille, jotka kommenteillaan rakentavat parempia oppimateriaaleja meille kaikille!</p>
     </div>
   </div>
   <div class="deck-list" id="deck-list"></div>
@@ -1958,6 +1955,7 @@ function heroMonaClick(){
 // Mona's speech bubbles, defined once and injected into both the homepage logo (#site-brand, .home-bubble)
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
+  home_start:'Aloita klikkaamalla haluamaasi korttipakkaa.',
   home_decks:'Alla näet hirmuisen määrän korttipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko-tietovisoista!',
   home_quiz:'Tietovisoja joka maanantai Aurumin TEK Loungessa klo 16:00. Tietovisoissa kerrataan edellisviikon luentojen asiat ja jaossa on pieniä palkintoja kaikille oikein vastaaville. Vapaa pääsy! Ei ilmoittautumista!',
   homepage1:'<span>Tervetuloa Solukkoon! Täältä löydät valmiita kysymyskortteja yliopistokursseja varten! Jos olet uusi täällä, nimeni on Mona ja klikkaamalla minua opastan sinua sivuston käytössä.</span>',
@@ -1974,7 +1972,7 @@ const MONA_BUBBLES={
   shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
   comment:'Kommentoijien kesken arvotaan 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
 };
-const HOME_BUBBLE_ORDER=['home_decks','home_quiz'];   // homepage shows only these two bubbles (Mona cycles between them)
+const HOME_BUBBLE_ORDER=['home_start','home_decks','home_quiz'];   // homepage bubbles Mona cycles through
 const PEEK_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // edge-peeker retired; keys kept valid
 function buildMonaBubbles(){   // inject the bubble divs into both containers from the shared definitions
   const home=document.getElementById('site-brand');
