@@ -1433,7 +1433,7 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
-    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()" onmouseenter="showGradeHint(event,'Tiesin')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="kylla.png" alt="Kyllä"><span class="grade-count" id="gc-nav-right"></span></button>
+    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()" onmouseenter="showGradeHint(event,'Tiesin')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="kylla.png" alt="Kyllä"></button>
   </div>
   <div id="grade-hint" class="grade-hint"></div>
 
@@ -4021,8 +4021,7 @@ function hideGradeHint(){ const h=document.getElementById('grade-hint'); if(h) h
 function updateGradeCounts(){   // persistent per-deck tally: known -> Tiesin thumb, unknown -> En tiennyt thumb
   let known=0,unknown=0;
   for(const k in cardGrades){ const v=cardGrades[k]; if(v==='known') known++; else if(v==='unknown') unknown++; }
-  const r=document.getElementById('gc-nav-right'), w=document.getElementById('gc-nav-left');
-  if(r){ r.textContent=known; r.classList.toggle('has', known>0); }
+  const w=document.getElementById('gc-nav-left');   // tally only on the 'En tiennyt' (Ei) thumb
   if(w){ w.textContent=unknown; w.classList.toggle('has', unknown>0); }
 }
 function gradeCard(correct){
