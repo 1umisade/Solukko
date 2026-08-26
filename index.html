@@ -1192,7 +1192,15 @@ body.dark-mode .cal-course { color:#eadfce; }
 .cal-ev-t { font-weight:700; }
 .cal-placeholder { text-align:center; color:#7a6f60; font-family:'Lora',serif; font-size:1.1rem; padding:70px 0; }
 #chat-view { max-width:680px; margin:0 auto; padding:0 16px 60px; width:100%; box-sizing:border-box; }
-.chat-intro { font-family:'Lora',serif; color:#56533c; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:14px 18px; margin-bottom:16px; line-height:1.5; }
+.chat-greet-row { display:flex; align-items:flex-start; justify-content:center; gap:16px; margin:6px 0 20px; }
+.chat-greet { position:relative; background:#fffef9; border:2px solid #d4cec4; border-radius:22px; padding:0.9rem 1.3rem; font-family:'Lora',serif; color:#56533c; font-size:1.05rem; line-height:1.4; box-shadow:0 6px 20px rgba(0,0,0,0.14); max-width:420px; }
+.chat-greet::after { content:''; position:absolute; right:-13px; top:26px; border:11px solid transparent; border-left-color:#d4cec4; border-right-width:0; }   /* tail border */
+.chat-greet::before { content:''; position:absolute; right:-10px; top:27px; border:10px solid transparent; border-left-color:#fffef9; border-right-width:0; z-index:1; }   /* tail fill */
+.chat-mona { width:92px; height:92px; flex:0 0 auto; margin-top:2px; }
+body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#6d5f52; }
+body.dark-mode .chat-greet::after { border-left-color:#6d5f52; }
+body.dark-mode .chat-greet::before { border-left-color:#2b2622; }
+@media (max-width:760px){ .chat-greet-row{ gap:10px; } .chat-mona{ width:64px; height:64px; } .chat-greet{ font-size:0.95rem; } }
 .chat-messages { min-height:200px; max-height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:6px 2px 14px; }
 .chat-empty { color:#7a6f60; font-family:'Lora',serif; text-align:center; padding:30px 0; }
 .chat-msg { display:flex; }
@@ -2201,7 +2209,10 @@ body.dark-mode .cal-ev { color:#241f1b; }
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
   <div id="chat-view" style="display:none;">
     <div class="chat-wrap">
-      <div class="chat-intro">Viestittele ylläpidon kanssa. Voit ilmoittaa esimerkiksi bugista sivustolla tai ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
+      <div class="chat-greet-row">
+        <div class="chat-greet">Löysitkö sivustolta bugin tai haluatko ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
+        <img class="chat-mona" src="mona_with_eyes.png" alt="Mona">
+      </div>
       <div id="chat-messages" class="chat-messages"><div class="chat-empty">Ei viestejä vielä. Kirjoita ensimmäinen alle.</div></div>
       <form class="chat-form" onsubmit="sendChatMessage(event)">
         <input id="chat-input" class="chat-input" type="text" placeholder="Kirjoita viesti…" autocomplete="off" maxlength="2000">
