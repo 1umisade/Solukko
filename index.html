@@ -1196,12 +1196,12 @@ body.dark-mode .cal-course { color:#eadfce; }
 .chat-greet { position:relative; background:#fffef9; border:2px solid #d4cec4; border-radius:22px; padding:0.9rem 1.3rem; font-family:'Lora',serif; color:#56533c; font-size:1.05rem; line-height:1.4; box-shadow:0 6px 20px rgba(0,0,0,0.14); max-width:420px; }
 .chat-greet::after { content:''; position:absolute; right:-13px; top:26px; border:11px solid transparent; border-left-color:#d4cec4; border-right-width:0; }   /* tail border */
 .chat-greet::before { content:''; position:absolute; right:-10px; top:27px; border:10px solid transparent; border-left-color:#fffef9; border-right-width:0; z-index:1; }   /* tail fill */
-.chat-mona { width:92px; height:92px; flex:0 0 auto; margin-top:2px; }
+.chat-mona { width:46px; height:46px; flex:0 0 auto; margin-top:2px; border-radius:50%; object-fit:cover; }
 body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#6d5f52; }
 body.dark-mode .chat-greet::after { border-left-color:#6d5f52; }
 body.dark-mode .chat-greet::before { border-left-color:#2b2622; }
-@media (max-width:760px){ .chat-greet-row{ gap:10px; } .chat-mona{ width:64px; height:64px; } .chat-greet{ font-size:0.95rem; } }
-.chat-messages { min-height:200px; max-height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:6px 2px 14px; }
+@media (max-width:760px){ .chat-greet-row{ gap:10px; } .chat-mona{ width:40px; height:40px; } .chat-greet{ font-size:0.95rem; } }
+.chat-messages { min-height:200px; max-height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:6px 14px 14px 2px; }
 .chat-empty { color:#7a6f60; font-family:'Lora',serif; text-align:center; padding:30px 0; }
 .chat-msg { display:flex; }
 .chat-msg.chat-mine { justify-content:flex-end; }
@@ -3501,7 +3501,7 @@ function buildDeckGrid(decks, list){
   years.forEach(y=>{
     const g=byYear[y];
     const section=document.createElement('div'); section.className='year-section';
-    const h=document.createElement('div'); h.className='year-heading'; h.textContent = y==='?' ? 'Muut' : (y+'. vuosi'); section.appendChild(h);
+    const h=document.createElement('div'); h.className='year-heading'; h.textContent = y==='?' ? 'Muut' : (y+'. lukuvuosi'); section.appendChild(h);
     const row=document.createElement('div'); row.className='year-row';
     const col=(cls,label,items)=>{
       const c=document.createElement('div'); c.className='sem-col '+cls+(items.length?'':' sem-empty');
