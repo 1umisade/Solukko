@@ -55,7 +55,14 @@ service cloud.firestore {
                          && request.resource.data.userId == request.auth.uid
                          && request.resource.data.sender == 'user'
                          && str(request.resource.data.text, 2000) );
-      allow update, delete: if isAdmin();
+      // The author may edit their own message text (but not reassign owner/sender); the dev may edit anything.
+      allow update: if isAdmin()
+                    || ( isOwner(resource.data.userId)
+                         && request.resource.data.userId == resource.data.userId
+                         && request.resource.data.sender == resource.data.sender
+                         && str(request.resource.data.text, 2000) );
+      // The author may delete their own message; the dev may delete anything.
+      allow delete: if isAdmin() || isOwner(resource.data.userId);
     }
 
     // ── Presence (online users); doc id == uid ──
