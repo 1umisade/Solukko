@@ -1148,6 +1148,36 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
+<style id="calendar-css">
+#home-tabs { display:flex; gap:10px; justify-content:center; margin:0 auto 20px; flex-wrap:wrap; }
+.home-tab { font-family:'Lora',serif; font-size:1.05rem; padding:0.5rem 1.7rem; border:1px solid #d4cec4; border-radius:12px; background:#fffef9; color:#56533c; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.08); transition:background .15s, border-color .15s, color .15s; }
+.home-tab:hover { border-color:#b7ad9d; }
+.home-tab.active { background:#3a5c4c; color:#fff; border-color:#3a5c4c; }
+body.dark-mode .home-tab { background:#2b2622; color:#eadfce; border-color:#6d5f52; }
+body.dark-mode .home-tab.active { background:#5c8a6a; border-color:#5c8a6a; color:#fff; }
+#calendar-view { padding:0 16px 60px; max-width:1120px; margin:0 auto; width:100%; box-sizing:border-box; }
+.cal-legend { display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:center; margin:0 0 24px; font-family:'Lora',serif; font-size:0.9rem; color:#56533c; }
+.cal-leg { display:inline-flex; align-items:center; gap:6px; }
+.cal-swatch { width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,0.15); display:inline-block; }
+.cal-month { margin:0 0 34px; }
+.cal-mtitle { font-family:'Lora',serif; color:#26473f; font-size:1.35rem; margin:0 0 12px; text-align:center; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; }
+.cal-wd { text-align:center; font-family:'Lora',serif; font-size:0.8rem; color:#7a6f60; padding:4px 0; text-transform:capitalize; }
+.cal-day { min-height:78px; background:#fffef9; border:1px solid #e7e1d6; border-radius:8px; padding:3px 4px; overflow:hidden; }
+.cal-day.cal-adj { background:#f5f5f5; }
+.cal-day.cal-adj .cal-num { color:#c2bbb0; }
+.cal-num { font-family:'Lora',serif; font-size:0.82rem; color:#56533c; font-weight:700; margin-bottom:2px; }
+.cal-ev { font-size:0.63rem; line-height:1.18; border-radius:4px; padding:2px 4px; margin-bottom:2px; color:#3a3320; overflow:hidden; }
+.cal-ev-t { font-weight:700; }
+.cal-placeholder { text-align:center; color:#7a6f60; font-family:'Lora',serif; font-size:1.1rem; padding:70px 0; }
+body.dark-mode #calendar-view { color:#eadfce; }
+body.dark-mode .cal-mtitle { color:#9fc7b4; }
+body.dark-mode .cal-day { background:#2b2622; border-color:#4a3f36; }
+body.dark-mode .cal-day.cal-adj { background:#241f1b; }
+body.dark-mode .cal-num { color:#cbb9a0; }
+body.dark-mode .cal-ev { color:#241f1b; }
+@media (max-width:760px){ .cal-day{ min-height:58px; } .cal-ev{ font-size:0.55rem; padding:1px 3px; } .cal-wd{ font-size:0.66rem; } .cal-num{ font-size:0.72rem; } }
+</style>
 </head>
 <body>
 
@@ -1249,7 +1279,581 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
     <p class="hero-manifest"><img id="aku-portrait" src="aku4.jpg" alt="Aku" width="213"> Moi! Nimeni on Aku ja ylläpidän solukko.comia. Oma kokemukseni yliopistosta on ollut, etteivät monetkaan asiat olleet niin vaikeita kuin ne luentodioissa esitettiin. Usein parhaan selityksen kuulikin kurssikaverin esitelmästä tai kysymällä vanhemmalta opiskelijalta. Meillä opiskelijoilla onkin jotain, mikä pitkään luennoineilta tutkijoilta usein hämärtyy: muisto siitä, miltä tietämättömyys tuntui. Kun asian on osannut vuosikymmeniä, on vaikea palauttaa mieleen, missä kohtaa ajatus aluksi katkesi, mitkä käsitteet menivät sekaisin ja millainen selitys lopulta auttoi ymmärtämään. Solukko.comin tavoite on luoda mahdollisimman selkokielinen ja saavutettava oppimateriaali, jota kehitetään opiskelijavoimin. Opiskelu sivustolla tapahtuu kysymyskorteilla, joissa käyttäjä vastaa etupuolen kysymykseen ja tarkistaa vastauksen kääntöpuolelta. Kortit, jotka olet merkinnyt osatuksi, maalautuvat vihreällä värillä.<br>&emsp;&emsp;Tämä sivusto on kutsumusprojekti, ja haluan sen aina pysyvän maksuttomana, mutta voit auttaa sen kehittämisessä kommentoimalla kortteja tai ostamalla haalarimerkin tietovisojen yhteydessä. Kiitoksena korttitietojen kehittämisestä, kommentoijien kesken arvotaan viikottain 5€. Voittajan kommentti maalautuu kultaiseksi ja Mona onnittelee käyttäjää sillä laitteella, jolla kommentti lähetettiin. Palkinnon voi noutaa Aurumin TEK Loungesta maanantaisin klo 16:00&ndash;18:00.<br>&emsp;&emsp;Toivottavasti sivustosta on sinulle hyötyä ja iso kiitos kaikille, jotka osallistuvat tämän avoimen oppimateriaalin kehittämiseen!</p>
     </div>
   </div>
+  <div id="home-tabs">
+    <button class="home-tab active" data-tab="kortit" onclick="showHomeTab('kortit')">kortit</button>
+    <button class="home-tab" data-tab="kalenteri" onclick="showHomeTab('kalenteri')">kalenteri</button>
+    <button class="home-tab" data-tab="kartta" onclick="showHomeTab('kartta')">kartta</button>
+  </div>
   <div class="deck-list" id="deck-list"></div>
+  <div id="calendar-view" style="display:none;">
+<div class="cal-month">
+<h3 class="cal-mtitle">Elokuu 2026</h3>
+<div class="cal-grid">
+<div class="cal-wd">maanantai</div>
+<div class="cal-wd">tiistai</div>
+<div class="cal-wd">keskiviikko</div>
+<div class="cal-wd">torstai</div>
+<div class="cal-wd">perjantai</div>
+<div class="cal-wd">lauantai</div>
+<div class="cal-wd">sunnuntai</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">27</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">28</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">29</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">30</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">31</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">2</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">3</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">4</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">5</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">6</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">7</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">8</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">9</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">10</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">11</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">12</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">13</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">14</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">15</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">16</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">17</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">18</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">19</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">20</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">21</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">22</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">23</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">24</div>
+<div class="cal-ev" style="background:#FFF2CC" title="09:00–10:00 Avaimet biokemian opiskeluun Luento Alhopuro-sali"><span class="cal-ev-t">09:00–10:00</span> Avaimet biokemian opiskeluun · Luento · Alhopuro-sali</div>
+<div class="cal-ev" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Laitoksen tervehdys Säätiösali"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Laitoksen tervehdys · Säätiösali</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">25</div>
+<div class="cal-ev" style="background:#FFF2CC" title="09:00–12:00 Avaimet biokemian opiskeluun Luento Osmo Järvi -sali"><span class="cal-ev-t">09:00–12:00</span> Avaimet biokemian opiskeluun · Luento · Osmo Järvi -sali</div>
+<div class="cal-ev" style="background:#FFF2CC" title="13:00–16:00 Avaimet biokemian opiskeluun Luento TEU103 Sammio"><span class="cal-ev-t">13:00–16:00</span> Avaimet biokemian opiskeluun · Luento · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">26</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">27</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">28</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">29</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">30</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">31</div>
+<div class="cal-ev" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">1</div>
+<div class="cal-ev" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">2</div>
+<div class="cal-ev" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">3</div>
+<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">4</div>
+<div class="cal-ev" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
+<div class="cal-ev" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">5</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">6</div>
+</div>
+</div></div>
+<div class="cal-month">
+<h3 class="cal-mtitle">Syyskuu 2026</h3>
+<div class="cal-grid">
+<div class="cal-wd">maanantai</div>
+<div class="cal-wd">tiistai</div>
+<div class="cal-wd">keskiviikko</div>
+<div class="cal-wd">torstai</div>
+<div class="cal-wd">perjantai</div>
+<div class="cal-wd">lauantai</div>
+<div class="cal-wd">sunnuntai</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">31</div>
+<div class="cal-ev" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">1</div>
+<div class="cal-ev" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">2</div>
+<div class="cal-ev" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">3</div>
+<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">4</div>
+<div class="cal-ev" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
+<div class="cal-ev" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">5</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">6</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">7</div>
+<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">8</div>
+<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">9</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">10</div>
+<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">11</div>
+<div class="cal-ev" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">12</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">13</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">14</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">15</div>
+<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">16</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">17</div>
+<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">18</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">19</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">20</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">21</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">22</div>
+<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" style="background:#E2EFDA" title="12:15–14:00 Solu ja biomolekyylit – käytäntö Aloitusluento Pha1"><span class="cal-ev-t">12:15–14:00</span> Solu ja biomolekyylit – käytäntö · Aloitusluento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">23</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">24</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">25</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">26</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">27</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">28</div>
+<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">29</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">30</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">1</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">2</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">3</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">4</div>
+</div>
+</div></div>
+<div class="cal-month">
+<h3 class="cal-mtitle">Lokakuu 2026</h3>
+<div class="cal-grid">
+<div class="cal-wd">maanantai</div>
+<div class="cal-wd">tiistai</div>
+<div class="cal-wd">keskiviikko</div>
+<div class="cal-wd">torstai</div>
+<div class="cal-wd">perjantai</div>
+<div class="cal-wd">lauantai</div>
+<div class="cal-wd">sunnuntai</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">28</div>
+<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">29</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">30</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">1</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">2</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">3</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">4</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">5</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–12:00 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–12:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">6</div>
+<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" style="background:#E2EFDA" title="14:00–16:00 Solu ja biomolekyylit – käytäntö Harjoitustyö DEN280 Dent3"><span class="cal-ev-t">14:00–16:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · DEN280 Dent3</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">7</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">8</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">9</div>
+<div class="cal-ev" style="background:#FCE4D6" title="08:00–10:00 Johdatus biotekniikkaan TENTTI DEN Aud"><span class="cal-ev-t">08:00–10:00</span> Johdatus biotekniikkaan · TENTTI · DEN Aud</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">10</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">11</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">12</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">13</div>
+<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">14</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">15</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">16</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">17</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">18</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">19</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">20</div>
+<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">21</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">22</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">23</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">24</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">25</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">26</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">27</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">28</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">29</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">30</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">31</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">1</div>
+</div>
+</div></div>
+<div class="cal-month">
+<h3 class="cal-mtitle">Marraskuu 2026</h3>
+<div class="cal-grid">
+<div class="cal-wd">maanantai</div>
+<div class="cal-wd">tiistai</div>
+<div class="cal-wd">keskiviikko</div>
+<div class="cal-wd">torstai</div>
+<div class="cal-wd">perjantai</div>
+<div class="cal-wd">lauantai</div>
+<div class="cal-wd">sunnuntai</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">26</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">27</div>
+<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">28</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">29</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">30</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">31</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">1</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">2</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">3</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">4</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">5</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">6</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">7</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">8</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">9</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">10</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">11</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">12</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">13</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">14</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">15</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">16</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">17</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">18</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">19</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">20</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">21</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">22</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">23</div>
+<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">24</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">25</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">26</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">27</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">28</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">29</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">30</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">1</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">2</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">3</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">4</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">5</div>
+</div>
+<div class="cal-day cal-adj">
+<div class="cal-num">6</div>
+</div>
+</div></div>
+  </div>
+  <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
+
   <!-- dev-only "All Decks" deck (every card, unsorted); cloned into the grid by buildDeckGrid, shown only in dev mode via body.devmode-on -->
   <div class="dev-deck-wrap">
     <button class="deck-btn custom-deck-btn dev-deck-btn" onclick="loadAllDecksDev()" title="Kaikki kortit lajittelemattomana (vain kehittäjä)">
@@ -4584,6 +5188,12 @@ document.addEventListener('click',e=>{
 // ════════════════════════════════════════════════════════════
 // ⑯ UTILITY
 // ════════════════════════════════════════════════════════════
+function showHomeTab(tab){
+  var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view'};
+  for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? (map[t]==='deck-list'?'flex':'block') : 'none'; }
+  var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
+  if(tab!=='kortit'){ window.scrollTo(0,0); }
+}
 function showDecks(){
   { const cs=document.getElementById('card-screen'); if(cs) cs.classList.remove('card-fs-on','faux-fs'); }   // clear any faux fullscreen when returning to the homepage
   sessionStorage.removeItem('solukko-savedDeck'); sessionStorage.removeItem('solukko-savedCardIdx'); sessionStorage.removeItem('solukko-savedFs'); sessionStorage.removeItem('solukko-savedAnswer');
