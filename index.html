@@ -1155,7 +1155,20 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 .home-tab.active { background:#3a5c4c; color:#fff; border-color:#3a5c4c; }
 body.dark-mode .home-tab { background:#2b2622; color:#eadfce; border-color:#6d5f52; }
 body.dark-mode .home-tab.active { background:#5c8a6a; border-color:#5c8a6a; color:#fff; }
-#calendar-view { padding:0 16px 60px; max-width:1120px; margin:0 auto; width:100%; box-sizing:border-box; }
+#calendar-view { padding:0 16px 60px; max-width:1240px; margin:0 auto; width:100%; box-sizing:border-box; }
+.cal-layout { display:flex; gap:22px; align-items:flex-start; }
+.cal-courses { flex:0 0 220px; position:sticky; top:12px; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 14px; font-family:'Lora',serif; }
+.cal-courses-title { font-weight:700; color:#26473f; margin-bottom:8px; font-size:0.95rem; }
+.cal-course { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:0.85rem; color:#56533c; cursor:pointer; line-height:1.25; }
+.cal-course .cal-swatch { flex:0 0 auto; }
+.cal-cb { cursor:pointer; flex:0 0 auto; }
+.cal-body { flex:1 1 auto; min-width:0; }
+.cal-ev { transition:opacity .15s; }
+.cal-ev.cal-dim { opacity:0.2; }
+body.dark-mode .cal-courses { background:#2b2622; border-color:#4a3f36; }
+body.dark-mode .cal-courses-title { color:#9fc7b4; }
+body.dark-mode .cal-course { color:#eadfce; }
+@media (max-width:760px){ .cal-layout{ flex-direction:column; } .cal-courses{ position:static; flex:none; width:100%; box-sizing:border-box; } }
 .cal-legend { display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:center; margin:0 0 24px; font-family:'Lora',serif; font-size:0.9rem; color:#56533c; }
 .cal-leg { display:inline-flex; align-items:center; gap:6px; }
 .cal-swatch { width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,0.15); display:inline-block; }
@@ -1286,7 +1299,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div id="calendar-view" style="display:none;">
-<div class="cal-month">
+<div class="cal-layout"><div class="cal-courses"><div class="cal-courses-title">Korosta kursseja</div><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5000" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF2CC"></span>Avaimet biokemian opiskeluun</label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5030" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DDEBF7"></span>Solu ja biomolekyylit – teoria</label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0070" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FCE4D6"></span>Johdatus biotekniikkaan</label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="KEMI6308" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E4DFEC"></span>Kemian peruskurssi I</label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5031" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E2EFDA"></span>Solu ja biomolekyylit – käytäntö</label></div><div class="cal-body"><div class="cal-month">
 <h3 class="cal-mtitle">Elokuu 2026</h3>
 <div class="cal-grid">
 <div class="cal-wd">maanantai</div>
@@ -1382,13 +1395,13 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">24</div>
-<div class="cal-ev" style="background:#FFF2CC" title="09:00–10:00 Avaimet biokemian opiskeluun Luento Alhopuro-sali"><span class="cal-ev-t">09:00–10:00</span> Avaimet biokemian opiskeluun · Luento · Alhopuro-sali</div>
-<div class="cal-ev" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Laitoksen tervehdys Säätiösali"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Laitoksen tervehdys · Säätiösali</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–10:00 Avaimet biokemian opiskeluun Luento Alhopuro-sali"><span class="cal-ev-t">09:00–10:00</span> Avaimet biokemian opiskeluun · Luento · Alhopuro-sali</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Laitoksen tervehdys Säätiösali"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Laitoksen tervehdys · Säätiösali</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">25</div>
-<div class="cal-ev" style="background:#FFF2CC" title="09:00–12:00 Avaimet biokemian opiskeluun Luento Osmo Järvi -sali"><span class="cal-ev-t">09:00–12:00</span> Avaimet biokemian opiskeluun · Luento · Osmo Järvi -sali</div>
-<div class="cal-ev" style="background:#FFF2CC" title="13:00–16:00 Avaimet biokemian opiskeluun Luento TEU103 Sammio"><span class="cal-ev-t">13:00–16:00</span> Avaimet biokemian opiskeluun · Luento · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–12:00 Avaimet biokemian opiskeluun Luento Osmo Järvi -sali"><span class="cal-ev-t">09:00–12:00</span> Avaimet biokemian opiskeluun · Luento · Osmo Järvi -sali</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00–16:00 Avaimet biokemian opiskeluun Luento TEU103 Sammio"><span class="cal-ev-t">13:00–16:00</span> Avaimet biokemian opiskeluun · Luento · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">26</div>
@@ -1407,28 +1420,28 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">31</div>
-<div class="cal-ev" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">1</div>
-<div class="cal-ev" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">2</div>
-<div class="cal-ev" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">3</div>
-<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">4</div>
-<div class="cal-ev" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
-<div class="cal-ev" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">5</div>
@@ -1449,28 +1462,28 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-wd">sunnuntai</div>
 <div class="cal-day cal-adj">
 <div class="cal-num">31</div>
-<div class="cal-ev" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">1</div>
-<div class="cal-ev" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">2</div>
-<div class="cal-ev" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">3</div>
-<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">4</div>
-<div class="cal-ev" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
-<div class="cal-ev" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">5</div>
@@ -1480,23 +1493,23 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">7</div>
-<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">8</div>
-<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">9</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">10</div>
-<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">11</div>
-<div class="cal-ev" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">12</div>
@@ -1509,15 +1522,15 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">15</div>
-<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">16</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">17</div>
-<div class="cal-ev" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">18</div>
@@ -1533,15 +1546,15 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">22</div>
-<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
-<div class="cal-ev" style="background:#E2EFDA" title="12:15–14:00 Solu ja biomolekyylit – käytäntö Aloitusluento Pha1"><span class="cal-ev-t">12:15–14:00</span> Solu ja biomolekyylit – käytäntö · Aloitusluento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="12:15–14:00 Solu ja biomolekyylit – käytäntö Aloitusluento Pha1"><span class="cal-ev-t">12:15–14:00</span> Solu ja biomolekyylit – käytäntö · Aloitusluento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">23</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">24</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">25</div>
@@ -1554,7 +1567,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">28</div>
-<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">29</div>
@@ -1564,7 +1577,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">1</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">2</div>
@@ -1588,7 +1601,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-wd">sunnuntai</div>
 <div class="cal-day cal-adj">
 <div class="cal-num">28</div>
-<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">29</div>
@@ -1598,7 +1611,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">1</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">2</div>
@@ -1611,23 +1624,23 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">5</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–12:00 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–12:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–12:00 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–12:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">6</div>
-<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
-<div class="cal-ev" style="background:#E2EFDA" title="14:00–16:00 Solu ja biomolekyylit – käytäntö Harjoitustyö DEN280 Dent3"><span class="cal-ev-t">14:00–16:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · DEN280 Dent3</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="14:00–16:00 Solu ja biomolekyylit – käytäntö Harjoitustyö DEN280 Dent3"><span class="cal-ev-t">14:00–16:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · DEN280 Dent3</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">7</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">8</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">9</div>
-<div class="cal-ev" style="background:#FCE4D6" title="08:00–10:00 Johdatus biotekniikkaan TENTTI DEN Aud"><span class="cal-ev-t">08:00–10:00</span> Johdatus biotekniikkaan · TENTTI · DEN Aud</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="08:00–10:00 Johdatus biotekniikkaan TENTTI DEN Aud"><span class="cal-ev-t">08:00–10:00</span> Johdatus biotekniikkaan · TENTTI · DEN Aud</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">10</div>
@@ -1637,19 +1650,19 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">12</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
-<div class="cal-ev" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">13</div>
-<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">14</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">15</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">16</div>
@@ -1662,18 +1675,18 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">19</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">20</div>
-<div class="cal-ev" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">21</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">22</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">23</div>
@@ -1686,11 +1699,11 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">26</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">27</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">28</div>
@@ -1720,11 +1733,11 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-wd">sunnuntai</div>
 <div class="cal-day cal-adj">
 <div class="cal-num">26</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">27</div>
-<div class="cal-ev" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
 </div>
 <div class="cal-day cal-adj">
 <div class="cal-num">28</div>
@@ -1743,7 +1756,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">2</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">3</div>
@@ -1765,7 +1778,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">9</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">10</div>
@@ -1787,7 +1800,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">16</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">17</div>
@@ -1809,7 +1822,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">23</div>
-<div class="cal-ev" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 <div class="cal-day">
 <div class="cal-num">24</div>
@@ -1850,7 +1863,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day cal-adj">
 <div class="cal-num">6</div>
 </div>
-</div></div>
+</div></div></div></div>
   </div>
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
 
@@ -5191,8 +5204,15 @@ document.addEventListener('click',e=>{
 function showHomeTab(tab){
   var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view'};
   for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? (map[t]==='deck-list'?'flex':'block') : 'none'; }
+  var hero=document.getElementById('home-hero'); if(hero) hero.style.display = (tab==='kortit') ? '' : 'none';   // Aku intro only on the deck tab
   var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
   if(tab!=='kortit'){ window.scrollTo(0,0); }
+}
+function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
+  var cbs=document.querySelectorAll('#calendar-view .cal-cb'), checked=[];
+  for(var i=0;i<cbs.length;i++){ if(cbs[i].checked) checked.push(cbs[i].getAttribute('data-course')); }
+  var evs=document.querySelectorAll('#calendar-view .cal-ev');
+  for(var j=0;j<evs.length;j++){ var course=evs[j].getAttribute('data-course'); evs[j].classList.toggle('cal-dim', checked.length>0 && checked.indexOf(course)===-1); }
 }
 function showDecks(){
   { const cs=document.getElementById('card-screen'); if(cs) cs.classList.remove('card-fs-on','faux-fs'); }   // clear any faux fullscreen when returning to the homepage
