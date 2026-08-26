@@ -1149,12 +1149,18 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
-#home-tabs { display:flex; gap:10px; justify-content:center; margin:0 auto 20px; flex-wrap:wrap; }
-.home-tab { font-family:'Lora',serif; font-size:1.05rem; padding:0.5rem 1.7rem; border:1px solid #d4cec4; border-radius:12px; background:#fffef9; color:#56533c; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.08); transition:background .15s, border-color .15s, color .15s; }
-.home-tab:hover { border-color:#b7ad9d; }
-.home-tab.active { background:#3a5c4c; color:#fff; border-color:#3a5c4c; }
-body.dark-mode .home-tab { background:#2b2622; color:#eadfce; border-color:#6d5f52; }
-body.dark-mode .home-tab.active { background:#5c8a6a; border-color:#5c8a6a; color:#fff; }
+#home-tabs { display:flex; width:fit-content; max-width:100%; margin:0 auto 20px; background:#e7e2d8; border-radius:999px; padding:4px; box-shadow:inset 0 1px 2px rgba(0,0,0,0.06); }
+.home-tab { position:relative; font-family:'Lora',serif; font-size:1.02rem; padding:0.5rem 1.7rem; border:none; border-radius:999px; background:transparent; color:#56533c; cursor:pointer; box-shadow:none; white-space:nowrap; transition:background .15s, color .15s; }
+.home-tab:hover:not(.active) { color:#26473f; }
+.home-tab.active { background:#3a5c4c; color:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.18); }
+.home-tab + .home-tab::before { content:''; position:absolute; left:0; top:22%; height:56%; width:1px; background:#c4bbac; }
+.home-tab.active::before, .home-tab.active + .home-tab::before { display:none; }
+body.dark-mode #home-tabs { background:#3a332c; box-shadow:inset 0 1px 2px rgba(0,0,0,0.3); }
+body.dark-mode .home-tab { color:#eadfce; }
+body.dark-mode .home-tab:hover:not(.active) { color:#fff; }
+body.dark-mode .home-tab.active { background:#5c8a6a; color:#fff; }
+body.dark-mode .home-tab + .home-tab::before { background:#5c5145; }
+@media (max-width:560px){ .home-tab{ padding:0.5rem 0.95rem; font-size:0.9rem; } }
 #calendar-view { padding:0 16px 60px; max-width:1240px; margin:0 auto; width:100%; box-sizing:border-box; }
 .cal-layout { display:flex; gap:22px; align-items:flex-start; }
 .cal-courses { flex:0 0 220px; position:sticky; top:12px; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 14px; font-family:'Lora',serif; }
