@@ -1210,6 +1210,8 @@ body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#4a
 .chat-msg.chat-dev { justify-content:flex-start; }
 .chat-bubble { position:relative; max-width:74%; padding:8px 12px; border-radius:14px; font-family:'Lora',serif; font-size:0.95rem; line-height:1.35; white-space:pre-wrap; word-wrap:break-word; }
 .chat-mine .chat-bubble { background:#3a5c4c; color:#fff; border-bottom-right-radius:4px; }
+.chat-bubble.chat-clickable { cursor:pointer; }
+.chat-bubble.chat-clickable:hover { background:#33513f; }
 .chat-dev .chat-bubble { background:#fffef9; color:#56533c; border:1px solid #e7e1d6; border-bottom-left-radius:4px; }
 .chat-menu-btn { align-self:center; background:none; border:none; color:#8a8574; opacity:0; cursor:pointer; font-size:1.15rem; line-height:1; padding:2px 5px; border-radius:6px; transition:opacity .12s; }
 .chat-msg.chat-mine:hover .chat-menu-btn, .chat-menu-btn:focus { opacity:.7; }
@@ -5614,8 +5616,8 @@ function renderChat(msgs){
     if(dev){
       h+='<div class="chat-msg chat-dev"><img class="chat-avatar" src="mona_with_eyes.png" alt="Mona"><div class="chat-bubble"><span class="chat-text">'+escCmt(m.text||'')+'</span></div></div>';
     } else {
-      var menu=(m._id)?'<button class="chat-menu-btn" onclick="openChatMenu(event,this)" aria-label="Valikko">⋮</button>':'';
-      h+='<div class="chat-msg chat-mine">'+menu+'<div class="chat-bubble" data-id="'+(m._id||'')+'"><span class="chat-text">'+escCmt(m.text||'')+'</span></div></div>';
+      var clk=(m._id)?(' chat-clickable" onclick="openChatMenu(event,this)'):'';
+      h+='<div class="chat-msg chat-mine"><div class="chat-bubble'+clk+'" data-id="'+(m._id||'')+'"><span class="chat-text">'+escCmt(m.text||'')+'</span></div></div>';
     }
   }
   box.innerHTML=h; box.scrollTop=box.scrollHeight;
@@ -5630,14 +5632,17 @@ function _chatCtxMenu(){
   }
   return menu;
 }
-function openChatMenu(e,btn){
+function openChatMenu(e,el){
   e.preventDefault(); e.stopPropagation();
-  _chatMenuTarget=btn.parentNode.querySelector('.chat-bubble');
+  _chatMenuTarget=(el&&el.closest)?el.closest('.chat-bubble'):null;
+  if(!_chatMenuTarget) return;
   var menu=_chatCtxMenu(); menu.style.display='block';
-  var r=btn.getBoundingClientRect(); var mw=menu.offsetWidth||130, mh=menu.offsetHeight||84;
-  var top=r.bottom+4, left=r.left;
+  var mw=menu.offsetWidth||130, mh=menu.offsetHeight||84;
+  var r=_chatMenuTarget.getBoundingClientRect();
+  var x=(e.clientX!=null&&e.clientX)||r.left, y=(e.clientY!=null&&e.clientY)||r.bottom;
+  var left=x, top=y+6;
   if(left+mw>window.innerWidth-8) left=window.innerWidth-8-mw;
-  if(top+mh>window.innerHeight-8) top=r.top-4-mh;
+  if(top+mh>window.innerHeight-8) top=y-6-mh;
   menu.style.top=Math.max(8,top)+'px'; menu.style.left=Math.max(8,left)+'px';
 }
 function closeChatMenu(){ var m=document.getElementById('chat-ctx-menu'); if(m) m.style.display='none'; }
