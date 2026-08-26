@@ -1191,6 +1191,22 @@ body.dark-mode .cal-course { color:#eadfce; }
 .cal-ev { font-size:0.63rem; line-height:1.18; border-radius:4px; padding:2px 4px; margin-bottom:2px; color:#3a3320; overflow:hidden; }
 .cal-ev-t { font-weight:700; }
 .cal-placeholder { text-align:center; color:#7a6f60; font-family:'Lora',serif; font-size:1.1rem; padding:70px 0; }
+#chat-view { max-width:680px; margin:0 auto; padding:0 16px 60px; width:100%; box-sizing:border-box; }
+.chat-intro { font-family:'Lora',serif; color:#56533c; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:14px 18px; margin-bottom:16px; line-height:1.5; }
+.chat-messages { min-height:200px; max-height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:6px 2px 14px; }
+.chat-empty { color:#7a6f60; font-family:'Lora',serif; text-align:center; padding:30px 0; }
+.chat-msg { display:flex; }
+.chat-msg.chat-mine { justify-content:flex-end; }
+.chat-msg.chat-dev { justify-content:flex-start; }
+.chat-bubble { max-width:78%; padding:8px 12px; border-radius:14px; font-family:'Lora',serif; font-size:0.95rem; line-height:1.35; white-space:pre-wrap; word-wrap:break-word; }
+.chat-mine .chat-bubble { background:#3a5c4c; color:#fff; border-bottom-right-radius:4px; }
+.chat-dev .chat-bubble { background:#fffef9; color:#56533c; border:1px solid #e7e1d6; border-bottom-left-radius:4px; }
+.chat-form { display:flex; gap:8px; margin-top:8px; }
+.chat-input { flex:1 1 auto; min-width:0; font-family:'Lora',serif; font-size:0.95rem; padding:10px 14px; border:1px solid #d4cec4; border-radius:12px; background:#fffef9; color:#56533c; }
+.chat-send { flex:0 0 auto; font-family:'Lora',serif; font-size:0.95rem; padding:10px 18px; border:1px solid #3a5c4c; border-radius:12px; background:#3a5c4c; color:#fff; cursor:pointer; }
+.chat-send:hover { background:#2e4a3d; }
+body.dark-mode #chat-view { color:#eadfce; }
+body.dark-mode .chat-intro, body.dark-mode .chat-dev .chat-bubble, body.dark-mode .chat-input { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
 body.dark-mode #calendar-view { color:#eadfce; }
 body.dark-mode .cal-mtitle { color:#9fc7b4; }
 body.dark-mode .cal-day { background:#2b2622; border-color:#4a3f36; }
@@ -1304,6 +1320,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
     <button class="home-tab active" data-tab="kortit" onclick="showHomeTab('kortit')">kortit</button>
     <button class="home-tab" data-tab="kalenteri" onclick="showHomeTab('kalenteri')">kalenteri</button>
     <button class="home-tab" data-tab="kartta" onclick="showHomeTab('kartta')">kartta</button>
+    <button class="home-tab" data-tab="chat" onclick="showHomeTab('chat')">chat</button>
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div id="calendar-view" style="display:none;">
@@ -2182,6 +2199,16 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div></div></div></div>
   </div>
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
+  <div id="chat-view" style="display:none;">
+    <div class="chat-wrap">
+      <div class="chat-intro">Viestittele ylläpidon kanssa. Voit ilmoittaa esimerkiksi bugista sivustolla tai ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
+      <div id="chat-messages" class="chat-messages"><div class="chat-empty">Ei viestejä vielä. Kirjoita ensimmäinen alle.</div></div>
+      <form class="chat-form" onsubmit="sendChatMessage(event)">
+        <input id="chat-input" class="chat-input" type="text" placeholder="Kirjoita viesti…" autocomplete="off" maxlength="2000">
+        <button type="submit" class="chat-send">Lähetä</button>
+      </form>
+    </div>
+  </div>
 
   <!-- dev-only "All Decks" deck (every card, unsorted); cloned into the grid by buildDeckGrid, shown only in dev mode via body.devmode-on -->
   <div class="dev-deck-wrap">
@@ -5518,12 +5545,41 @@ document.addEventListener('click',e=>{
 // ⑯ UTILITY
 // ════════════════════════════════════════════════════════════
 function showHomeTab(tab){
-  var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view'};
+  var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view', chat:'chat-view'};
   for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? (map[t]==='deck-list'?'flex':'block') : 'none'; }
   var hero=document.getElementById('home-hero'); if(hero) hero.style.display = (tab==='kortit') ? '' : 'none';   // Aku intro only on the deck tab
   var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
   if(tab==='kalenteri'){ updateCalHighlight(); }   // apply dimming on open (all dimmed until a course is picked)
+  if(tab==='chat'){ setupChat(); }
   if(tab!=='kortit'){ window.scrollTo(0,0); }
+}
+var _chatUnsub=null;
+function setupChat(){   // live user<->dev chat thread (one Firestore doc per message, keyed by the user's uid)
+  try{
+    var u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); var uid=u?u.uid:null;
+    if(!uid||!db){ setTimeout(setupChat, 600); return; }
+    if(_chatUnsub) return;
+    _chatUnsub=db.collection('chat').where('userId','==',uid).onSnapshot(function(snap){
+      var msgs=[]; snap.forEach(function(d){ msgs.push(d.data()); });
+      msgs.sort(function(a,b){ return ((a.ts&&a.ts.toMillis&&a.ts.toMillis())||0)-((b.ts&&b.ts.toMillis&&b.ts.toMillis())||0); });
+      renderChat(msgs);
+    }, function(){ _chatUnsub=null; });
+  }catch(e){}
+}
+function renderChat(msgs){
+  var box=document.getElementById('chat-messages'); if(!box) return;
+  if(!msgs.length){ box.innerHTML='<div class="chat-empty">Ei viestejä vielä. Kirjoita ensimmäinen alle.</div>'; return; }
+  var h='';
+  for(var i=0;i<msgs.length;i++){ var m=msgs[i]; var mine=(m.sender!=='dev'); h+='<div class="chat-msg '+(mine?'chat-mine':'chat-dev')+'"><div class="chat-bubble">'+escCmt(m.text||'')+'</div></div>'; }
+  box.innerHTML=h; box.scrollTop=box.scrollHeight;
+}
+function sendChatMessage(e){
+  if(e) e.preventDefault();
+  var inp=document.getElementById('chat-input'); if(!inp) return; var text=(inp.value||'').trim(); if(!text) return;
+  var u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); var uid=u?u.uid:null;
+  if(!uid||!db){ alert('Kirjautuminen kesken, yritä hetken kuluttua uudelleen.'); return; }
+  inp.value='';
+  db.collection('chat').add({ userId:uid, sender:'user', text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(err){ alert('Viestin lähetys epäonnistui: '+err.message); });
 }
 function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
   var cbs=document.querySelectorAll('#calendar-view .cal-cb'), checked=[];
