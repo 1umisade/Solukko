@@ -1192,30 +1192,29 @@ body.dark-mode .cal-course { color:#eadfce; }
 .cal-ev-t { font-weight:700; }
 .cal-placeholder { text-align:center; color:#7a6f60; font-family:'Lora',serif; font-size:1.1rem; padding:70px 0; }
 #chat-view { max-width:680px; margin:0 auto; padding:0 16px 60px; width:100%; box-sizing:border-box; }
-.chat-greet-row { display:flex; align-items:flex-start; justify-content:center; gap:16px; margin:6px 0 20px; }
-.chat-greet { position:relative; background:#fffef9; border:2px solid #d4cec4; border-radius:22px; padding:0.9rem 1.3rem; font-family:'Lora',serif; color:#56533c; font-size:1.05rem; line-height:1.4; box-shadow:0 6px 20px rgba(0,0,0,0.14); max-width:420px; }
-.chat-greet::after { content:''; position:absolute; right:-13px; top:26px; border:11px solid transparent; border-left-color:#d4cec4; border-right-width:0; }   /* tail border */
-.chat-greet::before { content:''; position:absolute; right:-10px; top:27px; border:10px solid transparent; border-left-color:#fffef9; border-right-width:0; z-index:1; }   /* tail fill */
-.chat-mona { width:46px; height:46px; flex:0 0 auto; margin-top:2px; border-radius:50%; object-fit:cover; }
-body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#6d5f52; }
-body.dark-mode .chat-greet::after { border-left-color:#6d5f52; }
-body.dark-mode .chat-greet::before { border-left-color:#2b2622; }
-@media (max-width:760px){ .chat-greet-row{ gap:10px; } .chat-mona{ width:40px; height:40px; } .chat-greet{ font-size:0.95rem; } }
-.chat-messages { min-height:200px; max-height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:6px 14px 14px 2px; }
+.chat-greet-row { display:flex; align-items:flex-end; justify-content:flex-start; gap:8px; margin:6px 0 14px; }
+.chat-greet { position:relative; background:#fffef9; border:1px solid #e7e1d6; border-radius:14px; border-bottom-left-radius:4px; padding:0.8rem 1.1rem; font-family:'Lora',serif; color:#56533c; font-size:1.0rem; line-height:1.4; box-shadow:0 2px 8px rgba(0,0,0,0.07); max-width:76%; }
+.chat-mona, .chat-avatar { width:38px; height:38px; flex:0 0 auto; border-radius:50%; object-fit:cover; }
+body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
+@media (max-width:760px){ .chat-greet-row{ gap:6px; } .chat-mona, .chat-avatar{ width:34px; height:34px; } .chat-greet{ font-size:0.92rem; } }
+.chat-messages { min-height:200px; max-height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:6px 14px 14px 2px; }
 .chat-empty { color:#7a6f60; font-family:'Lora',serif; text-align:center; padding:30px 0; }
-.chat-msg { display:flex; }
+.chat-msg { display:flex; align-items:flex-end; gap:8px; }
 .chat-msg.chat-mine { justify-content:flex-end; }
 .chat-msg.chat-dev { justify-content:flex-start; }
-.chat-bubble { position:relative; max-width:78%; padding:8px 12px; border-radius:14px; font-family:'Lora',serif; font-size:0.95rem; line-height:1.35; white-space:pre-wrap; word-wrap:break-word; }
+.chat-bubble { position:relative; max-width:74%; padding:8px 12px; border-radius:14px; font-family:'Lora',serif; font-size:0.95rem; line-height:1.35; white-space:pre-wrap; word-wrap:break-word; }
 .chat-mine .chat-bubble { background:#3a5c4c; color:#fff; border-bottom-right-radius:4px; }
 .chat-dev .chat-bubble { background:#fffef9; color:#56533c; border:1px solid #e7e1d6; border-bottom-left-radius:4px; }
-.chat-menu-btn { position:absolute; top:2px; right:4px; background:none; border:none; color:inherit; opacity:0; cursor:pointer; font-size:1rem; line-height:1; padding:2px 4px; border-radius:6px; transition:opacity .12s; }
-.chat-mine .chat-bubble:hover .chat-menu-btn, .chat-menu-btn:focus { opacity:.75; }
-.chat-menu-btn:hover { opacity:1 !important; background:rgba(255,255,255,.18); }
-.chat-menu { display:none; position:absolute; top:100%; right:0; margin-top:4px; background:#fffef9; border:1px solid #d4cec4; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.2); z-index:30; overflow:hidden; min-width:120px; }
-.chat-menu.open { display:block; }
-.chat-menu button { display:block; width:100%; text-align:left; background:none; border:none; padding:9px 14px; font-family:'Lora',serif; font-size:0.9rem; color:#56533c; cursor:pointer; }
-.chat-menu button:hover { background:#f0ece3; }
+.chat-menu-btn { align-self:center; background:none; border:none; color:#8a8574; opacity:0; cursor:pointer; font-size:1.15rem; line-height:1; padding:2px 5px; border-radius:6px; transition:opacity .12s; }
+.chat-msg.chat-mine:hover .chat-menu-btn, .chat-menu-btn:focus { opacity:.7; }
+.chat-menu-btn:hover { opacity:1 !important; background:rgba(0,0,0,.06); }
+@media (max-width:760px){ .chat-menu-btn{ opacity:.5; } }
+.chat-ctx-menu { position:fixed; display:none; background:#fffef9; border:1px solid #d4cec4; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.2); z-index:9999; overflow:hidden; min-width:130px; }
+.chat-ctx-menu button { display:block; width:100%; text-align:left; background:none; border:none; padding:10px 16px; font-family:'Lora',serif; font-size:0.92rem; color:#56533c; cursor:pointer; }
+.chat-ctx-menu button:hover { background:#f0ece3; }
+body.dark-mode .chat-ctx-menu { background:#2b2622; border-color:#4a3f36; }
+body.dark-mode .chat-ctx-menu button { color:#eadfce; }
+body.dark-mode .chat-ctx-menu button:hover { background:#3a332c; }
 .chat-form { display:flex; gap:8px; margin-top:8px; }
 .chat-input { flex:1 1 auto; min-width:0; font-family:'Lora',serif; font-size:0.95rem; padding:10px 14px; border:1px solid #d4cec4; border-radius:12px; background:#fffef9; color:#56533c; }
 .chat-send { flex:0 0 auto; font-family:'Lora',serif; font-size:0.95rem; padding:10px 18px; border:1px solid #3a5c4c; border-radius:12px; background:#3a5c4c; color:#fff; cursor:pointer; }
@@ -2228,8 +2227,8 @@ body.dark-mode .cal-ev { color:#241f1b; }
   <div id="chat-view" style="display:none;">
     <div class="chat-wrap">
       <div class="chat-greet-row">
-        <div class="chat-greet">Löysitkö sivustolta bugin tai haluatko ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
         <img class="chat-mona" src="mona_with_eyes.png" alt="Mona">
+        <div class="chat-greet">Löysitkö sivustolta bugin tai haluatko ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
       </div>
       <div id="chat-messages" class="chat-messages"><div class="chat-empty">Ei viestejä vielä. Kirjoita ensimmäinen alle.</div></div>
       <form class="chat-form" onsubmit="sendChatMessage(event)">
@@ -5605,29 +5604,49 @@ function renderChat(msgs){
   var box=document.getElementById('chat-messages'); if(!box) return;
   if(!msgs.length){ box.innerHTML='<div class="chat-empty">Ei viestejä vielä. Kirjoita ensimmäinen alle.</div>'; return; }
   var h='';
-  for(var i=0;i<msgs.length;i++){ var m=msgs[i]; var mine=(m.sender!=='dev');
-    var menu=(mine&&m._id)?('<button class="chat-menu-btn" onclick="toggleChatMenu(event,this)" aria-label="Valikko">⋮</button><div class="chat-menu"><button type="button" onclick="editChatMessage(this)">Muokkaa</button><button type="button" onclick="deleteChatMessage(this)">Poista</button></div>'):'';
-    h+='<div class="chat-msg '+(mine?'chat-mine':'chat-dev')+'"><div class="chat-bubble" data-id="'+(m._id||'')+'"><span class="chat-text">'+escCmt(m.text||'')+'</span>'+menu+'</div></div>';
+  for(var i=0;i<msgs.length;i++){ var m=msgs[i]; var dev=(m.sender==='dev');
+    if(dev){
+      h+='<div class="chat-msg chat-dev"><img class="chat-avatar" src="mona_with_eyes.png" alt="Mona"><div class="chat-bubble"><span class="chat-text">'+escCmt(m.text||'')+'</span></div></div>';
+    } else {
+      var menu=(m._id)?'<button class="chat-menu-btn" onclick="openChatMenu(event,this)" aria-label="Valikko">⋮</button>':'';
+      h+='<div class="chat-msg chat-mine">'+menu+'<div class="chat-bubble" data-id="'+(m._id||'')+'"><span class="chat-text">'+escCmt(m.text||'')+'</span></div></div>';
+    }
   }
   box.innerHTML=h; box.scrollTop=box.scrollHeight;
 }
-function toggleChatMenu(e,btn){
-  e.preventDefault(); e.stopPropagation();
-  var menu=btn.nextElementSibling; var open=menu&&menu.classList.contains('open');
-  var all=document.querySelectorAll('#chat-view .chat-menu.open'); for(var i=0;i<all.length;i++) all[i].classList.remove('open');
-  if(menu&&!open) menu.classList.add('open');
+var _chatMenuTarget=null;
+function _chatCtxMenu(){
+  var menu=document.getElementById('chat-ctx-menu');
+  if(!menu){
+    menu=document.createElement('div'); menu.id='chat-ctx-menu'; menu.className='chat-ctx-menu';
+    menu.innerHTML='<button type="button" onclick="editChatMessage()">Muokkaa</button><button type="button" onclick="deleteChatMessage()">Poista</button>';
+    document.body.appendChild(menu);
+  }
+  return menu;
 }
-document.addEventListener('click',function(){ var all=document.querySelectorAll('#chat-view .chat-menu.open'); for(var i=0;i<all.length;i++) all[i].classList.remove('open'); });
-function editChatMessage(btn){
-  var bubble=btn.closest('.chat-bubble'); if(!bubble) return;
+function openChatMenu(e,btn){
+  e.preventDefault(); e.stopPropagation();
+  _chatMenuTarget=btn.parentNode.querySelector('.chat-bubble');
+  var menu=_chatCtxMenu(); menu.style.display='block';
+  var r=btn.getBoundingClientRect(); var mw=menu.offsetWidth||130, mh=menu.offsetHeight||84;
+  var top=r.bottom+4, left=r.left;
+  if(left+mw>window.innerWidth-8) left=window.innerWidth-8-mw;
+  if(top+mh>window.innerHeight-8) top=r.top-4-mh;
+  menu.style.top=Math.max(8,top)+'px'; menu.style.left=Math.max(8,left)+'px';
+}
+function closeChatMenu(){ var m=document.getElementById('chat-ctx-menu'); if(m) m.style.display='none'; }
+document.addEventListener('click',closeChatMenu);
+window.addEventListener('resize',closeChatMenu);
+function editChatMessage(){
+  var bubble=_chatMenuTarget; closeChatMenu(); if(!bubble) return;
   var id=bubble.getAttribute('data-id'); if(!id) return;
   var cur=bubble.querySelector('.chat-text'); cur=cur?cur.textContent:'';
   var nt=prompt('Muokkaa viestiä:', cur); if(nt===null) return; nt=nt.trim();
   if(!nt||nt===cur) return;
   db.collection('chat').doc(id).update({ text:nt.slice(0,2000) }).catch(function(err){ alert('Muokkaus epäonnistui: '+err.message); });
 }
-function deleteChatMessage(btn){
-  var bubble=btn.closest('.chat-bubble'); if(!bubble) return;
+function deleteChatMessage(){
+  var bubble=_chatMenuTarget; closeChatMenu(); if(!bubble) return;
   var id=bubble.getAttribute('data-id'); if(!id) return;
   if(!confirm('Poistetaanko viesti?')) return;
   db.collection('chat').doc(id).delete().catch(function(err){ alert('Poisto epäonnistui: '+err.message); });
