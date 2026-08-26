@@ -2460,7 +2460,10 @@ async function loadDecks(){
     if(_tc){ const _topDeck=coursePathOf(_tc.deckName); if(names.includes(_topDeck)){ await startDeck(_topDeck, false); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
   }
   const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
-  if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck, false); if(savedIdx>0&&reviewCards[savedIdx]){ jumpToOverviewCard(savedIdx); } return; }
+  if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck, false);
+    const _rfs=sessionStorage.getItem('solukko-savedFs')==='1', _rans=sessionStorage.getItem('solukko-savedAnswer')==='1';   // also restore fullscreen review + revealed answer
+    if(reviewCards[savedIdx] && (savedIdx>0 || _rfs)){ jumpToOverviewCard(savedIdx, _rfs); if(_rans) setTimeout(()=>{ try{ showAnswer(); }catch(e){} }, 500); }
+    return; }
   show('deck-screen');
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display=devMode?'flex':'none'; }
   requestAnimationFrame(layoutDecksRadial);
@@ -2762,6 +2765,7 @@ async function renderCurrentCard(){
   clearTimeout(_bottomPeekTimer);
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
   sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
+  try{ sessionStorage.setItem('solukko-savedAnswer','0'); }catch(e){}   // new card shown -> answer not revealed yet
   if(devMode && currentCard){
     const cardId=String(currentCard.cardId||currentCard.noteId||'');
     clearBuzzers().then(()=>{ db.collection('gamestate').doc('current').set({ cardId, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); });
@@ -2884,12 +2888,14 @@ function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
   cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — it stays a page even if native fullscreen isn't available or gets dropped
+  try{ sessionStorage.setItem('solukko-savedFs','1'); }catch(e){}       // remember fullscreen review across a page refresh
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // own card → Ehdota button instead of the comment button
   if(!document.body.classList.contains('is-mobile') && _nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }   // desktop: best-effort native fullscreen to hide the browser chrome (needs the grid-card click's user activation). Mobile stays a plain page.
 }
 function exitCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
   cs.classList.remove('card-fs-on','faux-fs'); _onFsExit();             // leave the page
+  try{ sessionStorage.setItem('solukko-savedFs','0'); }catch(e){}
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // reset the fs buttons (hides the Ehdota button off the study view)
   if(document['fullscreenElement']){ document['exitFullscreen'] && document.exitFullscreen(); }   // ...and native fullscreen if it engaged
 }
@@ -3960,6 +3966,7 @@ function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
   cardAnswerShown=true;
+  try{ sessionStorage.setItem('solukko-savedAnswer','1'); }catch(e){}   // remember the revealed answer across a refresh
   const fc=document.getElementById('flashcard');
   const reveal=()=>{
     clearFrontMona();                    // drop the front hint; the graded bar (buttons + centred Mona) takes over
@@ -4579,7 +4586,7 @@ document.addEventListener('click',e=>{
 // ════════════════════════════════════════════════════════════
 function showDecks(){
   { const cs=document.getElementById('card-screen'); if(cs) cs.classList.remove('card-fs-on','faux-fs'); }   // clear any faux fullscreen when returning to the homepage
-  sessionStorage.removeItem('solukko-savedDeck'); sessionStorage.removeItem('solukko-savedCardIdx');
+  sessionStorage.removeItem('solukko-savedDeck'); sessionStorage.removeItem('solukko-savedCardIdx'); sessionStorage.removeItem('solukko-savedFs'); sessionStorage.removeItem('solukko-savedAnswer');
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   if(kuvaajatUnsubscribe){ kuvaajatUnsubscribe(); kuvaajatUnsubscribe=null; }
   if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
