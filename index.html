@@ -1162,6 +1162,10 @@ body.dark-mode .home-tab.active { background:#5c8a6a; border-color:#5c8a6a; colo
 .cal-course { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:0.85rem; color:#56533c; cursor:pointer; line-height:1.25; }
 .cal-course .cal-swatch { flex:0 0 auto; width:18px; height:18px; border-radius:4px; border:none; cursor:pointer; opacity:0.35; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.22); transition:opacity .12s, box-shadow .12s; }
 .cal-cb { display:none; }
+.cal-cname { flex:1 1 auto; }
+.cal-solo { flex:0 0 auto; font-family:'Lora',serif; font-size:0.66rem; padding:2px 8px; border:1px solid #d4cec4; border-radius:8px; background:#fffef9; color:#7a6f60; cursor:pointer; transition:border-color .12s, color .12s; }
+.cal-solo:hover { border-color:#3a5c4c; color:#3a5c4c; }
+body.dark-mode .cal-solo { background:#241f1b; border-color:#6d5f52; color:#cbb9a0; }
 .cal-cb:checked + .cal-swatch { opacity:1; box-shadow:0 0 0 2px #3a5c4c; }
 body.dark-mode .cal-cb:checked + .cal-swatch { box-shadow:0 0 0 2px #5c8a6a; }
 .cal-body { flex:1 1 auto; min-width:0; }
@@ -1303,7 +1307,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div id="calendar-view" style="display:none;">
-<div class="cal-layout"><div class="cal-body"><div class="cal-month">
+<div class="cal-layout"><div class="cal-courses"><div class="cal-courses-title">Korosta kursseja</div><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5000" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF2CC"></span><span class="cal-cname">Avaimet biokemian opiskeluun</span><button type="button" class="cal-solo" onclick="event.preventDefault();event.stopPropagation();calSolo('BKEM5000')" title="Näytä vain tämä kurssi">solo</button></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5030" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DDEBF7"></span><span class="cal-cname">Solu ja biomolekyylit – teoria</span><button type="button" class="cal-solo" onclick="event.preventDefault();event.stopPropagation();calSolo('BKEM5030')" title="Näytä vain tämä kurssi">solo</button></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0070" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FCE4D6"></span><span class="cal-cname">Johdatus biotekniikkaan</span><button type="button" class="cal-solo" onclick="event.preventDefault();event.stopPropagation();calSolo('DIBT0070')" title="Näytä vain tämä kurssi">solo</button></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="KEMI6308" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E4DFEC"></span><span class="cal-cname">Kemian peruskurssi I</span><button type="button" class="cal-solo" onclick="event.preventDefault();event.stopPropagation();calSolo('KEMI6308')" title="Näytä vain tämä kurssi">solo</button></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5031" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E2EFDA"></span><span class="cal-cname">Solu ja biomolekyylit – käytäntö</span><button type="button" class="cal-solo" onclick="event.preventDefault();event.stopPropagation();calSolo('BKEM5031')" title="Näytä vain tämä kurssi">solo</button></label></div><div class="cal-body"><div class="cal-month">
 <h3 class="cal-mtitle">Elokuu 2026</h3>
 <div class="cal-grid">
 <div class="cal-wd">maanantai</div>
@@ -5520,6 +5524,13 @@ function showHomeTab(tab){
   var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
   if(tab==='kalenteri'){ updateCalHighlight(); }   // apply dimming on open (all dimmed until a course is picked)
   if(tab!=='kortit'){ window.scrollTo(0,0); }
+}
+function calSolo(code){   // check only this course (toggle off if it is already the sole selection)
+  var cbs=document.querySelectorAll('#calendar-view .cal-cb'), count=0, onlyThis=true;
+  for(var i=0;i<cbs.length;i++){ if(cbs[i].checked){ count++; if(cbs[i].getAttribute('data-course')!==code) onlyThis=false; } }
+  var alreadySolo = onlyThis && count===1;
+  for(var j=0;j<cbs.length;j++){ cbs[j].checked = !alreadySolo && (cbs[j].getAttribute('data-course')===code); }
+  updateCalHighlight();
 }
 function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
   var cbs=document.querySelectorAll('#calendar-view .cal-cb'), checked=[];
