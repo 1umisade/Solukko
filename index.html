@@ -1212,6 +1212,7 @@ body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#4a
 .chat-mine .chat-bubble { background:#3a5c4c; color:#fff; border-bottom-right-radius:4px; }
 .chat-bubble.chat-clickable { cursor:pointer; }
 .chat-bubble.chat-clickable:hover { background:#33513f; }
+.chat-edit-input { font-family:'Lora',serif; font-size:0.95rem; line-height:1.35; padding:1px 4px; border:1px solid rgba(255,255,255,.55); border-radius:8px; background:rgba(255,255,255,.16); color:#fff; min-width:120px; width:100%; box-sizing:border-box; outline:none; }
 .chat-dev .chat-bubble { background:#fffef9; color:#56533c; border:1px solid #e7e1d6; border-bottom-left-radius:4px; }
 .chat-menu-btn { align-self:center; background:none; border:none; color:#8a8574; opacity:0; cursor:pointer; font-size:1.15rem; line-height:1; padding:2px 5px; border-radius:6px; transition:opacity .12s; }
 .chat-msg.chat-mine:hover .chat-menu-btn, .chat-menu-btn:focus { opacity:.7; }
@@ -5651,16 +5652,27 @@ window.addEventListener('resize',closeChatMenu);
 function editChatMessage(){
   var bubble=_chatMenuTarget; closeChatMenu(); if(!bubble) return;
   var id=bubble.getAttribute('data-id'); if(!id) return;
-  var cur=bubble.querySelector('.chat-text'); cur=cur?cur.textContent:'';
-  var nt=prompt('Muokkaa viestiä:', cur); if(nt===null) return; nt=nt.trim();
-  if(!nt||nt===cur) return;
-  db.collection('chat').doc(id).update({ text:nt.slice(0,2000) }).catch(function(err){ alert('Muokkaus epäonnistui: '+err.message); });
+  var span=bubble.querySelector('.chat-text'); if(!span) return;
+  if(bubble.querySelector('.chat-edit-input')) return;
+  var cur=span.textContent;
+  var inp=document.createElement('input');
+  inp.type='text'; inp.className='chat-edit-input'; inp.value=cur; inp.maxLength=2000;
+  span.style.display='none'; bubble.appendChild(inp); inp.focus(); inp.select();
+  var done=false;
+  function stop(ev){ ev.stopPropagation(); }
+  inp.addEventListener('click', stop); inp.addEventListener('mousedown', stop);
+  function save(){ if(done) return; done=true; var nt=(inp.value||'').trim();
+    if(inp.parentNode) inp.parentNode.removeChild(inp); span.style.display='';
+    if(nt && nt!==cur) db.collection('chat').doc(id).update({ text:nt.slice(0,2000) }).catch(function(){});
+  }
+  function cancel(){ if(done) return; done=true; if(inp.parentNode) inp.parentNode.removeChild(inp); span.style.display=''; }
+  inp.addEventListener('keydown', function(ev){ if(ev.key==='Enter'){ ev.preventDefault(); save(); } else if(ev.key==='Escape'){ ev.preventDefault(); cancel(); } });
+  inp.addEventListener('blur', save);
 }
 function deleteChatMessage(){
   var bubble=_chatMenuTarget; closeChatMenu(); if(!bubble) return;
   var id=bubble.getAttribute('data-id'); if(!id) return;
-  if(!confirm('Poistetaanko viesti?')) return;
-  db.collection('chat').doc(id).delete().catch(function(err){ alert('Poisto epäonnistui: '+err.message); });
+  db.collection('chat').doc(id).delete().catch(function(){});
 }
 function sendChatMessage(e){
   if(e) e.preventDefault();
@@ -5668,7 +5680,7 @@ function sendChatMessage(e){
   var u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); var uid=u?u.uid:null;
   if(!uid||!db){ alert('Kirjautuminen kesken, yritä hetken kuluttua uudelleen.'); return; }
   inp.value='';
-  db.collection('chat').add({ userId:uid, sender:'user', word:getUserWord(), text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(err){ alert('Viestin lähetys epäonnistui: '+err.message); });
+  db.collection('chat').add({ userId:uid, sender:'user', word:getUserWord(), text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
 }
 // ── Dev chat: pick a user thread, then reply ──
 var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null;
@@ -5724,7 +5736,7 @@ function sendDevReply(e){
   if(e) e.preventDefault();
   var inp=document.getElementById('dev-chat-input'); if(!inp) return; var text=(inp.value||'').trim(); if(!text||!_devChatSel) return;
   inp.value='';
-  db.collection('chat').add({ userId:_devChatSel, sender:'dev', word:'Mona', text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(err){ alert('Vastaus epäonnistui: '+err.message); });
+  db.collection('chat').add({ userId:_devChatSel, sender:'dev', word:'Mona', text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
 }
 function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
   var cbs=document.querySelectorAll('#calendar-view .cal-cb'), checked=[];
