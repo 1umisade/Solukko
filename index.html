@@ -3517,6 +3517,7 @@ async function loadDecks(){
     if(reviewCards[savedIdx] && (savedIdx>0 || _rfs)){ jumpToOverviewCard(savedIdx, _rfs); if(_rans) setTimeout(()=>{ try{ showAnswer(); }catch(e){} }, 500); }
     return; }
   show('deck-screen');
+  { const _ht=sessionStorage.getItem('solukko-homeTab'); if(_ht && _ht!=='kortit' && typeof showHomeTab==='function') showHomeTab(_ht); }   // restore the home tab (chat/kalenteri/kartta) the user was on
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display=devMode?'flex':'none'; }
   requestAnimationFrame(layoutDecksRadial);
   setTimeout(layoutDecksRadial, 140); setTimeout(layoutDecksRadial, 450);   // re-run once the packs have settled to their final size
@@ -5636,6 +5637,7 @@ document.addEventListener('click',e=>{
 // ⑯ UTILITY
 // ════════════════════════════════════════════════════════════
 function showHomeTab(tab){
+  try{ sessionStorage.setItem('solukko-homeTab', tab); }catch(e){}   // remember the active home tab across a refresh
   var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view', chat:'chat-view'};
   for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? (map[t]==='deck-list'?'flex':'block') : 'none'; }
   var hero=document.getElementById('home-hero'); if(hero) hero.style.display = (tab==='kortit') ? '' : 'none';   // Aku intro only on the deck tab
