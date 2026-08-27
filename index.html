@@ -5456,7 +5456,7 @@ function renderCardOverview(){
     const embedUrl = (!isPaapakka && group.link) ? getYouTubeEmbedUrl(group.link) : null;
     const videoHtml = isPaapakka ? '' : makeVideoEmbed(embedUrl, group.name);
 
-    const cardsHtml=group.cards.map(card=>{
+    const cardsHtml=group.cards.filter(card=>(getField(card,['Front','front'])||'').replace(/<[^>]*>/g,'').trim().toLowerCase()!=='esittely').map(card=>{   // the "esittely" intro card is the cover, not a grid tile
       const index=reviewCards.indexOf(card);
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
