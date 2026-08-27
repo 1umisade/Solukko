@@ -1263,10 +1263,13 @@ body.dark-mode .chat-ctx-menu button:hover { background:#3a332c; }
 .chat-send:hover { background:#2e4a3d; }
 #dev-chat { max-width:680px; margin:0 auto; }
 .dev-chat-title { font-family:'Lora',serif; font-weight:700; color:#26473f; font-size:1.1rem; margin:6px 0 14px; text-align:center; }
-.dev-chat-thread { background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 16px; margin-bottom:8px; cursor:pointer; transition:border-color .12s; }
+.dev-chat-thread { display:flex; align-items:center; gap:10px; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 16px; margin-bottom:8px; cursor:pointer; transition:border-color .12s; }
 .dev-chat-thread:hover { border-color:#3a5c4c; }
+.dev-thread-main { flex:1 1 auto; min-width:0; }
 .dev-thread-name { font-family:'Lora',serif; font-weight:700; color:#56533c; }
 .dev-thread-last { font-family:'Lora',serif; font-size:0.85rem; color:#7a6f60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dev-thread-del { flex:0 0 auto; background:none; border:none; color:#c0392b; font-size:1.25rem; line-height:1; cursor:pointer; padding:4px 8px; border-radius:8px; opacity:.75; }
+.dev-thread-del:hover { opacity:1; background:rgba(192,57,43,.1); }
 .dev-chat-head { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
 .dev-chat-back { font-family:'Lora',serif; font-size:0.9rem; padding:6px 12px; border:1px solid #d4cec4; border-radius:10px; background:#fffef9; color:#56533c; cursor:pointer; }
 .dev-chat-who { font-family:'Lora',serif; font-weight:700; color:#26473f; }
@@ -2364,7 +2367,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
         <div id="dev-comments-panel" style="display:none"></div>
       </div>
       <div class="dev-col">
-        <div class="dev-section-title">Käyttäjien kortit &amp; ehdotukset</div>
+        <div class="dev-section-title">Käyttäjien kortit</div>
         <div id="dev-usercards-panel" style="display:none"></div>
       </div>
     </div>
@@ -5382,6 +5385,7 @@ function renderDevUserCardsPanel(){
       if(d.paid){ badge='<span class="uc-badge paid">Maksettu</span>'; }
       else if(d.approved){ badge='<span class="uc-badge approved">Koodi '+_esc(String(d.approvedCode||''))+'</span>'; acts='<button class="dca-btn" title="Merkitse maksetuksi" onclick="event.stopPropagation();markUserCardPaid(\''+r.id+'\')">💶</button>'; }
       else if(d.suggested){ badge='<span class="uc-badge suggested">Ehdotettu</span>'; acts='<button class="dca-btn" title="Palkitse (anna koodi)" onclick="event.stopPropagation();awardUserCard(\''+r.id+'\')">🏅</button>'; }
+      acts+='<button class="dca-btn dca-del" title="Poista kortti" onclick="event.stopPropagation();devDeleteUserCard(\''+r.id+'\')">🗑</button>';
       html+='<div class="dev-comment-row" onclick="openUserCardInFs(\''+_esc(String(d.deck||'')).replace(/\x27/g,"\\\x27")+'\',\''+r.id+'\')">'
         +'<div class="dev-row-head"><span class="dev-row-name">'+name+'</span><span class="dev-comment-deck">'+deck+'</span><span class="dev-row-right">'+badge+'<span class="dev-comment-actions">'+acts+'</span></span></div>'
         +'<div class="dev-comment-snip">'+front+'</div>'
@@ -5391,6 +5395,7 @@ function renderDevUserCardsPanel(){
   }).catch(e=>{ panel.innerHTML='<div class="dev-comments-title">Käyttäjien kortit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+_esc(e.code||e.message||'')+'<br>Aseta oma UID isAdmin()-sääntöön ja julkaise firestore.rules.</div>'; });
 }
 function _refreshDevUserCards(){ setTimeout(renderDevUserCardsPanel, 700); }
+function devDeleteUserCard(id){ db.collection('userCards').doc(id).delete().then(_refreshDevUserCards).catch(e=>alert('Virhe: '+(e&&(e.code||e.message)))); }   // dev: delete any user card (immediate, no confirm)
 async function awardUserCard(docId){
   const code=await uiPrompt('Anna palkintokoodi (kortin tekijä tekstaa sen lunastaakseen 0,25 €):');
   if(code===null) return; if(!code.trim()){ alert('Koodi ei voi olla tyhjä.'); return; }
@@ -5737,7 +5742,7 @@ function sendChatMessage(e){
   db.collection('chat').add({ userId:uid, sender:'user', word:getUserWord(), text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
 }
 // ── Dev chat: pick a user thread, then reply ──
-var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null, _devDeleteConfirm=null, _devChatErr=false;
+var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null, _devChatErr=false;
 // ── Dev chat badge: count of new (unseen) user messages on the "chat" tab ──
 var _devBadgeUnsub=null, _devBadgeSeen=parseInt(localStorage.getItem('solukko-dev-chat-seen')||'0',10)||0, _devBadgeMaxTs=0;
 function updateChatBadge(n){
@@ -5829,13 +5834,12 @@ function renderDevChat(){
     var threads=_devThreads(), h='<div class="dev-chat-title">Chatit ('+threads.length+')</div>';
     if(!threads.length) h+='<div class="chat-empty">'+(_devChatErr?'Chatin luku estetty — varmista että oma dev-UID:si on Firestore-säännöissä (isAdmin).':'Ei viestejä.')+'</div>';
     for(var i=0;i<threads.length;i++){ var t=threads[i], nm=t.name||t.uid.slice(0,8);
-      h+='<div class="dev-chat-thread" onclick="openDevThread(\''+t.uid+'\')"><div class="dev-thread-name">'+escCmt(nm)+'</div><div class="dev-thread-last">'+escCmt((t.last||'').slice(0,70))+'</div></div>'; }
+      h+='<div class="dev-chat-thread" onclick="openDevThread(\''+t.uid+'\')"><div class="dev-thread-main"><div class="dev-thread-name">'+escCmt(nm)+'</div><div class="dev-thread-last">'+escCmt((t.last||'').slice(0,70))+'</div></div><button class="dev-thread-del" title="Poista koko chat" onclick="event.stopPropagation();deleteDevThread(\''+t.uid+'\')">✕</button></div>'; }
     wrap.innerHTML=h;
   } else {
     var msgs=_devChatMsgs.filter(function(m){ return m.userId===_devChatSel; }), name='';
     for(var j=0;j<msgs.length;j++){ if(msgs[j].sender!=='dev'&&msgs[j].word) name=msgs[j].word; }
-    var delC=(_devDeleteConfirm===_devChatSel);
-    var h='<div class="dev-chat-head"><button class="dev-chat-back" onclick="closeDevThread()">← chatit</button><span class="dev-chat-who">'+escCmt(name||_devChatSel.slice(0,8))+'</span><button class="dev-chat-del'+(delC?' confirm':'')+'" onclick="confirmDeleteThread(event)">'+(delC?'Poista lopullisesti?':'Poista keskustelu')+'</button></div>';
+    var h='<div class="dev-chat-head"><button class="dev-chat-back" onclick="closeDevThread()">← chatit</button><span class="dev-chat-who">'+escCmt(name||_devChatSel.slice(0,8))+'</span><button class="dev-chat-del" onclick="deleteDevThread(\''+_devChatSel+'\')">Poista keskustelu</button></div>';
     h+='<div class="chat-messages" id="dev-chat-messages">';
     for(var i=0;i<msgs.length;i++){ var m=msgs[i], mine=(m.sender==='dev'); h+='<div class="chat-msg '+(mine?'chat-mine':'chat-dev')+'"><div class="chat-bubble">'+escCmt(m.text||'')+'</div></div>'; }
     h+='</div><form class="chat-form" onsubmit="sendDevReply(event)"><input id="dev-chat-input" class="chat-input" type="text" placeholder="Vastaa…" autocomplete="off" maxlength="2000"><button type="submit" class="chat-send">Lähetä</button></form>';
@@ -5843,18 +5847,13 @@ function renderDevChat(){
     var box=document.getElementById('dev-chat-messages'); if(box) box.scrollTop=box.scrollHeight;
   }
 }
-function openDevThread(uid){ _devChatSel=uid; _devDeleteConfirm=null; renderDevChat(); }
-function closeDevThread(){ _devChatSel=null; _devDeleteConfirm=null; renderDevChat(); }
-function confirmDeleteThread(e){
-  if(e){ e.preventDefault(); e.stopPropagation(); }
-  if(_devDeleteConfirm!==_devChatSel){ _devDeleteConfirm=_devChatSel; renderDevChat(); return; }
-  deleteDevThread();
-}
-function deleteDevThread(){
-  var uid=_devChatSel; if(!uid||!db) return;
+function openDevThread(uid){ _devChatSel=uid; renderDevChat(); }
+function closeDevThread(){ _devChatSel=null; renderDevChat(); }
+function deleteDevThread(uid){   // dev: delete a whole chat thread (all its messages) — immediate, no confirm
+  uid=uid||_devChatSel; if(!uid||!db) return;
   db.collection('chat').where('userId','==',uid).get().then(function(snap){
     var b=db.batch(); snap.forEach(function(d){ b.delete(d.ref); }); return b.commit();
-  }).then(function(){ _devDeleteConfirm=null; _devChatSel=null; renderDevChat(); }).catch(function(){});
+  }).then(function(){ if(_devChatSel===uid) _devChatSel=null; renderDevChat(); }).catch(function(){});
 }
 function sendDevReply(e){
   if(e) e.preventDefault();
