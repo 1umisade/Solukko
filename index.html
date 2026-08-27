@@ -959,14 +959,15 @@ body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-colo
 body.dark-mode .overview-section-title { color: #cbbda8; border-bottom-color: #6d5f52; }
 
 /* Overview card — position:relative needed for star badge */
-.overview-card { background: url('new_bg.png?v=2') center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1 / 1.5; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; -webkit-box-pack: center; text-align: center; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }   /* text centred (h + v) like the real card; vertical on all devices */
+.overview-card { background: url('new_bg.png?v=2') center/cover no-repeat; border: 1px solid #d4cec4; border-radius: 10px; padding: 0.9rem; aspect-ratio: 1 / 1.5; height: auto; font-size: 0.68rem; line-height: 1.25; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); word-break: break-word; position: relative; }   /* text centred (h + v) like the real preview card */
+.overview-card .oc-text { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }   /* clamp long fronts to a few lines, still vertically centred by the flex parent */
 
 /* ── STAR BADGE inside overview cards ─────────────────────  */
 .overview-card-stars {
   position: absolute;
-  bottom: 4px;
-  right: 5px;
-  font-size: 0.48rem;
+  top: 6px;
+  right: 6px;
+  font-size: 0.6rem;
   color: #6b4423;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -5467,11 +5468,11 @@ function renderCardOverview(){
           ? (card._approved ? 'Hyväksytty — päivitä koodi' : 'Hyväksy kortti viralliseksi')
           : (card._approved ? 'Hyväksytty' : (card._suggested ? 'Ehdotettu (odottaa tarkistusta)' : 'Ehdota viralliseksi'));
         const tools=canEdit?`<span class="ucard-tools"><button type="button" class="${_sugCls}" onclick="event.stopPropagation();ehdotaBtnClick('${card._docId}')" title="${_sugTitle}">!</button><button type="button" onclick="event.stopPropagation();openEditCardForm('${card._docId}')" title="Muokkaa">✎</button><button type="button" onclick="event.stopPropagation();deleteUserCard('${card._docId}')" title="Poista">🗑</button></span>`:'';
-        return `<div class="overview-card user-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${tools}</div>`;
+        return `<div class="overview-card user-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)"><span class="oc-text">${text||'(tyhjä kortti)'}</span>${tools}</div>`;
       }
       const starCount=cardStarCount(card);
       const starsHtml=starCount?`<span class="overview-card-stars">${'★︎'.repeat(starCount)}</span>`:'';
-      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)">${text||'(tyhjä kortti)'}${starsHtml}</div>`;
+      return `<div class="overview-card ${index===currentOverviewIndex?'active':''} ${cardGrades[card.cardId]||''}" data-card-index="${index}" onmouseenter="previewCard(${index})" onclick="jumpToOverviewCard(${index}, true)"><span class="oc-text">${text||'(tyhjä kortti)'}</span>${starsHtml}</div>`;
     }).join('');
     const addTile=`<div class="overview-card add-card-tile" onclick="openAddCardForm(${groupIndex})" onmouseenter="previewAddCardInfo()" onmouseleave="previewRestore()" title="Luo oma kortti tähän osioon"><span class="add-card-plus">＋</span><span class="add-card-label">Luo kortti</span></div>`;
 
