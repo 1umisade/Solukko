@@ -5690,7 +5690,7 @@ function sendChatMessage(e){
   db.collection('chat').add({ userId:uid, sender:'user', word:getUserWord(), text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
 }
 // ── Dev chat: pick a user thread, then reply ──
-var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null, _devDeleteConfirm=null;
+var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null, _devDeleteConfirm=null, _devChatErr=false;
 // ── Dev chat badge: count of new (unseen) user messages on the "chat" tab ──
 var _devBadgeUnsub=null, _devBadgeSeen=parseInt(localStorage.getItem('solukko-dev-chat-seen')||'0',10)||0, _devBadgeMaxTs=0;
 function updateChatBadge(n){
@@ -5753,14 +5753,16 @@ function setupDevChat(){
   var cf=document.querySelector('#chat-view .chat-form'); if(cf) cf.style.display='none';
   wrap.style.display='block';
   markDevChatSeen();
-  if(_devChatUnsub){ renderDevChat(); return; }
+  renderDevChat();   // render immediately so the view is never blank while the listener loads
+  if(_devChatUnsub) return;
   try{
     if(!db){ setTimeout(setupDevChat, 600); return; }
     _devChatUnsub=db.collection('chat').onSnapshot(function(snap){
+      _devChatErr=false;
       _devChatMsgs=[]; snap.forEach(function(d){ var m=d.data(); m._id=d.id; _devChatMsgs.push(m); });
       _devChatMsgs.sort(function(a,b){ return ((a.ts&&a.ts.toMillis&&a.ts.toMillis())||0)-((b.ts&&b.ts.toMillis&&b.ts.toMillis())||0); });
       renderDevChat();
-    }, function(){ _devChatUnsub=null; });
+    }, function(){ _devChatUnsub=null; _devChatErr=true; renderDevChat(); });
   }catch(e){}
 }
 function _devThreads(){
@@ -5778,7 +5780,7 @@ function renderDevChat(){
   var wrap=document.getElementById('dev-chat'); if(!wrap) return;
   if(!_devChatSel){
     var threads=_devThreads(), h='<div class="dev-chat-title">Chatit ('+threads.length+')</div>';
-    if(!threads.length) h+='<div class="chat-empty">Ei viestejä.</div>';
+    if(!threads.length) h+='<div class="chat-empty">'+(_devChatErr?'Chatin luku estetty — varmista että oma dev-UID:si on Firestore-säännöissä (isAdmin).':'Ei viestejä.')+'</div>';
     for(var i=0;i<threads.length;i++){ var t=threads[i], nm=t.name||t.uid.slice(0,8);
       h+='<div class="dev-chat-thread" onclick="openDevThread(\''+t.uid+'\')"><div class="dev-thread-name">'+escCmt(nm)+'</div><div class="dev-thread-last">'+escCmt((t.last||'').slice(0,70))+'</div></div>'; }
     wrap.innerHTML=h;
