@@ -4498,8 +4498,7 @@ function devEditComment(id){   // dev: edit any comment's text from the dev list
     });
   }).catch(err=>alert('Virhe: '+err.message));
 }
-async function devDeleteComment(id){   // dev: delete any comment from the dev list
-  if(!(await uiConfirm('Poistetaanko kommentti pysyvästi?',{danger:true,okText:'Poista'}))) return;
+function devDeleteComment(id){   // dev: delete any comment from the dev list (immediate, no confirm)
   db.collection('comments').doc(id).delete().then(()=>{ renderDevCommentsPanel(); if(typeof loadFirestoreComments==='function') loadFirestoreComments(); }).catch(err=>alert('Virhe: '+err.message));
 }
 
@@ -4684,7 +4683,7 @@ function editComment(docId,btn){
 }
 function saveEditComment(docId,btn){ const textarea=btn.closest('.comment-text-wrap').querySelector('textarea'); const newText=textarea.value.trim(); if(!newText) return; db.collection('comments').doc(docId).update({text:newText}).then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 function cancelEditComment(btn){ loadFirestoreComments(); }
-async function deleteComment(docId){ if(!(await uiConfirm('Poistetaanko kommentti?',{danger:true,okText:'Poista'}))) return; db.collection('comments').doc(docId).delete().then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
+function deleteComment(docId){ db.collection('comments').doc(docId).delete().then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 // developer paints a comment gold (the weekly winner); the claim code goes to a PRIVATE prizes doc
 async function toggleGoldenComment(docId, isGolden){
   const cref=db.collection('comments').doc(docId), pref=db.collection('prizes').doc(docId);
@@ -4703,7 +4702,7 @@ async function toggleGoldenComment(docId, isGolden){
   }).catch(err=>alert('Virhe: '+err.message));
 }
 // after paying the winner, mark the prize paid -> removes the golden win bubbles from the winner's Mona (the gold comment stays as a record)
-async function markPrizePaid(docId){ if(!(await uiConfirm('Merkitäänkö palkinto maksetuksi? Voittoviesti poistuu voittajan Monalta.',{okText:'Merkitse'}))) return; db.collection('prizes').doc(docId).set({ paid: true, paidAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).then(()=>alert('Merkitty maksetuksi ✓ — voittoviesti poistui voittajan Monalta.')).catch(err=>alert('Virhe: '+err.message)); }
+function markPrizePaid(docId){ db.collection('prizes').doc(docId).set({ paid: true, paidAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).then(()=>alert('Merkitty maksetuksi ✓ — voittoviesti poistui voittajan Monalta.')).catch(err=>alert('Virhe: '+err.message)); }
 // watch this device's own comments; if one gets painted gold, show the winner celebration
 let _myGolden=null, _goldenShown=false, _goldenUnsub=null, _goldenRetry=null;
 function setupGoldenWatch(){
@@ -5287,7 +5286,6 @@ document.addEventListener('mousedown', e=>{ if(!document.body.classList.contains
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.body.classList.contains('adding-usercard')){ e.preventDefault(); commitUserCardForm(); } });
 async function deleteUserCard(docId){
   const c=_userCards.find(x=>x._docId===docId); if(!c) return;
-  if(!(await uiConfirm('Poistetaanko tämä kortti?',{danger:true,okText:'Poista'}))) return;
   try{ await db.collection('userCards').doc(docId).delete(); }catch(e){ alert('Poisto epäonnistui: '+(e&&(e.code||e.message))); return; }
   _userCards=_userCards.filter(x=>x._docId!==docId);
   const nextCur=(currentCard&&currentCard._docId===docId)?(reviewCards.find(x=>!x._userCard)||null):currentCard;
@@ -5335,7 +5333,6 @@ async function suggestUserCard(docId){   // suggest a specific own card (grid "!
   const c=_userCards.find(x=>x._docId===docId); if(!c) return;
   if(c._approved){ showCardAwardCodeStr(c._approvedCode); return; }
   if(c._suggested){ alert('Tämä kortti on jo ehdotettu. Ylläpito tarkistaa sen pian.'); return; }
-  if(!(await uiConfirm('Ehdota tätä korttia viralliseksi kurssikortiksi?\n\nYlläpito tarkistaa sen. Hyväksytystä ehdotuksesta maksetaan 0,25 €.',{okText:'Ehdota'}))) return;
   db.collection('userCards').doc(docId).update({ suggested:true, suggestedAt: firebase.firestore.FieldValue.serverTimestamp() })
     .then(()=>{ c._suggested=true; if(currentCard && currentCard._docId===docId) currentCard._suggested=true; if(typeof updateSuggestBtnState==='function') updateSuggestBtnState(); const g=document.getElementById('card-overview-grid'); if(g) g.dataset.deckName=''; if(typeof renderCardOverview==='function') renderCardOverview(); alert('Kiitos! Ehdotuksesi on lähetetty tarkistettavaksi.'); })
     .catch(e=>alert('Ehdotus epäonnistui: '+((e&&(e.code||e.message))||'')+'\n\n(Firestoren säännöt on ehkä julkaistava — ks. firestore.rules.)'));
@@ -5400,8 +5397,7 @@ async function awardUserCard(docId){
     .then(()=>{ const c=_userCards.find(x=>x._docId===docId); if(c){ c._approved=true; c._approvedCode=code.trim(); } const g=document.getElementById('card-overview-grid'); if(g) g.dataset.deckName=''; if(typeof renderCardOverview==='function') renderCardOverview(); if(typeof updateSuggestBtnState==='function') updateSuggestBtnState(); _refreshDevUserCards(); })
     .catch(e=>alert('Virhe: '+e.message));
 }
-async function markUserCardPaid(docId){
-  if(!(await uiConfirm('Merkitäänkö palkinto maksetuksi? Ilmoitus poistuu tekijän laitteelta.',{okText:'Merkitse'}))) return;
+function markUserCardPaid(docId){
   db.collection('userCards').doc(docId).update({ paid:true, paidAt: firebase.firestore.FieldValue.serverTimestamp() })
     .then(_refreshDevUserCards).catch(e=>alert('Virhe: '+e.message));
 }
