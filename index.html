@@ -1268,6 +1268,7 @@ body.dark-mode .chat-ctx-menu button:hover { background:#3a332c; }
 .dev-thread-main { flex:1 1 auto; min-width:0; }
 .dev-thread-name { font-family:'Lora',serif; font-weight:700; color:#56533c; }
 .dev-thread-last { font-family:'Lora',serif; font-size:0.85rem; color:#7a6f60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dev-thread-empty { font-style:italic; color:#b0a595; }
 .dev-thread-del { flex:0 0 auto; background:none; border:none; color:#c0392b; font-size:1.25rem; line-height:1; cursor:pointer; padding:4px 8px; border-radius:8px; opacity:.75; }
 .dev-thread-del:hover { opacity:1; background:rgba(192,57,43,.1); }
 .dev-chat-head { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
@@ -5742,7 +5743,7 @@ function sendChatMessage(e){
   db.collection('chat').add({ userId:uid, sender:'user', word:getUserWord(), text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
 }
 // ── Dev chat: pick a user thread, then reply ──
-var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null, _devChatErr=false;
+var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null, _devChatErr=false, _devAllUsers={}, _devPresenceUnsub=null;
 // ── Dev chat badge: count of new (unseen) user messages on the "chat" tab ──
 var _devBadgeUnsub=null, _devBadgeSeen=parseInt(localStorage.getItem('solukko-dev-chat-seen')||'0',10)||0, _devBadgeMaxTs=0;
 function updateChatBadge(n){
@@ -5806,6 +5807,12 @@ function setupDevChat(){
   wrap.style.display='block';
   markDevChatSeen();
   renderDevChat();   // render immediately so the view is never blank while the listener loads
+  if(!_devPresenceUnsub){   // every known user (from presence) gets a thread, so the dev can message anyone
+    try{ _devPresenceUnsub=db.collection('presence').onSnapshot(function(snap){
+      snap.forEach(function(d){ var x=d.data(); if(x&&x.userId) _devAllUsers[x.userId]=x.word||x.userId; });
+      renderDevChat();
+    },function(){}); }catch(e){}
+  }
   if(_devChatUnsub) return;
   try{
     if(!db){ setTimeout(setupDevChat, 600); return; }
@@ -5819,13 +5826,14 @@ function setupDevChat(){
 }
 function _devThreads(){
   var map={};
+  for(var u in _devAllUsers){ map[u]={uid:u, name:_devAllUsers[u], last:'', lastTs:0}; }   // seed an (empty) thread for every known user
   for(var i=0;i<_devChatMsgs.length;i++){ var m=_devChatMsgs[i]; var uid=m.userId; if(!uid) continue;
-    if(!map[uid]) map[uid]={uid:uid, name:'', last:'', lastTs:0};
+    if(!map[uid]) map[uid]={uid:uid, name:_devAllUsers[uid]||'', last:'', lastTs:0};
     if(m.sender!=='dev' && m.word) map[uid].name=m.word;
     map[uid].last=m.text||''; map[uid].lastTs=(m.ts&&m.ts.toMillis&&m.ts.toMillis())||0;
   }
   var arr=[]; for(var k in map) arr.push(map[k]);
-  arr.sort(function(a,b){ return b.lastTs-a.lastTs; });
+  arr.sort(function(a,b){ return (b.lastTs-a.lastTs) || String(a.name||a.uid).localeCompare(String(b.name||b.uid)); });   // messaged threads first (newest), then empty ones A→Z
   return arr;
 }
 function renderDevChat(){
@@ -5834,11 +5842,13 @@ function renderDevChat(){
     var threads=_devThreads(), h='<div class="dev-chat-title">Chatit ('+threads.length+')</div>';
     if(!threads.length) h+='<div class="chat-empty">'+(_devChatErr?'Chatin luku estetty — varmista että oma dev-UID:si on Firestore-säännöissä (isAdmin).':'Ei viestejä.')+'</div>';
     for(var i=0;i<threads.length;i++){ var t=threads[i], nm=t.name||t.uid.slice(0,8);
-      h+='<div class="dev-chat-thread" onclick="openDevThread(\''+t.uid+'\')"><div class="dev-thread-main"><div class="dev-thread-name">'+escCmt(nm)+'</div><div class="dev-thread-last">'+escCmt((t.last||'').slice(0,70))+'</div></div><button class="dev-thread-del" title="Poista koko chat" onclick="event.stopPropagation();deleteDevThread(\''+t.uid+'\')">✕</button></div>'; }
+      var last=t.last?escCmt(t.last.slice(0,70)):'<span class="dev-thread-empty">Ei viestejä — kirjoita ensimmäinen</span>';
+      h+='<div class="dev-chat-thread" onclick="openDevThread(\''+t.uid+'\')"><div class="dev-thread-main"><div class="dev-thread-name">'+escCmt(nm)+'</div><div class="dev-thread-last">'+last+'</div></div><button class="dev-thread-del" title="Poista koko chat" onclick="event.stopPropagation();deleteDevThread(\''+t.uid+'\')">✕</button></div>'; }
     wrap.innerHTML=h;
   } else {
     var msgs=_devChatMsgs.filter(function(m){ return m.userId===_devChatSel; }), name='';
     for(var j=0;j<msgs.length;j++){ if(msgs[j].sender!=='dev'&&msgs[j].word) name=msgs[j].word; }
+    if(!name) name=_devAllUsers[_devChatSel]||'';
     var h='<div class="dev-chat-head"><button class="dev-chat-back" onclick="closeDevThread()">← chatit</button><span class="dev-chat-who">'+escCmt(name||_devChatSel.slice(0,8))+'</span><button class="dev-chat-del" onclick="deleteDevThread(\''+_devChatSel+'\')">Poista keskustelu</button></div>';
     h+='<div class="chat-messages" id="dev-chat-messages">';
     for(var i=0;i<msgs.length;i++){ var m=msgs[i], mine=(m.sender==='dev'); h+='<div class="chat-msg '+(mine?'chat-mine':'chat-dev')+'"><div class="chat-bubble">'+escCmt(m.text||'')+'</div></div>'; }
