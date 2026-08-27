@@ -1161,6 +1161,7 @@ body.dark-mode .home-tab:hover:not(.active) { color:#fff; }
 body.dark-mode .home-tab.active { background:#5c8a6a; color:#fff; }
 body.dark-mode .home-tab + .home-tab::before { background:#5c5145; }
 @media (max-width:560px){ .home-tab{ padding:0.5rem 0.95rem; font-size:0.9rem; } }
+.tab-badge { align-items:center; justify-content:center; min-width:19px; height:19px; padding:0 5px; margin-left:7px; border-radius:10px; background:#c0392b; color:#fff; font-size:0.72rem; font-weight:700; line-height:1; box-sizing:border-box; vertical-align:middle; box-shadow:0 1px 3px rgba(0,0,0,0.25); }
 #calendar-view { padding:0 16px 60px; max-width:1240px; margin:0 auto; width:100%; box-sizing:border-box; }
 .cal-layout { display:flex; gap:22px; align-items:flex-start; }
 .cal-courses { flex:0 0 220px; position:sticky; top:12px; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 14px; font-family:'Lora',serif; }
@@ -1354,7 +1355,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
     <button class="home-tab active" data-tab="kortit" onclick="showHomeTab('kortit')">kortit</button>
     <button class="home-tab" data-tab="kalenteri" onclick="showHomeTab('kalenteri')">kalenteri</button>
     <button class="home-tab" data-tab="kartta" onclick="showHomeTab('kartta')">kartta</button>
-    <button class="home-tab" data-tab="chat" onclick="showHomeTab('chat')">chat</button>
+    <button class="home-tab" data-tab="chat" onclick="showHomeTab('chat')">chat<span id="chat-badge" class="tab-badge" style="display:none">0</span></button>
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div id="calendar-view" style="display:none;">
@@ -2581,6 +2582,7 @@ function applyDevMode(){
   const dsb=document.getElementById('dev-screen-btn');
   if(dsb) dsb.style.display = (devMode && document.getElementById('deck-screen').style.display==='flex') ? 'flex' : 'none';
   document.body.classList.toggle('devmode-on', !!devMode);   // reveals the dev-only "All Decks" deck in the homepage grid (CSS)
+  if(typeof startDevChatBadge==='function'){ if(devMode) startDevChatBadge(); else stopDevChatBadge(); }
 }
 
 function exitDevMode(){
@@ -5684,12 +5686,40 @@ function sendChatMessage(e){
 }
 // ── Dev chat: pick a user thread, then reply ──
 var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null;
+// ── Dev chat badge: count of new (unseen) user messages on the "chat" tab ──
+var _devBadgeUnsub=null, _devBadgeSeen=parseInt(localStorage.getItem('solukko-dev-chat-seen')||'0',10)||0, _devBadgeMaxTs=0;
+function updateChatBadge(n){
+  var b=document.getElementById('chat-badge'); if(!b) return;
+  if(n>0){ b.textContent=(n>99?'99+':String(n)); b.style.display='inline-flex'; }
+  else b.style.display='none';
+}
+function startDevChatBadge(){
+  if(_devBadgeUnsub) return;
+  if(!window.db){ setTimeout(startDevChatBadge,600); return; }
+  try{
+    _devBadgeUnsub=db.collection('chat').onSnapshot(function(snap){
+      var unread=0, maxTs=0;
+      snap.forEach(function(d){ var m=d.data(); var ts=(m.ts&&m.ts.toMillis&&m.ts.toMillis())||0; if(ts>maxTs) maxTs=ts; if(m.sender!=='dev' && ts>_devBadgeSeen) unread++; });
+      _devBadgeMaxTs=maxTs;
+      var cv=document.getElementById('chat-view');
+      if(devMode && cv && cv.style.display!=='none'){ if(maxTs>_devBadgeSeen){ _devBadgeSeen=maxTs; localStorage.setItem('solukko-dev-chat-seen',String(_devBadgeSeen)); } updateChatBadge(0); }
+      else updateChatBadge(unread);
+    }, function(){ _devBadgeUnsub=null; });
+  }catch(e){}
+}
+function stopDevChatBadge(){ if(_devBadgeUnsub){ try{_devBadgeUnsub();}catch(e){} _devBadgeUnsub=null; } updateChatBadge(0); }
+function markDevChatSeen(){
+  if(_devBadgeMaxTs>_devBadgeSeen) _devBadgeSeen=_devBadgeMaxTs;
+  localStorage.setItem('solukko-dev-chat-seen',String(_devBadgeSeen));
+  updateChatBadge(0);
+}
 function setupDevChat(){
   var wrap=document.getElementById('dev-chat'); if(!wrap) return;
   var g=document.querySelector('#chat-view .chat-greet-row'); if(g) g.style.display='none';
   var cm=document.getElementById('chat-messages'); if(cm) cm.style.display='none';
   var cf=document.querySelector('#chat-view .chat-form'); if(cf) cf.style.display='none';
   wrap.style.display='block';
+  markDevChatSeen();
   if(_devChatUnsub){ renderDevChat(); return; }
   try{
     if(!db){ setTimeout(setupDevChat, 600); return; }
