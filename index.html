@@ -1238,6 +1238,10 @@ body.dark-mode .chat-ctx-menu button:hover { background:#3a332c; }
 .dev-chat-head { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
 .dev-chat-back { font-family:'Lora',serif; font-size:0.9rem; padding:6px 12px; border:1px solid #d4cec4; border-radius:10px; background:#fffef9; color:#56533c; cursor:pointer; }
 .dev-chat-who { font-family:'Lora',serif; font-weight:700; color:#26473f; }
+.dev-chat-del { margin-left:auto; font-family:'Lora',serif; font-size:0.82rem; padding:6px 12px; border:1px solid #c4bbac; border-radius:999px; background:transparent; color:#9a6a6a; cursor:pointer; white-space:nowrap; }
+.dev-chat-del:hover { border-color:#c0392b; color:#c0392b; }
+.dev-chat-del.confirm { background:#c0392b; border-color:#c0392b; color:#fff; }
+body.dark-mode .dev-chat-del { color:#c99; border-color:#5c5145; }
 body.dark-mode .dev-chat-thread, body.dark-mode .dev-chat-back { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
 body.dark-mode .dev-thread-name, body.dark-mode .dev-chat-who, body.dark-mode .dev-chat-title { color:#eadfce; }
 body.dark-mode #chat-view { color:#eadfce; }
@@ -2582,7 +2586,7 @@ function applyDevMode(){
   const dsb=document.getElementById('dev-screen-btn');
   if(dsb) dsb.style.display = (devMode && document.getElementById('deck-screen').style.display==='flex') ? 'flex' : 'none';
   document.body.classList.toggle('devmode-on', !!devMode);   // reveals the dev-only "All Decks" deck in the homepage grid (CSS)
-  if(typeof startDevChatBadge==='function'){ if(devMode) startDevChatBadge(); else stopDevChatBadge(); }
+  if(typeof refreshChatBadge==='function') refreshChatBadge();
 }
 
 function exitDevMode(){
@@ -5600,6 +5604,7 @@ function setupChat(){   // live user<->dev chat thread (one Firestore doc per me
   var _gr=document.querySelector('#chat-view .chat-greet-row'); if(_gr) _gr.style.display='';
   var _cm=document.getElementById('chat-messages'); if(_cm) _cm.style.display='';
   var _cf=document.querySelector('#chat-view .chat-form'); if(_cf) _cf.style.display='';
+  if(typeof markUserChatSeen==='function') markUserChatSeen();
   try{
     var u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); var uid=u?u.uid:null;
     if(!uid||!db){ setTimeout(setupChat, 600); return; }
@@ -5685,7 +5690,7 @@ function sendChatMessage(e){
   db.collection('chat').add({ userId:uid, sender:'user', word:getUserWord(), text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
 }
 // ── Dev chat: pick a user thread, then reply ──
-var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null;
+var _devChatUnsub=null, _devChatMsgs=[], _devChatSel=null, _devDeleteConfirm=null;
 // ── Dev chat badge: count of new (unseen) user messages on the "chat" tab ──
 var _devBadgeUnsub=null, _devBadgeSeen=parseInt(localStorage.getItem('solukko-dev-chat-seen')||'0',10)||0, _devBadgeMaxTs=0;
 function updateChatBadge(n){
@@ -5695,7 +5700,7 @@ function updateChatBadge(n){
 }
 function startDevChatBadge(){
   if(_devBadgeUnsub) return;
-  if(!window.db){ setTimeout(startDevChatBadge,600); return; }
+  if(!db){ setTimeout(startDevChatBadge,600); return; }
   try{
     _devBadgeUnsub=db.collection('chat').onSnapshot(function(snap){
       var unread=0, maxTs=0;
@@ -5712,6 +5717,34 @@ function markDevChatSeen(){
   if(_devBadgeMaxTs>_devBadgeSeen) _devBadgeSeen=_devBadgeMaxTs;
   localStorage.setItem('solukko-dev-chat-seen',String(_devBadgeSeen));
   updateChatBadge(0);
+}
+// ── User chat badge: count of new dev replies in the user's own thread ──
+var _userBadgeUnsub=null, _userBadgeSeen=parseInt(localStorage.getItem('solukko-user-chat-seen')||'0',10)||0, _userBadgeMaxTs=0;
+function startUserChatBadge(){
+  if(_userBadgeUnsub) return;
+  var u=(window.firebase&&firebase.auth&&firebase.auth().currentUser); var uid=u?u.uid:null;
+  if(!db||!uid){ setTimeout(startUserChatBadge,600); return; }
+  try{
+    _userBadgeUnsub=db.collection('chat').where('userId','==',uid).onSnapshot(function(snap){
+      var unread=0, maxTs=0;
+      snap.forEach(function(d){ var m=d.data(); var ts=(m.ts&&m.ts.toMillis&&m.ts.toMillis())||0; if(ts>maxTs) maxTs=ts; if(m.sender==='dev' && ts>_userBadgeSeen) unread++; });
+      _userBadgeMaxTs=maxTs;
+      if(devMode) return;
+      var cv=document.getElementById('chat-view');
+      if(cv && cv.style.display!=='none'){ if(maxTs>_userBadgeSeen){ _userBadgeSeen=maxTs; localStorage.setItem('solukko-user-chat-seen',String(_userBadgeSeen)); } updateChatBadge(0); }
+      else updateChatBadge(unread);
+    }, function(){ _userBadgeUnsub=null; });
+  }catch(e){}
+}
+function stopUserChatBadge(){ if(_userBadgeUnsub){ try{_userBadgeUnsub();}catch(e){} _userBadgeUnsub=null; } }
+function markUserChatSeen(){
+  if(_userBadgeMaxTs>_userBadgeSeen) _userBadgeSeen=_userBadgeMaxTs;
+  localStorage.setItem('solukko-user-chat-seen',String(_userBadgeSeen));
+  updateChatBadge(0);
+}
+function refreshChatBadge(){
+  if(devMode){ stopUserChatBadge(); startDevChatBadge(); }
+  else { stopDevChatBadge(); startUserChatBadge(); }
 }
 function setupDevChat(){
   var wrap=document.getElementById('dev-chat'); if(!wrap) return;
@@ -5752,7 +5785,8 @@ function renderDevChat(){
   } else {
     var msgs=_devChatMsgs.filter(function(m){ return m.userId===_devChatSel; }), name='';
     for(var j=0;j<msgs.length;j++){ if(msgs[j].sender!=='dev'&&msgs[j].word) name=msgs[j].word; }
-    var h='<div class="dev-chat-head"><button class="dev-chat-back" onclick="closeDevThread()">← chatit</button><span class="dev-chat-who">'+escCmt(name||_devChatSel.slice(0,8))+'</span></div>';
+    var delC=(_devDeleteConfirm===_devChatSel);
+    var h='<div class="dev-chat-head"><button class="dev-chat-back" onclick="closeDevThread()">← chatit</button><span class="dev-chat-who">'+escCmt(name||_devChatSel.slice(0,8))+'</span><button class="dev-chat-del'+(delC?' confirm':'')+'" onclick="confirmDeleteThread(event)">'+(delC?'Poista lopullisesti?':'Poista keskustelu')+'</button></div>';
     h+='<div class="chat-messages" id="dev-chat-messages">';
     for(var i=0;i<msgs.length;i++){ var m=msgs[i], mine=(m.sender==='dev'); h+='<div class="chat-msg '+(mine?'chat-mine':'chat-dev')+'"><div class="chat-bubble">'+escCmt(m.text||'')+'</div></div>'; }
     h+='</div><form class="chat-form" onsubmit="sendDevReply(event)"><input id="dev-chat-input" class="chat-input" type="text" placeholder="Vastaa…" autocomplete="off" maxlength="2000"><button type="submit" class="chat-send">Lähetä</button></form>';
@@ -5760,8 +5794,19 @@ function renderDevChat(){
     var box=document.getElementById('dev-chat-messages'); if(box) box.scrollTop=box.scrollHeight;
   }
 }
-function openDevThread(uid){ _devChatSel=uid; renderDevChat(); }
-function closeDevThread(){ _devChatSel=null; renderDevChat(); }
+function openDevThread(uid){ _devChatSel=uid; _devDeleteConfirm=null; renderDevChat(); }
+function closeDevThread(){ _devChatSel=null; _devDeleteConfirm=null; renderDevChat(); }
+function confirmDeleteThread(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  if(_devDeleteConfirm!==_devChatSel){ _devDeleteConfirm=_devChatSel; renderDevChat(); return; }
+  deleteDevThread();
+}
+function deleteDevThread(){
+  var uid=_devChatSel; if(!uid||!db) return;
+  db.collection('chat').where('userId','==',uid).get().then(function(snap){
+    var b=db.batch(); snap.forEach(function(d){ b.delete(d.ref); }); return b.commit();
+  }).then(function(){ _devDeleteConfirm=null; _devChatSel=null; renderDevChat(); }).catch(function(){});
+}
 function sendDevReply(e){
   if(e) e.preventDefault();
   var inp=document.getElementById('dev-chat-input'); if(!inp) return; var text=(inp.value||'').trim(); if(!text||!_devChatSel) return;
