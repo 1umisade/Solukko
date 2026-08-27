@@ -33,6 +33,37 @@ firebase.initializeApp({
   appId: "1:143174538900:web:b55db7c61ce724827a4681"
 });
 const db = firebase.firestore();
+
+// ── Custom in-page dialogs (no native alert/confirm/prompt anywhere) ──
+function _uiModal(o){
+  return new Promise(function(resolve){
+    var ov=document.createElement('div'); ov.className='ui-modal-ov';
+    var box=document.createElement('div'); box.className='ui-modal';
+    var msg=document.createElement('div'); msg.className='ui-modal-msg'; msg.textContent=o.message||''; box.appendChild(msg);
+    var input=null;
+    if(o.isPrompt){ input=document.createElement('input'); input.className='ui-modal-input'; input.type='text'; input.value=(o.defaultVal!=null?o.defaultVal:''); box.appendChild(input); }
+    var row=document.createElement('div'); row.className='ui-modal-row';
+    var cancel=document.createElement('button'); cancel.type='button'; cancel.className='ui-modal-btn ui-modal-cancel'; cancel.textContent=o.cancelText||'Peruuta';
+    var ok=document.createElement('button'); ok.type='button'; ok.className='ui-modal-btn ui-modal-ok'+(o.danger?' ui-modal-danger':''); ok.textContent=o.okText||'OK';
+    row.appendChild(cancel); row.appendChild(ok); box.appendChild(row); ov.appendChild(box); document.body.appendChild(ov);
+    function done(v){ if(ov.parentNode) ov.parentNode.removeChild(ov); document.removeEventListener('keydown',onKey); resolve(v); }
+    function onKey(e){ if(e.key==='Escape'){ e.preventDefault(); done(o.isPrompt?null:false); } else if(e.key==='Enter'){ e.preventDefault(); done(o.isPrompt?(input?input.value:''):true); } }
+    cancel.onclick=function(){ done(o.isPrompt?null:false); };
+    ok.onclick=function(){ done(o.isPrompt?(input?input.value:''):true); };
+    ov.onclick=function(e){ if(e.target===ov) done(o.isPrompt?null:false); };
+    document.addEventListener('keydown',onKey);
+    if(input){ input.focus(); input.select(); } else ok.focus();
+  });
+}
+function uiConfirm(message, opts){ opts=opts||{}; return _uiModal({message:message, isPrompt:false, okText:opts.okText||'OK', cancelText:opts.cancelText||'Peruuta', danger:opts.danger}); }
+function uiPrompt(message, defaultVal){ return _uiModal({message:message, isPrompt:true, defaultVal:defaultVal!=null?defaultVal:'', okText:'OK', cancelText:'Peruuta'}); }
+function uiToast(message){
+  var t=document.createElement('div'); t.className='ui-toast'; t.textContent=(message==null?'':String(message)); document.body.appendChild(t);
+  requestAnimationFrame(function(){ t.classList.add('ui-toast-in'); });
+  setTimeout(function(){ t.classList.remove('ui-toast-in'); setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 320); }, 3400);
+}
+window.alert = uiToast;   // every alert(...) in the app becomes a non-blocking toast
+
 // Anonymous auth — gives every device a real, stable uid that the Firestore rules can verify.
 // (Requires "Anonymous" sign-in to be enabled in the Firebase console → Authentication.)
 try{
@@ -1242,6 +1273,24 @@ body.dark-mode .chat-ctx-menu button:hover { background:#3a332c; }
 .dev-chat-del:hover { border-color:#c0392b; color:#c0392b; }
 .dev-chat-del.confirm { background:#c0392b; border-color:#c0392b; color:#fff; }
 body.dark-mode .dev-chat-del { color:#c99; border-color:#5c5145; }
+/* ── Custom in-page dialogs (replace native alert/confirm/prompt) ── */
+.ui-modal-ov { position:fixed; inset:0; background:rgba(30,26,20,0.45); display:flex; align-items:center; justify-content:center; z-index:100000; padding:20px; }
+.ui-modal { background:#fffef9; border:1px solid #d4cec4; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,0.3); max-width:420px; width:100%; padding:22px; font-family:'Lora',serif; color:#56533c; }
+.ui-modal-msg { font-size:1.02rem; line-height:1.45; margin-bottom:14px; white-space:pre-wrap; word-wrap:break-word; }
+.ui-modal-input { width:100%; box-sizing:border-box; font-family:'Lora',serif; font-size:0.98rem; padding:9px 12px; border:1px solid #d4cec4; border-radius:10px; background:#fff; color:#56533c; margin-bottom:14px; outline:none; }
+.ui-modal-row { display:flex; justify-content:flex-end; gap:10px; }
+.ui-modal-btn { font-family:'Lora',serif; font-size:0.95rem; padding:9px 18px; border-radius:10px; cursor:pointer; border:1px solid #d4cec4; }
+.ui-modal-cancel { background:#f0ece3; color:#56533c; }
+.ui-modal-cancel:hover { background:#e7e1d6; }
+.ui-modal-ok { background:#3a5c4c; color:#fff; border-color:#3a5c4c; }
+.ui-modal-ok:hover { background:#2e4a3d; }
+.ui-modal-danger { background:#c0392b; border-color:#c0392b; }
+.ui-modal-danger:hover { background:#a93226; }
+.ui-toast { position:fixed; left:50%; bottom:32px; transform:translateX(-50%) translateY(20px); background:#3a3320; color:#fdf9ef; font-family:'Lora',serif; font-size:0.95rem; line-height:1.4; padding:12px 20px; border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,0.32); z-index:100001; max-width:80vw; opacity:0; transition:opacity .28s, transform .28s; pointer-events:none; text-align:center; }
+.ui-toast.ui-toast-in { opacity:1; transform:translateX(-50%) translateY(0); }
+body.dark-mode .ui-modal { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
+body.dark-mode .ui-modal-input { background:#211d1a; color:#eadfce; border-color:#4a3f36; }
+body.dark-mode .ui-modal-cancel { background:#3a332c; color:#eadfce; border-color:#4a3f36; }
 body.dark-mode .dev-chat-thread, body.dark-mode .dev-chat-back { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
 body.dark-mode .dev-thread-name, body.dark-mode .dev-chat-who, body.dark-mode .dev-chat-title { color:#eadfce; }
 body.dark-mode #chat-view { color:#eadfce; }
@@ -2695,7 +2744,7 @@ function initDarkmodeBtn(){
 
 function promptDevMode(){
   const o=document.getElementById('devpw-overlay'), inp=document.getElementById('devpw-input');
-  if(!o||!inp){ const pw=prompt('Anna kehittäjätilan salasana:'); if(pw) _checkDevPw(pw); return; }   // fallback
+  if(!o||!inp){ uiPrompt('Anna kehittäjätilan salasana:').then(function(pw){ if(pw) _checkDevPw(pw); }); return; }   // fallback
   inp.value=''; o.style.display='flex'; setTimeout(()=>{ inp.focus(); },50);
 }
 function closeDevPw(){ const o=document.getElementById('devpw-overlay'); if(o) o.style.display='none'; }
@@ -4387,8 +4436,8 @@ function copyDevUid(){
   const uid=_devUid();
   if(!uid){ alert('UID ei ole vielä valmis (kirjautuminen kesken). Yritä hetken kuluttua.'); return; }
   const t=document.getElementById('dev-uid-text'); if(t) t.textContent=uid;
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(uid).then(()=>alert('UID kopioitu:\n'+uid)).catch(()=>prompt('Kopioi UID:',uid)); }
-  else prompt('Kopioi UID:',uid);
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(uid).then(()=>alert('UID kopioitu:\n'+uid)).catch(()=>uiPrompt('Kopioi UID:',uid)); }
+  else uiPrompt('Kopioi UID:',uid);
 }
 function showDevScreen(){
   hide('deck-screen'); hide('card-screen'); show('dev-screen');
@@ -4443,13 +4492,14 @@ function _refreshDevComments(){ setTimeout(renderDevCommentsPanel, 700); }   // 
 function devEditComment(id){   // dev: edit any comment's text from the dev list
   db.collection('comments').doc(id).get().then(doc=>{
     if(!doc.exists){ alert('Kommenttia ei löytynyt.'); return; }
-    const t=prompt('Muokkaa kommenttia:', (doc.data()||{}).text||'');
-    if(t===null) return;
-    db.collection('comments').doc(id).update({ text:t }).then(()=>{ renderDevCommentsPanel(); if(typeof loadFirestoreComments==='function') loadFirestoreComments(); }).catch(err=>alert('Virhe: '+err.message));
+    uiPrompt('Muokkaa kommenttia:', (doc.data()||{}).text||'').then(t=>{
+      if(t===null) return;
+      db.collection('comments').doc(id).update({ text:t }).then(()=>{ renderDevCommentsPanel(); if(typeof loadFirestoreComments==='function') loadFirestoreComments(); }).catch(err=>alert('Virhe: '+err.message));
+    });
   }).catch(err=>alert('Virhe: '+err.message));
 }
-function devDeleteComment(id){   // dev: delete any comment from the dev list
-  if(!confirm('Poistetaanko kommentti pysyvästi?')) return;
+async function devDeleteComment(id){   // dev: delete any comment from the dev list
+  if(!(await uiConfirm('Poistetaanko kommentti pysyvästi?',{danger:true,okText:'Poista'}))) return;
   db.collection('comments').doc(id).delete().then(()=>{ renderDevCommentsPanel(); if(typeof loadFirestoreComments==='function') loadFirestoreComments(); }).catch(err=>alert('Virhe: '+err.message));
 }
 
@@ -4634,16 +4684,16 @@ function editComment(docId,btn){
 }
 function saveEditComment(docId,btn){ const textarea=btn.closest('.comment-text-wrap').querySelector('textarea'); const newText=textarea.value.trim(); if(!newText) return; db.collection('comments').doc(docId).update({text:newText}).then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 function cancelEditComment(btn){ loadFirestoreComments(); }
-function deleteComment(docId){ if(!confirm('Poistetaanko kommentti?')) return; db.collection('comments').doc(docId).delete().then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
+async function deleteComment(docId){ if(!(await uiConfirm('Poistetaanko kommentti?',{danger:true,okText:'Poista'}))) return; db.collection('comments').doc(docId).delete().then(()=>loadFirestoreComments()).catch(err=>alert('Virhe: '+err.message)); }
 // developer paints a comment gold (the weekly winner); the claim code goes to a PRIVATE prizes doc
-function toggleGoldenComment(docId, isGolden){
+async function toggleGoldenComment(docId, isGolden){
   const cref=db.collection('comments').doc(docId), pref=db.collection('prizes').doc(docId);
   if(isGolden){                                  // un-paint: drop the gold + the private code
     cref.update({ golden: false }).catch(err=>alert('Virhe: '+err.message));
     pref.delete().catch(()=>{});
     return;
   }
-  const code=prompt('Anna palkintokoodi (tämän voittaja tekstaa lunastaakseen):');
+  const code=await uiPrompt('Anna palkintokoodi (tämän voittaja tekstaa lunastaakseen):');
   if(code===null) return;                        // cancelled
   if(!code.trim()){ alert('Koodi ei voi olla tyhjä.'); return; }
   cref.get().then(doc=>{
@@ -4653,7 +4703,7 @@ function toggleGoldenComment(docId, isGolden){
   }).catch(err=>alert('Virhe: '+err.message));
 }
 // after paying the winner, mark the prize paid -> removes the golden win bubbles from the winner's Mona (the gold comment stays as a record)
-function markPrizePaid(docId){ if(!confirm('Merkitäänkö palkinto maksetuksi? Voittoviesti poistuu voittajan Monalta.')) return; db.collection('prizes').doc(docId).set({ paid: true, paidAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).then(()=>alert('Merkitty maksetuksi ✓ — voittoviesti poistui voittajan Monalta.')).catch(err=>alert('Virhe: '+err.message)); }
+async function markPrizePaid(docId){ if(!(await uiConfirm('Merkitäänkö palkinto maksetuksi? Voittoviesti poistuu voittajan Monalta.',{okText:'Merkitse'}))) return; db.collection('prizes').doc(docId).set({ paid: true, paidAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).then(()=>alert('Merkitty maksetuksi ✓ — voittoviesti poistui voittajan Monalta.')).catch(err=>alert('Virhe: '+err.message)); }
 // watch this device's own comments; if one gets painted gold, show the winner celebration
 let _myGolden=null, _goldenShown=false, _goldenUnsub=null, _goldenRetry=null;
 function setupGoldenWatch(){
@@ -5237,7 +5287,7 @@ document.addEventListener('mousedown', e=>{ if(!document.body.classList.contains
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && document.body.classList.contains('adding-usercard')){ e.preventDefault(); commitUserCardForm(); } });
 async function deleteUserCard(docId){
   const c=_userCards.find(x=>x._docId===docId); if(!c) return;
-  if(!confirm('Poistetaanko tämä kortti?')) return;
+  if(!(await uiConfirm('Poistetaanko tämä kortti?',{danger:true,okText:'Poista'}))) return;
   try{ await db.collection('userCards').doc(docId).delete(); }catch(e){ alert('Poisto epäonnistui: '+(e&&(e.code||e.message))); return; }
   _userCards=_userCards.filter(x=>x._docId!==docId);
   const nextCur=(currentCard&&currentCard._docId===docId)?(reviewCards.find(x=>!x._userCard)||null):currentCard;
@@ -5281,11 +5331,11 @@ function updateSuggestBtnState(){
   b.classList.toggle('approved', !!currentCard._approved);
   b.title=currentCard._approved?'Hyväksytty! Näytä palkintokoodi':(currentCard._suggested?'Ehdotettu — odottaa tarkistusta':'Ehdota korttia viralliseksi');
 }
-function suggestUserCard(docId){   // suggest a specific own card (grid "!" button or the fullscreen Ehdota button)
+async function suggestUserCard(docId){   // suggest a specific own card (grid "!" button or the fullscreen Ehdota button)
   const c=_userCards.find(x=>x._docId===docId); if(!c) return;
   if(c._approved){ showCardAwardCodeStr(c._approvedCode); return; }
   if(c._suggested){ alert('Tämä kortti on jo ehdotettu. Ylläpito tarkistaa sen pian.'); return; }
-  if(!confirm('Ehdota tätä korttia viralliseksi kurssikortiksi?\n\nYlläpito tarkistaa sen. Hyväksytystä ehdotuksesta maksetaan 0,25 €.')) return;
+  if(!(await uiConfirm('Ehdota tätä korttia viralliseksi kurssikortiksi?\n\nYlläpito tarkistaa sen. Hyväksytystä ehdotuksesta maksetaan 0,25 €.',{okText:'Ehdota'}))) return;
   db.collection('userCards').doc(docId).update({ suggested:true, suggestedAt: firebase.firestore.FieldValue.serverTimestamp() })
     .then(()=>{ c._suggested=true; if(currentCard && currentCard._docId===docId) currentCard._suggested=true; if(typeof updateSuggestBtnState==='function') updateSuggestBtnState(); const g=document.getElementById('card-overview-grid'); if(g) g.dataset.deckName=''; if(typeof renderCardOverview==='function') renderCardOverview(); alert('Kiitos! Ehdotuksesi on lähetetty tarkistettavaksi.'); })
     .catch(e=>alert('Ehdotus epäonnistui: '+((e&&(e.code||e.message))||'')+'\n\n(Firestoren säännöt on ehkä julkaistava — ks. firestore.rules.)'));
@@ -5343,15 +5393,15 @@ function renderDevUserCardsPanel(){
   }).catch(e=>{ panel.innerHTML='<div class="dev-comments-title">Käyttäjien kortit</div><div style="color:#c0392b;font-size:0.75rem;">Virhe: '+_esc(e.code||e.message||'')+'<br>Aseta oma UID isAdmin()-sääntöön ja julkaise firestore.rules.</div>'; });
 }
 function _refreshDevUserCards(){ setTimeout(renderDevUserCardsPanel, 700); }
-function awardUserCard(docId){
-  const code=prompt('Anna palkintokoodi (kortin tekijä tekstaa sen lunastaakseen 0,25 €):');
+async function awardUserCard(docId){
+  const code=await uiPrompt('Anna palkintokoodi (kortin tekijä tekstaa sen lunastaakseen 0,25 €):');
   if(code===null) return; if(!code.trim()){ alert('Koodi ei voi olla tyhjä.'); return; }
   db.collection('userCards').doc(docId).update({ approved:true, approvedCode:code.trim(), approvedAt: firebase.firestore.FieldValue.serverTimestamp() })
     .then(()=>{ const c=_userCards.find(x=>x._docId===docId); if(c){ c._approved=true; c._approvedCode=code.trim(); } const g=document.getElementById('card-overview-grid'); if(g) g.dataset.deckName=''; if(typeof renderCardOverview==='function') renderCardOverview(); if(typeof updateSuggestBtnState==='function') updateSuggestBtnState(); _refreshDevUserCards(); })
     .catch(e=>alert('Virhe: '+e.message));
 }
-function markUserCardPaid(docId){
-  if(!confirm('Merkitäänkö palkinto maksetuksi? Ilmoitus poistuu tekijän laitteelta.')) return;
+async function markUserCardPaid(docId){
+  if(!(await uiConfirm('Merkitäänkö palkinto maksetuksi? Ilmoitus poistuu tekijän laitteelta.',{okText:'Merkitse'}))) return;
   db.collection('userCards').doc(docId).update({ paid:true, paidAt: firebase.firestore.FieldValue.serverTimestamp() })
     .then(_refreshDevUserCards).catch(e=>alert('Virhe: '+e.message));
 }
@@ -5557,7 +5607,7 @@ function toggleGroupModeFromSwitch(){
 }
 
 function selectGroup(index){ if(!groupMode) return; selectedGroup=index; updateGroupUI(); }
-function renameGroup(index){ const n=prompt('Anna ryhmälle uusi nimi:',groups[index].name); if(!n||!n.trim()) return; groups[index].name=n.trim(); saveGroups(); updateGroupUI(); }
+async function renameGroup(index){ const n=await uiPrompt('Anna ryhmälle uusi nimi:',groups[index].name); if(!n||!n.trim()) return; groups[index].name=n.trim(); saveGroups(); updateGroupUI(); }
 function addGroup(){ groups.push({name:String.fromCharCode(65+groups.length),score:0}); saveGroups(); updateGroupUI(); }
 function bounceWinningGroup(index){ const c=document.querySelectorAll('.group-card')[index]; if(!c) return; c.classList.remove('coin-winner'); void c.offsetWidth; c.classList.add('coin-winner'); setTimeout(()=>c.classList.remove('coin-winner'),420); }
 
