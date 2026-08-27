@@ -5801,9 +5801,10 @@ function setupDevChat(){
   wrap.style.display='block';
   markDevChatSeen();
   renderDevChat();   // render immediately so the view is never blank while the listener loads
-  if(!_devPresenceUnsub){   // every known user (from presence) gets a thread, so the dev can message anyone
+  if(!_devPresenceUnsub){   // list users who have PROVABLY used the site (studied >=1 card), so the dev can message a real person
     try{ _devPresenceUnsub=db.collection('presence').onSnapshot(function(snap){
-      snap.forEach(function(d){ var x=d.data(); if(x&&x.userId) _devAllUsers[x.userId]=x.word||x.userId; });
+      var m={}; snap.forEach(function(d){ var x=d.data(); if(x&&x.userId && (x.known||0)>0) m[x.userId]=x.word||x.userId; });   // known>0 filters out drive-by loads / bots / duplicate empty sessions
+      _devAllUsers=m;
       renderDevChat();
     },function(){}); }catch(e){}
   }
