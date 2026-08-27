@@ -930,7 +930,7 @@ body.adding-usercard #usercard-form { display: flex; }
 #ucard-answer { display: block; border-top: none; position: relative; }   /* both sides always shown (front + back); divider drawn by ::before so it can fade at the edges */
 #ucard-answer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, #d4cec4 18%, #d4cec4 82%, transparent); }   /* faded-edge divider */
 body.dark-mode #ucard-answer::before { background: linear-gradient(90deg, transparent, #6d5f52 18%, #6d5f52 82%, transparent); }
-.ucard-editable { position: relative; min-height: 1.4em; outline: none; cursor: text; white-space: pre-wrap; }   /* pre-wrap keeps the line breaks the user types */
+.ucard-editable { position: relative; min-height: 1.4em; outline: none; cursor: text; white-space: pre-wrap; text-align: center; }   /* pre-wrap keeps the line breaks the user types; centred so the empty caret sits in the middle */
 .ucard-editable:empty::before { content: attr(data-ph); position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; color: #a89a86; font-weight: 400; letter-spacing: normal; }   /* placeholder OUT of flow, so the centred caret sits where the text will appear (not shoved left) */
 body.dark-mode .ucard-editable:empty::before { color: #8a7d6a; }
 @media (min-width: 901px) {   /* desktop: the card sits in the right half, replacing the preview while adding */
@@ -2408,9 +2408,9 @@ body.dark-mode .cal-ev { color:#241f1b; }
   <div id="usercard-form">   <!-- add/edit an own card: a plain editable flashcard showing BOTH sides (etupuoli + takapuoli). Auto-saves when you click away; delete from the grid. -->
     <div id="ucard-card-wrap">
       <div class="flashcard answer-shown" id="ucard-flashcard" onmousedown="ucardCardMousedown(event)">
-        <div class="card-content ucard-editable" id="ucard-front" contenteditable="true" data-ph="Kirjoita etupuoli…" spellcheck="false" oninput="updateUcardSaveBtn()"></div>
+        <div class="card-content ucard-editable" id="ucard-front" contenteditable="true" data-ph="Etupuoli" spellcheck="false" oninput="updateUcardSaveBtn()"></div>
         <div class="answer-section" id="ucard-answer">
-          <div class="card-content ucard-editable" id="ucard-back" contenteditable="true" data-ph="Kirjoita takapuoli…" spellcheck="false" oninput="updateUcardSaveBtn()"></div>
+          <div class="card-content ucard-editable" id="ucard-back" contenteditable="true" data-ph="Kääntöpuoli" spellcheck="false" oninput="updateUcardSaveBtn()"></div>
         </div>
       </div>
       <button type="button" id="ucard-save-btn" onclick="ucardSaveOrCancel()" title="Sulje / lisää kortti"></button>
