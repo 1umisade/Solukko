@@ -1269,15 +1269,9 @@ body.dark-mode .chat-ctx-menu button:hover { background:#3a332c; }
 .dev-thread-name { font-family:'Lora',serif; font-weight:700; color:#56533c; }
 .dev-thread-last { font-family:'Lora',serif; font-size:0.85rem; color:#7a6f60; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dev-thread-empty { font-style:italic; color:#b0a595; }
-.dev-thread-del { flex:0 0 auto; background:none; border:none; color:#c0392b; font-size:1.25rem; line-height:1; cursor:pointer; padding:4px 8px; border-radius:8px; opacity:.75; }
-.dev-thread-del:hover { opacity:1; background:rgba(192,57,43,.1); }
 .dev-chat-head { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
 .dev-chat-back { font-family:'Lora',serif; font-size:0.9rem; padding:6px 12px; border:1px solid #d4cec4; border-radius:10px; background:#fffef9; color:#56533c; cursor:pointer; }
 .dev-chat-who { font-family:'Lora',serif; font-weight:700; color:#26473f; }
-.dev-chat-del { margin-left:auto; font-family:'Lora',serif; font-size:0.82rem; padding:6px 12px; border:1px solid #c4bbac; border-radius:999px; background:transparent; color:#9a6a6a; cursor:pointer; white-space:nowrap; }
-.dev-chat-del:hover { border-color:#c0392b; color:#c0392b; }
-.dev-chat-del.confirm { background:#c0392b; border-color:#c0392b; color:#fff; }
-body.dark-mode .dev-chat-del { color:#c99; border-color:#5c5145; }
 /* ── Custom in-page dialogs (replace native alert/confirm/prompt) ── */
 .ui-modal-ov { position:fixed; inset:0; background:rgba(30,26,20,0.45); display:flex; align-items:center; justify-content:center; z-index:100000; padding:20px; }
 .ui-modal { background:#fffef9; border:1px solid #d4cec4; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,0.3); max-width:420px; width:100%; padding:22px; font-family:'Lora',serif; color:#56533c; }
@@ -5843,13 +5837,13 @@ function renderDevChat(){
     if(!threads.length) h+='<div class="chat-empty">'+(_devChatErr?'Chatin luku estetty — varmista että oma dev-UID:si on Firestore-säännöissä (isAdmin).':'Ei viestejä.')+'</div>';
     for(var i=0;i<threads.length;i++){ var t=threads[i], nm=t.name||t.uid.slice(0,8);
       var last=t.last?escCmt(t.last.slice(0,70)):'<span class="dev-thread-empty">Ei viestejä — kirjoita ensimmäinen</span>';
-      h+='<div class="dev-chat-thread" onclick="openDevThread(\''+t.uid+'\')"><div class="dev-thread-main"><div class="dev-thread-name">'+escCmt(nm)+'</div><div class="dev-thread-last">'+last+'</div></div><button class="dev-thread-del" title="Poista koko chat" onclick="event.stopPropagation();deleteDevThread(\''+t.uid+'\')">✕</button></div>'; }
+      h+='<div class="dev-chat-thread" onclick="openDevThread(\''+t.uid+'\')"><div class="dev-thread-main"><div class="dev-thread-name">'+escCmt(nm)+'</div><div class="dev-thread-last">'+last+'</div></div></div>'; }
     wrap.innerHTML=h;
   } else {
     var msgs=_devChatMsgs.filter(function(m){ return m.userId===_devChatSel; }), name='';
     for(var j=0;j<msgs.length;j++){ if(msgs[j].sender!=='dev'&&msgs[j].word) name=msgs[j].word; }
     if(!name) name=_devAllUsers[_devChatSel]||'';
-    var h='<div class="dev-chat-head"><button class="dev-chat-back" onclick="closeDevThread()">← chatit</button><span class="dev-chat-who">'+escCmt(name||_devChatSel.slice(0,8))+'</span><button class="dev-chat-del" onclick="deleteDevThread(\''+_devChatSel+'\')">Poista keskustelu</button></div>';
+    var h='<div class="dev-chat-head"><button class="dev-chat-back" onclick="closeDevThread()">← chatit</button><span class="dev-chat-who">'+escCmt(name||_devChatSel.slice(0,8))+'</span></div>';
     h+='<div class="chat-messages" id="dev-chat-messages">';
     for(var i=0;i<msgs.length;i++){ var m=msgs[i], mine=(m.sender==='dev'); h+='<div class="chat-msg '+(mine?'chat-mine':'chat-dev')+'"><div class="chat-bubble">'+escCmt(m.text||'')+'</div></div>'; }
     h+='</div><form class="chat-form" onsubmit="sendDevReply(event)"><input id="dev-chat-input" class="chat-input" type="text" placeholder="Vastaa…" autocomplete="off" maxlength="2000"><button type="submit" class="chat-send">Lähetä</button></form>';
@@ -5859,12 +5853,6 @@ function renderDevChat(){
 }
 function openDevThread(uid){ _devChatSel=uid; renderDevChat(); }
 function closeDevThread(){ _devChatSel=null; renderDevChat(); }
-function deleteDevThread(uid){   // dev: delete a whole chat thread (all its messages) — immediate, no confirm
-  uid=uid||_devChatSel; if(!uid||!db) return;
-  db.collection('chat').where('userId','==',uid).get().then(function(snap){
-    var b=db.batch(); snap.forEach(function(d){ b.delete(d.ref); }); return b.commit();
-  }).then(function(){ if(_devChatSel===uid) _devChatSel=null; renderDevChat(); }).catch(function(){});
-}
 function sendDevReply(e){
   if(e) e.preventDefault();
   var inp=document.getElementById('dev-chat-input'); if(!inp) return; var text=(inp.value||'').trim(); if(!text||!_devChatSel) return;
