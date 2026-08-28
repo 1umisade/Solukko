@@ -1230,13 +1230,15 @@ body.dark-mode .cal-course { color:#eadfce; }
 .cal-ev { font-size:0.63rem; line-height:1.18; border-radius:4px; padding:2px 4px; margin-bottom:2px; color:#3a3320; overflow:hidden; }
 .cal-ev-t { font-weight:700; }
 .cal-placeholder { text-align:center; color:#7a6f60; font-family:'Lora',serif; font-size:1.1rem; padding:70px 0; }
-#chat-view { max-width:680px; margin:0 auto; padding:0 16px 60px; width:100%; box-sizing:border-box; }
+#chat-view { max-width:680px; margin:0 auto; padding:0 16px 20px; width:100%; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; min-height:calc(100dvh - 118px); }   /* whole conversation group centred vertically */
+.chat-wrap { display:flex; flex-direction:column; }
+.chat-body { min-height:0; max-height:62vh; overflow-y:auto; display:flex; flex-direction:column; justify-content:flex-end; padding-right:6px; }   /* greeting + messages sit just above the input */
 .chat-greet-row { display:flex; align-items:flex-end; justify-content:flex-start; gap:8px; margin:6px 0 14px; }
 .chat-greet { position:relative; background:#fffef9; border:1px solid #e7e1d6; border-radius:14px; border-bottom-left-radius:4px; padding:0.8rem 1.1rem; font-family:'Lora',serif; color:#56533c; font-size:1.0rem; line-height:1.4; box-shadow:0 2px 8px rgba(0,0,0,0.07); max-width:76%; }
 .chat-mona, .chat-avatar { width:38px; height:38px; flex:0 0 auto; border-radius:50%; object-fit:cover; }
 body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
 @media (max-width:760px){ .chat-greet-row{ gap:6px; } .chat-mona, .chat-avatar{ width:34px; height:34px; } .chat-greet{ font-size:0.92rem; } }
-.chat-messages { min-height:200px; max-height:52vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:6px 14px 14px 2px; }
+.chat-messages { display:flex; flex-direction:column; gap:10px; padding:0 8px 6px 2px; }
 .chat-empty { color:#7a6f60; font-family:'Lora',serif; text-align:center; padding:30px 0; }
 .chat-msg { display:flex; align-items:flex-end; gap:8px; }
 .chat-msg.chat-mine { justify-content:flex-end; }
@@ -1407,7 +1409,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
     <button class="home-tab active" data-tab="kortit" onclick="showHomeTab('kortit')">kortit</button>
     <button class="home-tab" data-tab="kalenteri" onclick="showHomeTab('kalenteri')">kalenteri</button>
     <button class="home-tab" data-tab="kartta" onclick="showHomeTab('kartta')">kartta</button>
-    <button class="home-tab" data-tab="chat" onclick="showHomeTab('chat')">chat<span id="chat-badge" class="tab-badge" style="display:none">0</span></button>
+    <button class="home-tab" data-tab="chat" onclick="showHomeTab('chat')">viestit<span id="chat-badge" class="tab-badge" style="display:none">0</span></button>
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div id="calendar-view" style="display:none;">
@@ -2288,11 +2290,13 @@ body.dark-mode .cal-ev { color:#241f1b; }
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
   <div id="chat-view" style="display:none;">
     <div class="chat-wrap">
-      <div class="chat-greet-row">
-        <img class="chat-mona" src="mona_with_eyes.png" alt="Mona">
-        <div class="chat-greet">Löysitkö sivustolta bugin tai haluatko ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
+      <div class="chat-body">
+        <div class="chat-greet-row">
+          <img class="chat-mona" src="mona_with_eyes.png" alt="Mona">
+          <div class="chat-greet">Löysitkö sivustolta bugin tai haluatko ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
+        </div>
+        <div id="chat-messages" class="chat-messages"></div>
       </div>
-      <div id="chat-messages" class="chat-messages"><div class="chat-empty">Ei viestejä vielä. Kirjoita ensimmäinen alle.</div></div>
       <form class="chat-form" onsubmit="sendChatMessage(event)">
         <input id="chat-input" class="chat-input" type="text" placeholder="Kirjoita viesti…" autocomplete="off" maxlength="2000">
         <button type="submit" class="chat-send">Lähetä</button>
@@ -5639,7 +5643,7 @@ document.addEventListener('click',e=>{
 function showHomeTab(tab){
   try{ sessionStorage.setItem('solukko-homeTab', tab); }catch(e){}   // remember the active home tab across a refresh
   var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view', chat:'chat-view'};
-  for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? (map[t]==='deck-list'?'flex':'block') : 'none'; }
+  for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? ((map[t]==='deck-list'||map[t]==='chat-view')?'flex':'block') : 'none'; }
   var hero=document.getElementById('home-hero'); if(hero) hero.style.display = (tab==='kortit') ? '' : 'none';   // Aku intro only on the deck tab
   var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
   if(tab==='kalenteri'){ updateCalHighlight(); }   // apply dimming on open (all dimmed until a course is picked)
@@ -5650,6 +5654,7 @@ var _chatUnsub=null;
 function setupChat(){   // live user<->dev chat thread (one Firestore doc per message, keyed by the user's uid)
   if(typeof devMode!=='undefined' && devMode){ setupDevChat(); return; }   // dev: pick a user thread first
   var _dc=document.getElementById('dev-chat'); if(_dc) _dc.style.display='none';
+  var _cb=document.querySelector('#chat-view .chat-body'); if(_cb) _cb.style.display='';
   var _gr=document.querySelector('#chat-view .chat-greet-row'); if(_gr) _gr.style.display='';
   var _cm=document.getElementById('chat-messages'); if(_cm) _cm.style.display='';
   var _cf=document.querySelector('#chat-view .chat-form'); if(_cf) _cf.style.display='';
@@ -5667,7 +5672,7 @@ function setupChat(){   // live user<->dev chat thread (one Firestore doc per me
 }
 function renderChat(msgs){
   var box=document.getElementById('chat-messages'); if(!box) return;
-  if(!msgs.length){ box.innerHTML='<div class="chat-empty">Ei viestejä vielä. Kirjoita ensimmäinen alle.</div>'; return; }
+  if(!msgs.length){ box.innerHTML=''; return; }
   var h='';
   for(var i=0;i<msgs.length;i++){ var m=msgs[i]; var dev=(m.sender==='dev');
     if(dev){
@@ -5797,6 +5802,7 @@ function refreshChatBadge(){
 }
 function setupDevChat(){
   var wrap=document.getElementById('dev-chat'); if(!wrap) return;
+  var cb=document.querySelector('#chat-view .chat-body'); if(cb) cb.style.display='none';
   var g=document.querySelector('#chat-view .chat-greet-row'); if(g) g.style.display='none';
   var cm=document.getElementById('chat-messages'); if(cm) cm.style.display='none';
   var cf=document.querySelector('#chat-view .chat-form'); if(cf) cf.style.display='none';
