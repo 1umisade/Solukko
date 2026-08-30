@@ -213,6 +213,8 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .sem-col.spring { border-left: 1px dashed #cfc8bc; padding-left: 24px; }
 .sem-col.sem-empty { border: none !important; padding-left: 0 !important; padding-top: 0 !important; }
 .sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
+.period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.78rem; color: #56533c; opacity: 0.7; margin: 8px 0 -4px; }
+body.dark-mode .period-label { color: #eadfce; }
 .year-row .deck-btn { position: relative; left: auto; top: auto; width: 160px; }
 body.dark-mode .year-heading { color: #eadfce; border-bottom-color: #6d5f52; }
 body.dark-mode .sem-label { color: #eadfce; }
@@ -3575,7 +3577,20 @@ function buildDeckGrid(decks, list){
       if(items.length){ const l=document.createElement('div'); l.className='sem-label'; l.textContent=label; c.appendChild(l); items.forEach(it=>c.appendChild(it.btn)); }
       return c;
     };
-    row.appendChild(col('autumn','Syksy', g.S.concat(g.none)));   // decks with a year but no semester default to autumn
+    const _autumn = g.S.concat(g.none);   // decks with a year but no semester default to autumn
+    if(y==='1' && _autumn.length){        // 1st-year autumn is split into teaching periods (jaksot); the rest go to period 2
+      const _P1 = new Set(['avaimet biokemian opiskeluun','kemian peruskurssi i','johdatus biotekniikkaan','solu- ja biomolekyylit - teoria']);
+      const _nrm = s => String(s||'').toLowerCase().replace(/\s*\([^)]*\)\s*/g,'').replace(/\s+/g,' ').trim();
+      const _per = it => _P1.has(_nrm(it.cleanName)) ? 1 : 2;
+      const c=document.createElement('div'); c.className='sem-col autumn';
+      const l=document.createElement('div'); l.className='sem-label'; l.textContent='Syksy'; c.appendChild(l);
+      [1,2].forEach(p=>{ const items=_autumn.filter(it=>_per(it)===p); if(!items.length) return;
+        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. jakso'; c.appendChild(pl);
+        items.forEach(it=>c.appendChild(it.btn)); });
+      row.appendChild(c);
+    } else {
+      row.appendChild(col('autumn','Syksy', _autumn));
+    }
     row.appendChild(col('spring','Kevät', g.K));
     section.appendChild(row);
     list.appendChild(section);
