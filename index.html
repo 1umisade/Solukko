@@ -727,7 +727,21 @@ body.dark-mode .video-cover { background: #3a312b !important; border-color: #6d5
 body.dark-mode .video-cover > span { color: #eadfce !important; }
 body.dark-mode #back-btn-fixed { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
 body.dark-mode #gear-btn-wrap > button { background: #3a312b !important; border-color: #6d5f52 !important; }
-body.dark-mode #presence-list span { background: #3a312b !important; border-color: #6d5f52 !important; color: #eadfce !important; }
+/* dev user-activity dashboard */
+.dev-act-title { font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#6b6055; letter-spacing:0.03em; }
+.dev-act-stats { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; width:100%; max-width:660px; }
+.dev-act-stat { flex:1 1 84px; min-width:74px; background:#fffef9; border:1px solid #d4cec4; border-radius:10px; padding:7px 6px; text-align:center; font-family:'JetBrains Mono',monospace; }
+.dev-act-stat b { display:block; font-size:1.15rem; color:#26473f; line-height:1.15; }
+.dev-act-stat span { font-size:0.56rem; color:#8a7f70; letter-spacing:0.03em; text-transform:uppercase; }
+.dev-act-list { width:100%; max-width:660px; max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-top:2px; }
+.dev-act-row { display:flex; align-items:center; gap:8px; background:#fffef9; border:1px solid #e7e1d6; border-radius:8px; padding:5px 10px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#56533c; }
+.dev-act-row .da-name { font-weight:700; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dev-act-row .da-known { color:#498d65; flex:0 0 auto; }
+.dev-act-row .da-seen { color:#a89a86; flex:0 0 auto; font-size:0.64rem; min-width:84px; text-align:right; }
+.dev-act-dot { width:8px; height:8px; border-radius:50%; flex:0 0 auto; background:#c7bfb2; }
+.dev-act-dot.on { background:#4caf6a; box-shadow:0 0 0 2px rgba(76,175,106,0.25); }
+body.dark-mode .dev-act-stat, body.dark-mode .dev-act-row { background:#2b2622; border-color:#4a3f36; color:#eadfce; }
+body.dark-mode .dev-act-stat b { color:#9fc7b4; }
 body.dark-mode .kuvaaja-btn { color: #eadfce !important; border-color: #6d5f52 !important; }
 body.dark-mode .kuvaaja-cancel { border-color: #c0392b !important; color: #c0392b !important; }
 body.dark-mode #loading { color: #eadfce; }
@@ -2366,7 +2380,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
       <code id="dev-uid-text" onclick="copyDevUid()" title="Kopioi" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;background:#f0ebe0;padding:0.45rem 0.65rem;border-radius:8px;word-break:break-all;max-width:100%;cursor:pointer;">–</code>
       <button onclick="copyDevUid()" style="background:#56533c;color:#f5f0e8;border:none;border-radius:8px;padding:0.5rem 0.9rem;cursor:pointer;font-family:'Lora',serif;">Kopioi UID</button>
     </div>
-    <div class="dev-section-title">Paikalla nyt</div>
+    <div class="dev-section-title">Käyttäjäaktiivisuus</div>
     <div id="presence-list" style="width:100%;display:none;flex-direction:column;align-items:center;gap:0.6rem;"></div>
     <div class="dev-two-col">
       <div class="dev-col">
@@ -5583,8 +5597,9 @@ function initPresence(){   // called on load AND again once anonymous auth compl
 let _lastPresenceUsers=[];
 function listenToPresence(){
   db.collection('presence').onSnapshot(snap=>{
-    const now=Date.now(), users=[];
-    snap.forEach(doc=>{ const d=doc.data(); const lastSeen=d.lastSeen?.toMillis?.()||0; if(now-lastSeen<90000){ users.push({ word:d.word||d.userId, userId:d.userId, known:d.known||0, lastInteraction:d.lastInteraction?.toMillis?.()||0 }); } });
+    const users=[];
+    snap.forEach(doc=>{ const d=doc.data(); if(!d||!d.userId) return; users.push({ word:d.word||d.userId, userId:d.userId, known:d.known||0, lastSeen:d.lastSeen?.toMillis?.()||0, lastInteraction:d.lastInteraction?.toMillis?.()||0 }); });
+    users.sort((a,b)=>b.lastSeen-a.lastSeen);
     _lastPresenceUsers=users;
     renderPresenceList(users);
   },()=>{});
@@ -5592,10 +5607,23 @@ function listenToPresence(){
 function renderPresenceList(users){
   const el=document.getElementById('presence-list'); if(!el) return;
   if(!devMode){ el.style.display='none'; return; }
-  el.style.display='flex'; if(!users.length){ el.innerHTML=''; return; }
-  const myUid=getUserId(), now=Date.now();
-  const relTime=(ms)=>{ if(!ms) return '?'; const s=Math.floor((now-ms)/1000); if(s<15) return 'juuri äsken'; if(s<60) return s+'s sitten'; const m=Math.floor(s/60); if(m<60) return m+' min sitten'; return Math.floor(m/60)+'h sitten'; };
-  el.innerHTML='<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:#6b6055;letter-spacing:0.02em;">Paikalla nyt ('+users.length+')</span><div style="display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;">'+users.map(u=>{ const isMe=u.userId===myUid; const border=isMe?'#498d65':'#d4cec4'; const color=isMe?'#336644':'#56533c'; const meTag=isMe?'<span style="opacity:0.55;font-size:0.62rem;margin-left:3px;">(sinä)</span>':''; const knownTag='<span style="opacity:0.6;font-size:0.6rem;margin-left:4px;">✓'+u.known+'</span>'; const devTag=devMode&&!isMe?'<span style="opacity:0.45;font-size:0.55rem;margin-left:4px;">'+relTime(u.lastInteraction)+'</span>':''; return '<span style="background:#fffef9;border:1px solid '+border+';border-radius:999px;padding:0.22rem 0.75rem;font-family:\'JetBrains Mono\',monospace;font-size:0.68rem;color:'+color+';display:inline-flex;align-items:center;">'+u.word+knownTag+meTag+devTag+'</span>'; }).join('')+'</div>';
+  el.style.display='flex'; users=users||[];
+  if(!users.length){ el.innerHTML=''; return; }
+  const myUid=getUserId(), now=Date.now(), DAY=86400000;
+  const online=users.filter(u=>now-u.lastSeen<90000).length;
+  const act24=users.filter(u=>u.lastSeen&&now-u.lastSeen<DAY).length;
+  const act7=users.filter(u=>u.lastSeen&&now-u.lastSeen<7*DAY).length;
+  const studied=users.filter(u=>u.known>0).length;
+  const totalKnown=users.reduce((s,u)=>s+(u.known||0),0);
+  const relTime=(ms)=>{ if(!ms) return '–'; const s=Math.floor((now-ms)/1000); if(s<15) return 'juuri nyt'; if(s<60) return s+' s'; const m=Math.floor(s/60); if(m<60) return m+' min'; const h=Math.floor(m/60); if(h<24) return h+' h'; return Math.floor(h/24)+' pv'; };
+  const stat=(v,l)=>'<div class="dev-act-stat"><b>'+v+'</b><span>'+l+'</span></div>';
+  const head='<div class="dev-act-stats">'+stat(users.length,'käyttäjää')+stat(online,'paikalla nyt')+stat(act24,'aktiivi 24 h')+stat(act7,'aktiivi 7 pv')+stat(studied,'opiskellut')+stat(totalKnown,'kortteja ✓')+'</div>';
+  const rows=users.map(u=>{ const on=(now-u.lastSeen)<90000; const me=u.userId===myUid;
+    return '<div class="dev-act-row"><span class="dev-act-dot'+(on?' on':'')+'"></span>'+
+      '<span class="da-name">'+escCmt(u.word)+(me?' (sinä)':'')+'</span>'+
+      '<span class="da-known">✓ '+u.known+'</span>'+
+      '<span class="da-seen">'+relTime(u.lastSeen)+'</span></div>'; }).join('');
+  el.innerHTML=head+'<div class="dev-act-list">'+rows+'</div>';
 }
 
 
