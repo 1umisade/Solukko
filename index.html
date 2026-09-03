@@ -3591,7 +3591,7 @@ function buildDeckGrid(decks, list){
       const c=document.createElement('div'); c.className='sem-col autumn';
       const l=document.createElement('div'); l.className='sem-label'; l.textContent='Syksy'; c.appendChild(l);
       [1,2].forEach(p=>{ const items=_autumn.filter(it=>_per(it)===p); if(!items.length) return;
-        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. jakso'; c.appendChild(pl);
+        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. periodi'; c.appendChild(pl);
         items.forEach(it=>c.appendChild(it.btn)); });
       row.appendChild(c);
     } else {
