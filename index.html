@@ -1228,6 +1228,8 @@ body.dark-mode .cal-course { color:#eadfce; }
 .cal-day { min-height:78px; background:#fffef9; border:1px solid #e7e1d6; border-radius:8px; padding:3px 4px; overflow:hidden; }
 .cal-day.cal-adj { background:#f5f5f5; }
 .cal-day.cal-adj .cal-num { color:#c2bbb0; }
+.cal-day.cal-empty { background:repeating-linear-gradient(45deg,#efe8da,#efe8da 6px,#eae2d1 6px,#eae2d1 12px); border-color:#e5ddcc; box-shadow:none; }
+body.dark-mode .cal-day.cal-empty { background:repeating-linear-gradient(45deg,#241f18,#241f18 6px,#2a241c 6px,#2a241c 12px); border-color:#3a332a; }
 .cal-num { font-family:'Lora',serif; font-size:0.82rem; color:#56533c; font-weight:700; margin-bottom:2px; }
 .cal-day.cal-today { border:2px solid #3a5c4c; box-shadow:0 0 0 3px rgba(58,92,76,0.22); }
 .cal-day.cal-today .cal-num { display:inline-flex; align-items:center; justify-content:center; min-width:1.5em; height:1.5em; padding:0 .2em; border-radius:999px; background:#3a5c4c; color:#fff; }
@@ -5665,7 +5667,7 @@ function showHomeTab(tab){
   for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? ((map[t]==='deck-list'||map[t]==='chat-view')?'flex':'block') : 'none'; }
   var hero=document.getElementById('home-hero'); if(hero) hero.style.display = (tab==='kortit') ? '' : 'none';   // Aku intro only on the deck tab
   var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
-  if(tab==='kalenteri'){ updateCalHighlight(); highlightCalToday(); }   // apply dimming on open (all dimmed until a course is picked) + mark today
+  if(tab==='kalenteri'){ fixCalMonths(); updateCalHighlight(); highlightCalToday(); }   // trim adjacent-month duplicates, apply dimming, mark today
   if(tab==='chat'){ setupChat(); }
   if(tab!=='kortit'){ window.scrollTo(0,0); }
 }
@@ -5887,17 +5889,36 @@ function sendDevReply(e){
   inp.value='';
   db.collection('chat').add({ userId:_devChatSel, sender:'dev', word:'Mona', text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
 }
+var _CAL_MK=['tammikuu','helmikuu','maaliskuu','huhtikuu','toukokuu','kesäkuu','heinäkuu','elokuu','syyskuu','lokakuu','marraskuu','joulukuu'];
+function _calMonthIdx(title){ var t=(title||'').toLowerCase(); for(var k=0;k<_CAL_MK.length;k++){ if(t.indexOf(_CAL_MK[k])===0) return k; } return -1; }
+var _calFixed=false;
+function fixCalMonths(){   // each month grid shows ONLY its own days; leading/trailing cells become empty beige placeholders (no duplicates across months)
+  if(_calFixed) return; var cv=document.getElementById('calendar-view'); if(!cv) return;
+  var months=cv.querySelectorAll('.cal-month'); if(!months.length) return;
+  months.forEach(function(mo){
+    var ti=mo.querySelector('.cal-mtitle'); if(!ti) return;
+    var mi=_calMonthIdx(ti.textContent); if(mi<0) return;
+    var yrM=ti.textContent.match(/\d{4}/); var yr=yrM?+yrM[0]:new Date().getFullYear();
+    var lead=(new Date(yr,mi,1).getDay()+6)%7;          // Mon=0
+    var last=new Date(yr,mi+1,0).getDate();
+    mo.querySelectorAll('.cal-day').forEach(function(cell,i){
+      cell.classList.remove('cal-adj','cal-empty','cal-today');
+      if(i<lead || i>=lead+last){ cell.classList.add('cal-empty'); cell.innerHTML=''; }   // adjacent-month cell → empty placeholder
+      else { var num=cell.querySelector('.cal-num'); if(num) num.textContent=String(i-lead+1); }
+    });
+  });
+  _calFixed=true;
+}
 function highlightCalToday(){   // mark today's cell in the calendar
   var cv=document.getElementById('calendar-view'); if(!cv) return;
   var prev=cv.querySelector('.cal-day.cal-today'); if(prev) prev.classList.remove('cal-today');
-  var MK=['tammikuu','helmikuu','maaliskuu','huhtikuu','toukokuu','kesäkuu','heinäkuu','elokuu','syyskuu','lokakuu','marraskuu','joulukuu'];
-  var t=new Date(), mn=MK[t.getMonth()], day=String(t.getDate()), yr=String(t.getFullYear());
+  var t=new Date(), mn=_CAL_MK[t.getMonth()], day=String(t.getDate()), yr=String(t.getFullYear());
   var months=cv.querySelectorAll('.cal-month');
   for(var i=0;i<months.length;i++){
     var ti=months[i].querySelector('.cal-mtitle'); if(!ti) continue;
     var tl=ti.textContent.toLowerCase();
     if(tl.indexOf(mn)===0 && (tl.indexOf(yr)!==-1 || !/\d{4}/.test(tl))){
-      var days=months[i].querySelectorAll('.cal-day:not(.cal-adj)');
+      var days=months[i].querySelectorAll('.cal-day:not(.cal-empty)');
       for(var j=0;j<days.length;j++){
         var nn=days[j].querySelector('.cal-num');
         if(nn && nn.textContent.trim()===day){ days[j].classList.add('cal-today'); return; }
