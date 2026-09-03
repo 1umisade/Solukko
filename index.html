@@ -1229,6 +1229,10 @@ body.dark-mode .cal-course { color:#eadfce; }
 .cal-day.cal-adj { background:#f5f5f5; }
 .cal-day.cal-adj .cal-num { color:#c2bbb0; }
 .cal-num { font-family:'Lora',serif; font-size:0.82rem; color:#56533c; font-weight:700; margin-bottom:2px; }
+.cal-day.cal-today { border:2px solid #3a5c4c; box-shadow:0 0 0 3px rgba(58,92,76,0.22); }
+.cal-day.cal-today .cal-num { display:inline-flex; align-items:center; justify-content:center; min-width:1.5em; height:1.5em; padding:0 .2em; border-radius:999px; background:#3a5c4c; color:#fff; }
+body.dark-mode .cal-day.cal-today { border-color:#7fae91; box-shadow:0 0 0 3px rgba(127,174,145,0.25); }
+body.dark-mode .cal-day.cal-today .cal-num { background:#5c8a6a; color:#fff; }
 .cal-ev { font-size:0.63rem; line-height:1.18; border-radius:4px; padding:2px 4px; margin-bottom:2px; color:#3a3320; overflow:hidden; }
 .cal-ev-t { font-weight:700; }
 .cal-placeholder { text-align:center; color:#7a6f60; font-family:'Lora',serif; font-size:1.1rem; padding:70px 0; }
@@ -2295,7 +2299,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
       <div class="chat-body">
         <div class="chat-greet-row">
           <img class="chat-mona" src="mona_with_eyes.png" alt="Mona">
-          <div class="chat-greet">Löysitkö sivustolta bugin tai haluatko ilmoittaa virheellisestä kalenterimerkinnästä. Maksamme vinkistä 1€ palkkion.</div>
+          <div class="chat-greet">Askarruttaako jokin opiskeltava asia? Siinä tapauksessa jätä kommentti siihen korttiin, jossa asiaa käsitellään. Mutta jos haluat huomauttaa sivustolla olevasta bugista, virheellisestä kalenterimerkinnästä (maksamme näistä vinkeistä 1€ palkkion) tai muuten vaan ottaa yhteyttä ylläpitoon, kirjoita viestisi tänne.</div>
         </div>
         <div id="chat-messages" class="chat-messages"></div>
       </div>
@@ -5661,7 +5665,7 @@ function showHomeTab(tab){
   for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? ((map[t]==='deck-list'||map[t]==='chat-view')?'flex':'block') : 'none'; }
   var hero=document.getElementById('home-hero'); if(hero) hero.style.display = (tab==='kortit') ? '' : 'none';   // Aku intro only on the deck tab
   var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
-  if(tab==='kalenteri'){ updateCalHighlight(); }   // apply dimming on open (all dimmed until a course is picked)
+  if(tab==='kalenteri'){ updateCalHighlight(); highlightCalToday(); }   // apply dimming on open (all dimmed until a course is picked) + mark today
   if(tab==='chat'){ setupChat(); }
   if(tab!=='kortit'){ window.scrollTo(0,0); }
 }
@@ -5882,6 +5886,25 @@ function sendDevReply(e){
   var inp=document.getElementById('dev-chat-input'); if(!inp) return; var text=(inp.value||'').trim(); if(!text||!_devChatSel) return;
   inp.value='';
   db.collection('chat').add({ userId:_devChatSel, sender:'dev', word:'Mona', text:text.slice(0,2000), ts:firebase.firestore.FieldValue.serverTimestamp() }).catch(function(){});
+}
+function highlightCalToday(){   // mark today's cell in the calendar
+  var cv=document.getElementById('calendar-view'); if(!cv) return;
+  var prev=cv.querySelector('.cal-day.cal-today'); if(prev) prev.classList.remove('cal-today');
+  var MK=['tammikuu','helmikuu','maaliskuu','huhtikuu','toukokuu','kesäkuu','heinäkuu','elokuu','syyskuu','lokakuu','marraskuu','joulukuu'];
+  var t=new Date(), mn=MK[t.getMonth()], day=String(t.getDate()), yr=String(t.getFullYear());
+  var months=cv.querySelectorAll('.cal-month');
+  for(var i=0;i<months.length;i++){
+    var ti=months[i].querySelector('.cal-mtitle'); if(!ti) continue;
+    var tl=ti.textContent.toLowerCase();
+    if(tl.indexOf(mn)===0 && (tl.indexOf(yr)!==-1 || !/\d{4}/.test(tl))){
+      var days=months[i].querySelectorAll('.cal-day:not(.cal-adj)');
+      for(var j=0;j<days.length;j++){
+        var nn=days[j].querySelector('.cal-num');
+        if(nn && nn.textContent.trim()===day){ days[j].classList.add('cal-today'); return; }
+      }
+      return;
+    }
+  }
 }
 function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
   var cbs=document.querySelectorAll('#calendar-view .cal-cb'), checked=[];
