@@ -3851,8 +3851,7 @@ async function renderCurrentCard(){
   const _words=_src.trim()?_src.trim().split(/\s+/).length:0;
   const _rounded=Math.round(_words/10)*10;
   const _peek=document.getElementById('card-peek'), _bub=document.getElementById('card-peek-bubble');
-  let _laajuusText = _words>0 ? (_words<5 ? ('Vastauksen laajuus '+_words+' sanaa') : ('Vastauksen laajuus noin '+_rounded+' sanaa')) : '';   // exact under 5 words, else rounded
-  if((card.suppea||'').replace(/<[^>]*>/g,'').trim() && !card._isSpecial) _laajuusText=_laajuusTextForHtml(card.suppea);   // new type reveals Suppea first → front hint shows its length
+  let _laajuusText = ((card.suppea||'').replace(/<[^>]*>/g,'').trim() && !card._isSpecial) ? _laajuusTextForHtml(card.suppea,'Suppean vastauksen') : _laajuusTextForHtml(_ac.innerHTML);   // new type: Suppea shown first (front hint = its length); old cards: generic "Vastauksen laajuus"
   const _frontText = (_laajuusText ? (_laajuusText+'. ') : '') + 'Klikkaa korttia tarkistaaksesi.';   // laajuus + click prompt
   _frontHintText = _frontText;   // Mona's front bubble shows this
   _scopeText = _laajuusText; if(typeof updateScopeMona==='function') updateScopeMona();   // the bottom-right study-view Mona shows the answer's extent
@@ -5077,20 +5076,21 @@ function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='mona_scream.png');
 }
 let _answerMode='suppea';
-function _laajuusTextForHtml(html){   // "Vastauksen laajuus …" text for a given answer HTML (word count, cloze-aware)
+function _laajuusTextForHtml(html, prefix){   // "… laajuus …" for a given answer HTML (word count, cloze-aware); short answers show the exact count, long ones round to the nearest 10
+  prefix = prefix || 'Vastauksen';
   const d=document.createElement('div'); d.innerHTML=html||'';
   const clz=d.querySelectorAll('.cloze-answer, .cloze-answer-line, .cloze');
   const src=clz.length ? [...clz].map(e=>e.textContent).join(' ') : (d.textContent||'');
   const w=src.trim()?src.trim().split(/\s+/).length:0;
   if(!w) return '';
-  return w<5 ? ('Vastauksen laajuus '+w+' sanaa') : ('Vastauksen laajuus noin '+(Math.round(w/10)*10)+' sanaa');
+  return w<20 ? (prefix+' laajuus '+w+' sanaa') : (prefix+' laajuus noin '+(Math.round(w/10)*10)+' sanaa');
 }
 function _applyAnswerMode(){   // swap the answer text + the middle button image + Mona's word count to match the current Suppea/Laaja mode
   if(!currentCard||!currentCard._hasSuppea) return;
   const html=(_answerMode==='suppea')?currentCard._suppeaHtml:currentCard._laajaHtml;
   const ac=document.getElementById('answer-content'); if(ac) ac.innerHTML=html;
   const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src=(_answerMode==='suppea')?'suppea_vastaus.png':'laaja_vastaus.png';
-  _scopeText=_laajuusTextForHtml(html); if(typeof updateScopeMona==='function') updateScopeMona();   // Mona tells the shown answer's length
+  _scopeText=_laajuusTextForHtml(html, _answerMode==='suppea'?'Suppean vastauksen':'Laajan vastauksen'); if(typeof updateScopeMona==='function') updateScopeMona();   // Mona tells the shown answer's length
 }
 function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (new note type only)
   if(!currentCard||!currentCard._hasSuppea) return false;
