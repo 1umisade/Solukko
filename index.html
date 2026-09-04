@@ -3452,10 +3452,12 @@ function collectCourses(){
   paths.forEach(d=>{
     if(!d.startsWith('SOLUKKO::')) return;
     const segs=d.slice('SOLUKKO::'.length).split('::');
-    if(/LUKUVUOSI/i.test(segs[0])){                         // hierarchy: year :: semester :: course :: …
-      if(segs.length<3) return;                             // year or semester node — not a course
-      const path='SOLUKKO::'+segs.slice(0,3).join('::');
-      if(!courses.has(path)) courses.set(path,{ year:(segs[0].match(/(\d+)/)||[])[1]||'', semester:/SYKSY/i.test(segs[1])?'S':/KEV[ÄA]T/i.test(segs[1])?'K':'', name:segs[2] });
+    if(/LUKUVUOSI/i.test(segs[0])){                         // hierarchy: year :: semester :: [period ::] course :: …
+      let ci=2, period='';                                  // course index; the "N. Periodi" level is optional (SYKSY has it, KEVÄT may not)
+      if(segs[ci] && /periodi/i.test(segs[ci])){ period=(segs[ci].match(/(\d+)/)||[])[1]||''; ci++; }
+      if(segs.length<=ci) return;                           // year / semester / period node — not a course
+      const path='SOLUKKO::'+segs.slice(0,ci+1).join('::');
+      if(!courses.has(path)) courses.set(path,{ year:(segs[0].match(/(\d+)/)||[])[1]||'', semester:/SYKSY/i.test(segs[1])?'S':/KEV[ÄA]T/i.test(segs[1])?'K':'', period, name:segs[ci] });
     } else {                                                // flat: course :: …
       const path='SOLUKKO::'+segs[0];
       if(!courses.has(path)){
@@ -3471,7 +3473,7 @@ function collectCourses(){
 function coursePathOf(deckName){
   if(!deckName||!deckName.startsWith('SOLUKKO::')) return deckName;
   const segs=deckName.slice('SOLUKKO::'.length).split('::');
-  if(/LUKUVUOSI/i.test(segs[0])) return 'SOLUKKO::'+segs.slice(0,3).join('::');   // hierarchy: year::sem::course
+  if(/LUKUVUOSI/i.test(segs[0])){ let ci=2; if(segs[ci] && /periodi/i.test(segs[ci])) ci++; return 'SOLUKKO::'+segs.slice(0,ci+1).join('::'); }   // hierarchy: year::sem::[period::]course
   return 'SOLUKKO::'+segs[0];                                                       // flat: course
 }
 async function loadDecks(){
@@ -3504,7 +3506,7 @@ async function loadDecks(){
     const bgVideo = (videoName||cleanName) + '.mp4';            // named video if given, else fall back to the deck name
     const cardCount=(allCards||[]).filter(c=>c.deckName===deck || (c.deckName||'').startsWith(deck+'::')).length;
     const hasCards=cardCount>1;   // a lone card is just a placeholder -> keep the course dimmed & unclickable
-    return {deck,cleanName,courseCode,bgVideo,year:meta.year||'',semester:meta.semester||'',hasCards};
+    return {deck,cleanName,courseCode,bgVideo,year:meta.year||'',semester:meta.semester||'',period:meta.period||'',hasCards};
   });
   let widestTitle=0; decks.forEach(d=>{ widestTitle=Math.max(widestTitle,ctx2.measureText(d.cleanName).width); });
   const finalCardWidth=Math.ceil(Math.min(448,Math.max(260,widestTitle+42)));
@@ -3606,15 +3608,14 @@ function buildDeckGrid(decks, list){
       return c;
     };
     const _autumn = g.S.concat(g.none);   // decks with a year but no semester default to autumn
-    if(y==='1' && _autumn.length){        // 1st-year autumn is split into teaching periods (jaksot); the rest go to period 2
-      const _P1 = new Set(['avaimet biokemian opiskeluun','kemian peruskurssi i','johdatus biotekniikkaan','solu- ja biomolekyylit - teoria']);
-      const _nrm = s => String(s||'').toLowerCase().replace(/\s*\([^)]*\)\s*/g,'').replace(/\s+/g,' ').trim();
-      const _per = it => _P1.has(_nrm(it.cleanName)) ? 1 : 2;
+    const _autPeriods = [...new Set(_autumn.map(it=>it.period).filter(Boolean))].sort((a,b)=>(+a)-(+b));
+    if(_autPeriods.length){               // autumn split into teaching periods (jaksot), read from the deck path (…::"N. Periodi"::…)
       const c=document.createElement('div'); c.className='sem-col autumn';
       const l=document.createElement('div'); l.className='sem-label'; l.textContent='Syksy'; c.appendChild(l);
-      [1,2].forEach(p=>{ const items=_autumn.filter(it=>_per(it)===p); if(!items.length) return;
+      _autPeriods.forEach(p=>{ const items=_autumn.filter(it=>String(it.period)===String(p)); if(!items.length) return;
         const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. periodi'; c.appendChild(pl);
         items.forEach(it=>c.appendChild(it.btn)); });
+      _autumn.filter(it=>!it.period).forEach(it=>c.appendChild(it.btn));   // autumn courses without a period level → after the periods
       row.appendChild(c);
     } else {
       row.appendChild(col('autumn','Syksy', _autumn));
