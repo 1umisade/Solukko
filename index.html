@@ -3678,7 +3678,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
     if(_gt&&_gc&&_cog) _allDecks ? _gc.insertBefore(_gt,_cog) : _gc.appendChild(_gt); }   // dev "Kaikki kortit" deck: all tools ABOVE the cards; every other deck: back under the grid
   const infos=allCards.filter(c=>c.deckName===deckName||c.deckName.startsWith(deckName+'::'));
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
-  _deckIntro = infos.find(c=>getField(c,['Front','front']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front is "Esittely" becomes the deck cover
+  _deckIntro = infos.find(c=>getField(c,['Front','front','Kysymys','kysymys','Question','question']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front/Kysymys is "Esittely" becomes the deck cover
   reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
   queue = reviewCards.slice();
   shuffleMode=false; _reviewCardsOriginal=null; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
@@ -5549,7 +5549,7 @@ function renderCardOverview(){
     const embedUrl = (!isPaapakka && group.link) ? getYouTubeEmbedUrl(group.link) : null;
     const videoHtml = isPaapakka ? '' : makeVideoEmbed(embedUrl, group.name);
 
-    const cardsHtml=group.cards.filter(card=>(getField(card,['Front','front'])||'').replace(/<[^>]*>/g,'').trim().toLowerCase()!=='esittely').map(card=>{   // the "esittely" intro card is the cover, not a grid tile
+    const cardsHtml=group.cards.filter(card=>(getField(card,['Front','front','Kysymys','kysymys','Question','question'])||'').replace(/<[^>]*>/g,'').trim().toLowerCase()!=='esittely').map(card=>{   // the "esittely" intro card is the cover, not a grid tile
       const index=reviewCards.indexOf(card);
       const q=getField(card,['Front','front','Question','question','Text','text','Content','content'])||extractBody(card.question||'').body;
       const text=q.replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,70);
