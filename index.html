@@ -200,7 +200,7 @@ body.dark-mode #home-hero .hero-link:hover { color: #eadfce; }
 @media (max-width: 640px){ #aku-portrait { width: 163px; margin-right: 1rem; } }
 body.dark-mode #home-hero .hero-manifest { color: #cbb9a0; }
 /* permanent Tervetuloa greeting to Mona's right (2x normal bubble text) */
-.home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: auto; box-sizing: border-box; display: block; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1.2rem; font-family: 'Lora', serif; font-size: 1.26rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }   /* height:auto = the bubble always wraps snugly around its text */
+.home-greet { position: relative; align-self: flex-start; margin-left: 22px; max-width: 640px; height: auto; box-sizing: border-box; display: block; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1.2rem; font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); }   /* height:auto = the bubble always wraps snugly around its text */
 .home-greet::after { content: ""; position: absolute; right: 100%; top: var(--greet-tail-top, 47px); border: 13px solid transparent; border-right-color: #fffef9; }   /* tail Y set by positionGreetTail() so it always points at Mona's centre, whatever the viewport */
 .home-greet.greet-loading { padding: 1.15rem 1.6rem; }   /* while the decks load: a progress bar sits where the greeting text will go */
 .home-greet.greet-loading .loading-bar { margin: 2px auto; }
@@ -227,7 +227,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
   #home-mona { flex-direction: column-reverse; align-items: center; justify-content: center; align-self: stretch; gap: 10px; height: auto; margin: 8px 0 14px; }   /* bubble on top, Mona below, centred — same as the review page */
   #home-mona .site-brand { width: 92px; }
   .home-brand-block { display: none; }   /* hide the site-name block on mobile to keep Mona + bubble */
-  .home-greet { position: relative; height: auto; overflow: visible; font-size: 0.95rem; width: min(86vw, 320px); max-width: none; margin: 0; padding: 0.7rem 1rem; }
+  .home-greet { position: relative; height: auto; overflow: visible; font-size: 1.05rem; width: min(86vw, 320px); max-width: none; margin: 0; padding: 0.7rem 1rem; }
   .home-greet::after { left: 50%; top: 100%; right: auto; transform: translateX(-50%); border: 10px solid transparent; border-top-color: #fffef9; border-bottom-width: 0; }   /* tail points DOWN at Mona */
   body.dark-mode .home-greet::after { border-top-color: #3a312b; }
   body.dark-mode .sem-col.spring { border-top-color: #6d5f52; }
@@ -353,8 +353,8 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
 #front-check.back .tarkista-btn .tk-back { display: block; }
-#front-check.back .tarkista-fill { -webkit-mask-image: url('space_back.png'); mask-image: url('space_back.png'); }   /* mask the progress fill to the back keycap's shape */
-.tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('space_front.png') center/100% 100% no-repeat; mask: url('space_front.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
+#front-check.back .tarkista-fill { -webkit-mask-image: url('tarkista_vastaus.png'); mask-image: url('tarkista_vastaus.png'); }   /* mask the progress fill to the keycap's shape */
+.tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('tarkista_vastaus.png') center/100% 100% no-repeat; mask: url('tarkista_vastaus.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
 body.dark-mode .tarkista-fill { background: #6f8f77; }
 .tarkista-btn.keycap-press { animation: keycapPress 0.16s ease; }   /* same up/down dip as the answer buttons */
 .tarkista-btn:active { transform: translateY(2px); }
@@ -517,7 +517,7 @@ body.deck-intro-anim #card-overview-grid .overview-card, body.deck-intro-anim #c
 @keyframes monaShake { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-4px,2px) rotate(-6deg)} 40%{transform:translate(4px,-2px) rotate(6deg)} 60%{transform:translate(-3px,1px) rotate(-4deg)} 80%{transform:translate(2px,-1px) rotate(3deg)} }
 .mona-shake img { animation: monaShake 0.5s ease; }
 .mona-top-spacer { flex: 0 0 118px; visibility: hidden; }   /* balances Mona so the bubble stays centred on the title */
-.mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 36ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
+.mona-top-bubble { position: relative; flex: 0 1 auto; max-width: 36ch; background: #fffef9; border: 1px solid #d4cec4; border-radius: 16px; padding: 0.7rem 1rem; font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.45; color: #56533c; box-shadow: 0 4px 16px rgba(0,0,0,0.12); text-align: left; }
 @media (min-width: 901px) { #mona-top-peek { font-family: 'Lora', serif; font-size: clamp(1rem, 1.5vw, 1.2rem); max-width: 46ch; } #mona-top-peek .mona-top-bubble { flex: 1 1 auto; max-width: none; } #mona-top-peek .mona-top-spacer { display: none; } }   /* desktop review cover: Mona + bubble span the same 46ch as the esittely text (font matched so 46ch resolves identically), centred by the cover; bubble fills to the RIGHT of Mona */
 .mona-top-bubble::before { content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%); border: 9px solid transparent; border-right-color: #fffef9; border-left: 0; }
 body.dark-mode .mona-top-bubble { background: #3a312b; border-color: #6d5f52; color: #eadfce; }
@@ -841,7 +841,7 @@ body.dark-mode .dev-comment-snip { color: #eadfce; }
 .site-brand { position: relative; width: min(202px, 45vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
 .brand-inner { position: relative; width: 100%; height: 100%; }
 .brand-inner.twitch { animation: logoTwitch 0.45s ease; }
-.home-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 18px; width: max-content; max-width: 280px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.8rem 1.1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.4; text-align: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; }
+.home-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 18px; width: max-content; max-width: 280px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.8rem 1.1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.4; text-align: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; }
 .site-brand.home-bubble-open .home-bubble.active { opacity: 1; pointer-events: auto; }
 .home-bubble::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border: 12px solid transparent; border-top-color: #fffef9; margin-top: -2px; }
 body.dark-mode .home-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
@@ -857,7 +857,7 @@ body.is-mobile #peek-logo { width: 75px; height: 75px; }   /* half size on mobil
 .peek-inner { width: 100%; height: 100%; position: relative; transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1); }
 #peek-logo[data-side="left"].peek-show  .peek-inner { transform: rotate(8deg); }
 #peek-logo[data-side="right"].peek-show .peek-inner { transform: rotate(-8deg); }
-.peek-bubble { position: absolute; top: 50%; transform: translateY(-50%); width: max-content; max-width: 230px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 0.82rem; line-height: 1.35; display: none; align-items: center; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+.peek-bubble { position: absolute; top: 50%; transform: translateY(-50%); width: max-content; max-width: 230px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.7rem 1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.35; display: none; align-items: center; gap: 0.5rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
 .peek-bubble.active { display: flex; }
 #peek-logo.bubble-open .peek-bubble.active { opacity: 1; pointer-events: auto; }
 #peek-logo[data-side="left"]  .peek-bubble { left: 100%; margin-left: 14px; }
@@ -1256,10 +1256,17 @@ body.dark-mode .cal-day.cal-today .cal-num { background:#5c8a6a; color:#fff; }
 .chat-wrap { display:flex; flex-direction:column; }
 .chat-body { min-height:0; max-height:62vh; overflow-y:auto; display:flex; flex-direction:column; justify-content:flex-end; padding-right:6px; }   /* greeting + messages sit just above the input */
 .chat-greet-row { display:flex; align-items:flex-end; justify-content:flex-start; gap:8px; margin:6px 0 14px; }
-.chat-greet { position:relative; background:#fffef9; border:1px solid #e7e1d6; border-radius:14px; border-bottom-left-radius:4px; padding:0.8rem 1.1rem; font-family:'Lora',serif; color:#56533c; font-size:1.0rem; line-height:1.4; box-shadow:0 2px 8px rgba(0,0,0,0.07); max-width:76%; }
+#front-check.back .fc-nav { width: min(132px, 26vw) !important; }   /* grade state: widen the side buttons to fit the 1.8:1 En tiennyt / Tiesin images */
+.add-info-wrap { display:flex; flex-direction:column; align-items:center; }
+.add-info-bubble { position:relative; background:#fffef9; border:2px solid #d4cec4; border-radius:22px; padding:1rem 1.3rem; color:#56533c; box-shadow:0 6px 20px rgba(0,0,0,0.12); text-align:left; font-size:1.0rem; line-height:1.4; }
+.add-info-bubble::after { content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:14px solid transparent; border-top-color:#fffef9; margin-top:-2px; }
+body.dark-mode .add-info-bubble { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
+body.dark-mode .add-info-bubble::after { border-top-color:#2b2622; }
+.add-info-mona { display:block; width:130px; max-width:45%; margin:14px auto 0; }
+.chat-greet { position:relative; background:#fffef9; border:1px solid #e7e1d6; border-radius:14px; border-bottom-left-radius:4px; padding:0.8rem 1.1rem; font-family:'Lora',serif; color:#56533c; font-size:1.05rem; line-height:1.4; box-shadow:0 2px 8px rgba(0,0,0,0.07); max-width:76%; }
 .chat-mona, .chat-avatar { width:38px; height:38px; flex:0 0 auto; border-radius:50%; object-fit:cover; }
 body.dark-mode .chat-greet { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
-@media (max-width:760px){ .chat-greet-row{ gap:6px; } .chat-mona, .chat-avatar{ width:34px; height:34px; } .chat-greet{ font-size:0.92rem; } }
+@media (max-width:760px){ .chat-greet-row{ gap:6px; } .chat-mona, .chat-avatar{ width:34px; height:34px; } .chat-greet{ font-size:1.05rem; } }
 .chat-messages { display:flex; flex-direction:column; gap:10px; padding:0 8px 6px 2px; }
 .chat-empty { color:#7a6f60; font-family:'Lora',serif; text-align:center; padding:30px 0; }
 .chat-msg { display:flex; align-items:flex-end; gap:8px; }
@@ -2437,7 +2444,6 @@ body.dark-mode .cal-ev { color:#241f1b; }
           <div class="card-content ucard-editable" id="ucard-back" contenteditable="true" data-ph="Kääntöpuoli" spellcheck="false" oninput="updateUcardSaveBtn()"></div>
         </div>
       </div>
-      <button type="button" id="ucard-save-btn" onclick="ucardSaveOrCancel()" title="Sulje / lisää kortti"></button>
     </div>
   </div>
   <div id="grid-col">
@@ -2501,16 +2507,16 @@ body.dark-mode .cal-ev { color:#241f1b; }
 
   <!-- fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] -->
   <div id="front-check">
-    <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()" onmouseenter="showGradeHint(event,'En tiennyt')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="edellinen.png" alt="Edellinen"><img class="nav-back" src="ei.png" alt="Ei"><span class="grade-count" id="gc-nav-left"></span></button>
+    <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()" onmouseenter="showGradeHint(event,'En tiennyt')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="edellinen.png" alt="Edellinen"><img class="nav-back" src="en_tiennyt.png" alt="En tiennyt"><span class="grade-count" id="gc-nav-left"></span></button>
     <div class="tarkista-wrap">
       <div class="fc-bubble" id="fc-bubble"></div>
       <button id="tarkista-btn" class="tarkista-btn" onclick="frontCheckReveal()" title="Tarkista (välilyönti)">
-        <img class="tk-front" src="space_front.png" alt="Tarkista vastaus">
-        <img class="tk-back" src="space_back.png" alt="Tiesitkö vastauksen?">
+        <img class="tk-front" src="tarkista_vastaus.png" alt="Tarkista vastaus">
+        <img class="tk-back" src="tarkista_vastaus.png" alt="Tarkista vastaus">
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
-    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()" onmouseenter="showGradeHint(event,'Tiesin')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="kylla.png" alt="Kyllä"></button>
+    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()" onmouseenter="showGradeHint(event,'Tiesin')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="tiesin.png" alt="Tiesin"></button>
   </div>
   <div id="grade-hint" class="grade-hint"></div>
 
@@ -3035,7 +3041,7 @@ function heroMonaClick(){
 const MONA_BUBBLES={
   home_decks:'Alla näet hirmuisen määrän korttipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Aloita klikkaamalla haluamaasi korttipakkaa!',
   home_quiz:'Solukko.com järjestää tietovisoja pilteille joka maanantai Aurumin TEK Loungessa klo 16:00&ndash;18:00. Tietovisoissa kerrataan edellisviikon luentojen asiat ja jaossa on pieniä palkintoja kaikille oikein vastaaville. Vapaa pääsy, ei ilmoittautumista! Ensimmäinen tietovisa 7.9.2026.',
-  homepage1:'<span>Tervetuloa Solukkoon! Täällä voit opiskella yliopistokurssit valmiiden kysymyskorttien avulla! Jos olet uusi täällä, nimeni on Mona ja klikkaamalla minua opastan sinua sivuston käytössä.</span>',
+  homepage1:'<span>Tervetuloa Solukkoon! Täällä voit opiskella yliopistokurssit valmiiden kysymyskorttien avulla! Nimeni on Mona. Klikkaa minua, jos haluat opastusta sivuston käytössä.</span>',
   homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
   homepage3:'Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko™-tietovisoista!',
 
@@ -3341,9 +3347,11 @@ function parseAnkiDB(db) {
       const note=notes[noteId]; if(!note) return;
       const deckName=deckMap[String(did)]||String(did);
       const fnames=Object.keys(note.fields);
-      const frontF=fnames.find(f=>['front','question','text','content'].includes(f.toLowerCase()))||fnames[0]||'';
-      const backF=fnames.find(f=>['back','answer','extra'].includes(f.toLowerCase()))||fnames[1]||'';
-      cards.push({ cardId, noteId, deckName, modelName:note.modelName, fields:note.fields, tags:note.tags, question:note.fields[frontF]?.value||'', answer:note.fields[backF]?.value||'', due, type, queue, ord });
+      const frontF=fnames.find(f=>['front','question','text','content','kysymys'].includes(f.toLowerCase()))||fnames[0]||'';
+      const backF=fnames.find(f=>['back','answer','extra','laaja vastaus'].includes(f.toLowerCase()))||fnames[1]||'';
+      const suppeaF=fnames.find(f=>f.toLowerCase()==='suppea vastaus');   // new note type: the concise answer revealed at the second space
+      const suppea=suppeaF?(note.fields[suppeaF]?.value||''):'';
+      cards.push({ cardId, noteId, deckName, modelName:note.modelName, fields:note.fields, tags:note.tags, question:note.fields[frontF]?.value||'', answer:note.fields[backF]?.value||'', suppea, due, type, queue, ord });
     });
   }
   return cards;
@@ -3849,6 +3857,17 @@ async function renderCurrentCard(){
   _scopeText = _laajuusText; if(typeof updateScopeMona==='function') updateScopeMona();   // the bottom-right study-view Mona shows the answer's extent
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();   // own card in fullscreen (desktop) → Ehdota button instead of the comment button
   if(_bub) _bub.textContent=_frontText;
+  // ── Two answers (new note type): after reveal, the middle button shows Laaja/Suppea and space TOGGLES between them ──
+  _answerMode='laaja'; card._hasSuppea=false; card._suppeaHtml=''; card._laajaHtml='';
+  { const _tkb0=document.querySelector('#tarkista-btn .tk-back'); if(_tkb0) _tkb0.src='tarkista_vastaus.png'; }   // reset the reveal button image (new cards override to Laaja/Suppea on reveal)
+  { const _sup=(card.suppea||'');
+    if(_sup.replace(/<[^>]*>/g,'').trim() && !card._isSpecial){
+      card._laajaHtml=document.getElementById('answer-content').innerHTML;      // the revealed answer is the Laaja version
+      const _tmp=document.createElement('div'); _tmp.innerHTML=await fixImages(_sup); dimParentheses(_tmp); applyWordLinks(_tmp);
+      card._suppeaHtml=_tmp.innerHTML;
+      card._hasSuppea=true;
+    }
+  }
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
   clearTimeout(_peekRetractTimer); _peekAutoRetract=false; clearTimeout(_backPeekTimer);   // a fresh card cancels the backside-peeker timers
   clearTimeout(_cardPeekTimer);   // top peeker animates in 2s after the card loads
@@ -4178,6 +4197,7 @@ function fsBtnPress(el){ _keycapDip(el); try{ playKeyClick(); }catch(e){} }   //
 // reveal the answer via the Tarkista button
 function frontCheckReveal(){
   if(cardAnswerShown){                                          // back → front: same as the front→back flip — shake + click, no fly-in slide
+    if(currentCard && currentCard._hasSuppea){ _keycapDip(document.getElementById('tarkista-btn')); toggleAnswerMode(); return; }   // space after reveal: toggle Laaja <-> Suppea (new note type)
     _keycapDip(document.getElementById('tarkista-btn'));
     const fc=document.getElementById('flashcard');
     if(fc){ fc.classList.remove('card-in-right','card-in-left','card-shake'); void fc.offsetWidth; fc.classList.add('card-shake'); setTimeout(()=>fc.classList.remove('card-shake'),500); }
@@ -5055,6 +5075,19 @@ function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
   sing.classList.add('eyes-closed');
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='mona_scream.png');
 }
+let _answerMode='laaja';
+function _applyAnswerMode(){   // swap the answer text + the middle button's image to match the current Laaja/Suppea mode
+  if(!currentCard||!currentCard._hasSuppea) return;
+  const ac=document.getElementById('answer-content'); if(ac) ac.innerHTML=(_answerMode==='suppea')?currentCard._suppeaHtml:currentCard._laajaHtml;
+  const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src=(_answerMode==='suppea')?'suppea_vastaus.png':'laaja_vastaus.png';
+}
+function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (new note type only)
+  if(!currentCard||!currentCard._hasSuppea) return false;
+  _answerMode=(_answerMode==='suppea')?'laaja':'suppea'; _applyAnswerMode();
+  _cardShakeOnly(); try{ playKeyClick(); }catch(e){}
+  fitCardScale(); scrollToCard(); if(typeof flashWordLinkBubbles==='function') flashWordLinkBubbles();
+  return true;
+}
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
   cardAnswerShown=true;
@@ -5079,6 +5112,7 @@ function showAnswer(){
     fitCardScale(); scrollToCard();   // re-lay out so the answer buttons show fully
     updateFsSlider();   // in fullscreen: reveal shows the grading slider
     flashWordLinkBubbles();   // answer revealed: flash the speech-bubble graphic on its linked words
+    if(currentCard && currentCard._hasSuppea){ _answerMode='laaja'; _applyAnswerMode(); }   // new note type: reveal shows Laaja first + sets the toggle button image
   };
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
@@ -5334,9 +5368,11 @@ async function deleteUserCard(docId){
 // ════════════════════════════════════════════════════════════
 // KORTTIEHDOTUKSET   (a user suggests an OWN card as an official course card; the dev awards a golden-style claim code worth 0,25 €)
 // ════════════════════════════════════════════════════════════
-const ADD_CARD_INFO_HTML='<div style="font-weight:700;margin-bottom:0.6rem;">Haluatko luoda oman kortin?</div>'
-  +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin. Voit myös lähettää korttisi ylläpidon luettavaksi painamalla ”Ehdota”-painiketta. Hyväksytty korttiehdotus lisätään osaksi kurssia kaikille käyttäjille. Solukko.com palkitsee 0,25&nbsp;€ jokaisesta hyväksytystä korttiehdotuksesta, jolloin yhteydenottopyyntö lähetetään sille laitteelle, jolla korttia ehdotettiin.</div>'
-  +'<img src="mona_wow.png" alt="Mona" style="display:block;margin:1.4rem auto 0;width:150px;max-width:55%;">';
+const ADD_CARD_INFO_HTML='<div class="add-info-wrap">'
+  +'<div class="add-info-bubble"><div style="font-weight:700;margin-bottom:0.6rem;">Haluatko luoda oman kortin?</div>'
+  +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin. Voit myös lähettää korttisi ylläpidon luettavaksi painamalla ”Ehdota”-painiketta. Hyväksytty korttiehdotus lisätään osaksi kurssia kaikille käyttäjille. Solukko.com palkitsee 0,25&nbsp;€ jokaisesta hyväksytystä korttiehdotuksesta, jolloin yhteydenottopyyntö lähetetään sille laitteelle, jolla korttia ehdotettiin.</div></div>'
+  +'<img src="mona_wow.png" alt="Mona" class="add-info-mona">'
+  +'</div>';
 let _addInfoOn=false;
 function previewAddCardInfo(){   // hovering a "+ Lisää kortti" tile shows this info card on the right (review page, desktop preview)
   if(inFullscreen()) return;

@@ -1,1 +1,4 @@
 Archive/
+__pycache__/
+.claude/
+*.pyc
