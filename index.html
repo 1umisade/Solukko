@@ -6282,10 +6282,14 @@ function positionCommentArea(){   // comment area sits in-flow under the buttons
   if(!ca) return;
   ca.style.position='static'; ca.style.left=''; ca.style.top=''; ca.style.width='100%'; ca.style.transform='';
 }
-let _lastResizeW=window.innerWidth;
+let _lastResizeW=window.innerWidth, _lastResizeH=window.innerHeight;
 window.addEventListener('resize',()=>{
-  if(window.innerWidth===_lastResizeW) return;   // ignore height-only changes (mobile URL bar) to avoid jumpiness
-  _lastResizeW=window.innerWidth;
+  const w=window.innerWidth, h=window.innerHeight, vainKorkeus=(w===_lastResizeW);
+  // A height-only change is the mobile URL bar sliding in and out — re-fitting there just makes the
+  // card jump. On a desktop it is a real resize (window edge, bookmarks bar, DevTools), and skipping
+  // it left the card at its old size with the page background showing above and below it.
+  if(vainKorkeus && (_kosketus() || h===_lastResizeH)) return;
+  _lastResizeW=w; _lastResizeH=h;
   fitCardScale(); positionCommentArea(); fitDeckTitle(); layoutDecksRadial();
 });
 
