@@ -715,6 +715,11 @@ body.dark-mode #gear-btn-wrap > button { background: #3a312b !important; border-
 .dev-act-stat b { display:block; font-size:1.15rem; color:#26473f; line-height:1.15; }
 .dev-act-stat span { font-size:0.56rem; color:#8a7f70; letter-spacing:0.03em; text-transform:uppercase; }
 .dev-act-list { width:100%; max-width:660px; max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-top:2px; }
+.dev-chart { width:100%; max-width:660px; background:#fffef9; border:1px solid #d4cec4; border-radius:10px; padding:8px 10px 4px; }
+.dev-chart-title { font-family:'JetBrains Mono',monospace; font-size:0.6rem; letter-spacing:0.03em; text-transform:uppercase; color:#8a7f70; margin-bottom:2px; }
+.dev-chart-note { font-family:'JetBrains Mono',monospace; font-size:0.55rem; line-height:1.35; color:#8a7f70; padding:2px 0 6px; }
+body.dark-mode .dev-chart { background:#3a312b; border-color:#6d5f52; }
+body.dark-mode .dev-chart-title, body.dark-mode .dev-chart-note { color:#b9ab99; }
 .dev-act-row { display:flex; align-items:center; gap:8px; background:#fffef9; border:1px solid #e7e1d6; border-radius:8px; padding:5px 10px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#56533c; }
 .dev-act-row .da-name { font-weight:700; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dev-act-row .da-known { color:#498d65; flex:0 0 auto; }
@@ -5695,7 +5700,12 @@ function initPresence(){   // called on load AND again once anonymous auth compl
     ['mousedown','keydown','touchstart','click'].forEach(ev=>window.addEventListener(ev,()=>{ _lastInteractionTime=Date.now(); },{passive:true,capture:true}));
     window.addEventListener('pagehide',()=>{ const u=getUserId(); fetch('https://firestore.googleapis.com/v1/projects/solukko/databases/(default)/documents/presence/'+u+'?key=AIzaSyAeWTSjX8-M_-Xs780nnC_0o9d1YmYroGo',{method:'DELETE',keepalive:true}).catch(()=>{}); });
   }
-  const write=()=>{ const u=getUserId(); db.collection('presence').doc(u).set({ userId:u, word:getUserWord(), known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(_lastInteractionTime) },{merge:true}).catch(()=>{}); };
+  const write=()=>{ const u=getUserId();
+    const doc={ userId:u, word:getUserWord(), known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(_lastInteractionTime) };
+    const today=_dayKey(Date.now());
+    try{ if(localStorage.getItem('solukko-visitday')!==today){   // one extra field write per device per day
+      doc.days=firebase.firestore.FieldValue.arrayUnion(today); localStorage.setItem('solukko-visitday',today); } }catch(e){ doc.days=firebase.firestore.FieldValue.arrayUnion(today); }
+    db.collection('presence').doc(u).set(doc,{merge:true}).catch(()=>{}); };
   write();
   clearInterval(_presenceInterval); _presenceInterval=setInterval(write, 30000);
   listenToPresence();
@@ -5704,11 +5714,43 @@ let _lastPresenceUsers=[];
 function listenToPresence(){
   db.collection('presence').onSnapshot(snap=>{
     const users=[];
-    snap.forEach(doc=>{ const d=doc.data(); if(!d||!d.userId) return; users.push({ word:d.word||d.userId, userId:d.userId, known:d.known||0, lastSeen:d.lastSeen?.toMillis?.()||0, lastInteraction:d.lastInteraction?.toMillis?.()||0 }); });
+    snap.forEach(doc=>{ const d=doc.data(); if(!d||!d.userId) return; users.push({ word:d.word||d.userId, userId:d.userId, known:d.known||0, lastSeen:d.lastSeen?.toMillis?.()||0, lastInteraction:d.lastInteraction?.toMillis?.()||0, days:Array.isArray(d.days)?d.days:null }); });
     users.sort((a,b)=>b.lastSeen-a.lastSeen);
     _lastPresenceUsers=users;
     renderPresenceList(users);
   },()=>{});
+}
+function _dayKey(ms){ const d=new Date(ms); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _weekVisitChart(users){   // distinct devices per day, last 7 days (today last)
+  const VIIKONPAIVA=['su','ma','ti','ke','to','pe','la'];
+  const paivat=[];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i); paivat.push(d); }
+  const avaimet=paivat.map(d=>_dayKey(d.getTime()));
+  const luvut=avaimet.map(k=>0);
+  let tarkkoja=0;
+  users.forEach(u=>{
+    if(u.days && u.days.length){                       // real history: count every day it visited
+      tarkkoja++;
+      avaimet.forEach((k,i)=>{ if(u.days.indexOf(k)>=0) luvut[i]++; });
+    } else if(u.lastSeen){                              // no history yet: count it on its last visit
+      const i=avaimet.indexOf(_dayKey(u.lastSeen));
+      if(i>=0) luvut[i]++;
+    }
+  });
+  const max=Math.max(1,...luvut), W=660, H=132, PADB=22, PADT=16, leveys=W/avaimet.length;
+  const palkit=luvut.map((v,i)=>{
+    const h=Math.round((H-PADB-PADT)*v/max), x=Math.round(i*leveys+leveys*0.22), w=Math.round(leveys*0.56), y=H-PADB-h;
+    const tanaan=i===avaimet.length-1;
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+Math.max(h,2)+'" rx="4" fill="'+(tanaan?'#26473f':'#7fa98a')+'"></rect>'+
+           '<text x="'+(x+w/2)+'" y="'+(y-5)+'" text-anchor="middle" font-size="11" fill="#56533c" font-family="JetBrains Mono, monospace">'+v+'</text>'+
+           '<text x="'+(x+w/2)+'" y="'+(H-7)+'" text-anchor="middle" font-size="10" fill="#8a7f70" font-family="JetBrains Mono, monospace">'+VIIKONPAIVA[paivat[i].getDay()]+'</text>';
+  }).join('');
+  const huom = tarkkoja<users.length
+    ? '<div class="dev-chart-note">'+tarkkoja+'/'+users.length+' laitteesta on päiväkohtainen historia; muut näkyvät viimeisimmän käyntinsä kohdalla. Tarkkuus paranee päivä päivältä.</div>'
+    : '';
+  return '<div class="dev-chart"><div class="dev-chart-title">Eri laitteita päivässä (7 vrk)</div>'+
+         '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" role="img" aria-label="Eri laitteita päivässä viimeisen seitsemän vuorokauden ajalta">'+
+         '<line x1="0" y1="'+(H-PADB)+'" x2="'+W+'" y2="'+(H-PADB)+'" stroke="#d4cec4" stroke-width="1"></line>'+palkit+'</svg>'+huom+'</div>';
 }
 function renderPresenceList(users){
   const el=document.getElementById('presence-list'); if(!el) return;
@@ -5729,7 +5771,7 @@ function renderPresenceList(users){
       '<span class="da-name">'+escCmt(u.word)+(me?' (sinä)':'')+'</span>'+
       '<span class="da-known">✓ '+u.known+'</span>'+
       '<span class="da-seen">'+relTime(u.lastSeen)+'</span></div>'; }).join('');
-  el.innerHTML=head+'<div class="dev-act-list">'+rows+'</div>';
+  el.innerHTML=head+_weekVisitChart(users)+'<div class="dev-act-list">'+rows+'</div>';
 }
 
 
