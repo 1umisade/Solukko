@@ -367,10 +367,21 @@ body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona.bubble-off.visible {
 #fs-scope-bubble:empty, #fs-scope-mona.bubble-off #fs-scope-bubble { display: none; }   /* no bubble when empty or dismissed */
 body.dark-mode #fs-scope-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #fs-scope-bubble::after { border-top-color: #3a312b; }
-@media (max-width: 560px){ #card-screen.faux-fs #fs-comment-btn { left: 74px; } }   /* make room for the back button at top-left */
+@media (max-width: 560px){ body:not(.is-mobile) #card-screen.faux-fs #fs-comment-btn { left: 74px; } }   /* desktop only: clear the back button (mobile hides it) */
 #fs-comment-btn.visible { opacity: 1; pointer-events: auto; }   /* shown on mouse-move / touch, then fades (like the exit button) */
 @media (max-width: 560px){ #fs-comment-btn { top: 16px; left: 16px; bottom: auto; width: 48px; height: 48px; } }   /* mobile: move to the top-left so it doesn't overlap the bottom button row */
 #fs-comment-btn.active { background: #56533c; color: #f5f0e8; border-color: #56533c; }
+/* Touch devices: no hover, so hover popups only ever look stuck; and the study view has no room
+   for Mona. Keyed off (pointer: coarse) as well as .is-mobile — the class did not hold on the
+   user's phone, and it does not hold in the emulator either. */
+@media (pointer: coarse){
+  #card-screen.card-fs-on #fs-scope-mona, #card-screen.card-fs-on #fs-scope-bubble { display: none !important; }
+  #grade-hint { display: none !important; }
+  #gc-nav-left[data-tip]:hover::after, #gc-nav-right[data-tip]:hover::after { display: none !important; }
+  #card-screen.faux-fs #fs-comment-btn { left: 16px !important; }
+}
+body.is-mobile #card-screen.card-fs-on #fs-scope-mona, body.is-mobile #card-screen.card-fs-on #fs-scope-bubble { display: none !important; }
+body.is-mobile #grade-hint { display: none !important; }
 body.dark-mode #fs-comment-btn { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
 body.dark-mode #fs-comment-btn.active { background: #eadfce; color: #2b211b; border-color: #eadfce; }
 #fs-comment-btn.keycap-press { animation: keycapPress 0.16s ease; }
@@ -5196,7 +5207,9 @@ let _celebratedDeck=false;   // auto-show the celebration only once per deck ses
 // ── grade thumbs: mouse-following "Tiesin"/"En tiennyt" hint + persistent right/wrong tally ──
 const HINT_DELAY=1000;   // hovering has to settle for a second before a popup appears
 let _ghTO=null, _ghPending=null;
+function _kosketus(){ return document.body.classList.contains('is-mobile') || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches); }
 function _ghRequest(txt,e){   // ask for the hint; it appears once the pointer has rested HINT_DELAY on the target
+  if(_kosketus()) return;                             // touch devices have no hover — never pop a hint
   const h=document.getElementById('grade-hint'); if(!h) return;
   if(h.classList.contains('show')){ h.textContent=txt; moveGradeHint(e); return; }   // already up: just keep it current
   _ghPending={txt:txt, x:e.clientX, y:e.clientY};
@@ -5218,6 +5231,7 @@ function _tarkistaFillPct(){   // the green fill's width, as set by updateProgre
   return isNaN(v) ? 0 : v;
 }
 function showTarkistaHint(e){   // middle button: says what pressing it does right now (front: the shortcut · back: which answer it switches to)
+  if(_kosketus()) return;
   const btn=document.getElementById('tarkista-btn'), pct=_tarkistaFillPct();
   if(btn && pct>0){                                  // over the green part = the deck's progress bar
     const r=btn.getBoundingClientRect();
