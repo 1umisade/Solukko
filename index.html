@@ -262,7 +262,10 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 /* faux fullscreen (devices where the native Fullscreen API isn't available, e.g. iPhone Safari): a fixed overlay filling the viewport, identical to the native fullscreen layout above */
 #card-screen.card-fs-on.faux-fs { position: fixed; inset: 0; left: 0; top: 0; z-index: 9990; overflow: hidden; }
 /* study view: no rubber-band that would reveal the page background above or below the card */
-html.studying, body.studying { overscroll-behavior: none; overscroll-behavior-y: none; }
+html.studying, body.studying { overscroll-behavior: none; overscroll-behavior-y: none; overflow: hidden; }
+/* overscroll-behavior alone did not stop the bounce on the user's desktop Chrome. The study view
+   is a fixed, full-viewport overlay, so the document underneath has no reason to scroll at all —
+   locking it removes the only thing that could rubber-band. */
 body.studying #card-screen.card-fs-on, body.studying #card-screen.card-fs-on #card-col, body.studying #card-screen.card-fs-on #comment-col { overscroll-behavior: contain; }
 #card-screen.card-fs-on::backdrop { background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); }
 body.dark-mode #card-screen.card-fs-on { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
