@@ -1170,8 +1170,9 @@ body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after
 /* a definition is open: show every linked word on the card, and mark the one being read in dark brown */
 body.wl-open .flashcard.answer-shown .word-link { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 0 0 6px #a06a35, 0 4px 12px rgba(0,0,0,0.16); }
 body.dark-mode.wl-open .flashcard.answer-shown .word-link { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
-body.wl-open .flashcard.answer-shown .word-link.wl-focus, .word-link.wl-focus, .word-link.wl-focus:hover { background-color: #eadcc2; box-shadow: 0 0 0 4px #eadcc2, 0 0 0 6px #5a3a1b, 0 4px 12px rgba(0,0,0,0.16); }
-body.dark-mode.wl-open .flashcard.answer-shown .word-link.wl-focus, body.dark-mode .word-link.wl-focus, body.dark-mode .word-link.wl-focus:hover { background-color: #6b5540; box-shadow: 0 0 0 4px #6b5540, 0 0 0 6px #e0c49a, 0 4px 12px rgba(0,0,0,0.3); }
+body.wl-open .flashcard.answer-shown .word-link.wl-focus, .word-link.wl-focus, .word-link.wl-focus:hover { background-color: #4a2f14; color: #fff5e0; box-shadow: 0 0 0 4px #4a2f14, 0 0 0 6px #2c1a08, 0 4px 12px rgba(0,0,0,0.22); }
+body.wl-open .flashcard.answer-shown .word-link.wl-focus *, .word-link.wl-focus * { color: #fff5e0; }   /* dimmed parentheses inside the word must go light too */
+body.dark-mode.wl-open .flashcard.answer-shown .word-link.wl-focus, body.dark-mode .word-link.wl-focus, body.dark-mode .word-link.wl-focus:hover { background-color: #7a5326; color: #fff5e0; box-shadow: 0 0 0 4px #7a5326, 0 0 0 6px #e0c49a, 0 4px 12px rgba(0,0,0,0.35); }
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
@@ -5098,7 +5099,7 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
     const _cnt=_w?(' Laajemman vastauksen pituus '+_sanamaara(_w)+' sanaa.'):'';
     _scopeText=(_answerMode==='suppea')
       ? ('Näytä <b>laajempi vastaus</b> painamalla välilyöntiä'+(_revealedByKey?' uudestaan':'')+'.'+_cnt)   // "uudestaan" only if they got here with the space bar
-      : ('Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.'+_cnt);   // nothing left to reveal — tell them what grading does
+      : 'Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.';   // the long answer is on screen, so no word count — just what grading does
   }
   if(typeof updateScopeMona==='function') updateScopeMona();
 }
