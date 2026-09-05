@@ -6377,16 +6377,23 @@ function buildWordLinks(){
   if(reviewCards.length>500) return;   // huge decks (e.g. the dev "All Decks"): skip word-links — thousands of terms would make every card render run thousands of regexes
   const seen=new Set();
 
-  // Pass 0: explicit "references" field — words the card author chose to link to this card (highest priority)
-  reviewCards.forEach((card,idx)=>{
+  // Pass 0: explicit "linkkisanat" field — words the card author chose to link to this card
+  //         (highest priority). Scanned across EVERY deck so a term defined on another course still
+  //         links; the open deck goes first so a local definition wins a name clash.
+  _wlCards=[];
+  const _muut=(typeof allCards!=='undefined'?allCards:[]).filter(c=>reviewCards.indexOf(c)<0);
+  [...reviewCards,..._muut].forEach(card=>{
     const ref=(getField(card,['references','References','sanalinkit','Sanalinkit','linkkisanat','Linkkisanat'])||'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/&[a-z]+;/gi,' ');
+    if(!ref.trim()) return;
+    let ci=-1;
     ref.split(/[\n,;]+/).forEach(part=>{
       const clean=part.replace(/\s+/g,' ').trim();
       if(!clean||clean.length<2) return;
       const lower=clean.toLowerCase();
       if(seen.has(lower)) return;
       seen.add(lower);
-      _wordLinks.push({text:clean,lower,cardIndex:idx});
+      if(ci<0){ ci=_wlCards.length; _wlCards.push(card); }
+      _wordLinks.push({text:clean,lower,cardIndex:ci});
     });
   });
 
@@ -6399,7 +6406,7 @@ function buildWordLinks(){
     const lower=clean.toLowerCase();
     if(seen.has(lower)) return;
     seen.add(lower);
-    _wordLinks.push({text:clean,lower,cardIndex:idx});
+    _wordLinks.push({text:clean,lower,cardIndex:_wlCards.push(card)-1});
   });
 
   // Pass 2: tags — each tag on a card becomes an extra link trigger for that card
@@ -6411,7 +6418,7 @@ function buildWordLinks(){
       const lower=clean.toLowerCase();
       if(seen.has(lower)) return;
       seen.add(lower);
-      _wordLinks.push({text:clean,lower,cardIndex:idx});
+      _wordLinks.push({text:clean,lower,cardIndex:_wlCards.push(card)-1});
     });
   });
 
@@ -6425,7 +6432,7 @@ function buildWordLinks(){
     catch(e){ _wlRe=null; }   // pathological term list: fall back to no links rather than throwing
   }
 }
-let _wlRe=null, _wlMap=new Map();
+let _wlRe=null, _wlMap=new Map(), _wlCards=[];   // _wlCards: the cards links point at, from ANY deck
 
 function _wrapTextNode(textNode){
   const text=textNode.textContent;
@@ -6436,7 +6443,7 @@ function _wrapTextNode(textNode){
       const lower=m[0].toLowerCase();
       const ci=_wlMap.get(lower);
       if(ci===undefined) continue;
-      if(ci===currentOverviewIndex) continue;                          // don't link to the card being shown
+      if(_wlCards[ci]===currentCard) continue;                          // don't link to the card being shown
       if(lower===_curCardFrontLower) continue;                         // never link a word back to a same-term card
       matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:ci});
     }
@@ -6498,7 +6505,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
   function showTip(target){
     const idx=parseInt(target.dataset.cardIndex); if(isNaN(idx)) return;
-    const card=reviewCards[idx]; if(!card) return;
+    const card=_wlCards[idx]; if(!card) return;
     if(target!==_tipTarget){                          // rebuild content only when the hovered word changes (not every frame)
       _tipTarget=target;
       const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
