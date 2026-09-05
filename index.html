@@ -5698,7 +5698,9 @@ function initPresence(){   // called on load AND again once anonymous auth compl
   if(!_presenceBound){
     _presenceBound=true;
     ['mousedown','keydown','touchstart','click'].forEach(ev=>window.addEventListener(ev,()=>{ _lastInteractionTime=Date.now(); },{passive:true,capture:true}));
-    window.addEventListener('pagehide',()=>{ const u=getUserId(); fetch('https://firestore.googleapis.com/v1/projects/solukko/databases/(default)/documents/presence/'+u+'?key=AIzaSyAeWTSjX8-M_-Xs780nnC_0o9d1YmYroGo',{method:'DELETE',keepalive:true}).catch(()=>{}); });
+    // The presence doc used to be DELETEd on pagehide, which also threw away the device's visit
+    // history (the days array). It is kept now: "paikalla nyt" is derived from lastSeen < 90 s,
+    // so a closed tab drops off on its own without deleting anything.
   }
   const write=()=>{ const u=getUserId();
     const doc={ userId:u, word:getUserWord(), known:countKnownCards(), lastSeen:firebase.firestore.FieldValue.serverTimestamp(), lastInteraction:new Date(_lastInteractionTime) };
