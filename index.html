@@ -261,6 +261,9 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 #card-screen.card-fs-on { width: 100vw; height: 100vh; justify-content: center; background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); margin: 0 !important; }
 /* faux fullscreen (devices where the native Fullscreen API isn't available, e.g. iPhone Safari): a fixed overlay filling the viewport, identical to the native fullscreen layout above */
 #card-screen.card-fs-on.faux-fs { position: fixed; inset: 0; left: 0; top: 0; z-index: 9990; overflow: hidden; }
+/* study view: no rubber-band that would reveal the page background above or below the card */
+body.studying { overscroll-behavior: none; }
+body.studying #card-screen.card-fs-on, body.studying #card-screen.card-fs-on #card-col, body.studying #card-screen.card-fs-on #comment-col { overscroll-behavior: contain; }
 #card-screen.card-fs-on::backdrop { background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); }
 body.dark-mode #card-screen.card-fs-on { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
 body.dark-mode #card-screen.card-fs-on::backdrop { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
@@ -4050,6 +4053,7 @@ function _playFsFlip(){   // FLIP: card is now full-screen; animate it from wher
 let _fsFlipTO=null;
 // shared enter/exit logic, run by BOTH native fullscreenchange and the faux path
 function _onFsEnter(){
+  document.body.classList.add('studying');   // CSS locks overscroll so the page can't rubber-band behind the card
   document.getElementById('rotate-btn')?.classList.add('active');
   fitCardScale(); scrollToCard(); updateFsSlider();
   document.getElementById('fs-comment-btn')?.classList.remove('visible');   // comment button starts hidden (reveal via mouse-move / star tap)
@@ -4058,6 +4062,7 @@ function _onFsEnter(){
   const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none';
 }
 function _onFsExit(){
+  document.body.classList.remove('studying');
   const cs=document.getElementById('card-screen');
   document.getElementById('rotate-btn')?.classList.remove('active');
   fitCardScale(); scrollToCard(); updateFsSlider();
