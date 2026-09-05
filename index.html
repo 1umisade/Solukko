@@ -314,7 +314,7 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 #front-check { display: none; }
 #card-screen.card-fs-on #front-check.active { display: flex; align-items: flex-end; justify-content: center; gap: min(20px, 3.8vw); position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 96; max-width: 100vw; }   /* bottoms aligned so all three keycaps sit on the same line; scales down to fit narrow (mobile) screens */
 #card-screen.card-fs-on #progress-row { display: none !important; }   /* the old progress bar is never shown in fullscreen — the Tarkista button takes its place */
-.fc-nav { width: min(75px, 14vw, calc(100dvh / 7)); height: min(75px, 14vw, calc(100dvh / 7)); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
+.fc-nav { width: min(132px, 21vw); height: min(75px, 12vw, calc(100dvh / 7)); flex: 0 0 auto; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.1s ease; position: relative; touch-action: manipulation; }   /* side keycaps, same size as the backside Ei/Kyllä buttons; shrink on narrow screens; manipulation = no iOS tap delay */
 .fc-nav img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.22)); }
 /* armed (>=125%): pulsing glow — release now to register. Front (Edellinen/Seuraava) = beige on both; back answer buttons = orange (Ei) / sage (Kyllä) */
 #front-check:not(.back) .fc-nav.fc-nav-armed img { animation: fcGlowBeige 0.85s ease-in-out infinite; }
@@ -339,7 +339,7 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 #card-screen.card-fs-on button:focus, #card-screen.card-fs-on button:focus-visible { outline: none; }   /* no ugly rectangular Tab-focus box on the keycap buttons */
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 /* persistent right/wrong tally: a small badge on the grade thumbs, shown only in grade mode (#front-check.back) when the count > 0 */
-.grade-count { position: absolute; bottom: -6px; right: -6px; min-width: 40px; height: 40px; padding: 0 10px; border-radius: 20px; border: 2px solid rgba(0,0,0,0.55); font-family: 'Lora', serif; font-size: 1.48rem; line-height: 36px; text-align: center; color: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.4); z-index: 3; display: none; pointer-events: auto; cursor: default; }
+.grade-count { --gc: min(40px, 7.2vw); position: absolute; bottom: -6px; right: -6px; min-width: var(--gc); height: var(--gc); padding: 0 calc(var(--gc) / 4); border-radius: calc(var(--gc) / 2); border: 2px solid rgba(0,0,0,0.55); font-family: 'Lora', serif; font-size: calc(var(--gc) * 0.62); line-height: calc(var(--gc) - 4px); text-align: center; color: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.4); z-index: 3; display: none; pointer-events: auto; cursor: default; }
 #gc-nav-left[data-tip]:hover::after, #gc-nav-right[data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #3a312b; color: #fff; font-family: 'Lora', serif; font-size: 0.82rem; font-weight: 400; line-height: 1.2; padding: 6px 10px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.3); z-index: 20; pointer-events: none; }
 #front-check.back #fc-nav-left  .grade-count.has,
 #front-check.back #fc-nav-right .grade-count.has { display: block; }
@@ -350,7 +350,7 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 .grade-hint.show { opacity: 1; }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
 .tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; touch-action: manipulation; }
-.tarkista-btn img { height: min(75px, 14vw, calc(100dvh / 7)); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
+.tarkista-btn img { height: min(75px, 12vw, calc(100dvh / 7)); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
 #front-check.back .tarkista-btn .tk-back { display: block; }
@@ -1258,7 +1258,6 @@ body.dark-mode .cal-day.cal-today .cal-num { background:#5c8a6a; color:#fff; }
 .chat-wrap { display:flex; flex-direction:column; }
 .chat-body { min-height:0; max-height:62vh; overflow-y:auto; display:flex; flex-direction:column; justify-content:flex-end; padding-right:6px; }   /* greeting + messages sit just above the input */
 .chat-greet-row { display:flex; align-items:flex-end; justify-content:flex-start; gap:8px; margin:6px 0 14px; }
-#front-check.back .fc-nav { width: min(132px, 26vw) !important; }   /* grade state: widen the side buttons to fit the 1.8:1 En tiennyt / Tiesin images */
 .add-info-wrap { display:flex; flex-direction:column; align-items:center; }
 .add-info-bubble { position:relative; background:#fffef9; border:2px solid #d4cec4; border-radius:22px; padding:1rem 1.3rem; color:#56533c; box-shadow:0 6px 20px rgba(0,0,0,0.12); text-align:left; font-size:1.0rem; line-height:1.4; }
 .add-info-bubble::after { content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:14px solid transparent; border-top-color:#fffef9; margin-top:-2px; }
@@ -2509,16 +2508,16 @@ body.dark-mode .cal-ev { color:#241f1b; }
 
   <!-- fullscreen front: [Edellinen] [Tarkista button = progress fill + peeking Mona] [Seuraava] -->
   <div id="front-check">
-    <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()" onmouseenter="showGradeHint(event,'En tiennyt')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="edellinen.png" alt="Edellinen"><img class="nav-back" src="en_tiennyt.png" alt="En tiennyt"><span class="grade-count" id="gc-nav-left" onmouseenter="hideGradeHint()" onmousemove="event.stopPropagation();hideGradeHint()"></span></button>
+    <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()" onmouseenter="showGradeHint(event,'pikanäppäin: vasen nuoli')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="edellinen_new.png" alt="Edellinen"><img class="nav-back" src="en_tiennyt.png" alt="En tiennyt"><span class="grade-count" id="gc-nav-left" onmouseenter="hideGradeHint()" onmousemove="event.stopPropagation();hideGradeHint()"></span></button>
     <div class="tarkista-wrap">
       <div class="fc-bubble" id="fc-bubble"></div>
-      <button id="tarkista-btn" class="tarkista-btn" onclick="frontCheckReveal()" title="Tarkista (välilyönti)">
+      <button id="tarkista-btn" class="tarkista-btn" onclick="_revealedByKey=false;frontCheckReveal()" onmouseenter="showTarkistaHint(event)" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()">
         <img class="tk-front" src="tarkista_vastaus.png" alt="Tarkista vastaus">
         <img class="tk-back" src="tarkista_vastaus.png" alt="Tarkista vastaus">
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
-    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()" onmouseenter="showGradeHint(event,'Tiesin')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="seuraava.png" alt="Seuraava"><img class="nav-back" src="tiesin.png" alt="Tiesin"><span class="grade-count" id="gc-nav-right" onmouseenter="hideGradeHint()" onmousemove="event.stopPropagation();hideGradeHint()"></span></button>
+    <button class="fc-nav" id="fc-nav-right" onclick="frontNavRight()" onmouseenter="showGradeHint(event,'pikanäppäin: oikea nuoli')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="seuraava_new.png" alt="Seuraava"><img class="nav-back" src="tiesin.png" alt="Tiesin"><span class="grade-count" id="gc-nav-right" onmouseenter="hideGradeHint()" onmousemove="event.stopPropagation();hideGradeHint()"></span></button>
   </div>
   <div id="grade-hint" class="grade-hint"></div>
 
@@ -2613,6 +2612,19 @@ let groups = JSON.parse(localStorage.getItem('anki-groups') || JSON.stringify([
 ]));
 let groupMode = false;
 let queue=[];
+let _relearn=[];            // cards graded "En tiennyt": [{card, at}] — asked again once 5 min have passed
+const RELEARN_MS=5*60*1000;
+let _gradePending=false;    // a grade is showing its tally; ignore further clicks until the next card is up
+function _saveRelearn(){    // survives a reload: store card ids + due times, not the card objects
+  try{ localStorage.setItem('solukko-relearn-'+currentDeck, JSON.stringify(_relearn.map(e=>({id:e.card.cardId, at:e.at})))); }catch(e){}
+}
+function _loadRelearn(deckName){
+  _relearn=[];
+  try{
+    const raw=localStorage.getItem('solukko-relearn-'+deckName); if(!raw) return;
+    JSON.parse(raw).forEach(e=>{ const c=reviewCards.find(x=>String(x.cardId)===String(e.id)); if(c) _relearn.push({card:c, at:e.at}); });   // cards that no longer exist are dropped
+  }catch(e){ _relearn=[]; }
+}
 let reviewCards=[];
 let currentOverviewIndex=0;
 let cardGrades={};
@@ -2623,7 +2635,8 @@ let cardAnswerShown=false;
 let commentsUnsubscribe=null;
 let kuvaajatUnsubscribe=null;
 let _frontHintText='';   // "Vastauksen laajuus … · Klikkaa korttia" — shown in Mona's front bubble
-let _scopeText='';       // "Vastauksen laajuus … sanaa" — shown in the bottom-right study Mona's bubble
+let _scopeText='';
+let _revealedByKey=false;   // true only when the answer was revealed/toggled with the space bar (Mona then says "uudestaan")       // "Vastauksen laajuus … sanaa" — shown in the bottom-right study Mona's bubble
 
 
 // ════════════════════════════════════════════════════════════
@@ -3683,7 +3696,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   _deckIntro = infos.find(c=>getField(c,['Front','front','Kysymys','kysymys','Question','question']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front/Kysymys is "Esittely" becomes the deck cover
   reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
-  queue = reviewCards.slice();
+  queue = reviewCards.slice(); _loadRelearn(deckName);   // pick up cards still waiting to be re-asked from an earlier session
   shuffleMode=false; _reviewCardsOriginal=null; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
@@ -3949,8 +3962,8 @@ function shuffleDeck(){
 
 // Card-grid tools (under the overview grid in review mode)
 function resetDeckProgress(){   // mark every card "new" again
-  cardGrades={};
-  try{ localStorage.removeItem('solukko-grades-'+currentDeck); }catch(e){}
+  cardGrades={}; _relearn=[];
+  try{ localStorage.removeItem('solukko-grades-'+currentDeck); localStorage.removeItem('solukko-relearn-'+currentDeck); }catch(e){}
   _celebratedDeck=false;
   updateProgress();
   renderCardOverview();
@@ -4342,6 +4355,10 @@ function resetComment(){   // each new card starts centred with comments closed
 }
 
 async function nextCard(){
+  let ri=_relearn.findIndex(e=>e.at<=Date.now());                                  // a card whose 5 min are up jumps the queue
+  if(ri<0 && !queue.length && _relearn.length)                                     // deck ran out first: ask the one that has waited longest
+    ri=_relearn.reduce((b,e,k,a)=>a[k].at<a[b].at?k:b,0);
+  if(ri>=0){ stopMonaNotes(); currentCard=_relearn.splice(ri,1)[0].card; _saveRelearn(); currentOverviewIndex=reviewCards.indexOf(currentCard); await renderCurrentCard(); return; }
   if(!queue.length){ exitCardFs(); showDeckLanding(); return; }   // deck done: no auto-celebration — drop to the grid where the celebration card is clickable
   stopMonaNotes();
   currentCard=queue.shift();
@@ -4655,7 +4672,7 @@ function listenToGameState(){
   });
 }
 
-function handleShowButton(){ showAnswer(); }
+function handleShowButton(){ _revealedByKey=false; showAnswer(); }
 function updateShowBtn(){ const btn=document.getElementById('show-btn'); if(btn){ btn.textContent='Tarkista'; btn.style.background=''; } }
 
 function buzzIn(){
@@ -5097,7 +5114,7 @@ function _laajuusTextForHtml(html, prefix){   // "… laajuus …" for a given a
   prefix = prefix || 'Vastauksen';
   const w=_wordCountOfHtml(html);
   if(!w) return '';
-  return prefix+' laajuus '+_sanamaara(w)+' sanaa';
+  return prefix+' pituus '+_sanamaara(w)+' sanaa';
 }
 function _applyAnswerMode(){   // swap the answer text + the middle button image + Mona's word count to match the current Suppea/Laaja mode
   if(!currentCard||!currentCard._hasSuppea) return;
@@ -5106,10 +5123,10 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
   const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src=(_answerMode==='suppea')?'suppea_vastaus.png':'laaja_vastaus.png';
   // Mona's bubble: on the Suppea side she points to the Laaja answer (and its length); on the Laaja side just its length
   { const _w=_wordCountOfHtml(currentCard._laajaHtml);
-    const _cnt=_w?(' Laajan vastauksen sanamäärä on '+_sanamaara(_w)+'.'):'';
+    const _cnt=_w?(' Laajemman vastauksen pituus '+_sanamaara(_w)+' sanaa.'):'';
     _scopeText=(_answerMode==='suppea')
-      ? ('Näytä <b>laaja vastaus</b> painamalla välilyöntiä uudestaan.'+_cnt)
-      : _cnt.trim();
+      ? ('Näytä <b>laajempi vastaus</b> painamalla välilyöntiä'+(_revealedByKey?' uudestaan':'')+'.'+_cnt)   // "uudestaan" only if they got here with the space bar
+      : ('Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.'+_cnt);   // nothing left to reveal — tell them what grading does
   }
   if(typeof updateScopeMona==='function') updateScopeMona();
 }
@@ -5148,7 +5165,7 @@ function showAnswer(){
     else if(currentCard && currentCard._singleAnswer){                                        // only one answer written: no toggle to offer
       const _tkb=document.querySelector('#tarkista-btn .tk-back'); if(_tkb) _tkb.src='suppea_vastaus.png';
       const _tb=document.getElementById('tarkista-btn'); if(_tb) _tb.classList.add('tk-disabled');   // greyed out = not clickable
-      _scopeText='Tähän kysymykseen ei ole laajempaa vastausta.'; if(typeof updateScopeMona==='function') updateScopeMona();
+      _scopeText='Tähän kysymykseen ei ole laajempaa vastausta. Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.'; if(typeof updateScopeMona==='function') updateScopeMona();
     }
   };
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
@@ -5196,6 +5213,14 @@ let _celebratedDeck=false;   // auto-show the celebration only once per deck ses
 function showGradeHint(e,txt){ const fc=document.getElementById('front-check'); if(!fc||!fc.classList.contains('back')) return; const h=document.getElementById('grade-hint'); if(!h) return; h.textContent=txt; h.classList.add('show'); moveGradeHint(e); }
 function moveGradeHint(e){ const h=document.getElementById('grade-hint'); if(!h||!h.classList.contains('show')) return; h.style.left=(e.clientX+14)+'px'; h.style.top=(e.clientY+16)+'px'; }
 function hideGradeHint(){ const h=document.getElementById('grade-hint'); if(h) h.classList.remove('show'); }
+function showTarkistaHint(e){   // middle button: says what pressing it does right now (front: the shortcut · back: which answer it switches to)
+  const t = (!cardAnswerShown) ? 'pikanäppäin: välilyönti'
+          : (currentCard && currentCard._hasSuppea) ? (_answerMode==='suppea' ? 'Näytä laaja vastaus' : 'Näytä suppea vastaus')
+          : '';   // single-answer cards: the button is greyed out, no hint
+  if(!t) return;
+  const h=document.getElementById('grade-hint'); if(!h) return;
+  h.textContent=t; h.classList.add('show'); moveGradeHint(e);
+}
 function updateGradeCounts(){   // persistent per-deck tally: known -> Tiesin thumb, unknown -> En tiennyt thumb
   let known=0,unknown=0;
   for(const k in cardGrades){ const v=cardGrades[k]; if(v==='known') known++; else if(v==='unknown') unknown++; }
@@ -5205,13 +5230,14 @@ function updateGradeCounts(){   // persistent per-deck tally: known -> Tiesin th
   if(wr){ wr.textContent=known; wr.classList.toggle('has', known>0); wr.dataset.tip = (known===1?'1 kortti osattu':known+' korttia osattu'); }
 }
 function gradeCard(correct){
-  if(coinAnimating) return;
+  if(coinAnimating||_gradePending) return;   // don't let a second click during the 0.2 s hold skip a card
   if(currentCard){ cardGrades[currentCard.cardId]=correct?'known':'unknown'; renderCardOverview(); updateProgress(); localStorage.setItem('solukko-grades-'+currentDeck,JSON.stringify(cardGrades)); updateGradeCounts(); }
   if(!correct){ _celebratedDeck=false; }   // marking a card "unknown" re-arms the celebration, so re-completing the deck shows it again
   const _allKnownNow = correct && reviewCards.length>0 && reviewCards.every(c=>cardGrades[c.cardId]==='known');   // did this "known" complete the deck?
   const fc=document.getElementById('flashcard');
   const ov=document.getElementById('card-overlay');
   const doNext=()=>{
+    _gradePending=false;
     fc.classList.remove('card-out-left','card-out-right','card-out-up');
     if(ov){ ov.style.transition='none'; ov.style.opacity='0'; }
     // deck completion no longer auto-plays the celebration; the celebration card in the grid (CELEB_GRID_HTML, onclick=showCelebration) is the manual trigger
@@ -5221,7 +5247,9 @@ function gradeCard(correct){
       animateCoinToGroup(wg,()=>{ groups[wg].score+=1; saveGroups(); updateGroupUI(); bounceWinningGroup(wg); setTimeout(()=>{ coinAnimating=false; selectedGroup=null; updateGroupUI(); nextCard(); },450); });
       return;
     }
-    if(!correct){ queue.splice(Math.min(10,queue.length),0,currentCard); }
+    if(currentCard) _relearn=_relearn.filter(e=>e.card!==currentCard);          // re-grading clears any pending slot for this card
+    if(!correct&&currentCard) _relearn.push({card:currentCard, at:Date.now()+RELEARN_MS});   // "En tiennyt": ask again in 5 min
+    _saveRelearn();
     selectedGroup=null; updateGroupUI(); nextCard();
   };
   const flyOut=()=>{                                  // only the card flies up; bar stays pinned at bottom
@@ -5232,11 +5260,11 @@ function gradeCard(correct){
     fc.style.animation=''; fc.classList.add('card-out-left');
     setTimeout(doNext,280);
   };
-  if(_gradeInstant){                                  // click flow: no fly-out, no fade-in — swap to the new card at once
-    _gradeInstant=false; _skipCardFade=true;
+  if(_gradeInstant){                                  // click flow: no fly-out, no fade-in — swap to the new card
+    _gradeInstant=false; _skipCardFade=true; _gradePending=true;
     fc.classList.remove('card-in-right','card-in-left','card-out-left','card-out-right','card-out-up');
     fc.style.transition='none'; fc.style.transform=''; fc.style.animation='none';
-    doNext();
+    setTimeout(doNext,200);                           // hold 0.2 s so the Osattu/Kertaus badge is seen ticking up
     return;
   }
   if(correct){                                        // "yes": glow the bar (no green card), then fly out
@@ -6123,7 +6151,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     const _tapNow=Date.now();
     if(_tapNow-_lastFsCardTap<320){ _lastFsCardTap=0; exitCardFullscreen(); return; }   // double-tap the card → leave fullscreen
     _lastFsCardTap=_tapNow;
-    if(!cardAnswerShown){ showAnswer(); return; }          // front: tapping the card reveals the answer
+    if(!cardAnswerShown){ _revealedByKey=false; showAnswer(); return; }          // front: tapping the card reveals the answer
     if(Date.now()-pressT<=400) shakeCard();                // back: tapping the card only shakes (silent) — no flip, no sound; only the Tarkista button/space flips back to the front
   });
 
@@ -6140,8 +6168,8 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
       e.preventDefault();
       if(e.key==='ArrowRight') frontNavRight(); else frontNavLeft();   // front: Seuraava/Edellinen · back: Kyllä/Ei — with the keycap dip + sound
     }
-    if((e.key===' '||e.key==='ArrowUp'||e.key==='ArrowDown')&&currentCard){ e.preventDefault(); frontCheckReveal(); }   // space / up / down = press Tarkista: reveal on the front, flip back to the front from the back
-    else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); showAnswer(); }
+    if((e.key===' '||e.key==='ArrowUp'||e.key==='ArrowDown')&&currentCard){ e.preventDefault(); _revealedByKey=(e.key===' '); frontCheckReveal(); }   // space / up / down = press Tarkista: reveal on the front, flip back to the front from the back
+    else if(e.key==='Enter'&&!cardAnswerShown&&currentCard){ e.preventDefault(); _revealedByKey=false; showAnswer(); }
   });
 })();
 
