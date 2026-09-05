@@ -6130,6 +6130,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
       if(ni>=0 && ni<reviewCards.length) jumpToOverviewCard(ni);
       return;
     }
+    if(e.key==='Escape' && inFullscreen()){ e.preventDefault(); exitCardFs(); return; }   // Esc leaves the study view, same as the back arrow
     if(!inFullscreen()) return;                        // reveal/grade keys work only in fullscreen
     if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&currentCard){
       e.preventDefault();
