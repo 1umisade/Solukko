@@ -262,7 +262,7 @@ body.dark-mode #rotate-btn.active, body.dark-mode #comment-btn.active { backgrou
 /* faux fullscreen (devices where the native Fullscreen API isn't available, e.g. iPhone Safari): a fixed overlay filling the viewport, identical to the native fullscreen layout above */
 #card-screen.card-fs-on.faux-fs { position: fixed; inset: 0; left: 0; top: 0; z-index: 9990; overflow: hidden; }
 /* study view: no rubber-band that would reveal the page background above or below the card */
-body.studying { overscroll-behavior: none; }
+html.studying, body.studying { overscroll-behavior: none; overscroll-behavior-y: none; }
 body.studying #card-screen.card-fs-on, body.studying #card-screen.card-fs-on #card-col, body.studying #card-screen.card-fs-on #comment-col { overscroll-behavior: contain; }
 #card-screen.card-fs-on::backdrop { background: url('site_bg.jpg') center/cover no-repeat, linear-gradient(#efe7d8,#efe7d8); }
 body.dark-mode #card-screen.card-fs-on { background: linear-gradient(rgba(38,26,14,0.86), rgba(38,26,14,0.86)), url('site_bg.jpg') center/cover no-repeat, linear-gradient(#2b2622,#2b2622); }
@@ -4062,7 +4062,7 @@ function _playFsFlip(){   // FLIP: card is now full-screen; animate it from wher
 let _fsFlipTO=null;
 // shared enter/exit logic, run by BOTH native fullscreenchange and the faux path
 function _onFsEnter(){
-  document.body.classList.add('studying');   // CSS locks overscroll so the page can't rubber-band behind the card
+  document.body.classList.add('studying'); document.documentElement.classList.add('studying');   // the viewport reads overscroll-behavior from <html>, so body alone does not stop the bounce
   document.getElementById('rotate-btn')?.classList.add('active');
   fitCardScale(); scrollToCard(); updateFsSlider();
   document.getElementById('fs-comment-btn')?.classList.remove('visible');   // comment button starts hidden (reveal via mouse-move / star tap)
@@ -4071,7 +4071,7 @@ function _onFsEnter(){
   const _ht=document.getElementById('card-hover-tip'); if(_ht) _ht.style.display='none';
 }
 function _onFsExit(){
-  document.body.classList.remove('studying');
+  document.body.classList.remove('studying'); document.documentElement.classList.remove('studying');
   const cs=document.getElementById('card-screen');
   document.getElementById('rotate-btn')?.classList.remove('active');
   fitCardScale(); scrollToCard(); updateFsSlider();
@@ -4201,7 +4201,6 @@ function fsBtnPress(el){ _keycapDip(el); try{ playKeyClick(); }catch(e){} }   //
 // reveal the answer via the Tarkista button
 function frontCheckReveal(){
   if(cardAnswerShown){                                          // back → front: same as the front→back flip — shake + click, no fly-in slide
-    if(currentCard && currentCard._singleAnswer) return;                                                                            // only one answer: the button is greyed out, space does nothing
     if(currentCard && currentCard._hasSuppea){ _keycapDip(document.getElementById('tarkista-btn')); toggleAnswerMode(); return; }   // space after reveal: toggle Laaja <-> Suppea (new note type)
     _keycapDip(document.getElementById('tarkista-btn'));
     const fc=document.getElementById('flashcard');
@@ -5147,10 +5146,10 @@ function showAnswer(){
     updateFsSlider();   // in fullscreen: reveal shows the grading slider
     flashWordLinkBubbles();   // answer revealed: flash the speech-bubble graphic on its linked words
     if(currentCard && currentCard._hasSuppea){ _answerMode='suppea'; _applyAnswerMode(); }   // two answers: reveal shows Suppea first + sets the toggle button image & word count
-    else if(currentCard && currentCard._singleAnswer){                                        // only one answer written: no toggle to offer
-      const _tkb=document.querySelector('#tarkista-btn .tk-back'); if(_tkb) _tkb.src='suppea_vastaus.png';
-      const _tb=document.getElementById('tarkista-btn'); if(_tb) _tb.classList.add('tk-disabled');   // greyed out = not clickable
-      _scopeText='Tähän kysymykseen ei ole laajempaa vastausta. Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.'; if(typeof updateScopeMona==='function') updateScopeMona();
+    else if(currentCard && !currentCard._isSpecial){                                          // no separate Suppea: what is shown IS the Laaja answer
+      const _tkb=document.querySelector('#tarkista-btn .tk-back'); if(_tkb) _tkb.src='laaja_vastaus.png';
+      const _tb=document.getElementById('tarkista-btn'); if(_tb) _tb.classList.remove('tk-disabled');
+      _scopeText='Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.'; if(typeof updateScopeMona==='function') updateScopeMona();
     }
   };
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
@@ -6563,6 +6562,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     if(Math.abs(t.clientX-_wlSX)>10 || Math.abs(t.clientY-_wlSY)>10) _wlMoved=true;   // a scroll/drag, not a tap
   }, {passive:true});
   document.addEventListener('touchend', e=>{
+    if(e.target.closest('#word-link-tooltip')){ _wlTapLink=null; return; }   // tapping the tooltip (e.g. Laajenna) is not "tap elsewhere"
     const link=e.target.closest('.word-link');
     if(link && link===_wlTapLink && !_wlMoved){              // a tap on a linked word → toggle its definition
       if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; }
