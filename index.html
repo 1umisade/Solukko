@@ -118,32 +118,6 @@ body.dark-mode #decks-loading { color: #c9b48f; }
 .deck-btn.deck-in { animation: deckFadeIn 0.5s ease both; }
 /* homepage hero: title + slogan + manifest, at the very top (scrolled out of view on load) */
 #home-hero { order: 99; align-self: center; width: min(1200px, 92vw); max-width: none; margin: 0; padding: 48px 1rem 24px; text-align: left; font-family: 'Lora', serif; }   /* order:99 -> at the bottom of the page */
-/* fake solukko.shop product embed, floated to the right of the manifest */
-.shop-embed { width: 100%; max-width: 190px; display: block; text-decoration: none; color: inherit; background: #fffef9; border: 1px solid #d4cec4; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.14); font-family: 'Lora', serif; transition: box-shadow 0.15s ease, transform 0.15s ease; }
-.shop-embed:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.22); transform: translateY(-2px); }
-.shop-embed-head { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 700; color: #56533c; padding: 0.5rem 0.7rem; border-bottom: 1px solid #ece6da; }
-.shop-embed-dot { width: 8px; height: 8px; border-radius: 50%; background: #2e5a3e; }
-.shop-embed-imgwrap { display: block; padding: 0.8rem; text-align: center; background: #faf6ee; }
-.shop-embed-imgwrap img { max-width: 90%; max-height: 150px; width: auto; height: auto; display: inline-block; vertical-align: middle; }
-.shop-embed-name { display: block; font-size: 0.98rem; font-weight: 700; color: #1a1612; padding: 0.6rem 0.7rem 0; }
-.shop-embed-price { display: block; font-size: 1.15rem; font-weight: 800; color: #2e5a3e; padding: 0.1rem 0.7rem 0.55rem; }
-.shop-embed-buy { display: block; margin: 0 0.7rem 0.8rem; text-align: center; background: #2e5a3e; color: #fff; font-weight: 700; font-size: 0.9rem; padding: 0.5rem; border-radius: 10px; }
-body.dark-mode .shop-embed { background: #3a312b; border-color: #6d5f52; }
-body.dark-mode .shop-embed-head { color: #eadfce; border-bottom-color: #4a4038; }
-body.dark-mode .shop-embed-imgwrap { background: #332b25; }
-body.dark-mode .shop-embed-name { color: #eadfce; }
-@media (max-width: 640px){ .shop-embed { width: 150px; margin-left: 1rem; } .shop-embed-imgwrap img { width: 104px; } }
-/* solukko.shop overlay */
-#shop-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(24,18,12,0.66); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 2rem; overflow: auto; }
-.shop-overlay-inner { display: flex; align-items: center; justify-content: center; gap: 2.2rem; }
-.shop-overlay-side { display: flex; flex-direction: column; gap: 1.6rem; flex: 0 0 auto; }
-.shop-overlay-side .shop-embed { max-width: 210px; width: 210px; }
-.shop-embed.shop-embed-big { max-width: 420px; width: 420px; }
-.shop-embed.shop-embed-big .shop-embed-imgwrap img { max-height: 340px; }
-.shop-embed.shop-embed-big .shop-embed-name { font-size: 1.3rem; }
-.shop-embed.shop-embed-big .shop-embed-price { font-size: 1.5rem; }
-#shop-overlay-close { position: fixed; top: 18px; right: 24px; z-index: 201; width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,254,249,0.92); color: #56533c; font-size: 1.8rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-@media (max-width: 900px){ .shop-overlay-inner { flex-direction: column; gap: 1.4rem; } .shop-overlay-side { flex-direction: row; flex-wrap: wrap; justify-content: center; } .shop-embed.shop-embed-big { width: 300px; max-width: 300px; } }
 /* golden (winning) comment — painted gold only on the author's device */
 .comment-item.golden { background: linear-gradient(135deg, #fff7d6, #f6dd7f 55%, #e6c34a) !important; border: 2px solid #d4af37 !important; box-shadow: 0 0 14px rgba(212,175,55,0.55); }
 .comment-item.golden .comment-text { color: #5c4a12; font-weight: 700; }
@@ -2347,15 +2321,6 @@ body.dark-mode .cal-ev { color:#241f1b; }
     </button>
   </div>
 </div>
-<!-- solukko.shop overlay: opened from the hero Haalarimerkki; enlarged product in the centre, the rest on the sides -->
-<div id="shop-overlay" style="display:none" onclick="if(event.target===this)closeShopOverlay()">
-  <button id="shop-overlay-close" onclick="closeShopOverlay()" aria-label="Sulje">&times;</button>
-  <div class="shop-overlay-inner">
-    <div class="shop-overlay-side"><a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="solusota_web.jpg" alt="Solusota"></span><span class="shop-embed-name">Solusota &ndash; korttipeli</span><span class="shop-embed-price">19,90&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a></div>
-    <div class="shop-overlay-side"><a class="shop-embed" href="https://solukko.shop" target="_blank" rel="noopener noreferrer"><span class="shop-embed-head"><span class="shop-embed-dot"></span>solukko.shop</span><span class="shop-embed-imgwrap"><img src="poster_web.jpg" alt="Juliste"></span><span class="shop-embed-name">Juliste</span><span class="shop-embed-price">15,00&nbsp;&euro;</span><span class="shop-embed-buy">Osta</span></a></div>
-  
-  </div>
-</div>
 <!-- winner's award button (top-right, homepage + review); its fullscreen twin #fs-award-btn lives inside #card-screen -->
 <button id="award-btn" onclick="goldenAwardClick()" title="Palkintosi">🏆</button>
 <!-- winner's golden comment, top-right of the homepage; clicking opens its card in fullscreen with comments -->
@@ -3677,9 +3642,6 @@ function scrollPastHero(){   // start with the hero section just above the viewp
   requestAnimationFrame(doScroll);
   setTimeout(doScroll, 120); setTimeout(doScroll, 400);   // again once the deck layout has settled
 }
-function openShopOverlay(e){ if(e){ e.preventDefault(); } const o=document.getElementById('shop-overlay'); if(o) o.style.display='flex'; }
-function closeShopOverlay(){ const o=document.getElementById('shop-overlay'); if(o) o.style.display='none'; }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ const o=document.getElementById('shop-overlay'); if(o && o.style.display!=='none') closeShopOverlay(); } });   // golden overlay is intentionally not escapable (unskippable win view)
 
 async function startDeck(deckName, animate=true){   // animate=false (reload/deep-link restore) shows the landing at once, no fade-in
   show('loading'); hide('deck-screen');
