@@ -1167,12 +1167,6 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
 body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
 body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after { border-top-color: #4a3f34; }
-/* a definition is open: show every linked word on the card, and mark the one being read in dark brown */
-body.wl-open .flashcard.answer-shown .word-link { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 0 0 6px #a06a35, 0 4px 12px rgba(0,0,0,0.16); }
-body.dark-mode.wl-open .flashcard.answer-shown .word-link { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
-body.wl-open .flashcard.answer-shown .word-link.wl-focus, .word-link.wl-focus, .word-link.wl-focus:hover { background-color: #4a2f14; color: #fff5e0; box-shadow: 0 0 0 4px #4a2f14, 0 0 0 6px #2c1a08, 0 4px 12px rgba(0,0,0,0.22); }
-body.wl-open .flashcard.answer-shown .word-link.wl-focus *, .word-link.wl-focus * { color: #fff5e0; }   /* dimmed parentheses inside the word must go light too */
-body.dark-mode.wl-open .flashcard.answer-shown .word-link.wl-focus, body.dark-mode .word-link.wl-focus, body.dark-mode .word-link.wl-focus:hover { background-color: #7a5326; color: #fff5e0; box-shadow: 0 0 0 4px #7a5326, 0 0 0 6px #e0c49a, 0 4px 12px rgba(0,0,0,0.35); }
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: none; white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
@@ -6413,14 +6407,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
 (function initWordLinkTooltip(){
   const tip=document.createElement('div'); tip.id='word-link-tooltip'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
-  let touchPinnedLink=null, _tipTarget=null, _wlFocus=null;
-  function setWlFocus(el){   // el = the link whose definition is open, or null
-    if(_wlFocus===el) return;
-    if(_wlFocus) _wlFocus.classList.remove('wl-focus');
-    _wlFocus=el;
-    if(el) el.classList.add('wl-focus');
-    document.body.classList.toggle('wl-open', !!el);
-  }
+  let touchPinnedLink=null, _tipTarget=null;
 
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
 
@@ -6445,9 +6432,9 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
   function updateTip(){
     const hovered=document.body.classList.contains('is-mobile') ? null : document.querySelector('.word-link:hover');   // mobile: only long-press (touchPinnedLink), no hover
-    if(touchPinnedLink){ showTip(touchPinnedLink); setWlFocus(touchPinnedLink); }
-    else if(hovered){ showTip(hovered); setWlFocus(hovered); }
-    else { tip.style.display='none'; _tipTarget=null; setWlFocus(null); }
+    if(touchPinnedLink){ showTip(touchPinnedLink); }
+    else if(hovered){ showTip(hovered); }
+    else { tip.style.display='none'; _tipTarget=null; }
     requestAnimationFrame(updateTip);
   }
   requestAnimationFrame(updateTip);
@@ -6464,10 +6451,10 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
   document.addEventListener('touchend', e=>{
     const link=e.target.closest('.word-link');
     if(link && link===_wlTapLink && !_wlMoved){              // a tap on a linked word → toggle its definition
-      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; setWlFocus(null); }
+      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; }
       else { touchPinnedLink=link; showTip(link); }
     } else if(touchPinnedLink && !link){                     // tap anywhere else closes it
-      touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; setWlFocus(null);
+      touchPinnedLink=null; tip.style.display='none'; _tipTarget=null;
     }
     _wlTapLink=null;
   }, {passive:true});
