@@ -761,10 +761,11 @@ body:not(.is-mobile) .comment-box.open { width: 50%; }   /* half width on deskto
 .comment-box::before { content: "💬  Jätä kommentti"; display: flex; align-items: center; justify-content: center; padding: 0.85rem 1.4rem; color: #56533c; font-family: 'Lora', serif; font-size: 0.92rem; line-height: 1.25; white-space: nowrap; transition: opacity 0.2s ease; pointer-events: none; }   /* IN-FLOW so the closed pill wraps to this text */
 .comment-box.open::before { display: none; }
 .comment-box:not(.open) #card-comment { position: absolute; inset: 0; }   /* keep the hidden textarea from widening the closed pill */
-.comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #b5824a; border: none; border-radius: 50%; color: white; font-size: 1.1rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.comment-submit-btn { display: none; position: absolute; bottom: 12px; right: 12px; width: 36px; height: 36px; background: #e8dcc4; border: none; border-radius: 50%; color: #56533c; font-size: 1.1rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .comment-box.open .comment-submit-btn { display: flex; align-items: center; justify-content: center; }
 .comment-submit-btn::before { content: "\2715"; }                        /* before writing: an X (close) button (tan) */
-.comment-box.has-text .comment-submit-btn { background: #498d65; }        /* once there's text: green submit... */
+.comment-box.has-text .comment-submit-btn { background: #498d65; color: #fff; }   /* once there's text: green submit... */
+body.dark-mode .comment-submit-btn { background: #6b5540; color: #eadfce; }   /* beige reads as warm brown against the dark card */
 .comment-box.has-text .comment-submit-btn::before { content: "\2713"; }   /* ...shown as a check mark */
 .comment-box.open .comment-img-btn { display: flex; align-items: center; justify-content: center; }
 .comment-display { background: #fffef9; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.8rem 1rem; font-family: 'Lora', serif; font-size: 0.88rem; line-height: 1.5; color: #56533c; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: none; white-space: pre-wrap; }
@@ -811,7 +812,8 @@ body.dark-mode .dev-comment-snip { color: #eadfce; }
 .uc-badge.approved { background: linear-gradient(135deg,#fff7d6,#f0d878); color: #6b4a10; }
 .uc-badge.paid { background: #d7ecdd; color: #2f6b45; }
 #card-comment { width: 100%; min-height: 52px; height: auto; opacity: 0; pointer-events: none; resize: none; overflow: hidden; border: none; outline: none; background: transparent; color: #1a1612; padding: 1.2rem; font-family: 'Lora', serif; font-size: 1rem; line-height: 1.5; transition: opacity 0.2s ease 0.15s; }   /* auto-grows from ~1 line as you type (see autoGrowComment) */
-.comment-box.open #card-comment { opacity: 1; pointer-events: auto; }
+.comment-box.open #card-comment { opacity: 1; pointer-events: auto; min-height: 210px; overflow-y: auto; }   /* room for the full guidance text; scrolls instead of clipping on narrow screens */
+@media (max-width: 640px){ .comment-box.open #card-comment { min-height: 260px; } }   /* the same text wraps onto more lines in a narrow box */
 .moodle-link { position: absolute; top: 12px; left: 12px; z-index: 3; width: 48px; height: 48px; }
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
 
@@ -2369,7 +2371,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="comment-area" style="display:none">
   <div class="comment-box" id="comment-box">
     <textarea id="card-comment"
-      placeholder="Jätä kommentti ja osallistu 5€ arvontaan!"></textarea>
+      placeholder="Jätä kommentti ja osallistu 5€ arvontaan!&#10;&#10;Voit esimerkiksi pyytää täsmennystä korttiin tai huomauttaa asiavirheestä. Arvomme palkinnon tietovisojen yhteydessä maanantaisin Aurum TEK Loungessa klo 16."></textarea>
     <button class="comment-submit-btn" onclick="commentActionBtn(event)" aria-label="Sulje / lähetä"></button>
     <button class="comment-img-btn" onclick="event.stopPropagation();document.getElementById('comment-img-input').click()" style="display:none;position:absolute;bottom:12px;right:56px;width:36px;height:36px;background:#f0f0f0;border:none;border-radius:50%;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);">📷</button>
     <div id="comment-img-preview" style="display:none;padding:0 1.2rem 0.5rem;"></div>
