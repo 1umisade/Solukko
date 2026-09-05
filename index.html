@@ -314,7 +314,9 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 .fc-nav:active { transform: translateY(2px) scale(0.95); }
 /* persistent right/wrong tally: a small badge on the grade thumbs, shown only in grade mode (#front-check.back) when the count > 0 */
 .grade-count { --gc: min(40px, 7.2vw); position: absolute; bottom: -6px; right: -6px; min-width: var(--gc); height: var(--gc); padding: 0 calc(var(--gc) / 4); border-radius: calc(var(--gc) / 2); border: 2px solid rgba(0,0,0,0.55); font-family: 'Lora', serif; font-size: calc(var(--gc) * 0.62); line-height: calc(var(--gc) - 4px); text-align: center; color: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.4); z-index: 3; display: none; pointer-events: auto; cursor: default; }
-#gc-nav-left[data-tip]:hover::after, #gc-nav-right[data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #3a312b; color: #fff; font-family: 'Lora', serif; font-size: 0.82rem; font-weight: 400; line-height: 1.2; padding: 6px 10px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.3); z-index: 20; pointer-events: none; }
+@keyframes gcTipIn { to { opacity: 1; } }
+#gc-nav-left[data-tip]:hover::after, #gc-nav-right[data-tip]:hover::after { opacity: 0; animation: gcTipIn 0s linear 1s forwards;   /* same 1 s wait as the other hover popups */
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #3a312b; color: #fff; font-family: 'Lora', serif; font-size: 0.82rem; font-weight: 400; line-height: 1.2; padding: 6px 10px; border-radius: 8px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.3); z-index: 20; pointer-events: none; }
 #front-check.back #fc-nav-left  .grade-count.has,
 #front-check.back #fc-nav-right .grade-count.has { display: block; }
 #fc-nav-left  .grade-count { background: #c47a4a; }   /* En tiennyt — orange */
@@ -5177,9 +5179,24 @@ function showAnswer(){
 
 let _celebratedDeck=false;   // auto-show the celebration only once per deck session
 // ── grade thumbs: mouse-following "Tiesin"/"En tiennyt" hint + persistent right/wrong tally ──
-function showGradeHint(e,txt){ const h=document.getElementById('grade-hint'); if(!h) return; h.textContent=txt; h.classList.add('show'); moveGradeHint(e); }   // shown on both sides: the arrow keys do Edellinen/Seuraava on the front and En tiennyt/Tiesin on the back
-function moveGradeHint(e){ const h=document.getElementById('grade-hint'); if(!h||!h.classList.contains('show')) return; h.style.left=(e.clientX+14)+'px'; h.style.top=(e.clientY+16)+'px'; }
-function hideGradeHint(){ const h=document.getElementById('grade-hint'); if(h) h.classList.remove('show'); }
+const HINT_DELAY=1000;   // hovering has to settle for a second before a popup appears
+let _ghTO=null, _ghPending=null;
+function _ghRequest(txt,e){   // ask for the hint; it appears once the pointer has rested HINT_DELAY on the target
+  const h=document.getElementById('grade-hint'); if(!h) return;
+  if(h.classList.contains('show')){ h.textContent=txt; moveGradeHint(e); return; }   // already up: just keep it current
+  _ghPending={txt:txt, x:e.clientX, y:e.clientY};
+  if(_ghTO) return;                                   // a timer is already counting down — don't restart it on every mousemove
+  _ghTO=setTimeout(()=>{
+    _ghTO=null; const p=_ghPending; if(!p) return;
+    const el=document.getElementById('grade-hint'); if(!el) return;
+    el.textContent=p.txt; el.classList.add('show');
+    el.style.left=(p.x+14)+'px'; el.style.top=(p.y+16)+'px';
+  }, HINT_DELAY);
+}
+function showGradeHint(e,txt){ _ghRequest(txt,e); }   // shown on both sides: the arrow keys do Edellinen/Seuraava on the front and En tiennyt/Tiesin on the back
+function moveGradeHint(e){ const h=document.getElementById('grade-hint'); if(!h) return; if(_ghPending){ _ghPending.x=e.clientX; _ghPending.y=e.clientY; }   // still waiting: pop up where the pointer is NOW
+  if(!h.classList.contains('show')) return; h.style.left=(e.clientX+14)+'px'; h.style.top=(e.clientY+16)+'px'; }
+function hideGradeHint(){ clearTimeout(_ghTO); _ghTO=null; _ghPending=null; const h=document.getElementById('grade-hint'); if(h) h.classList.remove('show'); }
 function _tarkistaFillPct(){   // the green fill's width, as set by updateProgress
   const tf=document.getElementById('tarkista-fill'); if(!tf) return 0;
   const v=parseFloat(getComputedStyle(tf).getPropertyValue('--fill'));
@@ -5190,17 +5207,14 @@ function showTarkistaHint(e){   // middle button: says what pressing it does rig
   if(btn && pct>0){                                  // over the green part = the deck's progress bar
     const r=btn.getBoundingClientRect();
     if(r.width && ((e.clientX-r.left)/r.width)*100 <= pct){
-      const hp=document.getElementById('grade-hint'); if(!hp) return;
-      hp.textContent=Math.round(pct)+' % kurssista opiskeltu';
-      hp.classList.add('show'); moveGradeHint(e); return;
+      _ghRequest(Math.round(pct)+' % kurssista opiskeltu', e); return;
     }
   }
   const t = (!cardAnswerShown) ? 'pikanäppäin: välilyönti'
           : (currentCard && currentCard._hasSuppea) ? (_answerMode==='suppea' ? 'Näytä laaja vastaus' : 'Näytä suppea vastaus')
           : '';   // single-answer cards: the button is greyed out, no hint
   if(!t) return;
-  const h=document.getElementById('grade-hint'); if(!h) return;
-  h.textContent=t; h.classList.add('show'); moveGradeHint(e);
+  _ghRequest(t,e);
 }
 function updateGradeCounts(){   // persistent per-deck tally: known -> Tiesin thumb, unknown -> En tiennyt thumb
   let known=0,unknown=0;
