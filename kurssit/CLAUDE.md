@@ -181,26 +181,27 @@ kuulu kortin leipätekstiin: ne mainitaan **vain sen termin omalla kortilla** ri
 |---|---|---|
 | **lähetti-RNA**, lähetti-RNA-ketju | mRNA, messenger RNA | myös yhdyssanoissa: *lähetti-RNA-rokote* |
 | **tuma** | nucleus | |
+| **tumakotelo** | tumakalvo | |
+| **solulima** | sytoplasma | |
 | **endoplasminen kalvosto** | solulimakalvosto | |
+| **soluelin** | organelli | |
+| **genomi** | perimä, perimäaines | poikkeus suomalaisuussääntöön: käyttäjän valinta |
+| **nukleoemäsjärjestys** | emäsjärjestys, nukleotidijärjestys | |
 | **proteiini** | valkuaisaine | |
 | **solukalvo** | plasmakalvo | |
 | **soluseinä** | soluseinämä | |
 
-`Muut nimet` -rivit tällä hetkellä: *Mikä on tuma?* → nucleus, *Mikä on lähetti-RNA?* → mRNA,
-messenger RNA.
+Pääsääntö: **suomenkielinen sana voittaa** vierasperäisen. Poikkeukset merkitään taulukkoon.
 
-### Vielä päättämättä
+`Muut nimet` -rivit tällä hetkellä: *tuma* → nucleus, *lähetti-RNA* → mRNA, messenger RNA,
+*solulima* → sytoplasma, *soluelin* → organelli, *genomi* → perimä, *tumakotelo* → tumakalvo.
 
-Näissä pakassa esiintyy molempia muotoja. Kun linja on valittu, se merkitään yllä olevaan
-taulukkoon ja yhdenmukaistetaan koko pakkaan:
+### Taivutus vaihtaessa
 
-| vaihtoehto | esiintymiä | vaihtoehto | esiintymiä |
-|---|---|---|---|
-| solulima | 9 | sytoplasma | 12 |
-| perimä | 19 | genomi | 22 |
-| soluelin | 8 | organelli | 1 |
-| tumakotelo | 8 | tumakalvo | 2 |
-| emäsjärjestys | 5 | nukleotidijärjestys | 1 |
+Vartalo ratkaisee. *sytoplasma → solulima* on suora vartalonvaihto (molemmat a-vartaloita, pääte
+säilyy: sytoplasmassa → solulimassa). *perimä → genomi* ei ole: ä-vartalo vaihtuu i-vartaloon,
+joten jokainen muoto on lueteltava erikseen (perimää → genomia, perimässä → genomissa,
+perimään → genomiin).
 
 ### Lyhenteiden taivutus
 
