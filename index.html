@@ -729,7 +729,7 @@ body.dark-mode .dev-chart-title, body.dark-mode .dev-chart-note { color:#b9ab99;
 body.dark-mode .dev-act-stat, body.dark-mode .dev-act-row { background:#2b2622; border-color:#4a3f36; color:#eadfce; }
 body.dark-mode .dev-act-stat b { color:#9fc7b4; }
 body.dark-mode .kuvaaja-btn { color: #eadfce !important; border-color: #6d5f52 !important; }
-body.dark-mode .kuvaaja-cancel { border-color: #c0392b !important; color: #c0392b !important; }
+body.dark-mode .kuvaaja-cancel { background: #6b5540 !important; border: none !important; color: #eadfce !important; }
 body.dark-mode #loading { color: #eadfce; }
 #loading { position: fixed; inset: 0; z-index: 100000; display: none; background: #efe7d8; }   /* above #site-brand (z 9999) so the homepage brand Mona never shows through while loading */
 body.dark-mode #loading { background: #2b2622; }
@@ -5670,7 +5670,7 @@ function listenToKuvaajat(){
 }
 function updateKuvaajaBtnState(btn,state){
   var wrap=btn.parentElement; var xBtn=wrap?wrap.querySelector('.kuvaaja-cancel'):null;
-  if(!xBtn&&wrap){ xBtn=document.createElement('button'); xBtn.className='kuvaaja-cancel'; xBtn.title='Peruuta ilmoittautuminen'; xBtn.style.cssText='background:none;border:1px solid #c0392b;border-radius:50%;width:28px;height:28px;font-size:0.75rem;color:#c0392b;cursor:pointer;display:none;flex-shrink:0;'; xBtn.textContent='✕'; wrap.appendChild(xBtn); }
+  if(!xBtn&&wrap){ xBtn=document.createElement('button'); xBtn.className='kuvaaja-cancel'; xBtn.title='Peruuta ilmoittautuminen'; xBtn.style.cssText='background:#e8dcc4;border:none;border-radius:50%;width:28px;height:28px;font-size:0.75rem;color:#56533c;cursor:pointer;display:none;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.15);';   /* same beige close button as the comment box */ xBtn.textContent='✕'; wrap.appendChild(xBtn); }
   if(state==='mine'){ btn.innerHTML='✓ Olet ilmoittautunut kuvaamaan tämän luennon. Kuvaaminen vaatii aina luennoitsijan luvan. Kysy lupa luennoitsijalta ja kerro luentovideota käytettävän solukko.comin avoimen oppimateriaalin kehittämiseen. Emme julkaise tallenteita yliopistojen luennoista, vaan käytämme niitä rajataksemme omat luentovideomme kattamaan samat asiat. Luentovideosta maksamme 5€ palkkion, jonka voi noutaa Aurumin TEK Loungesta maanantaisin klo 16.00&ndash;18.00.'; btn.style.background='#498d65'; btn.style.color='white'; btn.style.border='1px solid #498d65'; btn.style.cursor='default'; btn.onclick=null; if(xBtn){ xBtn.style.display='flex'; xBtn.style.alignItems='center'; xBtn.style.justifyContent='center'; xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); }; } }
   else if(state==='taken'){ btn.innerHTML='Joku on ilmoittautunut kuvaamaan tämän luennon'; btn.style.background='none'; btn.style.color='#b0a898'; btn.style.border='1px solid #d4cec4'; btn.style.cursor='default'; btn.onclick=null; if(xBtn){ if(devMode){ xBtn.style.display='flex'; xBtn.style.alignItems='center'; xBtn.style.justifyContent='center'; xBtn.onclick=function(){ peruutaKuvaaja(btn.dataset.subdeck); }; } else { xBtn.style.display='none'; } } }
   else { btn.innerHTML='&#x1F4F7;&nbsp;Ilmoittaudu kuvaajaksi'; btn.style.background='none'; btn.style.color='#56533c'; btn.style.border='1px solid #d4cec4'; btn.style.cursor='pointer'; btn.onclick=function(){ ilmoittauduKuvaajaksi(this,this.dataset.subdeck); }; if(xBtn) xBtn.style.display='none'; }
