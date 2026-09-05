@@ -668,7 +668,7 @@ body.dark-mode .embed-3d-frame { background: #2a2622; }
 .io-card-image img { max-width: 100%; height: auto; max-height: none; display: block; }
 .io-overlay { position: absolute; inset: 0; pointer-events: none; }
 .io-overlay svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.answer-section { margin: 1.4rem -2rem 0; padding: 1.4rem 2rem 0; border-top: 1px solid #d4cec4; display: none; }   /* span the full card width (counteract the card's 2rem side padding) */
+.answer-section { margin: 1.4rem -2rem 0; padding: 1.4rem 2rem 0; border-top: 2px solid #9e9382; display: none; }   /* etupuoli/kääntöpuoli-erotin: selvästi näkyvä */   /* span the full card width (counteract the card's 2rem side padding) */
 
 /* ── PROGRESS BAR + GRADE BALL BUTTONS ──────────────────── */
 .progress-row { width: 100%; display: flex; align-items: center; gap: 12px; position: relative; margin-top: 66px; z-index: 2; }   /* room above the bar for Mona + her speech bubble (no overlap with the card) */
@@ -720,7 +720,7 @@ body.dark-mode .comment-display { color: #eadfce; }
 body.dark-mode .back-btn, body.dark-mode .remaining, body.dark-mode .deck-name, body.dark-mode .comment-status { color: #cbbda8; border-color: #6d5f52; }
 body.dark-mode .brand-back { color: #cbbda8; }
 body.dark-mode .show-btn { background: #eadfce; color: #2b211b; }
-body.dark-mode .answer-section { border-top-color: #6d5f52; }
+body.dark-mode .answer-section { border-top-color: #8a7d6c; }
 body.dark-mode .cloze-blank { background: #5a5148; }
 body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: none; color: inherit; }
 body.dark-mode .video-overlay { background: #3a312b !important; }
@@ -6311,18 +6311,32 @@ function buildWordLinks(){
     });
   });
 
-  _wordLinks.sort((a,b)=>b.text.length-a.text.length);
+  _wordLinks.sort((a,b)=>b.text.length-a.text.length);   // longest first, so the alternation prefers the longest term
+  // Precompile ONE alternation regex + a lookup map. Cards list every Finnish case form in
+  // "linkkisanat", so there can be >1000 triggers — a regex per trigger per text node would crawl.
+  _wlMap=new Map(); _wlRe=null;
+  _wordLinks.forEach(l=>{ if(!_wlMap.has(l.lower)) _wlMap.set(l.lower,l.cardIndex); });
+  if(_wordLinks.length){
+    try{ _wlRe=new RegExp('(?<![\\wäöåÄÖÅ-])(?:'+_wordLinks.map(l=>_escapeReg(l.text)).join('|')+')(?![\\wäöåÄÖÅ-])','gi'); }
+    catch(e){ _wlRe=null; }   // pathological term list: fall back to no links rather than throwing
+  }
 }
+let _wlRe=null, _wlMap=new Map();
 
 function _wrapTextNode(textNode){
   const text=textNode.textContent;
   const matches=[];
-  _wordLinks.forEach(link=>{
-    if(link.cardIndex===currentOverviewIndex) return;                 // don't link to the card being shown
-    if(link.lower && link.lower===_curCardFrontLower) return;         // don't link a word back to a same-term card (e.g. a duplicate) — i.e. never link the word to itself
-    const re=new RegExp('(?<![\\wäöåÄÖÅ-])'+_escapeReg(link.text)+'(?![\\wäöåÄÖÅ-])','gi');
-    let m; while((m=re.exec(text))!==null) matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:link.cardIndex});
-  });
+  if(_wlRe){
+    _wlRe.lastIndex=0;
+    let m; while((m=_wlRe.exec(text))!==null){
+      const lower=m[0].toLowerCase();
+      const ci=_wlMap.get(lower);
+      if(ci===undefined) continue;
+      if(ci===currentOverviewIndex) continue;                          // don't link to the card being shown
+      if(lower===_curCardFrontLower) continue;                         // never link a word back to a same-term card
+      matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:ci});
+    }
+  }
   if(!matches.length) return;
   matches.sort((a,b)=>a.start-b.start||(b.end-b.start)-(a.end-a.start));
   const filtered=[]; let lastEnd=0;
