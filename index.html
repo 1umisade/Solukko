@@ -5092,7 +5092,14 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
   const html=(_answerMode==='suppea')?currentCard._suppeaHtml:currentCard._laajaHtml;
   const ac=document.getElementById('answer-content'); if(ac) ac.innerHTML=html;
   const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src=(_answerMode==='suppea')?'suppea_vastaus.png':'laaja_vastaus.png';
-  _scopeText=_laajuusTextForHtml(html, _answerMode==='suppea'?'Suppean vastauksen':'Laajan vastauksen'); if(typeof updateScopeMona==='function') updateScopeMona();   // Mona tells the shown answer's length
+  // Mona's bubble: on the Suppea side she points to the Laaja answer (and its length); on the Laaja side just its length
+  if(_answerMode==='suppea'){
+    const _lt=_laajuusTextForHtml(currentCard._laajaHtml,'Laajan vastauksen');
+    _scopeText='Paina välilyöntiä uudestaan nähdäksesi laajan vastauksen.'+(_lt?(' '+_lt+'.'):'');
+  } else {
+    _scopeText=_laajuusTextForHtml(html,'Laajan vastauksen');
+  }
+  if(typeof updateScopeMona==='function') updateScopeMona();
 }
 function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (new note type only)
   if(!currentCard||!currentCard._hasSuppea) return false;
