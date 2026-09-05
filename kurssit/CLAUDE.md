@@ -169,7 +169,48 @@ Toteutuneet tasot: Solu L1 mediaani 51 sanaa, Biotekniikka L1 mediaani 53.
 
 ---
 
-## 10. Kuvakortit
+## 10. Termisanasto — mitä sanoja käytetään
+
+Sama asia sanotaan pakassa **aina samalla sanalla**. Vieraskieliset ja rinnakkaiset nimitykset eivät
+kuulu kortin leipätekstiin: ne mainitaan **vain sen termin omalla kortilla** rivillä
+`Muut nimet: ...` laajan vastauksen lopussa.
+
+### Käytä näitä
+
+| käytä | älä käytä | huom |
+|---|---|---|
+| **lähetti-RNA**, lähetti-RNA-ketju | mRNA, messenger RNA | myös yhdyssanoissa: *lähetti-RNA-rokote* |
+| **tuma** | nucleus | |
+| **endoplasminen kalvosto** | solulimakalvosto | |
+| **proteiini** | valkuaisaine | |
+| **solukalvo** | plasmakalvo | |
+| **soluseinä** | soluseinämä | |
+
+`Muut nimet` -rivit tällä hetkellä: *Mikä on tuma?* → nucleus, *Mikä on lähetti-RNA?* → mRNA,
+messenger RNA.
+
+### Vielä päättämättä
+
+Näissä pakassa esiintyy molempia muotoja. Kun linja on valittu, se merkitään yllä olevaan
+taulukkoon ja yhdenmukaistetaan koko pakkaan:
+
+| vaihtoehto | esiintymiä | vaihtoehto | esiintymiä |
+|---|---|---|---|
+| solulima | 9 | sytoplasma | 12 |
+| perimä | 19 | genomi | 22 |
+| soluelin | 8 | organelli | 1 |
+| tumakotelo | 8 | tumakalvo | 2 |
+| emäsjärjestys | 5 | nukleotidijärjestys | 1 |
+
+### Lyhenteiden taivutus
+
+Lyhennepäätteet ovat **takavokaalisia**, koska lyhenne luetaan koko sanana
+(*adenosiinitrifosfaattia* → ATP:ta): `ATP:ta`, `ADP:sta`, `DNA:ta`, `RNA:ta`, `NADH:ta`.
+Ei `ATP:tä` eikä `ADP:stä`.
+
+---
+
+## 11. Kuvakortit
 
 Osa dioista opettaa jotain, mitä pelkkä teksti ei opeta: rakennekaaviot, prosessikaaviot,
 fylogeneettiset puut, rakennekaavat, vertailukuvat, graafit. Niistä tehdään kortit näin:
