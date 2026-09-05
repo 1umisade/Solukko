@@ -4821,7 +4821,7 @@ function openGoldenComment(){
 // ════════════════════════════════════════════════════════════
 // Exam-probability stars: read the "propability" field (★ chars or a 1–5 number); fall back to old ★ tags.
 function cardStarCount(card){
-  const f=String(getField(card,['propability','probability','Probability','tenttitodennäköisyys','Tenttitodennäköisyys'])||'').replace(/<[^>]*>/g,'').trim();
+  const f=String(getField(card,['propability','probability','Probability','tenttitodennäköisyys','Tenttitodennäköisyys','tenttitodennakoisyys','Tenttitodennakoisyys'])||'').replace(/<[^>]*>/g,'').trim();
   const stars=(f.match(/★/g)||[]).length;
   if(stars) return Math.min(stars,5);
   const num=parseInt(f,10);
