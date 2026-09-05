@@ -357,6 +357,7 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 #front-check.back .tarkista-fill { -webkit-mask-image: url('tarkista_vastaus.png'); mask-image: url('tarkista_vastaus.png'); }   /* mask the progress fill to the keycap's shape */
 .tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('tarkista_vastaus.png') center/100% 100% no-repeat; mask: url('tarkista_vastaus.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
 body.dark-mode .tarkista-fill { background: #6f8f77; }
+.tarkista-btn.tk-disabled { filter: grayscale(1); opacity: 0.42; pointer-events: none; }   /* kortilla vain yksi vastaus → ei mitään mihin vaihtaa */
 .tarkista-btn.keycap-press { animation: keycapPress 0.16s ease; }   /* same up/down dip as the answer buttons */
 .tarkista-btn:active { transform: translateY(2px); }
 .fc-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; width: max-content; max-width: min(80vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.95rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
@@ -3352,7 +3353,9 @@ function parseAnkiDB(db) {
       const backF=fnames.find(f=>['back','answer','extra','laaja vastaus'].includes(f.toLowerCase()))||fnames[1]||'';
       const suppeaF=fnames.find(f=>f.toLowerCase()==='suppea vastaus');   // new note type: the concise answer revealed at the second space
       const suppea=suppeaF?(note.fields[suppeaF]?.value||''):'';
-      cards.push({ cardId, noteId, deckName, modelName:note.modelName, fields:note.fields, tags:note.tags, question:note.fields[frontF]?.value||'', answer:note.fields[backF]?.value||'', suppea, due, type, queue, ord });
+      let answer=note.fields[backF]?.value||'';
+      if(!answer.replace(/<[^>]*>/g,'').trim() && suppea) answer=suppea;   // no Laaja vastaus written → the Suppea one IS the answer
+      cards.push({ cardId, noteId, deckName, modelName:note.modelName, fields:note.fields, tags:note.tags, question:note.fields[frontF]?.value||'', answer, suppea, due, type, queue, ord });
     });
   }
   return cards;
@@ -3860,14 +3863,18 @@ async function renderCurrentCard(){
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();   // own card in fullscreen (desktop) → Ehdota button instead of the comment button
   if(_bub) _bub.textContent=_frontText;
   // ── Two answers (new note type): after reveal, the middle button shows Laaja/Suppea and space TOGGLES between them ──
-  _answerMode='suppea'; card._hasSuppea=false; card._suppeaHtml=''; card._laajaHtml='';
+  _answerMode='suppea'; card._hasSuppea=false; card._singleAnswer=false; card._suppeaHtml=''; card._laajaHtml='';
   { const _tkb0=document.querySelector('#tarkista-btn .tk-back'); if(_tkb0) _tkb0.src='tarkista_vastaus.png'; }   // reset the reveal button image (new cards override to Laaja/Suppea on reveal)
-  { const _sup=(card.suppea||'');
-    if(_sup.replace(/<[^>]*>/g,'').trim() && !card._isSpecial){
+  { const _tb0=document.getElementById('tarkista-btn'); if(_tb0) _tb0.classList.remove('tk-disabled'); }
+  { const _sup=(card.suppea||''); const _plain=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+    if(_plain(_sup) && !card._isSpecial){
       card._laajaHtml=document.getElementById('answer-content').innerHTML;      // the revealed answer is the Laaja version
       const _tmp=document.createElement('div'); _tmp.innerHTML=await fixImages(_sup); dimParentheses(_tmp); applyWordLinks(_tmp);
       card._suppeaHtml=_tmp.innerHTML;
-      card._hasSuppea=true;
+      // Only offer the toggle when there really are two different answers. If the card carries just
+      // one (no Laaja written, or the two are identical), it's a single-answer card.
+      if(_plain(card._laajaHtml) && _plain(card._laajaHtml)!==_plain(card._suppeaHtml)) card._hasSuppea=true;
+      else { card._singleAnswer=true; card._laajaHtml=card._suppeaHtml; }
     }
   }
   if(_peek){ _peek.style.display=''; _peek.style.visibility='hidden'; _peek.style.transition='none'; _peek.style.transform=''; _peek.style.transformOrigin=''; _peek.classList.remove('peek-in','peek-out'); }
@@ -4199,6 +4206,7 @@ function fsBtnPress(el){ _keycapDip(el); try{ playKeyClick(); }catch(e){} }   //
 // reveal the answer via the Tarkista button
 function frontCheckReveal(){
   if(cardAnswerShown){                                          // back → front: same as the front→back flip — shake + click, no fly-in slide
+    if(currentCard && currentCard._singleAnswer) return;                                                                            // only one answer: the button is greyed out, space does nothing
     if(currentCard && currentCard._hasSuppea){ _keycapDip(document.getElementById('tarkista-btn')); toggleAnswerMode(); return; }   // space after reveal: toggle Laaja <-> Suppea (new note type)
     _keycapDip(document.getElementById('tarkista-btn'));
     const fc=document.getElementById('flashcard');
@@ -5136,7 +5144,12 @@ function showAnswer(){
     fitCardScale(); scrollToCard();   // re-lay out so the answer buttons show fully
     updateFsSlider();   // in fullscreen: reveal shows the grading slider
     flashWordLinkBubbles();   // answer revealed: flash the speech-bubble graphic on its linked words
-    if(currentCard && currentCard._hasSuppea){ _answerMode='suppea'; _applyAnswerMode(); }   // new note type: reveal shows Suppea first + sets the toggle button image & word count
+    if(currentCard && currentCard._hasSuppea){ _answerMode='suppea'; _applyAnswerMode(); }   // two answers: reveal shows Suppea first + sets the toggle button image & word count
+    else if(currentCard && currentCard._singleAnswer){                                        // only one answer written: no toggle to offer
+      const _tkb=document.querySelector('#tarkista-btn .tk-back'); if(_tkb) _tkb.src='suppea_vastaus.png';
+      const _tb=document.getElementById('tarkista-btn'); if(_tb) _tb.classList.add('tk-disabled');   // greyed out = not clickable
+      _scopeText='Tähän kysymykseen ei ole laajempaa vastausta.'; if(typeof updateScopeMona==='function') updateScopeMona();
+    }
   };
   clearTimeout(_cardPeekTimer); clearTimeout(_laajuusTimer);   // don't pop the top peeker in mid-flip
   const _pk=document.getElementById('card-peek');   // top peeker turns WITH the card (same vertical axis)
