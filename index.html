@@ -4023,7 +4023,7 @@ function _showFsButtons(ms){   // reveal the comment + back buttons + scope Mona
   document.getElementById('fs-scope-mona')?.classList.add('visible');
   clearTimeout(_fsHideTimer); _fsHideTimer=setTimeout(()=>{ document.getElementById('fs-comment-btn')?.classList.remove('visible'); document.getElementById('fs-suggest-btn')?.classList.remove('visible'); document.getElementById('faux-fs-back')?.classList.remove('visible'); document.getElementById('fs-scope-mona')?.classList.remove('visible'); }, ms||1000);
 }
-function updateScopeMona(){ const b=document.getElementById('fs-scope-bubble'); if(b) b.textContent = (typeof _scopeText==='string' ? _scopeText : ''); }
+function updateScopeMona(){ const b=document.getElementById('fs-scope-bubble'); if(b) b.innerHTML = (typeof _scopeText==='string' ? _scopeText : ''); }   // innerHTML: the bubble bolds "laaja vastaus"
 function dismissScopeBubble(e){ if(e) e.stopPropagation(); const m=document.getElementById('fs-scope-mona'); if(!m) return; if(typeof monaReactAt==='function') monaReactAt(m, true); m.classList.toggle('bubble-off'); }   // clicking Mona always reacts (shake+scream+eyes) and toggles her bubble off/on
 function flashFsExitBtn(){   // desktop: flash the comment button on entering fullscreen and on each mouse move. Mobile: only a star tap reveals it (see the star tooltip handler)
   if(document.body.classList.contains('is-mobile')) return;
@@ -5078,14 +5078,18 @@ function closeCelebEyes(){   // ~42s: eyes shut again (main Mona + friends)
   sing.querySelectorAll('.brand-logo-img').forEach(img=>img.src='mona_scream.png');
 }
 let _answerMode='suppea';
-function _laajuusTextForHtml(html, prefix){   // "… laajuus …" for a given answer HTML (word count, cloze-aware); short answers show the exact count, long ones round to the nearest 10
-  prefix = prefix || 'Vastauksen';
+function _wordCountOfHtml(html){   // word count of an answer's HTML (cloze cards: count only the deleted text)
   const d=document.createElement('div'); d.innerHTML=html||'';
   const clz=d.querySelectorAll('.cloze-answer, .cloze-answer-line, .cloze');
   const src=clz.length ? [...clz].map(e=>e.textContent).join(' ') : (d.textContent||'');
-  const w=src.trim()?src.trim().split(/\s+/).length:0;
+  return src.trim()?src.trim().split(/\s+/).length:0;
+}
+function _sanamaara(w){ return w<20 ? String(w) : ('noin '+(Math.round(w/10)*10)); }   // short answers exact, long ones rounded to the nearest ten
+function _laajuusTextForHtml(html, prefix){   // "… laajuus …" for a given answer HTML
+  prefix = prefix || 'Vastauksen';
+  const w=_wordCountOfHtml(html);
   if(!w) return '';
-  return w<20 ? (prefix+' laajuus '+w+' sanaa') : (prefix+' laajuus noin '+(Math.round(w/10)*10)+' sanaa');
+  return prefix+' laajuus '+_sanamaara(w)+' sanaa';
 }
 function _applyAnswerMode(){   // swap the answer text + the middle button image + Mona's word count to match the current Suppea/Laaja mode
   if(!currentCard||!currentCard._hasSuppea) return;
@@ -5093,11 +5097,11 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
   const ac=document.getElementById('answer-content'); if(ac) ac.innerHTML=html;
   const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src=(_answerMode==='suppea')?'suppea_vastaus.png':'laaja_vastaus.png';
   // Mona's bubble: on the Suppea side she points to the Laaja answer (and its length); on the Laaja side just its length
-  if(_answerMode==='suppea'){
-    const _lt=_laajuusTextForHtml(currentCard._laajaHtml,'Laajan vastauksen');
-    _scopeText='Paina välilyöntiä uudestaan nähdäksesi laajan vastauksen.'+(_lt?(' '+_lt+'.'):'');
-  } else {
-    _scopeText=_laajuusTextForHtml(html,'Laajan vastauksen');
+  { const _w=_wordCountOfHtml(currentCard._laajaHtml);
+    const _cnt=_w?(' Laajan vastauksen sanamäärä on '+_sanamaara(_w)+'.'):'';
+    _scopeText=(_answerMode==='suppea')
+      ? ('Näytä <b>laaja vastaus</b> painamalla välilyöntiä uudestaan.'+_cnt)
+      : _cnt.trim();
   }
   if(typeof updateScopeMona==='function') updateScopeMona();
 }
