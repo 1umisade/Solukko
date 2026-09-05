@@ -2471,7 +2471,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
     <button class="fc-nav" id="fc-nav-left" onclick="frontNavLeft()" onmouseenter="showGradeHint(event,'pikanäppäin: vasen nuoli')" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()"><img class="nav-front" src="edellinen_new.png" alt="Edellinen"><img class="nav-back" src="en_tiennyt.png" alt="En tiennyt"><span class="grade-count" id="gc-nav-left" onmouseenter="hideGradeHint()" onmousemove="event.stopPropagation();hideGradeHint()"></span></button>
     <div class="tarkista-wrap">
       <div class="fc-bubble" id="fc-bubble"></div>
-      <button id="tarkista-btn" class="tarkista-btn" onclick="_revealedByKey=false;frontCheckReveal()" onmouseenter="showTarkistaHint(event)" onmousemove="moveGradeHint(event)" onmouseleave="hideGradeHint()">
+      <button id="tarkista-btn" class="tarkista-btn" onclick="_revealedByKey=false;frontCheckReveal()" onmouseenter="showTarkistaHint(event)" onmousemove="showTarkistaHint(event)" onmouseleave="hideGradeHint()">
         <img class="tk-front" src="tarkista_vastaus.png" alt="Tarkista vastaus">
         <img class="tk-back" src="tarkista_vastaus.png" alt="Tarkista vastaus">
         <div class="tarkista-fill" id="tarkista-fill"></div>
@@ -5177,10 +5177,24 @@ function showAnswer(){
 
 let _celebratedDeck=false;   // auto-show the celebration only once per deck session
 // ── grade thumbs: mouse-following "Tiesin"/"En tiennyt" hint + persistent right/wrong tally ──
-function showGradeHint(e,txt){ const fc=document.getElementById('front-check'); if(!fc||!fc.classList.contains('back')) return; const h=document.getElementById('grade-hint'); if(!h) return; h.textContent=txt; h.classList.add('show'); moveGradeHint(e); }
+function showGradeHint(e,txt){ const h=document.getElementById('grade-hint'); if(!h) return; h.textContent=txt; h.classList.add('show'); moveGradeHint(e); }   // shown on both sides: the arrow keys do Edellinen/Seuraava on the front and En tiennyt/Tiesin on the back
 function moveGradeHint(e){ const h=document.getElementById('grade-hint'); if(!h||!h.classList.contains('show')) return; h.style.left=(e.clientX+14)+'px'; h.style.top=(e.clientY+16)+'px'; }
 function hideGradeHint(){ const h=document.getElementById('grade-hint'); if(h) h.classList.remove('show'); }
+function _tarkistaFillPct(){   // the green fill's width, as set by updateProgress
+  const tf=document.getElementById('tarkista-fill'); if(!tf) return 0;
+  const v=parseFloat(getComputedStyle(tf).getPropertyValue('--fill'));
+  return isNaN(v) ? 0 : v;
+}
 function showTarkistaHint(e){   // middle button: says what pressing it does right now (front: the shortcut · back: which answer it switches to)
+  const btn=document.getElementById('tarkista-btn'), pct=_tarkistaFillPct();
+  if(btn && pct>0){                                  // over the green part = the deck's progress bar
+    const r=btn.getBoundingClientRect();
+    if(r.width && ((e.clientX-r.left)/r.width)*100 <= pct){
+      const hp=document.getElementById('grade-hint'); if(!hp) return;
+      hp.textContent=Math.round(pct)+' % kurssista opiskeltu';
+      hp.classList.add('show'); moveGradeHint(e); return;
+    }
+  }
   const t = (!cardAnswerShown) ? 'pikanäppäin: välilyönti'
           : (currentCard && currentCard._hasSuppea) ? (_answerMode==='suppea' ? 'Näytä laaja vastaus' : 'Näytä suppea vastaus')
           : '';   // single-answer cards: the button is greyed out, no hint

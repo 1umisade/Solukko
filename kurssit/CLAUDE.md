@@ -93,8 +93,15 @@ Eli yksikön **nominatiivi, genetiivi, partitiivi, inessiivi, elatiivi, illatiiv
 - **Ristiinlinkitys pakkojen välillä:** yleiset termit (solu, DNA, proteiini, entsyymi…) määritellään
   **kerran** perustavassa pakassa (Solu ja biomolekyylit) — muissa pakoissa niitä ei toisteta, vaan ne
   linkittyvät sinne. Älä siis anna samoja linkkisanoja kahdelle kortille.
-- **Jokaisella kortilla on tenttitodennäköisyys.** Arvo on numero: `3` ydinasia, `2` tärkeä, `1` yksityiskohta.
-  Sivusto piirtää siitä tähdet; numero on selvempi lukea ja muokata Ankissa.
+- **Jokaisella kortilla on tenttitodennäköisyys.** Arvo on numero, ja asteikko on:
+  | arvo | mitä | esimerkki |
+  |---|---|---|
+  | `3` | **perusasia** — ydinkäsite tai keskeinen määritelmä, joka on osattava | *Mikä on soluelin?*, *Mikä on entsyymi?*, keskusdogma |
+  | `2` | **syventävä tieto** — mekanismi, vertailu, luokittelu tai perustelu | *Miten X toimii?*, *Mitä eroa on X:llä ja Y:llä?* |
+  | `1` | **nippelitieto** — yksityiskohta: lukuarvot, vuosiluvut, henkilönnimet, anekdootit, lajinimet | *Kuka käytti termiä ensimmäisenä?*, Nobel-vuodet |
+
+  Sivusto piirtää arvosta tähdet; numero on selvempi lukea ja muokata Ankissa.
+  Peruskäsitteiden määrittelykortit ovat lähtökohtaisesti `3`, eivät `1` — pelkkä "helppo" kortti ei ole nippelitietoa.
 - **Älä ylikirjoita käyttäjän omia arvioita.** Jos kortilla on jo arvo kentässä **tai** tagissa, jätä se rauhaan.
 - **Korttityypit joissa ei ole tähtikenttää** (Enhanced Cloze, Image Occlusion): arvo tallennetaan tagina
   `tt1` / `tt2` / `tt3`. index.html lukee sen. **Älä lisää kenttää vieraaseen korttityyppiin** — kenttien

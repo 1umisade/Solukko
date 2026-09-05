@@ -7,6 +7,7 @@ __pycache__/
 # kurssit/ sisältää mm. yli 5 GB:n luentovideon (GitHubin raja on 100 MB/tiedosto),
 # Lehninger on tekijänoikeudella suojattu oppikirja. Sivusto ei tarvitse näitä.
 /kurssit/
+!/kurssit/CLAUDE.md   # korttien teko-ohjeet kuuluvat repoon, kurssimateriaali ei
 /Lehninger principles of biochemistry, Dave Nelson, Michael Cox/
 /Projektit/
 /Media/
