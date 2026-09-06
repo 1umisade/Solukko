@@ -3273,8 +3273,11 @@ async function init(){
   show('loading'); _setLoadBar(0);
   try {
     // Fast path: reuse the previously parsed .apkg from IndexedDB if the file on the server hasn't changed
+    // Nosta tätä aina, kun parseAnkiDB muuttaa korttien sisältöä: muuten paluukävijä jää
+    // vanhaan jäsennykseen niin pitkäksi aikaa, kunnes .apkg sattuu vaihtumaan.
+    const _JASENNYS='2';
     let _ver='';
-    try { const _h=await fetch('./'+APKG_FILE,{method:'HEAD',cache:'no-cache'}); _ver=(_h.headers.get('etag')||_h.headers.get('last-modified')||'')+'|'+(_h.headers.get('content-length')||''); } catch(e){}
+    try { const _h=await fetch('./'+APKG_FILE,{method:'HEAD',cache:'no-cache'}); _ver=(_h.headers.get('etag')||_h.headers.get('last-modified')||'')+'|'+(_h.headers.get('content-length')||'')+'|j'+_JASENNYS; } catch(e){}
     if(_ver){
       const _c=await idbGet('apkg');
       if(_c && _c.ver===_ver && _c.allCards && _c.allCards.length){
