@@ -336,8 +336,8 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
 #front-check.back .tarkista-btn .tk-back { display: block; }
-#front-check.back .tarkista-fill { -webkit-mask-image: url('tarkista_vastaus.png'); mask-image: url('tarkista_vastaus.png'); }   /* mask the progress fill to the keycap's shape */
-.tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('tarkista_vastaus.png') center/100% 100% no-repeat; mask: url('tarkista_vastaus.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
+#front-check.back .tarkista-fill { -webkit-mask-image: url('tyhja.png'); mask-image: url('tyhja.png'); }   /* mask the progress fill to the keycap's shape */
+.tarkista-fill { position: absolute; inset: 0; background: #9ab8a1; mix-blend-mode: multiply; -webkit-mask: url('vastaus.png') center/100% 100% no-repeat; mask: url('vastaus.png') center/100% 100% no-repeat; clip-path: inset(0 calc(100% - var(--fill, 0%)) 0 0); pointer-events: none; }   /* deck progress fills the keycap left-to-right */
 body.dark-mode .tarkista-fill { background: #6f8f77; }
 .tarkista-btn.tk-disabled { filter: grayscale(1); opacity: 0.42; pointer-events: none; }   /* kortilla vain yksi vastaus → ei mitään mihin vaihtaa */
 .tarkista-btn.keycap-press { animation: keycapPress 0.16s ease; }   /* same up/down dip as the answer buttons */
@@ -1196,7 +1196,8 @@ body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: auto;   /* the Laajenna button has to be clickable */ white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
-.wl-expand { display: block; margin: 0.7em 0 0; padding: 0.32em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.86em; cursor: pointer; }
+.answer-expand { margin: 1em auto 0 !important; }
+.wl-expand, .answer-expand { display: block; margin: 0.7em 0 0; padding: 0.32em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.86em; cursor: pointer; }
 .wl-expand:hover { background: #eadcc2; }
 body.dark-mode .wl-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .wl-expand:hover { background: #5c4e40; }
@@ -2502,8 +2503,8 @@ body.dark-mode .cal-ev { color:#241f1b; }
     <div class="tarkista-wrap">
       <div class="fc-bubble" id="fc-bubble"></div>
       <button id="tarkista-btn" class="tarkista-btn" onclick="_revealedByKey=false;frontCheckReveal()" onmouseenter="showTarkistaHint(event)" onmousemove="showTarkistaHint(event)" onmouseleave="hideGradeHint()">
-        <img class="tk-front" src="tarkista_vastaus.png" alt="Tarkista vastaus">
-        <img class="tk-back" src="tarkista_vastaus.png" alt="Tarkista vastaus">
+        <img class="tk-front" src="vastaus.png" alt="Näytä vastaus">
+        <img class="tk-back" src="tyhja.png" alt="">
         <div class="tarkista-fill" id="tarkista-fill"></div>
       </button>
     </div>
@@ -3871,7 +3872,7 @@ async function renderCurrentCard(){
   if(_bub) _bub.textContent=_frontText;
   // ── Two answers (new note type): after reveal, the middle button shows Laaja/Suppea and space TOGGLES between them ──
   _answerMode='suppea'; card._hasSuppea=false; card._singleAnswer=false; card._suppeaHtml=''; card._laajaHtml='';
-  { const _tkb0=document.querySelector('#tarkista-btn .tk-back'); if(_tkb0) _tkb0.src='tarkista_vastaus.png'; }   // reset the reveal button image (new cards override to Laaja/Suppea on reveal)
+  { const _tkb0=document.querySelector('#tarkista-btn .tk-back'); if(_tkb0) _tkb0.src='tyhja.png'; }   // reset the reveal button image (new cards override to Laaja/Suppea on reveal)
   { const _tb0=document.getElementById('tarkista-btn'); if(_tb0) _tb0.classList.remove('tk-disabled'); }
   { const _sup=(card.suppea||''); const _plain=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
     if(_plain(_sup) && !card._isSpecial){
@@ -5118,15 +5119,22 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
   if(!currentCard||!currentCard._hasSuppea) return;
   const html=(_answerMode==='suppea')?currentCard._suppeaHtml:currentCard._laajaHtml;
   const ac=document.getElementById('answer-content'); if(ac) ac.innerHTML=html;
-  const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src=(_answerMode==='suppea')?'suppea_vastaus.png':'laaja_vastaus.png';
+  if(ac && _answerMode==='suppea'){                    // the wider answer sits behind a button, like the word-link tooltip
+    const b=document.createElement('button');
+    b.type='button'; b.className='answer-expand'; b.textContent='Laajempi vastaus';
+    b.addEventListener('click',e=>{ e.stopPropagation(); toggleAnswerMode(); });   // don't let the card's own click handler shake it
+    ac.appendChild(b);
+  }
+  const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src='tyhja.png';
   // Mona's bubble: on the Suppea side she points to the Laaja answer (and its length); on the Laaja side just its length
   { const _w=_wordCountOfHtml(currentCard._laajaHtml);
     const _cnt=_w?(' Laajemman vastauksen pituus '+_sanamaara(_w)+' sanaa.'):'';
     _scopeText=(_answerMode==='suppea')
-      ? ('Näytä <b>laajempi vastaus</b> painamalla välilyöntiä'+(_revealedByKey?' uudestaan':'')+'.'+_cnt)   // "uudestaan" only if they got here with the space bar
+      ? _cnt.trim()                                     // the button says what to do; Mona just gives the length   // "uudestaan" only if they got here with the space bar
       : 'Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.';   // the long answer is on screen, so no word count — just what grading does
   }
   if(typeof updateScopeMona==='function') updateScopeMona();
+  if(typeof fitCardScale==='function') fitCardScale();   // the button changes the answer's height
 }
 function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (new note type only)
   if(!currentCard||!currentCard._hasSuppea) return false;
@@ -5161,7 +5169,7 @@ function showAnswer(){
     flashWordLinkBubbles();   // answer revealed: flash the speech-bubble graphic on its linked words
     if(currentCard && currentCard._hasSuppea){ _answerMode='suppea'; _applyAnswerMode(); }   // two answers: reveal shows Suppea first + sets the toggle button image & word count
     else if(currentCard && !currentCard._isSpecial){                                          // no separate Suppea: what is shown IS the Laaja answer
-      const _tkb=document.querySelector('#tarkista-btn .tk-back'); if(_tkb) _tkb.src='laaja_vastaus.png';
+      const _tkb=document.querySelector('#tarkista-btn .tk-back'); if(_tkb) _tkb.src='tyhja.png';
       const _tb=document.getElementById('tarkista-btn'); if(_tb) _tb.classList.remove('tk-disabled');
       _scopeText='Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.'; if(typeof updateScopeMona==='function') updateScopeMona();
     }
