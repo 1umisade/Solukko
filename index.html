@@ -1196,6 +1196,7 @@ body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: auto;   /* the Laajenna button has to be clickable */ white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.answer-body { overflow: hidden; transition: height 0.38s cubic-bezier(0.25,0.8,0.3,1); }
 .answer-expand { margin: 1em auto 0 !important; }
 .wl-expand, .answer-expand { display: block; margin: 0.7em 0 0; padding: 0.32em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.86em; cursor: pointer; }
 .wl-expand:hover, .answer-expand:hover { background: #eadcc2; }
@@ -5116,7 +5117,8 @@ function _laajuusTextForHtml(html, prefix){   // "… laajuus …" for a given a
   if(!w) return '';
   return prefix+' pituus '+_sanamaara(w)+' sanaa';
 }
-function _applyAnswerMode(){   // swap the answer text + the middle button image + Mona's word count to match the current Suppea/Laaja mode
+let _answerAnimTO=null;
+function _applyAnswerMode(anim){   // swap the answer text + the middle button image + Mona's word count to match the current Suppea/Laaja mode
   if(!currentCard||!currentCard._hasSuppea) return;
   const html=(_answerMode==='suppea')?currentCard._suppeaHtml:currentCard._laajaHtml;
   const ac=document.getElementById('answer-content');
@@ -5130,11 +5132,26 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
   if(ac){
     // Reserve the taller answer's height so the question and the divider stay put when the extent
     // changes. Measuring and restoring happen in one go, so no intermediate frame is painted.
+    const _edellinen=ac.querySelector('.answer-body');
+    const _vanhaK=_edellinen?_edellinen.getBoundingClientRect().height:0;
     ac.style.minHeight='';
-    ac.innerHTML=currentCard._laajaHtml; ac.appendChild(_nappi());
+    const _rakenna=(sisalto)=>{
+      ac.innerHTML='';
+      const d=document.createElement('div'); d.className='answer-body'; d.innerHTML=sisalto;
+      ac.appendChild(d); ac.appendChild(_nappi()); return d;
+    };
+    _rakenna(currentCard._laajaHtml);
     const _varattu=ac.scrollHeight;
-    ac.innerHTML=html; ac.appendChild(_nappi());
+    const _body=_rakenna(html);
+    const _uusiK=_body.getBoundingClientRect().height;
     ac.style.minHeight=_varattu+'px';
+    if(anim && _vanhaK && Math.abs(_vanhaK-_uusiK)>1){   // ease the box open/closed; the button rides along
+      _body.style.height=_vanhaK+'px';
+      void _body.offsetHeight;                         // pakota taitto, jotta siirtymä lähtee heti eikä jää ruudunpiirron varaan
+      _body.style.height=_uusiK+'px';
+      clearTimeout(_answerAnimTO);
+      _answerAnimTO=setTimeout(()=>{ if(_body.isConnected) _body.style.height=''; }, 460);
+    }
   }
   const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src='tyhja.png';
   // Mona's bubble: on the Suppea side she points to the Laaja answer (and its length); on the Laaja side just its length
@@ -5149,7 +5166,7 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
 }
 function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (new note type only)
   if(!currentCard||!currentCard._hasSuppea) return false;
-  _answerMode=(_answerMode==='suppea')?'laaja':'suppea'; _applyAnswerMode();
+  _answerMode=(_answerMode==='suppea')?'laaja':'suppea'; _applyAnswerMode(true);
   try{ playKeyClick(); }catch(e){}   // no card shake here: the answer just grows in place
   fitCardScale(); scrollToCard(); if(typeof flashWordLinkBubbles==='function') flashWordLinkBubbles();
   return true;
