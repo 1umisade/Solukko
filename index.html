@@ -5119,9 +5119,10 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
   if(!currentCard||!currentCard._hasSuppea) return;
   const html=(_answerMode==='suppea')?currentCard._suppeaHtml:currentCard._laajaHtml;
   const ac=document.getElementById('answer-content'); if(ac) ac.innerHTML=html;
-  if(ac && _answerMode==='suppea'){                    // the wider answer sits behind a button, like the word-link tooltip
+  if(ac){                                             // both directions behind a button, like the word-link tooltip
     const b=document.createElement('button');
-    b.type='button'; b.className='answer-expand'; b.textContent='Laajempi vastaus';
+    b.type='button'; b.className='answer-expand';
+    b.textContent=(_answerMode==='suppea')?'Laajenna':'Pienennä';
     b.addEventListener('click',e=>{ e.stopPropagation(); toggleAnswerMode(); });   // don't let the card's own click handler shake it
     ac.appendChild(b);
   }
@@ -5139,7 +5140,7 @@ function _applyAnswerMode(){   // swap the answer text + the middle button image
 function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (new note type only)
   if(!currentCard||!currentCard._hasSuppea) return false;
   _answerMode=(_answerMode==='suppea')?'laaja':'suppea'; _applyAnswerMode();
-  _cardShakeOnly(); try{ playKeyClick(); }catch(e){}
+  try{ playKeyClick(); }catch(e){}   // no card shake here: the answer just grows in place
   fitCardScale(); scrollToCard(); if(typeof flashWordLinkBubbles==='function') flashWordLinkBubbles();
   return true;
 }
