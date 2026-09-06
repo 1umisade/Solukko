@@ -3636,19 +3636,21 @@ function buildDeckGrid(decks, list){
       return c;
     };
     const _autumn = g.S.concat(g.none);   // decks with a year but no semester default to autumn
-    const _autPeriods = [...new Set(_autumn.map(it=>it.period).filter(Boolean))].sort((a,b)=>(+a)-(+b));
-    if(_autPeriods.length){               // autumn split into teaching periods (jaksot), read from the deck path (…::"N. Periodi"::…)
-      const c=document.createElement('div'); c.className='sem-col autumn';
-      const l=document.createElement('div'); l.className='sem-label'; l.textContent='Syksy'; c.appendChild(l);
-      _autPeriods.forEach(p=>{ const items=_autumn.filter(it=>String(it.period)===String(p)); if(!items.length) return;
+    // A semester is split into teaching periods (jaksot) read from the deck path (…::"N. Periodi"::…).
+    // Courses with no period level come after the numbered ones.
+    const _jaksoSarake=(cls,label,items)=>{
+      const jaksot=[...new Set(items.map(it=>it.period).filter(Boolean))].sort((a,b)=>(+a)-(+b));
+      if(!jaksot.length) return col(cls,label,items);
+      const c=document.createElement('div'); c.className='sem-col '+cls;
+      const l=document.createElement('div'); l.className='sem-label'; l.textContent=label; c.appendChild(l);
+      jaksot.forEach(p=>{ const osa=items.filter(it=>String(it.period)===String(p)); if(!osa.length) return;
         const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. periodi'; c.appendChild(pl);
-        items.forEach(it=>c.appendChild(it.btn)); });
-      _autumn.filter(it=>!it.period).forEach(it=>c.appendChild(it.btn));   // autumn courses without a period level → after the periods
-      row.appendChild(c);
-    } else {
-      row.appendChild(col('autumn','Syksy', _autumn));
-    }
-    row.appendChild(col('spring','Kevät', g.K));
+        osa.forEach(it=>c.appendChild(it.btn)); });
+      items.filter(it=>!it.period).forEach(it=>c.appendChild(it.btn));
+      return c;
+    };
+    row.appendChild(_jaksoSarake('autumn','Syksy', _autumn));
+    row.appendChild(_jaksoSarake('spring','Kevät', g.K));
     section.appendChild(row);
     list.appendChild(section);
   });
