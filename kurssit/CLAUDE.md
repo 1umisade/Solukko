@@ -173,7 +173,7 @@ Toteutuneet tasot: Solu L1 mediaani 51 sanaa, Biotekniikka L1 mediaani 53.
 
 Sama asia sanotaan pakassa **aina samalla sanalla**. Vieraskieliset ja rinnakkaiset nimitykset eivät
 kuulu kortin leipätekstiin: ne mainitaan **vain sen termin omalla kortilla** rivillä
-`Muut nimet: ...` laajan vastauksen lopussa.
+`Kutsutaan myös: ...` laajan vastauksen lopussa.
 
 ### Käytä näitä
 
@@ -190,11 +190,13 @@ kuulu kortin leipätekstiin: ne mainitaan **vain sen termin omalla kortilla** ri
 | **proteiini** | valkuaisaine | |
 | **solukalvo** | plasmakalvo | |
 | **soluseinä** | soluseinämä | |
+| **ribosomaalinen RNA** | rRNA | |
 
 Pääsääntö: **suomenkielinen sana voittaa** vierasperäisen. Poikkeukset merkitään taulukkoon.
 
-`Muut nimet` -rivit tällä hetkellä: *tuma* → nucleus, *lähetti-RNA* → mRNA, messenger RNA,
-*solulima* → sytoplasma, *soluelin* → organelli, *genomi* → perimä, *tumakotelo* → tumakalvo.
+`Kutsutaan myös` -rivit tällä hetkellä: *tuma* → nucleus, *lähetti-RNA* → mRNA, messenger RNA,
+*solulima* → sytoplasma, *soluelin* → organelli, *genomi* → perimä, *tumakotelo* → tumakalvo,
+*tumallinen* → eukaryootti, *tumaton* → prokaryootti.
 
 ### Taivutus vaihtaessa
 
