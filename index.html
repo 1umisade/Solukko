@@ -5269,9 +5269,10 @@ function _tarkistaFillPct(){   // the green fill's width, as set by updateProgre
   const v=parseFloat(getComputedStyle(tf).getPropertyValue('--fill'));
   return isNaN(v) ? 0 : v;
 }
-function showTarkistaHint(e){   // middle button: always the deck's progress, wherever the pointer sits on it
+function showTarkistaHint(e){   // middle button: the shortcut on the front, nothing on the blank back side
   if(_kosketus()) return;
-  _ghRequest(Math.round(_tarkistaFillPct())+' % kurssista opiskeltu', e);
+  if(cardAnswerShown) return;                        // the answer is out, the button is blank and does nothing
+  _ghRequest('pikanäppäin: välilyönti', e);
 }
 function updateGradeCounts(){   // persistent per-deck tally: known -> Tiesin thumb, unknown -> En tiennyt thumb
   let known=0,unknown=0;
