@@ -3349,6 +3349,13 @@ function parseAnkiDB(db) {
   }
   const cardRows = db.exec('SELECT id, nid, did, ord, due, type, queue FROM cards');
   const cards = [];
+  // "(1.0) Mikä on eliö?" -> järjestysluku 1.0, jota ei näytetä. Sallitaan alussa olevat tagit.
+  const _jnRx = /^((?:\s|&nbsp;|<[^>]+>)*)\(\s*(\d+(?:[.,]\d+)?)\s*\)(?:\s|&nbsp;)*/;
+  const _jarjestys = html => {
+    const m = String(html || '').match(_jnRx);
+    if (!m) return { luku: null, html: html };
+    return { luku: parseFloat(m[2].replace(',', '.')), html: m[1] + String(html).slice(m[0].length) };
+  };
   if (cardRows.length) {
     cardRows[0].values.forEach(([cardId,noteId,did,ord,due,type,queue]) => {
       const note=notes[noteId]; if(!note) return;
@@ -3360,9 +3367,21 @@ function parseAnkiDB(db) {
       const suppea=suppeaF?(note.fields[suppeaF]?.value||''):'';
       let answer=note.fields[backF]?.value||'';
       if(!answer.replace(/<[^>]*>/g,'').trim() && suppea) answer=suppea;   // no Laaja vastaus written → the Suppea one IS the answer
-      cards.push({ cardId, noteId, deckName, modelName:note.modelName, fields:note.fields, tags:note.tags, question:note.fields[frontF]?.value||'', answer, suppea, due, type, queue, ord });
+      const _jn=_jarjestys(note.fields[frontF]?.value||'');
+      if(note.fields[frontF]) note.fields[frontF].value=_jn.html;   // getField() readers (kansi, ruudukko, selite) näkevät tekstin ilman numeroa
+      cards.push({ cardId, noteId, deckName, modelName:note.modelName, fields:note.fields, tags:note.tags, question:_jn.html, jarjestysluku:_jn.luku, answer, suppea, due, type, queue, ord });
     });
   }
+  // Numeroidut ensin pienimmästä suurimpaan, numeroimattomat perään. Tasatilanteessa säilyy
+  // korttitunnuksen mukainen alkuperäinen järjestys, joten numeroimaton pakka ei muutu miksikään.
+  cards.forEach((c,i)=>{ c._alkujarjestys=i; });
+  cards.sort((a,b)=>{
+    const x=a.jarjestysluku, y=b.jarjestysluku;
+    if(x!=null && y!=null && x!==y) return x-y;
+    if(x!=null && y==null) return -1;
+    if(x==null && y!=null) return 1;
+    return a._alkujarjestys-b._alkujarjestys;
+  });
   return cards;
 }
 
