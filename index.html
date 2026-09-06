@@ -1198,9 +1198,9 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .answer-expand { margin: 1em auto 0 !important; }
 .wl-expand, .answer-expand { display: block; margin: 0.7em 0 0; padding: 0.32em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.86em; cursor: pointer; }
-.wl-expand:hover { background: #eadcc2; }
-body.dark-mode .wl-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
-body.dark-mode .wl-expand:hover { background: #5c4e40; }
+.wl-expand:hover, .answer-expand:hover { background: #eadcc2; }
+body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
+body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
@@ -3829,6 +3829,7 @@ async function renderCurrentCard(){
   document.getElementById('question-content').innerHTML=qHtml;
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
+  document.getElementById('answer-content').style.minHeight='';   // new card: drop the height reserved for the previous one
   dimParentheses(document.getElementById('question-content'));
   dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
@@ -5118,13 +5119,22 @@ function _laajuusTextForHtml(html, prefix){   // "… laajuus …" for a given a
 function _applyAnswerMode(){   // swap the answer text + the middle button image + Mona's word count to match the current Suppea/Laaja mode
   if(!currentCard||!currentCard._hasSuppea) return;
   const html=(_answerMode==='suppea')?currentCard._suppeaHtml:currentCard._laajaHtml;
-  const ac=document.getElementById('answer-content'); if(ac) ac.innerHTML=html;
-  if(ac){                                             // both directions behind a button, like the word-link tooltip
+  const ac=document.getElementById('answer-content');
+  const _nappi=()=>{                                  // both directions behind a button, like the word-link tooltip
     const b=document.createElement('button');
     b.type='button'; b.className='answer-expand';
     b.textContent=(_answerMode==='suppea')?'Laajenna':'Pienennä';
     b.addEventListener('click',e=>{ e.stopPropagation(); toggleAnswerMode(); });   // don't let the card's own click handler shake it
-    ac.appendChild(b);
+    return b;
+  };
+  if(ac){
+    // Reserve the taller answer's height so the question and the divider stay put when the extent
+    // changes. Measuring and restoring happen in one go, so no intermediate frame is painted.
+    ac.style.minHeight='';
+    ac.innerHTML=currentCard._laajaHtml; ac.appendChild(_nappi());
+    const _varattu=ac.scrollHeight;
+    ac.innerHTML=html; ac.appendChild(_nappi());
+    ac.style.minHeight=_varattu+'px';
   }
   const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src='tyhja.png';
   // Mona's bubble: on the Suppea side she points to the Laaja answer (and its length); on the Laaja side just its length
