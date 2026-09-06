@@ -1196,7 +1196,7 @@ body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after
 #word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: auto;   /* the Laajenna button has to be clickable */ white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
 body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
-.answer-body { overflow: hidden; transition: height 0.38s cubic-bezier(0.25,0.8,0.3,1); }
+.answer-body, .wl-body { overflow: hidden; transition: height 0.38s cubic-bezier(0.25,0.8,0.3,1); }
 .answer-expand { margin: 1em auto 0 0 !important; }   /* vasempaan reunaan, vastauksen kanssa linjaan */
 .wl-expand, .answer-expand { display: block; margin: 0.7em 0 0; padding: 0.32em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.86em; cursor: pointer; }
 .wl-expand:hover, .answer-expand:hover { background: #eadcc2; }
@@ -6545,7 +6545,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
 (function initWordLinkTooltip(){
   const tip=document.createElement('div'); tip.id='word-link-tooltip'; (document.getElementById('card-screen')||document.body).appendChild(tip);   // inside card-screen so it renders in fullscreen too
-  let touchPinnedLink=null, _tipTarget=null, _tipLaaja=null, _tipHold=0;
+  let touchPinnedLink=null, _tipTarget=null, _tipLaaja=null, _tipSuppea=null, _tipHold=0, _tipLukittu=false, _tipAnimTO=null;   // lukittu = laajennettu laatikko pysyy paikallaan
 
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
 
@@ -6553,36 +6553,55 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const idx=parseInt(target.dataset.cardIndex); if(isNaN(idx)) return;
     const card=_wlCards[idx]; if(!card) return;
     if(target!==_tipTarget){                          // rebuild content only when the hovered word changes (not every frame)
-      _tipTarget=target;
+      _tipTarget=target; _tipLukittu=false;
       const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
       const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
       const sup=card.suppea||'';
       const _pl=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
       if(_pl(sup) && _pl(back) && _pl(sup)!==_pl(back)){        // two answers: short one first, the rest behind a button
-        tip.innerHTML=prepareTooltipHtml(sup)+'<button type="button" class="wl-expand">Laajenna</button>';
-        _tipLaaja=prepareTooltipHtml(back);
+        _tipSuppea=prepareTooltipHtml(sup); _tipLaaja=prepareTooltipHtml(back);
+        tip.innerHTML='<div class="wl-body">'+_tipSuppea+'</div><button type="button" class="wl-expand">Laajenna</button>';
       } else {
         tip.innerHTML=prepareTooltipHtml(back||sup||front);   // only the definition (no front/term field)
-        _tipLaaja=null;
+        _tipLaaja=null; _tipSuppea=null;
       }
       dimParentheses(tip);                             // dim the parentheses like the card text
       const cc=target.closest('.card-content'); if(cc){ const fs=parseFloat(getComputedStyle(cc).fontSize); if(fs) tip.style.fontSize=(fs*0.8).toFixed(2)+'px'; }   // tooltip text is always 20% smaller than the card text it sits in
     }
-    placeTip(target);
+    placeTip(target,_tipLukittu);
   }
-  function placeTip(target){
+  function placeTip(target,pidaPaikallaan){
     tip.style.display='block'; tip.style.width='min(520px, calc(100vw - 24px))';
     const r=target.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
+    if(pidaPaikallaan){                               // the box grew where it stood: keep the corner, nudge only as much as the screen demands
+      const l0=parseFloat(tip.style.left)||0, t0=parseFloat(tip.style.top)||0;
+      tip.style.left=Math.max(8,Math.min(l0,vw-tw-12))+'px';
+      tip.style.top=Math.max(8,Math.min(t0,vh-th-12))+'px';
+      return;
+    }
     let l=r.left, t=r.bottom+8;
     if(l+tw>vw-12) l=vw-tw-12;
     if(t+th>vh-12) t=r.top-th-8;
     tip.style.left=Math.max(8,l)+'px'; tip.style.top=Math.max(8,t)+'px';
   }
   tip.addEventListener('click',e=>{
-    const b=e.target.closest('.wl-expand'); if(!b||!_tipLaaja) return;
+    const b=e.target.closest('.wl-expand'); if(!b||!(_tipLaaja&&_tipSuppea)) return;
     e.stopPropagation();
-    tip.innerHTML=_tipLaaja; _tipLaaja=null; dimParentheses(tip);
-    if(_tipTarget) placeTip(_tipTarget);                 // the box just grew — put it back on screen
+    const body=tip.querySelector('.wl-body'); if(!body) return;
+    const laajenee=(b.textContent.trim()==='Laajenna');
+    const vanhaK=body.getBoundingClientRect().height;
+    body.style.height=''; body.innerHTML=laajenee?_tipLaaja:_tipSuppea; dimParentheses(tip);
+    b.textContent=laajenee?'Pienennä':'Laajenna';
+    const uusiK=body.getBoundingClientRect().height;
+    _tipLukittu=true;
+    if(_tipTarget) placeTip(_tipTarget,true);            // clamp against the FINAL height, before the box starts moving
+    if(Math.abs(vanhaK-uusiK)>1){                        // same reveal as on the card: the button rides down as the text is uncovered
+      body.style.height=vanhaK+'px';
+      void body.offsetHeight;
+      body.style.height=uusiK+'px';
+      clearTimeout(_tipAnimTO);
+      _tipAnimTO=setTimeout(()=>{ if(body.isConnected) body.style.height=''; },460);
+    }
   });
 
   function updateTip(){
@@ -6593,7 +6612,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     else if(overTip){ _tipHold=0; }                       // pointer is reading the tooltip — leave it be
     else if(_tipTarget){
       if(!_tipHold) _tipHold=Date.now()+260;              // grace period for crossing the gap to the tooltip
-      if(Date.now()>_tipHold){ tip.style.display='none'; _tipTarget=null; _tipLaaja=null; _tipHold=0; }
+      if(Date.now()>_tipHold){ tip.style.display='none'; _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; }
     }
     requestAnimationFrame(updateTip);
   }
