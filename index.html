@@ -331,7 +331,7 @@ body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }  
 .grade-hint { position: fixed; z-index: 9999; background: #2b3f38; color: #fffef9; padding: 5px 11px; border-radius: 9px; font-family: 'Lora', serif; font-size: 0.82rem; pointer-events: none; box-shadow: 0 3px 12px rgba(0,0,0,0.4); white-space: nowrap; opacity: 0; transition: opacity 0.12s ease; }
 .grade-hint.show { opacity: 1; }
 .tarkista-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
-.tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; overflow: hidden; touch-action: manipulation; }
+.tarkista-btn { position: relative; z-index: 3; display: block; width: auto; border: none; background: none; padding: 0; cursor: pointer; touch-action: manipulation; }   /* no overflow:hidden — it clipped the image's drop-shadow to the button's rectangle, leaving a hard rectangular edge around it. The progress fill is already confined by inset:0 + its mask. */
 .tarkista-btn img { height: min(75px, 12vw, calc(100dvh / 7)); width: auto; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }   /* as tall as the backside Ei/Kyllä buttons; shrink on narrow screens */
 .tarkista-btn .tk-back { display: none; }   /* front = TARKISTA; back = TIESITKÖ? */
 #front-check.back .tarkista-btn .tk-front { display: none; }
