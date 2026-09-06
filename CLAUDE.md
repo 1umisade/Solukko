@@ -9,3 +9,6 @@
 4. Flag uncertainty explicitly. If you are not confident about an approach or technical detail, say so before proceeding. Confidence without certainty causes more damage than admitting a 
    gap.
 
+---
+
+**Perehdytys projektiin: lue [PROJEKTI.md](PROJEKTI.md) ensin.** Se kertoo mikä Solukko on, miten kortit kulkevat Ankista sivustolle, mitkä sopimukset korteissa on ja mihin sudenkuoppiin täällä on jo kompastuttu. Korttien sisältösäännöt ovat [kurssit/CLAUDE.md](kurssit/CLAUDE.md):ssä.
