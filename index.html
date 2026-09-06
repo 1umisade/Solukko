@@ -4305,7 +4305,7 @@ function clearFrontMona(){
 const _CLICKABLE='a[href],button,[onclick],[role="button"],summary,label,select,.deck-btn,.overview-card,#flashcard-wrap,.ball-btn,.grade-btn,.show-btn,.grid-tool-btn,.pb-knob,.progress-tube,.card-stars,#site-brand,.mona-top-inner';
 document.addEventListener('mouseover',e=>{
   let hit = e.target && e.target.closest && e.target.closest(_CLICKABLE);
-  if(hit && inFullscreen() && e.target.closest('#flashcard-wrap') && !e.target.closest('.word-link')) hit=null;   // fullscreen: the card itself isn't grabbable, only its word-links
+  if(hit && inFullscreen() && e.target.closest('#flashcard-wrap') && !e.target.closest('.word-link, .answer-expand')) hit=null;   // fullscreen: the card itself isn't grabbable, only its word-links and the Laajenna button
   document.body.classList.toggle('hover-interactive', !!hit);
 });
 function showTopHint(){}   // top peeker removed
@@ -5269,20 +5269,9 @@ function _tarkistaFillPct(){   // the green fill's width, as set by updateProgre
   const v=parseFloat(getComputedStyle(tf).getPropertyValue('--fill'));
   return isNaN(v) ? 0 : v;
 }
-function showTarkistaHint(e){   // middle button: says what pressing it does right now (front: the shortcut · back: which answer it switches to)
+function showTarkistaHint(e){   // middle button: always the deck's progress, wherever the pointer sits on it
   if(_kosketus()) return;
-  const btn=document.getElementById('tarkista-btn'), pct=_tarkistaFillPct();
-  if(btn && pct>0){                                  // over the green part = the deck's progress bar
-    const r=btn.getBoundingClientRect();
-    if(r.width && ((e.clientX-r.left)/r.width)*100 <= pct){
-      _ghRequest(Math.round(pct)+' % kurssista opiskeltu', e); return;
-    }
-  }
-  const t = (!cardAnswerShown) ? 'pikanäppäin: välilyönti'
-          : (currentCard && currentCard._hasSuppea) ? (_answerMode==='suppea' ? 'Näytä laaja vastaus' : 'Näytä suppea vastaus')
-          : '';   // single-answer cards: the button is greyed out, no hint
-  if(!t) return;
-  _ghRequest(t,e);
+  _ghRequest(Math.round(_tarkistaFillPct())+' % kurssista opiskeltu', e);
 }
 function updateGradeCounts(){   // persistent per-deck tally: known -> Tiesin thumb, unknown -> En tiennyt thumb
   let known=0,unknown=0;
