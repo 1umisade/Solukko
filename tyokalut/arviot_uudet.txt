@@ -1,0 +1,271 @@
+solu	Mikä on eliö?	3
+solu	Mikä on elektroninsiirtoreaktio ja miksi eliöt ylläpitävät toimintojaan juuri elektroninsiirtoreaktioiden avulla?	3
+solu	hapettuminen eli {{c1::de-elektronaatio (elektroni irtoaa molekyylistä)}}	3
+solu	pelkistyminen eli {{c1::elektronaatio (elektroni saapuu molekyyliin)}}	3
+solu	hapetus-pelkistysreaktio eli {{c1::elektroninsiirtoreaktio}}	3
+solu	redox-reaktio eli {{c1::elektroninsiirtoreaktio}}	3
+solu	Miten elektroninsiirtoareaktio aikaansaa jotain hyödyllistä? (kerro fysikaalinen toimintamekanismi)	2
+solu	Mikä on elämän tarkoitus (biologisesti)?	2
+solu	Kaikki univerusmin atomit sisältävät elektroneja. Jos eliöt saavat energiansa elektroninsiirtoreaktioista, mikseivät eliöt ota niitä kuin tietyistä atomeista?	2
+solu	kemiassa on paljon harhaanjohtavia termejä, jotka ovat liian vakiintuneita muutettaviksi. yksi näistä on hapettuminen. Miksi se on harhaanjohtava?	1
+solu	valkuaisaine eli {{c1::proteiini}}	3
+solu	Miten elämä (ehkä) syntyi maapallolla?	2
+solu	Mikä on solu?	3
+solu	Miksi nukleotidiketjuja on kehittynyt kahdentyyppisiä? (DNA ja RNA)	2
+solu	Mitä ovat nukleotidit?	3
+solu	montaako erilaista nukleotidia eliöt tuottavat?	2
+solu	montaako erilaista aminohappoa eliöt tuottavat?	3
+solu	Mikä on katalyytti?	3
+solu	Mitä on energia?	2
+solu	Fysiikkaan tai kemiaan verrattuna biotieteet mielletään usein epämääräiseksi tieteenhaaraksi, joka on täynnä muistisääntöjä ja poikkeuksia. Hämmennykseen voi auttaa, kun muistaa miksi eliöt tekevät mitä tekevät. Mikä päämäärä kaikkia eliöitä yhdistää eli mikä on elämän tarkoitus?	2
+solu	Mikä on solukalvo?	3
+solu	Mikä on sytoplasma?	3
+solu	Mikä on sytosoli?	2
+solu	Mikä on soluelin?	3
+solu	Mikä on ribosomi?	3
+solu	Mikä on genomi?	3
+solu	Mikä on tuma?	3
+solu	Mikä on tumakotelo?	2
+solu	Mikä on nukleoidi?	2
+solu	Mikä on makromolekyyli?	3
+solu	Mikä on monomeeri?	3
+solu	Mikä on polymeeri?	3
+solu	Mikä on nukleotidi?	3
+solu	Mikä on nukleiinihappo?	3
+solu	Mikä on aminohappo?	3
+solu	Mikä on proteiini?	3
+solu	Mitä sekvenssi tarkoittaa?	3
+solu	Mikä on selenokysteiini?	1
+solu	Mikä on iminohappo?	1
+solu	Mikä on prokaryootti?	3
+solu	Mikä on eukaryootti?	3
+solu	Mitä domeeni tarkoittaa taksonomiassa?	2
+solu	Mikä on bakteeri?	2
+solu	Mikä on arkeoni?	2
+solu	Mikä on syanobakteeri?	2
+solu	Mikä on protisti?	1
+solu	Mikä on hiiva?	2
+solu	Mitä LUCA tarkoittaa?	2
+solu	Mitä LECA tarkoittaa?	1
+solu	Mitä endosymbioosi tarkoittaa?	3
+solu	Mikä on mitokondrio?	3
+solu	Mikä on kloroplasti?	2
+solu	Mikä on asgardarkeoni?	2
+solu	Mikä on virus?	3
+solu	Mikä on malliorganismi?	3
+solu	Mikä on Escherichia coli?	2
+solu	Mikä on Saccharomyces cerevisiae?	1
+solu	Mikä on Caenorhabditis elegans?	1
+solu	Mikä on Drosophila melanogaster?	1
+solu	Mikä on Arabidopsis thaliana?	1
+solu	Mikä on Danio rerio?	1
+solu	Mikä on Mus musculus?	1
+solu	Mikä on stromatoliitti?	1
+solu	Mitä RNA-maailmahypoteesi tarkoittaa?	2
+solu	Mikä oli Miller-Urey-koe?	2
+solu	Mikä on soluseinä?	2
+solu	Mikä on peptidoglykaani?	2
+solu	Mikä on Gram-negatiivinen bakteeri?	2
+solu	Mikä on pilus?	1
+solu	Mikä on flagella?	1
+solu	Mikä on plasmidi?	2
+solu	Mikä on entsyymi?	3
+solu	Mikä on hapetus-pelkistysreaktio?	3
+solu	Mikä on hapetin?	2
+solu	Mikä on pelkistin?	2
+solu	Mitä aerobinen tarkoittaa?	2
+solu	Mitä anaerobinen tarkoittaa?	2
+solu	Mikä on fototrofi?	2
+solu	Mikä on kemotrofi?	2
+solu	Mikä on litotrofi?	1
+solu	Mikä on organotrofi?	1
+solu	Mikä on autotrofi?	2
+solu	Mikä on heterotrofi?	2
+solu	Mikä on alkuaine?	2
+solu	Mikä on kovalenttinen sidos?	2
+solu	Mikä on biomolekyyli?	3
+solu	Mikä on hiilihydraatti?	3
+solu	Mikä on lipidi?	3
+solu	Mikä on keratiini?	1
+solu	Mikä on kollageeni?	1
+solu	Mikä on vasta-aine?	2
+solu	Mikä on antigeeni?	2
+solu	Mikä on selluloosa?	2
+solu	Mikä on tärkkelys?	2
+solu	Mikä on geneettinen koodi?	3
+solu	Mitä konfiguraatio tarkoittaa?	2
+solu	Mitä konformaatio tarkoittaa?	2
+solu	Mitä cis-trans-isomeria tarkoittaa?	2
+solu	Mitä stereoisomeria tarkoittaa?	3
+solu	Mikä on kiraalinen keskus?	2
+solu	Mikä on enantiomeeri?	2
+solu	Mikä on diastereomeeri?	2
+solu	Mitä R/S-isomeria tarkoittaa?	1
+solu	Mitä L/D-isomeria tarkoittaa?	2
+solu	Mikä on konformeeri?	2
+solu	Mikä on kondensaatioreaktio?	3
+solu	Mikä on informationaalinen makromolekyyli?	2
+solu	Mitä molekyylibiologian keskusdogma tarkoittaa?	3
+solu	Mitä transkriptio tarkoittaa?	3
+solu	Mitä translaatio tarkoittaa?	3
+solu	Mikä on mRNA?	3
+solu	Mitä laskostuminen tarkoittaa?	3
+solu	Mikä on supramolekulaarinen rakenne?	2
+solu	Mikä on kromatiini?	2
+solu	Mikä on histoni?	2
+solu	Mitä sanoo termodynamiikan ensimmäinen pääsääntö?	3
+solu	Mitä sanoo termodynamiikan toinen pääsääntö?	3
+solu	Mitä entropia tarkoittaa?	2
+solu	Mikä on eksergoninen reaktio?	2
+solu	Mikä on endergoninen reaktio?	2
+solu	Mikä on kytketty reaktio?	3
+solu	Mikä on korkeaenerginen yhdiste?	2
+solu	Mikä on ATP?	3
+solu	Mikä on ADP?	2
+solu	Mikä on NADH?	2
+solu	Mitä katabolia tarkoittaa?	3
+solu	Mitä anabolia tarkoittaa?	3
+solu	Mitä metabolia tarkoittaa?	3
+solu	Mikä on reaktiotie?	2
+solu	Mikä on laktaatti?	1
+solu	Mikä on pyruvaatti?	2
+solu	Mikä on laktaattidehydrogenaasi?	1
+solu	Mitä hapetusluku tarkoittaa?	2
+solu	Mitä komplementaarisuus tarkoittaa?	3
+solu	Mikä on mutaatio?	3
+solu	Mitä duplikaatio tarkoittaa?	2
+solu	Mitä luonnonvalinta tarkoittaa?	3
+solu	Mitä on evoluutio?	3
+solu	Mitä erilaistuminen tarkoittaa?	2
+solu	Mitkä ovat elämän (elollisten organismien) keskeiset ominaispiirteet?	3
+solu	Mistä kaikki itsenäiset eliöt koostuvat, ja mikä on poikkeus?	3
+solu	Mitä kaikissa tavallisissa soluissa on?	3
+solu	Miksi nisäkkäiden punasolut ovat lisääntymiskyvyttömiä?	1
+solu	Montako erilaista nukleotidiä ja aminohappoa makromolekyylit rakentuvat?	2
+solu	Mihin proteiinien toiminta pohjimmiltaan perustuu?	3
+solu	Miksi biokemian yleistyksiin ('kaikki A ovat B') pitää suhtautua varauksella?	2
+solu	Mikä erottaa prokaryootin ja eukaryootin toisistaan solun perimän osalta?	3
+solu	Mihin kolmeen domeeniin eliökunta jaetaan?	3
+solu	Mistä eukaryootit ovat kehittyneet?	2
+solu	Miten mitokondriot ja kloroplastit ovat syntyneet, ja mikä todiste tästä on?	3
+solu	Kuinka kauan eukaryootteja on ollut maapallolla?	1
+solu	Mikä rajoittaa solun kokoa, ja miksi pieni koko on eduksi?	2
+solu	Mitä ovat tyypillisten solujen koot?	1
+solu	Miksi malliorganismeja voidaan käyttää biokemiallisessa tutkimuksessa?	2
+solu	Mainitse biokemian keskeisiä malliorganismeja.	1
+solu	Mikä on RNA-maailmahypoteesi?	2
+solu	Mitkä ovat vanhimmat todisteet elämästä?	1
+solu	Mitä OIL RIG tarkoittaa?	2
+solu	Miten aerobiset ja anaerobiset organismit eroavat elektronien vastaanottajan suhteen?	2
+solu	Miten organismeja luokitellaan energian- ja hiilenlähteen mukaan?	2
+solu	Mikä on ihmisen ravitsemustyyppi ja miksi?	2
+solu	Miksi E. coli on Gram-negatiivinen bakteeri?	2
+solu	Mitä E. coli -solun sisältä löytyy?	2
+solu	Mistä neljästä alkuaineesta solu pääosin koostuu?	3
+solu	Miksi kovalenttiset sidokset ovat soluissa stabiileja?	2
+solu	Mitkä ovat neljä keskeistä biomolekyyliluokkaa?	3
+solu	Mitä tehtäviä proteiineilla on?	2
+solu	Mitä tehtäviä hiilihydraateilla on?	2
+solu	Mikä on nukleiinihappojen tehtävä?	2
+solu	Mitä tehtäviä lipideillä on?	2
+solu	Mitä eroa on konfiguraatiolla ja konformaatiolla?	3
+solu	Miten cis- ja trans-isomeeri (maleiini- vs. fumaarihappo) eroavat ominaisuuksiltaan?	1
+solu	Milloin molekyyliin muodostuu kiraalinen keskus?	2
+solu	Mitä eroa on enantiomeereilla ja diastereomeereilla?	2
+solu	Missä muodossa aminohapot ja hiilihydraatit esiintyvät luonnossa (L/D)?	2
+solu	Mihin R/S- ja L/D-järjestelmät perustuvat?	2
+solu	Miten biologiset makromolekyylit (polymeerit) muodostuvat monomeereista?	3
+solu	Mikä on molekyylibiologian keskusdogma?	3
+solu	Mistä supramolekulaariset rakenteet muodostuvat? Anna esimerkkejä.	2
+solu	Miten eliöt suhtautuvat kemialliseen tasapainoon ympäristönsä kanssa?	2
+solu	Mitä termodynamiikan 1. ja 2. pääsääntö sanovat?	3
+solu	Miten eliö voi ylläpitää järjestyneisyyttään termodynamiikan 2. pääsäännöstä huolimatta?	3
+solu	Mikä on kytkettyjen reaktioiden periaate?	3
+solu	Mitkä molekyyliparit välittävät kytkentää katabolian ja anabolian välillä?	2
+solu	Miten atomi hapettuu biologisessa hapettumisessa?	2
+solu	Miten laktaattidehydrogenaasi toimii?	1
+solu	Miksi geneettisen informaation täytyy kopioitua ja ilmentyä lähes virheettömästi?	2
+solu	Miten uusia ominaisuuksia voi syntyä eliöön?	2
+solu	Miksi virusten evoluutio on nopeaa?	1
+solu	Miten solujen erilaistuminen tapahtuu monisoluisilla eliöillä?	2
+solu	Miksi vain neljästä nukleotidista ja kahdestakymmenestä aminohaposta voi rakentua lähes rajaton määrä erilaisia makromolekyylejä?	2
+solu	Mitä eroa on kolmen ja kahden domeenin mallilla elämän sukupuussa?	2
+solu	Miksi lähes kaikilla eukaryooteilla on mitokondrio, mutta kloroplasti vain osalla?	2
+solu	Mitä vaiheita eukaryoottisolun synty eli eukaryogeneesi sisälsi asgardarkeonista alkaen?	2
+solu	Mitä hyötyä endosymbioottisista bakteereista oli isäntäsolulle?	2
+solu	Mitkä solurakenteet ovat bakteerisolulle ja eläinsolulle yhteisiä, ja mitkä ovat vain eläinsolulla?	3
+solu	Miten Miller-Urey-kokeen laitteisto jäljitteli alkumaapallon olosuhteita?	1
+solu	Miksi fosfolipidit järjestyvät vedessä spontaanisti kaksoiskerrokseksi?	2
+solu	Mitkä ovat prokaryoottisolun tyypilliset rakenneosat ulkoa sisälle lueteltuna?	3
+solu	Miten gram-positiivisen bakteerin, gram-negatiivisen bakteerin ja arkeonin solun pintarakenteet eroavat toisistaan?	2
+solu	Mitä eroa on runsausalkuaineilla ja hivenalkuaineilla?	2
+solu	Millaisia kovalenttisia sidoksia hiili muodostaa biomolekyyleissä?	2
+solu	Millainen geometria on hiiliatomilla, jolla on neljä yksinkertaista sidosta?	2
+solu	Millainen geometria on kaksoissidoksella liittyneillä hiiliatomeilla, ja mitä siitä seuraa?	2
+solu	Mitkä ovat biomolekyylien tavallisimmat funktionaaliset ryhmät?	2
+solu	Miten cis-trans-isomeria liittyy valon aistimiseen?	2
+solu	Miksi aspartaami maistuu makealta mutta sen stereoisomeeri kitkerältä?	2
+solu	Miten kiraalisen keskuksen R- tai S-konfiguraatio määritetään?	2
+solu	Miksi etaanin konformeerit eivät ole energialtaan samanarvoisia?	1
+solu	Missä järjestyksessä elämän päävaiheet ilmestyivät maapallon historiassa?	2
+solu	Mistä atomeista irtoava vesimolekyyli tulee, kun kaksi aminohappoa liittyy yhteen?	2
+solu	Kumpaa DNA-juostetta käytetään mallina transkriptiossa?	2
+solu	Mitkä ovat solun rakenteen hierarkiatasot monomeereista alkaen?	3
+solu	Miten ATP saa aikaan reaktion, joka ei muuten tapahtuisi itsestään?	2
+solu	Millainen on ATP:n rakenne, ja millä kahdella tavalla se voi hajota?	2
+solu	Miten katalyytti nopeuttaa reaktiota muuttamatta sen lopputulosta?	3
+solu	Missä järjestyksessä hiiliyhdiste hapettuu, ja miten hiilen hapetusluku muuttuu?	2
+solu	Mistä kataboliset reaktiotiet alkavat ja mihin anaboliset päätyvät?	2
+solu	Mistä juosteista DNA:n kahdentumisessa syntyneet kaksoiskierteet koostuvat?	2
+solu	Miksi geenin kahdentuminen on usein edellytys uuden toiminnon syntymiselle?	2
+biotek	Mitä on biotekniikka?	3
+biotek	Mitä on geeniteknologia?	3
+biotek	Mitä on molekulaarinen biotekniikka?	2
+biotek	Mitä GMO tarkoittaa?	3
+biotek	Mitä teknologia tarkoittaa (vs. tekniikka)?	2
+biotek	Mitä on biotalous?	2
+biotek	Mitä on lääketieteellinen biotekniikka?	2
+biotek	Mitä on maatalousbiotekniikka?	2
+biotek	Mitä on teollinen biotekniikka?	2
+biotek	Mitä on ympäristöbiotekniikka?	2
+biotek	Mitä on elintarvikebiotekniikka?	2
+biotek	Mitä on geeniterapia?	3
+biotek	Mitä diagnostiikka tarkoittaa?	2
+biotek	Mikä on rokote?	3
+biotek	Mikä on antibiootti?	2
+biotek	Mitä on fermentaatio?	3
+biotek	Mitä on pastörointi?	1
+biotek	Mikä on PCR?	3
+biotek	Mitä on sekvensointi?	3
+biotek	Mikä on monoklonaalinen vasta-aine?	2
+biotek	Mikä on biosensori?	1
+biotek	Mikä on CRISPR-Cas9?	3
+biotek	Mikä on mRNA-rokote?	3
+biotek	Mikä on siirtogeeninen eläin?	2
+biotek	Mitä on kloonaus?	2
+biotek	Mikä on kantasolu?	2
+biotek	Mitä on bioremediaatio?	2
+biotek	Kuka käytti termiä 'biotekniikka' ensimmäisenä ja milloin?	1
+biotek	Miten biotekniikka jaotellaan väreittäin?	3
+biotek	Millä yhteiskunnallisilla osa-alueilla biotekniikan sovelluksia voidaan hyödyntää?	3
+biotek	Mitä eroa on biokemialla ja biotekniikalla?	3
+biotek	Millä tavoin esi-isämme hyödynsivät biotekniikkaa ymmärtämättään?	3
+biotek	Mainitse biotekniikan historian keskeisiä virstanpylväitä.	2
+biotek	Milloin ja miten ihmisinsuliinia alettiin tuottaa?	2
+biotek	Mikä on 'Central Dogma of Biotechnology'?	1
+biotek	Mainitse biotekniikkaan liittyviä Nobel-palkittuja saavutuksia.	2
+biotek	Mihin biotekniikka tieteenalana pohjautuu?	2
+biotek	Mitkä bioprosessit ovat biotekniikan sovellusalueiden taustalla?	2
+biotek	Millaisia konkreettisia tuotteita biotekniikalla valmistetaan eri sektoreilla?	2
+biotek	Mihin biotieteiden riskisijoitukset kohdistuvat eniten?	1
+biotek	Miten maailman biotekniikkamarkkina jakautuu alueittain ja sektoreittain?	1
+biotek	Kuinka suuri osuus Suomen kansantalouden arvonlisäyksestä on biotaloutta, ja mikä on sen suurin toimiala?	1
+biotek	Miten Suomen terveysteknologian tuotekauppa on kehittynyt?	1
+biotek	Mitä soluelimiä eukaryoottisolusta löytyy?	3
+biotek	Miten mRNA:n kodoni luetaan aminohapoksi koodipyörän avulla?	2
+biotek	Mitkä ovat PCR-syklin kolme vaihetta ja niiden lämpötilat?	3
+biotek	Miten Sangerin menetelmä lukee DNA:n emäsjärjestyksen?	2
+biotek	Mikä on faaginäyttötekniikan periaate?	1
+biotek	Miten ihmisgenomin sekvensoinnin hinta on kehittynyt 2000-luvulla?	2
+biotek	Miten mRNA-rokote saa aikaan immuunivasteen?	2
+biotek	Miten ravinto vaikuttaa suolistomikrobiston kautta terveyteen?	1

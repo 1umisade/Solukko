@@ -1,0 +1,308 @@
+TIEDOSTO: solu_s028_a8187e.png
+KURSSI: solu
+KYSYMYS: Miksi vain neljästä nukleotidista ja kahdestakymmenestä aminohaposta voi rakentua lähes rajaton määrä erilaisia makromolekyylejä?
+SUPPEA: Vaihtelu syntyy monomeerien järjestyksestä, ei niiden lukumäärästä.
+LAAJA: Kuva vertaa kolmea aakkostoa: englannin 26 kirjainta, DNA:n neljä deoksiribonukleotidia ja proteiinien 20 aminohappoa. Kustakin muodostetaan järjestyneitä lineaarisia sekvenssejä eli sanoja, DNA-juosteita ja proteiineja. Alarivi kertoo, että jo kahdeksan yksikön pätkälle on DNA:lla 65 536 ja proteiinilla noin 2,6 x 10^10 mahdollista sekvenssiä. Informaatio piilee siis järjestyksessä.
+TAHDET: 2
+---
+TIEDOSTO: solu_s033_8e11ac.png
+KURSSI: solu
+KYSYMYS: Mitä eroa on kolmen ja kahden domeenin mallilla elämän sukupuussa?
+SUPPEA: Kolmen domeenin mallissa eukaryootit ovat oma haaransa, kahden mallissa arkeonien sisällä.
+LAAJA: Kuvassa on kaksi vaihtoehtoista mallia. Vasemmalla kolmen domeenin malli, jossa Bacteria, Archaea ja Eukarya lähtevät erillisinä haaroina LUCA:sta. Oikealla kahden domeenin malli, jossa LUCA:sta haarautuvat vain bakteerit ja arkeonit ja Eukarya-ympyrä sijaitsee arkeonien ympyrän sisällä. Nykytiedon valossa kahden domeenin malli on evolutiivisesti perustellumpi. Ero on tärkeä, koska se muuttaa käsitystä siitä, ovatko eukaryootit oma alkuperäinen linjansa vai arkeonien jälkeläisiä.
+TAHDET: 2
+---
+TIEDOSTO: solu_s034_6df151.png
+KURSSI: solu
+KYSYMYS: Miksi lähes kaikilla eukaryooteilla on mitokondrio, mutta kloroplasti vain osalla?
+SUPPEA: Mitokondrio hankittiin ennen eukaryoottien haarautumista, kloroplasti vasta kasvien haarassa.
+LAAJA: Sukupuussa punainen linja johtaa ensimmäisestä solusta arkeonien kautta ensimmäiseen eukaryoottiin ja siitä kasveihin, eläimiin, sieniin ja protisteihin. Siniset nuolet kuvaavat endosymbiooseja. Mitokondrio tuli bakteereista jo ennen eukaryoottien haarautumista, joten se periytyi kaikille haaroille. Kloroplasti tuli syanobakteerista vasta kasvien haaraan, joten se on vain kasveilla. Kuva selittää siis samalla, miksi kloroplasti on selvästi nuorempi hankinta kuin mitokondrio.
+TAHDET: 2
+---
+TIEDOSTO: solu_s036_70e114.png
+KURSSI: solu
+KYSYMYS: Mitä vaiheita eukaryoottisolun synty eli eukaryogeneesi sisälsi asgardarkeonista alkaen?
+SUPPEA: Tukirangan kehitys, sisäkalvosto, symbiontin kaappaus ja tuman muodostuminen.
+LAAJA: Kaavio etenee esi-asgardarkeonista arkeoni-bakteerikonsortion kautta FECA:aan eli eukaryoottien ensimmäiseen esi-isään. Sen jälkeen kehittyy haarautuva soluntukiranka ja alkeellinen sisäkalvosto, minkä jälkeen solu kaappaa alfaproteobakteerisymbiontin. Lopuksi muodostuu tuma ja sisäkalvosto laajenee, jolloin syntyy mitokondrioita sisältävä LECA. Samalla bakteerigeenejä virtaa genomiin ja kalvot muuttuvat bakteerityyppisiksi. Kaavion mukaan symbiontti kaapattiin ennen tuman muodostumista, eli mitokondrio on tumaa vanhempi rakenne.
+TAHDET: 1
+---
+TIEDOSTO: solu_s037_2483db.png
+KURSSI: solu
+KYSYMYS: Mitä hyötyä endosymbioottisista bakteereista oli isäntäsolulle?
+SUPPEA: Aerobinen hapetus ja myöhemmin yhteyttäminen tehostivat solun energiansaantia.
+LAAJA: Kuva alkaa anaerobisesta esieukaryootista, jonka aineenvaihdunta on tehotonta, koska ravinto ei hapetu täydellisesti. Solu nielaisee aerobisen bakteerin, joka lisääntyy sen sisällä ja muuttuu mitokondrioksi, jolloin ravinto hapettuu hiilidioksidiksi asti. Osa haarasta nielaisee lisäksi syanobakteerin, josta tulee kloroplasti, jolloin solu voi valon avulla rakentaa biomolekyylejä hiilidioksidista.
+TAHDET: 2
+---
+TIEDOSTO: solu_s038_5f9692.png
+KURSSI: solu
+KYSYMYS: Mitkä solurakenteet ovat bakteerisolulle ja eläinsolulle yhteisiä, ja mitkä ovat vain eläinsolulla?
+SUPPEA: Yhteisiä ovat solukalvo, solulima ja ribosomit; tuma ja kalvorakenteiset soluelimet vain eläinsolulla.
+LAAJA: Kuvassa on rinnakkain noin 1 mikrometrin bakteerisolu ja noin 50 mikrometrin eläinsolu. Molemmilla on solukalvo, solulima ja ribosomit, jotka näkyvät punaisina pisteinä. Bakteerin DNA on ilman kalvoa nukleoidina, kun taas eläinsolun perimä on tumakotelon rajaamassa tumassa. Vain eläinsolulla on kalvorakenteisia soluelimiä, kuten mitokondrioita. Kokoero on suuri, sillä eläinsolu on halkaisijaltaan noin viisikymmenkertainen bakteerisoluun verrattuna.
+TAHDET: 3
+---
+TIEDOSTO: solu_s058_95c72b.png
+KURSSI: solu
+KYSYMYS: Miten Miller-Urey-kokeen laitteisto jäljitteli alkumaapallon olosuhteita?
+SUPPEA: Suljetussa kierrossa kaasuseokseen iskettiin kipinöitä ja tuotteet tiivistettiin keinotekoiseen mereen.
+LAAJA: Kaaviossa ylempään pulloon suljettiin alkuilmakehää jäljittelevä kaasuseos: vettä, metaania, ammoniakkia ja vetyä. Elektrodien välinen sähkökipinä vastasi salamointia ja käynnisti reaktiot. Syntyneet yhdisteet jäähdytettiin lauhduttimessa nesteeksi, joka valui alempaan kuumennettavaan pulloon eli keinotekoiseen mereen, josta höyry palasi kiertoon. Näin syntyi muun muassa aminohappoja. Koe osoitti, että biomolekyylien rakenneosia voi syntyä pelkästä kaasuseoksesta ilman eliöitä.
+TAHDET: 2
+---
+TIEDOSTO: solu_s060_ec19c1.png
+KURSSI: solu
+KYSYMYS: Miksi fosfolipidit järjestyvät vedessä spontaanisti kaksoiskerrokseksi?
+SUPPEA: Koska molekyylin pääryhmä on vesihakuinen ja hiilivetyhännät vettä hylkiviä.
+LAAJA: Suurennoksessa näkyy fosfolipidikaksoiskerros: hydrofiiliset pääryhmät osoittavat kalvon molemmilla puolilla vettä kohti ja hydrofobiset hännät pakkautuvat vastakkain kalvon sisäosaan. Sama rakenne rajaa vasemmalla olevaa rakkulaa, jonka sisällä on RNA-molekyylejä. Juuri tämä kaksijakoisuus tekee lipideistä kalvojen rakennusaineen ja teki hypoteettisen alkusolun mahdolliseksi. Rakkulan sisäpuoli erottuu näin ympäristöstään, mikä on kaiken solumaisen elämän perusedellytys.
+TAHDET: 2
+---
+TIEDOSTO: solu_s061_1f097b.png
+KURSSI: solu
+KYSYMYS: Mitkä ovat prokaryoottisolun tyypilliset rakenneosat ulkoa sisälle lueteltuna?
+SUPPEA: Kapseli, soluseinä, solukalvo, solulima ribosomeineen ja nukleoidi, sekä fimbriat ja flagella.
+LAAJA: Halkileikkauksessa solua ympäröi uloimpana kapseli, sen alla soluseinä ja solukalvo. Sisällä on solulima, jossa on runsaasti ribosomeja, varastoja eli inkluusiokappaleita ja nukleoidi, johon renkaanmuotoinen kromosomi-DNA on pakkautunut ilman ympäröivää kalvoa. Ulkopinnalla on lyhyitä fimbrioita tarttumiseen ja pitkä flagella, jolla solu liikkuu. Kapseli ja soluseinä suojaavat solua, kun taas solukalvo säätelee aineiden kulkua sisään ja ulos.
+TAHDET: 3
+---
+TIEDOSTO: solu_s069_204829.png
+KURSSI: solu
+KYSYMYS: Miten gram-positiivisen bakteerin, gram-negatiivisen bakteerin ja arkeonin solun pintarakenteet eroavat toisistaan?
+SUPPEA: Paksu peptidoglykaani, ohut peptidoglykaani ja ulkokalvo, tai pseudopeptidoglykaani.
+LAAJA: Kuvassa on kolme pintarakennetta rinnakkain. Gram-positiivisella on solukalvon päällä paksu peptidoglykaanikerros ja uloimpana glykoproteiinikerros. Gram-negatiivisella peptidoglykaani on ohut, ja sen ulkopuolella on toinen kalvo, jossa on LPS-molekyylejä ja poriineja; väliin jää periplasma. Arkeonilla, kuten Methanothermuksella, peptidoglykaani on korvautunut pseudopeptidoglykaanilla. Juuri peptidoglykaanikerroksen paksuus ratkaisee, jääkö gram-värjäyksen väri soluun vai huuhtoutuuko se pois.
+TAHDET: 2
+---
+TIEDOSTO: solu_s072_5aa5cd.png
+KURSSI: solu
+KYSYMYS: Mitä eroa on runsausalkuaineilla ja hivenalkuaineilla?
+SUPPEA: Runsausalkuaineet muodostavat lähes koko elävän aineen massan, hivenalkuaineita tarvitaan vain vähän.
+LAAJA: Jaksollisessa järjestelmässä on korostettu vain pieni osa alkuaineista. Oranssit runsausalkuaineet, kuten hiili, vety, typpi, happi, fosfori ja rikki sekä ionit natrium, kalium, kalsium ja kloori, muodostavat lähes koko elävän aineen massan. Keltaiset hivenalkuaineet, esimerkiksi rauta, sinkki, kupari, mangaani, molybdeeni, seleeni ja jodi, ovat välttämättömiä mutta hyvin pieninä pitoisuuksina.
+TAHDET: 2
+---
+TIEDOSTO: solu_s073_3e7e76.png
+KURSSI: solu
+KYSYMYS: Millaisia kovalenttisia sidoksia hiili muodostaa biomolekyyleissä?
+SUPPEA: Aina neljä sidosta: yksin-, kaksin- ja kolmoissidoksia hiileen, vetyyn, happeen ja typpeen.
+LAAJA: Lewis-kaavoissa hiilellä on neljä paritonta ulkoelektronia, joten se muodostaa aina neljä kovalenttista sidosta. Vasemmalla näkyvät sidokset vetyyn, happeen yksin- ja kaksoissidoksena sekä typpeen. Oikealla ovat kaksoissidos typpeen ja hiilten väliset yksin-, kaksin- ja kolmoissidokset. Kyky sitoutua toisiin hiiliin tekee mahdolliseksi pitkät hiiliketjut ja renkaat. Neljä sidosta selittävät myös sen, miksi juuri hiili kelpaa biomolekyylien runkoalkuaineeksi.
+TAHDET: 2
+---
+TIEDOSTO: solu_s074_a4fef2.png
+KURSSI: solu
+KYSYMYS: Millainen geometria on hiiliatomilla, jolla on neljä yksinkertaista sidosta?
+SUPPEA: Tetraedrinen: sidokset osoittavat tetraedrin kärkiin 109,5 asteen kulmissa.
+LAAJA: Kuvassa hiiliatomin neljä sidosta osoittavat säännöllisen tetraedrin kärkiin ja sidosten väliset kulmat ovat 109,5 astetta. Rakenne on siis kolmiulotteinen eikä tasomainen. Juuri tämä geometria tekee mahdolliseksi sen, että neljä erilaista ryhmää voidaan järjestää hiilen ympärille kahdella eri tavalla, jolloin syntyy kiraalinen keskus. Kaikki neljä sidosta ovat keskenään samanarvoisia ja asettuvat mahdollisimman kauas toisistaan.
+TAHDET: 2
+---
+TIEDOSTO: solu_s076_734b1c.png
+KURSSI: solu
+KYSYMYS: Millainen geometria on kaksoissidoksella liittyneillä hiiliatomeilla, ja mitä siitä seuraa?
+SUPPEA: Tasomainen ja 120 asteen kulmissa; kiertyminen estyy, joten syntyy cis-trans-isomeria.
+LAAJA: Kuvassa kaksoissidoksen molemmat hiilet ja niihin sitoutuneet ryhmät A, B, X ja Y ovat samassa tasossa ja sidoskulmat ovat noin 120 astetta. Kaksoissidos estää kiertymisen sidoksen ympäri, joten ryhmät jäävät pysyvästi joko samalle puolelle tai eri puolille tasoa. Tästä syntyy cis-trans-isomeria, joka muuttaa molekyylin ominaisuuksia.
+TAHDET: 2
+---
+TIEDOSTO: solu_s077_6fbfa0.png
+KURSSI: solu
+KYSYMYS: Mitkä ovat biomolekyylien tavallisimmat funktionaaliset ryhmät?
+SUPPEA: Muun muassa hydroksyyli, karbonyyli, karboksylaatti, amino, amido, sulfhydryyli ja fosforyyli.
+LAAJA: Taulukossa ryhmät on väritetty alkuaineen mukaan. Harmaat ovat hiilivetyryhmiä, kuten metyyli, etyyli ja fenyyli. Punaiset sisältävät happea: hydroksyyli, karbonyyli eli aldehydi ja ketoni, karboksylaatti, eetteri, esteri ja anhydridi. Siniset sisältävät typpeä, kuten amino, amido ja imiini. Keltaiset sisältävät rikkiä ja oranssit fosforia. Funktionaalinen ryhmä määrää, miten molekyylin kyseinen osa reagoi ja millaisia sidoksia se muodostaa.
+TAHDET: 2
+---
+TIEDOSTO: solu_s091_7dc76d.png
+KURSSI: solu
+KYSYMYS: Miten cis-trans-isomeria liittyy valon aistimiseen?
+SUPPEA: Valo muuttaa silmän 11-cis-retinaalin all-trans-muotoon, mikä käynnistää hermosignaalin.
+LAAJA: Kuvassa vasemmalla on 11-cis-retinaali, jonka hiilten 11 ja 12 välinen kaksoissidos on cis-asemassa, jolloin hiiliketju on taittunut. Valokvantti kääntää juuri tämän kaksoissidoksen konfiguraation, ja oikealla oleva all-trans-retinaali on suora. Molekyylin muodonmuutos välittyy sitä sitovaan proteiiniin ja käynnistää hermosignaalin. Alempana samat molekyylit on piirretty rakennekaavoina, joissa muuttuva kaksoissidos on korostettu värillä.
+TAHDET: 2
+---
+TIEDOSTO: solu_s095_5790be.png
+KURSSI: solu
+KYSYMYS: Miksi aspartaami maistuu makealta mutta sen stereoisomeeri kitkerältä?
+SUPPEA: Makureseptori tunnistaa vain toisen stereoisomeerin kolmiulotteisen muodon.
+LAAJA: Kuvan molemmat molekyylit ovat aspartyylifenyylialaniinin metyyliesteriä ja eroavat vain fenyylialaniiniosan kiraalisen hiilen konfiguraatiossa, joka on korostettu punaisella. Vasemmalla L-L-muoto eli aspartaami maistuu makealta, oikealla L-D-muoto kitkerältä. Atomit ja sidokset ovat samat, joten ero syntyy pelkästä kolmiulotteisesta järjestyksestä. Molekyylit ovat toistensa diastereomeereja, sillä vain toinen kahdesta kiraalisesta keskuksesta on kääntynyt.
+TAHDET: 2
+---
+TIEDOSTO: solu_s097_45766f.png
+KURSSI: solu
+KYSYMYS: Miten kiraalisen keskuksen R- tai S-konfiguraatio määritetään?
+SUPPEA: Käännetään vähiten tärkeä ryhmä poispäin ja katsotaan, kiertääkö 1-2-3 myötä- vai vastapäivään.
+LAAJA: Ryhmät järjestetään ensin Cahn-Ingold-Prelog-sääntöjen mukaan tärkeysjärjestykseen numeroilla 1-4. Molekyyliä katsotaan siltä puolelta, että vähiten tärkeä ryhmä 4 osoittaa katsojasta poispäin. Jos kulku ryhmästä 1 ryhmään 2 ja siitä ryhmään 3 kiertää myötäpäivään, konfiguraatio on R, ja jos vastapäivään, se on S. Kuvan vasemmassa molekyylissä kiertosuunta on myötäpäivään ja oikeassa vastapäivään, vaikka ryhmät ovat samat.
+TAHDET: 2
+---
+TIEDOSTO: solu_s099_ac8f34.png
+KURSSI: solu
+KYSYMYS: Miksi etaanin konformeerit eivät ole energialtaan samanarvoisia?
+SUPPEA: Porrastettu asento on energiaminimi, limittäinen asento maksimi.
+LAAJA: Kuvaajassa on etaanin potentiaalienergia hiili-hiili-sidoksen kiertokulman funktiona. Energia vaihtelee jaksollisesti: minimit vastaavat porrastettuja konformeereja, joissa vetyatomit ovat mahdollisimman kaukana toisistaan, ja maksimit limittäisiä, joissa vedyt osuvat päällekkäin. Ero on vain noin 12,1 kJ/mol, joten sidos kiertyy huoneenlämmössä jatkuvasti. Konformeerit ovat siis saman molekyylin eri asentoja eivätkä eri yhdisteitä, toisin kuin konfiguraatioisomeerit.
+TAHDET: 1
+---
+TIEDOSTO: solu_s056_5c23ce.png
+KURSSI: solu
+KYSYMYS: Missä järjestyksessä elämän päävaiheet ilmestyivät maapallon historiassa?
+SUPPEA: Prokaryootit, syanobakteerit, eukaryoottisolut, monisoluiset eukaryootit ja vasta lopuksi eläinryhmät.
+LAAJA: Aikajanassa edetään alhaalta ylöspäin. Prokaryoottisolut ilmestyivät noin 3,8-3,5 miljardia vuotta sitten ja vanhimmat syanobakteerifossiilit ovat noin 3,5 miljardin vuoden ikäisiä. Eukaryoottisolut syntyivät 2,5-2,0 miljardia ja monisoluiset eukaryootit noin 1,5 miljardia vuotta sitten. Kambrikauden räjähdys noin 530 miljoonaa vuotta sitten synnytti eläinten monimuotoisuuden, ja ihmisapinat ilmestyivät vasta 7 miljoonaa vuotta sitten.
+TAHDET: 2
+---
+TIEDOSTO: solu_s100_b260e0.png
+KURSSI: solu
+KYSYMYS: Mistä atomeista irtoava vesimolekyyli tulee, kun kaksi aminohappoa liittyy yhteen?
+SUPPEA: Toisen karboksyyliryhmän hydroksyylistä ja toisen aminoryhmän vedystä.
+LAAJA: Kuvassa ylhäällä on kaksi aminohappoa. Vasemmanpuoleisen karboksyyliryhmästä irtoaa hydroksyyli ja oikeanpuoleisen aminoryhmästä vety, ja nämä muodostavat yhdessä vesimolekyylin. Jäljelle jäävät hiili ja typpi sitoutuvat toisiinsa, jolloin syntyy oranssilla korostettu peptidisidos. Reaktio on kondensaatio, ja nuolet osoittavat sen olevan periaatteessa kaksisuuntainen. Vastaavalla kondensaatiolla syntyvät myös muut biologiset polymeerit, kuten nukleiinihapot ja polysakkaridit.
+TAHDET: 2
+---
+TIEDOSTO: solu_s101_d15a2d.png
+KURSSI: solu
+KYSYMYS: Kumpaa DNA-juostetta käytetään mallina transkriptiossa?
+SUPPEA: Vain mallijuostetta; toinen juoste eli ei-mallijuoste jää lukematta.
+LAAJA: Kuvassa DNA-kaksoiskierre on avattu transkription kohdalta. Punainen juoste on mallijuoste, jota vasten rakennetaan komplementaarinen RNA, ja sininen on ei-mallijuoste. Syntyvä vihreä RNA kasvaa 5-päästä 3-päähän ja irtoaa DNA:sta sitä mukaa kuin transkriptio etenee, jolloin kaksoiskierre sulkeutuu uudelleen taakse jäävältä osalta. Nuoli ylhäällä kertoo suunnan, johon avautuva ja sulkeutuva kupla etenee kaksoiskierteessä.
+TAHDET: 2
+---
+TIEDOSTO: solu_s104_bc1467.png
+KURSSI: solu
+KYSYMYS: Mitkä ovat solun rakenteen hierarkiatasot monomeereista alkaen?
+SUPPEA: Monomeerit, makromolekyylit, supramolekulaariset kompleksit ja niistä koostuvat soluelimet.
+LAAJA: Kuvassa edetään oikealta vasemmalle. Monomeereja ovat nukleotidit, aminohapot ja sokerit. Niistä rakentuu makromolekyylejä eli DNA, proteiinit ja selluloosa. Makromolekyylit liittyvät ei-kovalenttisin vuorovaikutuksin supramolekulaarisiksi rakenteiksi, kuten kromatiiniksi, solukalvoksi ja soluseinäksi. Nämä puolestaan muodostavat solun ja sen soluelimet. Jokainen taso rakentuu edellisestä, ja kokoluokka kasvaa yksittäisistä molekyyleistä koko soluun. Makromolekyylien sisällä sidokset ovat kovalenttisia, mutta niiden välillä ei-kovalenttisia.
+TAHDET: 3
+---
+TIEDOSTO: solu_s110_b13bd3.png
+KURSSI: solu
+KYSYMYS: Miten ATP saa aikaan reaktion, joka ei muuten tapahtuisi itsestään?
+SUPPEA: ATP:n hajoamisen vapauttama energia lasketaan yhteen endergonisen reaktion kanssa.
+LAAJA: Kuvaajassa reaktio 1 eli glukoosin fosforylointi vapaalla fosfaatilla on endergoninen, sillä sen vapaaenergian muutos on positiivinen. Reaktio 2 eli ATP:n hajoaminen ADP:ksi ja fosfaatiksi on selvästi eksergoninen. Kun entsyymi kytkee nämä yhdeksi reaktioksi 3, vapaaenergian muutokset lasketaan yhteen ja summa on negatiivinen, joten reaktio etenee.
+TAHDET: 3
+---
+TIEDOSTO: solu_s110_d95e5b.png
+KURSSI: solu
+KYSYMYS: Millainen on ATP:n rakenne, ja millä kahdella tavalla se voi hajota?
+SUPPEA: Adeniini, riboosi ja kolme fosfaattia; ADP:ksi ja fosfaatiksi tai AMP:ksi ja pyrofosfaatiksi.
+LAAJA: Kuvassa ylimpänä on ATP, jossa adeniiniemäs on kiinni riboosissa ja riboosiin on liittynyt kolme peräkkäistä fosfaattiryhmää. Alempana näkyy kaksi vaihtoehtoista hajoamistapaa. Uloin fosfaatti voi irrota yksin, jolloin syntyy ADP ja epäorgaaninen fosfaatti. Vaihtoehtoisesti kaksi uloimmaista irtoavat yhdessä, jolloin syntyy AMP ja epäorgaaninen pyrofosfaatti. Molemmissa tapauksissa katkeaa fosfoanhydridisidos, ja juuri siitä vapautuu solun käyttämä energia.
+TAHDET: 2
+---
+TIEDOSTO: solu_s111_c11073.png
+KURSSI: solu
+KYSYMYS: Miten katalyytti nopeuttaa reaktiota muuttamatta sen lopputulosta?
+SUPPEA: Se laskee aktivaatioenergiaa muuttamatta lähtöaineiden ja tuotteiden vapaaenergiaeroa.
+LAAJA: Kuvaajassa sininen käyrä on katalysoimaton ja punainen katalysoitu reaktio A:sta B:hen. Lähtöaineiden ja tuotteiden vapaaenergiat ovat molemmissa samat, joten kokonaisvapaaenergian muutos on sama. Ero on huipun korkeudessa: katalyytti laskee siirtymätilan energiaa eli aktivaatioenergiaa, jolloin yhä useampi molekyyli ylittää esteen ja reaktio nopeutuu. Katalyytti ei siis muuta reaktion tasapainoa tai suuntaa vaan ainoastaan sen nopeutta.
+TAHDET: 3
+---
+TIEDOSTO: solu_s113_593596.png
+KURSSI: solu
+KYSYMYS: Missä järjestyksessä hiiliyhdiste hapettuu, ja miten hiilen hapetusluku muuttuu?
+SUPPEA: Alkaani, alkoholi, aldehydi, karboksyylihappo ja hiilidioksidi; hapetusluku kasvaa -3:sta +4:ään.
+LAAJA: Kuvassa sama hiili on esitetty viidessä eri hapetusasteessa punaisella korostettuna. Ylimpänä on alkaani, jossa hiileen on sitoutunut pelkkiä vetyjä. Siitä edetään alkoholiin, aldehydiin ja karboksyylihappoon, kun hiileen tulee yhä enemmän happea ja yhä vähemmän vetyä. Lopuksi hiili on täysin hapettunut hiilidioksidiksi. Jokaisessa askeleessa hiili luovuttaa elektroneja, joten sarjan alkupäässä on eniten energiaa otettavana talteen.
+TAHDET: 2
+---
+TIEDOSTO: solu_s115_b69e44.png
+KURSSI: solu
+KYSYMYS: Mistä kataboliset reaktiotiet alkavat ja mihin anaboliset päätyvät?
+SUPPEA: Katabolia hajottaa ravinnon yksinkertaisiksi tuotteiksi, anabolia rakentaa niistä biomolekyylejä ja työtä.
+LAAJA: Kuvassa punainen nuoli kuvaa katabolisia eli hajottavia reaktioteitä, jotka lähtevät varastoravinnosta, ruoasta tai auringonvalosta ja päätyvät yksinkertaisiin tuotteisiin, kuten hiilidioksidiin, ammoniakkiin ja veteen. Sininen nuoli kuvaa anabolisia reaktioteitä, jotka rakentavat näistä monimutkaisia biomolekyylejä ja tekevät työtä. Keskellä ATP ja NAD(P)H välittävät energian. Kuva korostaa, että sama molekyylipari kiertää jatkuvasti vuoroin ladattuna ja purettuna.
+TAHDET: 2
+---
+TIEDOSTO: solu_s116_88958b.png
+KURSSI: solu
+KYSYMYS: Mistä juosteista DNA:n kahdentumisessa syntyneet kaksoiskierteet koostuvat?
+SUPPEA: Kumpikin uusi kaksoiskierre sisältää yhden vanhan ja yhden uuden juosteen.
+LAAJA: Kuvassa alkuperäisen kaksoiskierteen juosteet 1 ja 2 erkanevat toisistaan. Kumpikin vanha juoste toimii mallina, jota vasten rakennetaan uusi juoste emästen komplementaarisuuden mukaan, eli A pariutuu T:n ja G pariutuu C:n kanssa. Lopputuloksena syntyy kaksi identtistä kaksoiskierrettä, joissa kummassakin on yksi vanha ja yksi uusi juoste.
+TAHDET: 2
+---
+TIEDOSTO: solu_s118_c67f83.png
+KURSSI: solu
+KYSYMYS: Miksi geenin kahdentuminen on usein edellytys uuden toiminnon syntymiselle?
+SUPPEA: Kopio voi mutatoitua vapaasti, koska alkuperäinen geeni hoitaa edelleen vanhan tehtävän.
+LAAJA: Kuvassa DNA:n kahdentumisen harvinainen virhe monistaa heksokinaasigeenin, jolloin solulla on kaksi samanlaista geeniä. Toiseen kopioon osuu myöhemmin mutaatio, ja siitä ilmennetty entsyymi tunnistaakin uuden substraatin eli galaktoosin. Alkuperäinen geeni tuottaa yhä toimivaa heksokinaasia, joten vanha toiminto säilyy ja luonnonvalinta voi suosia uutta ominaisuutta. Ilman edeltävää kahdentumista mutaatio olisi vienyt solulta alkuperäisen entsyymin toiminnan.
+TAHDET: 2
+---
+TIEDOSTO: biotek_s017_f85110.png
+KURSSI: biotek
+KYSYMYS: Mitkä bioprosessit ovat biotekniikan sovellusalueiden taustalla?
+SUPPEA: Fermentointi, mikrobituotanto, entsyymien ja kemikaalien tuotanto sekä biokatalyysi.
+LAAJA: Kaavion keskellä ovat biotekniikan sovellusalueet: lääketiede, elintarviketeollisuus, maatalous, metsäteollisuus, ympäristö ja materiaalit. Näitä kaikkia ympäröi bioprosessien kehä, johon kuuluvat fermentointi, mikrobituotanto, entsyymien tuotanto, kemikaalien tuotanto ja biokatalyysi. Samat perusprosessit palvelevat siis hyvin erilaisia sovelluksia, mikä tekee biotekniikasta poikkialaista. Kaavion mukaan sama fermentointi voi tuottaa yhtä hyvin lääkkeen, entsyymin kuin biopolttoaineenkin.
+TAHDET: 2
+---
+TIEDOSTO: biotek_s018_03182f.png
+KURSSI: biotek
+KYSYMYS: Millaisia konkreettisia tuotteita biotekniikalla valmistetaan eri sektoreilla?
+SUPPEA: Lääkkeitä, teollisuuskemikaaleja, biopolttoaineita, elintarvikkeita, materiaaleja ja nanoteknologiaa.
+LAAJA: Taulukossa sovellukset on jaettu seitsemään sarakkeeseen. Lääketieteen sarakkeessa ovat biologiset lääkkeet, antibiootit, rokotteet, geeni- ja soluterapiat, kudosteknologia ja diagnostiikka. Teollisuuskemikaaleihin kuuluvat muun muassa biomuovit, kuidut, steroidit ja väriaineet. Muut sarakkeet kattavat energian, ympäristön, ruoantuotannon, materiaalit kuten hämähäkinseitin sekä nanoteknologian. Kuva havainnollistaa, ettei biotekniikka rajoitu lääketieteeseen vaan ulottuu materiaaleihin ja energiaan asti.
+TAHDET: 1
+---
+TIEDOSTO: biotek_s021_3d22a4.png
+KURSSI: biotek
+KYSYMYS: Mihin biotieteiden riskisijoitukset kohdistuvat eniten?
+SUPPEA: Lääkekehitykseen ja terveydenhuollon teknologiaan, eivät biopohjaisiin tuotteisiin.
+LAAJA: Pylväskuvaajassa ovat biotieteisiin liittyvät riskisijoitukset segmenteittäin vuosina 2019-2023. Selvästi suurimmat ovat lääkekehitys ja tutkimustyökalut noin 85 miljardia dollaria sekä terveydenhuollon teknologiajärjestelmät noin 84 miljardia. Biotekniikka sai 43 miljardia. Biopohjaiset tuotteet, kuten biopolttoaineet ja biopolymeerit, jäivät alle miljardiin, eli raha keskittyy voimakkaasti terveyssektorille. Kuvaaja kertoo siis, mihin biotekniikan kaupallinen kasvu tällä hetkellä painottuu.
+TAHDET: 1
+---
+TIEDOSTO: biotek_s022_6bc9f1.png
+KURSSI: biotek
+KYSYMYS: Miten maailman biotekniikkamarkkina jakautuu alueittain ja sektoreittain?
+SUPPEA: Suurin alue on Pohjois-Amerikka ja suurin sektori ihmisten terveys.
+LAAJA: Vasemmassa ympyrädiagrammissa markkina jakautuu alueittain: Pohjois-Amerikka noin 38 prosenttia, Eurooppa 29, Aasian ja Tyynenmeren alue 24 sekä Latinalainen Amerikka, Lähi-itä ja Afrikka vajaat 10 prosenttia. Oikealla on jako sektoreittain: ihmisten terveys 42, teollisuus 24, maatalous 21, palvelut 7 ja informatiikka 6 prosenttia. Kuva näyttää, että terveyssovellukset hallitsevat markkinaa ja että Eurooppa on toiseksi suurin alue.
+TAHDET: 1
+---
+TIEDOSTO: biotek_s023_c9d391.png
+KURSSI: biotek
+KYSYMYS: Kuinka suuri osuus Suomen kansantalouden arvonlisäyksestä on biotaloutta, ja mikä on sen suurin toimiala?
+SUPPEA: Noin 12 prosenttia eli 24,2 miljardia euroa; suurin toimiala on metsäsektori.
+LAAJA: Vasemmalla oleva ympyrä näyttää, että biotalouden osuus koko kansantalouden 204,1 miljardin euron arvonlisäyksestä oli 12 prosenttia vuonna 2020. Oikealla biotalouden 24,2 miljardia euroa on jaettu toimialoittain: metsäsektori 7,7, rakentaminen 4,6, elintarvikesektori 4,5, muut teollisuusalat 3,4, energia 2,0, palvelut 1,4 ja vesihuolto 0,5 miljardia euroa. Metsäsektorin suuri painoarvo erottaa Suomen biotalouden monien muiden maiden vastaavasta.
+TAHDET: 2
+---
+TIEDOSTO: biotek_s024_975d0d.png
+KURSSI: biotek
+KYSYMYS: Miten Suomen terveysteknologian tuotekauppa on kehittynyt?
+SUPPEA: Vienti on kasvanut voimakkaasti ja kauppatase on pysynyt selvästi positiivisena.
+LAAJA: Kuvaajassa ovat Suomen terveysteknologian vienti, tuonti ja kauppatase vuosina 1996-2019. Vienti kasvoi noin 350 miljoonasta eurosta yli 2300 miljoonaan euroon eli lähes seitsenkertaistui. Tuonti kasvoi hitaammin, noin 250 miljoonasta 1200 miljoonaan euroon. Kauppatase eli viennin ja tuonnin erotus pysyi koko ajan positiivisena ja nousi lähelle miljardia euroa.
+TAHDET: 1
+---
+TIEDOSTO: biotek_s032_fe42ae.png
+KURSSI: biotek
+KYSYMYS: Mitä soluelimiä eukaryoottisolusta löytyy?
+SUPPEA: Tuma, mitokondriot, solulimakalvosto, Golgin laite, lysosomit, ribosomit ja sentriolit.
+LAAJA: Halkaistussa eläinsolussa keskellä on tuma, jota rajaa tumakotelo ja jonka sisällä ovat tumajyvänen ja kromatiini. Tuman ympärillä kulkee karkeapintainen solulimakalvosto, jonka pinnalla on ribosomeja, sekä sileäpintainen solulimakalvosto. Lisäksi näkyvät mitokondriot, Golgin laite, lysosomit, sentriolit ja vapaat ribosomit. Uloimpana on solukalvo. Juuri kalvorakenteiset soluelimet erottavat eukaryoottisolun prokaryootista, jolla vastaavia sisäisiä osastoja ei ole.
+TAHDET: 1
+---
+TIEDOSTO: biotek_s035_04a538.png
+KURSSI: biotek
+KYSYMYS: Miten mRNA:n kodoni luetaan aminohapoksi koodipyörän avulla?
+SUPPEA: Emäkset luetaan keskeltä ulospäin, ja uloin kehä kertoo aminohapon.
+LAAJA: Koodipyörän keskellä on kodonin ensimmäinen emäs, seuraavassa kehässä toinen ja kolmannessa kolmas emäs. Uloimmalta kehältä luetaan aminohappo, jota kolmen emäksen yhdistelmä koodaa. Pyörästä näkyy myös, että useampi eri kodoni voi koodata samaa aminohappoa ja että osa kodoneista on lopetuskodoneja, jotka päättävät proteiinisynteesin. Kaikkiaan kodoneja on 64 mutta aminohappoja vain 20, eli koodi on redundantti.
+TAHDET: 2
+---
+TIEDOSTO: biotek_s036_bd6f88.png
+KURSSI: biotek
+KYSYMYS: Mitkä ovat PCR-syklin kolme vaihetta ja niiden lämpötilat?
+SUPPEA: Denaturaatio 94-98, alukkeiden kiinnittyminen 55-70 ja pidennys 68-72 astetta.
+LAAJA: Kaavio kiertää yhden PCR-syklin. Ensin kaksijuosteinen malli-DNA denaturoidaan 94-98 asteessa, jolloin juosteet erkanevat. Lämpötila lasketaan 55-70 asteeseen, jolloin alukkeet kiinnittyvät juosteiden vastinkohtiin. Lopuksi 68-72 asteessa DNA-polymeraasi pidentää alukkeita uusiksi juosteiksi. Sykliä toistetaan, jolloin kohdealueen kopiomäärä kaksinkertaistuu joka kierroksella. Noin kolmenkymmenen syklin jälkeen yhdestä alkuperäisestä molekyylistä on syntynyt miljoonia kopioita.
+TAHDET: 3
+---
+TIEDOSTO: biotek_s036_3eb5fd.png
+KURSSI: biotek
+KYSYMYS: Miten Sangerin menetelmä lukee DNA:n emäsjärjestyksen?
+SUPPEA: Väriaineleimatut dideoksinukleotidit katkaisevat ketjun, ja eripituiset palat luetaan järjestyksessä.
+LAAJA: Kuvan vasemmassa reunassa on neljä DNA-pätkää, joiden päähän on liittynyt värillä leimattu dideoksinukleotidi. Koska dideoksinukleotidi pysäyttää ketjun kasvun, syntyy eripituisia paloja, joista jokaisen viimeinen emäs tunnetaan värin perusteella. Oikealla palat on järjestetty pituuden mukaan, jolloin väripiikkien sarja eli kromatogrammi antaa suoraan emäsjärjestyksen. Menetelmä oli ensimmäinen laajaan käyttöön levinnyt tapa lukea DNA:n emäsjärjestystä.
+TAHDET: 2
+---
+TIEDOSTO: biotek_s038_99a74e.png
+KURSSI: biotek
+KYSYMYS: Mikä on faaginäyttötekniikan periaate?
+SUPPEA: Vasta-aineen geeni liitetään faagin pintaproteiinin geeniin, jolloin vasta-aine näkyy faagin pinnalla.
+LAAJA: Kuvassa bakteriofagin sisällä on fagemidi, joka sisältää sekä vasta-ainegeenit että pintaproteiinia koodaavan geenin III. Kun nämä ilmennetään yhdessä, faagin pinnalle rakentuu gIII-proteiini, johon vasta-aineen Fab-osa on kiinnittynyt disulfidisidoksella. Näin sama faagipartikkeli kantaa sekä vasta-ainetta että sen geeniä, jolloin sitoutuvat vasta-aineet voidaan seuloa ja niiden geenit tunnistaa.
+TAHDET: 1
+---
+TIEDOSTO: biotek_s039_c7fc2e.png
+KURSSI: biotek
+KYSYMYS: Miten ihmisgenomin sekvensoinnin hinta on kehittynyt 2000-luvulla?
+SUPPEA: Noin sadasta miljoonasta dollarista tuhanteen dollariin, nopeammin kuin Mooren laki ennustaa.
+LAAJA: Kuvaajan pystyakseli on logaritminen ja näyttää yhden genomin sekvensoinnin hinnan. Vuonna 2001 hinta oli noin 100 miljoonaa dollaria ja laski aluksi Mooren lakia kuvaavan valkoisen viivan tahtiin. Vuosina 2007-2008 uuden polven sekvensointimenetelmät romahduttivat hinnan jyrkästi tämän viivan alapuolelle, ja vuodesta 2015 alkaen genomi on maksanut noin tuhat dollaria.
+TAHDET: 3
+---
+TIEDOSTO: biotek_s040_e7e42b.png
+KURSSI: biotek
+KYSYMYS: Miten mRNA-rokote saa aikaan immuunivasteen?
+SUPPEA: Rasvarakkulassa oleva mRNA käännetään soluissa piikkiproteiiniksi, joka herättää vasta-aineet ja T-solut.
+LAAJA: Kaaviossa viruksen pintapiikkiä koodaava mRNA eristetään ja pakataan lipidirakkulan sisään rokotteeksi. Elimistössä immuunisolu ottaa mRNA:n sisäänsä ja kääntää sen piikkiproteiiniksi. Solu esittelee proteiinin immuunijärjestelmälle, joka tuottaa sitä vastaan vasta-aineita ja aktivoi T-soluja. Itse virusta ei siis tarvita rokotteen valmistukseen lainkaan. Siksi mRNA-rokote voidaan suunnitella nopeasti heti, kun taudinaiheuttajan geenisekvenssi on tiedossa.
+TAHDET: 3
+---
+TIEDOSTO: biotek_s041_09cc57.png
+KURSSI: biotek
+KYSYMYS: Miten ravinto vaikuttaa suolistomikrobiston kautta terveyteen?
+SUPPEA: Kuitu ja probiootit siirtävät tasapainoa terveyden suuntaan, sokeri ja tyydyttynyt rasva sairauden suuntaan.
+LAAJA: Kuvassa suolisto on keskellä ja vaikutukset jakautuvat punaisiin ja vihreisiin. Punaisella puolella sokeri, tyydyttynyt rasva, liiallinen proteiini, antibiootit ja happosalpaajat vähentävät lyhytketjuisten rasvahappojen tuotantoa ja lisäävät tulehdusta, insuliiniresistenssiä ja sydäntautiriskiä. Vihreällä puolella ravintokuitu ja probiootit lisäävät rasvahappojen ja antioksidanttien tuotantoa sekä parantavat insuliiniherkkyyttä. Alareunan nuoli kokoaa asian, sillä vaikutukset asettuvat janalle sairaudesta terveyteen.
+TAHDET: 1
+---

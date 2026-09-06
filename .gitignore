@@ -14,3 +14,6 @@ __pycache__/
 /Vihot/
 /RASTI/
 /Sekalaiset/
+
+# Luentokalvoilta poimitut kuvat: siirtyvät OneDriven mukana, eivät kuulu julkiseen repoon.
+/tyokalut/kuvat/

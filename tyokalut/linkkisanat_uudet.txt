@@ -1,0 +1,121 @@
+Mikä on polymeeri?	polymeeri, polymeerin, polymeeriä, polymeerissä, polymeeristä, polymeeriin, polymeerit, polymeerien, polymeerejä, polymeereissä
+Mikä on ribosomi?	ribosomi, ribosomin, ribosomia, ribosomissa, ribosomista, ribosomiin, ribosomit, ribosomien, ribosomeja, ribosomeissa
+Mikä on solukalvo?	solukalvo, solukalvon, solukalvoa, solukalvossa, solukalvosta, solukalvoon, solukalvot, solukalvojen, solukalvoja, solukalvoissa, plasmamembraani, plasmamembraanin, plasmamembraania, plasmamembraanissa, plasmamembraanista, plasmamembraaniin, plasmamembraanit, plasmamembraanien, plasmamembraaneja, plasmamembraaneissa, plasma membrane
+Mikä on sytoplasma?	sytoplasma, sytoplasman, sytoplasmaa, sytoplasmassa, sytoplasmasta, sytoplasmaan, solulima, soluliman, solulimaa, solulimassa, solulimasta, solulimaan
+Mikä on sytosoli?	sytosoli, sytosolin, sytosolia, sytosolissa, sytosolista, sytosoliin
+Mikä on soluelin?	soluelin, soluelimen, soluelintä, soluelimessä, soluelimestä, soluelimeen, soluelimet, soluelinten, soluelimiä, soluelimissä, organelli, organellin, organellia, organellissa, organellista, organelliin, organellit, organellien, organelleja, organelleissa
+Mikä on ribosomi?	ribosomi, ribosomin, ribosomia, ribosomissa, ribosomista, ribosomiin, ribosomit, ribosomien, ribosomeja, ribosomeissa
+Mikä on genomi?	genomi, genomin, genomia, genomissa, genomista, genomiin, genomit, genomien, genomeja, genomeissa, perimä, perimän, perimää, perimässä, perimästä, perimään
+Mikä on tuma?	tuma, tuman, tumaa, tumassa, tumasta, tumaan, tumat, tumien, tumia, tumissa, nucleus, tumallinen, tumallisen, tumallista, tumallisessa, tumallisesta, tumalliseen, tumalliset, tumallisten, tumallisia, tumallisissa
+Mikä on tumakotelo?	tumakotelo, tumakotelon, tumakoteloa, tumakotelossa, tumakotelosta, tumakoteloon, tumakotelot, tumakoteloiden, tumakoteloita, tumakoteloissa, tumakalvo, tumakalvon, tumakalvoa, tumakalvossa, tumakalvosta, tumakalvoon, tumakalvot, tumakalvojen, tumakalvoja, tumakalvoissa
+Mikä on nukleoidi?	nukleoidi, nukleoidin, nukleoidia, nukleoidissa, nukleoidista, nukleoidiin, nukleoidit, nukleoidien, nukleoideja, nukleoideissa
+Mikä on makromolekyyli?	makromolekyyli, makromolekyylin, makromolekyyliä, makromolekyylissä, makromolekyylistä, makromolekyyliin, makromolekyylit, makromolekyylien, makromolekyylejä, makromolekyyleissä
+Mikä on monomeeri?	monomeeri, monomeerin, monomeeria, monomeerissa, monomeerista, monomeeriin, monomeerit, monomeerien, monomeereja, monomeereissa, alayksikkö, alayksikön, alayksikköä, alayksikössä, alayksiköstä, alayksikköön, alayksiköt, alayksiköiden, alayksiköitä, alayksiköissä
+Mikä on polymeeri?	polymeeri, polymeerin, polymeeriä, polymeerissä, polymeeristä, polymeeriin, polymeerit, polymeerien, polymeerejä, polymeereissä
+Mikä on nukleotidi?	nukleotidi, nukleotidin, nukleotidia, nukleotidissa, nukleotidista, nukleotidiin, nukleotidit, nukleotidien, nukleotideja, nukleotideissa
+Mikä on nukleiinihappo?	nukleiinihappo, nukleiinihapon, nukleiinihappoa, nukleiinihapossa, nukleiinihaposta, nukleiinihappoon, nukleiinihapot, nukleiinihappojen, nukleiinihappoja, nukleiinihapoissa
+Mikä on aminohappo?	aminohappo, aminohapon, aminohappoa, aminohapossa, aminohaposta, aminohappoon, aminohapot, aminohappojen, aminohappoja, aminohapoissa
+Mikä on proteiini?	proteiini, proteiinin, proteiinia, proteiinissa, proteiinista, proteiiniin, proteiinit, proteiinien, proteiineja, proteiineissa, valkuaisaine, valkuaisaineen, valkuaisainetta, valkuaisaineessa, valkuaisaineesta, valkuaisaineeseen, valkuaisaineet, valkuaisaineiden, valkuaisaineita, valkuaisaineissa
+Mitä sekvenssi tarkoittaa?	sekvenssi, sekvenssin, sekvenssiä, sekvenssissä, sekvenssistä, sekvenssiin, sekvenssit, sekvenssien, sekvenssejä, sekvensseissä, aminohappojärjestys, aminohappojärjestyksen, aminohappojärjestystä, aminohappojärjestyksessä, aminohappojärjestyksestä, aminohappojärjestykseen
+Mikä on selenokysteiini?	selenokysteiini, selenokysteiinin, selenokysteiiniä, selenokysteiinissä, selenokysteiinistä, selenokysteiiniin
+Mikä on iminohappo?	iminohappo, iminohapon, iminohappoa, iminohapossa, iminohaposta, iminohappoon, iminohapot, iminohappojen, iminohappoja, iminohapoissa, proliini, proliinin, proliinia, proliinissa, proliinista, proliiniin
+Mikä on prokaryootti?	prokaryootti, prokaryootin, prokaryoottia, prokaryootissa, prokaryootista, prokaryoottiin, prokaryootit, prokaryoottien, prokaryootteja, prokaryooteissa, esitumainen, esitumaisen, esitumaista, esitumaisessa, esitumaisesta, esitumaiseen, esitumaiset, esitumaisten, esitumaisia, esitumaisissa, tumaton, tumattoman, tumatonta, tumattomassa, tumattomasta, tumattomaan, tumattomat, tumattomien, tumattomia, tumattomissa
+Mikä on eukaryootti?	eukaryootti, eukaryootin, eukaryoottia, eukaryootissa, eukaryootista, eukaryoottiin, eukaryootit, eukaryoottien, eukaryootteja, eukaryooteissa, aitotumainen, aitotumaisen, aitotumaista, aitotumaisessa, aitotumaisesta, aitotumaiseen, aitotumaiset, aitotumaisten, aitotumaisia, aitotumaisissa, tumallinen, tumallisen, tumallista, tumallisessa, tumallisesta, tumalliseen, tumalliset, tumallisten, tumallisia, tumallisissa
+Mitä domeeni tarkoittaa taksonomiassa?	domeeni, domeenin, domeenia, domeenissa, domeenista, domeeniin, domeenit, domeenien, domeeneja, domeeneissa
+Mikä on bakteeri?	bakteeri, bakteerin, bakteeria, bakteerissa, bakteerista, bakteeriin, bakteerit, bakteerien, bakteereja, bakteereissa
+Mikä on arkeoni?	arkeoni, arkeonin, arkeonia, arkeonissa, arkeonista, arkeoniin, arkeonit, arkeonien, arkeoneja, arkeoneissa, arkki, arkin, arkkia, arkissa, arkista, arkkiin, arkit, arkkien, arkkeja, arkeissa, archaea
+Mikä on syanobakteeri?	syanobakteeri, syanobakteerin, syanobakteeria, syanobakteerissa, syanobakteerista, syanobakteeriin, syanobakteerit, syanobakteerien, syanobakteereja, syanobakteereissa
+Mikä on protisti?	protisti, protistin, protistia, protistissa, protistista, protistiin, protistit, protistien, protisteja, protisteissa, alkueliö, alkueliön, alkueliötä, alkueliössä, alkueliöstä, alkueliöön, alkueliöt, alkueliöiden, alkueliöitä, alkueliöissä
+Mikä on hiiva?	hiiva, hiivan, hiivaa, hiivassa, hiivasta, hiivaan, hiivat, hiivojen, hiivoja, hiivoissa
+Mitä LUCA tarkoittaa?	LUCA, LUCA:n, LUCA:a, LUCA:ssa, LUCA:sta, LUCA:an, ensimmäinen solu, ensimmäisen solun, ensimmäistä solua, ensimmäisessä solussa, viimeinen yhteinen esisolu, viimeisen yhteisen esisolun, viimeistä yhteistä esisolua
+Mitä LECA tarkoittaa?	LECA, LECA:n, LECA:a, LECA:ssa, LECA:sta, LECA:an, ensimmäinen eukaryootti, ensimmäisen eukaryootin, ensimmäistä eukaryoottia, ensimmäisessä eukaryootissa
+Mitä endosymbioosi tarkoittaa?	endosymbioosi, endosymbioosin, endosymbioosia, endosymbioosissa, endosymbioosista, endosymbioosiin
+Mikä on mitokondrio?	mitokondrio, mitokondrion, mitokondriota, mitokondriossa, mitokondriosta, mitokondrioon, mitokondriot, mitokondrioiden, mitokondrioita, mitokondrioissa
+Mikä on kloroplasti?	kloroplasti, kloroplastin, kloroplastia, kloroplastissa, kloroplastista, kloroplastiin, kloroplastit, kloroplastien, kloroplasteja, kloroplasteissa
+Mikä on asgardarkeoni?	asgardarkeoni, asgardarkeonin, asgardarkeonia, asgardarkeonissa, asgardarkeonista, asgardarkeoniin, asgardarkeonit, asgardarkeonien, asgardarkeoneja, asgardarkeoneissa
+Mikä on virus?	virus, viruksen, virusta, viruksessa, viruksesta, virukseen, virukset, virusten, viruksia, viruksissa
+Mikä on malliorganismi?	malliorganismi, malliorganismin, malliorganismia, malliorganismissa, malliorganismista, malliorganismiin, malliorganismit, malliorganismien, malliorganismeja, malliorganismeissa
+Mikä on Escherichia coli?	Escherichia coli, E. coli
+Mikä on Saccharomyces cerevisiae?	Saccharomyces cerevisiae
+Mikä on Caenorhabditis elegans?	Caenorhabditis elegans, C. elegans
+Mikä on Drosophila melanogaster?	Drosophila melanogaster, banaanikärpänen, banaanikärpäsen, banaanikärpästä, banaanikärpäsessä, banaanikärpäsestä, banaanikärpäseen, banaanikärpäset, banaanikärpästen, banaanikärpäsiä, banaanikärpäsissä
+Mikä on Arabidopsis thaliana?	Arabidopsis thaliana, lituruoho, lituruohon, lituruohoa, lituruohossa, lituruohosta, lituruohoon, lituruohot, lituruohojen, lituruohoja, lituruohoissa
+Mikä on Danio rerio?	Danio rerio, seeprakala, seeprakalan, seeprakalaa, seeprakalassa, seeprakalasta, seeprakalaan, seeprakalat, seeprakalojen, seeprakaloja, seeprakaloissa
+Mikä on Mus musculus?	Mus musculus, hiiri, hiiren, hiirtä, hiiressä, hiirestä, hiireen, hiiret, hiirten, hiiriä, hiirissä
+Mikä on stromatoliitti?	stromatoliitti, stromatoliitin, stromatoliittia, stromatoliitissa, stromatoliitista, stromatoliittiin, stromatoliitit, stromatoliittien, stromatoliitteja, stromatoliiteissa
+Mitä RNA-maailmahypoteesi tarkoittaa?	RNA-maailmahypoteesi, RNA-maailmahypoteesin, RNA-maailmahypoteesia, RNA-maailmahypoteesissa, RNA-maailmahypoteesista, RNA-maailmahypoteesiin, RNA-maailma, RNA-maailman, RNA-maailmaa, RNA-maailmassa, RNA-maailmasta, RNA-maailmaan
+Mikä oli Miller-Urey-koe?	Miller-Urey, Miller-Urey-koe
+Mikä on soluseinä?	soluseinä, soluseinän, soluseinää, soluseinässä, soluseinästä, soluseinään, soluseinät, soluseinien, soluseiniä, soluseinissä
+Mikä on peptidoglykaani?	peptidoglykaani, peptidoglykaanin, peptidoglykaania, peptidoglykaanissa, peptidoglykaanista, peptidoglykaaniin
+Mikä on Gram-negatiivinen bakteeri?	Gram-negatiivinen, Gram-negatiivisen, Gram-negatiivista, Gram-negatiivisessa, Gram-negatiivisesta, Gram-negatiiviseen, Gram-negatiiviset, Gram-negatiivisten, gram-negatiivinen bakteeri, gram-negatiivisen bakteerin, gram-negatiivista bakteeria, gram-negatiivisessa bakteerissa, gram-negatiiviset bakteerit, gram-negatiivisten bakteerien
+Mikä on pilus?	pilus, piluksen, pilusta, piluksessa, piluksesta, pilukseen, pilukset, pilusten, piluksia, piluksissa
+Mikä on flagella?	flagella, flagellan, flagellaa, flagellassa, flagellasta, flagellaan, flagellat, siima, siiman, siimaa, siimassa, siimasta, siimaan, siimat, siimojen, siimoja, siimoissa
+Mikä on plasmidi?	plasmidi, plasmidin, plasmidia, plasmidissa, plasmidista, plasmidiin, plasmidit, plasmidien, plasmideja, plasmideissa
+Mikä on entsyymi?	entsyymi, entsyymin, entsyymiä, entsyymissä, entsyymistä, entsyymiin, entsyymit, entsyymien, entsyymejä, entsyymeissä
+Mikä on hapetus-pelkistysreaktio?	hapetus-pelkistysreaktio, hapetus-pelkistysreaktion, hapetus-pelkistysreaktiota, hapetus-pelkistysreaktiossa, hapetus-pelkistysreaktiosta, hapetus-pelkistysreaktioon, hapetus-pelkistysreaktiot, hapetus-pelkistysreaktioiden, hapetus-pelkistysreaktioita, hapetus-pelkistysreaktioissa, redox, hapetus-pelkistys, hapetus-pelkistyksen, hapetus-pelkistystä, hapetus-pelkistyksessä, hapetus-pelkistyksestä, hapetus-pelkistykseen
+Mikä on hapetin?	hapetin, hapettimen, hapetinta, hapettimessa, hapettimesta, hapettimeen, hapettimet, hapettimien, hapettimia, hapettimissa
+Mikä on pelkistin?	pelkistin, pelkistimen, pelkistintä, pelkistimessä, pelkistimestä, pelkistimeen, pelkistimet, pelkistimien, pelkistimiä, pelkistimissä
+Mitä aerobinen tarkoittaa?	aerobinen, aerobisen, aerobista, aerobisessa, aerobisesta, aerobiseen, aerobiset, aerobisten, aerobisia, aerobisissa
+Mitä anaerobinen tarkoittaa?	anaerobinen, anaerobisen, anaerobista, anaerobisessa, anaerobisesta, anaerobiseen, anaerobiset, anaerobisten, anaerobisia, anaerobisissa
+Mikä on fototrofi?	fototrofi, fototrofin, fototrofia, fototrofissa, fototrofista, fototrofiin, fototrofit, fototrofien, fototrofeja, fototrofeissa
+Mikä on kemotrofi?	kemotrofi, kemotrofin, kemotrofia, kemotrofissa, kemotrofista, kemotrofiin, kemotrofit, kemotrofien, kemotrofeja, kemotrofeissa
+Mikä on litotrofi?	litotrofi, litotrofin, litotrofia, litotrofissa, litotrofista, litotrofiin, litotrofit, litotrofien, litotrofeja, litotrofeissa
+Mikä on organotrofi?	organotrofi, organotrofin, organotrofia, organotrofissa, organotrofista, organotrofiin, organotrofit, organotrofien, organotrofeja, organotrofeissa
+Mikä on autotrofi?	autotrofi, autotrofin, autotrofia, autotrofissa, autotrofista, autotrofiin, autotrofit, autotrofien, autotrofeja, autotrofeissa, omavarainen, omavaraisen, omavaraista, omavaraisessa, omavaraisesta, omavaraiseen, omavaraiset, omavaraisten, omavaraisia, omavaraisissa
+Mikä on heterotrofi?	heterotrofi, heterotrofin, heterotrofia, heterotrofissa, heterotrofista, heterotrofiin, heterotrofit, heterotrofien, heterotrofeja, heterotrofeissa, toisenvarainen, toisenvaraisen, toisenvaraista, toisenvaraisessa, toisenvaraisesta, toisenvaraiseen, toisenvaraiset, toisenvaraisten, toisenvaraisia, toisenvaraisissa
+Mikä on alkuaine?	alkuaine, alkuaineen, alkuainetta, alkuaineessa, alkuaineesta, alkuaineeseen, alkuaineet, alkuaineiden, alkuaineita, alkuaineissa
+Mikä on kovalenttinen sidos?	kovalenttinen sidos, kovalenttisen sidoksen, kovalenttista sidosta, kovalenttisessa sidoksessa, kovalenttisesta sidoksesta, kovalenttiseen sidokseen, kovalenttiset sidokset, kovalenttisten sidosten, kovalenttisia sidoksia
+Mikä on biomolekyyli?	biomolekyyli, biomolekyylin, biomolekyyliä, biomolekyylissä, biomolekyylistä, biomolekyyliin, biomolekyylit, biomolekyylien, biomolekyylejä, biomolekyyleissä
+Mikä on hiilihydraatti?	hiilihydraatti, hiilihydraatin, hiilihydraattia, hiilihydraatissa, hiilihydraatista, hiilihydraattiin, hiilihydraatit, hiilihydraattien, hiilihydraatteja, hiilihydraateissa, sokeri, sokerin, sokeria, sokerissa, sokerista, sokeriin, sokerit, sokereiden, sokereita, sokereissa
+Mikä on lipidi?	lipidi, lipidin, lipidiä, lipidissä, lipidistä, lipidiin, lipidit, lipidien, lipidejä, lipideissä
+Mikä on keratiini?	keratiini, keratiinin, keratiinia, keratiinissa, keratiinista, keratiiniin
+Mikä on kollageeni?	kollageeni, kollageenin, kollageenia, kollageenissa, kollageenista, kollageeniin
+Mikä on vasta-aine?	vasta-aine, vasta-aineen, vasta-ainetta, vasta-aineessa, vasta-aineesta, vasta-aineeseen, vasta-aineet, vasta-aineiden, vasta-aineita, vasta-aineissa
+Mikä on antigeeni?	antigeeni, antigeenin, antigeenia, antigeenissa, antigeenista, antigeeniin, antigeenit, antigeenien, antigeeneja, antigeeneissa
+Mikä on selluloosa?	selluloosa, selluloosan, selluloosaa, selluloosassa, selluloosasta, selluloosaan
+Mikä on tärkkelys?	tärkkelys, tärkkelyksen, tärkkelystä, tärkkelyksessä, tärkkelyksestä, tärkkelykseen
+Mikä on geneettinen koodi?	geneettinen koodi, geneettisen koodin, geneettistä koodia, geneettisessä koodissa, geneettisestä koodista, geneettiseen koodiin
+Mitä konfiguraatio tarkoittaa?	konfiguraatio, konfiguraation, konfiguraatiota, konfiguraatiossa, konfiguraatiosta, konfiguraatioon, konfiguraatiot, konfiguraatioiden, konfiguraatioita, konfiguraatioissa
+Mitä konformaatio tarkoittaa?	konformaatio, konformaation, konformaatiota, konformaatiossa, konformaatiosta, konformaatioon, konformaatiot, konformaatioiden, konformaatioita, konformaatioissa
+Mitä cis-trans-isomeria tarkoittaa?	cis-trans-isomeria, cis-trans-isomerian, cis-trans-isomeriaa, cis-trans-isomeriassa, cis-trans-isomeriasta, cis-trans-isomeriaan, cis-trans
+Mitä stereoisomeria tarkoittaa?	stereoisomeria, stereoisomerian, stereoisomeriaa, stereoisomeriassa, stereoisomeriasta, stereoisomeriaan, stereoisomeeri, stereoisomeerin, stereoisomeeria, stereoisomeerissa, stereoisomeerista, stereoisomeeriin, stereoisomeerit, stereoisomeerien, stereoisomeereja, stereoisomeereissa
+Mikä on kiraalinen keskus?	kiraalinen keskus, kiraalisen keskuksen, kiraalista keskusta, kiraalisessa keskuksessa, kiraaliset keskukset, kiraalisten keskusten, kiraalisuus, kiraalisuuden, kiraalisuutta, kiraalisuudessa, kiraalisuudesta, kiraalisuuteen, kiraalinen, kiraalisen, kiraalista, kiraalisessa, kiraalisesta, kiraaliseen, kiraaliset, kiraalisten, kiraalisia, kiraalisissa
+Mikä on enantiomeeri?	enantiomeeri, enantiomeerin, enantiomeeria, enantiomeerissa, enantiomeerista, enantiomeeriin, enantiomeerit, enantiomeerien, enantiomeereja, enantiomeereissa, peilikuvaisomeeri, peilikuvaisomeerin, peilikuvaisomeeria, peilikuvaisomeerissa, peilikuvaisomeerista, peilikuvaisomeeriin, peilikuvaisomeerit, peilikuvaisomeerien, peilikuvaisomeereja
+Mikä on diastereomeeri?	diastereomeeri, diastereomeerin, diastereomeeria, diastereomeerissa, diastereomeerista, diastereomeeriin, diastereomeerit, diastereomeerien, diastereomeereja, diastereomeereissa
+Mitä R/S-isomeria tarkoittaa?	R/S-isomeria, R/S-isomerian, R/S-isomeriaa, R/S-isomeriassa, R/S-isomeriasta, R/S-isomeriaan, R/S, Cahn-Ingold-Prelog
+Mitä L/D-isomeria tarkoittaa?	L/D-isomeria, L/D-isomerian, L/D-isomeriaa, L/D-isomeriassa, L/D-isomeriasta, L/D-isomeriaan, L/D, L-muoto, L-muodon, L-muotoa, L-muodossa, L-muodosta, L-muotoon, D-muoto, D-muodon, D-muotoa, D-muodossa, D-muodosta, D-muotoon
+Mikä on konformeeri?	konformeeri, konformeerin, konformeeria, konformeerissa, konformeerista, konformeeriin, konformeerit, konformeerien, konformeereja, konformeereissa, rotameria, rotamerian, rotameriaa, rotameriassa, rotameriasta, rotameriaan
+Mikä on kondensaatioreaktio?	kondensaatioreaktio, kondensaatioreaktion, kondensaatioreaktiota, kondensaatioreaktiossa, kondensaatioreaktiosta, kondensaatioreaktioon, kondensaatioreaktiot, kondensaatioreaktioiden, kondensaatioreaktioita, kondensaatioreaktioissa, kondensaatio, kondensaation, kondensaatiota, kondensaatiossa, kondensaatiosta, kondensaatioon
+Mikä on informationaalinen makromolekyyli?	informationaalinen makromolekyyli, informationaalisen makromolekyylin, informationaalista makromolekyyliä, informationaalisessa makromolekyylissä, informationaaliset makromolekyylit, informationaalisten makromolekyylien
+Mitä molekyylibiologian keskusdogma tarkoittaa?	keskusdogma, keskusdogman, keskusdogmaa, keskusdogmassa, keskusdogmasta, keskusdogmaan, keskusdogmi, keskusdogmin, keskusdogmia, keskusdogmissa, keskusdogmista, keskusdogmiin, molekyylibiologian keskusdogma, molekyylibiologian keskusdogman, molekyylibiologian keskusdogmaa, molekyylibiologian keskusdogmassa
+Mitä transkriptio tarkoittaa?	transkriptio, transkription, transkriptiota, transkriptiossa, transkriptiosta, transkriptioon
+Mitä translaatio tarkoittaa?	translaatio, translaation, translaatiota, translaatiossa, translaatiosta, translaatioon
+Mikä on mRNA?	mRNA, mRNA:n, mRNA:ta, mRNA:ssa, mRNA:sta, mRNA:han, lähetti-RNA, lähetti-RNA:n, lähetti-RNA:ta, lähetti-RNA:ssa, lähetti-RNA:sta
+Mitä laskostuminen tarkoittaa?	laskostuminen, laskostumisen, laskostumista, laskostumisessa, laskostumisesta, laskostumiseen, laskostua, laskostuu, laskostui, laskostunut, laskostuneet
+Mikä on supramolekulaarinen rakenne?	supramolekulaarinen rakenne, supramolekulaarisen rakenteen, supramolekulaarista rakennetta, supramolekulaarisessa rakenteessa, supramolekulaariset rakenteet, supramolekulaaristen rakenteiden
+Mikä on kromatiini?	kromatiini, kromatiinin, kromatiinia, kromatiinissa, kromatiinista, kromatiiniin
+Mikä on histoni?	histoni, histonin, histonia, histonissa, histonista, histoniin, histonit, histonien, histoneja, histoneissa, histoniproteiini, histoniproteiinin, histoniproteiinia, histoniproteiinissa, histoniproteiinista, histoniproteiiniin, histoniproteiinit, histoniproteiinien, histoniproteiineja
+Mitä sanoo termodynamiikan ensimmäinen pääsääntö?	termodynamiikan ensimmäinen pääsääntö, termodynamiikan ensimmäisen pääsäännön, termodynamiikan ensimmäistä pääsääntöä, termodynamiikan ensimmäisessä pääsäännössä
+Mitä sanoo termodynamiikan toinen pääsääntö?	termodynamiikan toinen pääsääntö, termodynamiikan toisen pääsäännön, termodynamiikan toista pääsääntöä, termodynamiikan toisessa pääsäännössä
+Mitä entropia tarkoittaa?	entropia, entropian, entropiaa, entropiassa, entropiasta, entropiaan
+Mikä on eksergoninen reaktio?	eksergoninen, eksergonisen, eksergonista, eksergonisessa, eksergonisesta, eksergoniseen, eksergoniset, eksergonisten, eksergonisia, eksergonisissa, eksergoninen reaktio, eksergonisen reaktion, eksergonista reaktiota, eksergonisessa reaktiossa, eksergoniset reaktiot, eksergonisten reaktioiden
+Mikä on endergoninen reaktio?	endergoninen, endergonisen, endergonista, endergonisessa, endergonisesta, endergoniseen, endergoniset, endergonisten, endergonisia, endergonisissa, endergoninen reaktio, endergonisen reaktion, endergonista reaktiota, endergonisessa reaktiossa, endergoniset reaktiot, endergonisten reaktioiden
+Mikä on kytketty reaktio?	kytketty reaktio, kytketyn reaktion, kytkettyä reaktiota, kytketyssä reaktiossa, kytketyt reaktiot, kytkettyjen reaktioiden, reaktioiden kytkeminen, reaktioiden kytkemisen, reaktioiden kytkemistä
+Mikä on korkeaenerginen yhdiste?	korkeaenerginen yhdiste, korkeaenergisen yhdisteen, korkeaenergistä yhdistettä, korkeaenergisessä yhdisteessä, korkeaenergiset yhdisteet, korkeaenergisten yhdisteiden
+Mikä on ATP?	ATP, ATP:n, ATP:ta, ATP:ssa, ATP:sta, ATP:hen, adenosiinitrifosfaatti, adenosiinitrifosfaatin, adenosiinitrifosfaattia, adenosiinitrifosfaatissa, adenosiinitrifosfaatista, adenosiinitrifosfaattiin
+Mikä on ADP?	ADP, ADP:n, ADP:ta, ADP:ssa, ADP:sta, ADP:hen, adenosiinidifosfaatti, adenosiinidifosfaatin, adenosiinidifosfaattia, adenosiinidifosfaatissa, adenosiinidifosfaatista, adenosiinidifosfaattiin
+Mikä on NADH?	NADH, NADH:n, NADH:ta, NADH:ssa, NADH:sta, NADPH, NADPH:n, NADPH:ta, NADPH:ssa, NADPH:sta, NAD+, NADP+
+Mitä katabolia tarkoittaa?	katabolia, katabolian, kataboliaa, kataboliassa, kataboliasta, kataboliaan, katabolinen, katabolisen, katabolista, katabolisessa, katabolisesta, kataboliseen, kataboliset, katabolisten, katabolisia, hajottava metabolia, hajottavan metabolian, hajottavaa metaboliaa, hajottavassa metaboliassa
+Mitä anabolia tarkoittaa?	anabolia, anabolian, anaboliaa, anaboliassa, anaboliasta, anaboliaan, anabolinen, anabolisen, anabolista, anabolisessa, anabolisesta, anaboliseen, anaboliset, anabolisten, anabolisia, rakentava metabolia, rakentavan metabolian, rakentavaa metaboliaa, rakentavassa metaboliassa
+Mitä metabolia tarkoittaa?	metabolia, metabolian, metaboliaa, metaboliassa, metaboliasta, metaboliaan, aineenvaihdunta, aineenvaihdunnan, aineenvaihduntaa, aineenvaihdunnassa, aineenvaihdunnasta, aineenvaihduntaan
+Mikä on reaktiotie?	reaktiotie, reaktiotien, reaktiotietä, reaktiotiessä, reaktiotiestä, reaktiotiehen, reaktiotiet, reaktioteiden, reaktioteitä, reaktioteissä
+Mikä on laktaatti?	laktaatti, laktaatin, laktaattia, laktaatissa, laktaatista, laktaattiin, maitohappo, maitohapon, maitohappoa, maitohapossa, maitohaposta, maitohappoon
+Mikä on pyruvaatti?	pyruvaatti, pyruvaatin, pyruvaattia, pyruvaatissa, pyruvaatista, pyruvaattiin, palorypälehappo, palorypälehapon, palorypälehappoa, palorypälehapossa, palorypälehaposta, palorypälehappoon
+Mikä on laktaattidehydrogenaasi?	laktaattidehydrogenaasi, laktaattidehydrogenaasin, laktaattidehydrogenaasia, laktaattidehydrogenaasissa, laktaattidehydrogenaasista, laktaattidehydrogenaasiin
+Mitä hapetusluku tarkoittaa?	hapetusluku, hapetusluvun, hapetuslukua, hapetusluvussa, hapetusluvusta, hapetuslukuun, hapetusluvut, hapetuslukujen, hapetuslukuja, hapetusluvuissa, hiilen hapetusluku, hiilen hapetusluvun, hiilen hapetuslukua, hiilen hapetusluvussa
+Mitä komplementaarisuus tarkoittaa?	komplementaarisuus, komplementaarisuuden, komplementaarisuutta, komplementaarisuudessa, komplementaarisuudesta, komplementaarisuuteen, komplementaarinen, komplementaarisen, komplementaarista, komplementaarisessa, komplementaarisesta, komplementaariseen, komplementaariset, komplementaaristen, komplementaarisia
+Mikä on mutaatio?	mutaatio, mutaation, mutaatiota, mutaatiossa, mutaatiosta, mutaatioon, mutaatiot, mutaatioiden, mutaatioita, mutaatioissa
+Mitä duplikaatio tarkoittaa?	duplikaatio, duplikaation, duplikaatiota, duplikaatiossa, duplikaatiosta, duplikaatioon, duplikaatiot, duplikaatioiden, duplikaatioita, duplikaatioissa
+Mitä luonnonvalinta tarkoittaa?	luonnonvalinta, luonnonvalinnan, luonnonvalintaa, luonnonvalinnassa, luonnonvalinnasta, luonnonvalintaan
+Mitä on evoluutio?	evoluutio, evoluution, evoluutiota, evoluutiossa, evoluutiosta, evoluutioon
+Mitä erilaistuminen tarkoittaa?	erilaistuminen, erilaistumisen, erilaistumista, erilaistumisessa, erilaistumisesta, erilaistumiseen, erilaistunut, erilaistuneen, erilaistunutta, erilaistuneessa, erilaistuneet, erilaistuneiden

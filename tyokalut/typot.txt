@@ -1,0 +1,25 @@
+muodostaakeen	muodostaakseen	Mikä on eliö?
+korkeanerginen	korkeaenerginen	Mikä on elektroninsiirtoreaktio ja miksi eliöt ylläpitävät toimintojaan juuri elektroninsiirtoreaktioiden avulla?
+kanavaprotiineissa	kanavaproteiineissa	Mikä on elektroninsiirtoreaktio ja miksi eliöt ylläpitävät toimintojaan juuri elektroninsiirtoreaktioiden avulla?
+avullaa	avulla	Mikä on elektroninsiirtoreaktio ja miksi eliöt ylläpitävät toimintojaan juuri elektroninsiirtoreaktioiden avulla?
+pyriittia	pyriittiä	Mikä on elektroninsiirtoreaktio ja miksi eliöt ylläpitävät toimintojaan juuri elektroninsiirtoreaktioiden avulla?
+Elektronisiirtoreaktiot	Elektroninsiirtoreaktiot	Mikä on elektroninsiirtoreaktio ja miksi eliöt ylläpitävät toimintojaan juuri elektroninsiirtoreaktioiden avulla?
+elektroninsiirtoareaktio	elektroninsiirtoreaktio	Miten elektroninsiirtoareaktio aikaansaa jotain hyödyllistä? (kerro fysikaalinen toimintamekanismi)
+elekronien	elektronien	Mitä on energia?
+lähetti-RNA-ketjuhin	lähetti-RNA-ketjuihin	Mikä on ribosomi?
+keskenäisten	keskinäisten	Mikä on ribosomi?
+univerusmin	universumin	Kaikki univerusmin atomit sisältävät elektroneja. Jos eliöt saavat energiansa elektroninsiirtoreaktioista, mikseivät eliöt ota niitä kuin tietyistä atomeista?
+infromaatiota	informaatiota	Miten elämä (ehkä) syntyi maapallolla?
+keskenäisä	keskinäisiä	Mikä on katalyytti?
+levasolujen	leväsolujen	Mikä on kloroplasti?
+nukleotidiä	nukleotidia	Montako erilaista nukleotidiä ja aminohappoa makromolekyylit rakentuvat? (myös kortissa "Mikä on monomeeri?")
+nukleotidejä	nukleotideja	Mitä LUCA tarkoittaa?
+nukleotidistä	nukleotidista	Mikä on makromolekyyli? (myös korteissa "Mikä on nukleotidi?" ja "Montako erilaista nukleotidiä ja aminohappoa makromolekyylit rakentuvat?")
+voidaan siirrellään	voidaan siirrellä	Mikä on elektroninsiirtoreaktio…?
+ole niin reaktiivista	ole niin reaktiivisia	Miten elämä (ehkä) syntyi maapallolla?
+saman diat esimerkkejä	saman dian esimerkkejä	Mikä on selenokysteiini?
+erityislaatuinen ja ioni	erityislaatuinen ioni	Mikä on elektroninsiirtoreaktio…?
+ATP:tä	ATP:ta	lyhennepäätteen vokaalisointu
+ATP:nä	ATP:na	lyhennepäätteen vokaalisointu
+ADP:stä	ADP:sta	lyhennepäätteen vokaalisointu
+genomissä	genomissa	lyhyt vokaalisointuvirhe
