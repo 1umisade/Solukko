@@ -87,3 +87,85 @@ ti 06.10.2026 08:15-12:00 MED D1038-1, Alhopuro-sali
 ma 02.11.2026 08:15-16:00 Opetuslaboratorio
 ti 03.11.2026 08:15-13:00 Opetuslaboratorio
 ke 04.11.2026 08:15-16:00 Opetuslaboratorio
+
+BKEM5163 Solubiologia, 4 op
+BKEM5163-3002 Solubiologia 07.09.2026 - 31.12.2026
+ma 07.09.2026 10:15-12:00 Pha1, Auditorio Pha1
+
+BKEM5120 Immunologia - teoria, 4 op
+BKEM5120-3010 Immunologia - teoria 31.08.2026 - 16.10.2026
+ma 31.08.2026 13:15-16:00 Pha1, Auditorio Pha1
+ti 01.09.2026 13:15-16:00 Pha1, Auditorio Pha1
+ke 02.09.2026 13:15-16:00 Pha1, Auditorio Pha1
+to 03.09.2026 13:15-16:00 AGO XXI, Agora luentosali XXI
+pe 04.09.2026 13:15-16:00 Pha1, Auditorio Pha1
+pe 11.09.2026 13:15-16:00 Pha1, Auditorio Pha1
+pe 18.09.2026 13:15-16:00 Pha1, Auditorio Pha1
+pe 25.09.2026 13:15-16:00 DEN Aud, Arje Scheinin -sali
+pe 02.10.2026 13:15-16:00 DEN Aud, Arje Scheinin -sali
+ke 07.10.2026 09:15-12:00 Pha1, Auditorio Pha1
+pe 09.10.2026 13:15-16:00 DEN Aud, Arje Scheinin -sali
+pe 16.10.2026 14:00-17:00 Pha1, Auditorio Pha1
+
+BKEM5121 Immunologia - käytäntö, 2 op
+BKEM5121-3010 Immunologia - käytäntö 01.09.2026 - 30.12.2026
+ke 02.09.2026 10:15-12:00 DEN280, Dent3
+
+DIBT0082 Bioprosessitekniikka, 3 op
+DIBT0082-3005 Bioprosessitekniikka 27.10.2026 - 17.12.2026
+ti 27.10.2026 10:15-12:00 Pha1, Auditorio Pha1
+to 29.10.2026 08:15-10:00 Pha1, Auditorio Pha1
+ti 03.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+to 05.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ti 10.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+to 12.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ti 17.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+to 19.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ti 24.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+to 26.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ti 01.12.2026 10:15-12:00 Pha1, Auditorio Pha1
+to 03.12.2026 10:15-12:00 Pha1, Auditorio Pha1
+ti 08.12.2026 08:15-10:00 Pha1, Auditorio Pha1
+to 10.12.2026 08:15-10:00 Pha1, Auditorio Pha1
+ti 15.12.2026 08:15-10:00 Pha1, Auditorio Pha1
+to 17.12.2026 08:15-10:00 Pha1, Auditorio Pha1
+
+DIBT0072 Biotekniset analyysimenetelmät, 3 op
+DIBT0072-3006 Biotekniset analyysimenetelmät 14.09.2026 - 23.10.2026
+ma 14.09.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 16.09.2026 14:15-16:00 Pha1, Auditorio Pha1
+pe 18.09.2026 08:30-10:00 DEN Aud, Arje Scheinin -sali
+ma 21.09.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 23.09.2026 14:15-16:00 MED D1024, Säätiö-sali
+pe 25.09.2026 08:30-10:00 OJ, Osmo Järvi -sali
+ma 28.09.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 30.09.2026 14:15-16:00 Pha1, Auditorio Pha1
+pe 02.10.2026 08:30-10:00 Pha1, Auditorio Pha1
+ma 05.10.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 07.10.2026 14:15-16:00 Pha1, Auditorio Pha1
+pe 09.10.2026 08:30-10:00 Pha1, Auditorio Pha1
+ma 12.10.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 14.10.2026 14:15-16:00 Pha1, Auditorio Pha1
+pe 16.10.2026 08:30-10:00 Pha1, Auditorio Pha1
+ma 19.10.2026 08:15-10:00 Pha1, Auditorio Pha1
+ke 21.10.2026 14:15-16:00 Pha1, Auditorio Pha1
+pe 23.10.2026 08:30-10:00 Pha1, Auditorio Pha1
+
+BKEM5137 Kandidaatintutkielma, biokemia, 8 op
+BKEM5137-3002 Kandidaatintutkielma, biokemia 31.08.2026 - 20.12.2026
+ma 31.08.2026 08:15-10:00 DEN203, Dent4
+ke 02.09.2026 08:15-10:00 DEN Aud, Arje Scheinin -sali
+pe 04.09.2026 10:15-12:00 DEN Aud, Arje Scheinin -sali
+ma 07.09.2026 10:15-12:00 MED D1024, Säätiö-sali
+ma 07.12.2026 10:15-12:00 DEN203, Dent4
+ma 07.12.2026 14:15-16:00 Pha1, Auditorio Pha1
+ti 08.12.2026 10:15-12:00 DEN203, Dent4
+ti 08.12.2026 14:15-16:00 DEN218, Dent2
+ke 09.12.2026 10:15-12:00 DEN203, Dent4
+ke 09.12.2026 14:15-16:00 DEN216, Dent1
+to 10.12.2026 10:15-12:00 DEN218, Dent2
+to 10.12.2026 14:15-16:00 DEN203, Dent4
+pe 11.12.2026 10:15-12:00 DEN203, Dent4
+pe 11.12.2026 14:15-16:00 DEN203, Dent4
+ma 14.12.2026 10:15-12:00 DEN203, Dent4
+ti 15.12.2026 10:15-12:00 DEN203, Dent4

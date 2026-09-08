@@ -1,0 +1,402 @@
+{
+  "BKEM5000": {
+    "nimi": "Avaimet biokemian opiskeluun",
+    "vari": "#FFF2CC",
+    "alkaa": "2026-08-24",
+    "paattyy": "2026-09-04",
+    "luennot": [
+      {
+        "pvm": "2026-08-24",
+        "vk": "ma",
+        "alkaa": "09:00",
+        "paattyy": "10:00",
+        "laji": "Luento",
+        "paikka": "Alhopuro-sali"
+      },
+      {
+        "pvm": "2026-08-24",
+        "vk": "ma",
+        "alkaa": "12:00",
+        "paattyy": "14:00",
+        "laji": "Laitoksen tervehdys",
+        "paikka": "Säätiösali"
+      },
+      {
+        "pvm": "2026-08-25",
+        "vk": "ti",
+        "alkaa": "09:00",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "Osmo Järvi -sali"
+      },
+      {
+        "pvm": "2026-08-25",
+        "vk": "ti",
+        "alkaa": "13:00",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-08-31",
+        "vk": "ma",
+        "alkaa": "10:00",
+        "paattyy": "12:00",
+        "laji": "Harjoitustyöt",
+        "paikka": "sali auki"
+      },
+      {
+        "pvm": "2026-08-31",
+        "vk": "ma",
+        "alkaa": "13:00",
+        "paattyy": "15:00",
+        "laji": "Harjoitustyöt",
+        "paikka": "sali auki"
+      },
+      {
+        "pvm": "2026-09-02",
+        "vk": "ke",
+        "alkaa": "09:00",
+        "paattyy": "11:00",
+        "laji": "Harjoitustyöt",
+        "paikka": "sali auki"
+      },
+      {
+        "pvm": "2026-09-02",
+        "vk": "ke",
+        "alkaa": "12:00",
+        "paattyy": "14:00",
+        "laji": "Harjoitustyöt",
+        "paikka": "sali auki"
+      },
+      {
+        "pvm": "2026-09-02",
+        "vk": "ke",
+        "alkaa": "14:00",
+        "paattyy": "16:00",
+        "laji": "Harjoitustyöt",
+        "paikka": "sali auki"
+      },
+      {
+        "pvm": "2026-09-04",
+        "vk": "pe",
+        "alkaa": "10:15",
+        "paattyy": "11:45",
+        "laji": "Luento",
+        "paikka": "Quantum XVII"
+      }
+    ]
+  },
+  "BKEM5030": {
+    "nimi": "Solu ja biomolekyylit – teoria",
+    "vari": "#DDEBF7",
+    "alkaa": "2026-09-01",
+    "paattyy": "2026-10-27",
+    "luennot": [
+      {
+        "pvm": "2026-09-01",
+        "vk": "ti",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-09-03",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-09-08",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-09-10",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-09-15",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-09-17",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-09-22",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-09-24",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-01",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-06",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-08",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-13",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-15",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-20",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-22",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-27",
+        "vk": "ti",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "Pha1"
+      }
+    ]
+  },
+  "DIBT0070": {
+    "nimi": "Johdatus biotekniikkaan",
+    "vari": "#FCE4D6",
+    "alkaa": "2026-09-03",
+    "paattyy": "2026-10-09",
+    "luennot": [
+      {
+        "pvm": "2026-09-03",
+        "vk": "to",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "DEN Aud"
+      },
+      {
+        "pvm": "2026-09-04",
+        "vk": "pe",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "DEN Aud"
+      },
+      {
+        "pvm": "2026-09-10",
+        "vk": "to",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "DEN Aud"
+      },
+      {
+        "pvm": "2026-09-11",
+        "vk": "pe",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "laji": "Luento",
+        "paikka": "DEN Aud"
+      },
+      {
+        "pvm": "2026-09-17",
+        "vk": "to",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "laji": "Luento",
+        "paikka": "DEN Aud"
+      },
+      {
+        "pvm": "2026-10-09",
+        "vk": "pe",
+        "alkaa": "08:00",
+        "paattyy": "10:00",
+        "laji": "TENTTI",
+        "paikka": "DEN Aud"
+      }
+    ]
+  },
+  "KEMI6308": {
+    "nimi": "Kemian peruskurssi I",
+    "vari": "#E4DFEC",
+    "alkaa": "2026-09-07",
+    "paattyy": "2026-10-12",
+    "luennot": [
+      {
+        "pvm": "2026-09-07",
+        "vk": "ma",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "laji": "Luento",
+        "paikka": "Agora XXII"
+      },
+      {
+        "pvm": "2026-09-28",
+        "vk": "ma",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "laji": "Luento",
+        "paikka": "Agora XXII"
+      },
+      {
+        "pvm": "2026-10-12",
+        "vk": "ma",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "laji": "Luento",
+        "paikka": "Agora XXII"
+      }
+    ]
+  },
+  "BKEM5031": {
+    "nimi": "Solu ja biomolekyylit – käytäntö",
+    "vari": "#E2EFDA",
+    "alkaa": "2026-09-22",
+    "paattyy": "2026-11-23",
+    "luennot": [
+      {
+        "pvm": "2026-09-22",
+        "vk": "ti",
+        "alkaa": "12:15",
+        "paattyy": "14:00",
+        "laji": "Aloitusluento",
+        "paikka": "Pha1"
+      },
+      {
+        "pvm": "2026-10-05",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "12:00",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-10-06",
+        "vk": "ti",
+        "alkaa": "14:00",
+        "paattyy": "16:00",
+        "laji": "Harjoitustyö",
+        "paikka": "DEN280 Dent3"
+      },
+      {
+        "pvm": "2026-10-12",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "15:15",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-10-19",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "15:15",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-10-26",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "15:15",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-11-02",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "15:15",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-11-09",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "15:15",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-11-16",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "15:15",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      },
+      {
+        "pvm": "2026-11-23",
+        "vk": "ma",
+        "alkaa": "08:00",
+        "paattyy": "15:15",
+        "laji": "Harjoitustyö",
+        "paikka": "TEU103 Sammio"
+      }
+    ]
+  }
+}

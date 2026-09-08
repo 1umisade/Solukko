@@ -506,5 +506,513 @@
         }
       ]
     }
+  },
+  "BKEM5163": {
+    "nimi": "Solubiologia",
+    "op": 4.0,
+    "toteutus": "BKEM5163-3002 Solubiologia 07.09.2026 - 31.12.2026",
+    "periodi": 1,
+    "alkaa": "2026-09-07",
+    "paattyy": "2026-09-07",
+    "luennot": [
+      {
+        "pvm": "2026-09-07",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      }
+    ]
+  },
+  "BKEM5120": {
+    "nimi": "Immunologia - teoria",
+    "op": 4.0,
+    "toteutus": "BKEM5120-3010 Immunologia - teoria 31.08.2026 - 16.10.2026",
+    "periodi": 1,
+    "alkaa": "2026-08-31",
+    "paattyy": "2026-10-16",
+    "luennot": [
+      {
+        "pvm": "2026-08-31",
+        "vk": "ma",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-01",
+        "vk": "ti",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-02",
+        "vk": "ke",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-03",
+        "vk": "to",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "AGO XXI, Agora luentosali XXI"
+      },
+      {
+        "pvm": "2026-09-04",
+        "vk": "pe",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-11",
+        "vk": "pe",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-18",
+        "vk": "pe",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-25",
+        "vk": "pe",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "DEN Aud, Arje Scheinin -sali"
+      },
+      {
+        "pvm": "2026-10-02",
+        "vk": "pe",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "DEN Aud, Arje Scheinin -sali"
+      },
+      {
+        "pvm": "2026-10-07",
+        "vk": "ke",
+        "alkaa": "09:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-09",
+        "vk": "pe",
+        "alkaa": "13:15",
+        "paattyy": "16:00",
+        "paikka": "DEN Aud, Arje Scheinin -sali"
+      },
+      {
+        "pvm": "2026-10-16",
+        "vk": "pe",
+        "alkaa": "14:00",
+        "paattyy": "17:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      }
+    ]
+  },
+  "BKEM5121": {
+    "nimi": "Immunologia - käytäntö",
+    "op": 2.0,
+    "toteutus": "BKEM5121-3010 Immunologia - käytäntö 01.09.2026 - 30.12.2026",
+    "periodi": 1,
+    "alkaa": "2026-09-02",
+    "paattyy": "2026-09-02",
+    "luennot": [
+      {
+        "pvm": "2026-09-02",
+        "vk": "ke",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN280, Dent3"
+      }
+    ]
+  },
+  "DIBT0082": {
+    "nimi": "Bioprosessitekniikka",
+    "op": 3.0,
+    "toteutus": "DIBT0082-3005 Bioprosessitekniikka 27.10.2026 - 17.12.2026",
+    "periodi": 2,
+    "alkaa": "2026-10-27",
+    "paattyy": "2026-12-17",
+    "luennot": [
+      {
+        "pvm": "2026-10-27",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-29",
+        "vk": "to",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-03",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-05",
+        "vk": "to",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-10",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-12",
+        "vk": "to",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-17",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-19",
+        "vk": "to",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-24",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-11-26",
+        "vk": "to",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-12-01",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-12-03",
+        "vk": "to",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-12-08",
+        "vk": "ti",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-12-10",
+        "vk": "to",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-12-15",
+        "vk": "ti",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-12-17",
+        "vk": "to",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      }
+    ]
+  },
+  "DIBT0072": {
+    "nimi": "Biotekniset analyysimenetelmät",
+    "op": 3.0,
+    "toteutus": "DIBT0072-3006 Biotekniset analyysimenetelmät 14.09.2026 - 23.10.2026",
+    "periodi": 1,
+    "alkaa": "2026-09-14",
+    "paattyy": "2026-10-23",
+    "luennot": [
+      {
+        "pvm": "2026-09-14",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-16",
+        "vk": "ke",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-18",
+        "vk": "pe",
+        "alkaa": "08:30",
+        "paattyy": "10:00",
+        "paikka": "DEN Aud, Arje Scheinin -sali"
+      },
+      {
+        "pvm": "2026-09-21",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-23",
+        "vk": "ke",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "MED D1024, Säätiö-sali"
+      },
+      {
+        "pvm": "2026-09-25",
+        "vk": "pe",
+        "alkaa": "08:30",
+        "paattyy": "10:00",
+        "paikka": "OJ, Osmo Järvi -sali"
+      },
+      {
+        "pvm": "2026-09-28",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-09-30",
+        "vk": "ke",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-02",
+        "vk": "pe",
+        "alkaa": "08:30",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-05",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-07",
+        "vk": "ke",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-09",
+        "vk": "pe",
+        "alkaa": "08:30",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-12",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-14",
+        "vk": "ke",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-16",
+        "vk": "pe",
+        "alkaa": "08:30",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-19",
+        "vk": "ma",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-21",
+        "vk": "ke",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-10-23",
+        "vk": "pe",
+        "alkaa": "08:30",
+        "paattyy": "10:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      }
+    ]
+  },
+  "BKEM5137": {
+    "nimi": "Kandidaatintutkielma, biokemia",
+    "op": 8.0,
+    "toteutus": "BKEM5137-3002 Kandidaatintutkielma, biokemia 31.08.2026 - 20.12.2026",
+    "periodi": 1,
+    "alkaa": "2026-08-31",
+    "paattyy": "2026-12-15",
+    "luennot": [
+      {
+        "pvm": "2026-08-31",
+        "vk": "ma",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-09-02",
+        "vk": "ke",
+        "alkaa": "08:15",
+        "paattyy": "10:00",
+        "paikka": "DEN Aud, Arje Scheinin -sali"
+      },
+      {
+        "pvm": "2026-09-04",
+        "vk": "pe",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN Aud, Arje Scheinin -sali"
+      },
+      {
+        "pvm": "2026-09-07",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "MED D1024, Säätiö-sali"
+      },
+      {
+        "pvm": "2026-12-07",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-12-07",
+        "vk": "ma",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "Pha1, Auditorio Pha1"
+      },
+      {
+        "pvm": "2026-12-08",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-12-08",
+        "vk": "ti",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "DEN218, Dent2"
+      },
+      {
+        "pvm": "2026-12-09",
+        "vk": "ke",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-12-09",
+        "vk": "ke",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "DEN216, Dent1"
+      },
+      {
+        "pvm": "2026-12-10",
+        "vk": "to",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN218, Dent2"
+      },
+      {
+        "pvm": "2026-12-10",
+        "vk": "to",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-12-11",
+        "vk": "pe",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-12-11",
+        "vk": "pe",
+        "alkaa": "14:15",
+        "paattyy": "16:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-12-14",
+        "vk": "ma",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN203, Dent4"
+      },
+      {
+        "pvm": "2026-12-15",
+        "vk": "ti",
+        "alkaa": "10:15",
+        "paattyy": "12:00",
+        "paikka": "DEN203, Dent4"
+      }
+    ]
   }
 }
