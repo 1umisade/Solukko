@@ -4228,7 +4228,7 @@ async function renderCurrentCard(){
   const _pb0=document.getElementById('card-peek-bottom'); if(_pb0){ _pb0.style.display='none'; _pb0.classList.remove('peek-in','peek-out'); }   // bottom peek only on shake
   clearTimeout(_bottomPeekTimer);
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
-  localStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
+  localStorage.setItem('solukko-savedCardIdx', String(_navBase()));   // row position: a re-asked card is not where the row continues from
   try{ localStorage.setItem('solukko-savedAnswer','0'); }catch(e){}   // new card shown -> answer not revealed yet
   if(devMode && currentCard){
     const cardId=String(currentCard.cardId||currentCard.noteId||'');
@@ -4578,8 +4578,8 @@ function frontGoTo(i){
   if(shuffleMode){ for(let k=queue.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); const t=queue[k]; queue[k]=queue[j]; queue[j]=t; } }
   renderCurrentCard();
 }
-function frontNext(){ frontGoTo(currentOverviewIndex+1); }
-function frontPrev(){ frontGoTo(currentOverviewIndex-1); }
+function frontNext(){ frontGoTo(_navBase()+1); }
+function frontPrev(){ const b=_navBase(); frontGoTo(b===currentOverviewIndex ? b-1 : b); }   // from a re-ask card, Edellinen returns to the row card itself
 function _frontCheckShow(){   // fullscreen FRONT: [Edellinen] [Tarkista + peeking Mona] [Seuraava]
   _setKnobShown(false);
   const fchk=document.getElementById('front-check'), mona=document.getElementById('fc-mona'), fcb=document.getElementById('fc-bubble');
@@ -4742,9 +4742,20 @@ function previewCard(index){   // review page: hovering a grid card shows it (fr
 function _doPreview(index){
   if(inFullscreen()) return;
   if(index===_previewIndex && currentCard===reviewCards[index]) return;
+  const sama = currentCard===reviewCards[index];   // re-render of the same card (e.g. back from fullscreen): leave the queue alone, or a re-ask card would lose the row position
   _previewIndex=index; currentOverviewIndex=index; currentCard=reviewCards[index];
+  if(!sama || (queue.length && queue[0]===currentCard)) _syncQueueTo(index);   // the card shown on the right is where studying starts, so the queue must continue from it
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('welcome');
   renderCurrentCard();
+}
+function _syncQueueTo(i){   // queue = the cards after reviewCards[i] (shuffled if shuffle mode is on)
+  queue=reviewCards.slice(i+1);
+  if(shuffleMode){ for(let k=queue.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); const t=queue[k]; queue[k]=queue[j]; queue[j]=t; } }
+}
+function _navBase(){   // row position for Seuraava/Edellinen: a 5-min re-ask card is an interjection, so navigate from where the row was, not from the re-asked card
+  if(shuffleMode) return currentOverviewIndex;
+  const n = queue.length ? reviewCards.indexOf(queue[0])-1 : reviewCards.length-1;
+  return n>=0 ? n : currentOverviewIndex;
 }
 // Unite the review-page scroll: wheeling over the RIGHT side (card preview) scrolls the LEFT grid too — one scroll for the whole page.
 (function(){
@@ -6624,7 +6635,7 @@ window.addEventListener('popstate',e=>{ if(document.getElementById('card-screen'
     if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
     if((e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp') && !inFullscreen() && document.body.classList.contains('reviewing') && currentCard){   // grid view: browse cards with the arrows (left/up = prev, right/down = next)
       e.preventDefault();
-      const ni=currentOverviewIndex+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1);
+      const ni=_navBase()+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1);
       if(ni>=0 && ni<reviewCards.length) jumpToOverviewCard(ni);
       return;
     }
