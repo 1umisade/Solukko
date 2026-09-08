@@ -3797,9 +3797,9 @@ async function loadDecks(){
     const _tc=allCards.find(c=>String(c.cardId)===_pc);
     if(_tc){ const _topDeck=coursePathOf(_tc.deckName); if(names.includes(_topDeck)){ await startDeck(_topDeck, false); const _ci=reviewCards.findIndex(c=>String(c.cardId)===_pc); if(_ci>=0){ jumpToOverviewCard(_ci); if(_pa==='1') setTimeout(()=>showAnswer(),600); } return; } }
   }
-  const savedDeck=sessionStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(sessionStorage.getItem('solukko-savedCardIdx')||'0');
+  const savedDeck=localStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(localStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck, false);
-    const _rfs=sessionStorage.getItem('solukko-savedFs')==='1', _rans=sessionStorage.getItem('solukko-savedAnswer')==='1';   // also restore fullscreen review + revealed answer
+    const _rfs=localStorage.getItem('solukko-savedFs')==='1', _rans=localStorage.getItem('solukko-savedAnswer')==='1';   // also restore fullscreen review + revealed answer
     if(reviewCards[savedIdx] && (savedIdx>0 || _rfs)){ jumpToOverviewCard(savedIdx, _rfs); if(_rans) setTimeout(()=>{ try{ showAnswer(); }catch(e){} }, 500); }
     return; }
   show('deck-screen');
@@ -3984,7 +3984,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
       const _d=_tgt.getBoundingClientRect().top-_gc.getBoundingClientRect().top; _gc.scrollTop=Math.max(0,_d-1); };
     requestAnimationFrame(_scrollHeaderOff); setTimeout(_scrollHeaderOff,120); setTimeout(_scrollHeaderOff,350);   // re-assert past any load-time reflow
   }
-  sessionStorage.setItem('solukko-savedDeck', deckName);
+  localStorage.setItem('solukko-savedDeck', deckName);
   setTimeout(scrollToCard, 200);
   document.getElementById('site-brand').style.display='none';
   { const dsb=document.getElementById('dev-screen-btn'); if(dsb) dsb.style.display='none'; }
@@ -4161,8 +4161,8 @@ async function renderCurrentCard(){
   const _pb0=document.getElementById('card-peek-bottom'); if(_pb0){ _pb0.style.display='none'; _pb0.classList.remove('peek-in','peek-out'); }   // bottom peek only on shake
   clearTimeout(_bottomPeekTimer);
   loadCommentForCard(); renderCardStars(); loadBuzzers(); updateShowBtn();
-  sessionStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
-  try{ sessionStorage.setItem('solukko-savedAnswer','0'); }catch(e){}   // new card shown -> answer not revealed yet
+  localStorage.setItem('solukko-savedCardIdx', String(currentOverviewIndex));
+  try{ localStorage.setItem('solukko-savedAnswer','0'); }catch(e){}   // new card shown -> answer not revealed yet
   if(devMode && currentCard){
     const cardId=String(currentCard.cardId||currentCard.noteId||'');
     clearBuzzers().then(()=>{ db.collection('gamestate').doc('current').set({ cardId, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); });
@@ -4285,14 +4285,14 @@ function enterCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || inFullscreen()) return;
   _captureCardRect();
   cs.classList.add('card-fs-on','faux-fs'); _onFsEnter();               // the study view is its OWN full-page overlay (like the homepage) — it stays a page even if native fullscreen isn't available or gets dropped
-  try{ sessionStorage.setItem('solukko-savedFs','1'); }catch(e){}       // remember fullscreen review across a page refresh
+  try{ localStorage.setItem('solukko-savedFs','1'); }catch(e){}       // remember fullscreen review across a refresh and a closed tab
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // own card → Ehdota button instead of the comment button
   if(!document.body.classList.contains('is-mobile') && _nativeFsSupported()){ cs.requestFullscreen().catch(()=>{}); }   // desktop: best-effort native fullscreen to hide the browser chrome (needs the grid-card click's user activation). Mobile stays a plain page.
 }
 function exitCardFs(){
   const cs=document.getElementById('card-screen'); if(!cs || !inFullscreen()) return;
   cs.classList.remove('card-fs-on','faux-fs'); _onFsExit();             // leave the page
-  try{ sessionStorage.setItem('solukko-savedFs','0'); }catch(e){}
+  try{ localStorage.setItem('solukko-savedFs','0'); }catch(e){}
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();    // reset the fs buttons (hides the Ehdota button off the study view)
   if(document['fullscreenElement']){ document['exitFullscreen'] && document.exitFullscreen(); }   // ...and native fullscreen if it engaged
 }
@@ -5441,7 +5441,7 @@ function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (n
 function showAnswer(){
   if(!currentCard||cardAnswerShown) return;
   cardAnswerShown=true;
-  try{ sessionStorage.setItem('solukko-savedAnswer','1'); }catch(e){}   // remember the revealed answer across a refresh
+  try{ localStorage.setItem('solukko-savedAnswer','1'); }catch(e){}   // remember the revealed answer across a refresh and a closed tab
   const fc=document.getElementById('flashcard');
   const reveal=()=>{
     clearFrontMona();                    // drop the front hint; the graded bar (buttons + centred Mona) takes over
@@ -6433,7 +6433,7 @@ function updateCalHighlight(){   // checked courses stay highlighted; if any are
 }
 function showDecks(){
   { const cs=document.getElementById('card-screen'); if(cs) cs.classList.remove('card-fs-on','faux-fs'); }   // clear any faux fullscreen when returning to the homepage
-  sessionStorage.removeItem('solukko-savedDeck'); sessionStorage.removeItem('solukko-savedCardIdx'); sessionStorage.removeItem('solukko-savedFs'); sessionStorage.removeItem('solukko-savedAnswer');
+  localStorage.removeItem('solukko-savedDeck'); localStorage.removeItem('solukko-savedCardIdx'); localStorage.removeItem('solukko-savedFs'); localStorage.removeItem('solukko-savedAnswer');
   if(commentsUnsubscribe){ commentsUnsubscribe(); commentsUnsubscribe=null; }
   if(kuvaajatUnsubscribe){ kuvaajatUnsubscribe(); kuvaajatUnsubscribe=null; }
   if(buzzerUnsubscribe){ buzzerUnsubscribe(); buzzerUnsubscribe=null; }
