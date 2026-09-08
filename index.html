@@ -193,8 +193,9 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
 .period-empty { flex-basis: 100%; font-family: 'Lora', serif; font-style: italic; font-size: 0.76rem; color: #7a5230; margin: 0 0 6px; }
 body.dark-mode .period-empty { color: #eadfce; }
-.period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.02em; color: #7a5230; margin: 16px 0 6px; }   /* sama koko kuin Monan puhekuplassa */   /* ei versaaleja: kuukausi erottuu lihavointina, ei kirjainkoolla */
+.period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 400; font-size: 1.05rem; line-height: 1.5; letter-spacing: 0.02em; color: #7a5230; margin: 30px 0 8px; }   /* riviväli 1.5: 'normal' leikkaa Loran ylapidennykset */   /* sama koko kuin Monan puhekuplassa */   /* ei versaaleja: kuukausi erottuu lihavointina, ei kirjainkoolla */
 .period-label b { font-weight: 800; opacity: 1; }
+.sem-col.vuosi > .period-label:first-child { margin-top: 0; }   /* lukuvuoden ensimmainen otsikko kiinni alaviivaan */
 body.dark-mode .period-label { color: #eadfce; }
 .year-row .deck-btn { position: relative; left: auto; top: auto; width: 160px; }
 body.dark-mode .year-heading { color: #eadfce; border-bottom-color: #6d5f52; }
@@ -6446,17 +6447,29 @@ function highlightCalToday(){   // mark today's cell in the calendar
   }
 }
 function calValitseKaikki(el){   // lukuvuoden tai periodin ruutu valitsee kaikki alleen
-  var lohko=el.closest('.cal-period-block') || el.closest('.cal-year-block');
+  var jakso=el.closest('.cal-period-block'), vuosi=el.closest('.cal-year-block');
+  var lohko=jakso||vuosi;
   if(lohko) lohko.querySelectorAll('.cal-cb').forEach(function(cb){ cb.checked=el.checked; });
+  // Lukuvuoden ruutu saa rastin vain kun sita itseaan klikattiin: periodin valinta ei rastita koko vuotta.
+  if(vuosi){ if(!jakso && el.checked) vuosi.setAttribute('data-koko-vuosi','1'); else vuosi.removeAttribute('data-koko-vuosi'); }
   updateCalHighlight();
 }
 function calPaivitaRyhmaruudut(){   // ylatason ruutu kertoo onko sen alta valittu kaikki, osa vai ei mitaan
-  document.querySelectorAll('#calendar-view .cal-year-block, #calendar-view .cal-period-block').forEach(function(lohko){
+  document.querySelectorAll('#calendar-view .cal-period-block').forEach(function(lohko){
     var iso=lohko.querySelector(':scope > label > .cal-cb-all'); if(!iso) return;
     var omat=lohko.querySelectorAll('.cal-cb'); if(!omat.length) return;
     var n=0; omat.forEach(function(cb){ if(cb.checked) n++; });
     iso.checked = n===omat.length;
     iso.indeterminate = n>0 && n<omat.length;
+  });
+  // Lukuvuoden ruutu on valitsin, ei peili: rasti vain kun sita itseaan klikattiin ja kaikki on yha valittuna.
+  document.querySelectorAll('#calendar-view .cal-year-block').forEach(function(lohko){
+    var iso=lohko.querySelector(':scope > label > .cal-cb-all'); if(!iso) return;
+    var omat=lohko.querySelectorAll('.cal-cb'); if(!omat.length) return;
+    var n=0; omat.forEach(function(cb){ if(cb.checked) n++; });
+    if(n!==omat.length) lohko.removeAttribute('data-koko-vuosi');
+    iso.checked = n===omat.length && lohko.hasAttribute('data-koko-vuosi');
+    iso.indeterminate = false;   // periodin valinta ei merkitse lukuvuotta mitenkaan
   });
 }
 function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
