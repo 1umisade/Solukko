@@ -187,6 +187,8 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .sem-col.spring { border-left: 1px dashed #cfc8bc; padding-left: 24px; }
 .sem-col.sem-empty { border: none !important; padding-left: 0 !important; padding-top: 0 !important; }
 .sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
+.period-empty { flex-basis: 100%; font-family: 'Lora', serif; font-style: italic; font-size: 0.76rem; color: #56533c; opacity: 0.45; margin: 0 0 6px; }
+body.dark-mode .period-empty { color: #eadfce; }
 .period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.78rem; color: #56533c; opacity: 0.7; margin: 8px 0 -4px; }
 body.dark-mode .period-label { color: #eadfce; }
 .year-row .deck-btn { position: relative; left: auto; top: auto; width: 160px; }
@@ -3641,14 +3643,21 @@ function buildDeckGrid(decks, list){
     const _autumn = g.S.concat(g.none);   // decks with a year but no semester default to autumn
     // A semester is split into teaching periods (jaksot) read from the deck path (…::"N. Periodi"::…).
     // Courses with no period level come after the numbered ones.
+    // Lukuvuodessa on viisi periodia: syksyllä 1-2, keväällä 3-5. Jokainen saa otsikkonsa, myös
+    // tyhjä — muuten lukuvuoden rakenteesta ei näe, mihin kohtaan kurssi puuttuu.
+    const _JAKSOT={autumn:[1,2], spring:[3,4,5]};
     const _jaksoSarake=(cls,label,items)=>{
-      const jaksot=[...new Set(items.map(it=>it.period).filter(Boolean))].sort((a,b)=>(+a)-(+b));
-      if(!jaksot.length) return col(cls,label,items);
+      if(!items.length) return col(cls,label,items);
       const c=document.createElement('div'); c.className='sem-col '+cls;
       const l=document.createElement('div'); l.className='sem-label'; l.textContent=label; c.appendChild(l);
-      jaksot.forEach(p=>{ const osa=items.filter(it=>String(it.period)===String(p)); if(!osa.length) return;
-        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. periodi'; c.appendChild(pl);
-        osa.forEach(it=>c.appendChild(it.btn)); });
+      const omat=new Set(items.map(it=>String(it.period)).filter(Boolean));
+      const jaksot=[...new Set([...(_JAKSOT[cls]||[]), ...[...omat].map(Number)])].sort((a,b)=>a-b);
+      jaksot.forEach(p=>{
+        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent='Alkaa '+p+'. periodissa:'; c.appendChild(pl);
+        const osa=items.filter(it=>String(it.period)===String(p));
+        if(osa.length) osa.forEach(it=>c.appendChild(it.btn));
+        else { const e=document.createElement('div'); e.className='period-empty'; e.textContent='Ei kursseja.'; c.appendChild(e); }
+      });
       items.filter(it=>!it.period).forEach(it=>c.appendChild(it.btn));
       return c;
     };
