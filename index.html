@@ -4,7 +4,7 @@
   SOLUKKO — Anki-pohjainen kertaussivusto biokemian opiskelijoille
   MUUTOKSET (patch):
     • ☀️/🌙 -nappi korvaa Solukko-ikonin — klikkaus = tummatila
-    • 5 s pohjassapito → kehittäjätila-salasanakysely
+    • Monan 5 s pohjassapito etusivulla → kehittäjätila-salasanakysely
     • Dev-tilassa näkyy ⚡ tietovisa-nappi (sphere-tyyli)
     • Deploy-aikaleima näkyy vain dev-tilassa
     • Overview-ruudukon kortit näyttävät tähtiarvioin pienillä tähdillä
@@ -1228,7 +1228,7 @@ body.dark-mode .home-tab + .home-tab::before { background:#5c5145; }
 .tab-badge { align-items:center; justify-content:center; min-width:19px; height:19px; padding:0 5px; margin-left:7px; border-radius:10px; background:#c0392b; color:#fff; font-size:0.72rem; font-weight:700; line-height:1; box-sizing:border-box; vertical-align:middle; box-shadow:0 1px 3px rgba(0,0,0,0.25); }
 #calendar-view { padding:0 16px 60px; max-width:1240px; margin:0 auto; width:100%; box-sizing:border-box; }
 .cal-layout { display:flex; gap:22px; align-items:flex-start; }
-.cal-courses { flex:0 0 220px; position:sticky; top:12px; max-height:calc(100vh - 24px); overflow-y:auto; scrollbar-width:thin; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 14px; font-family:'Lora',serif; }
+.cal-courses { flex:0 0 220px; position:sticky; top:50%; transform:translateY(-50%); max-height:calc(100vh - 24px); overflow-y:auto; scrollbar-width:thin; background:#fffef9;   /* pysyy pystysuunnassa keskella nakymaa, sisalto vierii jos ei mahdu */ border:1px solid #e7e1d6; border-radius:12px; padding:12px 14px; font-family:'Lora',serif; }
 .cal-courses-title { font-weight:700; color:#26473f; margin-bottom:8px; font-size:0.95rem; }
 .cal-hide { display:none !important; }
 .cal-year-block { margin-bottom:6px; }
@@ -1259,7 +1259,7 @@ body.dark-mode .cal-cb:checked + .cal-swatch { box-shadow:0 0 0 2px #5c8a6a; }
 body.dark-mode .cal-courses { background:#2b2622; border-color:#4a3f36; }
 body.dark-mode .cal-courses-title { color:#9fc7b4; }
 body.dark-mode .cal-course { color:#eadfce; }
-@media (max-width:760px){ .cal-layout{ flex-direction:column; } .cal-courses{ position:static; flex:none; width:100%; box-sizing:border-box; } }
+@media (max-width:760px){ .cal-layout{ flex-direction:column; } .cal-courses{ position:static; transform:none; max-height:none; flex:none; width:100%; box-sizing:border-box; } }
 .cal-legend { display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:center; margin:0 0 24px; font-family:'Lora',serif; font-size:0.9rem; color:#56533c; }
 .cal-leg { display:inline-flex; align-items:center; gap:6px; }
 .cal-swatch { width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,0.15); display:inline-block; }
@@ -1419,7 +1419,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
           style="opacity:0;"
         />
       </svg>
-      <button id="darkmode-btn" title="Tummatila · pidä 5 s pohjassa → kehittäjätila">
+      <button id="darkmode-btn" title="Tummatila">
         <span id="darkmode-icon">☀️</span>Teema
       </button>
     </div>
@@ -2952,7 +2952,7 @@ document.addEventListener('click',e=>{
 let _suppressNextAnswer = false;
 
 // ════════════════════════════════════════════════════════════
-// DARKMODE BTN — hold 5 s = dev password prompt
+// DARKMODE BTN — tap toggles dark mode (the 5 s dev-mode hold moved to Mona)
 // ════════════════════════════════════════════════════════════
 function initDarkmodeBtn(){
   const btn    = document.getElementById('darkmode-btn');
@@ -2986,13 +2986,7 @@ function initDarkmodeBtn(){
     longFired = false;
     btn.classList.add('pressing');
     resetRing();
-    ringTimer = setTimeout(startRingAnimation, 3000);
-    pressTimer = setTimeout(()=>{
-      longFired = true;
-      btn.classList.remove('pressing');
-      resetRing();
-      promptDevMode();
-    }, 5000);
+    // no long-press here any more: dev mode is entered by holding Mona on the homepage (initMonaDevHold)
   }
 
   function cancelPress(wasTap){
@@ -3010,10 +3004,10 @@ function initDarkmodeBtn(){
   btn.addEventListener('click', e => e.stopPropagation());
 }
 
-// Hold Mona (homepage logo #site-brand OR the review-page peeker .mona-top-inner) for 5 s → dev password prompt
+// Hold Mona (homepage greeting .welcome-mona, header logo #site-brand OR the review-page peeker .mona-top-inner) for 5 s → dev password prompt
 (function initMonaDevHold(){
   let t=null, fired=false, sx=0, sy=0;
-  const isMona = el => el && el.closest && el.closest('#site-brand, .mona-top-inner');
+  const isMona = el => el && el.closest && el.closest('.welcome-mona, #site-brand, .mona-top-inner');
   const cancel = () => { clearTimeout(t); t=null; };
   document.addEventListener('pointerdown', e=>{
     if(!isMona(e.target)) return;
