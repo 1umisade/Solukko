@@ -1229,6 +1229,11 @@ body.dark-mode .home-tab + .home-tab::before { background:#5c5145; }
 .cal-layout { display:flex; gap:22px; align-items:flex-start; }
 .cal-courses { flex:0 0 220px; position:sticky; top:12px; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 14px; font-family:'Lora',serif; }
 .cal-courses-title { font-weight:700; color:#26473f; margin-bottom:8px; font-size:0.95rem; }
+.cal-hide { display:none !important; }
+.cal-group-title { margin:12px 0 4px; font-family:'Lora',serif; font-size:0.72rem; font-weight:700; color:#7a5230; letter-spacing:0.02em; }
+.cal-group { display:block; width:calc(100% - 26px); margin:2px 0 4px 26px; box-sizing:border-box; font-family:'Lora',serif; font-size:0.74rem; color:#56533c; background:#fffef9; border:1px solid #d4cec4; border-radius:8px; padding:3px 6px; }
+body.dark-mode .cal-group-title { color:#cbb89b; }
+body.dark-mode .cal-group { background:#3a312b; color:#eadfce; border-color:#6d5f52; }
 .cal-course { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:0.85rem; color:#56533c; cursor:pointer; line-height:1.25; }
 .cal-course .cal-swatch { flex:0 0 auto; width:18px; height:18px; border-radius:4px; border:none; cursor:pointer; opacity:0.35; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.22); transition:opacity .12s, box-shadow .12s; }
 .cal-cb { display:none; }
@@ -1456,41 +1461,44 @@ body.dark-mode .cal-ev { color:#241f1b; }
   </div>
   <div class="deck-list" id="deck-list"></div>
   <div id="calendar-view" style="display:none;">
-<div class="cal-layout"><div class="cal-courses"><div class="cal-courses-title">Näytä kursseja</div><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5000" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF2CC"></span><span class="cal-cname">Avaimet biokemian opiskeluun</span></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5030" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DDEBF7"></span><span class="cal-cname">Solu ja biomolekyylit – teoria</span></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0070" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FCE4D6"></span><span class="cal-cname">Johdatus biotekniikkaan</span></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="KEMI6308" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E4DFEC"></span><span class="cal-cname">Kemian peruskurssi I</span></label><label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5031" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E2EFDA"></span><span class="cal-cname">Solu ja biomolekyylit – käytäntö</span></label></div><div class="cal-body"><div class="cal-month">
+<div class="cal-layout"><div class="cal-courses"><div class="cal-courses-title">Näytä kursseja</div>
+<div class="cal-group-title">1. lukuvuosi &middot; 1. periodi</div>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5000" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF2CC"></span><span class="cal-cname">Avaimet biokemian opiskeluun</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0070" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FCE4D6"></span><span class="cal-cname">Johdatus biotekniikkaan</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="KEMI6308" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E4DFEC"></span><span class="cal-cname">Kemian peruskurssi I</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5031" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E2EFDA"></span><span class="cal-cname">Solu ja biomolekyylit – käytäntö</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5030" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DDEBF7"></span><span class="cal-cname">Solu ja biomolekyylit – teoria</span></label>
+<div class="cal-group-title">2. lukuvuosi &middot; 1. periodi</div>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5144" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FBE2D5"></span><span class="cal-cname">Kasvibiokemia - käytäntö</span></label>
+<select class="cal-group" data-course="BKEM5144" onchange="updateCalHighlight()"><option value="Opetusryhmä 1">Opetusryhmä 1</option><option value="Opetusryhmä 2">Opetusryhmä 2</option><option value="Opetusryhmä 3">Opetusryhmä 3</option><option value="Opetusryhmä 4">Opetusryhmä 4</option></select>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5142" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#CCC0DA"></span><span class="cal-cname">Kasvibiokemia - teoria 1</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5143" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#C6E0B4"></span><span class="cal-cname">Kasvibiokemia - teoria 2</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5163" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#EDEDED"></span><span class="cal-cname">Solubiologia</span></label>
+<div class="cal-group-title">2. lukuvuosi &middot; 2. periodi</div>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5162" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DEEAF6"></span><span class="cal-cname">Aineenvaihdunta</span></label>
+<div class="cal-group-title">3. lukuvuosi &middot; 1. periodi</div>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0072" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF0B3"></span><span class="cal-cname">Biotekniset analyysimenetelmät</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5121" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#BDD7EE"></span><span class="cal-cname">Immunologia - käytäntö</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5120" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFE699"></span><span class="cal-cname">Immunologia - teoria</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5137" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#F8CBAD"></span><span class="cal-cname">Kandidaatintutkielma, biokemia</span></label>
+<div class="cal-group-title">3. lukuvuosi &middot; 2. periodi</div>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0082" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#D9E2F3"></span><span class="cal-cname">Bioprosessitekniikka</span></label>
+</div><div class="cal-body">
+<div class="cal-month">
 <h3 class="cal-mtitle">Elokuu 2026</h3>
 <div class="cal-grid">
-<div class="cal-wd">maanantai</div>
-<div class="cal-wd">tiistai</div>
-<div class="cal-wd">keskiviikko</div>
-<div class="cal-wd">torstai</div>
-<div class="cal-wd">perjantai</div>
-<div class="cal-wd">lauantai</div>
-<div class="cal-wd">sunnuntai</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">27</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">28</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">29</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">30</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">31</div>
-<div class="cal-evs">
-</div>
-</div>
+<div class="cal-wd">Maanantai</div>
+<div class="cal-wd">Tiistai</div>
+<div class="cal-wd">Keskiviikko</div>
+<div class="cal-wd">Torstai</div>
+<div class="cal-wd">Perjantai</div>
+<div class="cal-wd">Lauantai</div>
+<div class="cal-wd">Sunnuntai</div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
 <div class="cal-day">
 <div class="cal-num">1</div>
 <div class="cal-evs">
@@ -1609,15 +1617,15 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">24</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–10:00 Avaimet biokemian opiskeluun Luento Alhopuro-sali"><span class="cal-ev-t">09:00–10:00</span> Avaimet biokemian opiskeluun · Luento · Alhopuro-sali</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Laitoksen tervehdys Säätiösali"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Laitoksen tervehdys · Säätiösali</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00-10:00 Avaimet biokemian opiskeluun Luento Alhopuro-sali"><span class="cal-ev-t">09:00&ndash;10:00</span> Avaimet biokemian opiskeluun &middot; Luento &middot; Alhopuro-sali</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00-14:00 Avaimet biokemian opiskeluun Laitoksen tervehdys Säätiösali"><span class="cal-ev-t">12:00&ndash;14:00</span> Avaimet biokemian opiskeluun &middot; Laitoksen tervehdys &middot; Säätiösali</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">25</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–12:00 Avaimet biokemian opiskeluun Luento Osmo Järvi -sali"><span class="cal-ev-t">09:00–12:00</span> Avaimet biokemian opiskeluun · Luento · Osmo Järvi -sali</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00–16:00 Avaimet biokemian opiskeluun Luento TEU103 Sammio"><span class="cal-ev-t">13:00–16:00</span> Avaimet biokemian opiskeluun · Luento · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00-12:00 Avaimet biokemian opiskeluun Luento Osmo Järvi -sali"><span class="cal-ev-t">09:00&ndash;12:00</span> Avaimet biokemian opiskeluun &middot; Luento &middot; Osmo Järvi -sali</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00-16:00 Avaimet biokemian opiskeluun Luento TEU103 Sammio"><span class="cal-ev-t">13:00&ndash;16:00</span> Avaimet biokemian opiskeluun &middot; Luento &middot; TEU103 Sammio</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1648,92 +1656,64 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">31</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="08:15-10:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">08:15&ndash;10:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:00-12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00&ndash;12:00</span> Avaimet biokemian opiskeluun &middot; Harjoitustyöt &middot; sali auki</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00-15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00&ndash;15:00</span> Avaimet biokemian opiskeluun &middot; Harjoitustyöt &middot; sali auki</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">1</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">2</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">3</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">4</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">5</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">6</div>
-<div class="cal-evs">
-</div>
-</div>
-</div></div>
 <div class="cal-month">
 <h3 class="cal-mtitle">Syyskuu 2026</h3>
 <div class="cal-grid">
-<div class="cal-wd">maanantai</div>
-<div class="cal-wd">tiistai</div>
-<div class="cal-wd">keskiviikko</div>
-<div class="cal-wd">torstai</div>
-<div class="cal-wd">perjantai</div>
-<div class="cal-wd">lauantai</div>
-<div class="cal-wd">sunnuntai</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">31</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:00–12:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">10:00–12:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="13:00–15:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">13:00–15:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-</div>
-</div>
+<div class="cal-wd">Maanantai</div>
+<div class="cal-wd">Tiistai</div>
+<div class="cal-wd">Keskiviikko</div>
+<div class="cal-wd">Torstai</div>
+<div class="cal-wd">Perjantai</div>
+<div class="cal-wd">Lauantai</div>
+<div class="cal-wd">Sunnuntai</div>
+<div class="cal-day cal-empty"></div>
 <div class="cal-day">
 <div class="cal-num">1</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="08:15–10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15–10:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="08:15-10:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">2</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00–11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00–11:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00–14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00–14:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="14:00–16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00–16:00</span> Avaimet biokemian opiskeluun · Harjoitustyöt · sali auki</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="08:15-10:00 Kandidaatintutkielma, biokemia DEN Aud, Arje Scheinin -sali"><span class="cal-ev-t">08:15&ndash;10:00</span> Kandidaatintutkielma, biokemia &middot; DEN Aud, Arje Scheinin -sali</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="09:00-11:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">09:00&ndash;11:00</span> Avaimet biokemian opiskeluun &middot; Harjoitustyöt &middot; sali auki</div>
+<div class="cal-ev" data-course="BKEM5121" style="background:#BDD7EE" title="10:15-12:00 Immunologia - käytäntö DEN280, Dent3"><span class="cal-ev-t">10:15&ndash;12:00</span> Immunologia - käytäntö &middot; DEN280, Dent3</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="12:00-14:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">12:00&ndash;14:00</span> Avaimet biokemian opiskeluun &middot; Harjoitustyöt &middot; sali auki</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="14:00-16:00 Avaimet biokemian opiskeluun Harjoitustyöt sali auki"><span class="cal-ev-t">14:00&ndash;16:00</span> Avaimet biokemian opiskeluun &middot; Harjoitustyöt &middot; sali auki</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">3</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15-12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15&ndash;12:00</span> Johdatus biotekniikkaan &middot; Luento &middot; DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria AGO XXI, Agora luentosali XXI"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; AGO XXI, Agora luentosali XXI</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">4</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:15–11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15–11:45</span> Avaimet biokemian opiskeluun · Luento · Quantum XVII</div>
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5000" style="background:#FFF2CC" title="10:15-11:45 Avaimet biokemian opiskeluun Luento Quantum XVII"><span class="cal-ev-t">10:15&ndash;11:45</span> Avaimet biokemian opiskeluun &middot; Luento &middot; Quantum XVII</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN Aud, Arje Scheinin -sali"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN Aud, Arje Scheinin -sali</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15-16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15&ndash;16:00</span> Johdatus biotekniikkaan &middot; Luento &middot; DEN Aud</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1749,13 +1729,16 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">7</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="08:15-10:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15-10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15&ndash;10:00</span> Kemian peruskurssi I &middot; Luento &middot; Agora XXII</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia MED D1024, Säätiö-sali"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; MED D1024, Säätiö-sali</div>
+<div class="cal-ev" data-course="BKEM5163" style="background:#EDEDED" title="10:15-12:00 Solubiologia Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Solubiologia &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">8</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15-12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1766,14 +1749,17 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">10</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15-12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15&ndash;12:00</span> Johdatus biotekniikkaan &middot; Luento &middot; DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="12:15-14:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">11</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15–16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15–16:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="08:15-10:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="14:15-16:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">14:15&ndash;16:00</span> Johdatus biotekniikkaan &middot; Luento &middot; DEN Aud</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1789,29 +1775,36 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">14</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="08:15-10:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="10:15-12:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">15</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15-12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">16</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="14:15-16:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">17</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15–12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15–12:00</span> Johdatus biotekniikkaan · Luento · DEN Aud</div>
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="10:15-12:00 Johdatus biotekniikkaan Luento DEN Aud"><span class="cal-ev-t">10:15&ndash;12:00</span> Johdatus biotekniikkaan &middot; Luento &middot; DEN Aud</div>
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="12:15-14:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">18</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="08:15-10:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="08:30-10:00 Biotekniset analyysimenetelmät DEN Aud, Arje Scheinin -sali"><span class="cal-ev-t">08:30&ndash;10:00</span> Biotekniset analyysimenetelmät &middot; DEN Aud, Arje Scheinin -sali</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1827,29 +1820,36 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">21</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="08:15-10:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="10:15-12:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">22</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="12:15–14:00 Solu ja biomolekyylit – käytäntö Aloitusluento Pha1"><span class="cal-ev-t">12:15–14:00</span> Solu ja biomolekyylit – käytäntö · Aloitusluento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15-12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="12:15-14:00 Solu ja biomolekyylit – käytäntö Aloitusluento Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Solu ja biomolekyylit – käytäntö &middot; Aloitusluento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">23</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="14:15-16:00 Biotekniset analyysimenetelmät MED D1024, Säätiö-sali"><span class="cal-ev-t">14:15&ndash;16:00</span> Biotekniset analyysimenetelmät &middot; MED D1024, Säätiö-sali</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">24</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="12:15-14:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">25</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5142" style="background:#CCC0DA" title="08:15-10:00 Kasvibiokemia - teoria 1 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 1 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="08:30-10:00 Biotekniset analyysimenetelmät OJ, Osmo Järvi -sali"><span class="cal-ev-t">08:30&ndash;10:00</span> Biotekniset analyysimenetelmät &middot; OJ, Osmo Järvi -sali</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria DEN Aud, Arje Scheinin -sali"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; DEN Aud, Arje Scheinin -sali</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1865,7 +1865,8 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">28</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15-10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15&ndash;10:00</span> Kemian peruskurssi I &middot; Luento &middot; Agora XXII</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="10:15-12:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1876,65 +1877,46 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">30</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="14:15-16:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">1</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">2</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">3</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">4</div>
-<div class="cal-evs">
-</div>
-</div>
-</div></div>
 <div class="cal-month">
 <h3 class="cal-mtitle">Lokakuu 2026</h3>
 <div class="cal-grid">
-<div class="cal-wd">maanantai</div>
-<div class="cal-wd">tiistai</div>
-<div class="cal-wd">keskiviikko</div>
-<div class="cal-wd">torstai</div>
-<div class="cal-wd">perjantai</div>
-<div class="cal-wd">lauantai</div>
-<div class="cal-wd">sunnuntai</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">28</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">29</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">30</div>
-<div class="cal-evs">
-</div>
-</div>
+<div class="cal-wd">Maanantai</div>
+<div class="cal-wd">Tiistai</div>
+<div class="cal-wd">Keskiviikko</div>
+<div class="cal-wd">Torstai</div>
+<div class="cal-wd">Perjantai</div>
+<div class="cal-wd">Lauantai</div>
+<div class="cal-wd">Sunnuntai</div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
 <div class="cal-day">
 <div class="cal-num">1</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">2</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="08:30-10:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">08:30&ndash;10:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria DEN Aud, Arje Scheinin -sali"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; DEN Aud, Arje Scheinin -sali</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1950,31 +1932,47 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">5</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–12:00 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–12:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-12:00 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;12:00</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="10:15-12:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 1" style="background:#FBE2D5" title="12:15-16:00 Kasvibiokemia - käytäntö Etäopetus: Zoom"><span class="cal-ev-t">12:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Etäopetus: Zoom</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 2" style="background:#FBE2D5" title="12:15-16:00 Kasvibiokemia - käytäntö Etäopetus: Zoom"><span class="cal-ev-t">12:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Etäopetus: Zoom</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 3" style="background:#FBE2D5" title="12:15-16:00 Kasvibiokemia - käytäntö Etäopetus: Zoom"><span class="cal-ev-t">12:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Etäopetus: Zoom</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 4" style="background:#FBE2D5" title="12:15-16:00 Kasvibiokemia - käytäntö Etäopetus: Zoom"><span class="cal-ev-t">12:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Etäopetus: Zoom</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">6</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="14:00–16:00 Solu ja biomolekyylit – käytäntö Harjoitustyö DEN280 Dent3"><span class="cal-ev-t">14:00–16:00</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · DEN280 Dent3</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 1" style="background:#FBE2D5" title="08:15-12:00 Kasvibiokemia - käytäntö MED D1038-1, Alhopuro-sali"><span class="cal-ev-t">08:15&ndash;12:00</span> Kasvibiokemia - käytäntö &middot; MED D1038-1, Alhopuro-sali</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 2" style="background:#FBE2D5" title="08:15-12:00 Kasvibiokemia - käytäntö MED D1038-1, Alhopuro-sali"><span class="cal-ev-t">08:15&ndash;12:00</span> Kasvibiokemia - käytäntö &middot; MED D1038-1, Alhopuro-sali</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 3" style="background:#FBE2D5" title="08:15-12:00 Kasvibiokemia - käytäntö MED D1038-1, Alhopuro-sali"><span class="cal-ev-t">08:15&ndash;12:00</span> Kasvibiokemia - käytäntö &middot; MED D1038-1, Alhopuro-sali</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 4" style="background:#FBE2D5" title="08:15-12:00 Kasvibiokemia - käytäntö MED D1038-1, Alhopuro-sali"><span class="cal-ev-t">08:15&ndash;12:00</span> Kasvibiokemia - käytäntö &middot; MED D1038-1, Alhopuro-sali</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15-12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="14:00-16:00 Solu ja biomolekyylit – käytäntö Harjoitustyö DEN280 Dent3"><span class="cal-ev-t">14:00&ndash;16:00</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; DEN280 Dent3</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">7</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 1" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="09:15-12:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">09:15&ndash;12:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="14:15-16:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">8</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="12:15-14:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">9</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="08:00–10:00 Johdatus biotekniikkaan TENTTI DEN Aud"><span class="cal-ev-t">08:00–10:00</span> Johdatus biotekniikkaan · TENTTI · DEN Aud</div>
+<div class="cal-ev" data-course="DIBT0070" style="background:#FCE4D6" title="08:00-10:00 Johdatus biotekniikkaan TENTTI DEN Aud"><span class="cal-ev-t">08:00&ndash;10:00</span> Johdatus biotekniikkaan &middot; TENTTI &middot; DEN Aud</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="08:30-10:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">08:30&ndash;10:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="10:15-12:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="13:15-16:00 Immunologia - teoria DEN Aud, Arje Scheinin -sali"><span class="cal-ev-t">13:15&ndash;16:00</span> Immunologia - teoria &middot; DEN Aud, Arje Scheinin -sali</div>
 </div>
 </div>
 <div class="cal-day">
@@ -1989,31 +1987,41 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 <div class="cal-day">
 <div class="cal-num">12</div>
-<div class="cal-evs cal-side">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
-<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15–10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15–10:00</span> Kemian peruskurssi I · Luento · Agora XXII</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;15:15</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="KEMI6308" style="background:#E4DFEC" title="08:15-10:00 Kemian peruskurssi I Luento Agora XXII"><span class="cal-ev-t">08:15&ndash;10:00</span> Kemian peruskurssi I &middot; Luento &middot; Agora XXII</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="10:15-12:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="14:15-16:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">13</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 1" style="background:#FBE2D5" title="08:15-13:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;13:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15-12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">14</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 1" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="14:15-16:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">15</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="12:15-14:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">16</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 2" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="08:30-10:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">08:30&ndash;10:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="10:15-12:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5120" style="background:#FFE699" title="14:00-17:00 Immunologia - teoria Pha1, Auditorio Pha1"><span class="cal-ev-t">14:00&ndash;17:00</span> Immunologia - teoria &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
@@ -2029,29 +2037,37 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">19</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;15:15</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 2" style="background:#FBE2D5" title="08:15-13:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;13:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="08:15-10:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="14:15-16:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">20</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15–12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15–12:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="10:15-12:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">21</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 2" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="14:15-16:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">22</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="08:15-10:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">23</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0072" style="background:#FFF0B3" title="08:30-10:00 Biotekniset analyysimenetelmät Pha1, Auditorio Pha1"><span class="cal-ev-t">08:30&ndash;10:00</span> Biotekniset analyysimenetelmät &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="10:15-12:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1 Lasnaolopakollinen seminaari"><span class="cal-ev-t">10:15&ndash;12:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1 &middot; Lasnaolopakollinen seminaari</div>
 </div>
 </div>
 <div class="cal-day">
@@ -2067,28 +2083,38 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">26</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;15:15</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 3" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="14:15-16:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">27</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 3" style="background:#FBE2D5" title="08:15-13:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;13:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="10:15-12:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15-16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Solu ja biomolekyylit – teoria &middot; Luento &middot; Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">28</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 3" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">29</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="12:15-14:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">30</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="10:15-12:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1 Lasnaolopakollinen seminaari"><span class="cal-ev-t">10:15&ndash;12:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1 &middot; Lasnaolopakollinen seminaari</div>
 </div>
 </div>
 <div class="cal-day">
@@ -2096,54 +2122,32 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-evs">
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">1</div>
-<div class="cal-evs">
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
 </div>
 </div>
-</div></div>
 <div class="cal-month">
 <h3 class="cal-mtitle">Marraskuu 2026</h3>
 <div class="cal-grid">
-<div class="cal-wd">maanantai</div>
-<div class="cal-wd">tiistai</div>
-<div class="cal-wd">keskiviikko</div>
-<div class="cal-wd">torstai</div>
-<div class="cal-wd">perjantai</div>
-<div class="cal-wd">lauantai</div>
-<div class="cal-wd">sunnuntai</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">26</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">27</div>
-<div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5030" style="background:#DDEBF7" title="14:15–16:00 Solu ja biomolekyylit – teoria Luento Pha1"><span class="cal-ev-t">14:15–16:00</span> Solu ja biomolekyylit – teoria · Luento · Pha1</div>
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">28</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">29</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">30</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">31</div>
-<div class="cal-evs">
-</div>
-</div>
+<div class="cal-wd">Maanantai</div>
+<div class="cal-wd">Tiistai</div>
+<div class="cal-wd">Keskiviikko</div>
+<div class="cal-wd">Torstai</div>
+<div class="cal-wd">Perjantai</div>
+<div class="cal-wd">Lauantai</div>
+<div class="cal-wd">Sunnuntai</div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
 <div class="cal-day">
 <div class="cal-num">1</div>
 <div class="cal-evs">
@@ -2152,12 +2156,217 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">2</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;15:15</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 4" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="14:15-16:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">3</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 4" style="background:#FBE2D5" title="08:15-13:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;13:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="10:15-12:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">4</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5144" data-group="Opetusryhmä 4" style="background:#FBE2D5" title="08:15-16:00 Kasvibiokemia - käytäntö Opetuslaboratorio"><span class="cal-ev-t">08:15&ndash;16:00</span> Kasvibiokemia - käytäntö &middot; Opetuslaboratorio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">5</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="12:15-14:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">6</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="10:15-12:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">7</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">8</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">9</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;15:15</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="10:15-12:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="14:15-16:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">10</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="10:15-12:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">11</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">12</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="12:15-14:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1 Lasnaolopakollinen seminaari"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1 &middot; Lasnaolopakollinen seminaari</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">13</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="08:15-10:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">14</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">15</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">16</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;15:15</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="10:15-12:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="14:15-16:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1 Lasnaolopakollinen seminaari"><span class="cal-ev-t">14:15&ndash;16:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1 &middot; Lasnaolopakollinen seminaari</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">17</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="10:15-12:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">18</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">19</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5143" style="background:#C6E0B4" title="12:15-14:00 Kasvibiokemia - teoria 2 Pha1, Auditorio Pha1 Lasnaolopakollinen tiimityo"><span class="cal-ev-t">12:15&ndash;14:00</span> Kasvibiokemia - teoria 2 &middot; Pha1, Auditorio Pha1 &middot; Lasnaolopakollinen tiimityo</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">20</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">21</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">22</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">23</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00-15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00&ndash;15:15</span> Solu ja biomolekyylit – käytäntö &middot; Harjoitustyö &middot; TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="10:15-12:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">24</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="10:15-12:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">25</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">26</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">27</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">28</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">29</div>
+<div class="cal-evs">
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">30</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="10:15-12:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+</div>
+</div>
+<div class="cal-month">
+<h3 class="cal-mtitle">Joulukuu 2026</h3>
+<div class="cal-grid">
+<div class="cal-wd">Maanantai</div>
+<div class="cal-wd">Tiistai</div>
+<div class="cal-wd">Keskiviikko</div>
+<div class="cal-wd">Torstai</div>
+<div class="cal-wd">Perjantai</div>
+<div class="cal-wd">Lauantai</div>
+<div class="cal-wd">Sunnuntai</div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day">
+<div class="cal-num">1</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="10:15-12:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">2</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+</div>
+</div>
+<div class="cal-day">
+<div class="cal-num">3</div>
+<div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="10:15-12:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
@@ -2178,27 +2387,40 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">7</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="10:15-12:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">10:15&ndash;12:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="14:15-16:00 Kandidaatintutkielma, biokemia Pha1, Auditorio Pha1"><span class="cal-ev-t">14:15&ndash;16:00</span> Kandidaatintutkielma, biokemia &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">8</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="14:15-16:00 Kandidaatintutkielma, biokemia DEN218, Dent2"><span class="cal-ev-t">14:15&ndash;16:00</span> Kandidaatintutkielma, biokemia &middot; DEN218, Dent2</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">9</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:15-10:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="14:15-16:00 Kandidaatintutkielma, biokemia DEN216, Dent1"><span class="cal-ev-t">14:15&ndash;16:00</span> Kandidaatintutkielma, biokemia &middot; DEN216, Dent1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">10</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN218, Dent2"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN218, Dent2</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="14:15-16:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">14:15&ndash;16:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">11</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="14:15-16:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">14:15&ndash;16:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
 </div>
 </div>
 <div class="cal-day">
@@ -2214,22 +2436,26 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">14</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">15</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
+<div class="cal-ev" data-course="BKEM5137" style="background:#F8CBAD" title="10:15-12:00 Kandidaatintutkielma, biokemia DEN203, Dent4"><span class="cal-ev-t">10:15&ndash;12:00</span> Kandidaatintutkielma, biokemia &middot; DEN203, Dent4</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">16</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
+<div class="cal-ev" data-course="BKEM5162" style="background:#DEEAF6" title="08:00-11:00 Aineenvaihdunta Pha1, Auditorio Pha1"><span class="cal-ev-t">08:00&ndash;11:00</span> Aineenvaihdunta &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
 <div class="cal-num">17</div>
 <div class="cal-evs">
+<div class="cal-ev" data-course="DIBT0082" style="background:#D9E2F3" title="08:15-10:00 Bioprosessitekniikka Pha1, Auditorio Pha1"><span class="cal-ev-t">08:15&ndash;10:00</span> Bioprosessitekniikka &middot; Pha1, Auditorio Pha1</div>
 </div>
 </div>
 <div class="cal-day">
@@ -2260,7 +2486,6 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-day">
 <div class="cal-num">23</div>
 <div class="cal-evs">
-<div class="cal-ev" data-course="BKEM5031" style="background:#E2EFDA" title="08:00–15:15 Solu ja biomolekyylit – käytäntö Harjoitustyö TEU103 Sammio"><span class="cal-ev-t">08:00–15:15</span> Solu ja biomolekyylit – käytäntö · Harjoitustyö · TEU103 Sammio</div>
 </div>
 </div>
 <div class="cal-day">
@@ -2298,37 +2523,24 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-evs">
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">1</div>
+<div class="cal-day">
+<div class="cal-num">31</div>
 <div class="cal-evs">
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">2</div>
-<div class="cal-evs">
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
+<div class="cal-day cal-empty"></div>
 </div>
 </div>
-<div class="cal-day cal-adj">
-<div class="cal-num">3</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">4</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">5</div>
-<div class="cal-evs">
-</div>
-</div>
-<div class="cal-day cal-adj">
-<div class="cal-num">6</div>
-<div class="cal-evs">
-</div>
-</div>
-</div></div></div></div>
+</div></div>
   </div>
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
   <div id="chat-view" style="display:none;">
@@ -6210,8 +6422,14 @@ function highlightCalToday(){   // mark today's cell in the calendar
 function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
   var cbs=document.querySelectorAll('#calendar-view .cal-cb'), checked=[];
   for(var i=0;i<cbs.length;i++){ if(cbs[i].checked) checked.push(cbs[i].getAttribute('data-course')); }
+  var valittu={};   // kurssi -> valittu opetusryhma
+  document.querySelectorAll('#calendar-view .cal-group').forEach(function(sel){ valittu[sel.getAttribute('data-course')]=sel.value; });
   var evs=document.querySelectorAll('#calendar-view .cal-ev');
-  for(var j=0;j<evs.length;j++){ var course=evs[j].getAttribute('data-course'); evs[j].classList.toggle('cal-dim', checked.indexOf(course)===-1); }   // dim every course that isn't checked (so nothing checked = all dimmed)
+  for(var j=0;j<evs.length;j++){
+    var course=evs[j].getAttribute('data-course'), ryhma=evs[j].getAttribute('data-group');
+    evs[j].classList.toggle('cal-hide', !!(ryhma && valittu[course] && ryhma!==valittu[course]));   // muun opetusryhman kerrat pois nakyvista
+    evs[j].classList.toggle('cal-dim', checked.indexOf(course)===-1);   // dim every course that isn't checked (so nothing checked = all dimmed)
+  }
 }
 function showDecks(){
   { const cs=document.getElementById('card-screen'); if(cs) cs.classList.remove('card-fs-on','faux-fs'); }   // clear any faux fullscreen when returning to the homepage
