@@ -3646,6 +3646,9 @@ function buildDeckGrid(decks, list){
     // Lukuvuodessa on viisi periodia: syksyllä 1-2, keväällä 3-5. Jokainen saa otsikkonsa, myös
     // tyhjä — muuten lukuvuoden rakenteesta ei näe, mihin kohtaan kurssi puuttuu.
     const _JAKSOT={autumn:[1,2], spring:[3,4,5]};
+    // Periodin alkukuukausi: I 1.8., II 26.10., III 11.1., IV 15.3., kesäperiodi 24.5.
+    const _JAKSOKUU={1:'Elokuussa', 2:'Lokakuussa', 3:'Tammikuussa', 4:'Maaliskuussa', 5:'Toukokuussa'};
+    const _jaksoOtsikko=p=>(_JAKSOKUU[p]||(p+'. periodissa'))+' alkavat kurssit:';
     const _jaksoSarake=(cls,label,items)=>{
       if(!items.length) return col(cls,label,items);
       const c=document.createElement('div'); c.className='sem-col '+cls;
@@ -3653,7 +3656,7 @@ function buildDeckGrid(decks, list){
       const omat=new Set(items.map(it=>String(it.period)).filter(Boolean));
       const jaksot=[...new Set([...(_JAKSOT[cls]||[]), ...[...omat].map(Number)])].sort((a,b)=>a-b);
       jaksot.forEach(p=>{
-        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. periodissa alkavat kurssit:'; c.appendChild(pl);
+        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=_jaksoOtsikko(p); c.appendChild(pl);
         const osa=items.filter(it=>String(it.period)===String(p));
         if(osa.length) osa.forEach(it=>c.appendChild(it.btn));
         else { const e=document.createElement('div'); e.className='period-empty'; e.textContent='Ei kursseja.'; c.appendChild(e); }
