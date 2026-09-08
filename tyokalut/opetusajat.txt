@@ -1,0 +1,89 @@
+# Peppin "Opetusajat" sellaisenaan liitettyna. Kurssit erotellaan tyhjalla rivilla.
+#   rivi 1        kurssikoodi, nimi ja opintopisteet
+#   rivi 2        toteutuksen koodi, nimi ja aikavali
+#   ## nimi       opetusryhma, jos kurssilla on rinnakkaisryhmia
+#   muut rivit    opetusaikoja: "ma 05.10.2026 12:15-16:00 paikka; huomio"
+# #-alkuiset rivit ovat kommentteja.
+
+BKEM5162 Aineenvaihdunta, 4 op
+BKEM5162-3002 Aineenvaihdunta 27.10.2026 - 18.12.2026
+ti 27.10.2026 08:15-10:00 Pha1, Auditorio Pha1
+ke 28.10.2026 08:15-10:00 Pha1, Auditorio Pha1
+ti 03.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ke 04.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 09.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+ti 10.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ke 11.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 16.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+ti 17.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ke 18.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 23.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 25.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 30.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 02.12.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 07.12.2026 10:15-12:00 Pha1, Auditorio Pha1
+ke 09.12.2026 08:15-10:00 Pha1, Auditorio Pha1
+ke 16.12.2026 08:00-11:00 Pha1, Auditorio Pha1
+
+BKEM5142 Kasvibiokemia - teoria 1, 2 op
+BKEM5142-3003 Kasvibiokemia - teoria 1 07.09.2026 - 05.10.2026
+ma 07.09.2026 08:15-10:00 Pha1, Auditorio Pha1
+to 10.09.2026 12:15-14:00 Pha1, Auditorio Pha1
+pe 11.09.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 14.09.2026 08:15-10:00 Pha1, Auditorio Pha1
+to 17.09.2026 12:15-14:00 Pha1, Auditorio Pha1
+pe 18.09.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 21.09.2026 08:15-10:00 Pha1, Auditorio Pha1
+to 24.09.2026 12:15-14:00 Pha1, Auditorio Pha1
+pe 25.09.2026 08:15-10:00 Pha1, Auditorio Pha1
+
+BKEM5143 Kasvibiokemia - teoria 2, 4 op
+BKEM5143-3002 Kasvibiokemia - teoria 2 08.10.2026 - 20.11.2026
+to 08.10.2026 12:15-14:00 Pha1, Auditorio Pha1
+pe 09.10.2026 10:15-12:00 Pha1, Auditorio Pha1
+ma 12.10.2026 14:15-16:00 Pha1, Auditorio Pha1
+to 15.10.2026 12:15-14:00 Pha1, Auditorio Pha1
+pe 16.10.2026 10:15-12:00 Pha1, Auditorio Pha1
+ma 19.10.2026 14:15-16:00 Pha1, Auditorio Pha1
+to 22.10.2026 08:15-10:00 Pha1, Auditorio Pha1
+pe 23.10.2026 10:15-12:00 Pha1, Auditorio Pha1; Lasnaolopakollinen seminaari
+ma 26.10.2026 14:15-16:00 Pha1, Auditorio Pha1
+to 29.10.2026 12:15-14:00 Pha1, Auditorio Pha1
+pe 30.10.2026 10:15-12:00 Pha1, Auditorio Pha1; Lasnaolopakollinen seminaari
+ma 02.11.2026 14:15-16:00 Pha1, Auditorio Pha1
+to 05.11.2026 12:15-14:00 Pha1, Auditorio Pha1
+pe 06.11.2026 10:15-12:00 Pha1, Auditorio Pha1
+ma 09.11.2026 14:15-16:00 Pha1, Auditorio Pha1
+to 12.11.2026 12:15-14:00 Pha1, Auditorio Pha1; Lasnaolopakollinen seminaari
+pe 13.11.2026 08:15-10:00 Pha1, Auditorio Pha1
+ma 16.11.2026 14:15-16:00 Pha1, Auditorio Pha1; Lasnaolopakollinen seminaari
+to 19.11.2026 12:15-14:00 Pha1, Auditorio Pha1; Lasnaolopakollinen tiimityo
+
+# KESKEN: Peppi naytti vain 5 ensimmaista aikaa per ryhma ("Nayta lisaa" auki).
+# Taydenna loput, niin kalenteri saa ryhmien koko aikataulut.
+BKEM5144 Kasvibiokemia - käytäntö, 4 op
+BKEM5144-3002 Kasvibiokemia - käytäntö 05.10.2026 - 11.12.2026
+## Opetusryhmä 1
+ma 05.10.2026 12:15-16:00 Etäopetus: Zoom
+ti 06.10.2026 08:15-12:00 MED D1038-1, Alhopuro-sali
+ke 07.10.2026 08:15-16:00 Opetuslaboratorio
+ti 13.10.2026 08:15-13:00 Opetuslaboratorio
+ke 14.10.2026 08:15-16:00 Opetuslaboratorio
+## Opetusryhmä 2
+ma 05.10.2026 12:15-16:00 Etäopetus: Zoom
+ti 06.10.2026 08:15-12:00 MED D1038-1, Alhopuro-sali
+pe 16.10.2026 08:15-16:00 Opetuslaboratorio
+ma 19.10.2026 08:15-13:00 Opetuslaboratorio
+ke 21.10.2026 08:15-16:00 Opetuslaboratorio
+## Opetusryhmä 3
+ma 05.10.2026 12:15-16:00 Etäopetus: Zoom
+ti 06.10.2026 08:15-12:00 MED D1038-1, Alhopuro-sali
+ma 26.10.2026 08:15-16:00 Opetuslaboratorio
+ti 27.10.2026 08:15-13:00 Opetuslaboratorio
+ke 28.10.2026 08:15-16:00 Opetuslaboratorio
+## Opetusryhmä 4
+ma 05.10.2026 12:15-16:00 Etäopetus: Zoom
+ti 06.10.2026 08:15-12:00 MED D1038-1, Alhopuro-sali
+ma 02.11.2026 08:15-16:00 Opetuslaboratorio
+ti 03.11.2026 08:15-13:00 Opetuslaboratorio
+ke 04.11.2026 08:15-16:00 Opetuslaboratorio
