@@ -3653,7 +3653,7 @@ function buildDeckGrid(decks, list){
       const omat=new Set(items.map(it=>String(it.period)).filter(Boolean));
       const jaksot=[...new Set([...(_JAKSOT[cls]||[]), ...[...omat].map(Number)])].sort((a,b)=>a-b);
       jaksot.forEach(p=>{
-        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent='Alkaa '+p+'. periodissa:'; c.appendChild(pl);
+        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=p+'. periodissa alkavat kurssit:'; c.appendChild(pl);
         const osa=items.filter(it=>String(it.period)===String(p));
         if(osa.length) osa.forEach(it=>c.appendChild(it.btn));
         else { const e=document.createElement('div'); e.className='period-empty'; e.textContent='Ei kursseja.'; c.appendChild(e); }
