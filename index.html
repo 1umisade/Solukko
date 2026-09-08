@@ -185,7 +185,8 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .year-row { display: flex; gap: 24px; align-items: flex-start; }
 .sem-col { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 18px 16px; align-content: flex-start; }
 .sem-col.vuosi { display: block; }
-.period-row { display: flex; gap: 16px; align-items: flex-start; overflow-x: auto; overflow-y: hidden; padding: 0 2px 10px; margin-bottom: 8px; scrollbar-width: thin; }
+.period-row { display: flex; gap: 16px; align-items: flex-start; padding: 0 2px; margin-bottom: 8px; }
+.period-row.vierii { overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scrollbar-width: thin; }   /* vierityssailio leikkaa sisaltonsa, joten vain jos kurssit eivat mahdu */
 .period-row > .deck-btn { flex: 0 0 auto; }   /* kortit eivat kutistu, rivi vierii sivusuunnassa */
 .sem-col.spring { border-left: 1px dashed #cfc8bc; padding-left: 24px; }
 .sem-col.sem-empty { border: none !important; padding-left: 0 !important; padding-top: 0 !important; }
@@ -3054,7 +3055,7 @@ function heroMonaClick(){
 const MONA_BUBBLES={
   home_decks:'Alla näet hirmuisen määrän korttipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Aloita klikkaamalla haluamaasi korttipakkaa!',
   home_quiz:'Solukko.com järjestää tietovisoja pilteille joka maanantai Aurumin TEK Loungessa klo 16:00&ndash;18:00. Tietovisoissa kerrataan edellisviikon luentojen asiat ja jaossa on pieniä palkintoja kaikille oikein vastaaville. Vapaa pääsy, ei ilmoittautumista! Ensimmäinen tietovisa 7.9.2026.',
-  homepage1:'<span>Tervetuloa Solukkoon! Täällä voit opiskella yliopistokurssit valmiiden kysymyskorttien avulla! Nimeni on Mona ja toimin sivuston oppaana. Klikkaa minua, niin ohjeistan sinua opiskelun aloittamisessa.</span>',
+  homepage1:'<span>Tervetuloa Solukkoon! Täällä voit opiskella yliopistokurssit valmiiden kysymyskorttien avulla! Nimeni on Mona ja toimin sivuston oppaana. Klikkaa minua, jos haluat ohjeistusta opiskelun aloittamiseen.</span>',
   homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
   homepage3:'Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko™-tietovisoista!',
 
@@ -3669,6 +3670,14 @@ function buildDeckGrid(decks, list){
     section.appendChild(row);
     list.appendChild(section);
   });
+  // A scroll container clips its content, and the pack-back cards behind each cover would be cut
+  // off at the row edge. Turn scrolling on only for the rows whose courses do not fit.
+  requestAnimationFrame(paivitaPeriodiVieritys);
+  [120,600,1600].forEach(ms=>setTimeout(paivitaPeriodiVieritys, ms));   // pakkojen kuvat ja fontit asettavat leveydet vasta vahitellen
+  if(!list._vieritysObs && window.ResizeObserver){   // rivien leveydet asettuvat vasta pakkojen latautuessa, joten tarkkaillaan
+    list._vieritysObs=new ResizeObserver(()=>{ clearTimeout(window._vieritysTO); window._vieritysTO=setTimeout(paivitaPeriodiVieritys, 80); });
+    list._vieritysObs.observe(list);
+  }
   // place the dev-only "All Decks" deck as the last deck, next to the last real deck in the grid
   const _sections=list.querySelectorAll('.year-section');
   const _lastSection=_sections[_sections.length-1];
@@ -3686,6 +3695,7 @@ function buildDeckGrid(decks, list){
   _media.forEach(m=>{ if(m.tagName==='VIDEO'){ try{ m.load(); }catch(e){} } });
   const _revealDecks=()=>{
     if(_decksReadyResolve){ _decksReadyResolve(); _decksReadyResolve=null; }   // let init lift the loading overlay
+    paivitaPeriodiVieritys();   // leveydet ovat vasta nyt lopulliset
     if(list.dataset.buildGen!==_gen) return;   // a newer buildDeckGrid superseded this one
     list.classList.remove('decks-loading');
     _setHomeMonaLoading(false);   // decks are in → Mona wakes up and her greeting bubble returns
@@ -3703,6 +3713,15 @@ function buildDeckGrid(decks, list){
   if(!_media.length) _revealDecks();
   else Promise.all(_media.map(m=>_waitMedia(m).then(_bumpGreet))).then(_revealDecks);
 }
+function paivitaPeriodiVieritys(){   // vain ylivuotava rivi vierii; muut saavat nayttaa pakan takakortit leikkaamatta
+  document.querySelectorAll('#deck-list .period-row').forEach(r=>{
+    const oli=r.classList.contains('vierii');
+    if(oli) r.classList.remove('vierii');           // mittaa leikkaamattomana, muuten scrollWidth on jo rajattu
+    const yli=r.scrollWidth > r.clientWidth + 1;
+    r.classList.toggle('vierii', yli);
+  });
+}
+window.addEventListener('resize', ()=>{ clearTimeout(window._vieritysTO); window._vieritysTO=setTimeout(paivitaPeriodiVieritys, 150); });
 function layoutDecksRadial(){ /* homepage layout is CSS-driven (see buildDeckGrid); nothing to reposition on resize */ }
 if('scrollRestoration' in history) history.scrollRestoration='manual';   // don't let the browser restore scroll to 0 and cover the hero-hiding scroll
 function scrollPastHero(){   // start with the hero section just above the viewport; it reveals when you scroll up
