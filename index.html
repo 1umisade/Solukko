@@ -96,7 +96,7 @@ body { font-family: 'Lora', Georgia, serif; background: #efe7d8 url('site_bg.jpg
 body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none; }   /* hide the scrollbar on the mobile homepage */
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
-.deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: none; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }
+.deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1240px; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }   /* sama leveys kuin kalenterinakymalla: lohko keskelle, sisalto siina vasemmalle */
 #home-mona { align-self: flex-start; display: flex; align-items: flex-start; gap: 18px; margin: 4px 0 10px; position: relative; }   /* Mona anchored to the TOP; on desktop the greeting bubble is absolute (below) so its size never shifts the decks */
 #home-mona .site-brand { width: 120px; margin: 0; }
 @media (min-width: 901px) { #home-mona { height: 120px; } }   /* fixed to Mona's height: a taller/shorter greeting bubble overflows instead of shifting the deck grid */
