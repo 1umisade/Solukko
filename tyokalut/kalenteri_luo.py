@@ -18,10 +18,24 @@ KUUKAUSI = ["tammikuu", "helmikuu", "maaliskuu", "huhtikuu", "toukokuu", "kesäk
             "heinäkuu", "elokuu", "syyskuu", "lokakuu", "marraskuu", "joulukuu"]
 VIIKONPAIVAT = ["Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai", "Lauantai", "Sunnuntai"]
 
-# kurssikoodi -> lukuvuosi. Opetussuunnitelmasta; koodia ei ole kaikilla pakoilla.
-VUOSI = {"BKEM5000": 1, "BKEM5030": 1, "BKEM5031": 1, "KEMI6308": 1, "DIBT0070": 1,
-         "BKEM5142": 2, "BKEM5143": 2, "BKEM5144": 2, "BKEM5162": 2, "BKEM5163": 2,
-         "BKEM5120": 3, "BKEM5121": 3, "DIBT0072": 3, "DIBT0082": 3, "BKEM5137": 3}
+EI_AIKOJA = "Opetusaikoja ei vielä julkaistu."
+
+
+def _avain(nimi):
+    """Nimi vertailumuodossa: pienet kirjaimet, ajatusviiva yhdysmerkiksi, yksi välilyönti."""
+    return re.sub(r"\s+", " ", (nimi or "").lower().replace("–", "-").replace("—", "-")).strip()
+
+
+# Opetussuunnitelma (tyokalut/opetussuunnitelma.txt): vuosi, periodit, koodi, nimi.
+# Antaa jokaiselle kurssille lukuvuoden ja periodin ja tuo listaan myos kurssit, joilla ei ole aikoja.
+OPS = []
+for rivi in io.open(os.path.join(SC, "opetussuunnitelma.txt"), encoding="utf-8"):
+    rivi = rivi.rstrip("\n")
+    if not rivi.strip() or rivi.startswith("#"):
+        continue
+    vuosi, periodit, koodi, nimi = rivi.split("\t")
+    OPS.append({"vuosi": int(vuosi), "periodit": [int(p) for p in periodit.split(",")],
+                "koodi": None if koodi.strip() == "-" else koodi.strip(), "nimi": nimi.strip()})
 
 VARIT = ["#FFF2CC", "#DDEBF7", "#FCE4D6", "#E4DFEC", "#E2EFDA", "#FFE699", "#BDD7EE",
          "#F8CBAD", "#CCC0DA", "#C6E0B4", "#FBE2D5", "#DEEAF6", "#EDEDED", "#FFF0B3", "#D9E2F3"]
@@ -56,11 +70,21 @@ for koodi, k in uusi.items():
     else:
         kurssit[koodi] = {"nimi": k["nimi"], "vari": "", "ryhmat": ryhmat}
 
-# värit: vanhat säilyvät, uusille seuraava vapaa
+# opetussuunnitelma: lukuvuosi ja periodi kurssille, ja listaan myos kurssit ilman aikoja
+nimella = {_avain(k["nimi"]): koodi for koodi, k in kurssit.items()}
+for o in OPS:
+    koodi = o["koodi"] if o["koodi"] in kurssit else nimella.get(_avain(o["nimi"]))
+    if koodi is None:
+        koodi = o["koodi"] or "OPS:" + _avain(o["nimi"]).replace(" ", "_")
+        kurssit[koodi] = {"nimi": o["nimi"], "vari": "", "ryhmat": {}}
+    kurssit[koodi]["vuosi"] = o["vuosi"]
+    kurssit[koodi]["periodi"] = o["periodit"][0]
+
+# värit: vanhat säilyvät, uusille seuraava vapaa. Kurssi ilman aikoja ei tarvitse väriä.
 kaytetyt = {k["vari"] for k in kurssit.values() if k["vari"]}
 vapaat = [v for v in VARIT if v not in kaytetyt]
 for koodi in sorted(kurssit):
-    if not kurssit[koodi]["vari"]:
+    if not kurssit[koodi]["vari"] and kurssit[koodi]["ryhmat"]:
         kurssit[koodi]["vari"] = vapaat.pop(0) if vapaat else "#EDEDED"
 
 # ---- tapahtumat päivittäin ---------------------------------------------------
@@ -70,13 +94,15 @@ for koodi, k in kurssit.items():
         for e in lista:
             pvm = datetime.date(*[int(x) for x in e["pvm"].split("-")])
             paivat[pvm].append((koodi, ryhma, e))
+    if k["ryhmat"]:
         k.setdefault("alkaa", min(x["pvm"] for lista2 in k["ryhmat"].values() for x in lista2))
 for lista in paivat.values():
     lista.sort(key=lambda t: (t[2]["alkaa"], t[0]))
 
+# kurssit, jotka eivat ole opetussuunnitelmassa: periodi ensimmaisen kerran paivasta, lukuvuosi "Muut"
 for koodi, k in kurssit.items():
-    k["periodi"] = periodi(datetime.date(*[int(x) for x in k["alkaa"].split("-")]))
-    k["vuosi"] = VUOSI.get(koodi, 0)
+    k.setdefault("periodi", periodi(datetime.date(*[int(x) for x in k["alkaa"].split("-")])) if k.get("alkaa") else 0)
+    k.setdefault("vuosi", 0)
 
 # ---- kurssivalitsin ----------------------------------------------------------
 osat = ['<div class="cal-layout"><div class="cal-courses"><div class="cal-courses-title">Näytä kursseja</div>']
@@ -90,11 +116,18 @@ for vuosi in sorted(ryhmitelty, key=lambda v: v or 99):
                 % (("%d. lukuvuosi" % vuosi) if vuosi else "Muut"))
     for per in sorted(ryhmitelty[vuosi], key=lambda p: p or 99):
         osat.append('<div class="cal-period-block">')
-        osat.append('<label class="cal-period"><input type="checkbox" class="cal-cb-all" '
-                    'onchange="calValitseKaikki(this)"><span>%s</span></label>'
-                    % (("%d. periodi" % per) if per else "ajankohta auki"))
+        otsikko = ("%d. periodi" % per) if per else "ajankohta auki"
+        if any(kurssit[c]["ryhmat"] for c in ryhmitelty[vuosi][per]):
+            osat.append('<label class="cal-period"><input type="checkbox" class="cal-cb-all" '
+                        'onchange="calValitseKaikki(this)"><span>%s</span></label>' % otsikko)
+        else:   # pelkkia kursseja ilman aikoja: otsikko ilman valintaruutua
+            osat.append('<div class="cal-period cal-period-tyhja"><span>%s</span></div>' % otsikko)
         for koodi in sorted(ryhmitelty[vuosi][per], key=lambda c: kurssit[c]["nimi"]):
             k = kurssit[koodi]
+            if not k["ryhmat"]:   # opetussuunnitelmassa, mutta aikoja ei ole: nakyy, ei valittavissa
+                osat.append('<div class="cal-course cal-tyhja"><span class="cal-swatch"></span>'
+                            '<span class="cal-cname">%s<span class="cal-note">%s</span></span></div>' % (esc(k["nimi"]), EI_AIKOJA))
+                continue
             osat.append('<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="%s" '
                         'onchange="updateCalHighlight()"><span class="cal-swatch" style="background:%s"></span>'
                         '<span class="cal-cname">%s</span></label>' % (koodi, k["vari"], esc(k["nimi"])))
@@ -152,6 +185,6 @@ print("%-10s %-34s %-6s %-9s %-8s %s" % ("koodi", "kurssi", "vuosi", "periodi", 
 print("-" * 92)
 for koodi in sorted(kurssit, key=lambda c: (kurssit[c]["vuosi"] or 99, kurssit[c]["periodi"], kurssit[c]["nimi"])):
     k = kurssit[koodi]
-    maara = " + ".join(str(len(v)) for v in k["ryhmat"].values())
-    print("%-10s %-34s %-6s %-9s %-8s %s" % (koodi, k["nimi"][:34], k["vuosi"] or "?",
-                                             "%d. periodi" % k["periodi"], k["vari"], maara))
+    maara = " + ".join(str(len(v)) for v in k["ryhmat"].values()) or "ei aikoja"
+    print("%-10s %-34s %-6s %-9s %-8s %s" % (koodi[:10], k["nimi"][:34], k["vuosi"] or "?",
+                                             "%d. periodi" % k["periodi"], k["vari"] or "-", maara))

@@ -1237,6 +1237,7 @@ body.dark-mode .home-tab + .home-tab::before { background:#5c5145; }
 .cal-period-block { margin-left:10px; }
 .cal-period { display:flex; align-items:center; gap:7px; margin:6px 0 1px; font-family:'Lora',serif; font-size:0.76rem; font-weight:700; color:#7a5230; opacity:0.8; cursor:pointer; }
 .cal-period-block .cal-course { margin-left:10px; }
+.cal-period-tyhja { cursor:default; padding-left:20px; }   /* ei valintaruutua: sisennys pitaa otsikot samassa linjassa */
 .cal-period-block .cal-group { margin-left:36px; width:calc(100% - 36px); }
 body.dark-mode .cal-year, body.dark-mode .cal-period { color:#cbb89b; }
 .cal-group { display:block; width:calc(100% - 26px); margin:2px 0 4px 26px; box-sizing:border-box; font-family:'Lora',serif; font-size:0.74rem; color:#56533c; background:#fffef9; border:1px solid #d4cec4; border-radius:8px; padding:3px 6px; }
@@ -1246,6 +1247,13 @@ body.dark-mode .cal-group { background:#3a312b; color:#eadfce; border-color:#6d5
 .cal-course .cal-swatch { flex:0 0 auto; width:18px; height:18px; border-radius:4px; border:none; cursor:pointer; opacity:0.35; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.22); transition:opacity .12s, box-shadow .12s; }
 .cal-cb { display:none; }
 .cal-cname { flex:1 1 auto; }
+.cal-tyhja { cursor:default; }   /* kurssi opetussuunnitelmassa, mutta opetusaikoja ei viela julkaistu */
+.cal-tyhja .cal-swatch { background:transparent; opacity:0.5; box-shadow:none; border:1px dashed #b8b0a4; box-sizing:border-box; cursor:default; }
+.cal-tyhja .cal-cname { color:#8a8274; }
+.cal-note { display:block; font-size:0.72rem; font-style:italic; color:#a39a8c; margin-top:1px; }
+body.dark-mode .cal-tyhja .cal-swatch { border-color:#6d5f52; }
+body.dark-mode .cal-tyhja .cal-cname { color:#9a8f80; }
+body.dark-mode .cal-note { color:#857a6c; }
 .cal-solo { flex:0 0 auto; font-family:'Lora',serif; font-size:0.66rem; padding:2px 8px; border:1px solid #d4cec4; border-radius:8px; background:#fffef9; color:#7a6f60; cursor:pointer; transition:border-color .12s, color .12s; }
 .cal-solo:hover { border-color:#3a5c4c; color:#3a5c4c; }
 body.dark-mode .cal-solo { background:#241f1b; border-color:#6d5f52; color:#cbb9a0; }
@@ -1475,39 +1483,76 @@ body.dark-mode .cal-ev { color:#241f1b; }
 <div class="cal-period-block">
 <label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>1. periodi</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5000" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF2CC"></span><span class="cal-cname">Avaimet biokemian opiskeluun</span></label>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">English for STEM A<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0070" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FCE4D6"></span><span class="cal-cname">Johdatus biotekniikkaan</span></label>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Kemian laboratoriomenetelmät<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="KEMI6308" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E4DFEC"></span><span class="cal-cname">Kemian peruskurssi I</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5031" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E2EFDA"></span><span class="cal-cname">Solu ja biomolekyylit – käytäntö</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5030" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DDEBF7"></span><span class="cal-cname">Solu ja biomolekyylit – teoria</span></label>
+</div>
+<div class="cal-period-block">
+<div class="cal-period cal-period-tyhja"><span>2. periodi</span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Kemian peruskurssi II<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+</div>
+<div class="cal-period-block">
+<div class="cal-period cal-period-tyhja"><span>3. periodi</span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">English for STEM B<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Kemia III<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Mikrobiologia<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Molekyylibiologia - käytäntö 1<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Molekyylibiologia - teoria<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+</div>
+<div class="cal-period-block">
+<div class="cal-period cal-period-tyhja"><span>4. periodi</span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Kemia IV<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
 </div>
 </div>
 <div class="cal-year-block">
 <label class="cal-year"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>2. lukuvuosi</span></label>
 <div class="cal-period-block">
 <label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>1. periodi</span></label>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5162" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DEEAF6"></span><span class="cal-cname">Aineenvaihdunta</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5144" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FBE2D5"></span><span class="cal-cname">Kasvibiokemia - käytäntö</span></label>
 <select class="cal-group" data-course="BKEM5144" onchange="updateCalHighlight()"><option value="Opetusryhmä 1">Opetusryhmä 1</option><option value="Opetusryhmä 2">Opetusryhmä 2</option><option value="Opetusryhmä 3">Opetusryhmä 3</option><option value="Opetusryhmä 4">Opetusryhmä 4</option></select>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5142" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#CCC0DA"></span><span class="cal-cname">Kasvibiokemia - teoria 1</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5143" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#C6E0B4"></span><span class="cal-cname">Kasvibiokemia - teoria 2</span></label>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Ruotsin kieli: Teknillinen tiedekunta, kirjallinen taito<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Ruotsin kieli: Teknillinen tiedekunta, suullinen taito<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5163" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#EDEDED"></span><span class="cal-cname">Solubiologia</span></label>
 </div>
 <div class="cal-period-block">
-<label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>2. periodi</span></label>
-<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5162" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DEEAF6"></span><span class="cal-cname">Aineenvaihdunta</span></label>
+<div class="cal-period cal-period-tyhja"><span>3. periodi</span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Biotekniikan harjoitustyö<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Biotekniset järjestelmät<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Molekyylibiologia - käytäntö 2<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Molekyylibiotieteiden tutkimuksen esittely<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Proteiinit ja entsyymit - käytäntö<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Proteiinit ja entsyymit - teoria<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Systeemibiologia<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
 </div>
 </div>
 <div class="cal-year-block">
 <label class="cal-year"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>3. lukuvuosi</span></label>
 <div class="cal-period-block">
 <label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>1. periodi</span></label>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Akateemiset tekstitaidot LuK-opiskelijoille<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Asiantuntijan vuorovaikutusosaaminen, tekniikka, oikeustiede ja luonnontieteet<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0082" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#D9E2F3"></span><span class="cal-cname">Bioprosessitekniikka</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0072" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF0B3"></span><span class="cal-cname">Biotekniset analyysimenetelmät</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5121" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#BDD7EE"></span><span class="cal-cname">Immunologia - käytäntö</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5120" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFE699"></span><span class="cal-cname">Immunologia - teoria</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5137" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#F8CBAD"></span><span class="cal-cname">Kandidaatintutkielma, biokemia</span></label>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">LuK-tutkinnon kypsyysnäyte kirjoituskokeena<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Tutkielmaseminaari, biokemia<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
 </div>
 <div class="cal-period-block">
-<label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>2. periodi</span></label>
-<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0082" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#D9E2F3"></span><span class="cal-cname">Bioprosessitekniikka</span></label>
+<div class="cal-period cal-period-tyhja"><span>3. periodi</span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Biokemistinä työelämässä<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Johdatus bioturvallisuuteen<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Laatu ja metrologia<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Laboratoriolaskut<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Tilastotieteen peruskurssi soveltajille<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
+<div class="cal-course cal-tyhja"><span class="cal-swatch"></span><span class="cal-cname">Tilastotieteen peruskurssi soveltajille, biokemian harjoitukset<span class="cal-note">Opetusaikoja ei vielä julkaistu.</span></span></div>
 </div>
 </div>
 </div><div class="cal-body">

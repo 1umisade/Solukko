@@ -1,0 +1,47 @@
+# Biokemia (LuK) 2024-2027, opetussuunnitelman ajoitus periodeittain (Peppi, "Ajoitus periodeittain").
+# vuosi <TAB> periodit <TAB> koodi tai - <TAB> kurssin nimi
+# Periodit ovat ne, joihin Peppi merkitsee rastin. Kalenteri ryhmittelee kurssin ensimmaiseen periodiin.
+# Kurssi nakyy kalenterin valitsimessa, vaikka sille ei olisi viela yhtaan opetusaikaa.
+1	1,2	BKEM5000	Avaimet biokemian opiskeluun
+1	1,2	BKEM5030	Solu ja biomolekyylit - teoria
+1	1,2	BKEM5031	Solu ja biomolekyylit - käytäntö
+1	3,4	BKEM5013	Mikrobiologia
+1	3,4	BKEM5024	Molekyylibiologia - teoria
+1	3,4	-	Molekyylibiologia - käytäntö 1
+1	1,2	DIBT0070	Johdatus biotekniikkaan
+1	1	KEMI6308	Kemian peruskurssi I
+1	2	-	Kemian peruskurssi II
+1	3	-	Kemia III
+1	4	-	Kemia IV
+1	1,2	-	Kemian laboratoriomenetelmät
+1	1,2	-	English for STEM A
+1	3,4	-	English for STEM B
+2	1,2	BKEM5162	Aineenvaihdunta
+2	1,2	BKEM5142	Kasvibiokemia - teoria 1
+2	1,2	BKEM5143	Kasvibiokemia - teoria 2
+2	1,2	BKEM5144	Kasvibiokemia - käytäntö
+2	3,4	-	Proteiinit ja entsyymit - teoria
+2	3,4	-	Proteiinit ja entsyymit - käytäntö
+2	1,2	BKEM5163	Solubiologia
+2	3,4	-	Molekyylibiologia - käytäntö 2
+2	3,4	-	Systeemibiologia
+2	3,4	-	Molekyylibiotieteiden tutkimuksen esittely
+2	3,4	-	Biotekniset järjestelmät
+2	3,4	-	Biotekniikan harjoitustyö
+2	1,2	-	Ruotsin kieli: Teknillinen tiedekunta, kirjallinen taito
+2	1,2	-	Ruotsin kieli: Teknillinen tiedekunta, suullinen taito
+3	1,2	BKEM5120	Immunologia - teoria
+3	1,2	BKEM5121	Immunologia - käytäntö
+3	1,2	DIBT0082	Bioprosessitekniikka
+3	1,2	DIBT0072	Biotekniset analyysimenetelmät
+3	3,4	-	Laatu ja metrologia
+3	3,4	-	Biokemistinä työelämässä
+3	3,4	-	Laboratoriolaskut
+3	3	-	Johdatus bioturvallisuuteen
+3	1,2	BKEM5137	Kandidaatintutkielma, biokemia
+3	1,2	-	Tutkielmaseminaari, biokemia
+3	1,2	-	LuK-tutkinnon kypsyysnäyte kirjoituskokeena
+3	3	-	Tilastotieteen peruskurssi soveltajille
+3	3	-	Tilastotieteen peruskurssi soveltajille, biokemian harjoitukset
+3	1,2	-	Akateemiset tekstitaidot LuK-opiskelijoille
+3	1,2	-	Asiantuntijan vuorovaikutusosaaminen, tekniikka, oikeustiede ja luonnontieteet
