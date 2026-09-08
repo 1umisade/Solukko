@@ -96,7 +96,7 @@ body { font-family: 'Lora', Georgia, serif; background: #efe7d8 url('site_bg.jpg
 body.is-mobile:not(.reviewing) { scrollbar-width: none; -ms-overflow-style: none; }   /* hide the scrollbar on the mobile homepage */
 body.is-mobile:not(.reviewing)::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Homepage: courses grouped by academic year (rows), autumn (left) / spring (right) within each year */
-.deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1240px; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }   /* sama leveys kuin kalenterinakymalla: lohko keskelle, sisalto siina vasemmalle */
+.deck-list { position: relative; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; width: 100%; max-width: 1260px; box-sizing: border-box; padding: 0 16px 60px; align-items: stretch; }   /* lohko keskelle, sisalto siina vasemmalle; leveys riittaa seitsemalle kortille rinnakkain */
 #home-mona { align-self: flex-start; display: flex; align-items: flex-start; gap: 18px; margin: 4px 0 10px; position: relative; }   /* Mona anchored to the TOP; on desktop the greeting bubble is absolute (below) so its size never shifts the decks */
 #home-mona .site-brand { width: 120px; margin: 0; }
 @media (min-width: 901px) { #home-mona { height: 120px; } }   /* fixed to Mona's height: a taller/shorter greeting bubble overflows instead of shifting the deck grid */
@@ -184,12 +184,15 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .year-heading { font-family: 'Lora', serif; font-weight: 800; font-size: 2.3rem; color: #453423; border-bottom: 2px solid #d4cec4; padding-bottom: 6px; margin-bottom: 16px; }
 .year-row { display: flex; gap: 24px; align-items: flex-start; }
 .sem-col { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 18px 16px; align-content: flex-start; }
+.sem-col.vuosi { display: block; }
+.period-row { display: flex; gap: 16px; align-items: flex-start; overflow-x: auto; overflow-y: hidden; padding: 0 2px 10px; margin-bottom: 8px; scrollbar-width: thin; }
+.period-row > .deck-btn { flex: 0 0 auto; }   /* kortit eivat kutistu, rivi vierii sivusuunnassa */
 .sem-col.spring { border-left: 1px dashed #cfc8bc; padding-left: 24px; }
 .sem-col.sem-empty { border: none !important; padding-left: 0 !important; padding-top: 0 !important; }
 .sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
 .period-empty { flex-basis: 100%; font-family: 'Lora', serif; font-style: italic; font-size: 0.76rem; color: #453423; margin: 0 0 6px; }
 body.dark-mode .period-empty { color: #eadfce; }
-.period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 400; font-size: 1.64rem; letter-spacing: 0.02em; color: #453423; margin: 16px 0 2px; }   /* ei versaaleja: kuukausi erottuu lihavointina, ei kirjainkoolla */
+.period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.02em; color: #453423; margin: 16px 0 6px; }   /* sama koko kuin Monan puhekuplassa */   /* ei versaaleja: kuukausi erottuu lihavointina, ei kirjainkoolla */
 .period-label b { font-weight: 800; opacity: 1; }
 body.dark-mode .period-label { color: #eadfce; }
 .year-row .deck-btn { position: relative; left: auto; top: auto; width: 160px; }
@@ -3649,16 +3652,18 @@ function buildDeckGrid(decks, list){
     if(_kaikki.length){
       const c=document.createElement('div'); c.className='sem-col vuosi';
       const omat=[...new Set(_kaikki.map(it=>Number(it.period)).filter(Boolean))];
+      const _rivi=(sisalto)=>{ const r=document.createElement('div'); r.className='period-row'; sisalto.forEach(el=>r.appendChild(el)); return r; };
       [...new Set([1,2,3,4,...omat])].sort((a,b)=>a-b).forEach(p=>{
         const pl=document.createElement('div'); pl.className='period-label';
         const b=document.createElement('b'); b.textContent=p+'. periodissa';
         pl.appendChild(b); pl.appendChild(document.createTextNode(' alkavat kurssit:'));
         c.appendChild(pl);
         const osa=_kaikki.filter(it=>String(it.period)===String(p));
-        if(osa.length) osa.forEach(it=>c.appendChild(it.btn));
-        else { const e=document.createElement('div'); e.className='period-empty'; e.textContent='Ei kursseja.'; c.appendChild(e); }
+        if(osa.length) c.appendChild(_rivi(osa.map(it=>it.btn)));
+        else { const e=document.createElement('div'); e.className='period-empty'; e.textContent='Ei kursseja.'; c.appendChild(_rivi([e])); }
       });
-      _kaikki.filter(it=>!it.period).forEach(it=>c.appendChild(it.btn));
+      const _numeroimattomat=_kaikki.filter(it=>!it.period);
+      if(_numeroimattomat.length) c.appendChild(_rivi(_numeroimattomat.map(it=>it.btn)));
       row.appendChild(c);
     }
     section.appendChild(row);
