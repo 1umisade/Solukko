@@ -2905,7 +2905,7 @@ function _loadRelearn(deckName){
   _relearn=[];
   try{
     const raw=localStorage.getItem('solukko-relearn-'+deckName); if(!raw) return;
-    JSON.parse(raw).forEach(e=>{ const c=reviewCards.find(x=>String(x.cardId)===String(e.id)); if(c) _relearn.push({card:c, at:e.at}); });   // cards that no longer exist are dropped
+    JSON.parse(raw).forEach(e=>{ const c=reviewCards.find(x=>String(x.cardId)===String(e.id)); if(c && cardGrades[c.cardId]!=='known') _relearn.push({card:c, at:e.at}); });   // cards that no longer exist, or were since marked known, are dropped
   }catch(e){ _relearn=[]; }
 }
 let reviewCards=[];
@@ -4018,7 +4018,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
   if(!infos.length){ alert('Tässä pakassa ei ole kortteja.'); show('deck-screen'); hide('loading'); return; }
   _deckIntro = infos.find(c=>getField(c,['Front','front','Kysymys','kysymys','Question','question']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front/Kysymys is "Esittely" becomes the deck cover
   reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
-  queue = reviewCards.slice(); _loadRelearn(deckName);   // pick up cards still waiting to be re-asked from an earlier session
+  queue = reviewCards.slice();
   shuffleMode=false; _reviewCardsOriginal=null; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
@@ -4032,6 +4032,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
     reviewCards.forEach((c,i)=>{ if(i!==_skip) cardGrades[c.cardId]='known'; });
     localStorage.setItem('solukko-grades-'+deckName, JSON.stringify(cardGrades));
   }
+  _loadRelearn(deckName);   // after the grades: cards still waiting to be re-asked from an earlier session, minus any since marked known
   updateGradeCounts();   // set the persistent right/wrong tally on the grade thumbs for this deck
   show('card-screen'); hide('loading');
   showDeckLanding();   // grid only; the first card highlights + shows on the right after the grid fades in
@@ -4686,6 +4687,11 @@ function resetComment(){   // each new card starts centred with comments closed
 }
 
 async function nextCard(){
+  // A re-ask slot is only valid while the card is still "En tiennyt". A card marked known by any other
+  // path (dev auto-mark, an older session) must not jump the queue, or review looks like it skips around.
+  const _before=_relearn.length;
+  _relearn=_relearn.filter(e=>cardGrades[e.card.cardId]!=='known');
+  if(_relearn.length!==_before) _saveRelearn();
   let ri=_relearn.findIndex(e=>e.at<=Date.now());                                  // a card whose 5 min are up jumps the queue
   if(ri<0 && !queue.length && _relearn.length)                                     // deck ran out first: ask the one that has waited longest
     ri=_relearn.reduce((b,e,k,a)=>a[k].at<a[b].at?k:b,0);
