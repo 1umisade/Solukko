@@ -189,7 +189,8 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
 .period-empty { flex-basis: 100%; font-family: 'Lora', serif; font-style: italic; font-size: 0.76rem; color: #56533c; opacity: 0.45; margin: 0 0 6px; }
 body.dark-mode .period-empty { color: #eadfce; }
-.period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.78rem; color: #56533c; opacity: 0.7; margin: 8px 0 -4px; }
+.period-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 400; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin: 10px 0 -2px; }
+.period-label b { font-weight: 800; opacity: 1; }
 body.dark-mode .period-label { color: #eadfce; }
 .year-row .deck-btn { position: relative; left: auto; top: auto; width: 160px; }
 body.dark-mode .year-heading { color: #eadfce; border-bottom-color: #6d5f52; }
@@ -3640,32 +3641,26 @@ function buildDeckGrid(decks, list){
       if(items.length){ const l=document.createElement('div'); l.className='sem-label'; l.textContent=label; c.appendChild(l); items.forEach(it=>c.appendChild(it.btn)); }
       return c;
     };
-    const _autumn = g.S.concat(g.none);   // decks with a year but no semester default to autumn
-    // A semester is split into teaching periods (jaksot) read from the deck path (…::"N. Periodi"::…).
-    // Courses with no period level come after the numbered ones.
-    // Lukuvuodessa on viisi periodia: syksyllä 1-2, keväällä 3-5. Jokainen saa otsikkonsa, myös
-    // tyhjä — muuten lukuvuoden rakenteesta ei näe, mihin kohtaan kurssi puuttuu.
-    const _JAKSOT={autumn:[1,2], spring:[3,4,5]};
-    // Periodin alkukuukausi: I 1.8., II 26.10., III 11.1., IV 15.3., kesäperiodi 24.5.
+    // Lukuvuosi on yksi jatkumo viittä opetusperiodia, ei kahta lukukautta. Otsikkona on periodin
+    // alkukuukausi: I 1.8., II 26.10., III 11.1., IV 15.3., kesäperiodi 24.5. Tyhjäkin periodi
+    // näytetään, muuten lukuvuoden rakenteesta ei näe, mihin kohtaan kurssi puuttuu.
     const _JAKSOKUU={1:'Elokuussa', 2:'Lokakuussa', 3:'Tammikuussa', 4:'Maaliskuussa', 5:'Toukokuussa'};
-    const _jaksoOtsikko=p=>(_JAKSOKUU[p]||(p+'. periodissa'))+' alkavat kurssit:';
-    const _jaksoSarake=(cls,label,items)=>{
-      if(!items.length) return col(cls,label,items);
-      const c=document.createElement('div'); c.className='sem-col '+cls;
-      const l=document.createElement('div'); l.className='sem-label'; l.textContent=label; c.appendChild(l);
-      const omat=new Set(items.map(it=>String(it.period)).filter(Boolean));
-      const jaksot=[...new Set([...(_JAKSOT[cls]||[]), ...[...omat].map(Number)])].sort((a,b)=>a-b);
-      jaksot.forEach(p=>{
-        const pl=document.createElement('div'); pl.className='period-label'; pl.textContent=_jaksoOtsikko(p); c.appendChild(pl);
-        const osa=items.filter(it=>String(it.period)===String(p));
+    const _kaikki = g.S.concat(g.none, g.K);
+    if(_kaikki.length){
+      const c=document.createElement('div'); c.className='sem-col vuosi';
+      const omat=[...new Set(_kaikki.map(it=>Number(it.period)).filter(Boolean))];
+      [...new Set([1,2,3,4,5,...omat])].sort((a,b)=>a-b).forEach(p=>{
+        const pl=document.createElement('div'); pl.className='period-label';
+        const b=document.createElement('b'); b.textContent=_JAKSOKUU[p]||(p+'. periodissa');
+        pl.appendChild(b); pl.appendChild(document.createTextNode(' alkavat kurssit:'));
+        c.appendChild(pl);
+        const osa=_kaikki.filter(it=>String(it.period)===String(p));
         if(osa.length) osa.forEach(it=>c.appendChild(it.btn));
         else { const e=document.createElement('div'); e.className='period-empty'; e.textContent='Ei kursseja.'; c.appendChild(e); }
       });
-      items.filter(it=>!it.period).forEach(it=>c.appendChild(it.btn));
-      return c;
-    };
-    row.appendChild(_jaksoSarake('autumn','Syksy', _autumn));
-    row.appendChild(_jaksoSarake('spring','Kevät', g.K));
+      _kaikki.filter(it=>!it.period).forEach(it=>c.appendChild(it.btn));
+      row.appendChild(c);
+    }
     section.appendChild(row);
     list.appendChild(section);
   });
