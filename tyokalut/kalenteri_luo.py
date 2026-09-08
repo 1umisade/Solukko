@@ -80,22 +80,30 @@ for koodi, k in kurssit.items():
 
 # ---- kurssivalitsin ----------------------------------------------------------
 osat = ['<div class="cal-layout"><div class="cal-courses"><div class="cal-courses-title">Näytä kursseja</div>']
-ryhmitelty = collections.defaultdict(list)
+ryhmitelty = collections.defaultdict(lambda: collections.defaultdict(list))
 for koodi, k in kurssit.items():
-    ryhmitelty[(k["vuosi"], k["periodi"])].append(koodi)
-for (vuosi, per) in sorted(ryhmitelty, key=lambda t: (t[0] or 99, t[1] or 99)):
-    osat.append('<div class="cal-group-title">%s &middot; %s</div>' % (
-        ("%d. lukuvuosi" % vuosi) if vuosi else "Muut",
-        ("%d. periodi" % per) if per else "ajankohta auki"))
-    for koodi in sorted(ryhmitelty[(vuosi, per)], key=lambda c: kurssit[c]["nimi"]):
-        k = kurssit[koodi]
-        osat.append('<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="%s" '
-                    'onchange="updateCalHighlight()"><span class="cal-swatch" style="background:%s"></span>'
-                    '<span class="cal-cname">%s</span></label>' % (koodi, k["vari"], esc(k["nimi"])))
-        if list(k["ryhmat"]) != [None]:
-            valinnat = "".join('<option value="%s">%s</option>' % (esc(r), esc(r)) for r in sorted(k["ryhmat"]))
-            osat.append('<select class="cal-group" data-course="%s" onchange="updateCalHighlight()">%s</select>'
-                        % (koodi, valinnat))
+    ryhmitelty[k["vuosi"]][k["periodi"]].append(koodi)
+for vuosi in sorted(ryhmitelty, key=lambda v: v or 99):
+    osat.append('<div class="cal-year-block">')
+    osat.append('<label class="cal-year"><input type="checkbox" class="cal-cb-all" '
+                'onchange="calValitseKaikki(this)"><span>%s</span></label>'
+                % (("%d. lukuvuosi" % vuosi) if vuosi else "Muut"))
+    for per in sorted(ryhmitelty[vuosi], key=lambda p: p or 99):
+        osat.append('<div class="cal-period-block">')
+        osat.append('<label class="cal-period"><input type="checkbox" class="cal-cb-all" '
+                    'onchange="calValitseKaikki(this)"><span>%s</span></label>'
+                    % (("%d. periodi" % per) if per else "ajankohta auki"))
+        for koodi in sorted(ryhmitelty[vuosi][per], key=lambda c: kurssit[c]["nimi"]):
+            k = kurssit[koodi]
+            osat.append('<label class="cal-course"><input type="checkbox" class="cal-cb" data-course="%s" '
+                        'onchange="updateCalHighlight()"><span class="cal-swatch" style="background:%s"></span>'
+                        '<span class="cal-cname">%s</span></label>' % (koodi, k["vari"], esc(k["nimi"])))
+            if list(k["ryhmat"]) != [None]:
+                valinnat = "".join('<option value="%s">%s</option>' % (esc(r), esc(r)) for r in sorted(k["ryhmat"]))
+                osat.append('<select class="cal-group" data-course="%s" onchange="updateCalHighlight()">%s</select>'
+                            % (koodi, valinnat))
+        osat.append('</div>')
+    osat.append('</div>')
 osat.append('</div><div class="cal-body">')
 
 # ---- kuukausiruudukot --------------------------------------------------------

@@ -1230,7 +1230,14 @@ body.dark-mode .home-tab + .home-tab::before { background:#5c5145; }
 .cal-courses { flex:0 0 220px; position:sticky; top:12px; background:#fffef9; border:1px solid #e7e1d6; border-radius:12px; padding:12px 14px; font-family:'Lora',serif; }
 .cal-courses-title { font-weight:700; color:#26473f; margin-bottom:8px; font-size:0.95rem; }
 .cal-hide { display:none !important; }
-.cal-group-title { margin:12px 0 4px; font-family:'Lora',serif; font-size:0.72rem; font-weight:700; color:#7a5230; letter-spacing:0.02em; }
+.cal-year-block { margin-bottom:6px; }
+.cal-year { display:flex; align-items:center; gap:7px; margin:10px 0 2px; font-family:'Lora',serif; font-size:0.85rem; font-weight:700; color:#7a5230; cursor:pointer; }
+.cal-year-block:first-child .cal-year { margin-top:0; }
+.cal-period-block { margin-left:10px; }
+.cal-period { display:flex; align-items:center; gap:7px; margin:6px 0 1px; font-family:'Lora',serif; font-size:0.76rem; font-weight:700; color:#7a5230; opacity:0.8; cursor:pointer; }
+.cal-period-block .cal-course { margin-left:10px; }
+.cal-period-block .cal-group { margin-left:36px; width:calc(100% - 36px); }
+body.dark-mode .cal-year, body.dark-mode .cal-period { color:#cbb89b; }
 .cal-group { display:block; width:calc(100% - 26px); margin:2px 0 4px 26px; box-sizing:border-box; font-family:'Lora',serif; font-size:0.74rem; color:#56533c; background:#fffef9; border:1px solid #d4cec4; border-radius:8px; padding:3px 6px; }
 body.dark-mode .cal-group-title { color:#cbb89b; }
 body.dark-mode .cal-group { background:#3a312b; color:#eadfce; border-color:#6d5f52; }
@@ -1462,27 +1469,46 @@ body.dark-mode .cal-ev { color:#241f1b; }
   <div class="deck-list" id="deck-list"></div>
   <div id="calendar-view" style="display:none;">
 <div class="cal-layout"><div class="cal-courses"><div class="cal-courses-title">Näytä kursseja</div>
-<div class="cal-group-title">1. lukuvuosi &middot; 1. periodi</div>
+<div class="cal-year-block">
+<label class="cal-year"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>1. lukuvuosi</span></label>
+<div class="cal-period-block">
+<label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>1. periodi</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5000" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF2CC"></span><span class="cal-cname">Avaimet biokemian opiskeluun</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0070" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FCE4D6"></span><span class="cal-cname">Johdatus biotekniikkaan</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="KEMI6308" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E4DFEC"></span><span class="cal-cname">Kemian peruskurssi I</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5031" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#E2EFDA"></span><span class="cal-cname">Solu ja biomolekyylit – käytäntö</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5030" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DDEBF7"></span><span class="cal-cname">Solu ja biomolekyylit – teoria</span></label>
-<div class="cal-group-title">2. lukuvuosi &middot; 1. periodi</div>
+</div>
+</div>
+<div class="cal-year-block">
+<label class="cal-year"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>2. lukuvuosi</span></label>
+<div class="cal-period-block">
+<label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>1. periodi</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5144" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FBE2D5"></span><span class="cal-cname">Kasvibiokemia - käytäntö</span></label>
 <select class="cal-group" data-course="BKEM5144" onchange="updateCalHighlight()"><option value="Opetusryhmä 1">Opetusryhmä 1</option><option value="Opetusryhmä 2">Opetusryhmä 2</option><option value="Opetusryhmä 3">Opetusryhmä 3</option><option value="Opetusryhmä 4">Opetusryhmä 4</option></select>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5142" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#CCC0DA"></span><span class="cal-cname">Kasvibiokemia - teoria 1</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5143" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#C6E0B4"></span><span class="cal-cname">Kasvibiokemia - teoria 2</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5163" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#EDEDED"></span><span class="cal-cname">Solubiologia</span></label>
-<div class="cal-group-title">2. lukuvuosi &middot; 2. periodi</div>
+</div>
+<div class="cal-period-block">
+<label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>2. periodi</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5162" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#DEEAF6"></span><span class="cal-cname">Aineenvaihdunta</span></label>
-<div class="cal-group-title">3. lukuvuosi &middot; 1. periodi</div>
+</div>
+</div>
+<div class="cal-year-block">
+<label class="cal-year"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>3. lukuvuosi</span></label>
+<div class="cal-period-block">
+<label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>1. periodi</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0072" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFF0B3"></span><span class="cal-cname">Biotekniset analyysimenetelmät</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5121" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#BDD7EE"></span><span class="cal-cname">Immunologia - käytäntö</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5120" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#FFE699"></span><span class="cal-cname">Immunologia - teoria</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="BKEM5137" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#F8CBAD"></span><span class="cal-cname">Kandidaatintutkielma, biokemia</span></label>
-<div class="cal-group-title">3. lukuvuosi &middot; 2. periodi</div>
+</div>
+<div class="cal-period-block">
+<label class="cal-period"><input type="checkbox" class="cal-cb-all" onchange="calValitseKaikki(this)"><span>2. periodi</span></label>
 <label class="cal-course"><input type="checkbox" class="cal-cb" data-course="DIBT0082" onchange="updateCalHighlight()"><span class="cal-swatch" style="background:#D9E2F3"></span><span class="cal-cname">Bioprosessitekniikka</span></label>
+</div>
+</div>
 </div><div class="cal-body">
 <div class="cal-month">
 <h3 class="cal-mtitle">Elokuu 2026</h3>
@@ -6419,6 +6445,20 @@ function highlightCalToday(){   // mark today's cell in the calendar
     }
   }
 }
+function calValitseKaikki(el){   // lukuvuoden tai periodin ruutu valitsee kaikki alleen
+  var lohko=el.closest('.cal-period-block') || el.closest('.cal-year-block');
+  if(lohko) lohko.querySelectorAll('.cal-cb').forEach(function(cb){ cb.checked=el.checked; });
+  updateCalHighlight();
+}
+function calPaivitaRyhmaruudut(){   // ylatason ruutu kertoo onko sen alta valittu kaikki, osa vai ei mitaan
+  document.querySelectorAll('#calendar-view .cal-year-block, #calendar-view .cal-period-block').forEach(function(lohko){
+    var iso=lohko.querySelector(':scope > label > .cal-cb-all'); if(!iso) return;
+    var omat=lohko.querySelectorAll('.cal-cb'); if(!omat.length) return;
+    var n=0; omat.forEach(function(cb){ if(cb.checked) n++; });
+    iso.checked = n===omat.length;
+    iso.indeterminate = n>0 && n<omat.length;
+  });
+}
 function updateCalHighlight(){   // checked courses stay highlighted; if any are checked, the rest dim
   var cbs=document.querySelectorAll('#calendar-view .cal-cb'), checked=[];
   for(var i=0;i<cbs.length;i++){ if(cbs[i].checked) checked.push(cbs[i].getAttribute('data-course')); }
@@ -6430,6 +6470,7 @@ function updateCalHighlight(){   // checked courses stay highlighted; if any are
     evs[j].classList.toggle('cal-hide', !!(ryhma && valittu[course] && ryhma!==valittu[course]));   // muun opetusryhman kerrat pois nakyvista
     evs[j].classList.toggle('cal-dim', checked.indexOf(course)===-1);   // dim every course that isn't checked (so nothing checked = all dimmed)
   }
+  calPaivitaRyhmaruudut();
 }
 function showDecks(){
   { const cs=document.getElementById('card-screen'); if(cs) cs.classList.remove('card-fs-on','faux-fs'); }   // clear any faux fullscreen when returning to the homepage
