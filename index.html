@@ -3644,14 +3644,14 @@ function buildDeckGrid(decks, list){
     // Lukuvuosi on yksi jatkumo viittä opetusperiodia, ei kahta lukukautta. Otsikkona on periodin
     // alkukuukausi: I 1.8., II 26.10., III 11.1., IV 15.3., kesäperiodi 24.5. Tyhjäkin periodi
     // näytetään, muuten lukuvuoden rakenteesta ei näe, mihin kohtaan kurssi puuttuu.
-    const _JAKSOKUU={1:'Elokuussa', 2:'Lokakuussa', 3:'Tammikuussa', 4:'Maaliskuussa', 5:'Toukokuussa'};   // 5 = kesäperiodi, näytetään vain jos jokin kurssi alkaa siinä
+    // 5 = kesäperiodi, näytetään vain jos jokin kurssi alkaa siinä
     const _kaikki = g.S.concat(g.none, g.K);
     if(_kaikki.length){
       const c=document.createElement('div'); c.className='sem-col vuosi';
       const omat=[...new Set(_kaikki.map(it=>Number(it.period)).filter(Boolean))];
       [...new Set([1,2,3,4,...omat])].sort((a,b)=>a-b).forEach(p=>{
         const pl=document.createElement('div'); pl.className='period-label';
-        const b=document.createElement('b'); b.textContent=_JAKSOKUU[p]||(p+'. periodissa');
+        const b=document.createElement('b'); b.textContent=p+'. periodissa';
         pl.appendChild(b); pl.appendChild(document.createTextNode(' alkavat kurssit:'));
         c.appendChild(pl);
         const osa=_kaikki.filter(it=>String(it.period)===String(p));
