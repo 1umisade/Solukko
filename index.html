@@ -848,7 +848,9 @@ body.dark-mode .dev-comment-snip { color: #eadfce; }
 .moodle-placeholder { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
 
 /* ── 11. SOLUKKO-LOGO ────────────────────────────────────── */
-.site-brand { position: relative; width: min(202px, 45vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; }
+.site-brand { position: relative; width: min(202px, 45vw); aspect-ratio: 1 / 1; z-index: 9999; margin: 0 auto; touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }   /* holdable 5 s for dev mode: no image callout, no selection, no scroll takeover */
+.site-brand img, .welcome-mona img, .mona-top-inner img { -webkit-user-drag: none; user-drag: none; -webkit-touch-callout: none; user-select: none; }
+.site-brand.dev-hold, .welcome-mona.dev-hold, .mona-top-inner.dev-hold { transition: filter 4.5s ease-in, transform 4.5s ease-in; filter: hue-rotate(300deg) saturate(1.6); transform: scale(1.06); }   /* feedback while holding: Mona slowly colours up until the prompt opens */
 .brand-inner { position: relative; width: 100%; height: 100%; }
 .brand-inner.twitch { animation: logoTwitch 0.45s ease; }
 .home-bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 18px; width: max-content; max-width: 280px; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 22px; padding: 0.8rem 1.1rem; box-shadow: 0 6px 20px rgba(0,0,0,0.16); font-family: 'Lora', serif; font-size: 1.05rem; line-height: 1.4; text-align: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; }
@@ -3053,12 +3055,17 @@ function initDarkmodeBtn(){
 (function initMonaDevHold(){
   let t=null, fired=false, sx=0, sy=0;
   const isMona = el => el && el.closest && el.closest('.welcome-mona, #site-brand, .mona-top-inner');
-  const cancel = () => { clearTimeout(t); t=null; };
+  const cancel = () => { clearTimeout(t); t=null; feedback(false); };
+  const _holdEl = e => isMona(e.target);
+  let held=null;
+  const feedback = on => { if(held) held.classList.toggle('dev-hold', on); if(!on) held=null; };
   document.addEventListener('pointerdown', e=>{
     if(!isMona(e.target)) return;
     fired=false; sx=e.clientX; sy=e.clientY; clearTimeout(t);
-    t=setTimeout(()=>{ fired=true; if(typeof promptDevMode==='function') promptDevMode(); }, 5000);
+    held=_holdEl(e); feedback(true);   // start the slow colour ramp so the hold visibly "charges" (synchronous: rAF may not run in a throttled tab)
+    t=setTimeout(()=>{ fired=true; feedback(false); if(typeof promptDevMode==='function') promptDevMode(); }, 5000);
   }, true);
+  document.addEventListener('contextmenu', e=>{ if(isMona(e.target)) e.preventDefault(); }, true);   // long-press on touch must not open the image menu
   document.addEventListener('pointermove', e=>{ if(t && (Math.abs(e.clientX-sx)>12 || Math.abs(e.clientY-sy)>12)) cancel(); }, true);   // a drag (e.g. dragging Mona) cancels the hold
   document.addEventListener('pointerup', cancel, true);
   document.addEventListener('pointercancel', cancel, true);
