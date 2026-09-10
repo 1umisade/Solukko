@@ -178,3 +178,15 @@ Nämä on opittu kantapään kautta. Älä oleta muuta:
   antavat 404:n solukko.comissa.
 - Käyttöliittymän tekstit ja korttisisältö ovat suomeksi, koodin kommentit englanniksi.
 - Käyttäjä lukee vastaukset suomeksi.
+
+## Molekyylipopupin kevyt sivu (simulaatiot/kortti.html)
+
+Solukon popup ei lataa koko simulaattoria vaan `simulaatiot/kortti.html`: jaettu koodi + `runEditor` leikattuna
+`simulaatiot/index.html`:sta (246 kB / 77 kB gzip, entinen 1 MB) ja oma tree-shaken Babylon-paketti
+`simulaatiot/babylon-kortti.js` (1,2 MB / 300 kB gzip, entinen CDN:n 8 MB / 1,8 MB, joka vaihtui tunnin valein).
+
+- **kortti.html on generoitu.** Aina kun `simulaatiot/index.html` muuttuu: `python tyokalut/kortti_build.py`
+  (tarkistaa syntaksin node --checkilla). Ala muokkaa kortti.html:aa kasin.
+- **babylon-kortti.js** rakennetaan esbuildilla `tyokalut/babylon_kortti_entry.js`:sta, ohje
+  `tyokalut/babylon_kortti_build.md`. Rakenna uudelleen vain, jos editori alkaa kayttaa uutta `BABYLON.`-luokkaa
+  (silloin lisaa se entryyn) tai Babylon paivitetaan.

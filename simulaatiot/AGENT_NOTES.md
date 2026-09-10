@@ -1,5 +1,7 @@
 # Geneesi - briefing for a new agent
 
+**Kun muokkaat tata tiedostoa (index.html), aja `python tyokalut/kortti_build.py`.** Solukon molekyylipopup kayttaa siita leikattua `kortti.html`:aa (generoitu, ala muokkaa kasin) ja omaa Babylon-pakettia `babylon-kortti.js` (ks. tyokalut/babylon_kortti_build.md).
+
 Read CLAUDE.md first (its four rules and the GLSL comment rule are binding). This file is the
 project context that the code and git history do not tell you. Last updated 2026-09-06.
 

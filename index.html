@@ -5767,8 +5767,8 @@ function getYouTubeEmbedUrl(url){ const m=url.match(/(?:youtube\.com\/watch\?v=|
 // Anyone signed in may drop a recording of the lecture; it goes to Firebase Storage under
 // luentovideot/<kurssi>/<luento>/ and stays private (rules: no read). Metadata goes to Firestore 'luentovideot'.
 function videoDropHtml(name){
-  return '<div class="video-drop" data-luento="'+String(name).replace(/"/g,'&quot;')+'" title="Lähetä luentovideo ylläpidolle raahaamalla tiedosto tähän tai klikkaa valitaksesi tiedoston">'
-    +'<span class="vd-text">Lähetä luentovideo ylläpidolle raahaamalla tiedosto tähän (tai <u>valitse tiedosto</u>).</span>'
+  return '<div class="video-drop" data-luento="'+String(name).replace(/"/g,'&quot;')+'" title="Lähetä luentovideo ylläpidolle vetämällä tiedosto tähän">'
+    +'<span class="vd-text">Lähetä luentovideo ylläpidolle vetämällä tiedosto tähän.</span>'
     +'<input type="file" accept="video/*,.mp4,.mov,.webm,.mkv,.m4v" hidden></div>';
 }
 const VIDEO_MAX_BYTES = 4*1024*1024*1024;   // 4 GiB
@@ -7013,7 +7013,7 @@ const molKehys=(function(){
   let f=null, alustettu=false, kohde=null, haluttu=null, nakyva=false;
   function luo(){ if(f) return f;
     try{ if(!document.createElement('canvas').getContext('webgl2')) return null; }catch(e){ return null; }
-    f=document.createElement('iframe'); f.id='mol-kehys'; f.src='simulaatiot/index.html?tila=kortti&v='+Math.floor(Date.now()/3.6e6);   /* hourly cache-buster: GitHub Pages caches 10 min and the pre-warmed frame otherwise kept an old simulator for days */ f.title='3D-malli: vedä kääntääksesi, rulla zoomaa';
+    f=document.createElement('iframe'); f.id='mol-kehys'; f.src='simulaatiot/kortti.html?tila=kortti&v='+Math.floor(Date.now()/3.6e6);   /* kortti.html = the popup-only build (tyokalut/kortti_build.py) with its own 1.2 MB Babylon bundle instead of the 8 MB CDN file; hourly cache-buster because GitHub Pages caches 10 min */ f.title='3D-malli: vedä kääntääksesi, rulla zoomaa';
     f.style.cssText='position:fixed;left:-9999px;top:0;width:260px;height:260px;border:none;border-radius:12px;background:#f2e6c9;z-index:100000;opacity:0;pointer-events:none;transition:opacity .3s;';
     document.body.appendChild(f); return f; }
   window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
