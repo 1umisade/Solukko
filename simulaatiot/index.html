@@ -269,16 +269,6 @@ html.nopills #toplist, html.nopills #scorebox, html.nopills #timerbox{display:no
 #c.spawning{cursor:crosshair}
 
 /* ── Start screen (the chemistry editor or the premade scene) ── */
-#start{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:var(--paper);font:13px/1.3 "Courier New",monospace;color:var(--ink)}
-.start-card{text-align:center;padding:28px 34px;background:var(--paper);border:2.5px solid var(--brown);border-radius:18px;box-shadow:0 4px 0 var(--brown);max-width:92vw}
-.start-title{font-size:30px;letter-spacing:1px;margin-bottom:4px}
-.start-sub{opacity:.75;margin-bottom:22px}
-.start-opts{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-.start-opt{display:flex;flex-direction:column;gap:6px;align-items:center;width:250px;padding:18px 16px;background:var(--paper2);color:var(--ink);border:2.5px solid var(--brown);border-radius:16px;box-shadow:0 3px 0 var(--brown);cursor:pointer;font:inherit}
-.start-opt b{font-size:17px}
-.start-opt span{font-size:11px;opacity:.75;line-height:1.35}
-.start-opt:hover{background:var(--sage);color:var(--sageink)}
-.start-opt:active{transform:translateY(2px);box-shadow:0 1px 0 var(--brown)}
 /* ── Chemistry editor (mode 'editori'): its own DOM, hidden until chosen - and the viewer's chrome hidden while it runs ── */
 /* ── Back button (Solukko's: a round button top-left) - only once a mode is chosen, revealed by mouse movement, fades when the mouse rests ── */
 #back-btn{position:fixed;left:16px;top:16px;z-index:60;width:46px;height:46px;border-radius:50%;background:var(--paper);color:var(--brown);border:2.5px solid var(--brown);box-shadow:0 3px 0 var(--brown);font:bold 22px/1 "Courier New",monospace;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0 0 2px;opacity:0;transition:opacity .35s;pointer-events:none}
@@ -328,18 +318,7 @@ html.editori.eraser #c{cursor:crosshair}
 </head>
 <body>
 <canvas id="c"></canvas>
-<button id="back-btn" title="Takaisin aloitussivulle">←</button>
-<div id="start">
-  <div class="start-card">
-    <div class="start-title">Simulaatiot</div>
-    <div class="start-sub">Valitse, mistä aloitat</div>
-    <div class="start-opts">
-      <button class="start-opt" data-tila="editori"><b>Kemiaeditori</b><span>Rakenna molekyylejä vedystä ja hapesta - atomit pomppivat ja reagoivat</span></button>
-      <button class="start-opt" data-tila="kalvosto"><b>Yhteyttämiskalvosto</b><span>Valmis tylakoidikalvon kohtaus - fotosysteemit, ATP-syntaasi ja stroma</span></button>
-      <button class="start-opt" data-tila="solu"><b>Solu</b><span>Kokonainen kasvisolu - jättimäinen solukalvo ja huokoinen tumakotelo, kalvoston koneisto solukalvon tasaisella pinnalla</span></button>
-    </div>
-  </div>
-</div>
+<button id="back-btn" title="Takaisin Solukkoon">←</button>
 <div id="lista" class="vesi card">
   <h1>Atomit</h1>
   <div class="ohje">Raahaa hiukkanen näkymään. Ne pomppivat tasossa ja reagoivat törmätessään. Kamera: WASD, nuolet, Q/E, N/M, rulla, keskinäppäin, ohjain, I.</div>
@@ -12903,10 +12882,10 @@ const startEditor = () => { document.documentElement.classList.add('editori');
   setLbl('Ladataan hiukkasia…'); setBar(0.03);
   const eb = document.getElementById('load-enter'); if(eb){ eb.hidden = false; eb.addEventListener('click', () => { document.getElementById('overlay').classList.add('gone'); }, { once: true }); }
   runEditor(); };
-{ const st = document.getElementById('start'), tila = new URLSearchParams(location.search).get('tila');
-  const go = t => { if(st) st.remove(); if(t === 'editori') startEditor(); else startViewer(t === 'solu'); };
-  if(tila === 'editori' || tila === 'kalvosto' || tila === 'solu') go(tila);
-  else { try{ sessionStorage.setItem('solukko-homeTab', 'simulaatiot'); }catch(e){} location.replace('../index.html'); }   // no mode: the chooser is Solukko's simulaatiot tab, not this page (owner 10.9.2026)
+{ const tila = new URLSearchParams(location.search).get('tila');   // the mode comes from Solukko's simulaatiot tab - there is no chooser here
+  if(tila === 'editori') startEditor();
+  else if(tila === 'kalvosto' || tila === 'solu') startViewer(tila === 'solu');
+  else { try{ sessionStorage.setItem('solukko-homeTab', 'simulaatiot'); }catch(e){} location.replace('../index.html'); }   // no mode: back to Solukko
 }
 </script>
 </body>

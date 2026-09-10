@@ -181,8 +181,9 @@ setting whatever happens. If it still lags after this commit, the quality slider
 
 ## Start screen and the chemistry editor (mode 'editori')
 
-index.html opens on a start screen (`#start`): 'Kemiaeditori' or 'Yhteyttamiskalvosto'. `?tila=editori` /
-`?tila=kalvosto` skips it. The viewer is `run()`, called by `startViewer()` (which sets `html.kalvosto`).
+index.html has NO start screen any more (owner 10.9.2026: 'i never want to see that view'): the mode comes from
+Solukko's simulaatiot tab as `?tila=editori|kalvosto|solu`, and without a mode the page sends the user back to
+Solukko (sessionStorage solukko-homeTab=simulaatiot, location.replace('../index.html')). The back button does the same. The viewer is `run()`, called by `startViewer()` (which sets `html.kalvosto`).
 The editor keeps the viewer's loading overlay (`#overlay`, exempt from the editori hide rule): `startEditor` sets the
 label and shows 'Käynnistä keskeneräisenä' at once, `loadProgress()` in runEditor drives label and bar by the list
 pictures done (thumbDone) out of TOTAL_ITEMS and lifts the screen at the last one (or after 90 s regardless).
