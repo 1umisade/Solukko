@@ -122,5 +122,18 @@ service cloud.firestore {
 
     // Everything else is denied.
     match /{document=**} { allow read, write: if false; }
+
+    // ── Luentovideot: metatieto Storageen lähetetyistä luentotallenteista (tiedostot: luentovideot/ Storagessa) ──
+    // Kuka tahansa kirjautunut kirjaa oman lähetyksensä; vain dev lukee listan.
+    match /luentovideot/{id} {
+      allow read: if isAdmin();
+      allow create: if signedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && str(request.resource.data.polku, 400)
+                    && str(request.resource.data.kurssi, 200)
+                    && str(request.resource.data.luento, 200);
+      allow update, delete: if isAdmin();
+    }
+
   }
 }

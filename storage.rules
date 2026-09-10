@@ -1,0 +1,23 @@
+rules_version = '2';
+// Solukko Cloud Storage -säännöt.
+// Käyttöönotto: Firebase console -> Build -> Storage -> Rules -> liitä -> Publish.
+// Vaatii Blaze-tason (Storage ei ole enää saatavilla Spark-tasolla) ja anonyymin kirjautumisen.
+//
+// luentovideot/<kurssi>/<luento>/<aika>_<uid8>.<ext>
+//   - kuka tahansa kirjautunut saa LÄHETTÄÄ yhden videotiedoston (enintään 4 GiB, content-type video/*)
+//   - kukaan ei lue selaimesta: videot ovat yksityisiä, katsot ne konsolista (Storage -> Files)
+//   - ei päivitystä eikä poistoa selaimesta
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /luentovideot/{allPaths=**} {
+      allow read: if false;
+      allow create: if request.auth != null
+                    && request.resource.size <= 4 * 1024 * 1024 * 1024
+                    && request.resource.contentType.matches('video/.*');
+      allow update, delete: if false;
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;   // mikään muu polku ei ole käytössä
+    }
+  }
+}

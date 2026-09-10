@@ -41,7 +41,11 @@ Repo on OneDrive-kansiossa, joten myös gitin ulkopuoliset osat siirtyvät konee
   purkaa ja lukee sen selaimessa (`parseAnkiDB`).
 - **Firebase** (compat-SDK, projekti `solukko`, anonyymi kirjautuminen). Firestore-kokoelmat:
   `userCards`, `comments`, `gamestate`, `chat`, `kuvaajat`, `joukkueet`, `prizes`, `presence`,
-  `buzzers`. Säännöt `firestore.rules`.
+  `buzzers`, `luentovideot`. Säännöt `firestore.rules`.
+- **Firebase Storage** (`solukko.firebasestorage.app`, vaatii Blaze-tason): luentotallenteet polkuun
+  `luentovideot/<kurssi>/<luento>/<aika>_<uid8>.<ext>`. Kuka tahansa kirjautunut voi pudottaa videon
+  (≤ 4 GiB, `video/*`) kannen pudotusalueeseen; lukuoikeutta ei ole kenelläkään selaimesta, videot katsotaan
+  konsolista. Säännöt `storage.rules`. Metatieto Firestoreen `luentovideot`.
 - **Jäsennysvälimuisti**: jäsennetyt kortit tallennetaan IndexedDB:hen (`solukko-apkg`).
   Avain on `.apkg`:n etag + koko **+ jäsennysversio** `_JASENNYS`. Jos muutat `parseAnkiDB`:tä niin,
   että korttien sisältö muuttuu, **nosta `_JASENNYS`** — muuten paluukävijä jää vanhaan
