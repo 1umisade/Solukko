@@ -1,0 +1,47 @@
+{
+ "H2O": {
+  "nimi": "water",
+  "smiles": "O",
+  "kaava": "H2O"
+ },
+ "CO2": {
+  "nimi": "carbon dioxide",
+  "smiles": "C(=O)=O",
+  "kaava": "CO2"
+ },
+ "O2": {
+  "nimi": "dioxygen",
+  "smiles": "O=O",
+  "kaava": "O2"
+ },
+ "Pi": {
+  "nimi": "phosphate",
+  "smiles": "[O-]P(=O)([O-])[O-]",
+  "kaava": "O4P-3"
+ },
+ "ATP": {
+  "nimi": "adenosine triphosphate",
+  "smiles": "C1=NC(=C2C(=N1)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N",
+  "kaava": "C10H16N5O13P3"
+ },
+ "ADP": {
+  "nimi": "adenosine diphosphate",
+  "smiles": "C1=NC(=C2C(=N1)N(C=N2)[C@H]3[C@@H]([C@@H]([C@H](O3)COP(=O)(O)OP(=O)(O)O)O)O)N",
+  "kaava": "C10H15N5O10P2"
+ },
+ "NADP": {
+  "nimi": "NADP+",
+  "smiles": "C1=CC(=C[N+](=C1)[C@H]2[C@@H]([C@@H]([C@H](O2)COP(=O)([O-])OP(=O)(O)OC[C@@H]3[C@H]([C@H]([C@@H](O3)N4C=NC5=C(N=CN=C54)N)OP(=O)(O)O)O)O)O)C(=O)N",
+  "kaava": "C21H28N7O17P3"
+ },
+ "CHL": {
+  "nimi": "chlorophyll a",
+  "smiles": "CCC1=C(C2=NC1=CC3=C(C4=C([N-]3)C(=C5[C@H]([C@@H](C(=N5)C=C6C(=C(C(=C2)[N-]6)C=C)C)C)CCC(=O)OC/C=C(\\C)/CCC[C@H](C)CCC[C@H](C)CCCC(C)C)[C@H](C4=O)C(=O)OC)C)C.[Mg+2]",
+  "kaava": "C55H72MgN4O5"
+ },
+ "PQ": {
+  "nimi": "plastoquinone",
+  "smiles": "CC1=C(C(=O)C(=CC1=O)C/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CCC=C(C)C)C",
+  "kaava": "C53H80O2"
+ }
+}

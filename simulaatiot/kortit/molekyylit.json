@@ -1,5 +1,5 @@
 {
- "_ohje": "Geneesin lajit Solukon korttien popupeihin. kaavat = kaavan kirjoitusasut korttitekstissa (Unicode ja HTML sub/sup), sanat = suomenkieliset nimet kaikissa sijamuodoissa. video = simulaatiot/kortit/<tiedosto>, pyorahdys Geneesin korttirenderista (tyokalut/vastaanota.py + selaimen MediaRecorder). kuva2d = rakennekaava (PubChem PNG) tai atomin kuorimalli (SVG) popupin 2D-asentoon. Tiedostonimet eroavat myos kirjainkoosta riippumatta (Windows): protoni on Hplus, fosfori P.",
+ "_ohje": "Geneesin lajit Solukon korttien popupeihin. kaavat = kaavan kirjoitusasut korttitekstissa (Unicode ja HTML sub/sup), sanat = suomenkieliset nimet kaikissa sijamuodoissa. video = simulaatiot/kortit/<tiedosto>, pyorahdys Geneesin korttirenderista (tyokalut/vastaanota.py + selaimen MediaRecorder). kuva2d = rakennekaava (tyokalut/kaava2d.py, RDKit, sarjakuvatyyli) tai atomin kuorimalli (SVG) popupin 2D-asentoon. Tiedostonimet eroavat myos kirjainkoosta riippumatta (Windows): protoni on Hplus, fosfori P.",
  "H2O": {
   "nimi": "vesi",
   "kaava": "H₂O",
@@ -36,7 +36,7 @@
    "vesimolekyyleistä",
    "vesimolekyyleihin"
   ],
-  "kuva2d": "2d/H2O.png"
+  "kuva2d": "2d/H2O.svg"
  },
  "p": {
   "nimi": "protoni",
@@ -86,7 +86,7 @@
    "hiilidioksidiksi",
    "hiilidioksidilla"
   ],
-  "kuva2d": "2d/CO2.png"
+  "kuva2d": "2d/CO2.svg"
  },
  "O2": {
   "nimi": "happi",
@@ -112,7 +112,7 @@
    "happimolekyylien",
    "happimolekyylejä"
   ],
-  "kuva2d": "2d/O2.png"
+  "kuva2d": "2d/O2.svg"
  },
  "Pi": {
   "nimi": "fosfaatti",
@@ -149,7 +149,7 @@
    "fosfaattiryhmien",
    "fosfaattiryhmiä"
   ],
-  "kuva2d": "2d/Pi.png"
+  "kuva2d": "2d/Pi.svg"
  },
  "ATP": {
   "nimi": "ATP",
@@ -165,7 +165,7 @@
    "adenosiinitrifosfaatiksi",
    "adenosiinitrifosfaatista"
   ],
-  "kuva2d": "2d/ATP.png"
+  "kuva2d": "2d/ATP.svg"
  },
  "ADP": {
   "nimi": "ADP",
@@ -181,7 +181,7 @@
    "adenosiinidifosfaatiksi",
    "adenosiinidifosfaatista"
   ],
-  "kuva2d": "2d/ADP.png"
+  "kuva2d": "2d/ADP.svg"
  },
  "NADP": {
   "nimi": "NADP⁺",
@@ -197,7 +197,7 @@
    "nikotiiniamidiadeniinidinukleotidifosfaatti",
    "nikotiiniamidiadeniinidinukleotidifosfaatin"
   ],
-  "kuva2d": "2d/NADP.png"
+  "kuva2d": "2d/NADP.svg"
  },
  "CHL": {
   "nimi": "klorofylli",
@@ -221,7 +221,7 @@
    "lehtivihreää",
    "lehtivihreässä"
   ],
-  "kuva2d": "2d/CHL.png"
+  "kuva2d": "2d/CHL.svg"
  },
  "PQ": {
   "nimi": "plastokinoni",
@@ -239,7 +239,7 @@
    "plastokinonien",
    "plastokinoneja"
   ],
-  "kuva2d": "2d/PQ.png"
+  "kuva2d": "2d/PQ.svg"
  },
  "H": {
   "nimi": "vety",
