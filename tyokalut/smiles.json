@@ -43,5 +43,10 @@
   "nimi": "plastoquinone",
   "smiles": "CC1=C(C(=O)C(=CC1=O)C/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CC/C=C(\\C)/CCC=C(C)C)C",
   "kaava": "C53H80O2"
+ },
+ "OH": {
+  "nimi": "hydroxide",
+  "smiles": "[OH-]",
+  "kaava": "HO-"
  }
 }

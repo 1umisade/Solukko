@@ -37,6 +37,44 @@
   ],
   "kuva2d": "2d/H2O.svg"
  },
+ "OH": {
+  "nimi": "hydroksidi-ioni",
+  "kaava": "OH⁻",
+  "kaavat": [
+   "OH⁻",
+   "OH<sup>−</sup>",
+   "OH<sup>-</sup>",
+   "OH<sup>–</sup>",
+   "HO⁻",
+   "HO<sup>−</sup>",
+   "HO<sup>-</sup>"
+  ],
+  "sanat": [
+   "hydroksidi-ioni",
+   "hydroksidi-ionin",
+   "hydroksidi-ionia",
+   "hydroksidi-ionissa",
+   "hydroksidi-ionista",
+   "hydroksidi-ioniin",
+   "hydroksidi-ionit",
+   "hydroksidi-ionien",
+   "hydroksidi-ioneja",
+   "hydroksidi-ioneita",
+   "hydroksidi-ioneiksi",
+   "hydroksidi",
+   "hydroksidin",
+   "hydroksidia",
+   "hydroksidissa",
+   "hydroksidista",
+   "hydroksidiin",
+   "hydroksidiksi",
+   "hydroksidit",
+   "hydroksidien",
+   "hydroksideja",
+   "hydroksideiksi"
+  ],
+  "kuva2d": "2d/OH.svg"
+ },
  "p": {
   "nimi": "protoni",
   "kaava": "H⁺",
