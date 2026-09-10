@@ -12416,7 +12416,7 @@ cam.inputs.attached.pointers.buttons = [1, 2];   // middle and right drag look a
 cam.panningSensibility = 0; cam.attachControl(canvas, true); cam.inertia = 0.82;
 const HD = 236;   // half depth of the 3-D box (the arena's half height - 840 x 472 x 472)
 let is3D = false, selected = null, arenaMesh = null;
-const buildArena = () => { if(arenaMesh) arenaMesh.dispose(); const V3 = (x,y,z) => new BABYLON.Vector3(x,y,z);
+const buildArena = () => { if(arenaMesh) arenaMesh.dispose(); if(KORTTI){ arenaMesh = null; return; } /* the popup shows the molecule alone - no box edges */ const V3 = (x,y,z) => new BABYLON.Vector3(x,y,z);
   const lines = is3D ? (() => { const c = [[-HW,-HH,-HD],[HW,-HH,-HD],[HW,HH,-HD],[-HW,HH,-HD],[-HW,-HH,HD],[HW,-HH,HD],[HW,HH,HD],[-HW,HH,HD]].map(q => V3(...q));
       return [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].map(e => [c[e[0]], c[e[1]]]); })()
     : [[V3(-HW,-HH,0), V3(HW,-HH,0), V3(HW,HH,0), V3(-HW,HH,0), V3(-HW,-HH,0)]];
