@@ -12887,7 +12887,7 @@ window.gVesi = { spawn, remove, mols, SPECIES, RULES, step, scene, cam, toPlane,
 }
 
 /* ── Start screen: the chemistry editor, the premade scene or the whole cell (?tila=editori / kalvosto / solu skips it) ── */
-const startViewer = solu => { document.documentElement.classList.add('kalvosto'); if(solu) document.documentElement.classList.add('solu'); return run().catch(err => { console.error(err); setLbl('Virhe: ' + err.message); }); };
+const startViewer = solu => { document.documentElement.classList.add('kalvosto'); if(solu){ document.documentElement.classList.add('solu'); document.title = 'Webcyte'; }   // the whole-cell scene is called Webcyte (owner 10.9.2026) return run().catch(err => { console.error(err); setLbl('Virhe: ' + err.message); }); };
 /* the back button: to the start page (the query is dropped, so the choice is asked again), revealed by
    mouse movement and gone again 2.2 s after the mouse rests - it never sits on the scene */
 { const bb = document.getElementById('back-btn'); let hideT = null;
