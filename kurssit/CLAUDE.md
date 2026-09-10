@@ -194,12 +194,13 @@ kuulu kortin leipätekstiin: ne mainitaan **vain sen termin omalla kortilla** ri
 | **solukalvo** | plasmakalvo | |
 | **soluseinä** | soluseinämä | |
 | **ribosomaalinen RNA** | rRNA | |
+| **vesikatkaisu** | hydrolyysi | myös johdokset: *vesikatkaista*, *vesikatkaisureaktio* (käyttäjän linjaus 10.9.2026) |
 
 Pääsääntö: **suomenkielinen sana voittaa** vierasperäisen. Poikkeukset merkitään taulukkoon.
 
 `Kutsutaan myös` -rivit tällä hetkellä: *tuma* → nucleus, *lähetti-RNA* → mRNA, messenger RNA,
 *solulima* → sytoplasma, *soluelin* → organelli, *genomi* → perimä, *tumakotelo* → tumakalvo,
-*tumallinen* → eukaryootti, *tumaton* → prokaryootti.
+*tumallinen* → eukaryootti, *tumaton* → prokaryootti, *vesikatkaisu* → hydrolyysi.
 
 ### Taivutus vaihtaessa
 

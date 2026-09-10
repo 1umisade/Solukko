@@ -70,7 +70,7 @@ Korttityyppi on **`Solukko`**, id `1727391050`, kuusi kenttää:
   eivät kuulu leipätekstiin.
 - Mitat: suppea ≤ 15 sanaa, laaja 45–65 sanaa. Ei puolipisteitä, käytä pistettä.
 - Termistö on lyöty lukkoon (`lähetti-RNA` ei `mRNA`, `tuma` ei `nucleus`, `solulima` ei
-  `sytoplasma`, `genomi` ei `perimä`, …). Koko taulukko on `kurssit/CLAUDE.md` §10.
+  `sytoplasma`, `genomi` ei `perimä`, `vesikatkaisu` ei `hydrolyysi`, …). Koko taulukko on `kurssit/CLAUDE.md` §10.
 
 **Pakkapuu koodaa lukuvuoden, lukukauden ja periodin:**
 
