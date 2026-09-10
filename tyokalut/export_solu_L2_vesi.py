@@ -117,8 +117,13 @@ if tormays:
 cur.execute("delete from cards"); cur.execute("delete from notes")
 cur.execute("delete from revlog"); cur.execute("delete from graves")
 
+GUID_VANHA = {   # a question renamed after the first import keeps the guid of its original wording (or the import duplicates it)
+    'Mitä vesikatkaisu tarkoittaa?': 'Mitä hydrolyysi tarkoittaa?',
+    'Kuinka paljon energiaa ATP:n vesikatkaisu vapauttaa?': 'Kuinka paljon energiaa ATP:n hydrolyysi vapauttaa?',
+}
 def guid_for(q):
-    h = hashlib.sha1(('solukko-vesi-L2|' + _kys(q).lower()).encode('utf-8')).digest()
+    k = _kys(q); k = GUID_VANHA.get(k, k)
+    h = hashlib.sha1(('solukko-vesi-L2|' + k.lower()).encode('utf-8')).digest()
     abc = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     return ''.join(abc[b % len(abc)] for b in h[:10])
 

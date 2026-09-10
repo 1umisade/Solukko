@@ -11,7 +11,7 @@ ESITTELY = (
     "niin poikkeuksellinen aine: vesimolekyylin dipoliluonne ja vetysidokset, veden tapa liuottaa "
     "toisia aineita ja pakata hydrofobiset osat yhteen, heikot vuorovaikutukset ja "
     "komplementaarisuus, kolligatiiviset ominaisuudet ja osmoosi, veden ionisoituminen, pH ja "
-    "puskurit sekä vesi reaktioiden osallisena kondensaatiossa ja hydrolyysissä."
+    "puskurit sekä vesi reaktioiden osallisena kondensaatiossa ja vesikatkaisussa."
 )
 
 def K(k, s, l, tt, ls="", kuva=""):

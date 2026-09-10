@@ -1213,7 +1213,7 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
 #word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
-.wl-mol video { display: block; width: 200px; height: 200px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; }   /* the recorded spin has Geneesi's card background baked in */
+.wl-mol video { display: block; width: 200px; height: 200px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; }   /* the recorded spin has the simulator card background baked in */
 .wl-tiedot { margin: 0.6em auto 0; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
@@ -2631,9 +2631,9 @@ body.dark-mode .cal-ev { color:#241f1b; }
   </div>
   <div id="sim-view" style="display:none;">
     <div class="sim-opts">
-      <a class="sim-opt" href="geneesi/index.html?tila=editori"><b>Kemiaeditori</b></a>
-      <a class="sim-opt" href="geneesi/index.html?tila=kalvosto"><b>Yhteyttämiskalvosto</b></a>
-      <a class="sim-opt" href="geneesi/index.html?tila=solu"><b>Kasvisolu</b></a>
+      <a class="sim-opt" href="simulaatiot/index.html?tila=editori"><b>Kemiaeditori</b></a>
+      <a class="sim-opt" href="simulaatiot/index.html?tila=kalvosto"><b>Yhteyttämiskalvosto</b></a>
+      <a class="sim-opt" href="simulaatiot/index.html?tila=solu"><b>Kasvisolu</b></a>
     </div>
   </div>
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
@@ -3892,8 +3892,8 @@ async function loadDecks(){
   }
   const savedDeck=localStorage.getItem('solukko-savedDeck'), savedIdx=parseInt(localStorage.getItem('solukko-savedCardIdx')||'0');
   if(savedDeck&&names.includes(savedDeck)){ await startDeck(savedDeck, false);
-    const _rfs=localStorage.getItem('solukko-savedFs')==='1', _rans=localStorage.getItem('solukko-savedAnswer')==='1';   // also restore fullscreen review + revealed answer
-    if(reviewCards[savedIdx] && (savedIdx>0 || _rfs)){ jumpToOverviewCard(savedIdx, _rfs); if(_rans) setTimeout(()=>{ try{ showAnswer(); }catch(e){} }, 500); }
+    const _rfs=localStorage.getItem('solukko-savedFs')==='1', _sa=localStorage.getItem('solukko-savedAnswer'), _rans=(_sa==='1'||_sa==='2');   // also restore fullscreen review + revealed answer ('2' = wide answer open)
+    if(reviewCards[savedIdx] && (savedIdx>0 || _rfs)){ jumpToOverviewCard(savedIdx, _rfs); if(_rans) setTimeout(()=>{ try{ showAnswer(); if(_sa==='2') setTimeout(()=>{ try{ if(_answerMode==='suppea') toggleAnswerMode(); }catch(e){} }, 700); }catch(e){} }, 500); }
     return; }
   show('deck-screen');
   { const _ht=sessionStorage.getItem('solukko-homeTab'); if(_ht && _ht!=='kortit' && typeof showHomeTab==='function') showHomeTab(_ht); }   // restore the home tab (chat/kalenteri/kartta) the user was on
@@ -5544,6 +5544,7 @@ function _applyAnswerMode(anim){   // swap the answer text + the middle button i
 function toggleAnswerMode(){   // space after reveal: toggle Laaja <-> Suppea (new note type only)
   if(!currentCard||!currentCard._hasSuppea) return false;
   _answerMode=(_answerMode==='suppea')?'laaja':'suppea'; _applyAnswerMode(true);
+  try{ localStorage.setItem('solukko-savedAnswer', _answerMode==='laaja'?'2':'1'); }catch(e){}   // '2' = the wide answer was open: a refresh reopens it
   try{ playKeyClick(); }catch(e){}   // no card shake here: the answer just grows in place
   fitCardScale(); scrollToCard(); if(typeof flashWordLinkBubbles==='function') flashWordLinkBubbles();
   return true;
@@ -6901,10 +6902,10 @@ function buildWordLinks(){
   }
 }
 let _wlRe=null, _wlMap=new Map(), _wlCards=[];   // _wlCards: the cards links point at, from ANY deck
-// Geneesi molecules (geneesi/kortit/molekyylit.json): a formula or a Finnish name in card text opens the
+// Geneesi molecules (simulaatiot/kortit/molekyylit.json): a formula or a Finnish name in card text opens the
 // spinning 3-D render recorded from Geneesi's info card. _molMap: lower-cased trigger -> species key.
 let _molekyylit=null, _molMap=new Map(), _molHtml=new Map();   // _molHtml: serialised "H<sub>2</sub>O" -> key
-fetch('geneesi/kortit/molekyylit.json').then(r=>r.ok?r.json():null).then(j=>{
+fetch('simulaatiot/kortit/molekyylit.json').then(r=>r.ok?r.json():null).then(j=>{
   if(!j) return; delete j._ohje; _molekyylit=j;
   _molHtml=new Map();
   Object.keys(j).forEach(key=>(j[key].kaavat||[]).forEach(k=>{ if(/</.test(k)) _molHtml.set(_molSer(k),key); }));
@@ -7021,7 +7022,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     if(molData && !(target===_tipTarget && _tipTiedot)){   // molecule: only the spinning render (+ Tiedot if a Solukko card exists)
       if(target!==_tipTarget){
         _tipTarget=target; _tipLukittu=false; _tipTiedot=false; _tipLaaja=null; _tipSuppea=null;
-        tip.innerHTML='<div class="wl-mol"><video src="geneesi/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video></div>'
+        tip.innerHTML='<div class="wl-mol"><video src="simulaatiot/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video></div>'
           +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-expand wl-tiedot">Tiedot</button>':'');
         tip.classList.add('mol-only'); tip.style.fontSize='';
       }
