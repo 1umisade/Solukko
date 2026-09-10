@@ -12591,7 +12591,8 @@ const draw = () => {
       continue; }
     if(na + sp.atoms.length > MAXATOM || nc + sp.coreN > MAXLOBE || nb + sp.bondN > MAXLOBE) continue;
     let mf = null; if(m.morph){ const e = (simT - m.morph.t0)/MORPH_S; if(e >= 1) m.morph = null; else mf = 1 - Math.pow(1 - Math.max(0, e), 3); }   // ease-out glide, null once settled
-    sp.atoms.forEach((a, ai) => { if(mf !== null){ const f = m.morph.from[ai]; _mq[0] = f[0] + (a.q[0]-f[0])*mf; _mq[1] = f[1] + (a.q[1]-f[1])*mf; _mq[2] = f[2] + (a.q[2]-f[2])*mf; xf(_mq, _v); } else xf(a.q, _v);
+    const mdel = mf !== null ? m.morph.from.map((f, ai) => { const q = sp.atoms[ai].q; return [(f[0]-q[0])*(1-mf), (f[1]-q[1])*(1-mf), (f[2]-q[2])*(1-mf)]; }) : null;   // each atom's current offset from its final spot (local frame)
+    sp.atoms.forEach((a, ai) => { if(mdel){ const d = mdel[ai]; _mq[0] = a.q[0]+d[0]; _mq[1] = a.q[1]+d[1]; _mq[2] = a.q[2]+d[2]; xf(_mq, _v); } else xf(a.q, _v);
       const ax = px + _v[0], ay = py + _v[1], az = pz + _v[2];
       const kx = m.id*3.7 + 1.3, ky = ai*2.9 + 0.7, kz = 0.5;   // a FIXED per-atom key in the w slots: the boil hashes from it, not from the live centre
       let o = na*16; B.shM.fill(0, o, o+16); B.shM[o]=1; B.shM[o+5]=1; B.shM[o+10]=1; B.shM[o+15]=1; B.shM[o+12]=ax; B.shM[o+13]=ay; B.shM[o+14]=az; B.shM[o+3]=kx; B.shM[o+7]=ky; B.shM[o+11]=kz;
@@ -12600,17 +12601,21 @@ const draw = () => {
       if(nn + a.nuc.length <= MAXNUC) for(const n of a.nuc){ xf(n.o, _w); o = nn*16; B.nuM.fill(0, o, o+16); B.nuM[o]=1; B.nuM[o+5]=1; B.nuM[o+10]=1; B.nuM[o+15]=1;
         B.nuM[o+12]=ax+_w[0]; B.nuM[o+13]=ay+_w[1]; B.nuM[o+14]=az+_w[2]; B.nuM[o+3]=kx; B.nuM[o+7]=ky; B.nuM[o+11]=kz;
         B.nuC[nn*4]=n.col[0]; B.nuC[nn*4+1]=n.col[1]; B.nuC[nn*4+2]=n.col[2]; B.nuC[nn*4+3]=n.p; nn++; } });
-    const putLobe = (src, q, M, COL, CEN, OID, SEED, idx, extra) => { const s0 = q*16, d0 = idx*16;
+    if(mdel && !sp._own){   // which atom(s) each lobe belongs to: the nearest atom for a core lobe, the two nearest for a bond lobe
+      const near = (cx, cy, cz, k) => sp.atoms.map((a, i) => [ (a.q[0]-cx)**2 + (a.q[1]-cy)**2 + (a.q[2]-cz)**2, i ]).sort((u, v) => u[0]-v[0]).slice(0, k).map(u => u[1]);
+      sp._own = { core: Array.from({length: sp.coreN}, (_, q) => near(sp.core.cen[q*3], sp.core.cen[q*3+1], sp.core.cen[q*3+2], 1)),
+                  bond: Array.from({length: sp.bondN}, (_, q) => near(sp.bond.cen[q*3], sp.bond.cen[q*3+1], sp.bond.cen[q*3+2], 2)) }; }
+    const putLobe = (src, q, M, COL, CEN, OID, SEED, idx, extra, own) => { const s0 = q*16, d0 = idx*16;
+      let ox = 0, oy = 0, oz = 0; if(mdel && own){ for(const i of own){ ox += mdel[i][0]/own.length; oy += mdel[i][1]/own.length; oz += mdel[i][2]/own.length; } }   // ride along with the gliding atoms
       for(let c=0;c<3;c++){ const ax=src.m[s0+c*4], ay=src.m[s0+c*4+1], az=src.m[s0+c*4+2];
         M[d0+c*4]  =R9[0]*ax+R9[1]*ay+R9[2]*az; M[d0+c*4+1]=R9[3]*ax+R9[4]*ay+R9[5]*az; M[d0+c*4+2]=R9[6]*ax+R9[7]*ay+R9[8]*az; M[d0+c*4+3]=0; }
-      const mx=src.m[s0+12], my=src.m[s0+13], mz=src.m[s0+14];
+      const mx=src.m[s0+12]+ox, my=src.m[s0+13]+oy, mz=src.m[s0+14]+oz;
       M[d0+12]=R9[0]*mx+R9[1]*my+R9[2]*mz+px; M[d0+13]=R9[3]*mx+R9[4]*my+R9[5]*mz+py; M[d0+14]=R9[6]*mx+R9[7]*my+R9[8]*mz+pz; M[d0+15]=1;
-      const ex=src.cen[q*3], ey=src.cen[q*3+1], ez=src.cen[q*3+2];
+      const ex=src.cen[q*3]+ox, ey=src.cen[q*3+1]+oy, ez=src.cen[q*3+2]+oz;
       CEN[idx*3]=R9[0]*ex+R9[1]*ey+R9[2]*ez+px; CEN[idx*3+1]=R9[3]*ex+R9[4]*ey+R9[5]*ez+py; CEN[idx*3+2]=R9[6]*ex+R9[7]*ey+R9[8]*ez+pz;
       COL[idx*3]=src.col[q*3]; COL[idx*3+1]=src.col[q*3+1]; COL[idx*3+2]=src.col[q*3+2]; OID[idx]=src.oid[q]; SEED[idx]=hash(m.id, q); if(extra) extra(idx, q); };
-    if(mf !== null) continue;   // orbitals are baked for the final geometry: they appear once the atoms have arrived
-    for(let q=0;q<sp.coreN;q++, nc++) putLobe(sp.core, q, B.coM, B.coCol, B.coCen, B.coOid, B.coSeed, nc);
-    for(let q=0;q<sp.bondN;q++, nb++) putLobe(sp.bond, q, B.boM, B.boCol, B.boCen, B.boOid, B.boSeed, nb, (i, k) => { B.boTap[i] = sp.bond.tap[k]; B.boProf[i] = sp.bond.prof[k]; }); }
+    for(let q=0;q<sp.coreN;q++, nc++) putLobe(sp.core, q, B.coM, B.coCol, B.coCen, B.coOid, B.coSeed, nc, null, mdel ? sp._own.core[q] : null);
+    for(let q=0;q<sp.bondN;q++, nb++) putLobe(sp.bond, q, B.boM, B.boCol, B.boCen, B.boOid, B.boSeed, nb, (i, k) => { B.boTap[i] = sp.bond.tap[k]; B.boProf[i] = sp.bond.prof[k]; }, mdel ? sp._own.bond[q] : null); }
   shellMesh.thinInstanceCount = na; nucMesh.thinInstanceCount = nn; coreMesh.thinInstanceCount = nc; bondMesh.thinInstanceCount = nb;
   if(na){ shellMesh.thinInstanceBufferUpdated('matrix'); shellMesh.thinInstanceBufferUpdated('instanceColor'); shellMesh.thinInstanceBufferUpdated('instR'); }
   if(nn){ nucMesh.thinInstanceBufferUpdated('matrix'); nucMesh.thinInstanceBufferUpdated('instanceColor'); }

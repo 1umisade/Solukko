@@ -362,12 +362,13 @@ body.dark-mode .fc-bubble::after { border-top-color: #3a312b; }
 #fs-comment-btn { display: none; position: fixed; left: 24px; bottom: 4vh; z-index: 98; width: 60px; height: 60px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; line-height: 1; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
 #card-screen.card-fs-on #fs-comment-btn { display: flex; }
 /* pseudo (faux) fullscreen back button — top-left, always visible; returns to the deck review. Only shown in faux mode (native fullscreen exits by double-tap). */
-#faux-fs-back { display: none; position: fixed; top: 16px; left: 16px; z-index: 262; width: 48px; height: 48px; border-radius: 50%; border: 1px solid #d4cec4; background: rgba(255,254,249,0.94); color: #56533c; font-size: 1.5rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.22); align-items: center; justify-content: center; }
+#faux-fs-back { display: none; position: fixed; top: 16px; left: 16px; z-index: 262; width: 46px; height: 46px; border-radius: 50%; border: 2.5px solid #4a3320; background: #f2e6c9; color: #4a3320; font: bold 22px/1 'Courier New', monospace; cursor: pointer; box-shadow: 0 3px 0 #4a3320; padding: 0 0 2px; align-items: center; justify-content: center; }
 #card-screen.faux-fs #faux-fs-back { display: flex; }
 body:not(.is-mobile) #card-screen.faux-fs #faux-fs-back { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }   /* desktop: hide when the mouse is still, like the comment button */
 body:not(.is-mobile) #card-screen.faux-fs #faux-fs-back.visible { opacity: 1; pointer-events: auto; }
 body.is-mobile #card-screen.faux-fs #faux-fs-back { display: none; }   /* mobile: no back button — double-tap the card to leave the study view */
-body.dark-mode #faux-fs-back { background: rgba(58,49,43,0.94); color: #eadfce; border-color: #6d5f52; }
+body.dark-mode #faux-fs-back { background: #3a2c1c; color: #eadfce; border-color: #7c5c39; box-shadow: 0 3px 0 #7c5c39; }
+body.dark-mode #faux-fs-back:hover, body.dark-mode #back-btn-fixed:hover { background: #88a35f !important; color: #f1f5e2 !important; }
 /* desktop study view: bottom-right Mona whose bubble shows the answer's extent; fades with the mouse like the other buttons */
 #fs-scope-mona { display: none; }
 body:not(.is-mobile) #card-screen.card-fs-on #fs-scope-mona { display: block; position: fixed; right: 22px; bottom: 3.5vh; z-index: 98; width: 56px; cursor: pointer; opacity: 1; pointer-events: auto; transition: opacity 0.2s ease; }
@@ -476,7 +477,9 @@ body.dark-mode .iphone-toggle-wrap { background: #3a312b; color: #eadfce; border
 :root { --side-card-gap: 50px; }
 #card-screen { position: relative; width: 100%; max-width: 1180px; min-width: 0; display: none; flex-direction: column; align-items: stretch; gap: 0; margin-top: 0; }
 #grid-header { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; }   /* the back button is fixed now: keep its old room so Mona's greeting does not slide under it */
-#back-btn-fixed { position: fixed; top: 14px; left: 14px; z-index: 60; flex: 0 0 auto; width: 46px; height: 46px; background: #fffef9; border: 1px solid #d4cec4; border-radius: 50%; font-size: 1.2rem; color: #56533c; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.12); align-items: center; justify-content: center; line-height: 1; }
+#back-btn-fixed { position: fixed; top: 16px; left: 16px; z-index: 60; flex: 0 0 auto; width: 46px; height: 46px; background: #f2e6c9; border: 2.5px solid #4a3320; border-radius: 50%; color: #4a3320; font: bold 22px/1 'Courier New', monospace; cursor: pointer; box-shadow: 0 3px 0 #4a3320; align-items: center; justify-content: center; padding: 0 0 2px; }   /* the simulator's back button, everywhere in Solukko */
+#back-btn-fixed:hover, #faux-fs-back:hover { background: #a3b881; color: #2f3d1c; }
+#back-btn-fixed span, #faux-fs-back span { margin-top: 0 !important; }
 #deck-title-bar { flex: 1 1 auto; min-width: 0; text-align: left; padding: 0; font-family: 'Lora', serif; font-weight: 800; font-size: clamp(1.3rem, 2.6vw, 2.2rem); line-height: 1.15; color: #1a1612; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #deck-title-bar { display: none; }   /* deck name lives on the cover + welcome bubble, not next to the back button */
 body.dark-mode #deck-title-bar { color: #eadfce; }
@@ -729,7 +732,7 @@ body.dark-mode .cloze-answer, body.dark-mode .cloze-answer-line { background: no
 body.dark-mode .video-overlay { background: #3a312b !important; }
 body.dark-mode .video-cover { background: #3a312b !important; border-color: #6d5f52 !important; }
 body.dark-mode .video-cover > span { color: #eadfce !important; }
-body.dark-mode #back-btn-fixed { background: #3a312b !important; color: #eadfce !important; border-color: #6d5f52 !important; }
+body.dark-mode #back-btn-fixed { background: #3a2c1c !important; color: #eadfce !important; border-color: #7c5c39 !important; box-shadow: 0 3px 0 #7c5c39 !important; }
 body.dark-mode #gear-btn-wrap > button { background: #3a312b !important; border-color: #6d5f52 !important; }
 /* dev user-activity dashboard */
 .dev-act-title { font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#6b6055; letter-spacing:0.03em; }
@@ -1333,7 +1336,8 @@ body.dark-mode .cal-day.cal-today .cal-num { background:#5c8a6a; color:#fff; }
 .chat-body { min-height:0; max-height:62vh; overflow-y:auto; display:flex; flex-direction:column; justify-content:flex-end; padding-right:6px; }   /* greeting + messages sit just above the input */
 .chat-greet-row { display:flex; align-items:flex-end; justify-content:flex-start; gap:8px; margin:6px 0 14px; }
 .add-info-wrap { display:flex; flex-direction:column; align-items:center; }
-.add-info-bubble { position:relative; background:#fffef9; border:2px solid #d4cec4; border-radius:22px; padding:1rem 1.3rem; color:#56533c; box-shadow:0 6px 20px rgba(0,0,0,0.12); text-align:left; font-size:1.0rem; line-height:1.4; }
+.add-info-bubble { position:relative; background:#fffef9; border:2px solid #d4cec4; border-radius:22px; padding:0.7rem 1.2rem; color:#56533c; box-shadow:0 6px 20px rgba(0,0,0,0.16); text-align:left; font-family:'Lora',serif; font-size:1.05rem; font-weight:400; line-height:1.3; }   /* exactly the homepage greeting bubble (.home-greet) */
+.add-info-bubble * { font-weight:400; }
 .add-info-bubble::after { content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:14px solid transparent; border-top-color:#fffef9; margin-top:-2px; }
 body.dark-mode .add-info-bubble { background:#2b2622; color:#eadfce; border-color:#4a3f36; }
 body.dark-mode .add-info-bubble::after { border-top-color:#2b2622; }
@@ -5956,7 +5960,7 @@ async function deleteUserCard(docId){
 // KORTTIEHDOTUKSET   (a user suggests an OWN card as an official course card; the dev awards a golden-style claim code worth 0,25 €)
 // ════════════════════════════════════════════════════════════
 const ADD_CARD_INFO_HTML='<div class="add-info-wrap">'
-  +'<div class="add-info-bubble"><div style="font-weight:700;margin-bottom:0.6rem;">Haluatko luoda oman kortin?</div>'
+  +'<div class="add-info-bubble"><div style="margin-bottom:0.6rem;">Haluatko luoda oman kortin?</div>'
   +'<div>Luomasi kortit eivät näy muille sivuston käyttäjille ja ovat saatavilla vain sillä laitteella, jolla ne luotiin.</div>'
   +'<div style="margin-top:0.6rem;">Ylläpito voi lukea korttejasi ja jos niitä lisätään osaksi virallisia kortteja, maksamme kustakin kortista 0,3&nbsp;€ palkkion. Palkkiot voi noutaa tietovisojen yhteydessä Aurumin TEK Loungesta maanantaisin klo 16&ndash;18.</div></div>'
   +'<img src="mona_wow.png" alt="Mona" class="add-info-mona">'
