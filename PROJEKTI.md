@@ -101,6 +101,10 @@ alkaa** (syksy 1–2, kevät 3–5).
 `?tila=kortti&laji=X` on Solukon popupia varten: ei listaa, ei esilatausta (55 MB), ei latausruutua — vain
 yksi laji origossa ja sen ympäri kiertävä kamera (`KORTTI`-lippu `runEditor`issa). Kun molekyyli on
 spawnattu, sivu lähettää `postMessage({solukkoKortti:'valmis'})`, ja Solukko häivyttää iframen näkyviin.
+Solukossa on **yksi pysyvä iframe** (`#mol-kehys`, `molKehys` index.html:ssä): se ladataan piiloon 2,5 s
+sivun latauduttua, ja popup vain asemoi sen 3D-ruudun päälle (`position:fixed`) ja pyytää lajin
+viestillä `{solukkoLaji:'ATP'}`. Iframea ei koskaan siirretä DOM:ssa — siirto lataisi sen uudelleen.
+Kortti-tila esilataa kaikki pienet lajit ja atomit taustalla, joten vaihto on välitön.
 Kehys lasketaan vdW-pinnan mukaan (`Math.max(sp.orbR, sp.radius)`), jotta molekyyli ei leikkaudu.
 
 ## Työjärjestys
