@@ -1262,10 +1262,10 @@ body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { backgroun
 body.dark-mode .wl-mol-tiedot { border-top-color: #6d5f52; }
 .wl-dim-switch { display: flex; justify-content: center; gap: 0; margin: 0; width: max-content; border: 1px solid #c9bda8; border-radius: 999px; overflow: hidden; background: #fff5e0; }
 .wl-dim { border: none; background: transparent; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; padding: 0.22em 0.9em; cursor: pointer; line-height: 1.4; }
-.wl-dim.on { background: #4a3320; color: #fff; }   /* ruskea kuten paluunapin reunus (omistaja 10.9.2026) */
+.wl-dim.on { background: #8a6a4a; color: #fff; }   /* vaalea ruskea (omistaja 10.9.2026: 'lighter shade of brown') */
 .wl-tiedot { display: block; margin: 0; padding: 0.22em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; line-height: 1.4; cursor: pointer; }
 .wl-tiedot:hover { background: #eadcc2; }
-body.dark-mode .wl-dim-switch { background: #4a3f34; border-color: #6d5f52; } body.dark-mode .wl-dim { color: #eadfce; } body.dark-mode .wl-dim.on { background: #8a6a4a; color: #fff; } body.dark-mode .wl-tiedot { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
+body.dark-mode .wl-dim-switch { background: #4a3f34; border-color: #6d5f52; } body.dark-mode .wl-dim { color: #eadfce; } body.dark-mode .wl-dim.on { background: #a98564; color: #fff; } body.dark-mode .wl-tiedot { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
@@ -7201,7 +7201,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
         _tipTarget=target; _tipLukittu=false; _tipTiedot=false; _tipLaaja=null; _tipSuppea=null;
         tip.innerHTML='<div class="wl-mol">'
           +'<div class="wl-mol-view"></div>'
-          +'<div class="wl-mol-foot"><div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">2D</button><button type="button" class="wl-dim" data-dim="3d">3D</button></div>'
+          +'<div class="wl-mol-foot"><div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">kaava</button><button type="button" class="wl-dim" data-dim="3d">muoto</button></div>'
           +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-tiedot">Tiedot</button>':'')+'</div>'
           +'</div>';
         _molRenderView(tip, molData);
