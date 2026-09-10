@@ -186,10 +186,8 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .year-row { display: flex; gap: 24px; align-items: flex-start; }
 .sem-col { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 18px 16px; align-content: flex-start; }
 .sem-col.vuosi { display: block; }
-.period-row { display: flex; gap: 16px; align-items: flex-start; padding: 0 2px; margin-bottom: 8px; }
-.period-row.vierii { overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scrollbar-width: thin; }   /* vierityssailio leikkaa sisaltonsa, joten vain jos kurssit eivat mahdu */
-.period-row > .deck-btn { flex: 0 0 auto; }   /* kortit eivat kutistu, rivi vierii sivusuunnassa */
-.period-row.vierii > .deck-btn { touch-action: pan-x pan-y; }   /* kosketuksella rivia voi pyyhkaista sivusuunnassa (pelkka pan-y esti sen: kurssit jaivat puhelimella piiloon) */
+.period-row { display: flex; flex-wrap: wrap; gap: 18px 16px; align-items: flex-start; padding: 0 2px; margin-bottom: 8px; }   /* NEVER a side-scroller (owner 10.9.2026): the courses fill the row and wrap onto the next one */
+.period-row > .deck-btn { flex: 0 0 auto; }   /* kortit eivat kutistu */
 .sem-col.spring { border-left: 1px dashed #cfc8bc; padding-left: 24px; }
 .sem-col.sem-empty { border: none !important; padding-left: 0 !important; padding-top: 0 !important; }
 .sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
@@ -208,8 +206,7 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
   .sem-col.spring { border-left: none; padding-left: 0; border-top: 1px dashed #cfc8bc; padding-top: 16px; }
   .sem-col { justify-content: center; }
   .year-row .deck-btn { width: min(160px, calc(50% - 8px)); }   /* always at least 2 decks per row on mobile */
-  .period-row { flex-wrap: wrap; justify-content: center; row-gap: 18px; }   /* puhelimella periodin kurssit rivittyvat 2 per rivi - ei piilotettua sivuvieritysta, kaikki kurssit nakyvat */
-  .period-row.vierii { overflow: visible; padding-bottom: 0; }
+  .period-row { justify-content: center; }   /* puhelimella 2 per rivi, keskitettyna */
   #home-mona { flex-direction: column-reverse; align-items: center; justify-content: center; align-self: stretch; gap: 10px; height: auto; margin: 8px 0 14px; }   /* bubble on top, Mona below, centred — same as the review page */
   #home-mona .site-brand { width: 92px; }
   .home-brand-block { display: none; }   /* hide the site-name block on mobile to keep Mona + bubble */
@@ -1226,7 +1223,7 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 .flashcard:not(.answer-shown) .word-link::after { display: none; }
 .word-link::after { display: none; }   /* tail arrow removed */
 /* the tietovisa countdown wears the word-link highlight pill permanently, in bold (owner 10.9.2026) */
-.tietovisa-aika { font-weight: 700; font-size: 0.85em; white-space: nowrap; border-radius: 7px; padding: 0 0.15em; margin: 0 0.35em; background-color: #fff5e0; box-shadow: 0 0 0 1.5px #fff5e0, 0 0 0 3.5px #a06a35, 0 3px 9px rgba(0,0,0,0.16); }   /* a quarter lower than the word-link pill: smaller text, tighter ring */
+.tietovisa-aika { font-weight: 700; display: inline-block; line-height: 1; vertical-align: baseline; white-space: nowrap; border-radius: 7px; padding: 0 0.15em; margin: 0 0.35em; background-color: #fff5e0; box-shadow: 0 0 0 1.5px #fff5e0, 0 0 0 3.5px #a06a35, 0 3px 9px rgba(0,0,0,0.16); }   /* a quarter lower than the word-link pill without shrinking the text: a tight line box and a tighter ring */
 body.dark-mode .tietovisa-aika { background-color: #4a3f34; box-shadow: 0 0 0 1.5px #4a3f34, 0 0 0 3.5px #a97f4e, 0 3px 9px rgba(0,0,0,0.3); }
 /* formula indices hug their element: the 2 of H₂O sits on the stem of the H and is outlined in the card's background
    colour, so it reads as a cut-out of the H. Plain text-shadow, because a background-image clipped to a stroked glyph
@@ -4059,14 +4056,6 @@ function buildDeckGrid(decks, list){
     section.appendChild(row);
     list.appendChild(section);
   });
-  // A scroll container clips its content, and the pack-back cards behind each cover would be cut
-  // off at the row edge. Turn scrolling on only for the rows whose courses do not fit.
-  requestAnimationFrame(paivitaPeriodiVieritys);
-  [120,600,1600].forEach(ms=>setTimeout(paivitaPeriodiVieritys, ms));   // pakkojen kuvat ja fontit asettavat leveydet vasta vahitellen
-  if(!list._vieritysObs && window.ResizeObserver){   // rivien leveydet asettuvat vasta pakkojen latautuessa, joten tarkkaillaan
-    list._vieritysObs=new ResizeObserver(()=>{ clearTimeout(window._vieritysTO); window._vieritysTO=setTimeout(paivitaPeriodiVieritys, 80); });
-    list._vieritysObs.observe(list);
-  }
   // place the dev-only "All Decks" deck as the last deck, next to the last real deck in the grid
   const _sections=list.querySelectorAll('.year-section');
   const _lastSection=_sections[_sections.length-1];
@@ -4084,7 +4073,6 @@ function buildDeckGrid(decks, list){
   _media.forEach(m=>{ if(m.tagName==='VIDEO'){ try{ m.load(); }catch(e){} } });
   const _revealDecks=()=>{
     if(_decksReadyResolve){ _decksReadyResolve(); _decksReadyResolve=null; }   // let init lift the loading overlay
-    paivitaPeriodiVieritys();   // leveydet ovat vasta nyt lopulliset
     if(list.dataset.buildGen!==_gen) return;   // a newer buildDeckGrid superseded this one
     list.classList.remove('decks-loading');
     _setHomeMonaLoading(false);   // decks are in → Mona wakes up and her greeting bubble returns
@@ -4102,15 +4090,7 @@ function buildDeckGrid(decks, list){
   if(!_media.length) _revealDecks();
   else Promise.all(_media.map(m=>_waitMedia(m).then(_bumpGreet))).then(_revealDecks);
 }
-function paivitaPeriodiVieritys(){   // vain ylivuotava rivi vierii; muut saavat nayttaa pakan takakortit leikkaamatta
-  document.querySelectorAll('#deck-list .period-row').forEach(r=>{
-    const oli=r.classList.contains('vierii');
-    if(oli) r.classList.remove('vierii');           // mittaa leikkaamattomana, muuten scrollWidth on jo rajattu
-    const yli=r.scrollWidth > r.clientWidth + 1;
-    r.classList.toggle('vierii', yli);
-  });
-}
-window.addEventListener('resize', ()=>{ clearTimeout(window._vieritysTO); window._vieritysTO=setTimeout(paivitaPeriodiVieritys, 150); });
+
 function layoutDecksRadial(){ /* homepage layout is CSS-driven (see buildDeckGrid); nothing to reposition on resize */ }
 if('scrollRestoration' in history) history.scrollRestoration='manual';   // don't let the browser restore scroll to 0 and cover the hero-hiding scroll
 function scrollPastHero(){   // start with the hero section just above the viewport; it reveals when you scroll up
