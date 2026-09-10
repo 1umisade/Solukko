@@ -3378,9 +3378,12 @@ function positionGreetTail(){   // point the bubble's tail at Mona's vertical ce
   if(!mr.height||!gr.height) return;
   greet.style.setProperty('--greet-tail-top', Math.round((mr.top+mr.height/2)-gr.top-13)+'px');   // Mona's centre − the tail's half-height
 }
+let _greetAvaus=null;   // bubble the homepage should open on this load (set when the homepage is built, consumed by the first render)
 function renderGreet(){   // render the current homepage greeting bubble (its index in _greetOrder())
   const greet=document.querySelector('#home-mona .home-greet'); if(!greet || typeof HOME_BUBBLE_ORDER==='undefined') return;
-  const order=_greetOrder(); const key=order[((_greetIdx%order.length)+order.length)%order.length];
+  const order=_greetOrder();
+  if(_greetAvaus){ const i=order.indexOf(_greetAvaus); if(i>=0) _greetIdx=i; _greetAvaus=null; }   /* the opening bubble for this load, resolved against the live order (a winner's golden bubble shifts it) */
+  const key=order[((_greetIdx%order.length)+order.length)%order.length];
   if(key==='__golden__'){ greet.classList.add('win-bubble'); greet.innerHTML=_goldenWinText(); }
   else { greet.classList.remove('win-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
   requestAnimationFrame(positionGreetTail);   // re-point the tail after the bubble's new height settles
@@ -3988,6 +3991,8 @@ function buildDeckGrid(decks, list){
   if(logo){ logo.style.cssText=''; logo.style.display=''; header.appendChild(logo); }     // Mona
   const greet=document.createElement('div'); greet.className='home-greet';                 // her speech bubble to the right (clicking Mona cycles it)
   _greetIdx=0;
+  // Every other homepage load opens on the tietovisa bubble; the device's very first visit always gets the normal one (owner 10.9.2026).
+  try{ const kerrat=+localStorage.getItem('solukko-etusivu-kerrat')||0; localStorage.setItem('solukko-etusivu-kerrat', String(kerrat+1)); _greetAvaus=(kerrat>0 && kerrat%2===1) ? 'home_quiz' : null; }catch(e){ _greetAvaus=null; }
   header.appendChild(greet);
   list.appendChild(header);
   _setHomeMonaLoading(true);              // Mona sleeps + her bubble shows a progress bar until the decks are in
