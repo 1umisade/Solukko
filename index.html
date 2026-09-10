@@ -1234,10 +1234,10 @@ body.dark-mode .flashcard { --card-tint: linear-gradient(#3a312b, #3a312b); }
 body.dark-mode .flashcard.graded-known   { --card-tint: linear-gradient(#303d35, #303d35); }
 body.dark-mode .flashcard.graded-unknown { --card-tint: linear-gradient(#3f3022, #3f3022); }
 body.dark-mode #word-link-tooltip { --card-tint: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)); }
-.mol-link sub, .mol-link sup { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.34em; margin-right: 0.05em; font-weight: 700; }
+.mol-link sub, .mol-link sup { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.55em; margin-right: 0.08em; font-weight: 700; }   /* -0.55em: the index sits on the element's stem, not just its serif, so the cut-out is an obvious notch */
 .mol-link sub { vertical-align: -0.28em; }
 .mol-link sup { vertical-align: 0.55em; }
-.mol-link sub::before, .mol-link sup::before { content: attr(data-i); position: absolute; left: 0; top: 0; z-index: -1; color: transparent; -webkit-text-stroke: 0.42em transparent; pointer-events: none;   /* half the stroke lies outside the glyph: ~0.2em of cut-out around the index, scaling with the text */
+.mol-link sub::before, .mol-link sup::before { content: attr(data-i); position: absolute; left: 0; top: 0; z-index: -1; color: transparent; -webkit-text-stroke: 0.5em transparent; pointer-events: none;   /* half the stroke lies outside the glyph: ~0.2em of cut-out around the index, scaling with the text */
   background: var(--card-tint, linear-gradient(transparent, transparent)), var(--card-bg, url('new_bg.png?v=2')) center / cover no-repeat fixed; -webkit-background-clip: text; background-clip: text; }
 .word-link.wl-show, .word-link:hover { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 0 0 6px #a06a35, 0 4px 12px rgba(0,0,0,0.16); }   /* speech-bubble graphic (cream fill + darker outline): on card load (flashes) and on hover */
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
