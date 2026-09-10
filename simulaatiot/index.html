@@ -300,6 +300,7 @@ html.editori #lista{display:flex}
 .atomi .pallo{display:block;width:36px;height:36px;min-width:36px;max-width:36px;min-height:36px;max-height:36px;aspect-ratio:1/1;flex:0 0 36px;align-self:center;border-radius:50%;border:2px solid var(--brown);box-sizing:border-box;object-fit:cover;background:var(--paper2) center/cover no-repeat}   /* an IMG (a replaced element with its own square size - a span still stretched with the row on some viewports) */
 #valinta{right:16px;top:16px;max-width:260px;font-size:12px;line-height:1.35}
 #valinta b{font-size:14px}
+#valintalaatikko{position:fixed;display:none;z-index:9;pointer-events:none;background:rgba(120,220,140,.12);border:1.5px solid rgba(140,235,160,.95);box-sizing:border-box}
 .atomi b{font-size:13px}
 .atomi small{display:block;font-size:10px;opacity:.7}
 #laskuri{right:16px;top:16px;text-align:right}
@@ -328,6 +329,7 @@ html.kortti body > *:not(#c){display:none !important} html.kortti #c{position:fi
 <div id="editorspeed" class="vesi card"><div style="margin-bottom:4px; letter-spacing:.5px;">nopeus <span id="editorspeedval">1.0×</span></div><input id="editorspeedsld" type="range" min="0" max="30" value="10" style="width:130px; cursor:pointer;"></div>
 <div id="editortools" class="vesi card"><button id="mode3d-btn" class="tool" title="Vaihda: hiukkaset tasossa (2D) tai laatikossa (3D)">⬚ 2D → 3D</button> <button id="resetview-btn" class="tool" title="Palauta kamera aloitusnäkymään (myös I)">⌂ palauta näkymä</button> <button id="eraser-btn" class="tool" title="Pyyhekumi: klikkaa hiukkasta tai vedä niiden yli poistaaksesi ne">🧽 pyyhekumi</button></div>
 <div id="valinta" class="vesi card" style="display:none"></div>
+<div id="valintalaatikko" class="vesi"></div>
 <div id="haamu" class="vesi"></div>
 <div id="overlay">
   <div class="loading-inner">
@@ -12412,10 +12414,10 @@ const CAM_R0 = HH / Math.tan(0.4) * 1.08;
 const cam = new BABYLON.ArcRotateCamera('cam', -Math.PI/2, Math.PI/2, CAM_R0, new BABYLON.Vector3(0, 0, 0), scene);
 cam.fov = 0.8; cam.minZ = 0.3; cam.maxZ = 9000; cam.lowerRadiusLimit = 2.5; cam.upperRadiusLimit = 5000; cam.lowerBetaLimit = 0.02; cam.upperBetaLimit = Math.PI - 0.02;   // free to orbit to either side of the plane
 cam.inputs.removeByType('ArcRotateCameraMouseWheelInput'); cam.inputs.removeByType('ArcRotateCameraKeyboardMoveInput');
-cam.inputs.attached.pointers.buttons = [1, 2];   // middle and right drag look around (left is the plane pan below)
+cam.inputs.attached.pointers.buttons = [];   // RTS mouse, as in the viewer: MIDDLE drag looks around (driven by hand below - Babylon 9 binds middle to nothing), right pans, left selects
 cam.panningSensibility = 0; cam.attachControl(canvas, true); cam.inertia = 0.82;
 const HD = 236;   // half depth of the 3-D box (the arena's half height - 840 x 472 x 472)
-let is3D = false, selected = null, arenaMesh = null;
+let is3D = false, selected = null, arenaMesh = null; const selSet = new Set();   // selected: the clicked one (card + swivel); selSet: a box-selected group (tint only)
 const buildArena = () => { if(arenaMesh) arenaMesh.dispose(); if(KORTTI){ arenaMesh = null; return; } /* the popup shows the molecule alone - no box edges */ const V3 = (x,y,z) => new BABYLON.Vector3(x,y,z);
   const lines = is3D ? (() => { const c = [[-HW,-HH,-HD],[HW,-HH,-HD],[HW,HH,-HD],[-HW,HH,-HD],[-HW,-HH,HD],[HW,-HH,HD],[HW,HH,HD],[-HW,HH,HD]].map(q => V3(...q));
       return [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].map(e => [c[e[0]], c[e[1]]]); })()
@@ -12577,7 +12579,7 @@ const draw = () => {
   let na = 0, nn = 0, nc = 0, nb = 0; const cp = cam.position;
   const planes = BABYLON.Frustum.GetPlanes(cam.getTransformationMatrix()), pxK = engine.getRenderHeight() / (2 * Math.tan(cam.fov * 0.5));
   const protFrac = d2 => { const px = 1.7 * pxK / Math.sqrt(Math.max(d2, 1)); return px >= 1.5 ? 1 : Math.max(0.0625, (px/1.5)*(px/1.5)); };   // the viewer's thinning by projected atom size
-  for(const m of mols){ rotOf(m, simT); const sp = m.sp, px = m.x, py = m.y, pz = m.z, sel = m === selected;
+  for(const m of mols){ rotOf(m, simT); const sp = m.sp, px = m.x, py = m.y, pz = m.z, sel = m === selected || selSet.has(m);
     if(sp.isProt){   // one matrix per model (column-major: R in the 3x3, the translation in 12..14), detail only near the camera
       const o = m.slot*16; gModelXform[o]=R9[0]; gModelXform[o+1]=R9[3]; gModelXform[o+2]=R9[6]; gModelXform[o+3]=0; gModelXform[o+4]=R9[1]; gModelXform[o+5]=R9[4]; gModelXform[o+6]=R9[7]; gModelXform[o+7]=0;
       gModelXform[o+8]=R9[2]; gModelXform[o+9]=R9[5]; gModelXform[o+10]=R9[8]; gModelXform[o+11]=0; gModelXform[o+12]=px; gModelXform[o+13]=py; gModelXform[o+14]=pz; gModelXform[o+15]=1;
@@ -12667,9 +12669,14 @@ const zoomTo = f => { const r0 = cam.radius, r1 = Math.max(cam.lowerRadiusLimit,
 canvas.addEventListener('wheel', e => { e.preventDefault(); const now = performance.now(); wheelStep = (now - lastWheel < 400) ? Math.min(10, wheelStep + 1) : 1; lastWheel = now;
   const slow = (e.buttons & 4) === 4; zoomEase = slow ? 0.05 : 0.16; const rc = canvas.getBoundingClientRect(); zoomAt = KORTTI ? null : toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height));   // card: zoom stays on the molecule
   zoomVel += Math.sign(e.deltaY) * 0.16 * (wheelStep/10) * (slow ? 0.15 : 1); zoomVel = Math.max(-0.6, Math.min(0.6, zoomVel)); }, { passive: false });
-/* left drag pans the plane */
+/* MIDDLE drag orbits - mirrored from the viewer: Babylon's own inertial rotation, but on our button */
+let rotDrag = null;
+canvas.addEventListener('pointerdown', e => { if(KORTTI || e.button !== 1) return; e.preventDefault(); rotDrag = { id: e.pointerId }; cam.inertialAlphaOffset = cam.inertialBetaOffset = 0; });
+window.addEventListener('pointermove', e => { if(!rotDrag || e.pointerId !== rotDrag.id) return; cam.inertialAlphaOffset -= (e.movementX || 0) / cam.angularSensibilityX; cam.inertialBetaOffset -= (e.movementY || 0) / cam.angularSensibilityY; });
+const endRot = e => { if(rotDrag && e.pointerId === rotDrag.id) rotDrag = null; }; window.addEventListener('pointerup', endRot); window.addEventListener('pointercancel', endRot);
+/* RIGHT drag pans the plane (the viewer's RTS scheme: left selects, middle rotates, right pans) */
 let panDrag = null;
-canvas.addEventListener('pointerdown', e => { if(KORTTI || e.button !== 0 || eraser) return; const rc = canvas.getBoundingClientRect(), p = toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height)); if(p) panDrag = { id: e.pointerId, p }; });
+canvas.addEventListener('pointerdown', e => { if(KORTTI || e.button !== 2 || eraser || drag) return; const rc = canvas.getBoundingClientRect(), p = toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height)); if(p) panDrag = { id: e.pointerId, p }; });
 canvas.addEventListener('pointermove', e => { if(!panDrag || e.pointerId !== panDrag.id) return; const rc = canvas.getBoundingClientRect(), p = toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height)); if(!p) return; cam.target.x -= p[0] - panDrag.p[0]; cam.target.y -= p[1] - panDrag.p[1]; });
 const endPan = e => { if(panDrag && e.pointerId === panDrag.id) panDrag = null; }; window.addEventListener('pointerup', endPan); window.addEventListener('pointercancel', endPan);
 
@@ -12704,7 +12711,7 @@ const planeOf = e => { const rc = canvas.getBoundingClientRect(); return toPlane
 let drag = null;
 host.addEventListener('pointerdown', async e => { const el = e.target.closest('.atomi'); if(!el || e.button !== 0) return; e.preventDefault();   // LEFT drags - the right button opens the info card (below)
   const d = { key: el.dataset.sp, id: e.pointerId, el, last: planeOf(e), m: null, done: false, right: false }; drag = d; const tila = el.querySelector('.tila');
-  cam.inputs.attached.pointers.buttons = [1];   // while a particle is in the hand the right button stamps copies (below), not the camera
+  cam.inputs.attached.pointers.buttons = [];   // while a particle is in the hand the right button stamps copies (below), not the camera
   try { tila.textContent = SPECIES[d.key] ? '' : 'ladataan…'; const sp = await ensureSpecies(d.key); tila.textContent = ''; if(sp) queueThumb(d.key);
     if(!sp || d.done || drag !== d) return;
     const p = clampXY(sp, d.last || [0, 0]); const m = spawn(d.key, p[0], p[1], 0, 0); if(!m){ tila.textContent = 'täynnä'; return; }
@@ -12713,7 +12720,7 @@ host.addEventListener('pointerdown', async e => { const el = e.target.closest('.
     let tb = document.getElementById('virhe-toast'); if(!tb){ tb = document.createElement('div'); tb.id = 'virhe-toast'; tb.className = 'vesi card'; tb.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);max-width:70vw;font-size:12px;display:block;z-index:12;white-space:pre-wrap'; document.body.appendChild(tb); }
     tb.textContent = 'Lataus epäonnistui (' + d.key + '): ' + String(err && (err.stack || err)).slice(0, 400); } });
 window.addEventListener('pointermove', e => { if(!drag || e.pointerId !== drag.id) return; const p = planeOf(e); if(!p) return; drag.last = p; if(drag.m){ const q = clampXY(drag.m.sp, p); drag.m.x = q[0]; drag.m.y = q[1]; } });
-const endDrag = e => { if(!drag || e.pointerId !== drag.id) return; const d = drag; drag = null; d.done = true; cam.inputs.attached.pointers.buttons = [1, 2];
+const endDrag = e => { if(!drag || e.pointerId !== drag.id) return; const d = drag; drag = null; d.done = true; cam.inputs.attached.pointers.buttons = [];
   const lb = document.getElementById('lista').getBoundingClientRect(), inList = e.clientX >= lb.left && e.clientX <= lb.right && e.clientY >= lb.top && e.clientY <= lb.bottom;
   if(!d.m) return;
   if(inList || e.type !== 'pointerup'){ remove(d.m); return; }
@@ -12760,7 +12767,7 @@ host.addEventListener('contextmenu', async e => { const el = e.target.closest('.
     showInfo(key, sp, el.querySelector('img').src); }
   catch(err){ tila.textContent = 'virhe: ' + String(err && (err.message || err)).slice(0, 60); } });
 const FORMULA = { H2:'H₂', O2:'O₂', OH:'OH', H2O:'H₂O', CO2:'CO₂', Pi:'PO₄³⁻', p:'H⁺', ATP:'ATP', ADP:'ADP', NADP:'NADP⁺', CHL:'klorofylli a', PQ:'plastokinoni' };
-const select = m => { selected = m; if(!m){ card.style.display = 'none'; return; } resetCard();
+const select = m => { selected = m; selSet.clear(); if(!m){ card.style.display = 'none'; return; } resetCard();
   const P = PROTEINS.find(x => x[0] === m.sp.key), name = NAME_FI[m.sp.key] || m.sp.key, sub = P ? P[2].replace('.mol2','') : (FORMULA[m.sp.key] || (ATOMS.includes(m.sp.key) ? m.sp.key[0] + m.sp.key.slice(1).toLowerCase() + '-atomi' : m.sp.key));
   card.innerHTML = '<b>' + name + '</b><br>' + sub + '<br>' + m.sp.model.na + ' atomia' + (m.sp.model.nb ? ', ' + m.sp.model.nb + ' sidosta' : '') + '<br><span style="opacity:.7">nopeus ' + Math.hypot(m.vx, m.vy, m.vz).toFixed(1) + ' Å/s</span>';
   card.style.display = 'block';
@@ -12769,6 +12776,26 @@ let clickStart = null;
 canvas.addEventListener('pointerdown', e => { if(e.button === 0) clickStart = { x: e.clientX, y: e.clientY, id: e.pointerId }; });
 window.addEventListener('pointerup', e => { if(!clickStart || e.pointerId !== clickStart.id) return; const moved = Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y); clickStart = null;
   if(KORTTI || moved > 4 || eraser || drag) return; select(pickMol(e)); });   // the popup never selects: a click there is the start of a turn
+/* LEFT drag on the canvas = the viewer's RTS selection box. Every free molecule whose centre projects inside the
+   box is selected (their shells tint sage); one hit behaves like a click on it, none clears the selection. */
+const laatikko = document.getElementById('valintalaatikko');
+let box = null;
+canvas.addEventListener('pointerdown', e => { if(KORTTI || e.button !== 0 || eraser || drag) return; box = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY, on: false }; });
+window.addEventListener('pointermove', e => { if(!box || e.pointerId !== box.id) return; box.x1 = e.clientX; box.y1 = e.clientY;
+  if(!box.on && Math.hypot(box.x1 - box.x0, box.y1 - box.y0) > 5){ box.on = true; laatikko.style.display = 'block'; }
+  if(box.on){ laatikko.style.left = Math.min(box.x0, box.x1) + 'px'; laatikko.style.top = Math.min(box.y0, box.y1) + 'px'; laatikko.style.width = Math.abs(box.x1 - box.x0) + 'px'; laatikko.style.height = Math.abs(box.y1 - box.y0) + 'px'; } });
+const _vpBox = new BABYLON.Viewport(0, 0, 1, 1);
+const endBox = e => { if(!box || e.pointerId !== box.id) return; const b = box; box = null; laatikko.style.display = 'none'; if(!b.on || e.type !== 'pointerup') return;
+  const rc = canvas.getBoundingClientRect(), kx = canvas.width / rc.width, ky = canvas.height / rc.height;
+  const lx = (Math.min(b.x0, b.x1) - rc.left)*kx, hx = (Math.max(b.x0, b.x1) - rc.left)*kx, ly = (Math.min(b.y0, b.y1) - rc.top)*ky, hy = (Math.max(b.y0, b.y1) - rc.top)*ky;
+  _vpBox.width = canvas.width; _vpBox.height = canvas.height; const hits = [];
+  for(const m of mols){ if(m.held) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(m.x, m.y, m.z), BABYLON.Matrix.Identity(), scene.getTransformMatrix(), _vpBox);
+    if(q.z >= 0 && q.z <= 1 && q.x >= lx && q.x <= hx && q.y >= ly && q.y <= hy) hits.push(m); }
+  if(hits.length <= 1){ select(hits[0] || null); return; }
+  select(null); for(const m of hits) selSet.add(m); resetCard();
+  const count = {}; for(const m of hits){ const k = NAME_FI[m.sp.key] || m.sp.key; count[k] = (count[k] || 0) + 1; }
+  card.innerHTML = '<b>' + hits.length + ' hiukkasta valittu</b><br>' + Object.keys(count).sort().map(k => count[k] + ' × ' + k).join('<br>'); card.style.display = 'block'; };
+window.addEventListener('pointerup', endBox); window.addEventListener('pointercancel', endBox);
 /* the 2D / 3D toggle: in 3-D the arena is a box and the particles bounce and tumble in all three axes */
 const m3 = document.getElementById('mode3d-btn');
 m3.addEventListener('click', () => { is3D = !is3D; m3.textContent = is3D ? '⬚ 3D → 2D' : '⬚ 2D → 3D'; m3.classList.toggle('on', is3D); buildArena();
@@ -12779,13 +12806,14 @@ let lastStamp = -1e9;
 window.addEventListener('pointerdown', e => { if(drag && e.button === 2){ drag.right = true; lastStamp = -1e9; e.preventDefault(); } }, true);
 window.addEventListener('pointerup', e => { if(drag && e.button === 2) drag.right = false; }, true);
 canvas.addEventListener('contextmenu', e => e.preventDefault());
-scene.onBeforeRenderObservable.add(() => { if(drag && drag.m && drag.right && uT - lastStamp >= 0.5){ lastStamp = uT; spawn(drag.m.sp.key, drag.m.x, drag.m.y); } if(selected && !mols.includes(selected)) select(null); else if(selected) card.querySelector('span').textContent = 'nopeus ' + Math.hypot(selected.vx, selected.vy, selected.vz).toFixed(1) + ' Å/s'; });
+scene.onBeforeRenderObservable.add(() => { if(drag && drag.m && drag.right && uT - lastStamp >= 0.5){ lastStamp = uT; spawn(drag.m.sp.key, drag.m.x, drag.m.y); } if(selSet.size){ for(const m of selSet) if(!mols.includes(m)) selSet.delete(m); if(!selSet.size) card.style.display = 'none'; else { const b = card.querySelector('b'); if(b) b.textContent = selSet.size + ' hiukkasta valittu'; } }
+  if(selected && !mols.includes(selected)) select(null); else if(selected) card.querySelector('span').textContent = 'nopeus ' + Math.hypot(selected.vx, selected.vy, selected.vz).toFixed(1) + ' Å/s'; });
 /* The eraser tool (button next to the speed slider): while it is on, a left click removes the molecule
    under the cursor and a left drag sweeps everything it passes over. Left-drag panning is off meanwhile. */
 document.getElementById('resetview-btn').addEventListener('click', resetView);   // the same reset the I key does
 let eraser = false, erasing = null; const erBtn = document.getElementById('eraser-btn');
 erBtn.addEventListener('click', () => { eraser = !eraser; erBtn.classList.toggle('on', eraser); document.documentElement.classList.toggle('eraser', eraser); erasing = null; });
-const eraseAt = e => { const m = pickMol(e); if(m){ if(m === selected) select(null); remove(m); } };
+const eraseAt = e => { const m = pickMol(e); if(m){ if(m === selected) select(null); selSet.delete(m); remove(m); } };
 canvas.addEventListener('pointerdown', e => { if(!eraser || e.button !== 0) return; e.preventDefault(); erasing = { id: e.pointerId }; eraseAt(e); });
 canvas.addEventListener('pointermove', e => { if(erasing && e.pointerId === erasing.id) eraseAt(e); });
 window.addEventListener('pointerup', e => { if(erasing && e.pointerId === erasing.id) erasing = null; }); window.addEventListener('pointercancel', () => { erasing = null; });
