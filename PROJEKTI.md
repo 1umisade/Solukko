@@ -63,7 +63,8 @@ Korttityyppi on **`Solukko`**, id `1727391050`, kuusi kenttää:
 - **Kysymys alkaa järjestysnumerolla** `(1.007)`. Se on korttien järjestys pakassa ja näkyy vain
   Ankissa: sivusto lukee sen lajitteluavaimeksi ja riisuu sen sekä näytettävästä kysymyksestä että
   itse kentästä. Numeroimattomat kortit menevät numeroitujen jälkeen entisessä järjestyksessään.
-- **Kansikortti** on kortti, jonka Kysymys on `Esittely`. Se on pakan kansiteksti, ei ruudukossa
+- **Kansikortti** on kortti, jonka Kysymys on `Esittely`. **Yksi kurssia kohti**, ei luentoa kohti:
+  luentopakkoihin ei tehdä omaa Esittelyä. Se on pakan kansiteksti, ei ruudukossa
   eikä järjestyksessä, eikä sille anneta numeroa eikä linkkisanoja.
 - **`Kutsutaan myös: ...`** laajan vastauksen lopussa kertoo termin rinnakkaiset nimitykset. Ne
   eivät kuulu leipätekstiin.

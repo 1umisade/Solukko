@@ -111,8 +111,11 @@ Eli yksikön **nominatiivi, genetiivi, partitiivi, inessiivi, elatiivi, illatiiv
 
 ## 6. Esittely-kortti = pakan kansi
 
-Jokaisessa kurssipakassa on kortti, jonka `Kysymys` on **`Esittely`**. Sen `Laaja vastaus` näkyy
+Jokaisessa kurssipakassa on **yksi** kortti, jonka `Kysymys` on **`Esittely`**. Sen `Laaja vastaus` näkyy
 sivustolla pakan kansitekstinä, eikä kortti näy korttiruudukossa. Älä anna sille linkkisanoja.
+
+**Yksi kurssia kohti, ei yksi luentoa kohti.** Luentopakkaan (`…::Luento N - …`) ei tehdä omaa
+Esittely-korttia — kurssin kansi kattaa kaikki sen luennot. (Käyttäjän linjaus 10.9.2026.)
 
 ---
 

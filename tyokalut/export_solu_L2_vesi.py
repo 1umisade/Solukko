@@ -137,7 +137,7 @@ def add_media(fn):
     num = str(len(mediamap))
     shutil.copyfile(os.path.join(KUVAT, fn), os.path.join(work, num)); mediamap[num] = fn
 
-insert(['Esittely', '', ESITTELY, '', '', ''], 0)
+# no Esittely card: the course deck's cover covers every lecture (one per course, not per lecture)
 jakauma = {'1': 0, '2': 0, '3': 0}; termeja = 0; kuvia = 0
 for i, c in enumerate(KORTIT, start=1):
     laaja = c['l']
@@ -158,7 +158,7 @@ with zipfile.ZipFile(OUT, 'w', zipfile.ZIP_DEFLATED) as z:
 shutil.rmtree(work, ignore_errors=True)
 
 laajat = sorted(_words(c['l']) for c in KORTIT)
-print("kortteja: %d (+ Esittely), termikortteja %d, kuvakortteja %d" % (len(KORTIT), termeja, kuvia))
+print("kortteja: %d, termikortteja %d, kuvakortteja %d" % (len(KORTIT), termeja, kuvia))
 print("tenttitodennakoisyys: 3=%d  2=%d  1=%d" % (jakauma['3'], jakauma['2'], jakauma['1']))
 print("laaja vastaus: min %d, mediaani %d, max %d sanaa" % (laajat[0], laajat[len(laajat) // 2], laajat[-1]))
 print("kirjoitettu:", OUT, os.path.getsize(OUT), "tavua")
