@@ -189,6 +189,7 @@ body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .period-row { display: flex; gap: 16px; align-items: flex-start; padding: 0 2px; margin-bottom: 8px; }
 .period-row.vierii { overflow-x: auto; overflow-y: hidden; padding-bottom: 10px; scrollbar-width: thin; }   /* vierityssailio leikkaa sisaltonsa, joten vain jos kurssit eivat mahdu */
 .period-row > .deck-btn { flex: 0 0 auto; }   /* kortit eivat kutistu, rivi vierii sivusuunnassa */
+.period-row.vierii > .deck-btn { touch-action: pan-x pan-y; }   /* kosketuksella rivia voi pyyhkaista sivusuunnassa (pelkka pan-y esti sen: kurssit jaivat puhelimella piiloon) */
 .sem-col.spring { border-left: 1px dashed #cfc8bc; padding-left: 24px; }
 .sem-col.sem-empty { border: none !important; padding-left: 0 !important; padding-top: 0 !important; }
 .sem-label { flex-basis: 100%; font-family: 'Lora', serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.02em; text-transform: uppercase; opacity: 0.55; color: #56533c; margin-bottom: -2px; }
