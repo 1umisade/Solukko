@@ -1254,7 +1254,7 @@ body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; 
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
 #word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
 .wl-mol-view { position: relative; width: 260px; height: 260px; margin: 0 auto; }
-.wl-mol .wl-2d { display: block; width: 260px !important; height: 260px !important; max-height: none !important; margin: 0 auto !important; border-radius: 0;   /* !important: the generic tooltip img rule (width/height auto, max-height 220px) made the canvas a wide strip with empty space under it */ background: #f2e6c9; margin: 0 auto; object-fit: contain; }
+.wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 0;   /* the generic tooltip img rule excludes .wl-2d, otherwise its width/height auto made the canvas a wide strip */ background: #f2e6c9; margin: 0 auto; object-fit: contain; }
 .wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 0; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
 #mol-kehys { box-shadow: none; }   /* the shared simulator frame (positioned over .wl-mol-view by molKehys) */
 .wl-mol-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 8px 0 0; }   /* switch bottom-left, Tiedot bottom-right (owner 10.9.2026) */
@@ -1266,7 +1266,7 @@ body.dark-mode .wl-mol-tiedot { border-top-color: #6d5f52; }
 .wl-tiedot { display: block; margin: 0; padding: 0.22em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; line-height: 1.4; cursor: pointer; }
 .wl-tiedot:hover { background: #eadcc2; }
 body.dark-mode .wl-dim-switch { background: #4a3f34; border-color: #6d5f52; } body.dark-mode .wl-dim { color: #eadfce; } body.dark-mode .wl-dim.on { background: #a98564; color: #fff; } body.dark-mode .wl-tiedot { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
-#word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
+#word-link-tooltip img:not(.wl-2d), #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
 .sim-intro { max-width: 720px; margin: 0 auto 22px; text-align: center; font-family: 'Lora', serif; font-size: 1.05rem; color: #56533c; line-height: 1.6; }
