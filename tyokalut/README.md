@@ -11,6 +11,7 @@ toiselle — siksi ne ovat nyt repossa.
 | `export_biotek_L1.py` | rakentaa **Johdatus biotekniikkaan, Luento 1** -pakan |
 | `export_solu_L2_vesi.py` | rakentaa **Solu ja biomolekyylit, Luento 2 - Vesi** -pakan tyhjästä; kortit ovat `vesi_L2_kortit*.py`-tiedostoissa |
 | `fix_solu_L1_fronts.py` | vanha etupuolten korjausskripti; solu-skripti lukee siitä kysymyskartan, joten **sitä ei saa poistaa** |
+| `vastaanota.py` | pieni POST-vastaanotin (portti 8754): selain lähettää MediaRecorder-videot levylle, kun Geneesin korttirenderistä kaapataan `geneesi/kortit/<laji>.webm`. Kaappaus itse ajetaan selaimessa (`?tila=editori`, 140 ruutua per kierros, `engine._deltaTime` käsin) |
 | `numeroi_kokoelma.py` | antaa jarjestysnumeron `(1)` kaikille kokoelman korteille, joilta se puuttuu |
 | `*.txt` | skriptien lukemaa dataa: laajat vastaukset, linkkisanat, kuvakortit, typokorjaukset, tenttitodennäköisyydet |
 | `kuvat/` | luentokalvoilta poimitut kuvat kuvakortteja varten (169 kpl, ~78 MB) |

@@ -25,7 +25,9 @@ selaimessa repon juuressa olevan `SOLUKKO.apkg`:n, joka on suora vienti käyttä
 | `tyokalut/` | pakkojen rakennusskriptit, oma `README.md`. |
 | `kurssit/` | luentomateriaali (PDF, tallenteet, transkriptiot) ja valmiit pakkatiedostot. **Ei gitissä**, siirtyy OneDrivessa. |
 | `kurssit/CLAUDE.md` | korttien teko-ohjeet: kenttärakenne, linkkisanat, termisanasto. Ainoa tiedosto, joka on `kurssit/`:sta gitissä. |
-| `.claude/launch.json` | esikatselupalvelin (`python -m http.server 8753`). Ei gitissä. |
+| `geneesi/` | **Geneesi**, Babylon.js-pohjainen 3D-molekyylisimulaattori (ent. geneesi.com), tuotu `git subtree`lla 10.9.2026 historia mukanaan. Oma `index.html` (~13 000 riviä) + mol2-mallit (~58 MB). Julkinen osoite `solukko.com/geneesi/`, etusivun *simulaatiot*-välilehti linkittää sen kolmeen tilaan (`?tila=editori`, `kalvosto`, `solu`). Perehdytys: `geneesi/AGENT_NOTES.md`. Kehitys tapahtuu nyt tässä repossa, ei enää Geneesi-repossa. |
+| `geneesi/kortit/` | 26 molekyylin ja atomin pyörähdysvideot (`<laji>.webm`, 256 px, ~450 kB) Geneesin korttirenderistä + `molekyylit.json` (laji → kaavan kirjoitusasut, suomenkieliset sijamuodot, video). Solukon kortti näyttää videon hoverilla. |
+| `.claude/launch.json` | esikatselupalvelin (`python -m http.server 8753`). Ei gitissä. Sama palvelin näyttää myös `localhost:8753/geneesi/index.html`. |
 
 Repo on OneDrive-kansiossa, joten myös gitin ulkopuoliset osat siirtyvät koneelta toiselle. Pelkkä
 `git clone` **ei** riitä: `kurssit/`, `tyokalut/kuvat/` ja `.claude/` jäisivät puuttumaan.
@@ -68,6 +70,12 @@ Korttityyppi on **`Solukko`**, id `1727391050`, kuusi kenttää:
   eikä järjestyksessä, eikä sille anneta numeroa eikä linkkisanoja.
 - **`Kutsutaan myös: ...`** laajan vastauksen lopussa kertoo termin rinnakkaiset nimitykset. Ne
   eivät kuulu leipätekstiin.
+- **Molekyylipopup:** kaava (`H<sub>2</sub>O`, `H₂O`, `ATP`, `Pᵢ`…) tai suomenkielinen nimi (vesi, vedessä,
+  protoni…) korttitekstissä avaa hoverilla pelkän pyörivän 3D-videon (`geneesi/kortit/`). Jos sanalla on
+  myös Solukon termikortti (ATP, vetyioni), popupissa on *Tiedot*-nappi, joka vaihtaa sisällöksi kortin
+  määritelmän. Laukaisijat tulevat `geneesi/kortit/molekyylit.json`:ista (`_molMap`, `_wrapMolHtml`
+  index.html:ssä) — uusi laji = uusi rivi JSONiin + video. HTML-muotoiset kaavat kaaritaan DOM-solmuina
+  (`_wrapMolHtml`), koska tekstisolmuregex ei näe `<sub>`-tagien yli.
 - Mitat: suppea ≤ 15 sanaa, laaja 45–65 sanaa. Ei puolipisteitä, käytä pistettä.
 - Termistö on lyöty lukkoon (`lähetti-RNA` ei `mRNA`, `tuma` ei `nucleus`, `solulima` ei
   `sytoplasma`, `genomi` ei `perimä`, `vesikatkaisu` ei `hydrolyysi`, …). Koko taulukko on `kurssit/CLAUDE.md` §10.

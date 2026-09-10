@@ -1212,9 +1212,21 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 .wl-expand:hover, .answer-expand:hover { background: #eadcc2; }
 body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
-#word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
+#word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
+.wl-mol video { display: block; width: 200px; height: 200px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; }   /* the recorded spin has Geneesi's card background baked in */
+.wl-tiedot { margin: 0.6em auto 0; }
+#word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
+.sim-intro { max-width: 720px; margin: 0 auto 22px; text-align: center; font-family: 'Lora', serif; font-size: 1.05rem; color: #56533c; line-height: 1.6; }
+.sim-opts { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; max-width: 980px; margin: 0 auto 60px; padding: 0 12px; }
+.sim-opt { flex: 1 1 260px; max-width: 300px; display: block; text-decoration: none; background: #fffef9; border: 1px solid #e7e1d6; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); font-family: 'Lora', serif; color: #56533c; transition: transform .15s, box-shadow .15s; }
+.sim-opt:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.10); }
+.sim-opt b { display: block; font-size: 1.15rem; color: #3a5c4c; margin-bottom: 6px; }
+.sim-opt span { display: block; font-size: 0.92rem; line-height: 1.5; }
+body.dark-mode .sim-intro { color: #eadfce; }
+body.dark-mode .sim-opt { background: #2b2622; border-color: #4a3f36; color: #eadfce; }
+body.dark-mode .sim-opt b { color: #9fc7b4; }
 #home-tabs { display:flex; width:fit-content; max-width:100%; margin:0 auto 20px; background:#e7e2d8; border-radius:999px; padding:4px; box-shadow:inset 0 1px 2px rgba(0,0,0,0.06); }
 .home-tab { position:relative; font-family:'Lora',serif; font-size:1.02rem; padding:0.5rem 1.7rem; border:none; border-radius:999px; background:transparent; color:#56533c; cursor:pointer; box-shadow:none; white-space:nowrap; transition:background .15s, color .15s; }
 .home-tab:hover:not(.active) { color:#26473f; }
@@ -1475,6 +1487,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
     <button class="home-tab active" data-tab="kortit" onclick="showHomeTab('kortit')">kortit</button>
     <button class="home-tab" data-tab="kalenteri" onclick="showHomeTab('kalenteri')">kalenteri</button>
     <button class="home-tab" data-tab="kartta" onclick="showHomeTab('kartta')">kartta</button>
+    <button class="home-tab" data-tab="simulaatiot" onclick="showHomeTab('simulaatiot')">simulaatiot</button>
     <button class="home-tab" data-tab="chat" onclick="showHomeTab('chat')">viestit<span id="chat-badge" class="tab-badge" style="display:none">0</span></button>
   </div>
   <div class="deck-list" id="deck-list"></div>
@@ -2615,6 +2628,14 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div>
 </div>
 </div></div>
+  </div>
+  <div id="sim-view" style="display:none;">
+    <div class="sim-intro">Geneesi on Solukon 3D-simulaattori: atomit, molekyylit ja kasvisolun yhteyttämiskoneisto oikeista rakennemalleista. Vaatii tietokoneen ja WebGL2:n.</div>
+    <div class="sim-opts">
+      <a class="sim-opt" href="geneesi/index.html?tila=editori"><b>Kemiaeditori</b><span>Rakenna molekyylejä vedystä ja hapesta. Atomit pomppivat ja reagoivat törmätessään.</span></a>
+      <a class="sim-opt" href="geneesi/index.html?tila=kalvosto"><b>Yhteyttämiskalvosto</b><span>Valmis tylakoidikalvon kohtaus: fotosysteemit, ATP-syntaasi ja strooma.</span></a>
+      <a class="sim-opt" href="geneesi/index.html?tila=solu"><b>Kasvisolu</b><span>Kokonainen kasvisolu: jättimäinen solukalvo, huokoinen tumakotelo ja kalvoston koneisto.</span></a>
+    </div>
   </div>
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
   <div id="chat-view" style="display:none;">
@@ -6245,7 +6266,7 @@ document.addEventListener('click',e=>{
 // ════════════════════════════════════════════════════════════
 function showHomeTab(tab){
   try{ sessionStorage.setItem('solukko-homeTab', tab); }catch(e){}   // remember the active home tab across a refresh
-  var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view', chat:'chat-view'};
+  var map={kortit:'deck-list', kalenteri:'calendar-view', kartta:'map-view', simulaatiot:'sim-view', chat:'chat-view'};
   for(var t in map){ var el=document.getElementById(map[t]); if(el) el.style.display = (t===tab) ? ((map[t]==='deck-list'||map[t]==='chat-view')?'flex':'block') : 'none'; }
   var hero=document.getElementById('home-hero'); if(hero) hero.style.display = (tab==='kortit') ? '' : 'none';   // Aku intro only on the deck tab
   var tabs=document.querySelectorAll('#home-tabs .home-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tab')===tab); }
@@ -6858,6 +6879,18 @@ function buildWordLinks(){
     });
   });
 
+  // Pass 3: Geneesi molecules — Finnish names and plain-text formulas open the 3-D render. A word that is
+  //         already a word-link (ATP) keeps its card too: the popup shows the molecule, "Tiedot" opens the card.
+  _molMap=new Map();
+  if(_molekyylit) Object.keys(_molekyylit).forEach(key=>{ const m=_molekyylit[key]; if(!m||!m.video) return;
+    [...(m.sanat||[]),...(m.kaavat||[]).filter(k=>!/</.test(k))].forEach(w=>{
+      const clean=String(w).replace(/\s+/g,' ').trim(); if(!clean) return; const lower=clean.toLowerCase();
+      if(!_molMap.has(lower)) _molMap.set(lower,key);
+      if(seen.has(lower)) return;
+      seen.add(lower); _wordLinks.push({text:clean,lower,cardIndex:-1});
+    });
+  });
+
   _wordLinks.sort((a,b)=>b.text.length-a.text.length);   // longest first, so the alternation prefers the longest term
   // Precompile ONE alternation regex + a lookup map. Cards list every Finnish case form in
   // "linkkisanat", so there can be >1000 triggers — a regex per trigger per text node would crawl.
@@ -6869,6 +6902,48 @@ function buildWordLinks(){
   }
 }
 let _wlRe=null, _wlMap=new Map(), _wlCards=[];   // _wlCards: the cards links point at, from ANY deck
+// Geneesi molecules (geneesi/kortit/molekyylit.json): a formula or a Finnish name in card text opens the
+// spinning 3-D render recorded from Geneesi's info card. _molMap: lower-cased trigger -> species key.
+let _molekyylit=null, _molMap=new Map(), _molHtml=new Map();   // _molHtml: serialised "H<sub>2</sub>O" -> key
+fetch('geneesi/kortit/molekyylit.json').then(r=>r.ok?r.json():null).then(j=>{
+  if(!j) return; delete j._ohje; _molekyylit=j;
+  _molHtml=new Map();
+  Object.keys(j).forEach(key=>(j[key].kaavat||[]).forEach(k=>{ if(/</.test(k)) _molHtml.set(_molSer(k),key); }));
+  if(typeof reviewCards!=='undefined' && reviewCards.length){ buildWordLinks(); if(typeof currentCard!=='undefined' && currentCard && typeof renderCurrentCard==='function') renderCurrentCard(); }   // a deck was open before the list arrived
+}).catch(()=>{});
+function _molSer(html){   // "PO<sub>4</sub><sup>3−</sup>" -> "PO|sub:4|sup:3−|" (one canonical string for lookups)
+  return String(html).replace(/-/g,'−').replace(/<(sub|sup)>([^<]*)<\/\1>/g,(m,t,v)=>'|'+t+':'+v+'|').toLowerCase();
+}
+function _molCardIdx(key){   // the Solukko term card behind a molecule word, if one exists (ATP has one, H₂O does not)
+  const m=_molekyylit&&_molekyylit[key]; if(!m) return -1;
+  for(const w of [...(m.kaavat||[]),...(m.sanat||[])]){ const ci=_wlMap.get(String(w).toLowerCase()); if(ci!==undefined && ci>=0) return ci; }
+  return -1;
+}
+// The HTML formula forms ("H<sub>2</sub>O") span several DOM nodes, so the text-node regex never sees them.
+// Around every <sub>/<sup> in the element, take the letter run before, the sub/sup chain and the letter run
+// after, serialise, and wrap the whole run when it is a known species.
+function _wrapMolHtml(element){
+  if(!_molHtml.size) return;
+  const subs=[...element.querySelectorAll('sub,sup')].filter(e=>!e.closest('.word-link'));
+  const done=new Set();
+  subs.forEach(e=>{
+    if(done.has(e) || !e.parentNode) return;
+    const chain=[e]; let nx=e.nextSibling;
+    while(nx && nx.nodeType===1 && /^(SUB|SUP)$/.test(nx.tagName)){ chain.push(nx); nx=nx.nextSibling; }
+    const pv=e.previousSibling;
+    const tail = (pv && pv.nodeType===3) ? (pv.textContent.match(/[A-Za-z]+$/)||[''])[0] : '';
+    const head = (nx && nx.nodeType===3) ? (nx.textContent.match(/^[A-Za-z]+/)||[''])[0] : '';
+    const ser=(tail+chain.map(c=>'<'+c.tagName.toLowerCase()+'>'+c.textContent+'</'+c.tagName.toLowerCase()+'>').join('')+head);
+    const key=_molHtml.get(_molSer(ser)); if(!key) return;
+    if(tail && pv.textContent.length>tail.length){ const before=pv.textContent.slice(0,-tail.length); if(/[\wäöåÄÖÅ]$/.test(before)) return; }   // letter glued before the formula: not a formula
+    const span=document.createElement('span'); span.className='word-link mol-link'; span.dataset.mol=key;
+    const ci=_molCardIdx(key); if(ci>=0) span.dataset.cardIndex=ci;
+    e.parentNode.insertBefore(span, e);   // between the (shortened) text before and the first sub/sup
+    if(tail){ const t=pv.textContent; pv.textContent=t.slice(0,-tail.length); span.appendChild(document.createTextNode(tail)); if(!pv.textContent) pv.remove(); }
+    chain.forEach(c=>{ span.appendChild(c); done.add(c); });
+    if(head){ const t=nx.textContent; nx.textContent=t.slice(head.length); span.appendChild(document.createTextNode(head)); if(!nx.textContent) nx.remove(); }
+  });
+}
 
 function _wrapTextNode(textNode){
   const text=textNode.textContent;
@@ -6877,11 +6952,11 @@ function _wrapTextNode(textNode){
     _wlRe.lastIndex=0;
     let m; while((m=_wlRe.exec(text))!==null){
       const lower=m[0].toLowerCase();
-      const ci=_wlMap.get(lower);
-      if(ci===undefined) continue;
-      if(_wlCards[ci]===currentCard) continue;                          // don't link to the card being shown
-      if(lower===_curCardFrontLower) continue;                         // never link a word back to a same-term card
-      matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:ci});
+      let ci=_wlMap.get(lower); const mol=_molMap.get(lower)||null;
+      if(ci===undefined || ci<0) ci=-1;
+      if(ci>=0 && (_wlCards[ci]===currentCard || lower===_curCardFrontLower)) ci=-1;   // don't link to the card being shown / a same-term card
+      if(ci<0 && !mol) continue;
+      matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:ci,mol});
     }
   }
   if(!matches.length) return;
@@ -6889,7 +6964,7 @@ function _wrapTextNode(textNode){
   const filtered=[]; let lastEnd=0;
   matches.forEach(m=>{ if(m.start>=lastEnd){ filtered.push(m); lastEnd=m.end; } });
   const frag=document.createDocumentFragment(); let pos=0;
-  filtered.forEach(m=>{ if(m.start>pos) frag.appendChild(document.createTextNode(text.slice(pos,m.start))); const span=document.createElement('span'); span.className='word-link'; span.dataset.cardIndex=m.cardIndex; span.textContent=m.text; frag.appendChild(span); pos=m.end; });
+  filtered.forEach(m=>{ if(m.start>pos) frag.appendChild(document.createTextNode(text.slice(pos,m.start))); const span=document.createElement('span'); span.className='word-link'+(m.mol?' mol-link':''); if(m.cardIndex>=0) span.dataset.cardIndex=m.cardIndex; if(m.mol) span.dataset.mol=m.mol; span.textContent=m.text; frag.appendChild(span); pos=m.end; });
   if(pos<text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
   textNode.parentNode.replaceChild(frag,textNode);
 }
@@ -6917,6 +6992,7 @@ function applyWordLinks(element){
   if(!_wordLinks.length||!element) return;
   const _c=reviewCards[currentOverviewIndex];   // this card's own front term, so its content never links back to a same-term card
   _curCardFrontLower = _c ? ((getField(_c,['Front','front','Question','question','Text','text','Content','content'])||_c.question||'').replace(/<[^>]*>/g,' ').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/&[a-z]+;/gi,' ').replace(/\s+/g,' ').trim().toLowerCase()) : '';
+  _wrapMolHtml(element);   // "H<sub>2</sub>O" and friends first: they span several nodes
   const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT,{
     acceptNode(node){ let p=node.parentElement; while(p&&p!==element){ if(p.classList&&(p.classList.contains('word-link')||p.classList.contains('cloze-blank'))) return NodeFilter.FILTER_REJECT; p=p.parentElement; } return node.textContent.trim()?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }
   });
@@ -6939,11 +7015,23 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
 
+  let _tipTiedot=false;   // molecule popup switched to the Solukko card with "Tiedot"
   function showTip(target){
-    const idx=parseInt(target.dataset.cardIndex); if(isNaN(idx)) return;
+    const mol=target.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol];
+    const idx=parseInt(target.dataset.cardIndex);
+    if(molData && !(target===_tipTarget && _tipTiedot)){   // molecule: only the spinning render (+ Tiedot if a Solukko card exists)
+      if(target!==_tipTarget){
+        _tipTarget=target; _tipLukittu=false; _tipTiedot=false; _tipLaaja=null; _tipSuppea=null;
+        tip.innerHTML='<div class="wl-mol"><video src="geneesi/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video></div>'
+          +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-expand wl-tiedot">Tiedot</button>':'');
+        tip.classList.add('mol-only'); tip.style.fontSize='';
+      }
+      placeTip(target,_tipLukittu); return;
+    }
+    if(isNaN(idx)) return;
     const card=_wlCards[idx]; if(!card) return;
-    if(target!==_tipTarget){                          // rebuild content only when the hovered word changes (not every frame)
-      _tipTarget=target; _tipLukittu=false;
+    if(target!==_tipTarget || _tipTiedot==='uusi'){   // rebuild content only when the hovered word changes (not every frame)
+      _tipTarget=target; _tipLukittu=false; _tipTiedot=!!molData; tip.classList.remove('mol-only');
       const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
       const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
       const sup=card.suppea||'';
@@ -6961,7 +7049,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     placeTip(target,_tipLukittu);
   }
   function placeTip(target,pidaPaikallaan){
-    tip.style.display='block'; tip.style.width='min(520px, calc(100vw - 24px))';
+    tip.style.display='block'; tip.style.width=tip.classList.contains('mol-only')?'auto':'min(520px, calc(100vw - 24px))';
     const r=target.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
     if(pidaPaikallaan){                               // the box grew where it stood: keep the corner, nudge only as much as the screen demands
       const l0=parseFloat(tip.style.left)||0, t0=parseFloat(tip.style.top)||0;
@@ -6975,6 +7063,8 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     tip.style.left=Math.max(8,l)+'px'; tip.style.top=Math.max(8,t)+'px';
   }
   tip.addEventListener('click',e=>{
+    const td=e.target.closest('.wl-tiedot');
+    if(td && _tipTarget){ e.stopPropagation(); _tipTiedot='uusi'; showTip(_tipTarget); _tipLukittu=true; placeTip(_tipTarget,true); return; }   // molecule popup -> the Solukko card behind the word
     const b=e.target.closest('.wl-expand'); if(!b||!(_tipLaaja&&_tipSuppea)) return;
     e.stopPropagation();
     const body=tip.querySelector('.wl-body'); if(!body) return;
@@ -7002,7 +7092,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     else if(overTip){ _tipHold=0; }                       // pointer is reading the tooltip — leave it be
     else if(_tipTarget){
       if(!_tipHold) _tipHold=Date.now()+260;              // grace period for crossing the gap to the tooltip
-      if(Date.now()>_tipHold){ tip.style.display='none'; _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; }
+      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only'); tip.innerHTML=''; _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }   // innerHTML='' stops the video
     }
     requestAnimationFrame(updateTip);
   }
