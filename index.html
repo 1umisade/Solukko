@@ -1235,7 +1235,7 @@ body.dark-mode .flashcard { --index-cut: #3a312b; }
 body.dark-mode .flashcard.graded-known   { --index-cut: #303d35; }
 body.dark-mode .flashcard.graded-unknown { --index-cut: #3f3022; }
 body.dark-mode #word-link-tooltip { --index-cut: #4e453d; }
-.mol-link sub { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.55em; margin-right: 0.08em; font-weight: 700; vertical-align: -0.28em;   /* subscripts only (owner 10.9.2026): superscripts keep their normal place */
+.mol-link sub { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.34em; margin-right: 0.04em; font-weight: 700; vertical-align: -0.364em;   /* subscripts only (owner 10.9.2026). -0.34em / -0.364em put the digit's ink centre exactly on the element's bottom-right ink corner (measured from Lora's glyph metrics: H advance 0.78em, ink right 0.73em; bold digit ink 0.47em wide, 0.73em tall at the sub size) */
   text-shadow: 0.07em 0 0 var(--index-cut, #fdf6ef), -0.07em 0 0 var(--index-cut, #fdf6ef), 0 0.07em 0 var(--index-cut, #fdf6ef), 0 -0.07em 0 var(--index-cut, #fdf6ef),
     0.05em 0.05em 0 var(--index-cut, #fdf6ef), -0.05em -0.05em 0 var(--index-cut, #fdf6ef), 0.05em -0.05em 0 var(--index-cut, #fdf6ef), -0.05em 0.05em 0 var(--index-cut, #fdf6ef), 0 0 0.04em var(--index-cut, #fdf6ef); }
 .word-link.wl-show, .word-link:hover { --index-cut: #fff5e0; }   /* on the cream speech bubble the cut is cream */
