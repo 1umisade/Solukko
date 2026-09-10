@@ -29,6 +29,41 @@ def lighten(hexc, f=0.45):
     return '#%02x%02x%02x' % tuple(int(c + (255 - c) * f) for c in (r, g, b))
 
 
+def sijoita_vedyt(m, pts):
+    """Vedyt eivat saa osua toisiinsa, muihin atomeihin tai sidosviivoihin (omistaja 10.9.2026: 'prevent atom overlap').
+    Jokainen vety kierretaan oman atominsa ympari (sidospituus sailyy) kulmaan, jossa lahin muu atomi tai sidos on
+    kauimpana; pienena lisana pysytaan lahella RDKitin ehdottamaa kulmaa. Kolme kierrosta, koska vedyt vaikuttavat toisiinsa."""
+    pts = list(pts)
+    hs = [a.GetIdx() for a in m.GetAtoms() if a.GetSymbol() == 'H' and a.GetDegree() == 1]
+    bonds = [(b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in m.GetBonds()]
+
+    def seg_d(p, a, b):
+        ax, ay = a; bx, by = b; px, py = p; dx, dy = bx - ax, by - ay
+        L2 = dx * dx + dy * dy
+        t = 0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
+        return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+
+    for _ in range(3):
+        for h in hs:
+            par = m.GetAtomWithIdx(h).GetNeighbors()[0].GetIdx()
+            px, py = pts[par]; hx, hy = pts[h]
+            L = math.hypot(hx - px, hy - py) or 1.0
+            a0 = math.atan2(hy - py, hx - px)
+            best, best_p = -1e9, (hx, hy)
+            for k in range(72):
+                ang = k * math.pi / 36
+                cx, cy = px + L * math.cos(ang), py + L * math.sin(ang)
+                d = min((math.hypot(cx - pts[j][0], cy - pts[j][1]) for j in range(len(pts)) if j != h and j != par), default=1e9)
+                for i, j in bonds:
+                    if h in (i, j): continue
+                    d = min(d, seg_d((cx, cy), pts[i], pts[j]) + 0.15)   # a bond line counts almost like an atom
+                diff = abs((ang - a0 + math.pi) % (2 * math.pi) - math.pi)
+                score = min(d, 1.6) - 0.02 * diff   # beyond 1.6 units more room buys nothing: stay near the suggested angle
+                if score > best: best, best_p = score, (cx, cy)
+            pts[h] = best_p
+    return pts
+
+
 def mol2d(smiles):
     m = Chem.MolFromSmiles(smiles)
     if m is None:   # esim. koordinoitunut Mg: osittainen sanitointi
@@ -44,6 +79,7 @@ def mol2d(smiles):
     m = Chem.AddHs(m, addCoords=True)
     conf = m.GetConformer()
     pts = [(conf.GetAtomPosition(i).x, conf.GetAtomPosition(i).y) for i in range(m.GetNumAtoms())]
+    pts = sijoita_vedyt(m, pts)
     # pitka akseli vaakaan (paakomponentti), fosfaatit vasemmalle kuten oppikirjassa (peilaus ei muuta tasokaavaa)
     cx = sum(p[0] for p in pts) / len(pts); cy = sum(p[1] for p in pts) / len(pts)
     sxx = sum((p[0] - cx) ** 2 for p in pts); syy = sum((p[1] - cy) ** 2 for p in pts); sxy = sum((p[0] - cx) * (p[1] - cy) for p in pts)
