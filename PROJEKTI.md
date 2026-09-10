@@ -190,3 +190,11 @@ Solukon popup ei lataa koko simulaattoria vaan `simulaatiot/kortti.html`: jaettu
 - **babylon-kortti.js** rakennetaan esbuildilla `tyokalut/babylon_kortti_entry.js`:sta, ohje
   `tyokalut/babylon_kortti_build.md`. Rakenna uudelleen vain, jos editori alkaa kayttaa uutta `BABYLON.`-luokkaa
   (silloin lisaa se entryyn) tai Babylon paivitetaan.
+
+## Uusi molekyyli simulaattoriin ja popupiin
+
+`python tyokalut/molekyyli_3d.py AVAIN "suomenkielinen nimi" <PubChem-CID> --kaava LYHENNE --kaavat ... --sanat ...`
+hakee 3D-konformeerin vetyineen PubChemista (tai `--smiles` → RDKit rakentaa sen), kirjoittaa `simulaatiot/AVAIN.mol2`:n,
+lisaa lajin simulaattorin SMALL/FORMULA/NAME_FI-tauluihin ja merkinnat smiles.json:iin ja molekyylit.json:iin. Sen jalkeen
+`python tyokalut/kaava2d.py && python tyokalut/kortti_build.py`. Laji piirtyy tasmalleen kuten muut (vdW-kuoret, orbitaalit)
+ja nakyy myos kemiaeditorin palettissa. Esimerkki: G6P (glukoosi-6-fosfaatti, CID 5958), lisatty 10.9.2026.

@@ -617,5 +617,27 @@
    "kobolttiin"
   ],
   "kuva2d": "2d/CO.svg"
+ },
+ "G6P": {
+  "nimi": "glukoosi-6-fosfaatti",
+  "kaava": "G6P",
+  "kaavat": [
+   "G6P"
+  ],
+  "sanat": [
+   "glukoosi-6-fosfaatti",
+   "glukoosi-6-fosfaatin",
+   "glukoosi-6-fosfaattia",
+   "glukoosi-6-fosfaatissa",
+   "glukoosi-6-fosfaatista",
+   "glukoosi-6-fosfaattiin",
+   "glukoosi-6-fosfaatiksi",
+   "glukoosi-6-fosfaatit",
+   "glukoosi-6-fosfaattien",
+   "glukoosi-6-fosfaatteja",
+   "glukoosi-6-fosfaatilla",
+   "glukoosi-6-fosfaatille"
+  ],
+  "kuva2d": "2d/G6P.svg"
  }
 }
