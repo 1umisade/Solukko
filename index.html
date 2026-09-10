@@ -208,6 +208,8 @@ body.dark-mode .sem-col.spring { border-left-color: #6d5f52; }
   .sem-col.spring { border-left: none; padding-left: 0; border-top: 1px dashed #cfc8bc; padding-top: 16px; }
   .sem-col { justify-content: center; }
   .year-row .deck-btn { width: min(160px, calc(50% - 8px)); }   /* always at least 2 decks per row on mobile */
+  .period-row { flex-wrap: wrap; justify-content: center; row-gap: 18px; }   /* puhelimella periodin kurssit rivittyvat 2 per rivi - ei piilotettua sivuvieritysta, kaikki kurssit nakyvat */
+  .period-row.vierii { overflow: visible; padding-bottom: 0; }
   #home-mona { flex-direction: column-reverse; align-items: center; justify-content: center; align-self: stretch; gap: 10px; height: auto; margin: 8px 0 14px; }   /* bubble on top, Mona below, centred — same as the review page */
   #home-mona .site-brand { width: 92px; }
   .home-brand-block { display: none; }   /* hide the site-name block on mobile to keep Mona + bubble */
