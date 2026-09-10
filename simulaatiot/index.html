@@ -12933,7 +12933,7 @@ if(KORTTI){ let kortinKoskettu = false, nykyinenLaji = null, vaihto = Promise.re
     const m = spawn(key, 0, 0, 0, 0); if(!m) return; m.held = true; m.ang = 0; m.rockAmp = 0; m.angV = 0; nykyinenLaji = key; kortinKoskettu = false;
     const R = Math.max(sp.orbR, sp.radius);   // vdW shell or orbital cloud, whichever reaches further - the whole molecule stays in frame
     cam.target.set(0, 0, 0); cam.alpha = -Math.PI/2.5; cam.beta = Math.PI/2.7;
-    cam.radius = Math.max(0.6, R/Math.sin(cam.fov/2)*(sp.model.na > 1 ? 1.15 : 1.08)); cam.lowerRadiusLimit = cam.radius*0.3; cam.upperRadiusLimit = cam.radius*4;   // a sphere of radius R needs d >= R/sin(fov/2) to stay inside the frame at every turn (R/tan clipped the near end - owner 10.9.2026 'leikkautuu')
+    cam.radius = Math.max(0.6, R/Math.sin(cam.fov/2)*(sp.model.na > 1 ? 1.15 : 1.08)); cam.lowerRadiusLimit = Math.max(0.05, R*0.08); cam.upperRadiusLimit = cam.radius*4; cam.minZ = 0.02; cam.maxZ = cam.radius*30;   // the wheel may dive into the molecule, through the shells (owner 10.9.2026 'zoom through'); near plane pulled in so nothing is cut while inside. A sphere of radius R needs d >= R/sin(fov/2) to stay inside the frame at every turn (R/tan clipped the near end - owner 10.9.2026 'leikkautuu')
     cam.inertialAlphaOffset = cam.inertialBetaOffset = cam.inertialRadiusOffset = 0;
     scene.render();   // one frame now, so the first thing Solukko reveals is the molecule, not the empty card
     try{ window.parent.postMessage({ solukkoKortti: 'valmis', laji: key }, '*'); }catch(e){}
