@@ -3385,7 +3385,7 @@ function renderGreet(){   // render the current homepage greeting bubble (its in
   if(_greetAvaus){ const i=order.indexOf(_greetAvaus); if(i>=0) _greetIdx=i; _greetAvaus=null; }   /* the opening bubble for this load, resolved against the live order (a winner's golden bubble shifts it) */
   const key=order[((_greetIdx%order.length)+order.length)%order.length];
   if(key==='__golden__'){ greet.classList.add('win-bubble'); greet.innerHTML=_goldenWinText(); }
-  else { greet.classList.remove('win-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); }
+  else { greet.classList.remove('win-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); if(typeof updateTietovisaAika==='function') updateTietovisaAika(); }
   requestAnimationFrame(positionGreetTail);   // re-point the tail after the bubble's new height settles
 }
 window.addEventListener('resize', ()=>{ if(typeof positionGreetTail==='function') positionGreetTail(); }, {passive:true});
@@ -3418,7 +3418,7 @@ function heroMonaClick(){
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
   home_decks:'Alla näet hirmuisen määrän korttipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Aloita klikkaamalla haluamaasi korttipakkaa!',
-  home_quiz:'Solukko.com järjestää tietovisoja pilteille joka maanantai Aurumin TEK Loungessa klo 16:00&ndash;18:00. Tietovisoissa kerrataan edellisviikon luentojen asiat ja jaossa on pieniä palkintoja kaikille oikein vastaaville. Vapaa pääsy, ei ilmoittautumista! Ensimmäinen tietovisa 7.9.2026.',
+  home_quiz:'Tietovisoja joka viikko! Näytä osaamisesi tai esitä kysymyksiä edellisviikon luennoista Solukko-tietovisoissa maanantaisin Aurumin TEK Loungessa klo 16:00&ndash;18:00. Jaossa myös pieniä palkintoja kaikille oikein vastaaville. Kaikille vapaa pääsy! Seuraava tietovisa alkaa <span class="tietovisa-aika"></span>.',   // the span is a live countdown (updateTietovisaAika)
   homepage1:'<span>Tervetuloa Solukkoon! Täällä voit opiskella yliopistokurssit valmiiden kysymyskorttien avulla! Nimeni on Mona ja toimin sivuston oppaana. Klikkaa minua, jos haluat ohjeistusta opiskelun aloittamiseen.</span>',
   homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
   homepage3:'Klikkaa jotain kurssipakkaa, niin näytän sinulle miten kertaaminen toimii. Tai sitten voin jatkaa kertomalla sinulle Solukko™-tietovisoista!',
@@ -3440,6 +3440,7 @@ function buildMonaBubbles(){   // inject the bubble divs into both containers fr
   if(home) HOME_BUBBLE_ORDER.forEach(k=>{ const d=document.createElement('div'); d.className='home-bubble'; d.innerHTML=MONA_BUBBLES[k]; home.appendChild(d); });
   const peek=document.getElementById('peek-logo');
   if(peek) PEEK_BUBBLE_ORDER.forEach(k=>{ const d=document.createElement('div'); d.className='peek-bubble'; d.innerHTML=MONA_BUBBLES[k]; peek.appendChild(d); });
+  if(typeof updateTietovisaAika==='function') updateTietovisaAika();   // fill the countdown in every injected copy of the tietovisa bubble
 }
 buildMonaBubbles();
 
@@ -3981,6 +3982,25 @@ function updateSoluvisaCountdown(){
   el.textContent=dd+' pv  '+hh+' h  '+mm+' min';
 }
 updateSoluvisaCountdown(); setInterval(updateSoluvisaCountdown, 20000);
+// Countdown in Mona's tietovisa bubble: every Monday 16:00-18:00 (Aurum, TEK Lounge)
+function nextTietovisaTime(){
+  const now=new Date(), d=new Date(now); d.setHours(16,0,0,0);
+  let days=(1 - now.getDay() + 7) % 7;                 // Monday = 1
+  if(days===0 && now.getTime()>=d.getTime()) days=7;   // Monday past 16:00 -> next week
+  d.setDate(now.getDate()+days); d.setHours(16,0,0,0);
+  return d;
+}
+function updateTietovisaAika(){
+  const els=document.querySelectorAll('.tietovisa-aika'); if(!els.length) return;
+  const now=new Date(), kaynnissa=now.getDay()===1 && now.getHours()>=16 && now.getHours()<18;
+  let txt;
+  if(kaynnissa) txt='juuri nyt - tervetuloa mukaan';
+  else { let ms=nextTietovisaTime().getTime()-now.getTime(); if(ms<0) ms=0;
+    const tot=Math.floor(ms/60000), dd=Math.floor(tot/1440), hh=Math.floor((tot%1440)/60), mm=tot%60;
+    txt=(dd?dd+' pv ':'')+(dd||hh?hh+' h ':'')+mm+' min kuluttua'; }
+  els.forEach(el=>{ el.textContent=txt; });
+}
+setInterval(updateTietovisaAika, 20000);
 
 // Build the homepage: Mona (+ greeting) top-left, then one section per academic year,
 // with autumn courses on the left and spring on the right (single column on narrow screens).
