@@ -12896,7 +12896,7 @@ const startViewer = solu => { document.documentElement.classList.add('kalvosto')
   const poke = () => { bb.classList.add('show'); clearTimeout(hideT); hideT = setTimeout(() => bb.classList.remove('show'), 2200); };
   window.addEventListener('pointermove', poke, { passive: true }); window.addEventListener('pointerdown', poke, { passive: true });
   bb.addEventListener('mouseenter', () => { clearTimeout(hideT); bb.classList.add('show'); }); bb.addEventListener('mouseleave', poke);
-  bb.addEventListener('click', () => { location.href = location.pathname; }); }
+  bb.addEventListener('click', () => { try{ sessionStorage.setItem('solukko-homeTab', 'simulaatiot'); }catch(e){} location.href = '../index.html'; }); }   // back = Solukko's simulaatiot tab
 const startEditor = () => { document.documentElement.classList.add('editori');
   /* the editor gets the same loading screen: Mona, the bar driven by the particle pictures below, and the
      'Käynnistä keskeneräisenä' button from the first moment - a click drops the screen while loading goes on */
@@ -12906,8 +12906,8 @@ const startEditor = () => { document.documentElement.classList.add('editori');
 { const st = document.getElementById('start'), tila = new URLSearchParams(location.search).get('tila');
   const go = t => { if(st) st.remove(); if(t === 'editori') startEditor(); else startViewer(t === 'solu'); };
   if(tila === 'editori' || tila === 'kalvosto' || tila === 'solu') go(tila);
-  else if(st) for(const b of st.querySelectorAll('.start-opt')) b.addEventListener('click', () => go(b.dataset.tila));
-  else startViewer(); }
+  else { try{ sessionStorage.setItem('solukko-homeTab', 'simulaatiot'); }catch(e){} location.replace('../index.html'); }   // no mode: the chooser is Solukko's simulaatiot tab, not this page (owner 10.9.2026)
+}
 </script>
 </body>
 </html>
