@@ -1242,11 +1242,15 @@ body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { backgroun
 .wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; object-fit: contain; }
 .wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 12px; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
 #mol-kehys { box-shadow: none; }   /* the shared simulator frame (positioned over .wl-mol-view by molKehys) */
-.wl-dim-switch { display: flex; justify-content: center; gap: 0; margin: 0 auto 8px; width: max-content; border: 1px solid #c9bda8; border-radius: 999px; overflow: hidden; background: #fff5e0; }
+.wl-mol-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 8px 0 0; }   /* switch bottom-left, Tiedot bottom-right (owner 10.9.2026) */
+.wl-mol-tiedot { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #c9bda8; text-align: left; }
+body.dark-mode .wl-mol-tiedot { border-top-color: #6d5f52; }
+.wl-dim-switch { display: flex; justify-content: center; gap: 0; margin: 0; width: max-content; border: 1px solid #c9bda8; border-radius: 999px; overflow: hidden; background: #fff5e0; }
 .wl-dim { border: none; background: transparent; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; padding: 0.22em 0.9em; cursor: pointer; line-height: 1.4; }
-.wl-dim.on { background: #3a5c4c; color: #fff; }
-.wl-tiedot { display: block; margin: 8px auto 0; border: none; background: none; color: #7a5230; font-family: 'Lora', serif; font-size: 0.8em; cursor: pointer; text-decoration: underline dotted; padding: 0; }
-body.dark-mode .wl-dim-switch { background: #4a3f34; border-color: #6d5f52; } body.dark-mode .wl-dim { color: #eadfce; } body.dark-mode .wl-dim.on { background: #9fc7b4; color: #1f2b25; } body.dark-mode .wl-tiedot { color: #cbb89b; }
+.wl-dim.on { background: #4a3320; color: #fff; }   /* ruskea kuten paluunapin reunus (omistaja 10.9.2026) */
+.wl-tiedot { display: block; margin: 0; padding: 0.22em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; line-height: 1.4; cursor: pointer; }
+.wl-tiedot:hover { background: #eadcc2; }
+body.dark-mode .wl-dim-switch { background: #4a3f34; border-color: #6d5f52; } body.dark-mode .wl-dim { color: #eadfce; } body.dark-mode .wl-dim.on { background: #8a6a4a; color: #fff; } body.dark-mode .wl-tiedot { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
@@ -7153,27 +7157,37 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     }
   }
 
-  let _tipTiedot=false;   // molecule popup switched to the Solukko card with "määritelmä"
+  let _tipTiedot=false;   // molecule popup: the card's text is open under the render (Tiedot)
+  /* the card text for a molecule popup: suppea first, Laajenna reveals laaja (the same pair the plain tooltip uses) */
+  function _molTiedotHtml(card){
+    const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
+    const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
+    const sup=card.suppea||'';
+    const _pl=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+    if(_pl(sup) && _pl(back) && _pl(sup)!==_pl(back)){ _tipSuppea=prepareTooltipHtml(sup); _tipLaaja=prepareTooltipHtml(back);
+      return '<div class="wl-body">'+_tipSuppea+'</div><button type="button" class="wl-expand">Laajenna</button>'; }
+    _tipLaaja=null; _tipSuppea=null; return '<div class="wl-body">'+prepareTooltipHtml(back||sup||front)+'</div>';
+  }
   function showTip(target){
     const mol=target.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol];
     const idx=parseInt(target.dataset.cardIndex);
-    if(molData && !(target===_tipTarget && _tipTiedot)){   // molecule: only the spinning render (+ Tiedot if a Solukko card exists)
+    if(molData){   // molecule: the render, 2D/3D switch bottom-left, "Tiedot" bottom-right opens the Solukko card's text under the render
       if(target!==_tipTarget){
         _tipTarget=target; _tipLukittu=false; _tipTiedot=false; _tipLaaja=null; _tipSuppea=null;
         tip.innerHTML='<div class="wl-mol">'
-          +'<div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">2D</button><button type="button" class="wl-dim" data-dim="3d">3D</button></div>'
           +'<div class="wl-mol-view"></div>'
-          +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-tiedot">määritelmä</button>':'')
+          +'<div class="wl-mol-foot"><div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">2D</button><button type="button" class="wl-dim" data-dim="3d">3D</button></div>'
+          +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-tiedot">Tiedot</button>':'')+'</div>'
           +'</div>';
         _molRenderView(tip, molData);
-        tip.classList.add('mol-only'); tip.style.fontSize='';
+        tip.classList.add('mol-only'); tip.classList.remove('tiedot-auki'); tip.style.fontSize='';
       }
       placeTip(target,_tipLukittu); return;
     }
     if(isNaN(idx)) return;
     const card=_wlCards[idx]; if(!card) return;
-    if(target!==_tipTarget || _tipTiedot==='uusi'){   // rebuild content only when the hovered word changes (not every frame)
-      _tipTarget=target; _tipLukittu=false; _tipTiedot=!!molData; tip.classList.remove('mol-only');
+    if(target!==_tipTarget){   // rebuild content only when the hovered word changes (not every frame)
+      _tipTarget=target; _tipLukittu=false; _tipTiedot=false; tip.classList.remove('mol-only','tiedot-auki');
       const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
       const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
       const sup=card.suppea||'';
@@ -7194,7 +7208,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     // The popup never covers its word: it goes BELOW (preferred) or ABOVE, whichever has room, is capped to
     // that room and scrolls inside when the text is longer (owner 10.9.2026). A box growing in place
     // (Laajenna) keeps its side and corner.
-    tip.style.display='block'; tip.style.width=tip.classList.contains('mol-only')?'auto':'min(520px, calc(100vw - 24px))';
+    tip.style.display='block'; tip.style.width=(tip.classList.contains('mol-only') && !tip.classList.contains('tiedot-auki'))?'auto':'min(520px, calc(100vw - 24px))';
     const r=target.getBoundingClientRect(), vw=window.innerWidth, vh=window.innerHeight, M=8, G=8;
     const tilaAlla=vh-r.bottom-G-M, tilaYlla=r.top-G-M;
     let alle;
@@ -7215,7 +7229,14 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     if(dim && _tipTarget){ e.stopPropagation(); _molDim=dim.dataset.dim==='2d'?'2d':'3d'; try{ localStorage.setItem('solukko-molDim',_molDim); }catch(err){}
       const md=_molekyylit&&_molekyylit[_tipTarget.dataset.mol]; if(md) _molRenderView(tip, md); placeTip(_tipTarget,true); return; }
     const td=e.target.closest('.wl-tiedot');
-    if(td && _tipTarget){ e.stopPropagation(); molKehys.piilota(); _tipTiedot='uusi'; showTip(_tipTarget); _tipLukittu=true; placeTip(_tipTarget,true); return; }   // molecule popup -> the Solukko card behind the word
+    if(td && _tipTarget){ e.stopPropagation(); _tipLukittu=true;   // Tiedot: open / close the card's text under the render (the render stays)
+      let osio=tip.querySelector('.wl-mol-tiedot');
+      if(osio){ osio.remove(); _tipTiedot=false; tip.classList.remove('tiedot-auki'); td.textContent='Tiedot'; _tipLaaja=null; _tipSuppea=null; }
+      else { const card=_wlCards[parseInt(_tipTarget.dataset.cardIndex)]; if(!card) return;
+        osio=document.createElement('div'); osio.className='wl-mol-tiedot'; osio.innerHTML=_molTiedotHtml(card); tip.querySelector('.wl-mol').appendChild(osio); dimParentheses(osio);
+        const cc=_tipTarget.closest('.card-content'); if(cc){ const fs=parseFloat(getComputedStyle(cc).fontSize); if(fs) osio.style.fontSize=(fs*0.8).toFixed(2)+'px'; }   // same 20 % smaller text as the plain tooltip
+        _tipTiedot=true; tip.classList.add('tiedot-auki'); td.textContent='Sulje tiedot'; }
+      placeTip(_tipTarget,true); return; }
     const b=e.target.closest('.wl-expand'); if(!b||!(_tipLaaja&&_tipSuppea)) return;
     e.stopPropagation();
     const body=tip.querySelector('.wl-body'); if(!body) return;
@@ -7243,7 +7264,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     else if(overTip){ _tipHold=0; }                       // pointer is reading the tooltip — leave it be
     else if(_tipTarget){
       if(!_tipHold) _tipHold=Date.now()+260;              // grace period for crossing the gap to the tooltip
-      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only'); tip.innerHTML=''; molKehys.piilota(); _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }
+      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only','tiedot-auki'); tip.innerHTML=''; molKehys.piilota(); _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }
     }
     requestAnimationFrame(updateTip);
   }
