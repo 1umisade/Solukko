@@ -1224,12 +1224,21 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 .flashcard:not(.answer-shown) .word-link.wl-show, .flashcard:not(.answer-shown) .word-link:hover { background: none; box-shadow: none; }
 .flashcard:not(.answer-shown) .word-link::after { display: none; }
 .word-link::after { display: none; }   /* tail arrow removed */
-/* formula indices hug their element: the 2 of H₂O is nudged onto the H and outlined in cream so it stays legible over the letter */
-.mol-link sub, .mol-link sup { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.34em; margin-right: 0.05em; font-weight: 700;
-  text-shadow: 1px 0 0 #fff5e0, -1px 0 0 #fff5e0, 0 1px 0 #fff5e0, 0 -1px 0 #fff5e0, 1px 1px 0 #fff5e0, -1px -1px 0 #fff5e0, 1px -1px 0 #fff5e0, -1px 1px 0 #fff5e0, 0 0 2px #fff5e0; }
+/* formula indices hug their element: the 2 of H₂O is nudged onto the H. Its outline is a stroked copy of the glyph
+   (::before) filled with the card's OWN background - paper image plus the grade tint - so it reads as a cut-out of
+   the H, not as a coloured halo (owner 10.9.2026: 'use the bg image for the outline'). */
+.flashcard, #word-link-tooltip, .overview-card { --card-tint: linear-gradient(transparent, transparent); }
+.flashcard.graded-known   { --card-tint: linear-gradient(rgba(154,184,161,0.42), rgba(154,184,161,0.42)); }
+.flashcard.graded-unknown { --card-tint: linear-gradient(rgba(239,154,95,0.42), rgba(239,154,95,0.42)); }
+body.dark-mode .flashcard { --card-tint: linear-gradient(#3a312b, #3a312b); }
+body.dark-mode .flashcard.graded-known   { --card-tint: linear-gradient(#303d35, #303d35); }
+body.dark-mode .flashcard.graded-unknown { --card-tint: linear-gradient(#3f3022, #3f3022); }
+body.dark-mode #word-link-tooltip { --card-tint: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)); }
+.mol-link sub, .mol-link sup { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.34em; margin-right: 0.05em; font-weight: 700; }
 .mol-link sub { vertical-align: -0.28em; }
 .mol-link sup { vertical-align: 0.55em; }
-body.dark-mode .mol-link sub, body.dark-mode .mol-link sup { text-shadow: 1px 0 0 #3a312b, -1px 0 0 #3a312b, 0 1px 0 #3a312b, 0 -1px 0 #3a312b, 1px 1px 0 #3a312b, -1px -1px 0 #3a312b, 1px -1px 0 #3a312b, -1px 1px 0 #3a312b, 0 0 2px #3a312b; }
+.mol-link sub::before, .mol-link sup::before { content: attr(data-i); position: absolute; left: 0; top: 0; z-index: -1; color: transparent; -webkit-text-stroke: 3px transparent; pointer-events: none;
+  background: var(--card-tint, linear-gradient(transparent, transparent)), var(--card-bg, url('new_bg.png?v=2')) center / cover no-repeat fixed; -webkit-background-clip: text; background-clip: text; }
 .word-link.wl-show, .word-link:hover { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 0 0 6px #a06a35, 0 4px 12px rgba(0,0,0,0.16); }   /* speech-bubble graphic (cream fill + darker outline): on card load (flashes) and on hover */
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
 body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
@@ -7065,7 +7074,8 @@ const _SUBS={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'
 const _SUPS={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'−'};
 function _molMarkup(t){
   const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  return esc(t).replace(/[₀-₉ᵢ]+/g,r=>'<sub>'+[...r].map(c=>_SUBS[c]||c).join('')+'</sub>').replace(/[⁰¹²³⁴-⁹⁺⁻]+/g,r=>'<sup>'+[...r].map(c=>_SUPS[c]||c).join('')+'</sup>');
+  const tag=(nm,txt)=>'<'+nm+' data-i="'+txt+'">'+txt+'</'+nm+'>';   // data-i feeds the ::before outline (CSS attr())
+  return esc(t).replace(/[₀-₉ᵢ]+/g,r=>tag('sub',[...r].map(c=>_SUBS[c]||c).join(''))).replace(/[⁰¹²³⁴-⁹⁺⁻]+/g,r=>tag('sup',[...r].map(c=>_SUPS[c]||c).join('')));
 }
 function _wrapMolHtml(element){
   if(!_molHtml.size) return;
@@ -7085,7 +7095,7 @@ function _wrapMolHtml(element){
     const ci=_molCardIdx(key); if(ci>=0) span.dataset.cardIndex=ci;
     e.parentNode.insertBefore(span, e);   // between the (shortened) text before and the first sub/sup
     if(tail){ const t=pv.textContent; pv.textContent=t.slice(0,-tail.length); span.appendChild(document.createTextNode(tail)); if(!pv.textContent) pv.remove(); }
-    chain.forEach(c=>{ span.appendChild(c); done.add(c); });
+    chain.forEach(c=>{ c.dataset.i=c.textContent; span.appendChild(c); done.add(c); });   // data-i feeds the ::before outline
     if(head){ const t=nx.textContent; nx.textContent=t.slice(head.length); span.appendChild(document.createTextNode(head)); if(!nx.textContent) nx.remove(); }
   });
 }
