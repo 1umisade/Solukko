@@ -1224,6 +1224,12 @@ body.is-mobile .comment-area { position: static; width: 100%; }
 .flashcard:not(.answer-shown) .word-link.wl-show, .flashcard:not(.answer-shown) .word-link:hover { background: none; box-shadow: none; }
 .flashcard:not(.answer-shown) .word-link::after { display: none; }
 .word-link::after { display: none; }   /* tail arrow removed */
+/* formula indices hug their element: the 2 of H₂O is nudged onto the H and outlined in cream so it stays legible over the letter */
+.mol-link sub, .mol-link sup { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.34em; margin-right: 0.05em; font-weight: 700;
+  text-shadow: 1px 0 0 #fff5e0, -1px 0 0 #fff5e0, 0 1px 0 #fff5e0, 0 -1px 0 #fff5e0, 1px 1px 0 #fff5e0, -1px -1px 0 #fff5e0, 1px -1px 0 #fff5e0, -1px 1px 0 #fff5e0, 0 0 2px #fff5e0; }
+.mol-link sub { vertical-align: -0.28em; }
+.mol-link sup { vertical-align: 0.55em; }
+body.dark-mode .mol-link sub, body.dark-mode .mol-link sup { text-shadow: 1px 0 0 #3a312b, -1px 0 0 #3a312b, 0 1px 0 #3a312b, 0 -1px 0 #3a312b, 1px 1px 0 #3a312b, -1px -1px 0 #3a312b, 1px -1px 0 #3a312b, -1px 1px 0 #3a312b, 0 0 2px #3a312b; }
 .word-link.wl-show, .word-link:hover { background-color: #fff5e0; box-shadow: 0 0 0 4px #fff5e0, 0 0 0 6px #a06a35, 0 4px 12px rgba(0,0,0,0.16); }   /* speech-bubble graphic (cream fill + darker outline): on card load (flashes) and on hover */
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
 body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
@@ -7053,6 +7059,14 @@ function _molCardIdx(key){   // the Solukko term card behind a molecule word, if
 // The HTML formula forms ("H<sub>2</sub>O") span several DOM nodes, so the text-node regex never sees them.
 // Around every <sub>/<sup> in the element, take the letter run before, the sub/sup chain and the letter run
 // after, serialise, and wrap the whole run when it is a known species.
+/* a formula's Unicode sub/superscripts (H₂O, PO₄³⁻) become real <sub>/<sup> inside the link, so the index can be
+   tucked against its element and outlined (owner 10.9.2026: 'the 2 visually associated with H') */
+const _SUBS={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','ᵢ':'i'};
+const _SUPS={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'−'};
+function _molMarkup(t){
+  const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return esc(t).replace(/[₀-₉ᵢ]+/g,r=>'<sub>'+[...r].map(c=>_SUBS[c]||c).join('')+'</sub>').replace(/[⁰¹²³⁴-⁹⁺⁻]+/g,r=>'<sup>'+[...r].map(c=>_SUPS[c]||c).join('')+'</sup>');
+}
 function _wrapMolHtml(element){
   if(!_molHtml.size) return;
   const subs=[...element.querySelectorAll('sub,sup')].filter(e=>!e.closest('.word-link'));
@@ -7095,7 +7109,7 @@ function _wrapTextNode(textNode){
   const filtered=[]; let lastEnd=0;
   matches.forEach(m=>{ if(m.start>=lastEnd){ filtered.push(m); lastEnd=m.end; } });
   const frag=document.createDocumentFragment(); let pos=0;
-  filtered.forEach(m=>{ if(m.start>pos) frag.appendChild(document.createTextNode(text.slice(pos,m.start))); const span=document.createElement('span'); span.className='word-link'+(m.mol?' mol-link':''); if(m.cardIndex>=0) span.dataset.cardIndex=m.cardIndex; if(m.mol) span.dataset.mol=m.mol; span.textContent=m.text; frag.appendChild(span); pos=m.end; });
+  filtered.forEach(m=>{ if(m.start>pos) frag.appendChild(document.createTextNode(text.slice(pos,m.start))); const span=document.createElement('span'); span.className='word-link'+(m.mol?' mol-link':''); if(m.cardIndex>=0) span.dataset.cardIndex=m.cardIndex; if(m.mol){ span.dataset.mol=m.mol; span.innerHTML=_molMarkup(m.text); } else span.textContent=m.text; frag.appendChild(span); pos=m.end; });
   if(pos<text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
   textNode.parentNode.replaceChild(frag,textNode);
 }
