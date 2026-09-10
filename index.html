@@ -1222,7 +1222,7 @@ body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { backgroun
 .sim-opts { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; max-width: 980px; margin: 0 auto 60px; padding: 0 12px; }
 .sim-opt { flex: 1 1 260px; max-width: 300px; display: block; text-decoration: none; background: #fffef9; border: 1px solid #e7e1d6; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); font-family: 'Lora', serif; color: #56533c; transition: transform .15s, box-shadow .15s; }
 .sim-opt:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.10); }
-.sim-opt b { display: block; font-size: 1.15rem; color: #3a5c4c; margin-bottom: 6px; }
+.sim-opt b { display: block; font-size: 1.15rem; color: #3a5c4c; text-align: center; }
 .sim-opt span { display: block; font-size: 0.92rem; line-height: 1.5; }
 body.dark-mode .sim-intro { color: #eadfce; }
 body.dark-mode .sim-opt { background: #2b2622; border-color: #4a3f36; color: #eadfce; }
@@ -2630,11 +2630,10 @@ body.dark-mode .cal-ev { color:#241f1b; }
 </div></div>
   </div>
   <div id="sim-view" style="display:none;">
-    <div class="sim-intro">Geneesi on Solukon 3D-simulaattori: atomit, molekyylit ja kasvisolun yhteyttämiskoneisto oikeista rakennemalleista. Vaatii tietokoneen ja WebGL2:n.</div>
     <div class="sim-opts">
-      <a class="sim-opt" href="geneesi/index.html?tila=editori"><b>Kemiaeditori</b><span>Rakenna molekyylejä vedystä ja hapesta. Atomit pomppivat ja reagoivat törmätessään.</span></a>
-      <a class="sim-opt" href="geneesi/index.html?tila=kalvosto"><b>Yhteyttämiskalvosto</b><span>Valmis tylakoidikalvon kohtaus: fotosysteemit, ATP-syntaasi ja strooma.</span></a>
-      <a class="sim-opt" href="geneesi/index.html?tila=solu"><b>Kasvisolu</b><span>Kokonainen kasvisolu: jättimäinen solukalvo, huokoinen tumakotelo ja kalvoston koneisto.</span></a>
+      <a class="sim-opt" href="geneesi/index.html?tila=editori"><b>Kemiaeditori</b></a>
+      <a class="sim-opt" href="geneesi/index.html?tila=kalvosto"><b>Yhteyttämiskalvosto</b></a>
+      <a class="sim-opt" href="geneesi/index.html?tila=solu"><b>Kasvisolu</b></a>
     </div>
   </div>
   <div id="map-view" style="display:none;"><img src="kartta.png" alt="Kartta" style="display:block; max-width:min(900px,100%); width:100%; height:auto; margin:0 auto 60px; border-radius:12px;"></div>
