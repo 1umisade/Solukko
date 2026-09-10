@@ -9,15 +9,16 @@ Vaatii: pip install rdkit"""
 import json, os, sys, math, io
 sys.stdout.reconfigure(encoding='utf-8')
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdDepictor
 
 SC = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(SC)
 OUT = os.path.join(REPO, 'simulaatiot', 'kortit', '2d')
 
 VARI = {'C': '#9d9d9d', 'H': '#c6c6c6', 'N': '#5a79d9', 'O': '#e5382d', 'P': '#f0932b', 'S': '#e3cf46', 'Mg': '#7fcf7f'}
 SADE = {'H': 15}                 # muut 21 px, P/Mg 24
-S = 42                           # px per RDKit-yksikko (sidos ~1.5 -> ~63 px)
+S = 50                           # px per RDKit-yksikko (sidos ~1.5 -> ~75 px)
 HALO = 30                        # hehkun paksuus atomin/sidoksen ympari
+SILTA = 2.0 * 1.5 * S            # hehkusilta, kun sitoutumattomat atomit ovat alle 2 sidospituuden paassa
 ULKO = 5                         # hehkun mustan aariviivan paksuus
 SIDOS = 6                        # sidosviivan paksuus
 HEHKU = '#e8221c'
@@ -33,15 +34,27 @@ def mol2d(smiles):
     if m is None:   # esim. koordinoitunut Mg: osittainen sanitointi
         m = Chem.MolFromSmiles(smiles, sanitize=False); m.UpdatePropertyCache(strict=False)
         Chem.SanitizeMol(m, sanitizeOps=Chem.SanitizeFlags.SANITIZE_ALL ^ Chem.SanitizeFlags.SANITIZE_PROPERTIES ^ Chem.SanitizeFlags.SANITIZE_KEKULIZE, catchErrors=True)
-    m = Chem.AddHs(m)
     try: Chem.Kekulize(m, clearAromaticFlags=True)
     except Exception: pass
-    AllChem.Compute2DCoords(m)
+    # Runko ensin ilman vetyja (oppikirjan tikkukaavan asettelu, RDKitin oma - CoordGen vaanti renkaat), vedyt
+    # lisataan valmiisiin koordinaatteihin. Kun vedyt olivat mukana asettelussa, ne veivat kulmatilaa ja runko
+    # vaantyi (omistaja 10.9.2026: 'atoms too crowded').
+    rdDepictor.SetPreferCoordGen(False)
+    rdDepictor.Compute2DCoords(m)
+    m = Chem.AddHs(m, addCoords=True)
     conf = m.GetConformer()
+    pts = [(conf.GetAtomPosition(i).x, conf.GetAtomPosition(i).y) for i in range(m.GetNumAtoms())]
+    # pitka akseli vaakaan (paakomponentti), fosfaatit vasemmalle kuten oppikirjassa (peilaus ei muuta tasokaavaa)
+    cx = sum(p[0] for p in pts) / len(pts); cy = sum(p[1] for p in pts) / len(pts)
+    sxx = sum((p[0] - cx) ** 2 for p in pts); syy = sum((p[1] - cy) ** 2 for p in pts); sxy = sum((p[0] - cx) * (p[1] - cy) for p in pts)
+    th = 0.5 * math.atan2(2 * sxy, sxx - syy); c, s_ = math.cos(-th), math.sin(-th)
+    pts = [((x - cx) * c - (y - cy) * s_, (x - cx) * s_ + (y - cy) * c) for x, y in pts]
+    px = [pts[a.GetIdx()][0] for a in m.GetAtoms() if a.GetSymbol() == 'P']
+    if px and sum(px) / len(px) > 0: pts = [(-x, y) for x, y in pts]
     atoms = []
     for a in m.GetAtoms():
-        p = conf.GetAtomPosition(a.GetIdx())
-        atoms.append({'sym': a.GetSymbol(), 'x': p.x * S, 'y': -p.y * S, 'q': a.GetFormalCharge()})
+        x, y = pts[a.GetIdx()]
+        atoms.append({'sym': a.GetSymbol(), 'x': x * S, 'y': -y * S, 'q': a.GetFormalCharge()})
     bonds = [(b.GetBeginAtomIdx(), b.GetEndAtomIdx(), int(round(b.GetBondTypeAsDouble()))) for b in m.GetBonds()]
     rings = [list(r) for r in m.GetRingInfo().AtomRings()]   # renkaan sisus taytetaan hehkulla, muuten keskelle jaa reika
     return atoms, bonds, rings
@@ -63,6 +76,10 @@ def piirra(atoms, bonds, rings=(), lisa_merkki=None):
         for i, j, k in bonds:
             a, b = atoms[i], atoms[j]
             o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke-width="%.1f"/>' % (a['x'], a['y'], b['x'], b['y'], 2 * (HALO + extra)))
+        for i in range(len(atoms)):   # hehkusilta lahekkaisten sitoutumattomien atomien valiin: molekyylin sisaan ei jaa pikkureikia
+            for j in range(i + 1, len(atoms)):
+                if math.hypot(atoms[i]['x'] - atoms[j]['x'], atoms[i]['y'] - atoms[j]['y']) < SILTA:
+                    o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke-width="%.1f"/>' % (atoms[i]['x'], atoms[i]['y'], atoms[j]['x'], atoms[j]['y'], 2 * (HALO + extra)))
         for a in atoms:
             o.append('<circle cx="%.1f" cy="%.1f" r="%.1f" stroke="none"/>' % (a['x'], a['y'], r_of(a) + HALO + extra))
         for ring in rings:
