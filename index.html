@@ -670,7 +670,8 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .embed-3d-frame { width: 100%; aspect-ratio: 1 / 1; height: auto; border: none; border-radius: 0; background: #efe9dd; display: block; pointer-events: none; }   /* front: no interaction — clicks flip the card */
 .answer-shown .embed-3d-frame { pointer-events: auto; aspect-ratio: 2 / 1; }   /* back: full width, half the front's height; allow rotating the model */
 body.dark-mode .embed-3d-frame { background: #2a2622; }
-.dim-paren { opacity: 0.5; }
+.dim-paren { color: rgba(26,22,18,0.5); }   /* dim by colour, not opacity: an opacity span faded the word-link bubbles inside it, which looked like cut-off bubbles (owner 10.9.2026) */
+body.dark-mode .dim-paren { color: rgba(234,223,206,0.55); }
 
 /* ── 7. IMAGE OCCLUSION ─────────────────────────────────── */
 .io-card-image { position: relative; width: 100%; display: inline-block; }
@@ -1256,7 +1257,10 @@ body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { backgroun
 #word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
 .wl-mol-view { position: relative; width: 260px; height: 260px; margin: 0 auto; }
 .wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 0;   /* the generic tooltip img rule excludes .wl-2d, otherwise its width/height auto made the canvas a wide strip */ background: #f2e6c9; margin: 0 auto; object-fit: contain; }
-.wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 0; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
+.wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 0; background: #f2e6c9; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.82rem; color: #8a7d6b; text-align: center; padding: 12px; box-sizing: border-box; }   /* loading card: stays under the 3-D frame (the frame covers it), so a frame that never appears still shows a card, never bare paper */
+.wl-3d-wait .wl-spin { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #d9c9a6; border-top-color: #8a6a4a; animation: wlSpin 0.9s linear infinite; }
+@keyframes wlSpin { to { transform: rotate(360deg); } }
+.wl-3d-wait .wl-2d-btn { margin-top: 4px; padding: 0.22em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.8rem; cursor: pointer; }
 #mol-kehys { box-shadow: none; }   /* the shared simulator frame (positioned over .wl-mol-view by molKehys) */
 .wl-mol-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 8px 0 0; }   /* switch bottom-left, Tiedot bottom-right (owner 10.9.2026) */
 .wl-mol-tiedot { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #c9bda8; text-align: left; }
@@ -7026,7 +7030,7 @@ let _molekyylit=null, _molMap=new Map(), _molHtml=new Map();   // _molHtml: seri
 // it is loaded once, early and hidden, and kept alive: a popup only lays it over its 3-D box and asks for a
 // species by postMessage. It is never re-parented (that would reload it) - only positioned.
 const molKehys=(function(){
-  let f=null, alustettu=false, kohde=null, haluttu=null, nakyva=false;
+  let f=null, alustettu=false, kohde=null, haluttu=null, nakyva=false, varaTO=null;
   function luo(){ if(f) return f;
     try{ if(!document.createElement('canvas').getContext('webgl2')) return null; }catch(e){ return null; }
     f=document.createElement('iframe'); f.id='mol-kehys'; f.src='simulaatiot/kortti.html?tila=kortti&v='+Math.floor(Date.now()/3.6e6);   /* kortti.html = the popup-only build (tyokalut/kortti_build.py) with its own 1.2 MB Babylon bundle instead of the 8 MB CDN file; hourly cache-buster because GitHub Pages caches 10 min */ f.title='3D-malli: vedä kääntääksesi, rulla zoomaa';
@@ -7034,8 +7038,9 @@ const molKehys=(function(){
     document.body.appendChild(f); return f; }
   window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
     if(d.solukkoKortti==='alustettu'){ alustettu=true; if(haluttu) f.contentWindow.postMessage({solukkoLaji:haluttu},'*'); }
-    if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; f.style.opacity='1'; f.style.pointerEvents='auto'; const w=kohde.querySelector('.wl-3d-wait'); if(w) w.remove(); }
+    if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; f.style.opacity='1'; f.style.pointerEvents='auto'; clearTimeout(varaTO); }   // the loading card stays underneath: the opaque frame covers it
   });
+  function vara(view, teksti){ const w=view.querySelector('.wl-3d-wait'); if(!w) return; w.innerHTML='<div>'+teksti+'</div><button type="button" class="wl-2d-btn wl-dim" data-dim="2d">Näytä kaava</button>'; }   // the button is a .wl-dim: the tooltip's own click handler switches to 2-D
   function asemoi(){ if(!f||!kohde||!kohde.isConnected){ return; } const r=kohde.getBoundingClientRect(), d=window.devicePixelRatio||1, sn=v=>Math.round(v*d)/d;   // snap to device pixels: a frame edge on a half pixel blends into a dark line
     f.style.left=sn(r.left)+'px'; f.style.top=sn(r.top)+'px'; f.style.width=sn(r.width)+'px'; f.style.height=sn(r.height)+'px';
     // the frame lives outside the popup, so the popup's own scroll box cannot clip it: clip it here to the popup's visible rectangle
@@ -7044,7 +7049,8 @@ const molKehys=(function(){
       f.style.clipPath=(ct||cb||cl||cr)?('inset('+ct+'px '+cr+'px '+cb+'px '+cl+'px)'):''; } }
   return {
     lammita(){ luo(); },   // start loading now, so the first popup is instant
-    nayta(key, view){ if(!luo()) return; kohde=view; haluttu=key; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; asemoi();
+    nayta(key, view){ if(!luo()){ vara(view, 'Selaimesi ei näytä 3D-malleja.'); return; } kohde=view; haluttu=key; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; asemoi();
+      clearTimeout(varaTO); varaTO=setTimeout(()=>{ if(!nakyva && kohde===view) vara(view, '3D-mallin lataus kestää tavallista pidempään.'); }, 8000);   // after 8 s: say so and offer the 2-D formula
       if(alustettu) f.contentWindow.postMessage({solukkoLaji:key},'*'); },   // else 'alustettu' will forward it
     piilota(){ if(!f) return; kohde=null; haluttu=null; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; f.style.left='-9999px'; },
     asemoi,
@@ -7178,7 +7184,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || '';
     if(_molDim==='2d' && molData.kuva2d){ view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">'; molKehys.piilota(); }
     else {   // live simulator: the shared, pre-warmed iframe is laid over this box (see molKehys); left drag turns, wheel zooms, nothing pans
-      view.innerHTML='<div class="wl-3d-wait">3D-malli latautuu…</div>';
+      view.innerHTML='<div class="wl-3d-wait"><div class="wl-spin"></div><div>Ladataan 3D-mallia…</div></div>';
       molKehys.nayta(molData.key, view);
     }
   }
