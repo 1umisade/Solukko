@@ -1,9 +1,8 @@
 {
- "_ohje": "Geneesin lajit Solukon korttien popupeihin. kaavat = kaavan kirjoitusasut korttitekstissa (Unicode ja HTML sub/sup), sanat = suomenkieliset nimet kaikissa sijamuodoissa. video = simulaatiot/kortit/<tiedosto>, pyorahdys Geneesin korttirenderista (tyokalut/vastaanota.py + selaimen MediaRecorder). kuva2d = rakennekaava (tyokalut/kaava2d.py, RDKit, sarjakuvatyyli) tai atomin kuorimalli (SVG) popupin 2D-asentoon. Tiedostonimet eroavat myos kirjainkoosta riippumatta (Windows): protoni on Hplus, fosfori P.",
+ "_ohje": "Simulaattorin lajit Solukon korttien popupeihin. kaavat = kaavan kirjoitusasut korttitekstissa (Unicode ja HTML sub/sup), sanat = suomenkieliset nimet kaikissa sijamuodoissa. 3D = elava simulaattori (simulaatiot/index.html?tila=kortti&laji=<avain>), kuva2d = rakennekaava (tyokalut/kaava2d.py) tai atomin kuorimalli. Tiedostonimet eroavat myos kirjainkoosta riippumatta (Windows): protoni on Hplus, fosfori P.",
  "H2O": {
   "nimi": "vesi",
   "kaava": "H₂O",
-  "video": "H2O.webm",
   "kaavat": [
    "H₂O",
    "H<sub>2</sub>O"
@@ -41,7 +40,6 @@
  "p": {
   "nimi": "protoni",
   "kaava": "H⁺",
-  "video": "Hplus.webm",
   "kaavat": [
    "H⁺",
    "H<sup>+</sup>"
@@ -71,7 +69,6 @@
  "CO2": {
   "nimi": "hiilidioksidi",
   "kaava": "CO₂",
-  "video": "CO2.webm",
   "kaavat": [
    "CO₂",
    "CO<sub>2</sub>"
@@ -91,7 +88,6 @@
  "O2": {
   "nimi": "happi",
   "kaava": "O₂",
-  "video": "O2.webm",
   "kaavat": [
    "O₂",
    "O<sub>2</sub>"
@@ -117,7 +113,6 @@
  "Pi": {
   "nimi": "fosfaatti",
   "kaava": "Pᵢ",
-  "video": "Pi.webm",
   "kaavat": [
    "Pᵢ",
    "P<sub>i</sub>",
@@ -154,7 +149,6 @@
  "ATP": {
   "nimi": "ATP",
   "kaava": "ATP",
-  "video": "ATP.webm",
   "kaavat": [
    "ATP"
   ],
@@ -170,7 +164,6 @@
  "ADP": {
   "nimi": "ADP",
   "kaava": "ADP",
-  "video": "ADP.webm",
   "kaavat": [
    "ADP"
   ],
@@ -186,7 +179,6 @@
  "NADP": {
   "nimi": "NADP⁺",
   "kaava": "NADP⁺",
-  "video": "NADP.webm",
   "kaavat": [
    "NADP⁺",
    "NADP<sup>+</sup>",
@@ -202,7 +194,6 @@
  "CHL": {
   "nimi": "klorofylli",
   "kaava": "klorofylli",
-  "video": "CHL.webm",
   "kaavat": [],
   "sanat": [
    "klorofylli",
@@ -226,7 +217,6 @@
  "PQ": {
   "nimi": "plastokinoni",
   "kaava": "PQ",
-  "video": "PQ.webm",
   "kaavat": [],
   "sanat": [
    "plastokinoni",
@@ -244,7 +234,6 @@
  "H": {
   "nimi": "vety",
   "kaava": "H",
-  "video": "H.webm",
   "kaavat": [],
   "sanat": [
    "vety",
@@ -271,7 +260,6 @@
  "C": {
   "nimi": "hiili",
   "kaava": "C",
-  "video": "C.webm",
   "kaavat": [],
   "sanat": [
    "hiili",
@@ -297,7 +285,6 @@
  "N": {
   "nimi": "typpi",
   "kaava": "N",
-  "video": "N.webm",
   "kaavat": [],
   "sanat": [
    "typpi",
@@ -319,7 +306,6 @@
  "O": {
   "nimi": "happiatomi",
   "kaava": "O",
-  "video": "O.webm",
   "kaavat": [],
   "sanat": [
    "happiatomi",
@@ -336,7 +322,6 @@
  "P": {
   "nimi": "fosfori",
   "kaava": "P",
-  "video": "P.webm",
   "kaavat": [],
   "sanat": [
    "fosfori",
@@ -355,7 +340,6 @@
  "S": {
   "nimi": "rikki",
   "kaava": "S",
-  "video": "S.webm",
   "kaavat": [],
   "sanat": [
    "rikki",
@@ -374,7 +358,6 @@
  "CL": {
   "nimi": "kloori",
   "kaava": "Cl",
-  "video": "CL.webm",
   "kaavat": [
    "Cl⁻",
    "Cl<sup>−</sup>",
@@ -404,7 +387,6 @@
  "NA": {
   "nimi": "natrium",
   "kaava": "Na",
-  "video": "NA.webm",
   "kaavat": [
    "Na⁺",
    "Na<sup>+</sup>"
@@ -432,7 +414,6 @@
  "K": {
   "nimi": "kalium",
   "kaava": "K",
-  "video": "K.webm",
   "kaavat": [
    "K⁺",
    "K<sup>+</sup>"
@@ -456,7 +437,6 @@
  "CA": {
   "nimi": "kalsium",
   "kaava": "Ca",
-  "video": "CA.webm",
   "kaavat": [
    "Ca²⁺",
    "Ca<sup>2+</sup>"
@@ -480,7 +460,6 @@
  "MG": {
   "nimi": "magnesium",
   "kaava": "Mg",
-  "video": "MG.webm",
   "kaavat": [
    "Mg²⁺",
    "Mg<sup>2+</sup>"
@@ -502,7 +481,6 @@
  "FE": {
   "nimi": "rauta",
   "kaava": "Fe",
-  "video": "FE.webm",
   "kaavat": [
    "Fe²⁺",
    "Fe³⁺",
@@ -531,7 +509,6 @@
  "MN": {
   "nimi": "mangaani",
   "kaava": "Mn",
-  "video": "MN.webm",
   "kaavat": [],
   "sanat": [
    "mangaani",
@@ -550,7 +527,6 @@
  "ZN": {
   "nimi": "sinkki",
   "kaava": "Zn",
-  "video": "ZN.webm",
   "kaavat": [
    "Zn²⁺",
    "Zn<sup>2+</sup>"
@@ -571,7 +547,6 @@
  "CU": {
   "nimi": "kupari",
   "kaava": "Cu",
-  "video": "CU.webm",
   "kaavat": [
    "Cu⁺",
    "Cu²⁺",
@@ -594,7 +569,6 @@
  "CO": {
   "nimi": "koboltti",
   "kaava": "Co",
-  "video": "CO.webm",
   "kaavat": [],
   "sanat": [
    "koboltti",

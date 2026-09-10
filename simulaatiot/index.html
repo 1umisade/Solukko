@@ -314,6 +314,7 @@ html.editori #editortools{display:flex}   /* only laid out in the editor - an un
 #editortools .tool{font:bold 12px/1 "Courier New",monospace;padding:8px 12px;border:2.5px solid var(--brown);border-radius:999px;background:var(--paper2);color:var(--ink);cursor:pointer;box-shadow:0 2px 0 var(--brown)}
 #editortools .tool.on{background:var(--sage);color:var(--sageink)}
 html.editori.eraser #c{cursor:crosshair}
+html.kortti body > *:not(#c){display:none !important} html.kortti #c{position:fixed;inset:0;width:100%;height:100%;cursor:default}   /* the popup: only the canvas */
 </style>
 </head>
 <body>
@@ -491,6 +492,7 @@ const PRE_FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_s
 const gPreText = new Map(), gPreParsed = new Map();
 const preText = fn => { let p = gPreText.get(fn); if(!p){ p = fetch('./' + fn).then(r => r.ok ? r.text() : null).catch(() => null); gPreText.set(fn, p); } return p; };
 const preParsed = fn => { let p = gPreParsed.get(fn); if(!p){ p = preText(fn).then(t => t === null ? null : parseMol2(t)); gPreParsed.set(fn, p); } return p; };
+if(new URLSearchParams(location.search).get('tila') !== 'kortti')   // the card popup loads only its own species
 (async () => { for(const fn of PRE_FILES) preText(fn);                       // the downloads, all at once
   for(const fn of PRE_FILES){ await preParsed(fn); await yield_(); } })();     // the parses, one by one
 
@@ -12220,6 +12222,7 @@ void main(void){
    Nothing of run() executes in this mode. window.gVesi exposes spawn / mols / scene for tests.
    ═══════════════════════════════════════════════════════════════════════════════════════════════ */
 function runEditor(){
+const KORTTI = new URLSearchParams(location.search).get('tila') === 'kortti', KORTTI_LAJI = new URLSearchParams(location.search).get('laji');   // Solukko's molecule popup: one species, orbit camera, nothing else
 /* Element data comes from the page's own tables (ELEM / EL_LIST / codeOf / info are globals above);
    the electron configurations and the p/d/f lobe templates are the viewer's, lifted verbatim. */
 const FILL_SCALE = 0.72;
@@ -12622,7 +12625,7 @@ const moveCamera = dt => { pollPad();
   /* WASD + Q/E FLY the camera exactly as in the viewer: E/Q in and out along the view direction, A/D strafe,
      W/S straight up and down ON SCREEN - target and camera move by the same delta, so the view direction is
      unchanged, and nothing keeps the camera on one side of the plane. */
-  const fly = rampStep(keys.w||keys.a||keys.s||keys.d||keys.q||keys.e, 'pan', dt), rot = rampStep(keys.ArrowLeft||keys.ArrowRight||keys.ArrowUp||keys.ArrowDown, 'rot', dt), rl = rampStep(keys.n||keys.m, 'roll', dt);
+  const fly = KORTTI ? 0 : rampStep(keys.w||keys.a||keys.s||keys.d||keys.q||keys.e, 'pan', dt), rot = rampStep(keys.ArrowLeft||keys.ArrowRight||keys.ArrowUp||keys.ArrowDown, 'rot', dt), rl = rampStep(keys.n||keys.m, 'roll', dt);
   if(fly > 0){ const fwd = (keys.e ? 1 : 0) - (keys.q ? 1 : 0), strafe = (keys.d ? 1 : 0) - (keys.a ? 1 : 0), vert = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
     cam.getDirectionToRef(BABYLON.Axis.Z, _fw); cam.getDirectionToRef(BABYLON.Axis.X, _rt); cam.getDirectionToRef(BABYLON.Axis.Y, _up);
     const sp = Math.max(4, Math.abs(cam.radius)*0.5) * fly * dt, spP = sp*0.05*10, spZ = sp*0.5*2;   // the viewer's gPanSpeed / gZoomSpeed tuning, scaled for the editor's distances
@@ -12640,11 +12643,11 @@ let zoomVel = 0, zoomEase = 0.16, wheelStep = 0, lastWheel = 0, zoomAt = null;
 const toPlane = (cx, cy) => { const ray = scene.createPickingRay(cx, cy, BABYLON.Matrix.Identity(), cam); if(Math.abs(ray.direction.z) < 1e-6) return null; const t = -ray.origin.z / ray.direction.z; return t > 0 ? [ray.origin.x + ray.direction.x*t, ray.origin.y + ray.direction.y*t] : null; };
 const zoomTo = f => { const r0 = cam.radius, r1 = Math.max(cam.lowerRadiusLimit, Math.min(cam.upperRadiusLimit, r0*(1 + f))); if(zoomAt && r1 < r0){ const k = 1 - r1/r0; cam.target.x += (zoomAt[0] - cam.target.x)*k; cam.target.y += (zoomAt[1] - cam.target.y)*k; } cam.radius = r1; };
 canvas.addEventListener('wheel', e => { e.preventDefault(); const now = performance.now(); wheelStep = (now - lastWheel < 400) ? Math.min(10, wheelStep + 1) : 1; lastWheel = now;
-  const slow = (e.buttons & 4) === 4; zoomEase = slow ? 0.05 : 0.16; const rc = canvas.getBoundingClientRect(); zoomAt = toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height));
+  const slow = (e.buttons & 4) === 4; zoomEase = slow ? 0.05 : 0.16; const rc = canvas.getBoundingClientRect(); zoomAt = KORTTI ? null : toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height));   // card: zoom stays on the molecule
   zoomVel += Math.sign(e.deltaY) * 0.16 * (wheelStep/10) * (slow ? 0.15 : 1); zoomVel = Math.max(-0.6, Math.min(0.6, zoomVel)); }, { passive: false });
 /* left drag pans the plane */
 let panDrag = null;
-canvas.addEventListener('pointerdown', e => { if(e.button !== 0 || eraser) return; const rc = canvas.getBoundingClientRect(), p = toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height)); if(p) panDrag = { id: e.pointerId, p }; });
+canvas.addEventListener('pointerdown', e => { if(KORTTI || e.button !== 0 || eraser) return; const rc = canvas.getBoundingClientRect(), p = toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height)); if(p) panDrag = { id: e.pointerId, p }; });
 canvas.addEventListener('pointermove', e => { if(!panDrag || e.pointerId !== panDrag.id) return; const rc = canvas.getBoundingClientRect(), p = toPlane((e.clientX - rc.left) * (canvas.width / rc.width), (e.clientY - rc.top) * (canvas.height / rc.height)); if(!p) return; cam.target.x -= p[0] - panDrag.p[0]; cam.target.y -= p[1] - panDrag.p[1]; });
 const endPan = e => { if(panDrag && e.pointerId === panDrag.id) panDrag = null; }; window.addEventListener('pointerup', endPan); window.addEventListener('pointercancel', endPan);
 
@@ -12743,7 +12746,7 @@ const select = m => { selected = m; if(!m){ card.style.display = 'none'; return;
 let clickStart = null;
 canvas.addEventListener('pointerdown', e => { if(e.button === 0) clickStart = { x: e.clientX, y: e.clientY, id: e.pointerId }; });
 window.addEventListener('pointerup', e => { if(!clickStart || e.pointerId !== clickStart.id) return; const moved = Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y); clickStart = null;
-  if(moved > 4 || eraser || drag) return; select(pickMol(e)); });
+  if(KORTTI || moved > 4 || eraser || drag) return; select(pickMol(e)); });   // the popup never selects: a click there is the start of a turn
 /* the 2D / 3D toggle: in 3-D the arena is a box and the particles bounce and tumble in all three axes */
 const m3 = document.getElementById('mode3d-btn');
 m3.addEventListener('click', () => { is3D = !is3D; m3.textContent = is3D ? '⬚ 3D → 2D' : '⬚ 2D → 3D'; m3.classList.toggle('on', is3D); buildArena();
@@ -12790,7 +12793,7 @@ const stopCardRender = () => { if(cardMol){ remove(cardMol); cardMol = null; } c
 const startCardRender = (key, sp, canvas, nucCanvas) => { stopCardRender(); const m = spawn(key, CARD_X, 0, 0, 0); if(!m) return;
   m.held = true; m.thumb = true; m.ang = 0; m.rockAmp = 0; m.angV = 0; cardMol = m;
   cardCam.target.set(CARD_X, 0, 0); cardCam.alpha = -Math.PI/2.5; cardCam.beta = Math.PI/2.7; cardCam.upVector.set(0, 1, 0);
-  cardCam.radius = Math.max(0.6, sp.orbR*(sp.model.na > 1 ? 2.6 : 3.0));
+  cardCam.radius = Math.max(0.6, Math.max(sp.orbR, sp.radius)*(sp.model.na > 1 ? 2.6 : 3.0)*1.15);   // vdW shell included: nothing clipped
   cardSt = { canvas, nucCanvas: nucCanvas || null, nucDone: false, blits: 0, drag:false, dAlpha:0, dBeta:0 }; spinHook(canvas, cardSt); };
 scene.onAfterRenderObservable.add(() => { const m = cardMol, st = cardSt; if(!m || !st || cardBusy || (++cardTick & 1)) return;
   if(!mols.includes(m)){ cardMol = null; return; }   // gone meanwhile (eraser, reset)
@@ -12857,13 +12860,29 @@ let thumbFrames = 0, thumbReady = false, thumbWait = 0;
    have been force-compiled, and a failed attempt waits ten frames before the next one. */
 Promise.all([[dynShell, shellMesh], [dynNuc, nucMesh], [dynCore, coreMesh], [dynBond, bondMesh]].map(([m, mesh]) => m.forceCompilationAsync(mesh).catch(() => {}))).then(() => { thumbReady = true; });
 scene.onAfterRenderObservable.add(() => { if(++thumbFrames < 30 || !thumbReady || thumbFrames < thumbWait || thumbBusy || !thumbQueue.length) return; thumbBusy = true; renderThumb(thumbQueue.shift()).finally(() => { thumbBusy = false; }); });
-for(const sym of ATOMS) queueThumb(sym); for(const S of SMALL) if(SPECIES[S[0]]) queueThumb(S[0]);
+if(!KORTTI){ for(const sym of ATOMS) queueThumb(sym); for(const S of SMALL) if(SPECIES[S[0]]) queueThumb(S[0]); }
 /* Background preload: the file-based species (small files first, then the proteins smallest to largest,
    55 MB in all - the same set the viewer loads) so every list item gets its picture and a drop is instant.
    Sequential, with a breath between, and a species already loaded by a drag is simply skipped. */
-(async () => { await new Promise(r => setTimeout(r, 1500));
+if(!KORTTI) (async () => { await new Promise(r => setTimeout(r, 1500));
   const order = SMALL.filter(x => x[2].endsWith('.mol2')).map(x => x[0]).concat(['PC','FD','PGR5','PGRL1','FNR','VDE','STN7','ZEP','PPH1','B6F','ATPS','NDH','RUB','PSI','PSII']);
   for(const k of order){ try { if(!SPECIES[k]) await ensureSpecies(k); queueThumb(k); } catch(err){ console.warn('preload', k, err); } await new Promise(r => setTimeout(r, 120)); } })();
+/* ── Solukko's molecule popup (?tila=kortti&laji=X): the species held at the origin, the camera orbiting it.
+   Wheel zooms (radius only), middle / right drag turns, nothing pans; a slow turntable spin until the user
+   takes hold. The overlay never shows; Solukko is told when the render is up (postMessage). */
+if(KORTTI){ let kortinKoskettu = false;
+  const ov = document.getElementById('overlay'); if(ov) ov.classList.add('gone');
+  (async () => { const sp = await ensureSpecies(KORTTI_LAJI); if(!sp){ console.warn('kortti: tuntematon laji', KORTTI_LAJI); return; }
+    const m = spawn(KORTTI_LAJI, 0, 0, 0, 0); if(!m) return; m.held = true; m.ang = 0; m.rockAmp = 0; m.angV = 0;
+    const R = Math.max(sp.orbR, sp.radius);   // vdW shell or orbital cloud, whichever reaches further - the whole molecule stays in frame
+    cam.target.set(0, 0, 0); cam.upVector.set(0, 1, 0); cam.alpha = -Math.PI/2.5; cam.beta = Math.PI/2.7; cam.fov = 0.7;
+    cam.radius = Math.max(0.6, R*(sp.model.na > 1 ? 2.6 : 3.0)*1.05); cam.lowerRadiusLimit = cam.radius*0.3; cam.upperRadiusLimit = cam.radius*4;
+    cam.inertialAlphaOffset = cam.inertialBetaOffset = cam.inertialRadiusOffset = 0;
+    cam.inputs.attached.pointers.buttons = [0, 1, 2];   // LEFT drag orbits the molecule (the viewer's F-pivot feel), middle and right too
+    canvas.addEventListener('pointerdown', () => { kortinKoskettu = true; });
+    scene.onBeforeRenderObservable.add(() => { if(!kortinKoskettu) cam.alpha += 0.225 * Math.min(engine.getDeltaTime(), 50) * 0.001; });   // half the card's 0.45 rad/s (owner: slower)
+    try{ window.parent.postMessage({ solukkoKortti: 'valmis', laji: KORTTI_LAJI }, '*'); }catch(e){}
+  })(); }
 window.gVesi = { spawn, remove, mols, SPECIES, RULES, step, scene, cam, toPlane, ensureSpecies, keys, HW, HH, HD, select, pickMol, queueThumb, rethumb: k => { thumbDone[k] = false; thumbTries[k] = 0; queueThumb(k); }, get thumbQueue(){ return thumbQueue; }, get is3D(){ return is3D; }, get selected(){ return selected; }, get drag(){ return drag; }, get eraser(){ return eraser; } };
 }
 
@@ -12884,6 +12903,7 @@ const startEditor = () => { document.documentElement.classList.add('editori');
   runEditor(); };
 { const tila = new URLSearchParams(location.search).get('tila');   // the mode comes from Solukko's simulaatiot tab - there is no chooser here
   if(tila === 'editori') startEditor();
+  else if(tila === 'kortti'){ document.documentElement.classList.add('editori', 'kortti'); runEditor(); }   // Solukko's popup: bare canvas
   else if(tila === 'kalvosto' || tila === 'solu') startViewer(tila === 'solu');
   else { try{ sessionStorage.setItem('solukko-homeTab', 'simulaatiot'); }catch(e){} location.replace('../index.html'); }   // no mode: back to Solukko
 }

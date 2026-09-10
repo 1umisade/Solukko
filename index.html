@@ -1232,7 +1232,11 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
 #word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
-.wl-mol video, .wl-mol .wl-2d { display: block; width: 200px; height: 200px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; object-fit: contain; }   /* the recorded spin has the simulator card background baked in */
+.wl-mol-view { position: relative; width: 260px; height: 260px; margin: 0 auto; }
+.wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; object-fit: contain; }
+.wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 12px; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
+.wl-mol .wl-3d { position: absolute; inset: 0; width: 260px; height: 260px; border: none; border-radius: 12px; background: #f2e6c9; opacity: 0; transition: opacity .4s; pointer-events: none; }   /* hidden until the simulator reports ready */
+.wl-mol .wl-3d.on { opacity: 1; pointer-events: auto; }
 .wl-dim-switch { display: flex; justify-content: center; gap: 0; margin: 0 auto 8px; width: max-content; border: 1px solid #c9bda8; border-radius: 999px; overflow: hidden; background: #fff5e0; }
 .wl-dim { border: none; background: transparent; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; padding: 0.22em 0.9em; cursor: pointer; line-height: 1.4; }
 .wl-dim.on { background: #3a5c4c; color: #fff; }
@@ -6969,7 +6973,7 @@ function buildWordLinks(){
   // Pass 3: Geneesi molecules — Finnish names and plain-text formulas open the 3-D render. A word that is
   //         already a word-link (ATP) keeps its card too: the popup shows the molecule, "Tiedot" opens the card.
   _molMap=new Map();
-  if(_molekyylit) Object.keys(_molekyylit).forEach(key=>{ const m=_molekyylit[key]; if(!m||!m.video) return;
+  if(_molekyylit) Object.keys(_molekyylit).forEach(key=>{ const m=_molekyylit[key]; if(!m||typeof m!=='object') return;
     [...(m.sanat||[]),...(m.kaavat||[]).filter(k=>!/</.test(k))].forEach(w=>{
       const clean=String(w).replace(/\s+/g,' ').trim(); if(!clean) return; const lower=clean.toLowerCase();
       if(!_molMap.has(lower)) _molMap.set(lower,key);
@@ -7106,10 +7110,17 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
   function _molRenderView(tip, molData){   // 3D = the recorded spin, 2D = structural formula (PubChem) or the atom's shell model
     const view=tip.querySelector('.wl-mol-view'); if(!view) return;
     tip.querySelectorAll('.wl-dim').forEach(b=>b.classList.toggle('on', b.dataset.dim===_molDim));
+    molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || '';
     if(_molDim==='2d' && molData.kuva2d) view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">';
-    else { view.innerHTML='<video src="simulaatiot/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video>'; const v=view.querySelector('video'); v.playbackRate=MOL_SPIN_RATE; v.addEventListener('loadedmetadata',()=>{ v.playbackRate=MOL_SPIN_RATE; }); }
+    else {   // live simulator: left drag turns the molecule, wheel zooms, nothing pans (simulaatiot/index.html?tila=kortti)
+      view.innerHTML='<div class="wl-3d-wait">3D-malli latautuu…</div><iframe class="wl-3d" src="simulaatiot/index.html?tila=kortti&laji='+encodeURIComponent(molData.key)+'" title="3D-malli: vedä kääntääksesi, rulla zoomaa"></iframe>';
+    }
   }
-  const MOL_SPIN_RATE=0.5;   // the recorded turn is ~14 s; the owner wants the popup to spin slower still (2026-09-10: 'too fast again')
+  window.addEventListener('message', e=>{   // the simulator says its molecule is up: fade it in over the placeholder
+    const d=e.data; if(!d || d.solukkoKortti!=='valmis') return;
+    const f=tip.querySelector('iframe.wl-3d'); if(!f || !f.src.includes('laji='+encodeURIComponent(d.laji))) return;
+    f.classList.add('on'); const w=tip.querySelector('.wl-3d-wait'); if(w) w.remove();
+  });
   let _tipTiedot=false;   // molecule popup switched to the Solukko card with "määritelmä"
   function showTip(target){
     const mol=target.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol];
@@ -7194,7 +7205,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     else if(overTip){ _tipHold=0; }                       // pointer is reading the tooltip — leave it be
     else if(_tipTarget){
       if(!_tipHold) _tipHold=Date.now()+260;              // grace period for crossing the gap to the tooltip
-      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only'); tip.innerHTML=''; _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }   // innerHTML='' stops the video
+      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only'); tip.innerHTML=''; _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }   // innerHTML='' unloads the simulator iframe
     }
     requestAnimationFrame(updateTip);
   }
