@@ -7108,8 +7108,9 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const view=tip.querySelector('.wl-mol-view'); if(!view) return;
     tip.querySelectorAll('.wl-dim').forEach(b=>b.classList.toggle('on', b.dataset.dim===_molDim));
     if(_molDim==='2d' && molData.kuva2d) view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">';
-    else view.innerHTML='<video src="simulaatiot/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video>';
+    else { view.innerHTML='<video src="simulaatiot/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video>'; const v=view.querySelector('video'); v.playbackRate=MOL_SPIN_RATE; v.addEventListener('loadedmetadata',()=>{ v.playbackRate=MOL_SPIN_RATE; }); }
   }
+  const MOL_SPIN_RATE=0.5;   // the recorded turn is ~14 s; the owner wants the popup to spin slower still (2026-09-10: 'too fast again')
   let _tipTiedot=false;   // molecule popup switched to the Solukko card with "määritelmä"
   function showTip(target){
     const mol=target.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol];
