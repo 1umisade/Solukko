@@ -12870,24 +12870,35 @@ if(!KORTTI) (async () => { await new Promise(r => setTimeout(r, 1500));
 /* ── Solukko's molecule popup (?tila=kortti&laji=X): the species held at the origin, the camera orbiting it.
    Wheel zooms (radius only), middle / right drag turns, nothing pans; a slow turntable spin until the user
    takes hold. The overlay never shows; Solukko is told when the render is up (postMessage). */
-if(KORTTI){ let kortinKoskettu = false;
+if(KORTTI){ let kortinKoskettu = false, nykyinenLaji = null, vaihto = Promise.resolve();
   const ov = document.getElementById('overlay'); if(ov) ov.classList.add('gone');
-  (async () => { const sp = await ensureSpecies(KORTTI_LAJI); if(!sp){ console.warn('kortti: tuntematon laji', KORTTI_LAJI); return; }
-    const m = spawn(KORTTI_LAJI, 0, 0, 0, 0); if(!m) return; m.held = true; m.ang = 0; m.rockAmp = 0; m.angV = 0;
+  cam.inputs.attached.pointers.buttons = [0, 1, 2];   // LEFT drag orbits the molecule (the viewer's F-pivot feel), middle and right too
+  cam.fov = 0.7; cam.upVector.set(0, 1, 0);
+  canvas.addEventListener('pointerdown', () => { kortinKoskettu = true; });
+  scene.onBeforeRenderObservable.add(() => { if(!kortinKoskettu) cam.alpha += 0.225 * Math.min(engine.getDeltaTime(), 50) * 0.001; });   // half the card's 0.45 rad/s (owner: slower)
+  /* show one species: drop whatever is up, spawn the new one held at the origin, frame it, tell Solukko */
+  const naytaLaji = key => { vaihto = vaihto.then(async () => {
+    const sp = await ensureSpecies(key); if(!sp){ console.warn('kortti: tuntematon laji', key); return; }
+    for(const m of mols.slice()) remove(m);
+    const m = spawn(key, 0, 0, 0, 0); if(!m) return; m.held = true; m.ang = 0; m.rockAmp = 0; m.angV = 0; nykyinenLaji = key; kortinKoskettu = false;
     const R = Math.max(sp.orbR, sp.radius);   // vdW shell or orbital cloud, whichever reaches further - the whole molecule stays in frame
-    cam.target.set(0, 0, 0); cam.upVector.set(0, 1, 0); cam.alpha = -Math.PI/2.5; cam.beta = Math.PI/2.7; cam.fov = 0.7;
+    cam.target.set(0, 0, 0); cam.alpha = -Math.PI/2.5; cam.beta = Math.PI/2.7;
     cam.radius = Math.max(0.6, R*(sp.model.na > 1 ? 2.6 : 3.0)*1.05); cam.lowerRadiusLimit = cam.radius*0.3; cam.upperRadiusLimit = cam.radius*4;
     cam.inertialAlphaOffset = cam.inertialBetaOffset = cam.inertialRadiusOffset = 0;
-    cam.inputs.attached.pointers.buttons = [0, 1, 2];   // LEFT drag orbits the molecule (the viewer's F-pivot feel), middle and right too
-    canvas.addEventListener('pointerdown', () => { kortinKoskettu = true; });
-    scene.onBeforeRenderObservable.add(() => { if(!kortinKoskettu) cam.alpha += 0.225 * Math.min(engine.getDeltaTime(), 50) * 0.001; });   // half the card's 0.45 rad/s (owner: slower)
-    try{ window.parent.postMessage({ solukkoKortti: 'valmis', laji: KORTTI_LAJI }, '*'); }catch(e){}
-  })(); }
+    scene.render();   // one frame now, so the first thing Solukko reveals is the molecule, not the empty card
+    try{ window.parent.postMessage({ solukkoKortti: 'valmis', laji: key }, '*'); }catch(e){}
+  }).catch(err => console.warn('kortti', err)); return vaihto; };
+  window.addEventListener('message', e => { const d = e.data; if(d && typeof d.solukkoLaji === 'string') naytaLaji(d.solukkoLaji); });
+  if(KORTTI_LAJI) naytaLaji(KORTTI_LAJI);
+  try{ window.parent.postMessage({ solukkoKortti: 'alustettu' }, '*'); }catch(e){}
+  /* warm the cache: every small species (their model files are a few hundred kB), one at a time, so a later switch is instant */
+  vaihto.then(async () => { for(const S of SMALL){ try{ await ensureSpecies(S[0]); }catch(e){} await new Promise(r => setTimeout(r, 60)); } for(const a of ATOMS){ try{ await ensureSpecies(a); }catch(e){} } });
+}
 window.gVesi = { spawn, remove, mols, SPECIES, RULES, step, scene, cam, toPlane, ensureSpecies, keys, HW, HH, HD, select, pickMol, queueThumb, rethumb: k => { thumbDone[k] = false; thumbTries[k] = 0; queueThumb(k); }, get thumbQueue(){ return thumbQueue; }, get is3D(){ return is3D; }, get selected(){ return selected; }, get drag(){ return drag; }, get eraser(){ return eraser; } };
 }
 
 /* ── Start screen: the chemistry editor, the premade scene or the whole cell (?tila=editori / kalvosto / solu skips it) ── */
-const startViewer = solu => { document.documentElement.classList.add('kalvosto'); if(solu){ document.documentElement.classList.add('solu'); document.title = 'Webcyte'; }   // the whole-cell scene is called Webcyte (owner 10.9.2026) return run().catch(err => { console.error(err); setLbl('Virhe: ' + err.message); }); };
+const startViewer = solu => { document.documentElement.classList.add('kalvosto'); if(solu){ document.documentElement.classList.add('solu'); document.title = 'Webcyte'; }   /* the whole-cell scene is called Webcyte (owner 10.9.2026) */ return run().catch(err => { console.error(err); setLbl('Virhe: ' + err.message); }); };
 /* the back button: to the start page (the query is dropped, so the choice is asked again), revealed by
    mouse movement and gone again 2.2 s after the mouse rests - it never sits on the scene */
 { const bb = document.getElementById('back-btn'); let hideT = null;

@@ -1235,8 +1235,7 @@ body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { backgroun
 .wl-mol-view { position: relative; width: 260px; height: 260px; margin: 0 auto; }
 .wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; object-fit: contain; }
 .wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 12px; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
-.wl-mol .wl-3d { position: absolute; inset: 0; width: 260px; height: 260px; border: none; border-radius: 12px; background: #f2e6c9; opacity: 0; transition: opacity .4s; pointer-events: none; }   /* hidden until the simulator reports ready */
-.wl-mol .wl-3d.on { opacity: 1; pointer-events: auto; }
+#mol-kehys { box-shadow: none; }   /* the shared simulator frame (positioned over .wl-mol-view by molKehys) */
 .wl-dim-switch { display: flex; justify-content: center; gap: 0; margin: 0 auto 8px; width: max-content; border: 1px solid #c9bda8; border-radius: 999px; overflow: hidden; background: #fff5e0; }
 .wl-dim { border: none; background: transparent; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; padding: 0.22em 0.9em; cursor: pointer; line-height: 1.4; }
 .wl-dim.on { background: #3a5c4c; color: #fff; }
@@ -6996,6 +6995,31 @@ let _wlRe=null, _wlMap=new Map(), _wlCards=[];   // _wlCards: the cards links po
 // Geneesi molecules (simulaatiot/kortit/molekyylit.json): a formula or a Finnish name in card text opens the
 // spinning 3-D render recorded from Geneesi's info card. _molMap: lower-cased trigger -> species key.
 let _molekyylit=null, _molMap=new Map(), _molHtml=new Map();   // _molHtml: serialised "H<sub>2</sub>O" -> key
+// ONE simulator iframe for every molecule popup. Loading the simulator (Babylon + shaders) takes seconds, so
+// it is loaded once, early and hidden, and kept alive: a popup only lays it over its 3-D box and asks for a
+// species by postMessage. It is never re-parented (that would reload it) - only positioned.
+const molKehys=(function(){
+  let f=null, alustettu=false, kohde=null, haluttu=null, nakyva=false;
+  function luo(){ if(f) return f;
+    try{ if(!document.createElement('canvas').getContext('webgl2')) return null; }catch(e){ return null; }
+    f=document.createElement('iframe'); f.id='mol-kehys'; f.src='simulaatiot/index.html?tila=kortti'; f.title='3D-malli: vedä kääntääksesi, rulla zoomaa';
+    f.style.cssText='position:fixed;left:-9999px;top:0;width:260px;height:260px;border:none;border-radius:12px;background:#f2e6c9;z-index:100000;opacity:0;pointer-events:none;transition:opacity .3s;';
+    document.body.appendChild(f); return f; }
+  window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
+    if(d.solukkoKortti==='alustettu'){ alustettu=true; if(haluttu) f.contentWindow.postMessage({solukkoLaji:haluttu},'*'); }
+    if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; f.style.opacity='1'; f.style.pointerEvents='auto'; const w=kohde.querySelector('.wl-3d-wait'); if(w) w.remove(); }
+  });
+  function asemoi(){ if(!f||!kohde||!kohde.isConnected){ return; } const r=kohde.getBoundingClientRect(); f.style.left=r.left+'px'; f.style.top=r.top+'px'; f.style.width=r.width+'px'; f.style.height=r.height+'px'; }
+  return {
+    lammita(){ luo(); },   // start loading now, so the first popup is instant
+    nayta(key, view){ if(!luo()) return; kohde=view; haluttu=key; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; asemoi();
+      if(alustettu) f.contentWindow.postMessage({solukkoLaji:key},'*'); },   // else 'alustettu' will forward it
+    piilota(){ if(!f) return; kohde=null; haluttu=null; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; f.style.left='-9999px'; },
+    asemoi,
+    hover(){ return !!(f && nakyva && f.matches(':hover')); }
+  };
+})();
+window.addEventListener('load', ()=>{ setTimeout(()=>molKehys.lammita(), 2500); });   // after the page's own start-up work
 fetch('simulaatiot/kortit/molekyylit.json').then(r=>r.ok?r.json():null).then(j=>{
   if(!j) return; delete j._ohje; _molekyylit=j;
   _molHtml=new Map();
@@ -7111,16 +7135,13 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const view=tip.querySelector('.wl-mol-view'); if(!view) return;
     tip.querySelectorAll('.wl-dim').forEach(b=>b.classList.toggle('on', b.dataset.dim===_molDim));
     molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || '';
-    if(_molDim==='2d' && molData.kuva2d) view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">';
-    else {   // live simulator: left drag turns the molecule, wheel zooms, nothing pans (simulaatiot/index.html?tila=kortti)
-      view.innerHTML='<div class="wl-3d-wait">3D-malli latautuu…</div><iframe class="wl-3d" src="simulaatiot/index.html?tila=kortti&laji='+encodeURIComponent(molData.key)+'" title="3D-malli: vedä kääntääksesi, rulla zoomaa"></iframe>';
+    if(_molDim==='2d' && molData.kuva2d){ view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">'; molKehys.piilota(); }
+    else {   // live simulator: the shared, pre-warmed iframe is laid over this box (see molKehys); left drag turns, wheel zooms, nothing pans
+      view.innerHTML='<div class="wl-3d-wait">3D-malli latautuu…</div>';
+      molKehys.nayta(molData.key, view);
     }
   }
-  window.addEventListener('message', e=>{   // the simulator says its molecule is up: fade it in over the placeholder
-    const d=e.data; if(!d || d.solukkoKortti!=='valmis') return;
-    const f=tip.querySelector('iframe.wl-3d'); if(!f || !f.src.includes('laji='+encodeURIComponent(d.laji))) return;
-    f.classList.add('on'); const w=tip.querySelector('.wl-3d-wait'); if(w) w.remove();
-  });
+
   let _tipTiedot=false;   // molecule popup switched to the Solukko card with "määritelmä"
   function showTip(target){
     const mol=target.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol];
@@ -7165,19 +7186,20 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
       const l0=parseFloat(tip.style.left)||0, t0=parseFloat(tip.style.top)||0;
       tip.style.left=Math.max(8,Math.min(l0,vw-tw-12))+'px';
       tip.style.top=Math.max(8,Math.min(t0,vh-th-12))+'px';
-      return;
+      molKehys.asemoi(); return;
     }
     let l=r.left, t=r.bottom+8;
     if(l+tw>vw-12) l=vw-tw-12;
     if(t+th>vh-12) t=r.top-th-8;
     tip.style.left=Math.max(8,l)+'px'; tip.style.top=Math.max(8,t)+'px';
+    molKehys.asemoi();
   }
   tip.addEventListener('click',e=>{
     const dim=e.target.closest('.wl-dim');
     if(dim && _tipTarget){ e.stopPropagation(); _molDim=dim.dataset.dim==='2d'?'2d':'3d'; try{ localStorage.setItem('solukko-molDim',_molDim); }catch(err){}
       const md=_molekyylit&&_molekyylit[_tipTarget.dataset.mol]; if(md) _molRenderView(tip, md); placeTip(_tipTarget,true); return; }
     const td=e.target.closest('.wl-tiedot');
-    if(td && _tipTarget){ e.stopPropagation(); _tipTiedot='uusi'; showTip(_tipTarget); _tipLukittu=true; placeTip(_tipTarget,true); return; }   // molecule popup -> the Solukko card behind the word
+    if(td && _tipTarget){ e.stopPropagation(); molKehys.piilota(); _tipTiedot='uusi'; showTip(_tipTarget); _tipLukittu=true; placeTip(_tipTarget,true); return; }   // molecule popup -> the Solukko card behind the word
     const b=e.target.closest('.wl-expand'); if(!b||!(_tipLaaja&&_tipSuppea)) return;
     e.stopPropagation();
     const body=tip.querySelector('.wl-body'); if(!body) return;
@@ -7199,13 +7221,13 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
   function updateTip(){
     const hovered=document.body.classList.contains('is-mobile') ? null : document.querySelector('.word-link:hover');   // mobile: only long-press (touchPinnedLink), no hover
-    const overTip = _tipTarget && tip.style.display==='block' && tip.matches(':hover');
+    const overTip = _tipTarget && tip.style.display==='block' && (tip.matches(':hover') || molKehys.hover());
     if(touchPinnedLink){ showTip(touchPinnedLink); }
     else if(hovered){ _tipHold=0; showTip(hovered); }
     else if(overTip){ _tipHold=0; }                       // pointer is reading the tooltip — leave it be
     else if(_tipTarget){
       if(!_tipHold) _tipHold=Date.now()+260;              // grace period for crossing the gap to the tooltip
-      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only'); tip.innerHTML=''; _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }   // innerHTML='' unloads the simulator iframe
+      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only'); tip.innerHTML=''; molKehys.piilota(); _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }
     }
     requestAnimationFrame(updateTip);
   }
