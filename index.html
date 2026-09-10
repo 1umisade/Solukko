@@ -1213,8 +1213,13 @@ body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.
 body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
 #word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
-.wl-mol video { display: block; width: 200px; height: 200px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; }   /* the recorded spin has the simulator card background baked in */
-.wl-tiedot { margin: 0.6em auto 0; }
+.wl-mol video, .wl-mol .wl-2d { display: block; width: 200px; height: 200px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; object-fit: contain; }   /* the recorded spin has the simulator card background baked in */
+.wl-mol .wl-2d { mix-blend-mode: multiply; }   /* PubChem drawings come on white: multiply drops the white onto the cream card */
+.wl-dim-switch { display: flex; justify-content: center; gap: 0; margin: 0 auto 8px; width: max-content; border: 1px solid #c9bda8; border-radius: 999px; overflow: hidden; background: #fff5e0; }
+.wl-dim { border: none; background: transparent; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; padding: 0.22em 0.9em; cursor: pointer; line-height: 1.4; }
+.wl-dim.on { background: #3a5c4c; color: #fff; }
+.wl-tiedot { display: block; margin: 8px auto 0; border: none; background: none; color: #7a5230; font-family: 'Lora', serif; font-size: 0.8em; cursor: pointer; text-decoration: underline dotted; padding: 0; }
+body.dark-mode .wl-dim-switch { background: #4a3f34; border-color: #6d5f52; } body.dark-mode .wl-dim { color: #eadfce; } body.dark-mode .wl-dim.on { background: #9fc7b4; color: #1f2b25; } body.dark-mode .wl-tiedot { color: #cbb89b; }
 #word-link-tooltip img, #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
@@ -7015,15 +7020,26 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
 
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
 
-  let _tipTiedot=false;   // molecule popup switched to the Solukko card with "Tiedot"
+  let _molDim=(function(){ try{ return localStorage.getItem('solukko-molDim')==='2d'?'2d':'3d'; }catch(e){ return '3d'; } })();   // last chosen view, kept across popups
+  function _molRenderView(tip, molData){   // 3D = the recorded spin, 2D = structural formula (PubChem) or the atom's shell model
+    const view=tip.querySelector('.wl-mol-view'); if(!view) return;
+    tip.querySelectorAll('.wl-dim').forEach(b=>b.classList.toggle('on', b.dataset.dim===_molDim));
+    if(_molDim==='2d' && molData.kuva2d) view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">';
+    else view.innerHTML='<video src="simulaatiot/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video>';
+  }
+  let _tipTiedot=false;   // molecule popup switched to the Solukko card with "määritelmä"
   function showTip(target){
     const mol=target.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol];
     const idx=parseInt(target.dataset.cardIndex);
     if(molData && !(target===_tipTarget && _tipTiedot)){   // molecule: only the spinning render (+ Tiedot if a Solukko card exists)
       if(target!==_tipTarget){
         _tipTarget=target; _tipLukittu=false; _tipTiedot=false; _tipLaaja=null; _tipSuppea=null;
-        tip.innerHTML='<div class="wl-mol"><video src="simulaatiot/kortit/'+molData.video+'" autoplay loop muted playsinline disablepictureinpicture></video></div>'
-          +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-expand wl-tiedot">Tiedot</button>':'');
+        tip.innerHTML='<div class="wl-mol">'
+          +'<div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">2D</button><button type="button" class="wl-dim" data-dim="3d">3D</button></div>'
+          +'<div class="wl-mol-view"></div>'
+          +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-tiedot">määritelmä</button>':'')
+          +'</div>';
+        _molRenderView(tip, molData);
         tip.classList.add('mol-only'); tip.style.fontSize='';
       }
       placeTip(target,_tipLukittu); return;
@@ -7063,6 +7079,9 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     tip.style.left=Math.max(8,l)+'px'; tip.style.top=Math.max(8,t)+'px';
   }
   tip.addEventListener('click',e=>{
+    const dim=e.target.closest('.wl-dim');
+    if(dim && _tipTarget){ e.stopPropagation(); _molDim=dim.dataset.dim==='2d'?'2d':'3d'; try{ localStorage.setItem('solukko-molDim',_molDim); }catch(err){}
+      const md=_molekyylit&&_molekyylit[_tipTarget.dataset.mol]; if(md) _molRenderView(tip, md); placeTip(_tipTarget,true); return; }
     const td=e.target.closest('.wl-tiedot');
     if(td && _tipTarget){ e.stopPropagation(); _tipTiedot='uusi'; showTip(_tipTarget); _tipLukittu=true; placeTip(_tipTarget,true); return; }   // molecule popup -> the Solukko card behind the word
     const b=e.target.closest('.wl-expand'); if(!b||!(_tipLaaja&&_tipSuppea)) return;

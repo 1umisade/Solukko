@@ -1,81 +1,609 @@
 {
-  "_ohje": "Geneesin lajit Solukon korttien popupeihin. kaavat = kaavan kirjoitusasut korttitekstissa (Unicode ja HTML sub/sup), sanat = suomenkieliset nimet kaikissa sijamuodoissa. video = simulaatiot/kortit/<tiedosto>, pyorahdys Geneesin korttirenderista (tyokalut/vastaanota.py + selaimen MediaRecorder).",
-  "H2O":  { "nimi": "vesi", "kaava": "H₂O", "video": "H2O.webm",
-            "kaavat": ["H₂O", "H<sub>2</sub>O"],
-            "sanat": ["vesi", "veden", "vettä", "vedessä", "vedestä", "veteen", "vedellä", "vedeksi", "vetenä", "vedet", "vesien", "vesiä", "vesimolekyyli", "vesimolekyylin", "vesimolekyyliä", "vesimolekyylissä", "vesimolekyylistä", "vesimolekyyliin", "vesimolekyyliltä", "vesimolekyylille", "vesimolekyylit", "vesimolekyylien", "vesimolekyylejä", "vesimolekyyleissä", "vesimolekyyleistä", "vesimolekyyleihin"] },
-  "p":    { "nimi": "protoni", "kaava": "H⁺", "video": "p.webm",
-            "kaavat": ["H⁺", "H<sup>+</sup>"],
-            "sanat": ["protoni", "protonin", "protonia", "protonissa", "protonista", "protoniin", "protonit", "protonien", "protoneja", "protoneita", "protoneja", "vetyioni", "vetyionin", "vetyionia", "vetyionit", "vetyionien", "vetyioneja", "vetyioneiksi"] },
-  "CO2":  { "nimi": "hiilidioksidi", "kaava": "CO₂", "video": "CO2.webm",
-            "kaavat": ["CO₂", "CO<sub>2</sub>"],
-            "sanat": ["hiilidioksidi", "hiilidioksidin", "hiilidioksidia", "hiilidioksidissa", "hiilidioksidista", "hiilidioksidiin", "hiilidioksidiksi", "hiilidioksidilla"] },
-  "O2":   { "nimi": "happi", "kaava": "O₂", "video": "O2.webm",
-            "kaavat": ["O₂", "O<sub>2</sub>"],
-            "sanat": ["happi", "hapen", "happea", "hapessa", "hapesta", "happeen", "hapella", "hapeksi", "happimolekyyli", "happimolekyylin", "happimolekyyliä", "happimolekyylit", "happimolekyylien", "happimolekyylejä"] },
-  "Pi":   { "nimi": "fosfaatti", "kaava": "Pᵢ", "video": "Pi.webm",
-            "kaavat": ["Pᵢ", "P<sub>i</sub>", "PO₄³⁻", "PO<sub>4</sub><sup>3−</sup>", "PO<sub>4</sub><sup>3-</sup>"],
-            "sanat": ["fosfaatti", "fosfaatin", "fosfaattia", "fosfaatissa", "fosfaatista", "fosfaattiin", "fosfaatiksi", "fosfaatit", "fosfaattien", "fosfaatteja", "epäorgaaninen fosfaatti", "epäorgaanisen fosfaatin", "epäorgaanista fosfaattia", "fosfaatti-ioni", "fosfaatti-ionin", "fosfaatti-ionia", "fosfaattiryhmä", "fosfaattiryhmän", "fosfaattiryhmää", "fosfaattiryhmät", "fosfaattiryhmien", "fosfaattiryhmiä"] },
-  "ATP":  { "nimi": "ATP", "kaava": "ATP", "video": "ATP.webm",
-            "kaavat": ["ATP"],
-            "sanat": ["adenosiinitrifosfaatti", "adenosiinitrifosfaatin", "adenosiinitrifosfaattia", "adenosiinitrifosfaatiksi", "adenosiinitrifosfaatista"] },
-  "ADP":  { "nimi": "ADP", "kaava": "ADP", "video": "ADP.webm",
-            "kaavat": ["ADP"],
-            "sanat": ["adenosiinidifosfaatti", "adenosiinidifosfaatin", "adenosiinidifosfaattia", "adenosiinidifosfaatiksi", "adenosiinidifosfaatista"] },
-  "NADP": { "nimi": "NADP⁺", "kaava": "NADP⁺", "video": "NADP.webm",
-            "kaavat": ["NADP⁺", "NADP<sup>+</sup>", "NADPH", "NADP"],
-            "sanat": ["nikotiiniamidiadeniinidinukleotidifosfaatti", "nikotiiniamidiadeniinidinukleotidifosfaatin"] },
-  "CHL":  { "nimi": "klorofylli", "kaava": "klorofylli", "video": "CHL.webm",
-            "kaavat": [],
-            "sanat": ["klorofylli", "klorofyllin", "klorofylliä", "klorofyllissä", "klorofyllistä", "klorofylliin", "klorofyllit", "klorofyllien", "klorofyllejä", "klorofylleissä", "klorofylleihin", "lehtivihreä", "lehtivihreän", "lehtivihreää", "lehtivihreässä"] },
-  "PQ":   { "nimi": "plastokinoni", "kaava": "PQ", "video": "PQ.webm",
-            "kaavat": [],
-            "sanat": ["plastokinoni", "plastokinonin", "plastokinonia", "plastokinonissa", "plastokinonista", "plastokinoniin", "plastokinonit", "plastokinonien", "plastokinoneja"] },
-  "H":    { "nimi": "vety", "kaava": "H", "video": "H.webm",
-            "kaavat": [],
-            "sanat": ["vety", "vedyn", "vetyä", "vedyssä", "vedystä", "vetyyn", "vedyllä", "vedyt", "vetyjen", "vetyjä", "vetyatomi", "vetyatomin", "vetyatomia", "vetyatomissa", "vetyatomit", "vetyatomien", "vetyatomeja", "vetyatomeista"] },
-  "C":    { "nimi": "hiili", "kaava": "C", "video": "C.webm",
-            "kaavat": [],
-            "sanat": ["hiili", "hiilen", "hiiltä", "hiilessä", "hiilestä", "hiileen", "hiilet", "hiilien", "hiiliä", "hiiliatomi", "hiiliatomin", "hiiliatomia", "hiiliatomissa", "hiiliatomit", "hiiliatomien", "hiiliatomeja", "hiiliatomeista"] },
-  "N":    { "nimi": "typpi", "kaava": "N", "video": "N.webm",
-            "kaavat": [],
-            "sanat": ["typpi", "typen", "typpeä", "typessä", "typestä", "typpeen", "typpiatomi", "typpiatomin", "typpiatomia", "typpiatomissa", "typpiatomit", "typpiatomien", "typpiatomeja"] },
-  "O":    { "nimi": "happiatomi", "kaava": "O", "video": "O.webm",
-            "kaavat": [],
-            "sanat": ["happiatomi", "happiatomin", "happiatomia", "happiatomissa", "happiatomit", "happiatomien", "happiatomeja", "happiatomeista"] },
-  "P":    { "nimi": "fosfori", "kaava": "P", "video": "P.webm",
-            "kaavat": [],
-            "sanat": ["fosfori", "fosforin", "fosforia", "fosforissa", "fosforista", "fosforiin", "fosforiatomi", "fosforiatomin", "fosforiatomia", "fosforiatomit"] },
-  "S":    { "nimi": "rikki", "kaava": "S", "video": "S.webm",
-            "kaavat": [],
-            "sanat": ["rikki", "rikin", "rikkiä", "rikissä", "rikistä", "rikkiin", "rikkiatomi", "rikkiatomin", "rikkiatomia", "rikkiatomit"] },
-  "CL":   { "nimi": "kloori", "kaava": "Cl", "video": "CL.webm",
-            "kaavat": ["Cl⁻", "Cl<sup>−</sup>", "Cl<sup>-</sup>"],
-            "sanat": ["kloori", "kloorin", "klooria", "kloorissa", "kloorista", "klooriin", "kloridi", "kloridin", "kloridia", "kloridiksi", "kloridi-ioni", "kloridi-ionin", "kloridi-ionia", "kloridi-ionit", "kloridi-ionien", "kloridi-ioneja", "kloridi-ioneiksi"] },
-  "NA":   { "nimi": "natrium", "kaava": "Na", "video": "NA.webm",
-            "kaavat": ["Na⁺", "Na<sup>+</sup>"],
-            "sanat": ["natrium", "natriumin", "natriumia", "natriumissa", "natriumista", "natriumiin", "natriumioni", "natriumionin", "natriumionia", "natriumionit", "natriumionien", "natriumioneja", "natrium-ioni", "natrium-ionin", "natrium-ionia", "natrium-ionit"] },
-  "K":    { "nimi": "kalium", "kaava": "K", "video": "K.webm",
-            "kaavat": ["K⁺", "K<sup>+</sup>"],
-            "sanat": ["kalium", "kaliumin", "kaliumia", "kaliumissa", "kaliumista", "kaliumiin", "kaliumioni", "kaliumionin", "kaliumionia", "kaliumionit", "kaliumionien", "kaliumioneja"] },
-  "CA":   { "nimi": "kalsium", "kaava": "Ca", "video": "CA.webm",
-            "kaavat": ["Ca²⁺", "Ca<sup>2+</sup>"],
-            "sanat": ["kalsium", "kalsiumin", "kalsiumia", "kalsiumissa", "kalsiumista", "kalsiumiin", "kalsiumioni", "kalsiumionin", "kalsiumionia", "kalsiumionit", "kalsiumionien", "kalsiumioneja"] },
-  "MG":   { "nimi": "magnesium", "kaava": "Mg", "video": "MG.webm",
-            "kaavat": ["Mg²⁺", "Mg<sup>2+</sup>"],
-            "sanat": ["magnesium", "magnesiumin", "magnesiumia", "magnesiumissa", "magnesiumista", "magnesiumiin", "magnesiumioni", "magnesiumionin", "magnesiumionia", "magnesiumionit"] },
-  "FE":   { "nimi": "rauta", "kaava": "Fe", "video": "FE.webm",
-            "kaavat": ["Fe²⁺", "Fe³⁺", "Fe<sup>2+</sup>", "Fe<sup>3+</sup>"],
-            "sanat": ["rauta", "raudan", "rautaa", "raudassa", "raudasta", "rautaan", "rauta-atomi", "rauta-atomin", "rauta-atomia", "rautaioni", "rautaionin", "rautaionia", "rautaionit", "rautaionien", "rautaioneja"] },
-  "MN":   { "nimi": "mangaani", "kaava": "Mn", "video": "MN.webm",
-            "kaavat": [],
-            "sanat": ["mangaani", "mangaanin", "mangaania", "mangaanissa", "mangaanista", "mangaaniin", "mangaaniatomi", "mangaaniatomin", "mangaaniatomia", "mangaaniatomit"] },
-  "ZN":   { "nimi": "sinkki", "kaava": "Zn", "video": "ZN.webm",
-            "kaavat": ["Zn²⁺", "Zn<sup>2+</sup>"],
-            "sanat": ["sinkki", "sinkin", "sinkkiä", "sinkissä", "sinkistä", "sinkkiin", "sinkki-ioni", "sinkki-ionin", "sinkki-ionia"] },
-  "CU":   { "nimi": "kupari", "kaava": "Cu", "video": "CU.webm",
-            "kaavat": ["Cu⁺", "Cu²⁺", "Cu<sup>+</sup>", "Cu<sup>2+</sup>"],
-            "sanat": ["kupari", "kuparin", "kuparia", "kuparissa", "kuparista", "kupariin", "kupari-ioni", "kupari-ionin", "kupari-ionia"] },
-  "CO":   { "nimi": "koboltti", "kaava": "Co", "video": "CO.webm",
-            "kaavat": [],
-            "sanat": ["koboltti", "koboltin", "kobolttia", "koboltissa", "koboltista", "kobolttiin"] }
+ "_ohje": "Geneesin lajit Solukon korttien popupeihin. kaavat = kaavan kirjoitusasut korttitekstissa (Unicode ja HTML sub/sup), sanat = suomenkieliset nimet kaikissa sijamuodoissa. video = simulaatiot/kortit/<tiedosto>, pyorahdys Geneesin korttirenderista (tyokalut/vastaanota.py + selaimen MediaRecorder). kuva2d = rakennekaava (PubChem PNG) tai atomin kuorimalli (SVG) popupin 2D-asentoon. Tiedostonimet eroavat myos kirjainkoosta riippumatta (Windows): protoni on Hplus, fosfori P.",
+ "H2O": {
+  "nimi": "vesi",
+  "kaava": "H₂O",
+  "video": "H2O.webm",
+  "kaavat": [
+   "H₂O",
+   "H<sub>2</sub>O"
+  ],
+  "sanat": [
+   "vesi",
+   "veden",
+   "vettä",
+   "vedessä",
+   "vedestä",
+   "veteen",
+   "vedellä",
+   "vedeksi",
+   "vetenä",
+   "vedet",
+   "vesien",
+   "vesiä",
+   "vesimolekyyli",
+   "vesimolekyylin",
+   "vesimolekyyliä",
+   "vesimolekyylissä",
+   "vesimolekyylistä",
+   "vesimolekyyliin",
+   "vesimolekyyliltä",
+   "vesimolekyylille",
+   "vesimolekyylit",
+   "vesimolekyylien",
+   "vesimolekyylejä",
+   "vesimolekyyleissä",
+   "vesimolekyyleistä",
+   "vesimolekyyleihin"
+  ],
+  "kuva2d": "2d/H2O.png"
+ },
+ "p": {
+  "nimi": "protoni",
+  "kaava": "H⁺",
+  "video": "Hplus.webm",
+  "kaavat": [
+   "H⁺",
+   "H<sup>+</sup>"
+  ],
+  "sanat": [
+   "protoni",
+   "protonin",
+   "protonia",
+   "protonissa",
+   "protonista",
+   "protoniin",
+   "protonit",
+   "protonien",
+   "protoneja",
+   "protoneita",
+   "protoneja",
+   "vetyioni",
+   "vetyionin",
+   "vetyionia",
+   "vetyionit",
+   "vetyionien",
+   "vetyioneja",
+   "vetyioneiksi"
+  ],
+  "kuva2d": "2d/Hplus.svg"
+ },
+ "CO2": {
+  "nimi": "hiilidioksidi",
+  "kaava": "CO₂",
+  "video": "CO2.webm",
+  "kaavat": [
+   "CO₂",
+   "CO<sub>2</sub>"
+  ],
+  "sanat": [
+   "hiilidioksidi",
+   "hiilidioksidin",
+   "hiilidioksidia",
+   "hiilidioksidissa",
+   "hiilidioksidista",
+   "hiilidioksidiin",
+   "hiilidioksidiksi",
+   "hiilidioksidilla"
+  ],
+  "kuva2d": "2d/CO2.png"
+ },
+ "O2": {
+  "nimi": "happi",
+  "kaava": "O₂",
+  "video": "O2.webm",
+  "kaavat": [
+   "O₂",
+   "O<sub>2</sub>"
+  ],
+  "sanat": [
+   "happi",
+   "hapen",
+   "happea",
+   "hapessa",
+   "hapesta",
+   "happeen",
+   "hapella",
+   "hapeksi",
+   "happimolekyyli",
+   "happimolekyylin",
+   "happimolekyyliä",
+   "happimolekyylit",
+   "happimolekyylien",
+   "happimolekyylejä"
+  ],
+  "kuva2d": "2d/O2.png"
+ },
+ "Pi": {
+  "nimi": "fosfaatti",
+  "kaava": "Pᵢ",
+  "video": "Pi.webm",
+  "kaavat": [
+   "Pᵢ",
+   "P<sub>i</sub>",
+   "PO₄³⁻",
+   "PO<sub>4</sub><sup>3−</sup>",
+   "PO<sub>4</sub><sup>3-</sup>"
+  ],
+  "sanat": [
+   "fosfaatti",
+   "fosfaatin",
+   "fosfaattia",
+   "fosfaatissa",
+   "fosfaatista",
+   "fosfaattiin",
+   "fosfaatiksi",
+   "fosfaatit",
+   "fosfaattien",
+   "fosfaatteja",
+   "epäorgaaninen fosfaatti",
+   "epäorgaanisen fosfaatin",
+   "epäorgaanista fosfaattia",
+   "fosfaatti-ioni",
+   "fosfaatti-ionin",
+   "fosfaatti-ionia",
+   "fosfaattiryhmä",
+   "fosfaattiryhmän",
+   "fosfaattiryhmää",
+   "fosfaattiryhmät",
+   "fosfaattiryhmien",
+   "fosfaattiryhmiä"
+  ],
+  "kuva2d": "2d/Pi.png"
+ },
+ "ATP": {
+  "nimi": "ATP",
+  "kaava": "ATP",
+  "video": "ATP.webm",
+  "kaavat": [
+   "ATP"
+  ],
+  "sanat": [
+   "adenosiinitrifosfaatti",
+   "adenosiinitrifosfaatin",
+   "adenosiinitrifosfaattia",
+   "adenosiinitrifosfaatiksi",
+   "adenosiinitrifosfaatista"
+  ],
+  "kuva2d": "2d/ATP.png"
+ },
+ "ADP": {
+  "nimi": "ADP",
+  "kaava": "ADP",
+  "video": "ADP.webm",
+  "kaavat": [
+   "ADP"
+  ],
+  "sanat": [
+   "adenosiinidifosfaatti",
+   "adenosiinidifosfaatin",
+   "adenosiinidifosfaattia",
+   "adenosiinidifosfaatiksi",
+   "adenosiinidifosfaatista"
+  ],
+  "kuva2d": "2d/ADP.png"
+ },
+ "NADP": {
+  "nimi": "NADP⁺",
+  "kaava": "NADP⁺",
+  "video": "NADP.webm",
+  "kaavat": [
+   "NADP⁺",
+   "NADP<sup>+</sup>",
+   "NADPH",
+   "NADP"
+  ],
+  "sanat": [
+   "nikotiiniamidiadeniinidinukleotidifosfaatti",
+   "nikotiiniamidiadeniinidinukleotidifosfaatin"
+  ],
+  "kuva2d": "2d/NADP.png"
+ },
+ "CHL": {
+  "nimi": "klorofylli",
+  "kaava": "klorofylli",
+  "video": "CHL.webm",
+  "kaavat": [],
+  "sanat": [
+   "klorofylli",
+   "klorofyllin",
+   "klorofylliä",
+   "klorofyllissä",
+   "klorofyllistä",
+   "klorofylliin",
+   "klorofyllit",
+   "klorofyllien",
+   "klorofyllejä",
+   "klorofylleissä",
+   "klorofylleihin",
+   "lehtivihreä",
+   "lehtivihreän",
+   "lehtivihreää",
+   "lehtivihreässä"
+  ],
+  "kuva2d": "2d/CHL.png"
+ },
+ "PQ": {
+  "nimi": "plastokinoni",
+  "kaava": "PQ",
+  "video": "PQ.webm",
+  "kaavat": [],
+  "sanat": [
+   "plastokinoni",
+   "plastokinonin",
+   "plastokinonia",
+   "plastokinonissa",
+   "plastokinonista",
+   "plastokinoniin",
+   "plastokinonit",
+   "plastokinonien",
+   "plastokinoneja"
+  ],
+  "kuva2d": "2d/PQ.png"
+ },
+ "H": {
+  "nimi": "vety",
+  "kaava": "H",
+  "video": "H.webm",
+  "kaavat": [],
+  "sanat": [
+   "vety",
+   "vedyn",
+   "vetyä",
+   "vedyssä",
+   "vedystä",
+   "vetyyn",
+   "vedyllä",
+   "vedyt",
+   "vetyjen",
+   "vetyjä",
+   "vetyatomi",
+   "vetyatomin",
+   "vetyatomia",
+   "vetyatomissa",
+   "vetyatomit",
+   "vetyatomien",
+   "vetyatomeja",
+   "vetyatomeista"
+  ],
+  "kuva2d": "2d/H.svg"
+ },
+ "C": {
+  "nimi": "hiili",
+  "kaava": "C",
+  "video": "C.webm",
+  "kaavat": [],
+  "sanat": [
+   "hiili",
+   "hiilen",
+   "hiiltä",
+   "hiilessä",
+   "hiilestä",
+   "hiileen",
+   "hiilet",
+   "hiilien",
+   "hiiliä",
+   "hiiliatomi",
+   "hiiliatomin",
+   "hiiliatomia",
+   "hiiliatomissa",
+   "hiiliatomit",
+   "hiiliatomien",
+   "hiiliatomeja",
+   "hiiliatomeista"
+  ],
+  "kuva2d": "2d/C.svg"
+ },
+ "N": {
+  "nimi": "typpi",
+  "kaava": "N",
+  "video": "N.webm",
+  "kaavat": [],
+  "sanat": [
+   "typpi",
+   "typen",
+   "typpeä",
+   "typessä",
+   "typestä",
+   "typpeen",
+   "typpiatomi",
+   "typpiatomin",
+   "typpiatomia",
+   "typpiatomissa",
+   "typpiatomit",
+   "typpiatomien",
+   "typpiatomeja"
+  ],
+  "kuva2d": "2d/N.svg"
+ },
+ "O": {
+  "nimi": "happiatomi",
+  "kaava": "O",
+  "video": "O.webm",
+  "kaavat": [],
+  "sanat": [
+   "happiatomi",
+   "happiatomin",
+   "happiatomia",
+   "happiatomissa",
+   "happiatomit",
+   "happiatomien",
+   "happiatomeja",
+   "happiatomeista"
+  ],
+  "kuva2d": "2d/O.svg"
+ },
+ "P": {
+  "nimi": "fosfori",
+  "kaava": "P",
+  "video": "P.webm",
+  "kaavat": [],
+  "sanat": [
+   "fosfori",
+   "fosforin",
+   "fosforia",
+   "fosforissa",
+   "fosforista",
+   "fosforiin",
+   "fosforiatomi",
+   "fosforiatomin",
+   "fosforiatomia",
+   "fosforiatomit"
+  ],
+  "kuva2d": "2d/P.svg"
+ },
+ "S": {
+  "nimi": "rikki",
+  "kaava": "S",
+  "video": "S.webm",
+  "kaavat": [],
+  "sanat": [
+   "rikki",
+   "rikin",
+   "rikkiä",
+   "rikissä",
+   "rikistä",
+   "rikkiin",
+   "rikkiatomi",
+   "rikkiatomin",
+   "rikkiatomia",
+   "rikkiatomit"
+  ],
+  "kuva2d": "2d/S.svg"
+ },
+ "CL": {
+  "nimi": "kloori",
+  "kaava": "Cl",
+  "video": "CL.webm",
+  "kaavat": [
+   "Cl⁻",
+   "Cl<sup>−</sup>",
+   "Cl<sup>-</sup>"
+  ],
+  "sanat": [
+   "kloori",
+   "kloorin",
+   "klooria",
+   "kloorissa",
+   "kloorista",
+   "klooriin",
+   "kloridi",
+   "kloridin",
+   "kloridia",
+   "kloridiksi",
+   "kloridi-ioni",
+   "kloridi-ionin",
+   "kloridi-ionia",
+   "kloridi-ionit",
+   "kloridi-ionien",
+   "kloridi-ioneja",
+   "kloridi-ioneiksi"
+  ],
+  "kuva2d": "2d/CL.svg"
+ },
+ "NA": {
+  "nimi": "natrium",
+  "kaava": "Na",
+  "video": "NA.webm",
+  "kaavat": [
+   "Na⁺",
+   "Na<sup>+</sup>"
+  ],
+  "sanat": [
+   "natrium",
+   "natriumin",
+   "natriumia",
+   "natriumissa",
+   "natriumista",
+   "natriumiin",
+   "natriumioni",
+   "natriumionin",
+   "natriumionia",
+   "natriumionit",
+   "natriumionien",
+   "natriumioneja",
+   "natrium-ioni",
+   "natrium-ionin",
+   "natrium-ionia",
+   "natrium-ionit"
+  ],
+  "kuva2d": "2d/NA.svg"
+ },
+ "K": {
+  "nimi": "kalium",
+  "kaava": "K",
+  "video": "K.webm",
+  "kaavat": [
+   "K⁺",
+   "K<sup>+</sup>"
+  ],
+  "sanat": [
+   "kalium",
+   "kaliumin",
+   "kaliumia",
+   "kaliumissa",
+   "kaliumista",
+   "kaliumiin",
+   "kaliumioni",
+   "kaliumionin",
+   "kaliumionia",
+   "kaliumionit",
+   "kaliumionien",
+   "kaliumioneja"
+  ],
+  "kuva2d": "2d/K.svg"
+ },
+ "CA": {
+  "nimi": "kalsium",
+  "kaava": "Ca",
+  "video": "CA.webm",
+  "kaavat": [
+   "Ca²⁺",
+   "Ca<sup>2+</sup>"
+  ],
+  "sanat": [
+   "kalsium",
+   "kalsiumin",
+   "kalsiumia",
+   "kalsiumissa",
+   "kalsiumista",
+   "kalsiumiin",
+   "kalsiumioni",
+   "kalsiumionin",
+   "kalsiumionia",
+   "kalsiumionit",
+   "kalsiumionien",
+   "kalsiumioneja"
+  ],
+  "kuva2d": "2d/CA.svg"
+ },
+ "MG": {
+  "nimi": "magnesium",
+  "kaava": "Mg",
+  "video": "MG.webm",
+  "kaavat": [
+   "Mg²⁺",
+   "Mg<sup>2+</sup>"
+  ],
+  "sanat": [
+   "magnesium",
+   "magnesiumin",
+   "magnesiumia",
+   "magnesiumissa",
+   "magnesiumista",
+   "magnesiumiin",
+   "magnesiumioni",
+   "magnesiumionin",
+   "magnesiumionia",
+   "magnesiumionit"
+  ],
+  "kuva2d": "2d/MG.svg"
+ },
+ "FE": {
+  "nimi": "rauta",
+  "kaava": "Fe",
+  "video": "FE.webm",
+  "kaavat": [
+   "Fe²⁺",
+   "Fe³⁺",
+   "Fe<sup>2+</sup>",
+   "Fe<sup>3+</sup>"
+  ],
+  "sanat": [
+   "rauta",
+   "raudan",
+   "rautaa",
+   "raudassa",
+   "raudasta",
+   "rautaan",
+   "rauta-atomi",
+   "rauta-atomin",
+   "rauta-atomia",
+   "rautaioni",
+   "rautaionin",
+   "rautaionia",
+   "rautaionit",
+   "rautaionien",
+   "rautaioneja"
+  ],
+  "kuva2d": "2d/FE.svg"
+ },
+ "MN": {
+  "nimi": "mangaani",
+  "kaava": "Mn",
+  "video": "MN.webm",
+  "kaavat": [],
+  "sanat": [
+   "mangaani",
+   "mangaanin",
+   "mangaania",
+   "mangaanissa",
+   "mangaanista",
+   "mangaaniin",
+   "mangaaniatomi",
+   "mangaaniatomin",
+   "mangaaniatomia",
+   "mangaaniatomit"
+  ],
+  "kuva2d": "2d/MN.svg"
+ },
+ "ZN": {
+  "nimi": "sinkki",
+  "kaava": "Zn",
+  "video": "ZN.webm",
+  "kaavat": [
+   "Zn²⁺",
+   "Zn<sup>2+</sup>"
+  ],
+  "sanat": [
+   "sinkki",
+   "sinkin",
+   "sinkkiä",
+   "sinkissä",
+   "sinkistä",
+   "sinkkiin",
+   "sinkki-ioni",
+   "sinkki-ionin",
+   "sinkki-ionia"
+  ],
+  "kuva2d": "2d/ZN.svg"
+ },
+ "CU": {
+  "nimi": "kupari",
+  "kaava": "Cu",
+  "video": "CU.webm",
+  "kaavat": [
+   "Cu⁺",
+   "Cu²⁺",
+   "Cu<sup>+</sup>",
+   "Cu<sup>2+</sup>"
+  ],
+  "sanat": [
+   "kupari",
+   "kuparin",
+   "kuparia",
+   "kuparissa",
+   "kuparista",
+   "kupariin",
+   "kupari-ioni",
+   "kupari-ionin",
+   "kupari-ionia"
+  ],
+  "kuva2d": "2d/CU.svg"
+ },
+ "CO": {
+  "nimi": "koboltti",
+  "kaava": "Co",
+  "video": "CO.webm",
+  "kaavat": [],
+  "sanat": [
+   "koboltti",
+   "koboltin",
+   "kobolttia",
+   "koboltissa",
+   "koboltista",
+   "kobolttiin"
+  ],
+  "kuva2d": "2d/CO.svg"
+ }
 }

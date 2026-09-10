@@ -12818,7 +12818,7 @@ scene.onAfterRenderObservable.add(() => { const m = cardMol, st = cardSt; if(!m 
   const dt = Math.min(0.1, scene.getEngine().getDeltaTime()/1000);
   if(!st.drag) cardCam.alpha += 0.45*dt;
   cardCam.alpha += st.dAlpha; cardCam.beta = Math.max(0.05, Math.min(Math.PI - 0.05, cardCam.beta + st.dBeta)); st.dAlpha = 0; st.dBeta = 0;
-  const sp = m.sp; cardRT.renderList = (sp.coreN + sp.bondN) ? [coreMesh, bondMesh, nucMesh] : [shellMesh, nucMesh];
+  const sp = m.sp; cardRT.renderList = (sp.coreN + sp.bondN) ? [shellMesh, coreMesh, bondMesh, nucMesh] : [shellMesh, nucMesh];   // the vdW shell too, so the card looks like the molecule in the scene (owner 10.9.2026: 'missa vdw?')
   const save = scene.activeCamera; scene.activeCamera = cardCam; cardRT.render(); scene.activeCamera = save;
   cardBusy = true; Promise.resolve(cardRT.readPixels()).then(px => { if(px && cardSt === st){ blitRTT(cardRT, px, st.canvas); st.blits++;
       const ax = axisOfOid(cardFocus); if(ax !== null) drawAxes(st.canvas, cardCam, CARD_C, cardCam.radius/3, ax); } }).finally(() => { cardBusy = false;

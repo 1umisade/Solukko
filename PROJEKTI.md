@@ -26,7 +26,7 @@ selaimessa repon juuressa olevan `SOLUKKO.apkg`:n, joka on suora vienti käyttä
 | `kurssit/` | luentomateriaali (PDF, tallenteet, transkriptiot) ja valmiit pakkatiedostot. **Ei gitissä**, siirtyy OneDrivessa. |
 | `kurssit/CLAUDE.md` | korttien teko-ohjeet: kenttärakenne, linkkisanat, termisanasto. Ainoa tiedosto, joka on `kurssit/`:sta gitissä. |
 | `simulaatiot/` | **Geneesi**, Babylon.js-pohjainen 3D-molekyylisimulaattori (ent. geneesi.com), tuotu `git subtree`lla 10.9.2026 historia mukanaan. Oma `index.html` (~13 000 riviä) + mol2-mallit (~58 MB). Julkinen osoite `solukko.com/simulaatiot/`, etusivun *simulaatiot*-välilehti linkittää sen kolmeen tilaan (`?tila=editori`, `kalvosto`, `solu`). Perehdytys: `simulaatiot/AGENT_NOTES.md`. Kehitys tapahtuu nyt tässä repossa, ei enää Geneesi-repossa. |
-| `simulaatiot/kortit/` | 26 molekyylin ja atomin pyörähdysvideot (`<laji>.webm`, 256 px, ~450 kB) Geneesin korttirenderistä + `molekyylit.json` (laji → kaavan kirjoitusasut, suomenkieliset sijamuodot, video). Solukon kortti näyttää videon hoverilla. |
+| `simulaatiot/kortit/` | 26 molekyylin ja atomin pyörähdysvideot (`<laji>.webm`, 256 px, ~700 kB, 280 ruutua per kierros) simulaattorin korttirenderistä vdW-pintoineen + `2d/` (rakennekaavat PubChemista PNG:nä, atomien kuorimallit SVG:nä) + `molekyylit.json` (laji → kaavan kirjoitusasut, suomenkieliset sijamuodot, video, kuva2d). **Tiedostonimet eivät saa erota vain kirjainkoolla** (Windows: `p` ja `P` ovat sama tiedosto) — protoni on `Hplus`, fosfori `P`. |
 | `.claude/launch.json` | esikatselupalvelin (`python -m http.server 8753`). Ei gitissä. Sama palvelin näyttää myös `localhost:8753/simulaatiot/index.html`. |
 
 Repo on OneDrive-kansiossa, joten myös gitin ulkopuoliset osat siirtyvät koneelta toiselle. Pelkkä
@@ -72,8 +72,9 @@ Korttityyppi on **`Solukko`**, id `1727391050`, kuusi kenttää:
   eivät kuulu leipätekstiin.
 - **Molekyylipopup:** kaava (`H<sub>2</sub>O`, `H₂O`, `ATP`, `Pᵢ`…) tai suomenkielinen nimi (vesi, vedessä,
   protoni…) korttitekstissä avaa hoverilla pelkän pyörivän 3D-videon (`simulaatiot/kortit/`). Jos sanalla on
-  myös Solukon termikortti (ATP, vetyioni), popupissa on *Tiedot*-nappi, joka vaihtaa sisällöksi kortin
-  määritelmän. Laukaisijat tulevat `simulaatiot/kortit/molekyylit.json`:ista (`_molMap`, `_wrapMolHtml`
+  myös Solukon termikortti (ATP, vetyioni), popupissa on pieni *määritelmä*-linkki, joka vaihtaa sisällöksi
+  kortin määritelmän. Popupin yläreunassa on 2D/3D-kytkin: 3D = pyörähdysvideo, 2D = rakennekaava tai atomin
+  kuorimalli. Valinta muistetaan (`localStorage solukko-molDim`). Laukaisijat tulevat `simulaatiot/kortit/molekyylit.json`:ista (`_molMap`, `_wrapMolHtml`
   index.html:ssä) — uusi laji = uusi rivi JSONiin + video. HTML-muotoiset kaavat kaaritaan DOM-solmuina
   (`_wrapMolHtml`), koska tekstisolmuregex ei näe `<sub>`-tagien yli.
 - Mitat: suppea ≤ 15 sanaa, laaja 45–65 sanaa. Ei puolipisteitä, käytä pistettä.
@@ -90,6 +91,16 @@ Sivusto lukee vuoden, lukukauden ja periodin suoraan tästä polusta. Periodi on
 alkaa** (syksy 1–2, kevät 3–5).
 
 ---
+
+## Simulaattorin videot uusiksi
+
+Kun simulaattorin korttirenderi muuttuu (`startCardRender`, `cardRT.renderList` — sisältää vdW-kuoren
+`shellMesh`, orbitaalit ja ytimet), videot kaapataan uudelleen: `python tyokalut/vastaanota.py
+simulaatiot/kortit 8754` taustalle, avaa `simulaatiot/index.html?tila=editori` selainpaneeliin ja aja
+kaappausskripti (ks. muistiinpano `geneesi-merged`): render loop pysäytetään, `engine._deltaTime` =
+2π/(0,45·280)·1000, joka ruutu = kaksi `scene.render()`-kutsua, kortin 256 px canvas piirretään #f2e6c9-taustalle,
+`captureStream(0)` + `requestFrame()`, MediaRecorder vp9 1 Mbit/s, blob POSTataan vastaanottimeen. Piilotetussa
+paneelissa rAF ei käy, siksi renderöinti askelletaan käsin ja odotukset tehdään MessageChannelilla.
 
 ## Työjärjestys
 
