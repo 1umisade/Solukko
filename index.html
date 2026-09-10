@@ -7009,7 +7009,11 @@ const molKehys=(function(){
     if(d.solukkoKortti==='alustettu'){ alustettu=true; if(haluttu) f.contentWindow.postMessage({solukkoLaji:haluttu},'*'); }
     if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; f.style.opacity='1'; f.style.pointerEvents='auto'; const w=kohde.querySelector('.wl-3d-wait'); if(w) w.remove(); }
   });
-  function asemoi(){ if(!f||!kohde||!kohde.isConnected){ return; } const r=kohde.getBoundingClientRect(); f.style.left=r.left+'px'; f.style.top=r.top+'px'; f.style.width=r.width+'px'; f.style.height=r.height+'px'; }
+  function asemoi(){ if(!f||!kohde||!kohde.isConnected){ return; } const r=kohde.getBoundingClientRect(); f.style.left=r.left+'px'; f.style.top=r.top+'px'; f.style.width=r.width+'px'; f.style.height=r.height+'px';
+    // the frame lives outside the popup, so the popup's own scroll box cannot clip it: clip it here to the popup's visible rectangle
+    const tip=document.getElementById('word-link-tooltip'), t=tip?tip.getBoundingClientRect():null;
+    if(t){ const ct=Math.max(0,t.top-r.top), cb=Math.max(0,r.bottom-t.bottom), cl=Math.max(0,t.left-r.left), cr=Math.max(0,r.right-t.right);
+      f.style.clipPath=(ct||cb||cl||cr)?('inset('+ct+'px '+cr+'px '+cb+'px '+cl+'px round 12px)'):''; } }
   return {
     lammita(){ luo(); },   // start loading now, so the first popup is instant
     nayta(key, view){ if(!luo()) return; kohde=view; haluttu=key; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; asemoi();
@@ -7180,20 +7184,25 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     placeTip(target,_tipLukittu);
   }
   function placeTip(target,pidaPaikallaan){
+    // The popup never covers its word: it goes BELOW (preferred) or ABOVE, whichever has room, is capped to
+    // that room and scrolls inside when the text is longer (owner 10.9.2026). A box growing in place
+    // (Laajenna) keeps its side and corner.
     tip.style.display='block'; tip.style.width=tip.classList.contains('mol-only')?'auto':'min(520px, calc(100vw - 24px))';
-    const r=target.getBoundingClientRect(), tw=tip.offsetWidth, th=tip.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
-    if(pidaPaikallaan){                               // the box grew where it stood: keep the corner, nudge only as much as the screen demands
-      const l0=parseFloat(tip.style.left)||0, t0=parseFloat(tip.style.top)||0;
-      tip.style.left=Math.max(8,Math.min(l0,vw-tw-12))+'px';
-      tip.style.top=Math.max(8,Math.min(t0,vh-th-12))+'px';
-      molKehys.asemoi(); return;
-    }
-    let l=r.left, t=r.bottom+8;
-    if(l+tw>vw-12) l=vw-tw-12;
-    if(t+th>vh-12) t=r.top-th-8;
-    tip.style.left=Math.max(8,l)+'px'; tip.style.top=Math.max(8,t)+'px';
+    const r=target.getBoundingClientRect(), vw=window.innerWidth, vh=window.innerHeight, M=8, G=8;
+    const tilaAlla=vh-r.bottom-G-M, tilaYlla=r.top-G-M;
+    let alle;
+    if(pidaPaikallaan && tip.dataset.puoli) alle=(tip.dataset.puoli==='alle');
+    else { tip.style.maxHeight='none'; const th0=tip.offsetHeight; alle = th0<=tilaAlla || tilaAlla>=tilaYlla; }
+    tip.dataset.puoli=alle?'alle':'ylle';
+    tip.style.maxHeight=Math.max(80, alle?tilaAlla:tilaYlla)+'px'; tip.style.overflowY='auto';
+    const tw=tip.offsetWidth, th=tip.offsetHeight;
+    let l=pidaPaikallaan ? (parseFloat(tip.style.left)||r.left) : r.left;
+    if(l+tw>vw-12) l=vw-tw-12; l=Math.max(M,l);
+    const t=alle ? r.bottom+G : r.top-G-th;
+    tip.style.left=l+'px'; tip.style.top=Math.max(M,t)+'px';
     molKehys.asemoi();
   }
+  tip.addEventListener('scroll',()=>molKehys.asemoi());   // the 3-D frame rides along when the popup scrolls
   tip.addEventListener('click',e=>{
     const dim=e.target.closest('.wl-dim');
     if(dim && _tipTarget){ e.stopPropagation(); _molDim=dim.dataset.dim==='2d'?'2d':'3d'; try{ localStorage.setItem('solukko-molDim',_molDim); }catch(err){}
