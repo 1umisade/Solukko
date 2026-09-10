@@ -12540,14 +12540,28 @@ const step = dt => {
       const siblings = a.grp && a.grp === b.grp && simT - a.born < 0.4;
       const prods = siblings ? null : RULES[a.sp.key + '+' + b.sp.key];
       if(prods){ dead.add(a); dead.add(b); const g = ++rxId;
+        const pool = [];   // where every reactant atom is right now: the product's atoms glide from these spots (alkaaMorph)
+        for(const r of [a, b]){ rotOf(r, simT); for(const at of r.sp.atoms){ xf(at.q, _v); pool.push({ e: at.e, x: r.x + _v[0], y: r.y + _v[1], z: r.z + _v[2] }); } }
         const M = a.sp.mass + b.sp.mass, vx = (a.vx*a.sp.mass + b.vx*b.sp.mass)/M, vy = (a.vy*a.sp.mass + b.vy*b.sp.mass)/M, vz = (a.vz*a.sp.mass + b.vz*b.sp.mass)/M, cx = (a.x + b.x)/2, cy = (a.y + b.y)/2, cz = (a.z + b.z)/2;
-        prods.forEach((k, q) => { const sp = SPECIES[k]; if(q === 0) born.push([k, cx, cy, vx, vy, g, cz, vz]);
-          else { const s = Math.hypot(vx, vy, vz) + 1.5, px = -ny, py = nx, side = q % 2 ? 1 : -1; born.push([k, cx + px*side*(sp.radius + SPECIES[prods[0]].radius + 0.2), cy + py*side*(sp.radius + SPECIES[prods[0]].radius + 0.2), px*side*s, py*side*s, g, cz, vz]); } });
+        prods.forEach((k, q) => { const sp = SPECIES[k]; if(q === 0) born.push([k, cx, cy, vx, vy, g, cz, vz, pool]);
+          else { const s = Math.hypot(vx, vy, vz) + 1.5, px = -ny, py = nx, side = q % 2 ? 1 : -1; born.push([k, cx + px*side*(sp.radius + SPECIES[prods[0]].radius + 0.2), cy + py*side*(sp.radius + SPECIES[prods[0]].radius + 0.2), px*side*s, py*side*s, g, cz, vz, pool]); } });
         break; }
       const ma = a.sp.mass, mb = b.sp.mass, rv = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny + (b.vz - a.vz)*nz; if(rv < 0){ const jn = -2*rv/(1/ma + 1/mb); a.vx -= jn*nx/ma; a.vy -= jn*ny/ma; a.vz -= jn*nz/ma; b.vx += jn*nx/mb; b.vy += jn*ny/mb; b.vz += jn*nz/mb; a.angV = -a.angV; b.angV = -b.angV; }
       const ov = (R - d) + 0.01, wa = mb/(ma+mb), wb = ma/(ma+mb); a.x -= nx*ov*wa; a.y -= ny*ov*wa; a.z -= nz*ov*wa; b.x += nx*ov*wb; b.y += ny*ov*wb; b.z += nz*ov*wb; } }
-  if(dead.size){ for(const m of [...dead]) remove(m); for(const b of born){ const m = spawn(b[0], b[1], b[2], b[3], b[4], b[5]); if(m && is3D){ m.z = b[6]; m.vz = b[7]; } } fmt(); }
+  if(dead.size){ for(const m of [...dead]) remove(m); for(const b of born){ const m = spawn(b[0], b[1], b[2], b[3], b[4], b[5]); if(m && is3D){ m.z = b[6]; m.vz = b[7]; } if(m && b[8]) alkaaMorph(m, b[8]); } fmt(); }
 };
+/* A reaction must not snap: the product's atoms start where the reactants' atoms were and ease into the bonded
+   geometry over MORPH_S seconds (owner 10.9.2026: 'the hydrogens should ease into their new positions'). Each
+   product atom takes the nearest still-unused reactant atom of its element, its spot expressed in the product's
+   own frame so the glide rides along with the molecule's tumble. */
+const MORPH_S = 0.55;
+const alkaaMorph = (m, pool) => { rotOf(m, simT); const from = [];
+  for(const at of m.sp.atoms){ xf(at.q, _v); const wx = m.x + _v[0], wy = m.y + _v[1], wz = m.z + _v[2];
+    let best = -1, bd = 1e9; for(let i=0;i<pool.length;i++){ const p = pool[i]; if(p.e !== at.e) continue; const d = (p.x-wx)*(p.x-wx) + (p.y-wy)*(p.y-wy) + (p.z-wz)*(p.z-wz); if(d < bd){ bd = d; best = i; } }
+    if(best < 0){ from.push([at.q[0], at.q[1], at.q[2]]); continue; }
+    const p = pool.splice(best, 1)[0], dx = p.x - m.x, dy = p.y - m.y, dz = p.z - m.z;   // into the molecule's frame: R^T (world - centre)
+    from.push([R9[0]*dx + R9[3]*dy + R9[6]*dz, R9[1]*dx + R9[4]*dy + R9[7]*dz, R9[2]*dx + R9[5]*dy + R9[8]*dz]); }
+  m.morph = { t0: simT, from }; };
 
 /* ── drawing ───────────────────────────────────────────────────────────────────────────────────── */
 const R9 = new Float64Array(9);
@@ -12558,7 +12572,7 @@ const rotOf = (m, t) => { if(is3D){ const k = m.ax3, c = Math.cos(m.ang), s = Ma
   const Rz = [cz,-sz,0, sz,cz,0, 0,0,1];
   for(let r=0;r<3;r++) for(let cc=0;cc<3;cc++) R9[r*3+cc] = Rk[r*3]*Rz[cc] + Rk[r*3+1]*Rz[3+cc] + Rk[r*3+2]*Rz[6+cc]; };
 const xf = (v, out) => { out[0] = R9[0]*v[0] + R9[1]*v[1] + R9[2]*v[2]; out[1] = R9[3]*v[0] + R9[4]*v[1] + R9[5]*v[2]; out[2] = R9[6]*v[0] + R9[7]*v[1] + R9[8]*v[2]; return out; };
-const _v = [0,0,0], _w = [0,0,0];
+const _v = [0,0,0], _w = [0,0,0], _mq = [0,0,0];
 const draw = () => {
   let na = 0, nn = 0, nc = 0, nb = 0; const cp = cam.position;
   const planes = BABYLON.Frustum.GetPlanes(cam.getTransformationMatrix()), pxK = engine.getRenderHeight() / (2 * Math.tan(cam.fov * 0.5));
@@ -12576,7 +12590,9 @@ const draw = () => {
         if(vis && !near) c.ch.thinInstanceCount = Math.max(1, Math.round(c.n * protFrac(d2))); }
       continue; }
     if(na + sp.atoms.length > MAXATOM || nc + sp.coreN > MAXLOBE || nb + sp.bondN > MAXLOBE) continue;
-    sp.atoms.forEach((a, ai) => { xf(a.q, _v); const ax = px + _v[0], ay = py + _v[1], az = pz + _v[2];
+    let mf = null; if(m.morph){ const e = (simT - m.morph.t0)/MORPH_S; if(e >= 1) m.morph = null; else mf = 1 - Math.pow(1 - Math.max(0, e), 3); }   // ease-out glide, null once settled
+    sp.atoms.forEach((a, ai) => { if(mf !== null){ const f = m.morph.from[ai]; _mq[0] = f[0] + (a.q[0]-f[0])*mf; _mq[1] = f[1] + (a.q[1]-f[1])*mf; _mq[2] = f[2] + (a.q[2]-f[2])*mf; xf(_mq, _v); } else xf(a.q, _v);
+      const ax = px + _v[0], ay = py + _v[1], az = pz + _v[2];
       const kx = m.id*3.7 + 1.3, ky = ai*2.9 + 0.7, kz = 0.5;   // a FIXED per-atom key in the w slots: the boil hashes from it, not from the live centre
       let o = na*16; B.shM.fill(0, o, o+16); B.shM[o]=1; B.shM[o+5]=1; B.shM[o+10]=1; B.shM[o+15]=1; B.shM[o+12]=ax; B.shM[o+13]=ay; B.shM[o+14]=az; B.shM[o+3]=kx; B.shM[o+7]=ky; B.shM[o+11]=kz;
       if(sel){ B.shC[na*4]=a.col[0]*0.55+0.64*0.45; B.shC[na*4+1]=a.col[1]*0.55+0.72*0.45; B.shC[na*4+2]=a.col[2]*0.55+0.51*0.45; } else { B.shC[na*4]=a.col[0]; B.shC[na*4+1]=a.col[1]; B.shC[na*4+2]=a.col[2]; }   // selected: shells tinted toward sage
@@ -12592,6 +12608,7 @@ const draw = () => {
       const ex=src.cen[q*3], ey=src.cen[q*3+1], ez=src.cen[q*3+2];
       CEN[idx*3]=R9[0]*ex+R9[1]*ey+R9[2]*ez+px; CEN[idx*3+1]=R9[3]*ex+R9[4]*ey+R9[5]*ez+py; CEN[idx*3+2]=R9[6]*ex+R9[7]*ey+R9[8]*ez+pz;
       COL[idx*3]=src.col[q*3]; COL[idx*3+1]=src.col[q*3+1]; COL[idx*3+2]=src.col[q*3+2]; OID[idx]=src.oid[q]; SEED[idx]=hash(m.id, q); if(extra) extra(idx, q); };
+    if(mf !== null) continue;   // orbitals are baked for the final geometry: they appear once the atoms have arrived
     for(let q=0;q<sp.coreN;q++, nc++) putLobe(sp.core, q, B.coM, B.coCol, B.coCen, B.coOid, B.coSeed, nc);
     for(let q=0;q<sp.bondN;q++, nb++) putLobe(sp.bond, q, B.boM, B.boCol, B.boCen, B.boOid, B.boSeed, nb, (i, k) => { B.boTap[i] = sp.bond.tap[k]; B.boProf[i] = sp.bond.prof[k]; }); }
   shellMesh.thinInstanceCount = na; nucMesh.thinInstanceCount = nn; coreMesh.thinInstanceCount = nc; bondMesh.thinInstanceCount = nb;
