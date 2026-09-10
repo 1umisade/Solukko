@@ -7009,7 +7009,7 @@ const molKehys=(function(){
   let f=null, alustettu=false, kohde=null, haluttu=null, nakyva=false;
   function luo(){ if(f) return f;
     try{ if(!document.createElement('canvas').getContext('webgl2')) return null; }catch(e){ return null; }
-    f=document.createElement('iframe'); f.id='mol-kehys'; f.src='simulaatiot/index.html?tila=kortti'; f.title='3D-malli: vedä kääntääksesi, rulla zoomaa';
+    f=document.createElement('iframe'); f.id='mol-kehys'; f.src='simulaatiot/index.html?tila=kortti&v='+Math.floor(Date.now()/3.6e6);   /* hourly cache-buster: GitHub Pages caches 10 min and the pre-warmed frame otherwise kept an old simulator for days */ f.title='3D-malli: vedä kääntääksesi, rulla zoomaa';
     f.style.cssText='position:fixed;left:-9999px;top:0;width:260px;height:260px;border:none;border-radius:12px;background:#f2e6c9;z-index:100000;opacity:0;pointer-events:none;transition:opacity .3s;';
     document.body.appendChild(f); return f; }
   window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
