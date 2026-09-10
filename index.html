@@ -1254,7 +1254,7 @@ body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; 
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
 #word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
 .wl-mol-view { position: relative; width: 260px; height: 260px; margin: 0 auto; }
-.wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 0; background: #f2e6c9; margin: 0 auto; object-fit: contain; }
+.wl-mol .wl-2d { display: block; width: 260px !important; height: 260px !important; max-height: none !important; margin: 0 auto !important; border-radius: 0;   /* !important: the generic tooltip img rule (width/height auto, max-height 220px) made the canvas a wide strip with empty space under it */ background: #f2e6c9; margin: 0 auto; object-fit: contain; }
 .wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 0; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
 #mol-kehys { box-shadow: none; }   /* the shared simulator frame (positioned over .wl-mol-view by molKehys) */
 .wl-mol-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 8px 0 0; }   /* switch bottom-left, Tiedot bottom-right (owner 10.9.2026) */
