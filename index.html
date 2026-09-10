@@ -5763,8 +5763,8 @@ function getYouTubeEmbedUrl(url){ const m=url.match(/(?:youtube\.com\/watch\?v=|
 // Anyone signed in may drop a recording of the lecture; it goes to Firebase Storage under
 // luentovideot/<kurssi>/<luento>/ and stays private (rules: no read). Metadata goes to Firestore 'luentovideot'.
 function videoDropHtml(name){
-  return '<div class="video-drop" data-luento="'+String(name).replace(/"/g,'&quot;')+'" title="Pudota luentovideo tähän tai klikkaa valitaksesi tiedoston">'
-    +'<span class="vd-text">Pudota luentovideo tähän tai <u>valitse tiedosto</u></span>'
+  return '<div class="video-drop" data-luento="'+String(name).replace(/"/g,'&quot;')+'" title="Lähetä luentovideo ylläpidolle raahaamalla tiedosto tähän tai klikkaa valitaksesi tiedoston">'
+    +'<span class="vd-text">Lähetä luentovideo ylläpidolle raahaamalla tiedosto tähän (tai <u>valitse tiedosto</u>).</span>'
     +'<input type="file" accept="video/*,.mp4,.mov,.webm,.mkv,.m4v" hidden></div>';
 }
 const VIDEO_MAX_BYTES = 4*1024*1024*1024;   // 4 GiB
