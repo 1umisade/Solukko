@@ -1239,8 +1239,8 @@ body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; 
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
 #word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
 .wl-mol-view { position: relative; width: 260px; height: 260px; margin: 0 auto; }
-.wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 12px; background: #f2e6c9; margin: 0 auto; object-fit: contain; }
-.wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 12px; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
+.wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 0; background: #f2e6c9; margin: 0 auto; object-fit: contain; }
+.wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 0; background: #f2e6c9; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.78rem; color: #8a7d6b; }   /* cream card while the simulator boots */
 #mol-kehys { box-shadow: none; }   /* the shared simulator frame (positioned over .wl-mol-view by molKehys) */
 .wl-mol-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 8px 0 0; }   /* switch bottom-left, Tiedot bottom-right (owner 10.9.2026) */
 .wl-mol-tiedot { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #c9bda8; text-align: left; }
@@ -7014,17 +7014,18 @@ const molKehys=(function(){
   function luo(){ if(f) return f;
     try{ if(!document.createElement('canvas').getContext('webgl2')) return null; }catch(e){ return null; }
     f=document.createElement('iframe'); f.id='mol-kehys'; f.src='simulaatiot/kortti.html?tila=kortti&v='+Math.floor(Date.now()/3.6e6);   /* kortti.html = the popup-only build (tyokalut/kortti_build.py) with its own 1.2 MB Babylon bundle instead of the 8 MB CDN file; hourly cache-buster because GitHub Pages caches 10 min */ f.title='3D-malli: vedä kääntääksesi, rulla zoomaa';
-    f.style.cssText='position:fixed;left:-9999px;top:0;width:260px;height:260px;border:none;border-radius:12px;background:#f2e6c9;z-index:100000;opacity:0;pointer-events:none;transition:opacity .3s;';
+    f.style.cssText='position:fixed;left:-9999px;top:0;width:260px;height:260px;border:none;border-radius:0;background:#f2e6c9;z-index:100000;opacity:0;pointer-events:none;transition:opacity .3s;';   /* no radius: a rounded, composited iframe gets a dark antialiased fringe at its corners on phones (owner 10.9.2026 'dark corners') */
     document.body.appendChild(f); return f; }
   window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
     if(d.solukkoKortti==='alustettu'){ alustettu=true; if(haluttu) f.contentWindow.postMessage({solukkoLaji:haluttu},'*'); }
     if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; f.style.opacity='1'; f.style.pointerEvents='auto'; const w=kohde.querySelector('.wl-3d-wait'); if(w) w.remove(); }
   });
-  function asemoi(){ if(!f||!kohde||!kohde.isConnected){ return; } const r=kohde.getBoundingClientRect(); f.style.left=r.left+'px'; f.style.top=r.top+'px'; f.style.width=r.width+'px'; f.style.height=r.height+'px';
+  function asemoi(){ if(!f||!kohde||!kohde.isConnected){ return; } const r=kohde.getBoundingClientRect(), d=window.devicePixelRatio||1, sn=v=>Math.round(v*d)/d;   // snap to device pixels: a frame edge on a half pixel blends into a dark line
+    f.style.left=sn(r.left)+'px'; f.style.top=sn(r.top)+'px'; f.style.width=sn(r.width)+'px'; f.style.height=sn(r.height)+'px';
     // the frame lives outside the popup, so the popup's own scroll box cannot clip it: clip it here to the popup's visible rectangle
     const tip=document.getElementById('word-link-tooltip'), t=tip?tip.getBoundingClientRect():null;
     if(t){ const ct=Math.max(0,t.top-r.top), cb=Math.max(0,r.bottom-t.bottom), cl=Math.max(0,t.left-r.left), cr=Math.max(0,r.right-t.right);
-      f.style.clipPath=(ct||cb||cl||cr)?('inset('+ct+'px '+cr+'px '+cb+'px '+cl+'px round 12px)'):''; } }
+      f.style.clipPath=(ct||cb||cl||cr)?('inset('+ct+'px '+cr+'px '+cb+'px '+cl+'px)'):''; } }
   return {
     lammita(){ luo(); },   // start loading now, so the first popup is instant
     nayta(key, view){ if(!luo()) return; kohde=view; haluttu=key; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; asemoi();
