@@ -4928,7 +4928,8 @@ void main(void){
   let gSimStat = () => '0 sim';   // molecules in the collision simulation, and what that pass costs
   let gDev = false;
   let gDevBox = null;                 // dev: the container box the free molecules and the loose proteins bounce in
-let gDevPlane = null, gPlaneDim = false, gTasoZ = 0; const TASO_N = 100;   // dev: the particle plane (100 of every free species live on it) and the 'dim the rest' switch
+let gDevPlane = null, gPlaneDim = false, gTasoZ = 0; const TASO_N = 100;
+let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the photosynthetic unit that keeps the loose proteins near it (drawn in dev mode)   // dev: the particle plane (100 of every free species live on it) and the 'dim the rest' switch
   let gBoxLo = null, gBoxHi = null;
   let gCellWrap = false;   // cell mode: the free molecules' box repeats around the camera (bnc / bncY wrap like the shader)
   let gCellDrop = null;    // cell mode: (x,y,z) => true when a wrapped copy's molecule is outside the cytosol (the shader drops it)
@@ -4945,6 +4946,7 @@ let gDevPlane = null, gPlaneDim = false, gTasoZ = 0; const TASO_N = 100;   // de
       const lab=document.getElementById('dev-label'); if(lab) lab.textContent = gDev ? 'Dev päällä' : 'Dev';
       if(gDevBox) gDevBox.setEnabled(gDev);
       if(gDevPlane) gDevPlane.setEnabled(gDev);
+      if(gDevPsuBox) gDevPsuBox.setEnabled(gDev);
       { const pdb = document.getElementById('plane-dim-btn'); if(pdb) pdb.style.display = gDev ? '' : 'none'; }   // the Tasohiukkaset button is a dev tool
       applyDevMode(); }); }
   { const etcBtn = document.getElementById('etc-btn');   // highlight the electron-transport cofactors on top of everything
@@ -9383,11 +9385,24 @@ let gDevPlane = null, gPlaneDim = false, gTasoZ = 0; const TASO_N = 100;   // de
     const th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1), sp=10+Math.random()*8;
     gBouncers.push({ mi, R:h.maxR, vx:sp*Math.sin(ph)*Math.cos(th), vy:sp*Math.cos(ph), vz:sp*Math.sin(ph)*Math.sin(th),
       ax:new BABYLON.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize(), w:0.15+Math.random()*0.2 }); }
+  /* PSU BOX (owner 10.9.2026 'put the photosynthetic unit in a box'): the loose proteins bounce inside a box around
+     the membrane complexes (their hulls plus a margin), not the whole free-molecule box, so the unit stays together.
+     Clamped inside the big box; drawn as a teal wireframe in dev mode. */
+  { let lx=Infinity, ly=Infinity, lz=Infinity, hx=-Infinity, hy=-Infinity, hz=-Infinity, any=false;
+    for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!gMemBound[mi] || !m || m.shuttle) continue; const c=mInfo[mi]; if(!c) continue; any=true;
+      lx=Math.min(lx, c.cx-h.maxR); hx=Math.max(hx, c.cx+h.maxR); ly=Math.min(ly, c.cy-h.maxR); hy=Math.max(hy, c.cy+h.maxR); lz=Math.min(lz, c.cz-h.maxR); hz=Math.max(hz, c.cz+h.maxR); }
+    if(any && gBoxLo){ const M=120, MY=160;   // margin around the complexes: sideways and along the membrane 120 Å, up and down 160 Å
+      gPsuLo=new BABYLON.Vector3(Math.max(gBoxLo.x, lx-M), Math.max(gBoxLo.y, ly-MY), Math.max(gBoxLo.z, lz-M));
+      gPsuHi=new BABYLON.Vector3(Math.min(gBoxHi.x, hx+M), Math.min(gBoxHi.y, hy+MY), Math.min(gBoxHi.z, hz+M));
+      const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {width:gPsuHi.x-gPsuLo.x, height:gPsuHi.y-gPsuLo.y, depth:gPsuHi.z-gPsuLo.z}, scene);
+      bx.position.set((gPsuLo.x+gPsuHi.x)/2, (gPsuLo.y+gPsuHi.y)/2, (gPsuLo.z+gPsuHi.z)/2);
+      const bm=new BABYLON.StandardMaterial('devPsuBoxMat', scene); bm.wireframe=true; bm.emissiveColor=new BABYLON.Color3(0.35,0.85,0.75); bm.disableLighting=true;
+      bx.material=bm; bx.isPickable=false; bx.setEnabled(gDev); gDevPsuBox=bx; } }
   { const _q=new BABYLON.Quaternion(), _dq=new BABYLON.Quaternion();
     scene.onBeforeRenderObservable.add(() => {
       if(!gBouncers.length || !gBoxLo || gizmoDragging) return;
       const dt = Math.min(engine.getDeltaTime(), 50)*0.001*gSpeed*gProtSpeed; if(dt <= 0) return;
-      const lo=gBoxLo, hi=gBoxHi, hT=gMemHalfT;
+      const lo=gPsuLo||gBoxLo, hi=gPsuHi||gBoxHi, hT=gMemHalfT;   // the loose proteins keep to the PSU box
       for(const b of gBouncers){ const mi=b.mi, c=mInfo[mi], R=b.R; const vx0=b.vx, vy0=b.vy, vz0=b.vz;   // remembered: a velocity change below means a collision
         let x=c.cx+gModelOff[mi*3]+b.vx*dt, y=c.cy+gModelOff[mi*3+1]+b.vy*dt, z=c.cz+gModelOff[mi*3+2]+b.vz*dt;
         if(x<lo.x+R){ x=lo.x+R; b.vx=Math.abs(b.vx); } else if(x>hi.x-R){ x=hi.x-R; b.vx=-Math.abs(b.vx); }

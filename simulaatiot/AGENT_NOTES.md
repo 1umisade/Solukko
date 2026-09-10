@@ -461,3 +461,7 @@ protein footprints, the shuttles, the bouncers - is untouched. Around it, in `bu
   OTMPL lobes - the protein atom build always did this, the three `rigidOrbSet` builders (the viewer's free
   species, the lipids' sibling, the editor's) gave one id per subshell, so in the editor isolating 2px kept every
   p lobe solid (owner, 2026-09-10: 'z valitsee kaikki p-orbitaalit?'). All three number per pair now.
+
+## Dev-taso ja PSU-laatikko (10.9.2026)
+- Jokaisen vapaan lajin 100 ensimmaista molekyylia (TASO_N) on sidottu tasoon z = gTasoZ (laatikon keskitaso): `tasoita(c, v, n)` nollaa z-nopeuden ja asettaa lahtopisteen tasolle, shaderin kolmioaalto pitaa ne siina. Taso piirretaan dev-tilassa (`devTaso`). Asetusvalikon dev-nappi `plane-dim-btn` (Tasohiukkaset) asettaa `gPlaneDim`, jonka imp/orb/bond-shaderit lukevat uniformeina `planeDim`/`planeZ` (vain vapaiden lajien materiaalit asettavat ne) ja himmentavat muut 90 %.
+- Irralliset proteiinit (gBouncers) pomppivat PSU-laatikossa `gPsuLo/gPsuHi` = kalvokompleksien hullit + 120/160 Å, rajattu vapaiden molekyylien laatikkoon; dev-tilassa turkoosi rautalankalaatikko `devPsuBox`.
