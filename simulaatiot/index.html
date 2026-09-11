@@ -12350,7 +12350,7 @@ void main(void){
         eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter); eff.setFloat('selModel', gSelModel); eff.setColor3('selCol', SAGE); eff.setFloat('boil', gBoil);
         eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); bindCof(eff); bindPLight(eff); bindLink(eff); });
       const dnaNuc = new BABYLON.ShaderMaterial('dnaNuc', scene, 'imp', withLinks(nucMatG));
-      dnaNuc.setFloat('radius', NUCLEON_R); dnaNuc.setFloat('isShell', 0); dnaNuc.setFloat('bubbleR', BUBBLE_R); dnaNuc.setFloat('protonOutline', 0); dnaNuc.setFloat('depthBias', 0); dnaNuc.setFloat('coneCos', CONE_COS);
+      dnaNuc.setFloat('radius', NUCLEON_R); dnaNuc.setFloat('isShell', 0); dnaNuc.setFloat('bubbleR', BUBBLE_R); dnaNuc.setFloat('protonOutline', 0); dnaNuc.setFloat('depthBias', NUC_BIAS); dnaNuc.disableDepthWrite = true;   // like nucMatG: biased onto its own lobes, no depth write dnaNuc.setFloat('coneCos', CONE_COS);
       dnaNuc.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); dnaNuc.backFaceCulling = false;
       dnaNuc.onBindObservable.add(() => { const eff = dnaNuc.getEffect(); if(!eff) return;
         eff.setFloat('uT', gWaveT); eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd);
@@ -12365,7 +12365,7 @@ void main(void){
         eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd); eff.setFloat('selModel', gSelModel); eff.setColor3('selCol', SAGE);
         eff.setFloat('cofHideOn', gRevealOn); eff.setVector2('cofTexel', gCofTexel); if(cofDepthRT) eff.setTexture('cofDepth', cofDepthRT); bindFocus(eff); bindLink(eff); });
       const dnaBond = new BABYLON.ShaderMaterial('dnaBond', scene, 'bond', withLinks(bondMatG('dnaBondProto')));
-      dnaBond.setFloat('bubbleR', 1e9); dnaBond.setFloat('nElec', 2); dnaBond.setFloat('coneCos', -1.0); dnaBond.setFloat('drawElec', 1); dnaBond.backFaceCulling = true;
+      dnaBond.setFloat('bubbleR', 1e9); dnaBond.setFloat('nElec', 2); dnaBond.setFloat('coneCos', -1.0); dnaBond.setFloat('drawElec', 1); dnaBond.backFaceCulling = true; realAlpha(dnaBond);   // blended + depth write like bondG (the options clone carries the shader, not these flags)
       dnaBond.onBindObservable.add(() => { const eff = dnaBond.getEffect(); if(!eff) return;
         eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR); eff.setFloat('uT', gWaveT); eff.setFloat('elecR', gCrisp); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0);
         eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter);
@@ -12373,7 +12373,7 @@ void main(void){
       // static geometry per chunk, every instance tagged with its base pair (linkId) and the identity model slot
       const PC = [1.0, 0.5, 0.5], NC = [0.62, 0.62, 0.62], BLOB_R = 5.5, BLOB_COL = [0.75, 0.80, 0.88];
       const mkMesh = (nm, sphere, mat) => { const m = sphere ? BABYLON.MeshBuilder.CreateSphere(nm, {segments:3, diameter:1}, scene) : BABYLON.MeshBuilder.CreatePlane(nm, {size:2}, scene);
-        m.material = mat; m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.renderingGroupId = 1; m.doNotSyncBoundingInfo = true; m.setEnabled(false); return m; };
+        m.material = mat; m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.renderingGroupId = sphere ? 0 : 1; m.doNotSyncBoundingInfo = true; m.setEnabled(false); return m; };   // lobes (sphere meshes) in group 0 BEFORE the glass shells and nucleons in group 1, exactly like the protein meshes (co/cb = 0, cs/cn = 1) - in group 1 the shells' depth write hid every lobe inside its own shell, and a hydrogen's only lobe is its 1s inside the shell, so the DNA looked hydrogen-free (owner 11.9.2026)
       const chunks = [];
       for(let c=0;c<NCH;c++){ const bp0 = c*CHUNK, bp1 = Math.min(N_BP, bp0+CHUNK);
         let nS=0, nN=0, nC=0, nB=0, nF=0;
