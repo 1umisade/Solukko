@@ -9396,9 +9396,12 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
      the membrane complexes (their hulls plus a margin), not the whole free-molecule box, so the unit stays together.
      Clamped inside the big box; drawn as a teal wireframe in dev mode. */
   { let lx=Infinity, ly=Infinity, lz=Infinity, hx=-Infinity, hy=-Infinity, hz=-Infinity, any=false;
-    for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!gMemBound[mi] || !m || m.shuttle) continue; const c=mInfo[mi]; if(!c) continue; any=true;
-      lx=Math.min(lx, c.cx-h.maxR); hx=Math.max(hx, c.cx+h.maxR); ly=Math.min(ly, c.cy-h.maxR); hy=Math.max(hy, c.cy+h.maxR); lz=Math.min(lz, c.cz-h.maxR); hz=Math.max(hz, c.cz+h.maxR); }
-    if(any && gBoxLo){ const M=120, MY=160;   // margin around the complexes: sideways and along the membrane 120 Å, up and down 160 Å
+    const loose=new Set(gBouncers.map(b=>b.mi));   // the box just barely holds the membrane complexes AND the loose proteins (RuBisCO, FNR, ...) where they start (owner 11.9.2026: 'tighter')
+    for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !(gMemBound[mi] || loose.has(mi))) continue; const c=mInfo[mi]; if(!c) continue; any=true;
+      const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];
+      lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
+    if(any && gBoxLo){ const M=15, MY=15;   // a thin margin: the box only just contains them
+      if(gTasoZ < lz) lz = gTasoZ - 5; if(gTasoZ > hz) hz = gTasoZ + 5;   // the particle plane must lie inside the box
       gPsuLo=new BABYLON.Vector3(Math.max(gBoxLo.x, lx-M), Math.max(gBoxLo.y, ly-MY), Math.max(gBoxLo.z, lz-M));
       gPsuHi=new BABYLON.Vector3(Math.min(gBoxHi.x, hx+M), Math.min(gBoxHi.y, hy+MY), Math.min(gBoxHi.z, hz+M));
       const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {width:gPsuHi.x-gPsuLo.x, height:gPsuHi.y-gPsuLo.y, depth:gPsuHi.z-gPsuLo.z}, scene);
