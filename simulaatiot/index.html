@@ -904,7 +904,6 @@ void main(void){
   vec3 wCen = vec3(bnc(wOrig.x + wVel.x*uT, boxLo.x, boxHi.x),
                    bnc(yO + wVel.y*uT, yLo, yHi),
                    bnc(wOrig.z + wVel.z*uT, boxLo.z, boxHi.z));
-    tasoDim = planeDim * (1.0 - step(abs(wVel.z), 1e-4) * step(abs(wOrig.z - planeZ), 0.01)) * (step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z));   // off the plane AND inside the PSU box -> culled below
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
   { vec3 k = cellWrap.x > 0.0 ? floor((cellCam - wCen) / cellWrap + 0.5) : vec3(0.0);
@@ -935,6 +934,7 @@ void main(void){
   wCen = repelShells(wCen);   // the protein shells still win: they are applied last
 #endif
 #endif
+  tasoDim = planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * (step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z));   // judged on the FINAL centre (after the CPU displacement and the shell repel - the protons live entirely in that displacement): off the plane and inside the PSU box -> culled
   base = wCen + W[3].xyz;
 #endif
 #ifdef LIPTILE
@@ -7003,7 +7003,7 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
      the nucleus; each control point sways on a slow sum of sines whose phase advances along the chain, so the whole
      thing undulates like a length of rope rather than jittering. Strands are two updatable tubes, the base pairs three
      small spheres per rung (thin instances) coloured by base: A yellow, T red, G green, C blue. */
-  if(SOLU_CELL && SOLU_CELL.NE){
+  if(false && SOLU_CELL && SOLU_CELL.NE){   // DISABLED (owner 11.9.2026: 'looks like a textbook doodle') - the DNA must be built from real atoms through the same LoD pipeline as every other molecule; this tube version stays only as the rope-axis reference
     const NE = SOLU_CELL.NE, NC = NE.C, NR = NE.R * 0.72;   // keep the chain well inside the inner envelope (2500)
     const DNA_BP = 1000, DNA_K = 24, RISE = 3.4, HELIX_R = 10, TWIST = 2*Math.PI/10;
     const seed = i => { const v = Math.sin(i*12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
@@ -7608,28 +7608,7 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
     // element colours, so once you are close enough to see them the chemistry is still honest.
     mkImp('wO', oR, [0.22,0.52,0.85], NW, false);
     mkImp('wH', info(codeH).vr*FILL_SCALE, [0.62,0.82,0.97], NW*2, true);
-    /* CELL MODE: the far haze. The medium around the camera is the box above repeated (see CELLCLIP), which ends
-       half a box away - so from a distance the cytosol would look empty. This is a sparse fill of the whole cell:
-       single spheres a little larger than an atom, drifting slowly in a box the size of the cell and clipped to the
-       cytosol like the copies, in the free species' colours (mostly water blue). Not pickable, no orbitals. */
-    if(SOLU_CELL){ const NH = 250000, C = SOLU_CELL.CEN, HR = SOLU_CELL.R*SOLU_CELL.MEMS[0].gmax, sd = 5150;   // 250000 (owner: the cytoplasm looked only partly filled)
-      const mesh = BABYLON.MeshBuilder.CreatePlane('haze', {size:2}, scene); mesh.material = wMat(6.0, true, false, 0, false, true);
-      mesh.isPickable = false; mesh.alwaysSelectAsActiveMesh = true; mesh.renderingGroupId = 1;
-      const cb=new Float32Array(NH*4), mb=new Float32Array(NH*16), og=new Float32Array(NH*3), vl=new Float32Array(NH*3), mid=new Float32Array(NH);
-      const PAL = [[0.22,0.52,0.85],[0.22,0.52,0.85],[0.62,0.82,0.97],[0.62,0.82,0.97],[0.85,0.30,0.30],[0.80,0.80,0.85],[0.95,0.75,0.30],[0.55,0.85,0.55]];
-      for(let k=0;k<NH;k++){ const col = PAL[Math.floor(rnd(sd+k*11+5)*PAL.length) % PAL.length];
-        mid[k]=k; cb[k*4]=col[0]; cb[k*4+1]=col[1]; cb[k*4+2]=col[2]; cb[k*4+3]=0;
-        mb[k*16]=1; mb[k*16+5]=1; mb[k*16+10]=1; mb[k*16+15]=1;
-        og[k*3]=C.x+(rnd(sd+k*3+1)*2-1)*HR; og[k*3+1]=C.y+(rnd(sd+k*3+2)*2-1)*HR; og[k*3+2]=C.z+(rnd(sd+k*3+3)*2-1)*HR;
-        const sp=6+rnd(sd+k*5+7)*10, th=rnd(sd+k*5+4)*6.283, ph=Math.acos(2*rnd(sd+k*5+5)-1);
-        vl[k*3]=sp*Math.sin(ph)*Math.cos(th); vl[k*3+1]=sp*Math.cos(ph); vl[k*3+2]=sp*Math.sin(ph)*Math.sin(th); }
-      mesh.thinInstanceSetBuffer('instanceColor',cb,4,true); mesh.thinInstanceSetBuffer('matrix',mb,16,true);
-      mesh.thinInstanceSetBuffer('wOrig',og,3,true); mesh.thinInstanceSetBuffer('wVel',vl,3,true); mesh.thinInstanceSetBuffer('molId',mid,1,true);
-      mesh.thinInstanceCount = NH; gFreeMeshes.push(mesh);
-      const hLo = new BABYLON.Vector3(C.x-HR, C.y-HR, C.z-HR), hHi = new BABYLON.Vector3(C.x+HR, C.y+HR, C.z+HR), hm = mesh.material;
-      hm.onBindObservable.add(() => { const eff = hm.getEffect(); if(!eff) return; eff.setVector3('boxLo', hLo); eff.setVector3('boxHi', hHi); eff.setFloat('memHalf', 0); });   // after wMat's own bind, so these win
-    }
-
+    /* (the far haze - 250000 loose spheres filling the cytosol - was removed on the owner's order, 11.9.2026: up close they read as big empty balls) */
     /* ── The other three free species sharing the box ──────────────────────────────────────────────
        Free protons, carbon dioxide and dioxygen, all flying and bouncing through the SAME analytic
        triangle wave and the same protein-shell repulsion as the water — nothing per-frame on the CPU.
