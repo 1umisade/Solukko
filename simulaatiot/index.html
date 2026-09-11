@@ -4414,7 +4414,7 @@ void main(void){
       .multiply(BABYLON.Quaternion.RotationAxis(_flF, ra));   // roll about the VIEW axis - tips the horizon, gaze unchanged
     BABYLON.Matrix.FromQuaternionToRef(q, _flM);
     const nF = BABYLON.Vector3.TransformCoordinates(_flF, _flM), nU = BABYLON.Vector3.TransformCoordinates(_flU, _flM); nU.normalize();
-    cam.upVector.copyFrom(nU);
+    cam.upVector.copyFrom(nU); cam.setMatUp();   // copyFrom bypasses the upVector setter, so the up<->Y matrices went stale: alpha/beta then mapped to the wrong directions and a middle-drag orbit lurched sideways or flipped (owner 11.9.2026)
     cam.inertialAlphaOffset = cam.inertialBetaOffset = 0;
     cam.setTarget(new BABYLON.Vector3(pos.x + nF.x*dist, pos.y + nF.y*dist, pos.z + nF.z*dist));
   });
@@ -4490,6 +4490,11 @@ void main(void){
       if(rotating){   // MIDDLE-drag → orbit. Mirror Babylon's own inertial rotation, but on our button.
         cam.inertialAlphaOffset -= (e.movementX || 0) / cam.angularSensibilityX;
         cam.inertialBetaOffset  -= (e.movementY || 0) / cam.angularSensibilityY;
+        /* Never let the orbit run over the pole: the beta limits are off (free look may backflip), so a fast vertical
+           drag pushed beta past 0 or pi and the picture flipped upside down. Clamp the pending beta INCLUDING the inertia
+           still to come (sum of the geometric decay = offset / (1 - inertia)). */
+        { const k = 1 - cam.inertia, tot = cam.inertialBetaOffset / k, lo = 0.03, hi = Math.PI - 0.03;
+          if(cam.beta + tot < lo) cam.inertialBetaOffset = (lo - cam.beta) * k; else if(cam.beta + tot > hi) cam.inertialBetaOffset = (hi - cam.beta) * k; }
         showTips(); return;
       }
       if(rtsBoxing){   // LEFT-drag → grow the selection box (the overlay draws it)
@@ -7342,7 +7347,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   let CAM_DEF_ALPHA = 0, CAM_DEF_BETA = 0;   // filled in from the derived angles right after the first resetView() (used by viewPerp)
   const resetView = () => { scene.stopAnimation(cam);   // I → restore the default starting view
     if(gFocusRadiusObs){ scene.onBeforeRenderObservable.remove(gFocusRadiusObs); gFocusRadiusObs = null; }
-    cam.upVector.set(0, 0, 1);   // undo any WASD arcball roll → the default view is level again
+    cam.upVector.set(0, 0, 1); cam.setMatUp();   // undo any WASD arcball roll → the default view is level again (setMatUp: keep the camera's up matrices in step)
     cam.setTarget(CAM_DEF_TGT.clone()); cam.setPosition(CAM_DEF_POS.clone());
     cam.inertialAlphaOffset = cam.inertialBetaOffset = cam.inertialRadiusOffset = 0; cam.inertialPanningX = cam.inertialPanningY = 0; gZoomVel = 0; };
   resetView();
@@ -7387,7 +7392,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     scene.stopAnimation(cam);
     if(gFocusRadiusObs){ scene.onBeforeRenderObservable.remove(gFocusRadiusObs); gFocusRadiusObs = null; }
     if(Math.abs(cam.upVector.x) > 1e-4 || Math.abs(cam.upVector.y) > 1e-4){   // undo any WASD arcball roll, then rebuild angles in the Z-up frame so the level snap below is actually level
-      cam.upVector.set(0,0,1); cam.setTarget(cam.getTarget().clone()); }
+      cam.upVector.set(0,0,1); cam.setMatUp(); cam.setTarget(cam.getTarget().clone()); }
     const R = cam.radius, F = 18;
     const aEnd = CAM_DEF_ALPHA + 2*Math.PI*Math.round((cam.alpha - CAM_DEF_ALPHA)/(2*Math.PI));   // nearest wrap of the level heading (no long way round)
     const ease = new BABYLON.CubicEase(); ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
