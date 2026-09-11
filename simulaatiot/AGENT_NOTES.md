@@ -465,3 +465,16 @@ protein footprints, the shuttles, the bouncers - is untouched. Around it, in `bu
 ## Dev-taso ja PSU-laatikko (10.9.2026)
 - Jokaisen vapaan lajin 100 ensimmaista molekyylia (TASO_N) on sidottu tasoon z = gTasoZ (laatikon keskitaso): `tasoita(c, v, n)` nollaa z-nopeuden ja asettaa lahtopisteen tasolle, shaderin kolmioaalto pitaa ne siina. Taso piirretaan dev-tilassa (`devTaso`). Asetusvalikon dev-nappi `plane-dim-btn` (Tasohiukkaset) asettaa `gPlaneDim`, jonka imp/orb/bond-shaderit lukevat uniformeina `planeDim`/`planeZ` (vain vapaiden lajien materiaalit asettavat ne) ja jattavat PSU-laatikon sisalla olevat tason ulkopuoliset hiukkaset piirtamatta (gl_Position ulos ruudusta; laatikon ulkopuolella kaikki nakyy).
 - Irralliset proteiinit (gBouncers) pomppivat PSU-laatikossa `gPsuLo/gPsuHi` = kalvokompleksien hullit + 120/160 Å, rajattu vapaiden molekyylien laatikkoon; dev-tilassa turkoosi rautalankalaatikko `devPsuBox`.
+
+
+## Mol2-tiedostojen vienti ChimeraX:sta (11.9.2026)
+
+Rakenteet viedaan ChimeraX:sta suoraan tahan kansioon, ei enaa vanhaan SoluKone/Geneesi-kansioon:
+
+```
+open 1JB0            # esim. PDB-tunnus
+addh                 # vedyt mukaan - simulaattori tarvitsee ne
+save "C:\Users\akuka\OneDrive\DATA\GitHub_Repos\Solukko\simulaatiot\photosystem_I.mol2" models #1 format mol2
+```
+
+Sama polku kaikille: `...\Solukko\simulaatiot\<nimi>.mol2`. Tiedosto lisataan gittiin (`git add`), muuten se 404:aa solukko.comissa. Uusi pieni molekyyli popupiin: `tyokalut/molekyyli_3d.py`.
