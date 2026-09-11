@@ -3604,10 +3604,24 @@ uniform float slabDark;
 uniform float midY;
 uniform float halfH;
 uniform float blendW;
+uniform sampler2D grainTex;   // the owner's far-tier texture (laatta_*.jpg)
+uniform float texOn;         // 1 = read it, 0 = the lattice grain below
 varying float vZ;
 varying vec3 vWP;
 float hash1(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }
 vec2 hash2(vec2 c){ return vec2(hash1(c), hash1(c + vec2(19.3, 7.7))); }
+/* The far tier's look from a picture (owner 11.9.2026): the cheap-tier screenshot tiled over the slab, one dot per lipid. The
+   picture holds about 180 dots across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). Multi-scale like the
+   lattice grain - as the dots shrink toward a pixel the tile doubles, two neighbouring levels blended by the pixel footprint,
+   so a whole organelle stays mottled far away instead of going flat. */
+vec3 laatta(vec2 pq){
+  float T = max(grainPitch, 0.5) * 360.0;
+  vec2 q0 = pq / T;
+  float px = (fwidth(q0.x) + fwidth(q0.y)) * 180.0;
+  float lg = max(0.0, log2(max(px * 4.0, 1e-6)));
+  float L = floor(lg), tL = lg - L;
+  return mix(texture2D(grainTex, pq / (T * exp2(L))).rgb, texture2D(grainTex, pq / (T * exp2(L + 1.0))).rgb, tL);
+}
 void main(void){
   /* inside holeR of the camera every lipid is drawn at full density, so the slab steps aside there -
      a glass shell over a slab of its own colour was invisible, and the two never belong in one place */
@@ -3641,7 +3655,9 @@ void main(void){
   float px = fwidth(q.x) + fwidth(q.y);
   tone = mix(tone, 0.80, clamp(px * 1.5, 0.0, 1.0));
   float dt = clamp((distance(vWP, camPos) - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);
-  gl_FragColor = vec4(slabCol * (1.0 - slabDark) * tone * mix(1.0, depthLo, dt * depthK), 1.0);
+  vec3 col = slabCol * tone;
+  if(texOn > 0.5) col = laatta(pq);   // the owner's texture instead of the procedural grain
+  gl_FragColor = vec4(col * (1.0 - slabDark) * mix(1.0, depthLo, dt * depthK), 1.0);
 }`;
 /* CELL MODE far tier: the slab shader above, for a closed membrane - any axis-aligned ellipsoid (centre cen, the
    inverse squared scales for its normal). Same grain, depth darkening, hole and blend band cut, but the band cut
@@ -3701,6 +3717,8 @@ uniform float clipOn;
 uniform vec3 clipC;
 uniform vec3 clipInvS;
 uniform float clipR;
+uniform sampler2D grainTex;   // the owner's far-tier texture (laatta_*.jpg)
+uniform float texOn;
 varying vec3 vWP;
 varying float vSurf;
 float hash1(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }
@@ -3743,6 +3761,18 @@ float poreRatio(vec3 d){
 /* the pore's depth cue, the CPU's poreShade line for line: the outer membrane darkens toward the rim, the inner one
    carries the shadow of the hole above it */
 float poreShade(float r){ return poreInner > 0.5 ? 1.0 - 0.55 * (1.0 - smoothstep(1.0, 2.4, r)) : 1.0 - 0.45 * (1.0 - smoothstep(1.0, 1.8, r)); }
+/* The far tier's look from a picture (owner 11.9.2026): the cheap-tier screenshot tiled over the slab, one dot per lipid. The
+   picture holds about 180 dots across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). Multi-scale like the
+   lattice grain - as the dots shrink toward a pixel the tile doubles, two neighbouring levels blended by the pixel footprint,
+   so a whole organelle stays mottled far away instead of going flat. */
+vec3 laatta(vec2 pq){
+  float T = max(grainPitch, 0.5) * 360.0;
+  vec2 q0 = pq / T;
+  float px = (fwidth(q0.x) + fwidth(q0.y)) * 180.0;
+  float lg = max(0.0, log2(max(px * 4.0, 1e-6)));
+  float L = floor(lg), tL = lg - L;
+  return mix(texture2D(grainTex, pq / (T * exp2(L))).rgb, texture2D(grainTex, pq / (T * exp2(L + 1.0))).rgb, tL);
+}
 void main(void){
   float dCam = distance(vWP, camPos);
   if(holeR > 0.0 && dCam < holeR) discard;
@@ -3774,7 +3804,9 @@ void main(void){
   if(shapeP > 0.0){ vec3 qs = w3 * invS; nrm = normalize(sign(qs) * pow(abs(qs) + 1e-6, vec3(shapeP - 1.0)) * invS); }
   float lit = 0.62 + 0.38 * abs(dot(nrm, normalize(camPos - vWP)));
   float dt = clamp((dCam - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);
-  gl_FragColor = vec4(slabCol * (1.0 - slabDark) * tone * lit * shadeP * mix(1.0, depthLo, dt * depthK), 1.0);
+  vec3 col = slabCol * tone;
+  if(texOn > 0.5) col = laatta(pq);   // the owner's texture instead of the procedural grain
+  gl_FragColor = vec4(col * (1.0 - slabDark) * lit * shadeP * mix(1.0, depthLo, dt * depthK), 1.0);
 }`;
   const bgMat = new BABYLON.ShaderMaterial('bgMat', scene, 'bg', { attributes:['position'], uniforms:['cBg','focusAmt','focusDark'] });
   bgMat.backFaceCulling = false;
@@ -5797,6 +5829,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      dilation pass guarantees the shell never cuts inside an atom it is meant to contain.
      Star-shaped, so a deep concavity is bridged rather than followed — the usual trade for a collision
      proxy, and it stays a closed watertight surface. Dev-only. */
+  /* The far tier's texture - the owner's screenshots of the cheap tier (11.9.2026): laatta_vihrea.jpg on the chloroplast
+     membranes and the thylakoid sheet, laatta_keltainen.jpg on every other membrane. Wrapped, mipmapped, read by the slab and
+     cellshell shaders in place of the lattice grain. A missing file falls back to a white 1x1 texture and texOn 0 (the grain). */
+  const gLaatta = {};
+  const laattaTex = (mat, kind) => {
+    let t = gLaatta[kind];
+    if(!t){ t = gLaatta[kind] = { tex: null, ok: 1, mats: [] };
+      t.tex = new BABYLON.Texture('./laatta_' + kind + '.jpg', scene, false, true, BABYLON.Texture.TRILINEAR_SAMPLINGMODE, null, () => {
+        console.warn('laatta_' + kind + '.jpg puuttuu - laatta piirtaa proseduraalisen rakeen'); t.ok = 0;
+        t.tex = BABYLON.RawTexture.CreateRGBATexture(new Uint8Array([255,255,255,255]), 1, 1, scene); for(const m of t.mats) m.setTexture('grainTex', t.tex); });
+      t.tex.wrapU = t.tex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE; t.tex.anisotropicFilteringLevel = 8; }
+    t.mats.push(mat); mat.setTexture('grainTex', t.tex); mat.setFloat('texOn', t.ok);
+    mat.onBindObservable.add(() => { const eff = mat.getEffect(); if(eff) eff.setFloat('texOn', t.ok); });
+  };
   const gHulls = [];
   const gProtSlab = [];   // per model: true = far enough that its atoms are replaced by the hull
   const SH_LAT = 32, SH_LON = 64;   // ~5.6 deg bearings
@@ -6371,11 +6417,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       slab.position.copyFrom(bilayerCen);
       slab.isPickable = false; slab.renderingGroupId = 0; slab.alwaysSelectAsActiveMesh = true;
       const sm = new BABYLON.ShaderMaterial('memSlabMat', scene, 'slab', {
-        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW'] });
+        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW','texOn'], samplers:['grainTex'] });
       sm.backFaceCulling = false;
       sm.setColor3('slabCol', new BABYLON.Color3(0.35,0.33,0.22));   // placeholder until the real lipid mean lands below
       sm.setFloat('grainPitch', S*0.5);   // the grain's cell size: half the real lipid pitch - smaller, denser 'lipids'
       sm.setFloat('midY', bilayerCen.y); sm.setFloat('halfH', ySpan);
+      laattaTex(sm, 'vihrea');   // the sheet is the thylakoid membrane
       sm.onBindObservable.add(()=>{ const eff=sm.getEffect(); if(!eff) return;
         eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo);
         eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread);
@@ -6937,13 +6984,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const _e0 = [0,0,0];
       for(const M of MEMS){
         const mat = new BABYLON.ShaderMaterial('cellShellMat'+M.id, scene, 'cellshell', {
-          attributes:['position','surf'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP'] });
+          attributes:['position','surf','texOn'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP'] });
         mat.setFloat('poreAng', NE_PORE_R/M.R); mat.setFloat('poreInner', M.inner ? 1 : 0); mat.setFloat('baseShade', M.baseShade);
         mat.setFloat('clipOn', M.clipTo ? 1 : 0);
         if(M.clipTo){ const K = M.clipTo; mat.setVector3('clipC', K.C); mat.setVector3('clipInvS', new BABYLON.Vector3(1/K.s[0], 1/K.s[1], 1/K.s[2])); mat.setFloat('clipR', K.R); }
         mat.backFaceCulling = false;
         const hh = M.halfH || ySpan;   // the cell wall is thicker than a bilayer
         mat.setColor3('slabCol', M.col ? new BABYLON.Color3(M.col[0], M.col[1], M.col[2]) : new BABYLON.Color3(0.35,0.33,0.22)); mat.setFloat('grainPitch', M.nolat ? S*2.0 : S*0.5); mat.setFloat('halfH', hh); mat.setFloat('shapeP', M.p || 0);
+        laattaTex(mat, /viherhiukkanen|tylakoidi/.test(M.name) ? 'vihrea' : 'keltainen');   // green for the chloroplast, yellow elsewhere (owner)
         mat.setVector3('cen', M.C); mat.setVector3('invS', new BABYLON.Vector3(M.invS[0], M.invS[1], M.invS[2])); mat.setVector3('invS2', new BABYLON.Vector3(M.invS[0]*M.invS[0], M.invS[1]*M.invS[1], M.invS[2]*M.invS[2]));
         mat.setFloat('facetOn', M.facet ? 1 : 0); mat.setFloat('facetY', bilayerCen.y); mat.setFloat('facetR', facetR);
         mat.setVector2('footCen', new BABYLON.Vector2(bilayerCen.x, bilayerCen.z)); mat.setVector2('footHalf', new BABYLON.Vector2(0, 0));   // the plasma membrane's plane part covers the sheet's rectangle too (the sheet's own slab box is off in cell mode)
