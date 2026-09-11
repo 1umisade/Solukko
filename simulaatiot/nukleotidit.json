@@ -1,0 +1,5 @@
+{
+ "rise": 3.3185,
+ "twistDeg": 35.727,
+ "note": "B-DNA 1D28: base pair i frame = frame 1 screwed i-1 times; templates nuk-<strand>-<type> live in that frame (origin on the helix axis)"
+}

@@ -201,4 +201,4 @@ ja nakyy myos kemiaeditorin palettissa. Esimerkki: G6P (glukoosi-6-fosfaatti, CI
 
 ## DNA Webcytessa
 
-Tuman 1000 emasparin B-DNA on oikeita atomeja: `tyokalut/dna_rakenna.py` rakentaa sen `simulaatiot/DNA.mol2`:sta (ChimeraX, 1D28 + addh) tiedostoksi `simulaatiot/DNA_1000.mol2`, 30 jaykkaa segmenttia, jotka katselija lataa malleina (samat LoD-tasot kuin proteiineilla) ja asettelee huojuvaksi koydeksi tumaan. Yksityiskohdat simulaatiot/AGENT_NOTES.md.
+Tuman 1000 emasparin B-DNA on oikeita atomeja ja jokainen nukleotidi oma lenkkinsa: `tyokalut/dna_nukleotidit.py` tekee `simulaatiot/DNA.mol2`:sta (ChimeraX, 1D28 + addh) 8 nukleotidimallia (`nukleotidit.mol2`), ja katselija asettelee 2000 lenkkia joka frame huojuvalle koysiakselille tekstuuripohjaisella LINKS-shaderpolulla (kuoret, ytimet, orbitaalit ja kaukotaso samoilla shadereilla kuin proteiinit). Yksityiskohdat simulaatiot/AGENT_NOTES.md.

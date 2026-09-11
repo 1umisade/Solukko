@@ -709,6 +709,12 @@ precision highp float;
 attribute vec3 position;
 attribute vec4 instanceColor;
 attribute vec4 world0;
+#ifdef LINKS
+attribute float linkId;   // DNA links: which base-pair frame this instance rides on (a column-major mat4 in linkTex, 4 texels per link)
+uniform sampler2D linkTex; uniform float linkTexW;
+mat4 linkMat(float id){ float u = (id + 0.5) / linkTexW;
+  return mat4(texture2D(linkTex, vec2(u, 0.125)), texture2D(linkTex, vec2(u, 0.375)), texture2D(linkTex, vec2(u, 0.625)), texture2D(linkTex, vec2(u, 0.875))); }
+#endif
 attribute vec4 world1;
 attribute vec4 world2;
 attribute vec4 world3;
@@ -888,6 +894,10 @@ vec3 memSway(vec3 b, float sid){ float ph = b.x*0.28 + b.z*0.24;
 void main(void){
   float tasoDim = 0.0;   // dev plane: 1 = this molecule is off the plane while the dim switch is on
   mat4 W = mat4(world0, world1, world2, world3);
+#ifdef LINKS
+  { mat4 LM = linkMat(linkId); vec3 pc = vec3(W[0].w, W[1].w, W[2].w); W[0].w = 0.0; W[1].w = 0.0; W[2].w = 0.0; W = LM * W;   // the link's frame first - a nucleon's atom centre rides in the w slots, so it is moved separately (no semicolons in GLSL comments)
+    if(dot(pc, pc) > 0.0){ vec3 q = (LM * vec4(pc, 1.0)).xyz; W[0].w = q.x; W[1].w = q.y; W[2].w = q.z; } }
+#endif
 #ifdef LIPWRAP
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
@@ -1533,7 +1543,13 @@ attribute vec4 world1;
 attribute vec4 world2;
 attribute vec4 world3;
 attribute float taper;     // per-lobe: widen the far end by bond polarity (0 = uniform ellipsoid)
-attribute vec3 ocen;       // this lobe's atom centre → compare to the selected atom
+attribute vec3 ocen;
+#ifdef LINKS
+attribute float linkId;   // DNA links: which base-pair frame this instance rides on (a column-major mat4 in linkTex, 4 texels per link)
+uniform sampler2D linkTex; uniform float linkTexW;
+mat4 linkMat(float id){ float u = (id + 0.5) / linkTexW;
+  return mat4(texture2D(linkTex, vec2(u, 0.125)), texture2D(linkTex, vec2(u, 0.375)), texture2D(linkTex, vec2(u, 0.625)), texture2D(linkTex, vec2(u, 0.875))); }
+#endif       // this lobe's atom centre → compare to the selected atom
 attribute vec3 bcol;       // per-instance element colour (so bonds combine across elements per cell)
 uniform float planeDim; uniform float planeZ; uniform vec3 psuLo; uniform vec3 psuHi;   // dev plane (free orbitals only)
 attribute float oid;       // orbital id (hybrid = 1000+i, π = 900, lone pair = 2000+i) → focus filter
@@ -1609,6 +1625,9 @@ vec3 memSway(vec3 b, float sid){ float ph = b.x*0.28 + b.z*0.24;
 #endif
 void main(void){
   mat4 W = mat4(world0, world1, world2, world3);
+#ifdef LINKS
+  mat4 LM = linkMat(linkId); W = LM * W;   // DNA link: the base-pair frame
+#endif
 #ifdef LIPWRAP
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
@@ -1675,7 +1694,9 @@ void main(void){
   vec3 M0=world0.xyz, M1=world1.xyz, M2=world2.xyz;   // cofactor matrix → correct normal under non-uniform scale
   vec3 wn = cross(M1,M2)*sn.x + cross(M2,M0)*sn.y + cross(M0,M1)*sn.z;
   vNrmV = (view * vec4(wn, 0.0)).xyz;
-#ifdef LIPBAKE
+#ifdef LINKS
+  vec3 ocenW = (LM * vec4(ocen, 1.0)).xyz;   // DNA link: the atom centre in its frame
+#elif defined(LIPBAKE)
   vec3 ocenW = mat3(W) * ocen + W[3].xyz;  // baked templates hold ocen lipid-local, so the instance puts it in the world (rotated with the lipid)
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
@@ -1904,7 +1925,13 @@ precision highp float;
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 ocol;
-attribute vec3 ocen;       // this orbital's atom centre (world) → compare to the selected atom
+attribute vec3 ocen;
+#ifdef LINKS
+attribute float linkId;   // DNA links: which base-pair frame this instance rides on (a column-major mat4 in linkTex, 4 texels per link)
+uniform sampler2D linkTex; uniform float linkTexW;
+mat4 linkMat(float id){ float u = (id + 0.5) / linkTexW;
+  return mat4(texture2D(linkTex, vec2(u, 0.125)), texture2D(linkTex, vec2(u, 0.375)), texture2D(linkTex, vec2(u, 0.625)), texture2D(linkTex, vec2(u, 0.875))); }
+#endif       // this orbital's atom centre (world) → compare to the selected atom
 uniform float planeDim; uniform float planeZ; uniform vec3 psuLo; uniform vec3 psuHi;   // dev plane (free orbitals only): lobes of off-plane molecules inside the PSU box are not drawn
 attribute float oid;       // subshell id → focus filter
 #ifdef SEEDATTR
@@ -1975,6 +2002,9 @@ vec3 memSway(vec3 b, float sid){ float ph = b.x*0.28 + b.z*0.24;
 #endif
 void main(void){
   mat4 W = mat4(world0, world1, world2, world3);
+#ifdef LINKS
+  mat4 LM = linkMat(linkId); W = LM * W;   // DNA link: the base-pair frame
+#endif
 #ifdef LIPWRAP
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
@@ -2035,7 +2065,9 @@ void main(void){
   vec3 wn = cross(M1,M2)*normal.x + cross(M2,M0)*normal.y + cross(M0,M1)*normal.z;
   vNrmV = (view * vec4(wn, 0.0)).xyz;
   vCol = ocol;   // orbitals ALWAYS keep their element colour — per-model pastel applies to the vdW spheres only
-#ifdef LIPBAKE
+#ifdef LINKS
+  vec3 ocenW = (LM * vec4(ocen, 1.0)).xyz;   // DNA link: the atom centre in its frame
+#elif defined(LIPBAKE)
   vec3 ocenW = mat3(W) * ocen + W[3].xyz;  // baked templates hold ocen lipid-local, so the instance puts it in the world (rotated with the lipid)
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
@@ -3116,12 +3148,9 @@ async function run(){
     {match:'plastoquinone', x:-495, y:150, z:135, label:'Plastoquinone'},   // one PL9 plucked from cytb6f → its own file, beside the lone chlorophyll
     {match:'nadph', x:-425, y:150, z:135, label:'NADPH'},   // one NADP+ plucked from FNR → its own file, beside the chlorophyll + quinone (coloured pink)
   ];
-  /* Webcyte: the DNA's 30 segments (dna-seg-00 ... dna-seg-29). Their sheet position is a placeholder inside the existing bounds; the rope observer below moves them into the nucleus every frame. */
-  if(SOLU) for(let k=0;k<30;k++) MODELS.push({ match:'dna-seg-'+String(k).padStart(2,'0'), x:-3000 + k*160, y:2600, z:0, label:'DNA', dna:true });   // placeholders spread out and clear of every other model: each atom is bound to the model whose bounding box holds it (modelOf), so the segments must not overlap anything at load; they are excluded from the scene bounds below
   const FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_synthase.mol2','NDH-1.mol2',
     'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2','PGR5.mol2',
     'PGRL1.mol2','PPH1.mol2','STN7.mol2','Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];
-  if(SOLU) FILES.push('DNA_1000.mol2');   // Webcyte: the 1000 bp B-DNA in 30 rigid segments (tyokalut/dna_rakenna.py), each a model of its own
   setLbl('Haetaan tylakoidimalleja…');
   const mols = [];
   for(let i=0;i<FILES.length;i++){ const fn=FILES[i];
@@ -3134,7 +3163,6 @@ async function run(){
         const cfg = MODELS.find(e => !e._used && nm.includes(e.match));   // match by internal name/code
         if(!cfg){ console.log('unmatched molecule "'+m.name+'" in '+fn+' (skipped)'); continue; }
         cfg._used = true; cfg.file = fn; m.cfg = cfg; m.name = cfg.label;
-        if(cfg.dna){ const mm = nm.match(/-bp(\d+)/); cfg.bpN = mm ? +mm[1] : 33; }   // the segment's base-pair count rides in the molecule name (dna-seg-00-bp33)
         markTyrZ(m);                                   // tag the OEC-adjacent tyrosine as Tyr Z (needs raw, pre-transform coords)
         mols.push(m); }
     }catch(err){ console.warn('failed to load', fn, err); }
@@ -4940,7 +4968,8 @@ void main(void){
   let gDev = false;
   let gDevBox = null;                 // dev: the container box the free molecules and the loose proteins bounce in
 let gDevPlane = null, gPlaneDim = false, gTasoZ = 0; const TASO_N = 100;
-let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the photosynthetic unit that keeps the loose proteins near it (drawn in dev mode)   // dev: the particle plane (100 of every free species live on it) and the 'dim the rest' switch
+let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;
+let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block for the DNA links   // the box around the photosynthetic unit that keeps the loose proteins near it (drawn in dev mode)   // dev: the particle plane (100 of every free species live on it) and the 'dim the rest' switch
   let gBoxLo = null, gBoxHi = null;
   let gCellWrap = false;   // cell mode: the free molecules' box repeats around the camera (bnc / bncY wrap like the shader)
   let gCellDrop = null;    // cell mode: (x,y,z) => true when a wrapped copy's molecule is outside the cytosol (the shader drops it)
@@ -8414,6 +8443,7 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
     /* The placer, shared by every free species with an orbital set: per frame, every molecule inside
        the crisp zone gets the canonical lobes mapped through frameOf(i, T, R) - the molecule's own
        rotation with the spin composed on - and its live position. CAP bounds the buffers. */
+    gRigidOrbSet = rigidOrbSet;   // exposed: the DNA links build their lobes with it
     const freeOrb = (nm, F, core, bond, frameOf, CAP) => {
       const coreN = core.m.length/16, bondN = bond.m.length/16;
       if(!coreN && !bondN) return;
@@ -9369,66 +9399,6 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
         BABYLON.Quaternion.FromRotationMatrixToRef(_rm, _q);
         gModelQuat[mi*4]=_q.x; gModelQuat[mi*4+1]=_q.y; gModelQuat[mi*4+2]=_q.z; gModelQuat[mi*4+3]=_q.w;
         gModelOff[mi*3]=nx-c.cx; gModelOff[mi*3+1]=ny-c.cy; gModelOff[mi*3+2]=nz-c.cz; rebuildModelXform(mi); } } }
-  /* ── DNA ROPE (owner 11.9.2026): the 30 rigid B-DNA segments (DNA_1000.mol2 - real atoms, 1000 bp, from the 1D28
-     crystal via tyokalut/dna_rakenna.py) are strung along a rope-like axis inside the nucleus. The axis is a
-     Catmull-Rom curve through K control points that sway on slow sines whose phase advances along the chain; it is
-     sampled finely for arc length, and segment k sits at the arc position of its base pairs with its helix axis
-     (local +Z) along the tangent and its local +X along the parallel-transported normal, so the helix phase runs on
-     from one segment to the next. Poses go through gModelQuat / gModelOff / rebuildModelXform like every other
-     model, so atoms, orbitals, hull, slab LoD and shell all follow. */
-  const gDnaSegs = mols.map((m, mi) => (m.cfg && m.cfg.dna) ? mi : -1).filter(mi => mi >= 0);
-  if(SOLU_CELL && SOLU_CELL.NE && gDnaSegs.length){
-    for(const mi of gDnaSegs) gOrganelleModels.add(mi);   // not a bouncer, never flattened, left alone by the cap placement
-    const NE = SOLU_CELL.NE, NC = NE.C, NR = NE.R * 0.72, K = 24, RISE = 3.32, M = 4000;
-    const bpN = gDnaSegs.map(mi => mols[mi].cfg.bpN || 33), totalL = bpN.reduce((a, b) => a + b, 0) * RISE;
-    const segMid = []; { let acc = 0; for(const nbp of bpN){ segMid.push(acc + nbp*RISE/2); acc += nbp*RISE; } }
-    const seed = i => { const v = Math.sin(i*12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
-    // control points: a seeded random walk inside the sphere, long enough that the curve outruns the chain
-    const base = []; { let p = new BABYLON.Vector3(NC.x - NR*0.5, NC.y, NC.z), d = new BABYLON.Vector3(1, 0.3, -0.5).normalize(); const stepL = totalL*1.12/(K-1);
-      for(let k=0;k<K;k++){ base.push(p.clone());
-        const turn = new BABYLON.Vector3(seed(k*3+1)-0.5, seed(k*3+2)-0.5, seed(k*3+3)-0.5).scale(1.1); d = d.add(turn).normalize();
-        let q = p.add(d.scale(stepL)); const off = q.subtract(NC); if(off.length() > NR){ d = d.subtract(off.normalize().scale(1.7)).normalize(); q = p.add(d.scale(stepL)); }
-        p = q; } }
-    const ctrl = base.map(b => b.clone());
-    const sample = (u, out) => { const k = Math.max(0, Math.min(K-2, Math.floor(u))), t = u - k;
-      const p0 = ctrl[Math.max(0,k-1)], p1 = ctrl[k], p2 = ctrl[Math.min(K-1,k+1)], p3 = ctrl[Math.min(K-1,k+2)], t2 = t*t, t3 = t2*t;
-      out[0] = 0.5*((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3);
-      out[1] = 0.5*((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3);
-      out[2] = 0.5*((2*p1.z) + (-p0.z+p2.z)*t + (2*p0.z-5*p1.z+4*p2.z-p3.z)*t2 + (-p0.z+3*p1.z-3*p2.z+p3.z)*t3); };
-    const pts = new Float32Array(M*3), arc = new Float32Array(M), nrm = new Float32Array(M*3), _p = [0,0,0];
-    const _rm = new BABYLON.Matrix(), _q = new BABYLON.Quaternion();
-    let dnaT = 0;
-    const poseDna = () => {
-      for(let i=0;i<M;i++){ sample(i/(M-1)*(K-1), _p); pts[i*3]=_p[0]; pts[i*3+1]=_p[1]; pts[i*3+2]=_p[2]; }
-      arc[0] = 0; for(let i=1;i<M;i++){ const dx=pts[i*3]-pts[(i-1)*3], dy=pts[i*3+1]-pts[(i-1)*3+1], dz=pts[i*3+2]-pts[(i-1)*3+2]; arc[i] = arc[i-1] + Math.hypot(dx,dy,dz); }
-      let nx = 0, ny = 1, nz = 0;   // parallel transport of the normal along the sampled curve
-      for(let i=0;i<M;i++){ const a = Math.max(0,i-1), b = Math.min(M-1,i+1); let tx=pts[b*3]-pts[a*3], ty=pts[b*3+1]-pts[a*3+1], tz=pts[b*3+2]-pts[a*3+2]; const tl=Math.hypot(tx,ty,tz)||1; tx/=tl; ty/=tl; tz/=tl;
-        const d = nx*tx+ny*ty+nz*tz; nx-=d*tx; ny-=d*ty; nz-=d*tz; let l=Math.hypot(nx,ny,nz);
-        if(l<1e-4){ nx = Math.abs(tx)<0.9?1:0; ny = Math.abs(tx)<0.9?0:1; nz=0; const d2=nx*tx+ny*ty; nx-=d2*tx; ny-=d2*ty; nz-=d2*tz; l=Math.hypot(nx,ny,nz)||1; }
-        nx/=l; ny/=l; nz/=l; nrm[i*3]=nx; nrm[i*3+1]=ny; nrm[i*3+2]=nz; }
-      let i = 1;
-      for(let k=0;k<gDnaSegs.length;k++){ const sMid = segMid[k]; while(i < M-1 && arc[i] < sMid) i++;
-        const a = Math.max(0,i-1), b = Math.min(M-1,i+1), f = (sMid - arc[i-1]) / Math.max(1e-6, arc[i]-arc[i-1]);
-        const px = pts[(i-1)*3] + (pts[i*3]-pts[(i-1)*3])*f, py = pts[(i-1)*3+1] + (pts[i*3+1]-pts[(i-1)*3+1])*f, pz = pts[(i-1)*3+2] + (pts[i*3+2]-pts[(i-1)*3+2])*f;
-        let tx=pts[b*3]-pts[a*3], ty=pts[b*3+1]-pts[a*3+1], tz=pts[b*3+2]-pts[a*3+2]; const tl=Math.hypot(tx,ty,tz)||1; tx/=tl; ty/=tl; tz/=tl;
-        const X = [nrm[i*3], nrm[i*3+1], nrm[i*3+2]], Z = [tx,ty,tz], Y = [Z[1]*X[2]-Z[2]*X[1], Z[2]*X[0]-Z[0]*X[2], Z[0]*X[1]-Z[1]*X[0]];   // local +Z along the rope, local +X the carried normal
-        BABYLON.Matrix.FromValuesToRef(X[0],X[1],X[2],0, Y[0],Y[1],Y[2],0, Z[0],Z[1],Z[2],0, 0,0,0,1, _rm);
-        BABYLON.Quaternion.FromRotationMatrixToRef(_rm, _q);
-        const mi = gDnaSegs[k], c = mInfo[mi];
-        gModelQuat[mi*4]=_q.x; gModelQuat[mi*4+1]=_q.y; gModelQuat[mi*4+2]=_q.z; gModelQuat[mi*4+3]=_q.w;
-        gModelOff[mi*3]=px-c.cx; gModelOff[mi*3+1]=py-c.cy; gModelOff[mi*3+2]=pz-c.cz; rebuildModelXform(mi); }
-    };
-    poseDna();
-    scene.onBeforeRenderObservable.add(() => {
-      const dt = Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; dnaT += dt;
-      for(let k=0;k<K;k++){ const b = base[k], ph = k*0.55;   // the rope's sway: slow sines, phase running along the chain
-        ctrl[k].set(b.x + 120*Math.sin(0.31*dnaT + ph) + 50*Math.sin(0.83*dnaT + ph*1.7),
-                    b.y + 100*Math.sin(0.27*dnaT + ph + 1.3) + 45*Math.sin(0.71*dnaT + ph*2.1),
-                    b.z + 120*Math.sin(0.35*dnaT + ph + 2.6) + 50*Math.sin(0.67*dnaT + ph*1.3));
-        const off = ctrl[k].subtract(NC), L = off.length(); if(L > NR) ctrl[k].copyFrom(NC.add(off.scale(NR/L))); }
-      poseDna();
-    }, -1, true);   // first in the frame, like the bouncers, so hull, shell and slab see this frame's pose
-  }
   const gBouncers = [];
   for(const h of gHulls){ const mi = h.mi, m = mols[mi]; if(gMemBound[mi] || !m || !m.cfg || m.shuttle || m.cfg.dna || gOrganelleModels.has(mi)) continue;
     if(/chlorophyll|plastoquinone|nadph/i.test(m.cfg.label || '')) continue;
@@ -12303,6 +12273,165 @@ void main(void){
       if(menu){ menu.style.left = 'auto'; menu.style.top = 'auto'; menu.style.right = '16px'; menu.style.bottom = (dock.offsetHeight + 26) + 'px';
         menu.style.alignItems = 'flex-end'; menu.style.flexDirection = 'column-reverse'; menu.style.maxHeight = 'calc(100vh - 120px)'; menu.style.overflowY = 'auto'; } }
     if(typeof devPanel !== 'undefined' && devPanel){ devPanel.style.maxHeight = 'calc(100vh - 380px)'; devPanel.style.overflowY = 'auto'; } }
+  /* ── DNA LINKS (owner 11.9.2026: 'each nucleotide has to be separated and move like links in the chain') ──
+     The nucleus holds a 1000 bp B-DNA whose 2000 nucleotides are separate rigid bodies. nukleotidit.mol2 carries
+     eight templates (dA dT dG dC for each strand, real atoms with hydrogens, from the 1D28 crystal via
+     tyokalut/dna_nukleotidit.py), each expressed in ITS base pair's frame: origin on the helix axis, z along the
+     axis, x the reference direction. So base pair i is "frame i times template", and both strands share frame i.
+     The frames follow a rope-like axis inside the nucleus (Catmull-Rom through swaying control points, sampled by
+     arc length, normal parallel-transported and twisted 35.7 degrees per base pair). Every frame the 1000 frame
+     matrices go to a float texture; the shaders' LINKS path multiplies each instance by its link's matrix, so all
+     the geometry - vdW shells, nucleons, orbital lobes and the far blob - is static on the GPU and drawn through the
+     very same impostor / lobe shaders as the proteins. LoD per 50 bp chunk by camera distance: near = everything,
+     mid = shells (the cheap tier), far = one blob per nucleotide (the slab tier). */
+  if(SOLU_CELL && SOLU_CELL.NE){ try {
+    const recs = await preParsed('nukleotidit.mol2'), cst = await fetch('./nukleotidit.json').then(r => r.ok ? r.json() : null).catch(() => null);
+    const tmpl = {};
+    if(recs) for(const r of recs){ const mm = (r.name || '').trim().match(/^nuk-([AB])-(D[ATGC])$/); if(!mm || !r.na) continue;
+      let cx=0, cy=0, cz=0; for(let k=0;k<r.na;k++){ cx+=r.x[k]; cy+=r.y[k]; cz+=r.z[k]; } cx/=r.na; cy/=r.na; cz/=r.na;
+      const at = []; for(let k=0;k<r.na;k++){ const e=r.el[k], I=info(e); at.push({ q:[r.x[k], r.y[k], r.z[k]], e, rad:I.vr*FILL_SCALE, col:I.c, A:I.n, Z:I.z }); }
+      tmpl[mm[1] + mm[2]] = { at, orb: gRigidOrbSet(r), cen:[cx,cy,cz] }; }   // rigidOrbSet centres on the centroid: cen puts its lobes back into the frame
+    if(Object.keys(tmpl).length === 8 && cst){
+      const N_BP = 1000, RISE = cst.rise, TW = cst.twistDeg*Math.PI/180, CHUNK = 50, NCH = Math.ceil(N_BP/CHUNK), TEXW = 1024;
+      const LINK_SLOT = Math.min(MAX_MODELS - 1, mols.length + 1);   // an unused model slot (the rotor takes mols.length) holding the identity - the links' own transform comes from the texture; keeps modelCol in range
+      gModelXform.set([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1], LINK_SLOT*16); if(LINK_SLOT*3+2 < gModelCol.length){ gModelCol[LINK_SLOT*3]=0.75; gModelCol[LINK_SLOT*3+1]=0.80; gModelCol[LINK_SLOT*3+2]=0.88; }
+      const seed = i => { const v = Math.sin(i*12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
+      const PAIR = { A:'T', T:'A', G:'C', C:'G' }, seq = []; for(let i=0;i<N_BP;i++) seq.push('ATGC'[Math.floor(seed(i*7+5)*4)]);
+      // frame texture: link i (= base pair i) is a column-major mat4 in texels (i, 0..3)
+      const linkData = new Float32Array(TEXW*4*4);
+      const linkTex = new BABYLON.RawTexture(linkData, TEXW, 4, BABYLON.Constants.TEXTUREFORMAT_RGBA, scene, false, false, BABYLON.Texture.NEAREST_SAMPLINGMODE, BABYLON.Constants.TEXTURETYPE_FLOAT);
+      linkTex.wrapU = linkTex.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+      // materials: the protein materials' own option lists plus the LINKS path
+      const withLinks = (m, extraDefs) => { const o = m._options; return { attributes: o.attributes.concat(['linkId']), uniforms: o.uniforms.concat(['linkTexW']), samplers: (o.samplers || []).concat(['linkTex']), defines: (o.defines || []).concat(['#define LINKS']).concat(extraDefs || []) }; };
+      const bindLink = eff => { eff.setTexture('linkTex', linkTex); eff.setFloat('linkTexW', TEXW); };
+      const dnaShell = new BABYLON.ShaderMaterial('dnaShell', scene, 'imp', withLinks(vdwMat));
+      dnaShell.setFloat('radius',1.0); dnaShell.setFloat('isShell',0); dnaShell.setFloat('shellMin',0); dnaShell.setFloat('bubbleR',1e9); dnaShell.setFloat('protonOutline',0); dnaShell.setFloat('depthBias',0); dnaShell.setFloat('coneCos',-1.0);
+      dnaShell.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); dnaShell.backFaceCulling = false; realAlpha(dnaShell);
+      dnaShell.onBindObservable.add(() => { const eff = dnaShell.getEffect(); if(!eff) return;
+        eff.setFloat('isShell', gShell); eff.setFloat('shellMin', gShellMin); eff.setFloat('revealFade', gRevealFade); eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);
+        eff.setFloat('uT', gWaveT); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0); eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd);
+        eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter); eff.setFloat('selModel', gSelModel); eff.setColor3('selCol', SAGE); eff.setFloat('boil', gBoil);
+        eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); bindCof(eff); bindPLight(eff); bindLink(eff); });
+      const dnaNuc = new BABYLON.ShaderMaterial('dnaNuc', scene, 'imp', withLinks(nucMatG));
+      dnaNuc.setFloat('radius', NUCLEON_R); dnaNuc.setFloat('isShell', 0); dnaNuc.setFloat('bubbleR', BUBBLE_R); dnaNuc.setFloat('protonOutline', 0); dnaNuc.setFloat('depthBias', 0); dnaNuc.setFloat('coneCos', CONE_COS);
+      dnaNuc.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); dnaNuc.backFaceCulling = false;
+      dnaNuc.onBindObservable.add(() => { const eff = dnaNuc.getEffect(); if(!eff) return;
+        eff.setFloat('uT', gWaveT); eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd);
+        eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0); bindFocus(eff);
+        eff.setFloat('selModel', -1); eff.setColor3('selCol', SAGE); bindLink(eff); });
+      realAlpha(dnaNuc);
+      const dnaOrb = new BABYLON.ShaderMaterial('dnaOrb', scene, 'orb', withLinks(orbMatG));
+      dnaOrb.setFloat('bubbleR', 1e9); dnaOrb.setFloat('nElec', 2); dnaOrb.setFloat('coneCos', -1.0); dnaOrb.setFloat('drawElec', 1); realAlpha(dnaOrb); dnaOrb.backFaceCulling = true;
+      dnaOrb.onBindObservable.add(() => { const eff = dnaOrb.getEffect(); if(!eff) return;
+        eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR); eff.setFloat('uT', gWaveT); eff.setFloat('elecR', gCrisp); eff.setMatrices('modelXform', gModelXform);
+        eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter);
+        eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd); eff.setFloat('selModel', gSelModel); eff.setColor3('selCol', SAGE);
+        eff.setFloat('cofHideOn', gRevealOn); eff.setVector2('cofTexel', gCofTexel); if(cofDepthRT) eff.setTexture('cofDepth', cofDepthRT); bindFocus(eff); bindLink(eff); });
+      const dnaBond = new BABYLON.ShaderMaterial('dnaBond', scene, 'bond', withLinks(bondMatG('dnaBondProto')));
+      dnaBond.setFloat('bubbleR', 1e9); dnaBond.setFloat('nElec', 2); dnaBond.setFloat('coneCos', -1.0); dnaBond.setFloat('drawElec', 1); dnaBond.backFaceCulling = true;
+      dnaBond.onBindObservable.add(() => { const eff = dnaBond.getEffect(); if(!eff) return;
+        eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR); eff.setFloat('uT', gWaveT); eff.setFloat('elecR', gCrisp); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0);
+        eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter);
+        eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd); eff.setFloat('selModel', gSelModel); eff.setColor3('selCol', SAGE); eff.setFloat('opacity', 1.0); bindFocus(eff); bindLink(eff); });
+      // static geometry per chunk, every instance tagged with its base pair (linkId) and the identity model slot
+      const PC = [1.0, 0.5, 0.5], NC = [0.62, 0.62, 0.62], BLOB_R = 5.5, BLOB_COL = [0.75, 0.80, 0.88];
+      const mkMesh = (nm, sphere, mat) => { const m = sphere ? BABYLON.MeshBuilder.CreateSphere(nm, {segments:3, diameter:1}, scene) : BABYLON.MeshBuilder.CreatePlane(nm, {size:2}, scene);
+        m.material = mat; m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.renderingGroupId = 1; m.doNotSyncBoundingInfo = true; m.setEnabled(false); return m; };
+      const chunks = [];
+      for(let c=0;c<NCH;c++){ const bp0 = c*CHUNK, bp1 = Math.min(N_BP, bp0+CHUNK);
+        let nS=0, nN=0, nC=0, nB=0, nF=0;
+        const per = []; for(let i=bp0;i<bp1;i++){ const tA = tmpl['A'+'D'+seq[i]], tB = tmpl['B'+'D'+PAIR[seq[i]]]; per.push([i,tA],[i,tB]);
+          for(const t of [tA,tB]){ nS += t.at.length; for(const a of t.at) nN += a.A; nC += t.orb.core.m.length/16; nB += t.orb.bond.m.length/16; nF += 1; } }
+        const sM=new Float32Array(nS*16), sC=new Float32Array(nS*4), sR=new Float32Array(nS), sMid=new Float32Array(nS), sL=new Float32Array(nS);
+        const nM=new Float32Array(nN*16), nCc=new Float32Array(nN*4), nMid=new Float32Array(nN), nL=new Float32Array(nN);
+        const cM=new Float32Array(nC*16), cCol=new Float32Array(nC*3), cCen=new Float32Array(nC*3), cOid=new Float32Array(nC), cMid=new Float32Array(nC), cL=new Float32Array(nC);
+        const bM=new Float32Array(nB*16), bCol=new Float32Array(nB*3), bCen=new Float32Array(nB*3), bOid=new Float32Array(nB), bTap=new Float32Array(nB), bMid=new Float32Array(nB), bL=new Float32Array(nB);
+        const fM=new Float32Array(nF*16), fC=new Float32Array(nF*4), fR=new Float32Array(nF), fMid=new Float32Array(nF), fL=new Float32Array(nF);
+        let iS=0, iN=0, iC=0, iB=0, iF=0;
+        for(const [i, t] of per){
+          for(const a of t.at){ const o=iS*16; sM.fill(0,o,o+16); sM[o]=1; sM[o+5]=1; sM[o+10]=1; sM[o+15]=1; sM[o+12]=a.q[0]; sM[o+13]=a.q[1]; sM[o+14]=a.q[2];
+            sC[iS*4]=a.col[0]; sC[iS*4+1]=a.col[1]; sC[iS*4+2]=a.col[2]; sC[iS*4+3]=0; sR[iS]=a.rad; sMid[iS]=LINK_SLOT; sL[iS]=i; iS++;
+            for(let j=0;j<a.A;j++){ const p=iN*16; nM.fill(0,p,p+16); nM[p]=1; nM[p+5]=1; nM[p+10]=1; nM[p+15]=1;
+              nM[p+12]=a.q[0]+fcc[j][0]*SPACING; nM[p+13]=a.q[1]+fcc[j][1]*SPACING; nM[p+14]=a.q[2]+fcc[j][2]*SPACING; nM[p+3]=a.q[0]; nM[p+7]=a.q[1]; nM[p+11]=a.q[2];   // the atom centre in the w slots, as the protein nucleons do
+              const proton = Math.floor((j+1)*a.Z/a.A) > Math.floor(j*a.Z/a.A), col = proton ? PC : NC;
+              nCc[iN*4]=col[0]; nCc[iN*4+1]=col[1]; nCc[iN*4+2]=col[2]; nCc[iN*4+3]=proton?1:0; nMid[iN]=LINK_SLOT; nL[iN]=i; iN++; } }
+          const oc = t.orb.core, ob = t.orb.bond, cen = t.cen;
+          for(let q=0;q<oc.m.length/16;q++){ const o=iC*16; for(let j=0;j<16;j++) cM[o+j]=oc.m[q*16+j]; cM[o+12]+=cen[0]; cM[o+13]+=cen[1]; cM[o+14]+=cen[2];
+            cCol[iC*3]=oc.col[q*3]; cCol[iC*3+1]=oc.col[q*3+1]; cCol[iC*3+2]=oc.col[q*3+2]; cCen[iC*3]=oc.cen[q*3]+cen[0]; cCen[iC*3+1]=oc.cen[q*3+1]+cen[1]; cCen[iC*3+2]=oc.cen[q*3+2]+cen[2]; cOid[iC]=oc.oid[q]; cMid[iC]=LINK_SLOT; cL[iC]=i; iC++; }
+          for(let q=0;q<ob.m.length/16;q++){ const o=iB*16; for(let j=0;j<16;j++) bM[o+j]=ob.m[q*16+j]; bM[o+12]+=cen[0]; bM[o+13]+=cen[1]; bM[o+14]+=cen[2];
+            bCol[iB*3]=ob.col[q*3]; bCol[iB*3+1]=ob.col[q*3+1]; bCol[iB*3+2]=ob.col[q*3+2]; bCen[iB*3]=ob.cen[q*3]+cen[0]; bCen[iB*3+1]=ob.cen[q*3+1]+cen[1]; bCen[iB*3+2]=ob.cen[q*3+2]+cen[2]; bOid[iB]=ob.oid[q]; bTap[iB]=ob.tap ? ob.tap[q] : 1; bMid[iB]=LINK_SLOT; bL[iB]=i; iB++; }
+          { const o=iF*16; fM.fill(0,o,o+16); fM[o]=1; fM[o+5]=1; fM[o+10]=1; fM[o+15]=1; fM[o+12]=cen[0]; fM[o+13]=cen[1]; fM[o+14]=cen[2];
+            fC[iF*4]=BLOB_COL[0]; fC[iF*4+1]=BLOB_COL[1]; fC[iF*4+2]=BLOB_COL[2]; fC[iF*4+3]=0; fR[iF]=BLOB_R; fMid[iF]=LINK_SLOT; fL[iF]=i; iF++; }
+        }
+        const shells = mkMesh('dnaS'+c, false, dnaShell); shells.thinInstanceSetBuffer('matrix', sM, 16, true); shells.thinInstanceSetBuffer('instanceColor', sC, 4, true); shells.thinInstanceSetBuffer('instR', sR, 1, true); shells.thinInstanceSetBuffer('modelId', sMid, 1, true); shells.thinInstanceSetBuffer('linkId', sL, 1, true);
+        const nucs = mkMesh('dnaN'+c, false, dnaNuc); nucs.thinInstanceSetBuffer('matrix', nM, 16, true); nucs.thinInstanceSetBuffer('instanceColor', nCc, 4, true); nucs.thinInstanceSetBuffer('modelId', nMid, 1, true); nucs.thinInstanceSetBuffer('linkId', nL, 1, true);
+        const cores = mkMesh('dnaC'+c, true, dnaOrb); cores.thinInstanceSetBuffer('matrix', cM, 16, true); cores.thinInstanceSetBuffer('ocol', cCol, 3, true); cores.thinInstanceSetBuffer('ocen', cCen, 3, true); cores.thinInstanceSetBuffer('oid', cOid, 1, true); cores.thinInstanceSetBuffer('modelId', cMid, 1, true); cores.thinInstanceSetBuffer('linkId', cL, 1, true);
+        const bonds = mkMesh('dnaB'+c, true, dnaBond); bonds.thinInstanceSetBuffer('matrix', bM, 16, true); bonds.thinInstanceSetBuffer('bcol', bCol, 3, true); bonds.thinInstanceSetBuffer('ocen', bCen, 3, true); bonds.thinInstanceSetBuffer('oid', bOid, 1, true); bonds.thinInstanceSetBuffer('taper', bTap, 1, true); bonds.thinInstanceSetBuffer('modelId', bMid, 1, true); bonds.thinInstanceSetBuffer('linkId', bL, 1, true);
+        const blobs = mkMesh('dnaF'+c, false, dnaShell); blobs.thinInstanceSetBuffer('matrix', fM, 16, true); blobs.thinInstanceSetBuffer('instanceColor', fC, 4, true); blobs.thinInstanceSetBuffer('instR', fR, 1, true); blobs.thinInstanceSetBuffer('modelId', fMid, 1, true); blobs.thinInstanceSetBuffer('linkId', fL, 1, true);
+        chunks.push({ bp0, bp1, shells, nucs, cores, bonds, blobs, tier:-1 });
+        if(c % 4 === 3) await yield_();
+      }
+      // the rope axis inside the nucleus
+      const NE = SOLU_CELL.NE, NC0 = NE.C, NR = NE.R * 0.72, K = 24, M = 4000, totalL = N_BP*RISE;
+      const base = []; { let p = new BABYLON.Vector3(NC0.x - NR*0.5, NC0.y, NC0.z), d = new BABYLON.Vector3(1, 0.3, -0.5).normalize(); const stepL = totalL*1.12/(K-1);
+        for(let k=0;k<K;k++){ base.push(p.clone());
+          const turn = new BABYLON.Vector3(seed(k*3+1)-0.5, seed(k*3+2)-0.5, seed(k*3+3)-0.5).scale(1.1); d = d.add(turn).normalize();
+          let q = p.add(d.scale(stepL)); const off = q.subtract(NC0); if(off.length() > NR){ d = d.subtract(off.normalize().scale(1.7)).normalize(); q = p.add(d.scale(stepL)); }
+          p = q; } }
+      const ctrl = base.map(b => b.clone()), _p = [0,0,0];
+      const sample = (u, out) => { const k = Math.max(0, Math.min(K-2, Math.floor(u))), t = u - k;
+        const p0 = ctrl[Math.max(0,k-1)], p1 = ctrl[k], p2 = ctrl[Math.min(K-1,k+1)], p3 = ctrl[Math.min(K-1,k+2)], t2 = t*t, t3 = t2*t;
+        out[0] = 0.5*((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3);
+        out[1] = 0.5*((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3);
+        out[2] = 0.5*((2*p1.z) + (-p0.z+p2.z)*t + (2*p0.z-5*p1.z+4*p2.z-p3.z)*t2 + (-p0.z+3*p1.z-3*p2.z+p3.z)*t3); };
+      const pts = new Float32Array(M*3), arc = new Float32Array(M), nrmA = new Float32Array(M*3), bpPos = new Float32Array(N_BP*3);
+      let dnaT = 0;
+      const poseLinks = () => {
+        for(let i=0;i<M;i++){ sample(i/(M-1)*(K-1), _p); pts[i*3]=_p[0]; pts[i*3+1]=_p[1]; pts[i*3+2]=_p[2]; }
+        arc[0] = 0; for(let i=1;i<M;i++){ const dx=pts[i*3]-pts[(i-1)*3], dy=pts[i*3+1]-pts[(i-1)*3+1], dz=pts[i*3+2]-pts[(i-1)*3+2]; arc[i] = arc[i-1] + Math.hypot(dx,dy,dz); }
+        let nx = 0, ny = 1, nz = 0;
+        for(let i=0;i<M;i++){ const a = Math.max(0,i-1), b = Math.min(M-1,i+1); let tx=pts[b*3]-pts[a*3], ty=pts[b*3+1]-pts[a*3+1], tz=pts[b*3+2]-pts[a*3+2]; const tl=Math.hypot(tx,ty,tz)||1; tx/=tl; ty/=tl; tz/=tl;
+          const d = nx*tx+ny*ty+nz*tz; nx-=d*tx; ny-=d*ty; nz-=d*tz; let l=Math.hypot(nx,ny,nz);
+          if(l<1e-4){ nx = Math.abs(tx)<0.9?1:0; ny = Math.abs(tx)<0.9?0:1; nz=0; const d2=nx*tx+ny*ty; nx-=d2*tx; ny-=d2*ty; nz-=d2*tz; l=Math.hypot(nx,ny,nz)||1; }
+          nx/=l; ny/=l; nz/=l; nrmA[i*3]=nx; nrmA[i*3+1]=ny; nrmA[i*3+2]=nz; }
+        let j = 1;
+        for(let i=0;i<N_BP;i++){ const sArc = i*RISE; while(j < M-1 && arc[j] < sArc) j++;
+          const a = Math.max(0,j-1), b = Math.min(M-1,j+1), f = (sArc - arc[j-1]) / Math.max(1e-6, arc[j]-arc[j-1]);
+          const px = pts[(j-1)*3] + (pts[j*3]-pts[(j-1)*3])*f, py = pts[(j-1)*3+1] + (pts[j*3+1]-pts[(j-1)*3+1])*f, pz = pts[(j-1)*3+2] + (pts[j*3+2]-pts[(j-1)*3+2])*f;
+          let tx=pts[b*3]-pts[a*3], ty=pts[b*3+1]-pts[a*3+1], tz=pts[b*3+2]-pts[a*3+2]; const tl=Math.hypot(tx,ty,tz)||1; tx/=tl; ty/=tl; tz/=tl;
+          const n0x=nrmA[j*3], n0y=nrmA[j*3+1], n0z=nrmA[j*3+2], bx0=ty*n0z-tz*n0y, by0=tz*n0x-tx*n0z, bz0=tx*n0y-ty*n0x;   // binormal = T x N
+          const ph = i*TW, c = Math.cos(ph), sn = Math.sin(ph);
+          const xx = n0x*c + bx0*sn, xy = n0y*c + by0*sn, xz = n0z*c + bz0*sn;          // x = N rotated about T by the twist
+          const yx = ty*xz - tz*xy, yy = tz*xx - tx*xz, yz = tx*xy - ty*xx;                 // y = T x X
+          const o = i*4;   // column-major mat4 in four texels: columns x, y, z(=T), translation
+          linkData[o]=xx; linkData[o+1]=xy; linkData[o+2]=xz; linkData[o+3]=0;
+          linkData[TEXW*4 + o]=yx; linkData[TEXW*4 + o+1]=yy; linkData[TEXW*4 + o+2]=yz; linkData[TEXW*4 + o+3]=0;
+          linkData[TEXW*8 + o]=tx; linkData[TEXW*8 + o+1]=ty; linkData[TEXW*8 + o+2]=tz; linkData[TEXW*8 + o+3]=0;
+          linkData[TEXW*12 + o]=px; linkData[TEXW*12 + o+1]=py; linkData[TEXW*12 + o+2]=pz; linkData[TEXW*12 + o+3]=1;
+          bpPos[i*3]=px; bpPos[i*3+1]=py; bpPos[i*3+2]=pz; }
+        linkTex.update(linkData);
+      };
+      poseLinks();
+      scene.onBeforeRenderObservable.add(() => {
+        const dt = Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; dnaT += dt;
+        for(let k=0;k<K;k++){ const b = base[k], ph = k*0.55;   // the rope's sway: slow sines, phase running along the chain
+          ctrl[k].set(b.x + 120*Math.sin(0.31*dnaT + ph) + 50*Math.sin(0.83*dnaT + ph*1.7),
+                      b.y + 100*Math.sin(0.27*dnaT + ph + 1.3) + 45*Math.sin(0.71*dnaT + ph*2.1),
+                      b.z + 120*Math.sin(0.35*dnaT + ph + 2.6) + 50*Math.sin(0.67*dnaT + ph*1.3));
+          const off = ctrl[k].subtract(NC0), L = off.length(); if(L > NR) ctrl[k].copyFrom(NC0.add(off.scale(NR/L))); }
+        poseLinks();
+        // LoD per chunk: near = shells + nucleons + orbitals, mid = shells (cheap), far = blobs (slab)
+        const cp = cam.position, memR = deriveLod().memR, nearR = gCrisp + 60;
+        for(const ch of chunks){ let cx=0, cy=0, cz=0, n=0; for(let i=ch.bp0;i<ch.bp1;i++){ cx+=bpPos[i*3]; cy+=bpPos[i*3+1]; cz+=bpPos[i*3+2]; n++; } cx/=n; cy/=n; cz/=n;
+          const d = Math.hypot(cx-cp.x, cy-cp.y, cz-cp.z) - (ch.bp1-ch.bp0)*RISE*0.5;   // to the chunk's near end
+          const tier = d < nearR ? 0 : (d < memR ? 1 : 2);
+          if(tier === ch.tier) continue; ch.tier = tier;
+          ch.shells.setEnabled(tier <= 1); ch.nucs.setEnabled(tier === 0); ch.cores.setEnabled(tier === 0); ch.bonds.setEnabled(tier === 0); ch.blobs.setEnabled(tier === 2); }
+      }, -1, true);
+      window.gDnaLinks = { chunks, bpPos, N_BP };   // dev: where the chain is
+      console.log('DNA links: ' + N_BP + ' bp, ' + chunks.length + ' chunks');
+    } else console.warn('DNA links: nukleotidit.mol2 / .json puuttuu tai vajaa', Object.keys(tmpl));
+  } catch(err){ console.warn('DNA links failed:', err); } }
   dockChrome();
   try { applyDevMode(); } catch(_){}
   setBar(1); setLbl('Valmis');

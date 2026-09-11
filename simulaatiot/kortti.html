@@ -345,6 +345,12 @@ precision highp float;
 attribute vec3 position;
 attribute vec4 instanceColor;
 attribute vec4 world0;
+#ifdef LINKS
+attribute float linkId;   // DNA links: which base-pair frame this instance rides on (a column-major mat4 in linkTex, 4 texels per link)
+uniform sampler2D linkTex; uniform float linkTexW;
+mat4 linkMat(float id){ float u = (id + 0.5) / linkTexW;
+  return mat4(texture2D(linkTex, vec2(u, 0.125)), texture2D(linkTex, vec2(u, 0.375)), texture2D(linkTex, vec2(u, 0.625)), texture2D(linkTex, vec2(u, 0.875))); }
+#endif
 attribute vec4 world1;
 attribute vec4 world2;
 attribute vec4 world3;
@@ -524,6 +530,10 @@ vec3 memSway(vec3 b, float sid){ float ph = b.x*0.28 + b.z*0.24;
 void main(void){
   float tasoDim = 0.0;   // dev plane: 1 = this molecule is off the plane while the dim switch is on
   mat4 W = mat4(world0, world1, world2, world3);
+#ifdef LINKS
+  { mat4 LM = linkMat(linkId); vec3 pc = vec3(W[0].w, W[1].w, W[2].w); W[0].w = 0.0; W[1].w = 0.0; W[2].w = 0.0; W = LM * W;   // the link's frame first - a nucleon's atom centre rides in the w slots, so it is moved separately (no semicolons in GLSL comments)
+    if(dot(pc, pc) > 0.0){ vec3 q = (LM * vec4(pc, 1.0)).xyz; W[0].w = q.x; W[1].w = q.y; W[2].w = q.z; } }
+#endif
 #ifdef LIPWRAP
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
@@ -1169,7 +1179,13 @@ attribute vec4 world1;
 attribute vec4 world2;
 attribute vec4 world3;
 attribute float taper;     // per-lobe: widen the far end by bond polarity (0 = uniform ellipsoid)
-attribute vec3 ocen;       // this lobe's atom centre → compare to the selected atom
+attribute vec3 ocen;
+#ifdef LINKS
+attribute float linkId;   // DNA links: which base-pair frame this instance rides on (a column-major mat4 in linkTex, 4 texels per link)
+uniform sampler2D linkTex; uniform float linkTexW;
+mat4 linkMat(float id){ float u = (id + 0.5) / linkTexW;
+  return mat4(texture2D(linkTex, vec2(u, 0.125)), texture2D(linkTex, vec2(u, 0.375)), texture2D(linkTex, vec2(u, 0.625)), texture2D(linkTex, vec2(u, 0.875))); }
+#endif       // this lobe's atom centre → compare to the selected atom
 attribute vec3 bcol;       // per-instance element colour (so bonds combine across elements per cell)
 uniform float planeDim; uniform float planeZ; uniform vec3 psuLo; uniform vec3 psuHi;   // dev plane (free orbitals only)
 attribute float oid;       // orbital id (hybrid = 1000+i, π = 900, lone pair = 2000+i) → focus filter
@@ -1245,6 +1261,9 @@ vec3 memSway(vec3 b, float sid){ float ph = b.x*0.28 + b.z*0.24;
 #endif
 void main(void){
   mat4 W = mat4(world0, world1, world2, world3);
+#ifdef LINKS
+  mat4 LM = linkMat(linkId); W = LM * W;   // DNA link: the base-pair frame
+#endif
 #ifdef LIPWRAP
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
@@ -1311,7 +1330,9 @@ void main(void){
   vec3 M0=world0.xyz, M1=world1.xyz, M2=world2.xyz;   // cofactor matrix → correct normal under non-uniform scale
   vec3 wn = cross(M1,M2)*sn.x + cross(M2,M0)*sn.y + cross(M0,M1)*sn.z;
   vNrmV = (view * vec4(wn, 0.0)).xyz;
-#ifdef LIPBAKE
+#ifdef LINKS
+  vec3 ocenW = (LM * vec4(ocen, 1.0)).xyz;   // DNA link: the atom centre in its frame
+#elif defined(LIPBAKE)
   vec3 ocenW = mat3(W) * ocen + W[3].xyz;  // baked templates hold ocen lipid-local, so the instance puts it in the world (rotated with the lipid)
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
@@ -1540,7 +1561,13 @@ precision highp float;
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 ocol;
-attribute vec3 ocen;       // this orbital's atom centre (world) → compare to the selected atom
+attribute vec3 ocen;
+#ifdef LINKS
+attribute float linkId;   // DNA links: which base-pair frame this instance rides on (a column-major mat4 in linkTex, 4 texels per link)
+uniform sampler2D linkTex; uniform float linkTexW;
+mat4 linkMat(float id){ float u = (id + 0.5) / linkTexW;
+  return mat4(texture2D(linkTex, vec2(u, 0.125)), texture2D(linkTex, vec2(u, 0.375)), texture2D(linkTex, vec2(u, 0.625)), texture2D(linkTex, vec2(u, 0.875))); }
+#endif       // this orbital's atom centre (world) → compare to the selected atom
 uniform float planeDim; uniform float planeZ; uniform vec3 psuLo; uniform vec3 psuHi;   // dev plane (free orbitals only): lobes of off-plane molecules inside the PSU box are not drawn
 attribute float oid;       // subshell id → focus filter
 #ifdef SEEDATTR
@@ -1611,6 +1638,9 @@ vec3 memSway(vec3 b, float sid){ float ph = b.x*0.28 + b.z*0.24;
 #endif
 void main(void){
   mat4 W = mat4(world0, world1, world2, world3);
+#ifdef LINKS
+  mat4 LM = linkMat(linkId); W = LM * W;   // DNA link: the base-pair frame
+#endif
 #ifdef LIPWRAP
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
@@ -1671,7 +1701,9 @@ void main(void){
   vec3 wn = cross(M1,M2)*normal.x + cross(M2,M0)*normal.y + cross(M0,M1)*normal.z;
   vNrmV = (view * vec4(wn, 0.0)).xyz;
   vCol = ocol;   // orbitals ALWAYS keep their element colour — per-model pastel applies to the vdW spheres only
-#ifdef LIPBAKE
+#ifdef LINKS
+  vec3 ocenW = (LM * vec4(ocen, 1.0)).xyz;   // DNA link: the atom centre in its frame
+#elif defined(LIPBAKE)
   vec3 ocenW = mat3(W) * ocen + W[3].xyz;  // baked templates hold ocen lipid-local, so the instance puts it in the world (rotated with the lipid)
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
