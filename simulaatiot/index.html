@@ -3116,9 +3116,12 @@ async function run(){
     {match:'plastoquinone', x:-495, y:150, z:135, label:'Plastoquinone'},   // one PL9 plucked from cytb6f → its own file, beside the lone chlorophyll
     {match:'nadph', x:-425, y:150, z:135, label:'NADPH'},   // one NADP+ plucked from FNR → its own file, beside the chlorophyll + quinone (coloured pink)
   ];
+  /* Webcyte: the DNA's 30 segments (dna-seg-00 ... dna-seg-29). Their sheet position is a placeholder inside the existing bounds; the rope observer below moves them into the nucleus every frame. */
+  if(SOLU) for(let k=0;k<30;k++) MODELS.push({ match:'dna-seg-'+String(k).padStart(2,'0'), x:-3000 + k*160, y:2600, z:0, label:'DNA', dna:true });   // placeholders spread out and clear of every other model: each atom is bound to the model whose bounding box holds it (modelOf), so the segments must not overlap anything at load; they are excluded from the scene bounds below
   const FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_synthase.mol2','NDH-1.mol2',
     'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2','PGR5.mol2',
     'PGRL1.mol2','PPH1.mol2','STN7.mol2','Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];
+  if(SOLU) FILES.push('DNA_1000.mol2');   // Webcyte: the 1000 bp B-DNA in 30 rigid segments (tyokalut/dna_rakenna.py), each a model of its own
   setLbl('Haetaan tylakoidimalleja…');
   const mols = [];
   for(let i=0;i<FILES.length;i++){ const fn=FILES[i];
@@ -3131,6 +3134,7 @@ async function run(){
         const cfg = MODELS.find(e => !e._used && nm.includes(e.match));   // match by internal name/code
         if(!cfg){ console.log('unmatched molecule "'+m.name+'" in '+fn+' (skipped)'); continue; }
         cfg._used = true; cfg.file = fn; m.cfg = cfg; m.name = cfg.label;
+        if(cfg.dna){ const mm = nm.match(/-bp(\d+)/); cfg.bpN = mm ? +mm[1] : 33; }   // the segment's base-pair count rides in the molecule name (dna-seg-00-bp33)
         markTyrZ(m);                                   // tag the OEC-adjacent tyrosine as Tyr Z (needs raw, pre-transform coords)
         mols.push(m); }
     }catch(err){ console.warn('failed to load', fn, err); }
@@ -6997,80 +7001,7 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
         eff.setVector3('cellWrap', _wrap); eff.setVector3('cellCam', cam.position); eff.setVector3('cellCen', CEN); eff.setFloat('cellR', SOLU_CELL.R);
         eff.setFloat('cellFacetY', bilayerCen.y); eff.setFloat('cellMemT', mT); eff.setFloat('cellClipAll', haze ? 1 : 0);
         eff.setArray4('orgA', orgA); eff.setArray4('orgB', orgB); eff.setFloat('nOrg', Math.min(32, SOLU_CELL.ORG.length)); };
-      /* ── DNA in the nucleus (owner 11.9.2026): one 1000 bp double helix that wiggles like a rope ─────────────
-     Geometry: B-DNA numbers scaled to the scene - 3.4 per base pair along the axis (3400 long), 10 bp per turn, the two
-     strands 10 off the axis (20 across). The axis is a Catmull-Rom curve through DNA_K control points scattered inside
-     the nucleus; each control point sways on a slow sum of sines whose phase advances along the chain, so the whole
-     thing undulates like a length of rope rather than jittering. Strands are two updatable tubes, the base pairs three
-     small spheres per rung (thin instances) coloured by base: A yellow, T red, G green, C blue. */
-  if(false && SOLU_CELL && SOLU_CELL.NE){   // DISABLED (owner 11.9.2026: 'looks like a textbook doodle') - the DNA must be built from real atoms through the same LoD pipeline as every other molecule; this tube version stays only as the rope-axis reference
-    const NE = SOLU_CELL.NE, NC = NE.C, NR = NE.R * 0.72;   // keep the chain well inside the inner envelope (2500)
-    const DNA_BP = 1000, DNA_K = 24, RISE = 3.4, HELIX_R = 10, TWIST = 2*Math.PI/10;
-    const seed = i => { const v = Math.sin(i*12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
-    // control points: a random walk that stays inside the sphere, spaced so the chain roughly fills its length
-    const base = []; { let p = new BABYLON.Vector3(NC.x, NC.y, NC.z); let d = new BABYLON.Vector3(1, 0.3, -0.5).normalize();
-      const stepL = (DNA_BP*RISE)/(DNA_K-1) * 0.9;
-      for(let k=0;k<DNA_K;k++){ base.push(p.clone());
-        const turn = new BABYLON.Vector3(seed(k*3+1)-0.5, seed(k*3+2)-0.5, seed(k*3+3)-0.5).scale(1.4); d = d.add(turn).normalize();
-        let q = p.add(d.scale(stepL)); const off = q.subtract(NC); if(off.length() > NR){ d = d.subtract(off.normalize().scale(1.6)).normalize(); q = p.add(d.scale(stepL)); }
-        p = q; } }
-    const ctrl = base.map(b => b.clone());
-    const strandA = new Array(DNA_BP), strandB = new Array(DNA_BP); for(let i=0;i<DNA_BP;i++){ strandA[i] = new BABYLON.Vector3(); strandB[i] = new BABYLON.Vector3(); }
-    const BASES = 'ATGC', pair = { A:'T', T:'A', G:'C', C:'G' }, BCOL = { A:[0.95,0.80,0.25], T:[0.90,0.30,0.30], G:[0.35,0.80,0.40], C:[0.35,0.55,0.95] };
-    const seq = []; for(let i=0;i<DNA_BP;i++) seq.push(BASES[Math.floor(seed(i*7+5)*4)]);
-    const mat = (nm, c) => { const m = new BABYLON.StandardMaterial(nm, scene); m.diffuseColor = new BABYLON.Color3(c[0], c[1], c[2]); m.specularColor = new BABYLON.Color3(0.15,0.15,0.15); m.emissiveColor = new BABYLON.Color3(c[0]*0.25, c[1]*0.25, c[2]*0.25); return m; };
-    const mkTube = (nm, path, col) => { const t = BABYLON.MeshBuilder.CreateTube(nm, { path, radius: 4.2, tessellation: 8, updatable: true, cap: BABYLON.Mesh.CAP_ALL }, scene); t.material = mat(nm+'Mat', col); t.isPickable = false; t.alwaysSelectAsActiveMesh = true; t.renderingGroupId = 1; return t; };
-    // rung spheres: one mesh per base letter (its colour), instances placed each frame
-    const rung = {}; for(const b of BASES){ const m = BABYLON.MeshBuilder.CreateSphere('dnaBase'+b, { segments: 5, diameter: 5.6 }, scene); m.material = mat('dnaBase'+b+'Mat', BCOL[b]); m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.renderingGroupId = 1;
-      const cnt = seq.filter(x => x === b).length + seq.filter(x => pair[x] === b).length; m._dnaN = cnt*3; m._dnaM = new Float32Array(cnt*3*16); m._dnaI = 0; rung[b] = m; }
-    const putBall = (m, x, y, z) => { const o = m._dnaI*16; const M = m._dnaM; M.fill(0, o, o+16); M[o]=1; M[o+5]=1; M[o+10]=1; M[o+15]=1; M[o+12]=x; M[o+13]=y; M[o+14]=z; m._dnaI++; };
-    // Catmull-Rom sample at parameter u in [0, DNA_K-1]
-    const _cr = new BABYLON.Vector3();
-    const sample = (u, out) => { const k = Math.max(0, Math.min(DNA_K-2, Math.floor(u))), t = u - k;
-      const p0 = ctrl[Math.max(0,k-1)], p1 = ctrl[k], p2 = ctrl[Math.min(DNA_K-1,k+1)], p3 = ctrl[Math.min(DNA_K-1,k+2)];
-      const t2 = t*t, t3 = t2*t;
-      out.x = 0.5*((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3);
-      out.y = 0.5*((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3);
-      out.z = 0.5*((2*p1.z) + (-p0.z+p2.z)*t + (2*p0.z-5*p1.z+4*p2.z-p3.z)*t2 + (-p0.z+3*p1.z-3*p2.z+p3.z)*t3); return out; };
-    const axisPts = new Array(DNA_BP); for(let i=0;i<DNA_BP;i++) axisPts[i] = new BABYLON.Vector3();
-    const _tan = new BABYLON.Vector3(), _n = new BABYLON.Vector3(0,1,0), _b = new BABYLON.Vector3(), _tmp = new BABYLON.Vector3();
-    const build = () => {
-      for(let i=0;i<DNA_BP;i++) sample(i/(DNA_BP-1)*(DNA_K-1), axisPts[i]);
-      for(const b of BASES) rung[b]._dnaI = 0;
-      // parallel-transport frame along the axis, twisted 36 degrees per base pair
-      let nx = 0, ny = 1, nz = 0;
-      for(let i=0;i<DNA_BP;i++){ const p = axisPts[i], q = axisPts[Math.min(DNA_BP-1, i+1)], r = axisPts[Math.max(0, i-1)];
-        _tan.set(q.x-r.x, q.y-r.y, q.z-r.z).normalize();
-        // remove the tangent component from the carried normal, renormalise (parallel transport)
-        const d = nx*_tan.x + ny*_tan.y + nz*_tan.z; nx -= d*_tan.x; ny -= d*_tan.y; nz -= d*_tan.z; let l = Math.hypot(nx,ny,nz); if(l < 1e-4){ nx = 1; ny = 0; nz = 0; l = 1; } nx/=l; ny/=l; nz/=l;
-        const bx = _tan.y*nz - _tan.z*ny, by = _tan.z*nx - _tan.x*nz, bz = _tan.x*ny - _tan.y*nx;
-        const ph = i*TWIST, c = Math.cos(ph), sn = Math.sin(ph);
-        const ux = nx*c + bx*sn, uy = ny*c + by*sn, uz = nz*c + bz*sn;   // radial direction of strand A at this base pair
-        strandA[i].set(p.x + ux*HELIX_R, p.y + uy*HELIX_R, p.z + uz*HELIX_R);
-        strandB[i].set(p.x - ux*HELIX_R, p.y - uy*HELIX_R, p.z - uz*HELIX_R);
-        const b1 = seq[i], b2 = pair[b1];   // the rung: three balls from strand A to the axis in b1's colour, three from the axis to strand B in b2's colour
-        for(const f of [0.8, 0.55, 0.3]) putBall(rung[b1], p.x + ux*HELIX_R*f, p.y + uy*HELIX_R*f, p.z + uz*HELIX_R*f);
-        for(const f of [0.8, 0.55, 0.3]) putBall(rung[b2], p.x - ux*HELIX_R*f, p.y - uy*HELIX_R*f, p.z - uz*HELIX_R*f);
-      }
-      for(const b of BASES){ const m = rung[b]; if(m._dnaI*16 > m._dnaM.length){ m._dnaM = new Float32Array(m._dnaI*16*2); m._dnaI = 0; return build(); } m.thinInstanceSetBuffer('matrix', m._dnaM, 16, false); m.thinInstanceCount = m._dnaI; }
-    };
-    build();
-    const tubeA = mkTube('dnaStrandA', strandA, [0.55,0.62,0.85]), tubeB = mkTube('dnaStrandB', strandB, [0.80,0.62,0.45]);
-    // the rope's sway: every control point drifts on three slow sines; the phase advances along the chain so a wave travels down the rope
-    let dnaT = 0;
-    scene.onBeforeRenderObservable.add(() => {
-      const dt = Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; dnaT += dt;
-      for(let k=0;k<DNA_K;k++){ const b = base[k], ph = k*0.55;
-        ctrl[k].set(b.x + 140*Math.sin(0.31*dnaT + ph) + 60*Math.sin(0.83*dnaT + ph*1.7),
-                    b.y + 120*Math.sin(0.27*dnaT + ph + 1.3) + 55*Math.sin(0.71*dnaT + ph*2.1),
-                    b.z + 140*Math.sin(0.35*dnaT + ph + 2.6) + 60*Math.sin(0.67*dnaT + ph*1.3));
-        const off = ctrl[k].subtract(NC), L = off.length(); if(L > NR) ctrl[k].copyFrom(NC.add(off.scale(NR/L))); }   // never through the envelope
-      build();
-      BABYLON.MeshBuilder.CreateTube('dnaStrandA', { path: strandA, instance: tubeA });
-      BABYLON.MeshBuilder.CreateTube('dnaStrandB', { path: strandB, instance: tubeB });
-    });
-  }
-  /* pills: the whole cell from outside, the plasma membrane's outer face, the nucleus from below, the organelles */
+      /* pills: the whole cell from outside, the plasma membrane's outer face, the nucleus from below, the organelles */
       const at = (M, d, dist) => () => { const l = Math.hypot(d[0],d[1],d[2]); SOLU_CELL.surf(M, [d[0]/l, d[1]/l, d[2]/l], _sf); return { pos: new BABYLON.Vector3(_sf.p[0], _sf.p[1], _sf.p[2]), dist }; };
       window.__cellGoto = {
         'solu': () => ({ pos: CEN.clone(), dist: SOLU_CELL.R*3.2 }),
@@ -7315,7 +7246,7 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
   /* Frame camera on the whole row (fit both axes for any viewport aspect) */
   let gMiX=Infinity,gMiY=Infinity,gMaX=-Infinity,gMaY=-Infinity,gMiZ=Infinity,gMaZ=-Infinity;
   for(let mi=0;mi<mols.length;mi++){
-    const b=box[mi];
+    const b=box[mi]; if(mols[mi].cfg && mols[mi].cfg.dna) continue;   // the DNA placeholders sit far above the sheet on purpose - not part of the scene bounds
     gMiX=Math.min(gMiX,b.miX+mols[mi].ox); gMaX=Math.max(gMaX,b.maX+mols[mi].ox);
     gMiY=Math.min(gMiY,b.miY+mols[mi].oy); gMaY=Math.max(gMaY,b.maY+mols[mi].oy);
     gMiZ=Math.min(gMiZ,b.miZ+mols[mi].oz); gMaZ=Math.max(gMaZ,b.maZ+mols[mi].oz);
@@ -9438,8 +9369,68 @@ let gDevPsuBox = null, gPsuLo = null, gPsuHi = null;   // the box around the pho
         BABYLON.Quaternion.FromRotationMatrixToRef(_rm, _q);
         gModelQuat[mi*4]=_q.x; gModelQuat[mi*4+1]=_q.y; gModelQuat[mi*4+2]=_q.z; gModelQuat[mi*4+3]=_q.w;
         gModelOff[mi*3]=nx-c.cx; gModelOff[mi*3+1]=ny-c.cy; gModelOff[mi*3+2]=nz-c.cz; rebuildModelXform(mi); } } }
+  /* ── DNA ROPE (owner 11.9.2026): the 30 rigid B-DNA segments (DNA_1000.mol2 - real atoms, 1000 bp, from the 1D28
+     crystal via tyokalut/dna_rakenna.py) are strung along a rope-like axis inside the nucleus. The axis is a
+     Catmull-Rom curve through K control points that sway on slow sines whose phase advances along the chain; it is
+     sampled finely for arc length, and segment k sits at the arc position of its base pairs with its helix axis
+     (local +Z) along the tangent and its local +X along the parallel-transported normal, so the helix phase runs on
+     from one segment to the next. Poses go through gModelQuat / gModelOff / rebuildModelXform like every other
+     model, so atoms, orbitals, hull, slab LoD and shell all follow. */
+  const gDnaSegs = mols.map((m, mi) => (m.cfg && m.cfg.dna) ? mi : -1).filter(mi => mi >= 0);
+  if(SOLU_CELL && SOLU_CELL.NE && gDnaSegs.length){
+    for(const mi of gDnaSegs) gOrganelleModels.add(mi);   // not a bouncer, never flattened, left alone by the cap placement
+    const NE = SOLU_CELL.NE, NC = NE.C, NR = NE.R * 0.72, K = 24, RISE = 3.32, M = 4000;
+    const bpN = gDnaSegs.map(mi => mols[mi].cfg.bpN || 33), totalL = bpN.reduce((a, b) => a + b, 0) * RISE;
+    const segMid = []; { let acc = 0; for(const nbp of bpN){ segMid.push(acc + nbp*RISE/2); acc += nbp*RISE; } }
+    const seed = i => { const v = Math.sin(i*12.9898 + 78.233) * 43758.5453; return v - Math.floor(v); };
+    // control points: a seeded random walk inside the sphere, long enough that the curve outruns the chain
+    const base = []; { let p = new BABYLON.Vector3(NC.x - NR*0.5, NC.y, NC.z), d = new BABYLON.Vector3(1, 0.3, -0.5).normalize(); const stepL = totalL*1.12/(K-1);
+      for(let k=0;k<K;k++){ base.push(p.clone());
+        const turn = new BABYLON.Vector3(seed(k*3+1)-0.5, seed(k*3+2)-0.5, seed(k*3+3)-0.5).scale(1.1); d = d.add(turn).normalize();
+        let q = p.add(d.scale(stepL)); const off = q.subtract(NC); if(off.length() > NR){ d = d.subtract(off.normalize().scale(1.7)).normalize(); q = p.add(d.scale(stepL)); }
+        p = q; } }
+    const ctrl = base.map(b => b.clone());
+    const sample = (u, out) => { const k = Math.max(0, Math.min(K-2, Math.floor(u))), t = u - k;
+      const p0 = ctrl[Math.max(0,k-1)], p1 = ctrl[k], p2 = ctrl[Math.min(K-1,k+1)], p3 = ctrl[Math.min(K-1,k+2)], t2 = t*t, t3 = t2*t;
+      out[0] = 0.5*((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3);
+      out[1] = 0.5*((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3);
+      out[2] = 0.5*((2*p1.z) + (-p0.z+p2.z)*t + (2*p0.z-5*p1.z+4*p2.z-p3.z)*t2 + (-p0.z+3*p1.z-3*p2.z+p3.z)*t3); };
+    const pts = new Float32Array(M*3), arc = new Float32Array(M), nrm = new Float32Array(M*3), _p = [0,0,0];
+    const _rm = new BABYLON.Matrix(), _q = new BABYLON.Quaternion();
+    let dnaT = 0;
+    const poseDna = () => {
+      for(let i=0;i<M;i++){ sample(i/(M-1)*(K-1), _p); pts[i*3]=_p[0]; pts[i*3+1]=_p[1]; pts[i*3+2]=_p[2]; }
+      arc[0] = 0; for(let i=1;i<M;i++){ const dx=pts[i*3]-pts[(i-1)*3], dy=pts[i*3+1]-pts[(i-1)*3+1], dz=pts[i*3+2]-pts[(i-1)*3+2]; arc[i] = arc[i-1] + Math.hypot(dx,dy,dz); }
+      let nx = 0, ny = 1, nz = 0;   // parallel transport of the normal along the sampled curve
+      for(let i=0;i<M;i++){ const a = Math.max(0,i-1), b = Math.min(M-1,i+1); let tx=pts[b*3]-pts[a*3], ty=pts[b*3+1]-pts[a*3+1], tz=pts[b*3+2]-pts[a*3+2]; const tl=Math.hypot(tx,ty,tz)||1; tx/=tl; ty/=tl; tz/=tl;
+        const d = nx*tx+ny*ty+nz*tz; nx-=d*tx; ny-=d*ty; nz-=d*tz; let l=Math.hypot(nx,ny,nz);
+        if(l<1e-4){ nx = Math.abs(tx)<0.9?1:0; ny = Math.abs(tx)<0.9?0:1; nz=0; const d2=nx*tx+ny*ty; nx-=d2*tx; ny-=d2*ty; nz-=d2*tz; l=Math.hypot(nx,ny,nz)||1; }
+        nx/=l; ny/=l; nz/=l; nrm[i*3]=nx; nrm[i*3+1]=ny; nrm[i*3+2]=nz; }
+      let i = 1;
+      for(let k=0;k<gDnaSegs.length;k++){ const sMid = segMid[k]; while(i < M-1 && arc[i] < sMid) i++;
+        const a = Math.max(0,i-1), b = Math.min(M-1,i+1), f = (sMid - arc[i-1]) / Math.max(1e-6, arc[i]-arc[i-1]);
+        const px = pts[(i-1)*3] + (pts[i*3]-pts[(i-1)*3])*f, py = pts[(i-1)*3+1] + (pts[i*3+1]-pts[(i-1)*3+1])*f, pz = pts[(i-1)*3+2] + (pts[i*3+2]-pts[(i-1)*3+2])*f;
+        let tx=pts[b*3]-pts[a*3], ty=pts[b*3+1]-pts[a*3+1], tz=pts[b*3+2]-pts[a*3+2]; const tl=Math.hypot(tx,ty,tz)||1; tx/=tl; ty/=tl; tz/=tl;
+        const X = [nrm[i*3], nrm[i*3+1], nrm[i*3+2]], Z = [tx,ty,tz], Y = [Z[1]*X[2]-Z[2]*X[1], Z[2]*X[0]-Z[0]*X[2], Z[0]*X[1]-Z[1]*X[0]];   // local +Z along the rope, local +X the carried normal
+        BABYLON.Matrix.FromValuesToRef(X[0],X[1],X[2],0, Y[0],Y[1],Y[2],0, Z[0],Z[1],Z[2],0, 0,0,0,1, _rm);
+        BABYLON.Quaternion.FromRotationMatrixToRef(_rm, _q);
+        const mi = gDnaSegs[k], c = mInfo[mi];
+        gModelQuat[mi*4]=_q.x; gModelQuat[mi*4+1]=_q.y; gModelQuat[mi*4+2]=_q.z; gModelQuat[mi*4+3]=_q.w;
+        gModelOff[mi*3]=px-c.cx; gModelOff[mi*3+1]=py-c.cy; gModelOff[mi*3+2]=pz-c.cz; rebuildModelXform(mi); }
+    };
+    poseDna();
+    scene.onBeforeRenderObservable.add(() => {
+      const dt = Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; dnaT += dt;
+      for(let k=0;k<K;k++){ const b = base[k], ph = k*0.55;   // the rope's sway: slow sines, phase running along the chain
+        ctrl[k].set(b.x + 120*Math.sin(0.31*dnaT + ph) + 50*Math.sin(0.83*dnaT + ph*1.7),
+                    b.y + 100*Math.sin(0.27*dnaT + ph + 1.3) + 45*Math.sin(0.71*dnaT + ph*2.1),
+                    b.z + 120*Math.sin(0.35*dnaT + ph + 2.6) + 50*Math.sin(0.67*dnaT + ph*1.3));
+        const off = ctrl[k].subtract(NC), L = off.length(); if(L > NR) ctrl[k].copyFrom(NC.add(off.scale(NR/L))); }
+      poseDna();
+    }, -1, true);   // first in the frame, like the bouncers, so hull, shell and slab see this frame's pose
+  }
   const gBouncers = [];
-  for(const h of gHulls){ const mi = h.mi, m = mols[mi]; if(gMemBound[mi] || !m || !m.cfg || m.shuttle || gOrganelleModels.has(mi)) continue;
+  for(const h of gHulls){ const mi = h.mi, m = mols[mi]; if(gMemBound[mi] || !m || !m.cfg || m.shuttle || m.cfg.dna || gOrganelleModels.has(mi)) continue;
     if(/chlorophyll|plastoquinone|nadph/i.test(m.cfg.label || '')) continue;
     const th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1), sp=10+Math.random()*8;
     gBouncers.push({ mi, R:h.maxR, vx:sp*Math.sin(ph)*Math.cos(th), vy:sp*Math.cos(ph), vz:sp*Math.sin(ph)*Math.sin(th),

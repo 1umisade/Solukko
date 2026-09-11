@@ -478,3 +478,9 @@ save "C:\Users\akuka\OneDrive\DATA\GitHub_Repos\Solukko\simulaatiot\photosystem_
 ```
 
 Sama polku kaikille: `...\Solukko\simulaatiot\<nimi>.mol2`. Tiedosto lisataan gittiin (`git add`), muuten se 404:aa solukko.comissa. Uusi pieni molekyyli popupiin: `tyokalut/molekyyli_3d.py`.
+
+## DNA Webcyten tumassa (11.9.2026)
+- Lahde `DNA.mol2` (ChimeraX: `open 1D28; delete solvent; addh; save ... format mol2`), 12 ep B-DNA vetyineen.
+- `python tyokalut/dna_rakenna.py` sovittaa yhden emasparin askeleen (Kabsch, 35,7 astetta / 3,32 Å), monistaa yksikon (ep 2-11) 100 kertaa liitossidoksineen ja kirjoittaa `DNA_1000.mol2`: 30 jaykkaa segmenttia `dna-seg-NN-bpMM` (63 600 atomia). Nimen bpMM = emasparien maara, katselija lukee sen (cfg.bpN).
+- Katselija (vain tila=solu): FILES saa DNA_1000.mol2:n, MODELS 30 cfg:ta (label 'DNA', dna:true) paikkamerkkipaikoilla x=-3000+k*160, y=2600 KAUKANA muista malleista, koska joka atomi sidotaan malliin sen paikan sisaltavan bboxin mukaan (modelOf/mdlBuf) - paallekkaiset paikkamerkit sitoivat kaikki segmentit yhteen malliin. Paikkamerkit ohitetaan rajojen (gMiX...) laskussa.
+- 'DNA ROPE'-lohko (kaari-asettelun jalkeen) asettelee segmentit joka frame Catmull-Rom-akselille tumaan (NE.C, sade 0,72*NE.R): gModelQuat/gModelOff/rebuildModelXform, insertFirst kuten pomppijat. Segmentit ovat gOrganelleModels-joukossa (ei pomppijoita). MAX_MODELS 80: nyt 76 mallia kaytossa.

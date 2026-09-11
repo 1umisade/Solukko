@@ -198,3 +198,7 @@ hakee 3D-konformeerin vetyineen PubChemista (tai `--smiles` → RDKit rakentaa s
 lisaa lajin simulaattorin SMALL/FORMULA/NAME_FI-tauluihin ja merkinnat smiles.json:iin ja molekyylit.json:iin. Sen jalkeen
 `python tyokalut/kaava2d.py && python tyokalut/kortti_build.py`. Laji piirtyy tasmalleen kuten muut (vdW-kuoret, orbitaalit)
 ja nakyy myos kemiaeditorin palettissa. Esimerkki: G6P (glukoosi-6-fosfaatti, CID 5958), lisatty 10.9.2026.
+
+## DNA Webcytessa
+
+Tuman 1000 emasparin B-DNA on oikeita atomeja: `tyokalut/dna_rakenna.py` rakentaa sen `simulaatiot/DNA.mol2`:sta (ChimeraX, 1D28 + addh) tiedostoksi `simulaatiot/DNA_1000.mol2`, 30 jaykkaa segmenttia, jotka katselija lataa malleina (samat LoD-tasot kuin proteiineilla) ja asettelee huojuvaksi koydeksi tumaan. Yksityiskohdat simulaatiot/AGENT_NOTES.md.
