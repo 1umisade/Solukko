@@ -402,6 +402,7 @@ varying vec3 vWB1;       // normal in the fragment so the boil warp is object-lo
 varying vec3 vWB2;       // sphere instead of swimming in screen space)
 #ifdef MEMFADE
 varying float vMemAnc;   // this atom's LIPID anchor Z (identical across the whole molecule) → the cross-cut hides WHOLE lipids
+varying vec3 vMemW;      // world centre - the cut is confined to a box (the light-reaction box in the cell)
 #ifndef LIPTILE
 attribute float memAnc;
 #endif
@@ -589,6 +590,9 @@ void main(void){
 #ifdef LIPTPL
   base += mat3(W) * atomOff;   // this vertex's atom, inside the lipid the instance places (rotated with it - a cell membrane's lipids stand on their local normal)
 #endif
+#ifdef MEMFADE
+  vMemW = base;
+#endif
   // Shake/boil are computed on the ORIGINAL (pre-model-transform) centre, then modelXform is applied to
   // BOTH the shaken point and the centre — exactly the order the orb shader uses. Doing modelXform first
   // (as before) made the nuclei shake with the flattened Z while the orbitals shook with the original Z,
@@ -744,7 +748,9 @@ uniform float cofOutCol;      // grey level of a revealed atom's outline (0 = bl
 #endif
 #ifdef MEMFADE
 uniform vec3 memCut;       // [cutZ, cutSign, strength] → membrane lipids in front of the plane fade away
+uniform vec3 cutLo; uniform vec3 cutHi;   // the cut applies inside this box only (cell mode: the light-reaction box, sheet: everything)
 varying float vMemAnc;     // per-lipid anchor Z → the cut hides WHOLE lipids, never slices one in half
+varying vec3 vMemW;
 #endif
 #ifdef ETCHL
 varying float vGid;        // this cofactor atom's group index
@@ -817,7 +823,7 @@ void main(void){
   // far atom hidden behind nearer geometry is never shaded at all.
   if(r2 > 1.0) discard;
 #ifdef MEMFADE
-  if(memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) > 0.5) discard;   // honour the membrane cross-cut
+  if(memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z)) > 0.5) discard;   // honour the membrane cross-cut
 #endif
   /* Shade with the REAL sphere normal, the same half-lambert the crisp path uses, the same rim, and the
      same depth darkening. A cheap linear ramp instead of this was tried and the boundary was glaring —
@@ -881,7 +887,7 @@ void main(void){
   // (No screen-door dither anywhere.) Depth-write stays on, so fully opaque fragments still occlude.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y);   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
 #endif
   float edge = smoothstep(bubbleR - 8.0, bubbleR, dist);      // 0 inside the reveal radius, 1 beyond it
   float perp = (vCenterV.z > 0.0) ? length(vCenterV.xy)/vCenterV.z : 1e9;   // tan(angle) from the view axis → forward cone (matches the orbital shaders)
@@ -1216,7 +1222,7 @@ varying float vSel;
 varying vec3 vBcol;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
 varying float vMemAnc; attribute float memAnc;   // per-lipid anchor Z → whole-lipid cross-cut
 #endif
 #ifdef LIPWRAP
@@ -1369,7 +1375,7 @@ varying vec3 vNrmV;
 varying vec3 vLocalDir;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
 varying float vMemAnc;
 #endif
 varying float vOid;
@@ -1472,7 +1478,7 @@ void main(void){
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y);   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));   // fade in inside the bubble
   if(coneCos > -0.5) alpha *= 1.0 - smoothstep(coneCos*0.86, coneCos, vCang);   // soft-edged forward cone
@@ -1542,7 +1548,7 @@ void main(void){
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y);   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));   // fade in inside the bubble
   if(alpha < 0.004) discard;
@@ -1601,7 +1607,7 @@ varying float vSel;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
 varying float vMemAnc; attribute float memAnc;   // per-lipid anchor Z → whole-lipid cross-cut
 #endif
 #ifdef LIPWRAP
@@ -1750,7 +1756,7 @@ varying float vSel;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
 varying float vMemAnc;
 #endif
 uniform float selModel;   // index of the SELECTED complex (-1 = none)
@@ -1846,7 +1852,7 @@ void main(void){
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y);   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));   // fade in inside the camera sphere
   if(coneCos > -0.5) alpha *= 1.0 - smoothstep(coneCos*0.86, coneCos, vCang);   // soft-edged forward cone
@@ -1913,7 +1919,7 @@ varying float vOid;
 varying float vCang;
 varying float vMid;      // spawn orbitals are not model-tagged (always -1) but the shared orb fragment reads vMid
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
 #endif
 vec3 shakeOff(vec3 p){ return 0.12*vec3(sin(uT*1.3+p.x*0.12+p.y*0.08), sin(uT*1.1+p.y*0.12+p.z*0.08), sin(uT*1.6+p.z*0.12+p.x*0.08)); }
 void main(void){
@@ -1977,7 +1983,7 @@ varying float vSel;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
 #endif
 vec3 gElecP = vec3(0.0);   // the current electron's surface point (view space), set before each elecBolt
 float elecBolt(vec3 N, vec3 e, vec3 uref){
@@ -2056,7 +2062,7 @@ void main(void){
   // TRUE ALPHA — this pass is additive, so coverage scales the glow instead of keying a dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y);   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));
   if(coneCos > -0.5) alpha *= 1.0 - smoothstep(coneCos*0.86, coneCos, vCang);
@@ -2092,7 +2098,7 @@ varying float vSel;
 varying vec3 vBcol;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
 #endif
 vec3 gElecP = vec3(0.0);   // the current electron's surface point (view space), set before each elecBolt
 float elecBolt(vec3 N, vec3 e, vec3 uref){
@@ -2171,7 +2177,7 @@ void main(void){
   // TRUE ALPHA — additive pass, so coverage scales the glow instead of keying a dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y);   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));
   if(coneCos > -0.5) alpha *= 1.0 - smoothstep(coneCos*0.86, coneCos, vCang);
