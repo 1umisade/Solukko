@@ -479,6 +479,14 @@ save "C:\Users\akuka\OneDrive\DATA\GitHub_Repos\Solukko\simulaatiot\photosystem_
 
 Sama polku kaikille: `...\Solukko\simulaatiot\<nimi>.mol2`. Tiedosto lisataan gittiin (`git add`), muuten se 404:aa solukko.comissa. Uusi pieni molekyyli popupiin: `tyokalut/molekyyli_3d.py`.
 
+Sama koskee kaikkia muitakin ChimeraX-vienteja - vanhat Geneesi-polut (`Geneesi\.claude\worktrees\...\Protein_models`) eivat ole enaa olemassa (kansio poistettiin 11.9.2026). Esim. GLB-pintamalli:
+
+```
+save "C:\Users\akuka\OneDrive\DATA\GitHub_Repos\Solukko\simulaatiot\<nimi>.glb" models #1
+```
+
+Huom: simulaattori piirtaa molekyylit mol2-atomeista (kuoret, orbitaalit), ei GLB-pinnoista - GLB on tarpeen vain, jos sita kaytetaan johonkin muuhun (esim. VR-lavasteet).
+
 ## DNA Webcyten tumassa (11.9.2026): nukleotidit ketjun lenkkeina
 - Lahde `DNA.mol2` (ChimeraX: `open 1D28; delete solvent; addh; save ... format mol2`), 12 ep B-DNA vetyineen.
 - `python tyokalut/dna_nukleotidit.py` sovittaa emasparin ruuviaskeleen (Kabsch, 35,7 astetta / 3,32 Å) ja kirjoittaa `nukleotidit.mol2`: 8 mallia `nuk-<A|B>-<DA|DT|DG|DC>`, kukin OMAN emasparinsa kehyksessa (origo kierteen akselilla, z akseli, x viitesuunta) - emaspari i = kehys_i * malli, molemmat juosteet jakavat kehyksen. `nukleotidit.json` = nousu ja kierto.
