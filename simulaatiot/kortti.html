@@ -3472,7 +3472,7 @@ if(KORTTI){ let kortinKoskettu = false, nykyinenLaji = null, vaihto = Promise.re
 window.gVesi = { spawn, remove, mols, SPECIES, RULES, step, scene, cam, toPlane, ensureSpecies, keys, HW, HH, HD, select, pickMol, queueThumb, rethumb: k => { thumbDone[k] = false; thumbTries[k] = 0; queueThumb(k); }, get thumbQueue(){ return thumbQueue; }, get is3D(){ return is3D; }, get selected(){ return selected; }, get drag(){ return drag; }, get eraser(){ return eraser; } };
 }
 
-/* ── Start screen: the chemistry editor, the premade scene or the whole cell (?tila=editori / kalvosto / solu skips it) ── */
+/* ── Modes: the chemistry editor, the popup card or the whole cell (?tila=editori / kortti / solu). ?tila=kalvosto, the old standalone sheet scene, redirects to solu ── */
 document.documentElement.classList.add('editori', 'kortti'); runEditor();
 </script>
 </body>

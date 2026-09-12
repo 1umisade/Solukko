@@ -3305,7 +3305,7 @@ async function run(){
          arrangement (the exponential map of its sheet position, see the placement block). The sphere runs on
          beyond the complexes and is cut where it leaves the inner envelope, so it reads as a bulge of the inner
          membrane. Its lattice leaves a hole under every membrane complex (foot). Untinted, like the sheet was. */
-      const THY_R = 2400, thy = add('tylakoidi', new BABYLON.Vector3(760, -THY_R, 0), THY_R, null, { ax:'x', notint:true, clipTo: inn, foot:true });
+      const THY_R = 2400, thy = add('tylakoidi', new BABYLON.Vector3(760, -THY_R, 0), THY_R, null, { ax:'x', clipTo: inn, foot:true });   // tinted like every other chloroplast membrane (owner 12.9.2026: all of them green - the sheet's lipids ride on this host and take its tint too)
       thy.pole = new BABYLON.Vector3(760, 0, 0);
       CHL.push(o); DISCS.push([thy, thy, thy]); LAYOUT_THY = thy; }
     chloro(5000, -1800, -1800, 'z'); chloro(-1500, -800, -5400, 'x');
@@ -3331,7 +3331,7 @@ async function run(){
        element colours) and on the far shells alike. Inner membranes and sacs share their organelle's hue. */
     const TINT = { 'solukalvo':[0.50,0.90,0.45], 'tumakotelo':[0.80,0.55,1.00], 'vakuoli':[0.45,0.70,1.00], 'viherhiukkanen':[0.45,0.95,0.45], 'tylakoidi':[0.35,0.85,0.40],
                    'mitokondrio':[1.00,0.45,0.40], 'krista':[1.00,0.40,0.35], 'golgin laite':[1.00,0.55,0.85], 'solulimakalvosto':[0.55,0.55,1.00], 'vesikkeli':[1.00,0.72,0.30] };
-    for(const M of MEMS){ const key = Object.keys(TINT).find(k => M.name.startsWith(k)); M.tint = (key && !M.notint) ? TINT[key] : null; }   // notint: the host's thylakoid discs stay the sheet's own yellow
+    for(const M of MEMS){ const key = Object.keys(TINT).find(k => M.name.startsWith(k)); M.tint = (key && !M.notint) ? TINT[key] : null; }   // notint: a membrane that keeps the lipids' own yellow (none at the moment - the thylakoid used to)
     /* depth cue (owner, 2026-09-09: a pore was invisible without it): enclosed membranes are drawn darker, so what shows
        through a hole is darker than the surface around it - and the pores themselves get a rim and a shadow (poreShade) */
     for(const M of MEMS) M.baseShade = M.inner ? 0.70 : (/-sisä$|^krista/.test(M.name) ? 0.82 : 1.0);
@@ -13596,7 +13596,7 @@ if(KORTTI){ let kortinKoskettu = false, nykyinenLaji = null, vaihto = Promise.re
 window.gVesi = { spawn, remove, mols, SPECIES, RULES, step, scene, cam, toPlane, ensureSpecies, keys, HW, HH, HD, select, pickMol, queueThumb, rethumb: k => { thumbDone[k] = false; thumbTries[k] = 0; queueThumb(k); }, get thumbQueue(){ return thumbQueue; }, get is3D(){ return is3D; }, get selected(){ return selected; }, get drag(){ return drag; }, get eraser(){ return eraser; } };
 }
 
-/* ── Start screen: the chemistry editor, the premade scene or the whole cell (?tila=editori / kalvosto / solu skips it) ── */
+/* ── Modes: the chemistry editor, the popup card or the whole cell (?tila=editori / kortti / solu). ?tila=kalvosto, the old standalone sheet scene, redirects to solu ── */
 const startViewer = solu => { document.documentElement.classList.add('kalvosto'); if(solu){ document.documentElement.classList.add('solu'); document.title = 'Webcyte'; }   /* the whole-cell scene is called Webcyte (owner 10.9.2026) */ return run().catch(err => { console.error(err); setLbl('Virhe: ' + err.message); }); };
 /* the back button: to the start page (the query is dropped, so the choice is asked again), revealed by
    mouse movement and gone again 2.2 s after the mouse rests - it never sits on the scene */
@@ -13614,7 +13614,8 @@ const startEditor = () => { document.documentElement.classList.add('editori');
 { const tila = new URLSearchParams(location.search).get('tila');   // the mode comes from Solukko's simulaatiot tab - there is no chooser here
   if(tila === 'editori') startEditor();
   else if(tila === 'kortti'){ document.documentElement.classList.add('editori', 'kortti'); runEditor(); }   // Solukko's popup: bare canvas
-  else if(tila === 'kalvosto' || tila === 'solu') startViewer(tila === 'solu');
+  else if(tila === 'solu') startViewer(true);
+  else if(tila === 'kalvosto'){ location.replace('index.html?tila=solu'); }   // the standalone thylakoid-sheet scene is retired (owner 12.9.2026: only the whole cell from now on) - old links land in Webcyte, where the sheet lives inside the chloroplast
   else { try{ sessionStorage.setItem('solukko-homeTab', 'simulaatiot'); }catch(e){} location.replace('../index.html'); }   // no mode: back to Solukko
 }
 </script>
