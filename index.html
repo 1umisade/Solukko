@@ -7050,7 +7050,7 @@ const molKehys=(function(){
   // progress for the loading card: real stages (frame created 0.1, frame loaded 0.45, simulator up 0.7, species asked 0.78, shown 1)
   // and a slow creep toward the next stage between them, so the bar never looks stuck
   let vaihe=0, katto=0.4, palkkiTO=null;
-  const valmisLajit=new Set(); let kunValmisFn=null;   // species the simulator has built at least once, and who to tell when one completes
+  const valmisLajit=new Set(); let kunValmisFn=null, naytetty=null;   // species the simulator has built at least once, who to tell when one completes, and the species the frame shows right now
   function aseta(v, k){ vaihe=Math.max(vaihe, v); katto=Math.max(katto, k); piirraPalkki(); }
   function piirraPalkki(){ if(!kohde) return; const b=kohde.querySelector('.loading-bar-fill'); if(b) b.style.width=Math.round(vaihe*100)+'%'; }
   function kaynnistaPalkki(){ clearInterval(palkkiTO); palkkiTO=setInterval(()=>{ if(nakyva||!kohde){ clearInterval(palkkiTO); return; } vaihe=Math.min(katto, vaihe+(katto-vaihe)*0.06); piirraPalkki(); },120); }
@@ -7063,7 +7063,7 @@ const molKehys=(function(){
   window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
     if(!f || e.source!==f.contentWindow) return;   // only the popup's own frame: a card's embedded model frame (3D-malli field) posts the same messages
     if(d.solukkoKortti==='alustettu'){ alustettu=true; aseta(0.7, 0.95); if(haluttu){ f.contentWindow.postMessage({solukkoLaji:haluttu},'*'); aseta(0.78, 0.95); } }
-    if(d.solukkoKortti==='valmis'){ valmisLajit.add(d.laji); if(kunValmisFn) kunValmisFn(d.laji); }   // per-species readiness (owner 12.9.2026: a popup opens on the formula until ITS model is built, then flips to muoto)
+    if(d.solukkoKortti==='valmis'){ valmisLajit.add(d.laji); naytetty=d.laji; if(kunValmisFn) kunValmisFn(d.laji); }   // per-species readiness (owner 12.9.2026: a popup opens on the formula until ITS model is built, then flips to muoto)
     if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; vaihe=1; piirraPalkki(); f.style.opacity='1'; f.style.pointerEvents='auto'; clearTimeout(varaTO); clearInterval(palkkiTO); }   // the loading card stays underneath: the opaque frame covers it
   });
   function vara(view, teksti){ const w=view.querySelector('.wl-3d-wait'); if(!w) return; w.innerHTML='<div>'+teksti+'</div><button type="button" class="wl-2d-btn wl-dim" data-dim="2d">Näytä kaava</button>'; }   // the button is a .wl-dim: the tooltip's own click handler switches to 2-D
@@ -7076,16 +7076,19 @@ const molKehys=(function(){
   return {
     lammita(){ luo(); },   // start loading now, so the first popup is instant
     nayta(key, view){ if(!luo()){ vara(view, 'Selaimesi ei näytä 3D-malleja.'); return; } kohde=view; haluttu=key; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; asemoi();
+      if(alustettu && naytetty===key){ nakyva=true; vaihe=1; piirraPalkki(); f.style.opacity='1'; f.style.pointerEvents='auto'; clearTimeout(varaTO); clearInterval(palkkiTO); return; }   // the frame holds this species already (esilataa built it behind the formula): show it at once
       if(alustettu){ vaihe=0.78; katto=0.95; }   // a new species starts its own bar from the 'simulator up' stage
       clearTimeout(varaTO); varaTO=setTimeout(()=>{ if(!nakyva && kohde===view) vara(view, '3D-mallin lataus kestää tavallista pidempään.'); }, 8000);   // after 8 s: say so and offer the 2-D formula
-      if(alustettu){ f.contentWindow.postMessage({solukkoLaji:key},'*'); aseta(0.78, 0.95); } else piirraPalkki();   // else 'alustettu' will forward it
+      if(alustettu){ naytetty=null; f.contentWindow.postMessage({solukkoLaji:key},'*'); aseta(0.78, 0.95); } else piirraPalkki();   // else 'alustettu' will forward it
       kaynnistaPalkki(); },
     piilota(){ if(!f) return; kohde=null; haluttu=null; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; f.style.left='-9999px'; },
     asemoi,
     hover(){ return !!(f && nakyva && f.matches(':hover')); },
     valmiina(key){ return alustettu && (!key || valmisLajit.has(key)); },   // the simulator is up AND this species has been built: the popup may open straight in 3-D
-    esilataa(key){ if(!luo()) return; kohde=null; haluttu=key; if(alustettu) f.contentWindow.postMessage({solukkoLaji:key},'*'); },   // build a species in the background (the popup shows the formula meanwhile)
-    kunValmis(fn){ kunValmisFn=fn; }
+    esilataa(key){ if(!luo()) return; kohde=null; haluttu=key; if(alustettu && naytetty!==key){ naytetty=null; f.contentWindow.postMessage({solukkoLaji:key},'*'); } },   // build a species in the background (the popup shows the formula meanwhile)
+    kunValmis(fn){ kunValmisFn=fn; },
+    naytossa(key){ return alustettu && naytetty===key; },   // the frame holds this species right now
+    kunValmisNyt(key){ if(kunValmisFn) kunValmisFn(key); }   // fire the 'built' callback for a species the frame already holds
   };
 })();
 window.addEventListener('load', ()=>{ setTimeout(()=>molKehys.lammita(), 2500); });   // after the page's own start-up work
@@ -7215,7 +7218,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const view=tip.querySelector('.wl-mol-view'); if(!view) return;
     tip.querySelectorAll('.wl-dim').forEach(b=>b.classList.toggle('on', b.dataset.dim===_molDim));
     molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || '';
-    if(_molDim==='2d' && molData.kuva2d){ view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">'; molKehys.piilota(); if(_molAuto2d && molData.key) molKehys.esilataa(molData.key); }   // formula now, the model builds behind it
+    if(_molDim==='2d' && molData.kuva2d){ view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">'; molKehys.piilota(); if(_molAuto2d && molData.key){ if(molKehys.naytossa(molData.key)) setTimeout(()=>molKehys.kunValmisNyt(molData.key), 0); else molKehys.esilataa(molData.key); } }   // formula now, the model builds behind it
     else {   // live simulator: the shared, pre-warmed iframe is laid over this box (see molKehys); left drag turns, wheel zooms, nothing pans
       view.innerHTML='<div class="wl-3d-wait"><div>Ladataan 3D-mallia…</div><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>';   // the site's loading bar; molKehys drives its width
       molKehys.nayta(molData.key, view);
@@ -7240,7 +7243,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
       if(target!==_tipTarget){
         _tipTarget=target; _tipLukittu=false; _tipTiedot=false; _tipLaaja=null; _tipSuppea=null;
         molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || ''; _tipMolData=molData;
-        _molDim=(molKehys.valmiina(molData.key) || !molData.kuva2d) ? '3d' : '2d'; _molAuto2d=(_molDim==='2d');   // this species not built yet → open on the formula and flip to muoto when it lands; built → straight to muoto (owner 12.9.2026)
+        _molDim=molData.kuva2d ? '2d' : '3d'; _molAuto2d=(_molDim==='2d');   // open on the formula while the frame builds the model, flip to muoto the moment it is up (owner 12.9.2026: '2d by default if the 3d is loading, once shown default to that'); no formula → straight to muoto
         tip.innerHTML='<div class="wl-mol">'
           +'<div class="wl-mol-view"></div>'
           +'<div class="wl-mol-foot"><div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">kaava</button><button type="button" class="wl-dim" data-dim="3d">muoto</button></div>'
