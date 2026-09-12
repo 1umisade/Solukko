@@ -198,6 +198,13 @@ kuulu kortin leipätekstiin: ne mainitaan **vain sen termin omalla kortilla** ri
 
 Pääsääntö: **suomenkielinen sana voittaa** vierasperäisen. Poikkeukset merkitään taulukkoon.
 
+### Yksiköt
+
+Litran tunnus on **aina ℓ** (U+2113), ei `l` eikä `L`: `mol/ℓ`, `osmol/ℓ`, `g/ℓ`, `10 mℓ`, `2 dℓ`, `5 ℓ`,
+`ℓ/min` (käyttäjän linjaus 12.9.2026). Sanana *litra* taipuu normaalisti. `L/D-isomeria` ja `L-muoto` eivät
+ole litroja. Vanhojen korttien korjaus: `python tyokalut/litra.py` (patchaa SOLUKKO.apkg:n ja kirjoittaa
+`kurssit/Litra-korjaus.apkg`:n Ankiin tuotavaksi).
+
 `Kutsutaan myös` -rivit tällä hetkellä: *tuma* → nucleus, *lähetti-RNA* → mRNA, messenger RNA,
 *solulima* → sytoplasma, *soluelin* → organelli, *genomi* → perimä, *tumakotelo* → tumakalvo,
 *tumallinen* → eukaryootti, *tumaton* → prokaryootti, *vesikatkaisu* → hydrolyysi.
