@@ -3627,7 +3627,6 @@ uniform float halfH;
 uniform float blendW;
 uniform sampler2D grainTex;   // the owner's far-tier texture (laatta_*.jpg)
 uniform float texOn;         // 1 = read it, 0 = the lattice grain below
-uniform float texMean;       // the texture's mean luminance (CPU, once at load) - the picture only modulates brightness
 varying float vZ;
 varying vec3 vWP;
 float hash1(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }
@@ -3678,7 +3677,7 @@ void main(void){
   tone = mix(tone, 0.80, clamp(px * 1.5, 0.0, 1.0));
   float dt = clamp((distance(vWP, camPos) - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);
   vec3 col = slabCol * tone;
-  if(texOn > 0.5) col = slabCol * (0.80 * dot(laatta(pq), vec3(0.299, 0.587, 0.114)) / max(texMean, 1e-3));   // the owner's picture as a brightness pattern only - the COLOUR is always the crisp lipids' own mean (owner 12.9.2026), at the grain's mean tone
+  if(texOn > 0.5) col = laatta(pq);   // the owner's picture, its own colours (owner 12.9.2026: 'use only that green png for the chloroplast membranes')
   gl_FragColor = vec4(col * (1.0 - slabDark) * mix(1.0, depthLo, dt * depthK), 1.0);
 }`;
 /* CELL MODE far tier: the slab shader above, for a closed membrane - any axis-aligned ellipsoid (centre cen, the
@@ -3795,7 +3794,6 @@ vec3 laatta(vec2 pq){
   float L = floor(lg), tL = lg - L;
   return mix(texture2D(grainTex, pq / (T * exp2(L))).rgb, texture2D(grainTex, pq / (T * exp2(L + 1.0))).rgb, tL);
 }
-uniform float texMean;       // the texture's mean luminance (CPU, once at load) - the picture only modulates brightness
 uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the camera-side half inside the cut box is not drawn, like the lipids (owner 12.9.2026)
 void main(void){
   float dCam = distance(vWP, camPos);
@@ -3830,7 +3828,7 @@ void main(void){
   float lit = 0.62 + 0.38 * abs(dot(nrm, normalize(camPos - vWP)));
   float dt = clamp((dCam - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);
   vec3 col = slabCol * tone;
-  if(texOn > 0.5) col = slabCol * (0.80 * dot(laatta(pq), vec3(0.299, 0.587, 0.114)) / max(texMean, 1e-3));   // the owner's picture as a brightness pattern only - the COLOUR is always the crisp lipids' own mean (owner 12.9.2026), at the grain's mean tone
+  if(texOn > 0.5) col = laatta(pq);   // the owner's picture, its own colours (owner 12.9.2026: 'use only that green png for the chloroplast membranes')
   gl_FragColor = vec4(col * (1.0 - slabDark) * lit * shadeP * mix(1.0, depthLo, dt * depthK), 1.0);
 }`;
   const bgMat = new BABYLON.ShaderMaterial('bgMat', scene, 'bg', { attributes:['position'], uniforms:['cBg','focusAmt','focusDark'] });
@@ -5907,23 +5905,26 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      dilation pass guarantees the shell never cuts inside an atom it is meant to contain.
      Star-shaped, so a deep concavity is bridged rather than followed — the usual trade for a collision
      proxy, and it stays a closed watertight surface. Dev-only. */
-  /* The far tier's texture - the owner's screenshots of the cheap tier (11.9.2026): laatta_vihrea.jpg on the chloroplast
-     membranes and the thylakoid sheet, laatta_keltainen.jpg on every other membrane. Wrapped, mipmapped, read by the slab and
-     cellshell shaders in place of the lattice grain. A missing file falls back to a white 1x1 texture and texOn 0 (the grain). */
+  /* The far tier's picture - the owner's own PNG (green_membrane_slab.png, 12.9.2026: 'use only that green png for the
+     chloroplast membranes, create no texture yourself'), tiled as laatta_vihrea.jpg on the chloroplast membranes and the
+     thylakoid sheet, drawn with its own colours. Every other membrane has NO picture: the lattice grain in the lipids'
+     own colour (texOn 0). Nothing is generated. A missing file falls back to the grain too. */
   const gLaatta = {};
+  const gNoTex = BABYLON.RawTexture.CreateRGBATexture(new Uint8Array([255,255,255,255]), 1, 1, scene);
   const laattaTex = (mat, kind) => {
+    if(!kind){ mat.setTexture('grainTex', gNoTex); mat.setFloat('texOn', 0); return; }
     let t = gLaatta[kind];
-    if(!t){ t = gLaatta[kind] = { tex: null, ok: 1, mean: 0.5, mats: [] };
+    if(!t){ t = gLaatta[kind] = { tex: null, ok: 1, mean: null, mats: [] };
       t.tex = new BABYLON.Texture('./laatta_' + kind + '.jpg', scene, false, true, BABYLON.Texture.TRILINEAR_SAMPLINGMODE, () => {
-        /* the picture's mean luminance, so the shader can use it as a pure brightness pattern around the lipids' own colour */
-        Promise.resolve(t.tex.readPixels()).then(px => { if(!px || !px.length) return; let sum = 0, n = 0;
-          for(let i = 0; i < px.length; i += 64){ sum += 0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]; n++; }
-          if(n) t.mean = sum / n / 255; }).catch(() => {}); }, () => {
+        /* the picture's mean colour - the chlorophyll's far slab wears it, so it matches the membrane it sits in */
+        Promise.resolve(t.tex.readPixels()).then(px => { if(!px || !px.length) return; let r = 0, g = 0, b = 0, n = 0;
+          for(let i = 0; i < px.length; i += 64){ r += px[i]; g += px[i+1]; b += px[i+2]; n++; }
+          if(n) t.mean = [r/n/255, g/n/255, b/n/255]; }).catch(() => {}); }, () => {
         console.warn('laatta_' + kind + '.jpg puuttuu - laatta piirtaa proseduraalisen rakeen'); t.ok = 0;
-        t.tex = BABYLON.RawTexture.CreateRGBATexture(new Uint8Array([255,255,255,255]), 1, 1, scene); for(const m of t.mats) m.setTexture('grainTex', t.tex); });
+        t.tex = gNoTex; for(const m of t.mats) m.setTexture('grainTex', t.tex); });
       t.tex.wrapU = t.tex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE; t.tex.anisotropicFilteringLevel = 8; }
-    t.mats.push(mat); mat.setTexture('grainTex', t.tex); mat.setFloat('texOn', t.ok); mat.setFloat('texMean', t.mean);
-    mat.onBindObservable.add(() => { const eff = mat.getEffect(); if(eff){ eff.setFloat('texOn', t.ok); eff.setFloat('texMean', t.mean); } });
+    t.mats.push(mat); mat.setTexture('grainTex', t.tex); mat.setFloat('texOn', t.ok);
+    mat.onBindObservable.add(() => { const eff = mat.getEffect(); if(eff) eff.setFloat('texOn', t.ok); });
   };
   const gHulls = [];
   const gProtSlab = [];   // per model: true = far enough that its atoms are replaced by the hull
@@ -6499,7 +6500,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       slab.position.copyFrom(bilayerCen);
       slab.isPickable = false; slab.renderingGroupId = 0; slab.alwaysSelectAsActiveMesh = true;
       const sm = new BABYLON.ShaderMaterial('memSlabMat', scene, 'slab', {
-        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW','texOn','texMean'], samplers:['grainTex'] });
+        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW','texOn'], samplers:['grainTex'] });
       sm.backFaceCulling = false;
       sm.setColor3('slabCol', new BABYLON.Color3(0.35,0.33,0.22));   // placeholder until the real lipid mean lands below
       sm.setFloat('grainPitch', S*0.5);   // the grain's cell size: half the real lipid pitch - smaller, denser 'lipids'
@@ -7066,14 +7067,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const _e0 = [0,0,0];
       for(const M of MEMS){
         const mat = new BABYLON.ShaderMaterial('cellShellMat'+M.id, scene, 'cellshell', {
-          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','texMean','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi'] });
+          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi'] });
         mat.setFloat('poreAng', NE_PORE_R/M.R); mat.setFloat('poreInner', M.inner ? 1 : 0); mat.setFloat('baseShade', M.baseShade);
         mat.setFloat('clipOn', M.clipTo ? 1 : 0);
         if(M.clipTo){ const K = M.clipTo; mat.setVector3('clipC', K.C); mat.setVector3('clipInvS', new BABYLON.Vector3(1/K.s[0], 1/K.s[1], 1/K.s[2])); mat.setFloat('clipR', K.R); }
         mat.backFaceCulling = false;
         const hh = M.halfH || ySpan;   // the cell wall is thicker than a bilayer
         mat.setColor3('slabCol', M.col ? new BABYLON.Color3(M.col[0], M.col[1], M.col[2]) : new BABYLON.Color3(0.35,0.33,0.22)); mat.setFloat('grainPitch', M.nolat ? S*2.0 : S*0.5); mat.setFloat('halfH', hh); mat.setFloat('shapeP', M.p || 0);
-        laattaTex(mat, /viherhiukkanen|tylakoidi/.test(M.name) ? 'vihrea' : 'keltainen');   // green for the chloroplast, yellow elsewhere (owner)
+        laattaTex(mat, /viherhiukkanen|tylakoidi/.test(M.name) ? 'vihrea' : null);   // the owner's picture on the chloroplast's membranes, the plain grain elsewhere
         mat.setVector3('cen', M.C); mat.setVector3('invS', new BABYLON.Vector3(M.invS[0], M.invS[1], M.invS[2])); mat.setVector3('invS2', new BABYLON.Vector3(M.invS[0]*M.invS[0], M.invS[1]*M.invS[1], M.invS[2]*M.invS[2]));
         mat.setFloat('facetOn', M.facet ? 1 : 0); mat.setFloat('facetY', bilayerCen.y); mat.setFloat('facetR', facetR);
         mat.setVector2('footCen', new BABYLON.Vector2(bilayerCen.x, bilayerCen.z)); mat.setVector2('footHalf', new BABYLON.Vector2(0, 0));   // the plasma membrane's plane part covers the sheet's rectangle too (the sheet's own slab box is off in cell mode)
@@ -8884,12 +8885,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(h.slab.isEnabled() !== want){ h.slab.setEnabled(want);
         if(want){ const o=h.mi*3;   // the model's own colour, dimmed like packed atoms against a flat fill
           const m = mols[h.mi];
-          if(m && m.cfg && m.cfg.match === 'chlorophyll' && gSlabN){   // the chlorophyll's slab wears the thylakoid membrane's slab green, not its neon cofactor green (owner 12.9.2026)
-            let r = gSlabR/gSlabN, g = gSlabG/gSlabN, b = gSlabB/gSlabN;   // the lipids' own mean...
-            const tn = SOLU && SOLU_CELL && SOLU_CELL.THY && SOLU_CELL.THY.tint;   // ...tinted exactly as the thylakoid shell tints it
-            if(tn){ const a = 0.72, f = 0.5 + 0.6*(0.3*r + 0.59*g + 0.11*b); r = r*(1-a) + tn[0]*f*a; g = g*(1-a) + tn[1]*f*a; b = b*(1-a) + tn[2]*f*a; }
-            const K = (1 - gSlabDark) * 0.80;   // the shell's own darkening and the grain's mean tone, so the two read as one green
-            h.sMat.emissiveColor.set(r*K, g*K, b*K); }
+          const lt = gLaatta.vihrea;
+          if(m && m.cfg && m.cfg.match === 'chlorophyll' && lt && lt.mean){   // the chlorophyll's slab wears the thylakoid membrane's green - the owner's picture's mean colour - not its neon cofactor green (owner 12.9.2026)
+            const K = (1 - gSlabDark) * 0.85;   // the shell's own darkening and its average wrap shade, so the two read as one green
+            h.sMat.emissiveColor.set(lt.mean[0]*K, lt.mean[1]*K, lt.mean[2]*K); }
           else h.sMat.emissiveColor.set(gModelCol[o]*0.72, gModelCol[o+1]*0.72, gModelCol[o+2]*0.72); } }
     }
     if(gMemSlab){
