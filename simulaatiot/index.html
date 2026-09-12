@@ -4676,14 +4676,31 @@ void main(void){
   /* 'Kalvostoon' (owner, 2026-09-09): a slow flight from wherever the camera is into the thylakoid scene - the sheet's
      old default view, now inside the host chloroplast - over FLY_S seconds, eased, target and position together.
      Any control (a press, a wheel notch, a key) breaks it off. */
-  { const FLY_S = 14, TGT = new BABYLON.Vector3(82.7, 68.3, 197.6), POS = new BABYLON.Vector3(41, 30, 820);
+  /* The destination is the owner's exact dev-readout view (12.9.2026): sij. 33, 224, -904 · α -448.7° β 68.5° kierto 1.3° · et. 386.
+     Rebuilt the way the readout was made: ArcRotate puts the position at target + r·(cos α sin β, cos β, sin α sin β) in
+     the frame where cam.upVector is Y (setMatUp's yToUp matrix); β is the angle between cam.upVector and the offset,
+     and the roll is the angle of the real SCREEN-up (cam.upVector with its view-axis component removed) from level
+     (world Z) about the view axis. So the up vector is U = -cos β·fw + sin β·screenUp, where fw itself comes from
+     (α, β) in U's frame - a fixed point, settled by substitution from level up (a few rounds, checked at load). */
+  const POSE = (() => { const pos = new BABYLON.Vector3(33, 224, -904), a = -448.7*Math.PI/180, b = 68.5*Math.PI/180, roll = 1.3*Math.PI/180, r = 386;
+    const off = new BABYLON.Vector3(Math.cos(a)*Math.sin(b), Math.cos(b), Math.sin(a)*Math.sin(b));   // the unit offset (target -> position) in the up-is-Y frame
+    let up = new BABYLON.Vector3(0, 0, 1), fw = null; const m = new BABYLON.Matrix(), o = new BABYLON.Vector3();
+    for(let i=0;i<24;i++){ BABYLON.Matrix.RotationAlignToRef(BABYLON.Vector3.Up(), up, m); BABYLON.Vector3.TransformCoordinatesToRef(off, m, o);
+      fw = o.scale(-1);   // the view axis this up vector gives
+      const lv = new BABYLON.Vector3(0, 0, 1); lv.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(lv, fw))); lv.normalize();
+      const sUp = lv.scale(Math.cos(roll)).add(BABYLON.Vector3.Cross(fw, lv).scale(Math.sin(roll)));   // the screen-up the readout's roll means
+      const nu = fw.scale(-Math.cos(b)).add(sUp.scale(Math.sin(b))).normalize();
+      const done = BABYLON.Vector3.Distance(nu, up) < 1e-7; up = nu; if(done) break; }
+    return { pos, tgt: pos.add(fw.scale(r)), up }; })();
+  { const FLY_S = 14, TGT = POSE.tgt, POS = POSE.pos, UP = POSE.up;
     let fly = null;
     window.gFlyToSheet = () => { scene.stopAnimation(cam); gLookPivot = null; gZoomVel = 0;
-      fly = { t0: performance.now(), p0: cam.position.clone(), q0: cam.getTarget().clone() }; };
+      fly = { t0: performance.now(), p0: cam.position.clone(), q0: cam.getTarget().clone(), u0: cam.upVector.clone() }; };
     const stop = () => { fly = null; };
     canvas.addEventListener('pointerdown', stop); canvas.addEventListener('wheel', stop, { passive:true }); window.addEventListener('keydown', stop);
     scene.onBeforeRenderObservable.add(() => { if(!fly) return;
       const u = Math.min(1, (performance.now() - fly.t0)/(FLY_S*1000)), k = u*u*(3 - 2*u);
+      cam.upVector.copyFrom(BABYLON.Vector3.Lerp(fly.u0, UP, k).normalize()); cam.setMatUp();   // the roll glides too (copyFrom bypasses the setter - setMatUp keeps the up matrices in step)
       cam.setTarget(BABYLON.Vector3.Lerp(fly.q0, TGT, k)); cam.setPosition(BABYLON.Vector3.Lerp(fly.p0, POS, k));
       if(u >= 1) fly = null; }); }
   if(SOLU_CELL) scene.onBeforeRenderObservable.add(() => {   // the depth cue's two regimes (see gShadeD)
