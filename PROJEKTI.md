@@ -81,6 +81,10 @@ Korttityyppi on **`Solukko`**, id `1727391050`, kuusi kenttää:
   kuorimalli. Valinta muistetaan (`localStorage solukko-molDim`). Ei videoita: omistaja poisti ne 10.9.2026. Laukaisijat tulevat `simulaatiot/kortit/molekyylit.json`:ista (`_molMap`, `_wrapMolHtml`
   index.html:ssä) — uusi laji = uusi rivi JSONiin + video. HTML-muotoiset kaavat kaaritaan DOM-solmuina
   (`_wrapMolHtml`), koska tekstisolmuregex ei näe `<sub>`-tagien yli.
+- **Popupin otsikko ja ketjutus (12.9.2026):** popupin yläreunassa on linkitetty termi (`.wl-termi`, kortin ensimmäinen
+  linkkisana). Popupin tekstin sanat linkittyvät edelleen, ja linkin hover avaa seuraavan tason popupin (`.wl-lapsi`,
+  `naytaLapsi` index.html:ssä), joten popupeja voi ketjuttaa. Popupin oma kortti ei linkity itseensä (`_wlOmaKortti`).
+  2D-kaavoissa vdW-hehku on alkuaineen värinen, sidoksilla liukuväri (`tyokalut/kaava2d.py`).
 - **`3D-malli`-kenttä** on simulaattorin lajiavain (`ETANOLI`, `ASETONI`, `ATP`…). Sivusto upottaa kortin etupuolelle
   kaksi neliötä vierekkäin: lajin 2D-rakennekaavan (`simulaatiot/kortit/2d/<avain>.svg`) ja elävän 3D-mallin
   (`simulaatiot/kortti.html?tila=kortti&laji=<avain>`, `EMBED_3D_BASE` index.html:ssä). Etupuolella malli ei ota hiirtä
