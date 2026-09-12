@@ -7039,6 +7039,7 @@ const molKehys=(function(){
   // progress for the loading card: real stages (frame created 0.1, frame loaded 0.45, simulator up 0.7, species asked 0.78, shown 1)
   // and a slow creep toward the next stage between them, so the bar never looks stuck
   let vaihe=0, katto=0.4, palkkiTO=null;
+  const valmisLajit=new Set(); let kunValmisFn=null;   // species the simulator has built at least once, and who to tell when one completes
   function aseta(v, k){ vaihe=Math.max(vaihe, v); katto=Math.max(katto, k); piirraPalkki(); }
   function piirraPalkki(){ if(!kohde) return; const b=kohde.querySelector('.loading-bar-fill'); if(b) b.style.width=Math.round(vaihe*100)+'%'; }
   function kaynnistaPalkki(){ clearInterval(palkkiTO); palkkiTO=setInterval(()=>{ if(nakyva||!kohde){ clearInterval(palkkiTO); return; } vaihe=Math.min(katto, vaihe+(katto-vaihe)*0.06); piirraPalkki(); },120); }
@@ -7050,6 +7051,7 @@ const molKehys=(function(){
     document.body.appendChild(f); return f; }
   window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
     if(d.solukkoKortti==='alustettu'){ alustettu=true; aseta(0.7, 0.95); if(haluttu){ f.contentWindow.postMessage({solukkoLaji:haluttu},'*'); aseta(0.78, 0.95); } }
+    if(d.solukkoKortti==='valmis'){ valmisLajit.add(d.laji); if(kunValmisFn) kunValmisFn(d.laji); }   // per-species readiness (owner 12.9.2026: a popup opens on the formula until ITS model is built, then flips to muoto)
     if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; vaihe=1; piirraPalkki(); f.style.opacity='1'; f.style.pointerEvents='auto'; clearTimeout(varaTO); clearInterval(palkkiTO); }   // the loading card stays underneath: the opaque frame covers it
   });
   function vara(view, teksti){ const w=view.querySelector('.wl-3d-wait'); if(!w) return; w.innerHTML='<div>'+teksti+'</div><button type="button" class="wl-2d-btn wl-dim" data-dim="2d">Näytä kaava</button>'; }   // the button is a .wl-dim: the tooltip's own click handler switches to 2-D
@@ -7069,7 +7071,9 @@ const molKehys=(function(){
     piilota(){ if(!f) return; kohde=null; haluttu=null; nakyva=false; f.style.opacity='0'; f.style.pointerEvents='none'; f.style.left='-9999px'; },
     asemoi,
     hover(){ return !!(f && nakyva && f.matches(':hover')); },
-    valmiina(){ return alustettu; }   // the simulator is up: popups may open straight in 3-D
+    valmiina(key){ return alustettu && (!key || valmisLajit.has(key)); },   // the simulator is up AND this species has been built: the popup may open straight in 3-D
+    esilataa(key){ if(!luo()) return; kohde=null; haluttu=key; if(alustettu) f.contentWindow.postMessage({solukkoLaji:key},'*'); },   // build a species in the background (the popup shows the formula meanwhile)
+    kunValmis(fn){ kunValmisFn=fn; }
   };
 })();
 window.addEventListener('load', ()=>{ setTimeout(()=>molKehys.lammita(), 2500); });   // after the page's own start-up work
@@ -7193,11 +7197,13 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
   function prepareTooltipHtml(html){ html=String(html||''); html=html.replace(/src="([^"]+)"/gi,(m,src)=>{ return mediaMap[src]?`src="${mediaMap[src]}"`:m; }); return html; }
 
   let _molDim='3d';   // every popup opens on 'muoto' (3D); 'kaava' lasts only while that popup is open (owner 10.9.2026)
+  let _molAuto2d=false, _tipMolData=null;   // the popup is on the formula only because its 3-D model is not built yet: flip to muoto when it is (owner 12.9.2026)
+  molKehys.kunValmis(laji=>{ if(_molAuto2d && _tipTarget && _tipMolData && _tipMolData.key===laji){ _molAuto2d=false; _molDim='3d'; const t=document.getElementById('word-link-tooltip'); if(t) _molRenderView(t, _tipMolData); } });
   function _molRenderView(tip, molData){   // 3D = the recorded spin, 2D = structural formula (PubChem) or the atom's shell model
     const view=tip.querySelector('.wl-mol-view'); if(!view) return;
     tip.querySelectorAll('.wl-dim').forEach(b=>b.classList.toggle('on', b.dataset.dim===_molDim));
     molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || '';
-    if(_molDim==='2d' && molData.kuva2d){ view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">'; molKehys.piilota(); }
+    if(_molDim==='2d' && molData.kuva2d){ view.innerHTML='<img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt="">'; molKehys.piilota(); if(_molAuto2d && molData.key) molKehys.esilataa(molData.key); }   // formula now, the model builds behind it
     else {   // live simulator: the shared, pre-warmed iframe is laid over this box (see molKehys); left drag turns, wheel zooms, nothing pans
       view.innerHTML='<div class="wl-3d-wait"><div>Ladataan 3D-mallia…</div><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>';   // the site's loading bar; molKehys drives its width
       molKehys.nayta(molData.key, view);
@@ -7221,7 +7227,8 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     if(molData){   // molecule: the render, 2D/3D switch bottom-left, "Tiedot" bottom-right opens the Solukko card's text under the render
       if(target!==_tipTarget){
         _tipTarget=target; _tipLukittu=false; _tipTiedot=false; _tipLaaja=null; _tipSuppea=null;
-        _molDim=(molKehys.valmiina() || !molData.kuva2d) ? '3d' : '2d';   // simulator still booting → open on the formula; once it is up, every popup opens on muoto (owner 10.9.2026)
+        molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || ''; _tipMolData=molData;
+        _molDim=(molKehys.valmiina(molData.key) || !molData.kuva2d) ? '3d' : '2d'; _molAuto2d=(_molDim==='2d');   // this species not built yet → open on the formula and flip to muoto when it lands; built → straight to muoto (owner 12.9.2026)
         tip.innerHTML='<div class="wl-mol">'
           +'<div class="wl-mol-view"></div>'
           +'<div class="wl-mol-foot"><div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">kaava</button><button type="button" class="wl-dim" data-dim="3d">muoto</button></div>'
@@ -7274,7 +7281,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
   tip.addEventListener('scroll',()=>molKehys.asemoi());   // the 3-D frame rides along when the popup scrolls
   tip.addEventListener('click',e=>{
     const dim=e.target.closest('.wl-dim');
-    if(dim && _tipTarget){ e.stopPropagation(); _molDim=dim.dataset.dim==='2d'?'2d':'3d';
+    if(dim && _tipTarget){ e.stopPropagation(); _molAuto2d=false; _molDim=dim.dataset.dim==='2d'?'2d':'3d';
       const md=_molekyylit&&_molekyylit[_tipTarget.dataset.mol]; if(md) _molRenderView(tip, md); placeTip(_tipTarget,true); return; }
     const td=e.target.closest('.wl-tiedot');
     if(td && _tipTarget){ e.stopPropagation(); _tipLukittu=true;   // Tiedot: open / close the card's text under the render (the render stays)
