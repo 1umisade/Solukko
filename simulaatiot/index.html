@@ -13080,7 +13080,7 @@ const canvas = document.getElementById('c');
 const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: false, stencil: false, antialias: true });
 const scene = new BABYLON.Scene(engine);
 const PAPER = new BABYLON.Color3(0.949, 0.902, 0.788);
-scene.clearColor = new BABYLON.Color4(PAPER.r, PAPER.g, PAPER.b, 1);
+scene.clearColor = KORTTI ? new BABYLON.Color4(0, 0, 0, 0) : new BABYLON.Color4(PAPER.r, PAPER.g, PAPER.b, 1);   /* the popup / card frame is transparent: the card's own paper shows behind the molecule (owner 12.9.2026) */
 scene.fogColor = PAPER; scene.fogStart = 1e8; scene.fogEnd = 1e9;
 scene.skipPointerMovePicking = true;
 scene.setRenderingAutoClearDepthStencil(1, false);   // shells and nuclei (group 1) are depth-tested against the orbitals (group 0), as in the viewer - a lobe in front of a shell surface stays uncovered

@@ -6,7 +6,7 @@
 <title>3D-malli</title>
 <!-- GENEROITU TIEDOSTO: tyokalut/kortti_build.py leikkaa taman simulaatiot/index.html:sta. Ala muokkaa kasin - aja skripti. -->
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#f2e6c9}
+html,body{margin:0;height:100%;overflow:hidden;background:transparent}
 #c{width:100%;height:100%;display:block;touch-action:none;cursor:url('./cursor_normal.png') 3 3, auto}
 .stub{display:none !important}
 </style>
@@ -2936,7 +2936,7 @@ const canvas = document.getElementById('c');
 const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: false, stencil: false, antialias: true });
 const scene = new BABYLON.Scene(engine);
 const PAPER = new BABYLON.Color3(0.949, 0.902, 0.788);
-scene.clearColor = new BABYLON.Color4(PAPER.r, PAPER.g, PAPER.b, 1);
+scene.clearColor = KORTTI ? new BABYLON.Color4(0, 0, 0, 0) : new BABYLON.Color4(PAPER.r, PAPER.g, PAPER.b, 1);   /* the popup / card frame is transparent: the card's own paper shows behind the molecule (owner 12.9.2026) */
 scene.fogColor = PAPER; scene.fogStart = 1e8; scene.fogEnd = 1e9;
 scene.skipPointerMovePicking = true;
 scene.setRenderingAutoClearDepthStencil(1, false);   // shells and nuclei (group 1) are depth-tested against the orbitals (group 0), as in the viewer - a lobe in front of a shell surface stays uncovered

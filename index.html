@@ -662,13 +662,11 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .flashcard:not(.front-basic):not(.answer-shown):not(.celebrating) { display: flex; flex-direction: column; justify-content: safe center; }   /* cloze / special fronts: centre on the Y axis too */
 .flashcard.front-basic #question-content { line-height: 1.25; }
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
-.card-embed-3d { width: 100%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }   /* front: the 2-D formula and the live 3-D model side by side as two equal squares; wrapper clips the iframe so its rounded corners have no dark fringe */
-.card-embed-3d:not(:has(.embed-2d)) { grid-template-columns: 1fr; }   /* an unknown species: the model alone */
-.answer-shown .card-embed-3d { width: 100%; }   /* back: full width */
-.embed-2d { width: 100%; aspect-ratio: 1 / 1; height: auto; object-fit: contain; background: #efe9dd; padding: 6%; box-sizing: border-box; display: block; }   /* the model molecule's structural formula (simulaatiot/kortit/2d) */
-.embed-3d-frame { width: 100%; aspect-ratio: 1 / 1; height: auto; border: none; border-radius: 0; background: #efe9dd; display: block; pointer-events: none; }   /* front: no interaction — clicks flip the card */
-.answer-shown .embed-3d-frame { pointer-events: auto; }   /* back: allow rotating the model */
-body.dark-mode .embed-3d-frame, body.dark-mode .embed-2d { background: #2a2622; }
+.card-embed-3d { width: 100%; margin: 0.6rem auto 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }   /* the answer side's model of the 3D-malli field: ONE view (kaava = the 2-D formula, muoto = the live 3-D model) and the popup's switch under it; no box - the card's own paper shows through (owner 12.9.2026) */
+.embed-stack { position: relative; width: min(100%, 380px); aspect-ratio: 1 / 1; }
+.embed-2d, .embed-3d-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: none; background: transparent; display: block; }
+.embed-2d { object-fit: contain; padding: 6%; box-sizing: border-box; }
+.card-embed-3d[data-dim="2d"] .embed-3d-frame, .card-embed-3d[data-dim="3d"] .embed-2d { visibility: hidden; pointer-events: none; }   /* the other view stays loaded underneath (the model keeps building while the formula shows) */
 .dim-paren { color: rgba(26,22,18,0.5); }   /* dim by colour, not opacity: an opacity span faded the word-link bubbles inside it, which looked like cut-off bubbles (owner 10.9.2026) */
 body.dark-mode .dim-paren { color: rgba(234,223,206,0.55); }
 
@@ -2959,7 +2957,10 @@ body.dark-mode .cal-ev { color:#241f1b; }
 // ① KONFIGURAATIO & TILA   (config constants + global state variables)
 // ════════════════════════════════════════════════════════════
 const APKG_FILE = 'SOLUKKO.apkg';
-const EMBED_3D_BASE = 'simulaatiot/kortti.html?tila=kortti&laji=';   // cards with a non-empty 3D-malli field (a simulator species key, e.g. ETANOLI) embed the live model on the front, next to its 2-D formula from simulaatiot/kortit/2d (owner 12.9.2026: functional-group cards)
+const EMBED_3D_BASE = 'simulaatiot/kortti.html?tila=kortti&laji=';
+function _embedDim(emb, dim){ emb.dataset.dim=dim; emb.querySelectorAll('.wl-dim').forEach(b=>b.classList.toggle('on', b.dataset.dim===dim)); }   // kaava (2d) / muoto (3d) on a card's embedded model
+window.addEventListener('message', e=>{ const d=e.data; if(!d||d.solukkoKortti!=='valmis') return;   // an embedded frame has built its species → flip to muoto unless the reader chose kaava
+  document.querySelectorAll('#answer-section .card-embed-3d').forEach(emb=>{ const fr=emb.querySelector('iframe'); if(fr && fr.contentWindow===e.source && emb._auto) _embedDim(emb, '3d'); }); });   // cards with a non-empty 3D-malli field (a simulator species key, e.g. ETANOLI) embed the live model on the front, next to its 2-D formula from simulaatiot/kortit/2d (owner 12.9.2026: functional-group cards)
 let allCards  = [];
 let allDeckNames = [];
 let mediaMap  = {};
@@ -4272,13 +4273,19 @@ async function renderCurrentCard(){
     }
   }
   flashWordLinkBubbles();   // new card loaded: flash the speech-bubble graphic on each linked word
-  // Cards with a non-empty 3D field embed the external viewer at the bottom of the front, fed with that value
-  { const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D','3D-malli','3D-Malli']).replace(/<[^>]*>/g,'').trim();
-    if(_3d){ const _qc=document.getElementById('question-content'); const _emb=document.createElement('div'); _emb.className='card-embed-3d';
-      const _m=_molekyylit&&_molekyylit[_3d];   // a known species: its 2-D formula (kaava2d.py SVG) on the left, the live 3-D model on the right
-      _emb.innerHTML=(_m&&_m.kuva2d ? '<img class="embed-2d" src="simulaatiot/kortit/'+_m.kuva2d+'" alt="'+(_m.nimi||_3d)+' rakennekaava" title="2D: rakennekaava">' : '')
-        +'<iframe class="embed-3d-frame" src="'+EMBED_3D_BASE+encodeURIComponent(_3d)+'&v='+Math.floor(Date.now()/3.6e6)+'" loading="lazy" title="3D: '+(_m?_m.nimi:_3d)+' - vedä kääntääksesi, rulla zoomaa" referrerpolicy="no-referrer"></iframe>';
-      _qc.appendChild(_emb); }
+  // Cards with a non-empty 3D-malli field (a simulator species key) get the model on the ANSWER side: the 2-D formula
+  // first, the live 3-D model once its frame reports the species built (like the popup), a kaava/muoto switch under it.
+  // It lives beside answer-content (not inside), so the Suppea/Laaja swap never touches it.
+  { document.querySelectorAll('#answer-section .card-embed-3d').forEach(x=>x.remove());
+    const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D','3D-malli','3D-Malli']).replace(/<[^>]*>/g,'').trim();
+    if(_3d){ const _m=_molekyylit&&_molekyylit[_3d], _emb=document.createElement('div'); _emb.className='card-embed-3d'; _emb.dataset.dim=(_m&&_m.kuva2d)?'2d':'3d'; _emb._auto=true;
+      _emb.innerHTML='<div class="embed-stack">'+(_m&&_m.kuva2d ? '<img class="embed-2d" src="simulaatiot/kortit/'+_m.kuva2d+'" alt="'+(_m.nimi||_3d)+' rakennekaava">' : '')
+        +'<iframe class="embed-3d-frame" src="'+EMBED_3D_BASE+encodeURIComponent(_3d)+'&v='+Math.floor(Date.now()/3.6e6)+'" title="'+(_m?_m.nimi:_3d)+' - vedä kääntääksesi, rulla zoomaa" referrerpolicy="no-referrer"></iframe></div>'
+        +(_m&&_m.kuva2d ? '<div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">kaava</button><button type="button" class="wl-dim" data-dim="3d">muoto</button></div>' : '');
+      _embedDim(_emb, _emb.dataset.dim);
+      _emb.addEventListener('click', e=>{ const b=e.target.closest('.wl-dim'); if(!b) return; e.stopPropagation(); _emb._auto=false; _embedDim(_emb, b.dataset.dim); });   // the switch never counts as a click on the card
+      _emb.addEventListener('mousedown', e=>{ if(e.target.closest('.wl-dim, .embed-3d-frame')) e.stopPropagation(); });
+      document.getElementById('answer-section').appendChild(_emb); }
   }
   const _ac=document.getElementById('answer-content');
   const _clz=_ac.querySelectorAll('.cloze-answer, .cloze-answer-line, .cloze');   // cloze: count only the deleted text
@@ -5500,7 +5507,7 @@ function showCelebration(){
   _celebTrack=CELEB_TRACKS[Math.floor(Math.random()*CELEB_TRACKS.length)];
   const fc=document.getElementById('flashcard'); fc.style.minHeight=''; fc.classList.add('celebrating');
   document.getElementById('question-content').innerHTML='<div class="mona-sing"><div class="disco"></div><div class="mona-rover"><div class="mona-bubble">Koko kurssi opiskeltu!</div><div class="mona-body" onclick="monaCelebClick(event)"><div class="mona-scale"><img src="mona_no_eyes.png" class="brand-logo-img" alt="Mona"><div class="logo-eye le"><span class="logo-pupil"></span></div><div class="logo-eye re"><span class="logo-pupil"></span></div></div></div></div></div>';
-  document.getElementById('answer-content').innerHTML='';
+  document.getElementById('answer-content').innerHTML=''; document.querySelectorAll('#answer-section .card-embed-3d').forEach(x=>x.remove());
   ['answer-section','show-row','grade-row','card-peek'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   { const _ca=document.querySelector('.comment-area'); if(_ca) _ca.style.display='none'; }   // no comments on the celebration card
   const pr=document.getElementById('progress-row'); pr.style.display='flex'; pr.classList.add('celebrating');   // full green glowing bar = the volume slider
@@ -6009,7 +6016,7 @@ function previewAddCardInfo(){   // hovering a "+ Lisää kortti" tile shows thi
   cc.classList.remove('welcome'); cc.classList.add('add-info'); _addInfoOn=true;
   document.getElementById('flashcard')?.classList.remove('answer-shown');
   const qc=document.getElementById('question-content'); if(qc){ qc.className='card-content left-align'; qc.innerHTML=ADD_CARD_INFO_HTML; }
-  const ans=document.getElementById('answer-content'); if(ans) ans.innerHTML='';
+  const ans=document.getElementById('answer-content'); if(ans) ans.innerHTML=''; document.querySelectorAll('#answer-section .card-embed-3d').forEach(x=>x.remove());
 }
 function previewRestore(){   // mouse leaves the tile → restore the real card preview
   const cc=document.getElementById('card-col'); if(cc) cc.classList.remove('add-info');

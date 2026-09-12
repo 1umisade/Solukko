@@ -56,7 +56,7 @@ html = NL.join([
     '<title>3D-malli</title>',
     '<!-- GENEROITU TIEDOSTO: tyokalut/kortti_build.py leikkaa taman simulaatiot/index.html:sta. Ala muokkaa kasin - aja skripti. -->',
     '<style>',
-    'html,body{margin:0;height:100%;overflow:hidden;background:#f2e6c9}',
+    'html,body{margin:0;height:100%;overflow:hidden;background:transparent}',   # transparent: Solukko paints the popup frame cream itself, a card embed shows the card paper
     css_c,
     '.stub{display:none !important}',
     '</style>',
