@@ -6992,7 +6992,7 @@ function _escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
 function buildWordLinks(){
   _wordLinks=[];
-  if(reviewCards.length>500) return;   // huge decks (e.g. the dev "All Decks"): skip word-links — thousands of terms would make every card render run thousands of regexes
+  if(reviewCards.length>5000) return;   // only a truly huge deck (the dev "All Decks" beyond any course) skips word-links: since the sanasto rounds (12.9.2026) a course deck alone has 650+ cards and the triggers come from EVERY deck anyway - one precompiled alternation, ~0.3 ms per card
   const seen=new Set();
 
   // Pass 0: explicit "linkkisanat" field — words the card author chose to link to this card
