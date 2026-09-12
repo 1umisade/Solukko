@@ -350,6 +350,7 @@ html.kortti body > *:not(#c){display:none !important} html.kortti #c{position:fi
 <button id="dev-btn" title="Dev-tila: mallien siirto/kierto-työkalu + sijaintimerkinnät"><span id="dev-icon">🛠️</span><span id="dev-label">Dev</span></button>
 <button id="lantern-btn" title="Lyhty: pimennä kaikki paitsi kiihdytetty elektroni (valaisee lähiatomit)"><span id="lantern-icon">🏮</span><span id="lantern-label">Lyhty</span></button>
 <button id="memcut-btn" title="Piilota kameran ja hiukkastason välinen kalvon puolisko yhteyttämiskalvoston laatikossa (näe tasolle)"><span id="memcut-icon">◧</span><span id="memcut-label">Puolikas</span></button>
+<button id="slab-btn" title="Kaukotason laatta: pois = kalvot piirretään lipideinä niin kauas kuin puskurit riittävät (kaksinkertainen matka), kaukokuoret piilotetaan"><span id="slab-icon">▦</span><span id="slab-label">Laatta</span></button>
 <button id="outline-btn" title="Piilota mustat ja vihreät ääriviivat"><span id="outline-icon">✒️</span><span id="outline-label">Reunat</span></button>
 <button id="particles-btn" title="Piilota vapaana lentävät molekyylit — vesi, protonit, CO₂ ja O₂ (keventää)"><span id="particles-icon">💨</span><span id="particles-label">Hiukkaset</span></button>
 <button id="vr-btn" title="Siirry VR-tilaan" style="display:none"><span id="vr-icon">🥽</span><span id="vr-label">VR</span></button>
@@ -5134,6 +5135,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      Off means: every block within the footprint is gathered in full, no wrap, no cell ever goes
      megacheap, the slab mesh stays hidden. The PROTEIN hull handover keeps using memR regardless. */
   let gSlabLod = SOLU;   // cell mode starts with the slab tier ON: the closed membranes are always slab past memR, and a facet still covered in lipid spheres stuck out of the cell (2026-09-09)
+  const gSlabSync = [];   // every button that shows the slab tier's state (the gear-menu Laatta, the dev laatta-LoD) refreshes through here
+  const setSlabLod = v => { gSlabLod = !!v; for(const f of gSlabSync) f(); };
+  { const sb = document.getElementById('slab-btn');   // gear menu, for everyone (owner 12.9.2026: 'a button to disable the slab LoD and just use cheap and crisp')
+    if(sb){ sb.addEventListener('click', () => setSlabLod(!gSlabLod)); gSlabSync.push(() => sb.classList.toggle('on', gSlabLod)); sb.classList.toggle('on', gSlabLod); } }
   let gMembrane = true;    // membrane SHOWN by default (it used to start hidden as the heaviest thing in the scene, but the slab and the density ramp made it cheap enough); the Kalvo button hides it
   // (the Kalvo button that hid the whole bilayer is gone - owner 12.9.2026; gMembrane stays true)
   // Membrane half-cut → fade out the CAMERA-SIDE leaflet so it stops occluding the complexes. This used to be
@@ -6343,7 +6348,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const gLod = { memR:0, memFull:0, orbR:0, step:[0,0,0,0,0] };
   const deriveLod = () => {
     const patchHalf = (gMemSpanX && gMemSpanZ) ? Math.min(gMemSpanX, gMemSpanZ)*0.5 : Infinity;
-    const memR = Math.min(gMega, patchHalf);
+    const memR = (SOLU && !gSlabLod) ? gMega*2 : Math.min(gMega, patchHalf);   // slab tier OFF in the cell: lipids as far as the streams reach (they hold four times gMega's disc - twice the radius); the shells are hidden meanwhile
     /* The SAME two radii as the proteins: orbitals and glass within gCrisp, the slab past memR. The
        glass shader cuts at gCrisp per fragment, so the block-level band only has to be wide enough
        (a block radius) that every lipid within gCrisp holds the glass-capable material. */
@@ -7044,7 +7049,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           m.refreshBoundingInfo(); m.position.copyFrom(M.C);
           m.material = mat; m.isPickable = false; m.renderingGroupId = 0; m.alwaysSelectAsActiveMesh = true; shells.push(m); }
       }
-      scene.onBeforeRenderObservable.add(() => { for(const m of shells) if(m.isEnabled() !== gMembrane) m.setEnabled(gMembrane); });
+      scene.onBeforeRenderObservable.add(() => { const on = gMembrane && gSlabLod; for(const m of shells) if(m.isEnabled() !== on) m.setEnabled(on); });   // the shells ARE the slab tier - off with it (Laatta button)
       /* THE GATHER: for every membrane within reach, the blocks inside an angular window around the camera's
          foot on each cube face (the window widened where the ellipsoid compresses the lattice), then the sheet's
          own per-block rule - full to memR, a strided prefix over the blend band, near or far stream by memFull,
@@ -10430,8 +10435,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Membrane slab tier on/off (see gSlabLod).
   const slRow = document.createElement('div'); const slBtn = document.createElement('button');
   const syncSl = () => { slBtn.textContent = gSlabLod ? 'laatta-LoD: ON' : 'laatta-LoD: OFF'; slBtn.style.cssText = cullStyle(gSlabLod); };
-  slBtn.onclick = () => { gSlabLod = !gSlabLod; syncSl(); };
-  syncSl(); slRow.appendChild(slBtn);
+  slBtn.onclick = () => setSlabLod(!gSlabLod);
+  syncSl(); gSlabSync.push(syncSl); slRow.appendChild(slBtn);
   devPanel.appendChild(cullRow); devPanel.appendChild(selRow); devPanel.appendChild(phRow); devPanel.appendChild(slRow);   // (cullRow had been built but never attached)
   devPanel.appendChild(psRow); devPanel.appendChild(psSld); devPanel.appendChild(ppRow);
   { const vr = document.createElement('div'); vr.id = 'dev-valo-row'; vr.textContent = 'valoreaktiot: -'; devPanel.appendChild(vr); }
@@ -11627,7 +11632,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn',
-                     'memcut-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
+                     'memcut-btn','slab-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
       const b = document.getElementById(id); if(!b) continue;
       b.style.position = 'static'; b.style.left = 'auto'; b.style.top = 'auto'; menu.appendChild(b);   // static → they stack in the menu
     }
