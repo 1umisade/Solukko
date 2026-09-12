@@ -1165,6 +1165,10 @@ uniform vec3 keyDir;
 uniform float keyFloor;    // dev slider 'varjon syvyys': what the shadow side keeps (1 = no shading at all)
 uniform float macroMix;    // dev slider 'muodon valo': how much of the key normal is the MOLECULE's surface normal (0 = each sphere on its own)
 uniform float aoAmt;       // dev slider 'uurteiden tummuus': how much a buried atom darkens
+uniform vec3 keyCol;       // dev slider 'valon lampo': the key's colour (warm amber .. cool blue), on the lit side only
+uniform float specAmt;     // dev slider 'kiilto': a specular highlight from the key
+uniform float rimAmt;      // dev slider 'reunahohde': the electric-blue grazing sheen
+uniform float selfShade;   // dev slider 'pallon oma varjo': each sphere's rim darkening
 #ifdef MACRON
 varying vec4 vMacroN;
 #endif
@@ -1181,11 +1185,15 @@ vec3 keyNormal(vec3 nW){
   if(lM > 0.5) return normalize(nW * (1.0 - macroMix) + m * (macroMix / lM));
 #endif
   return nW; }
-float keyShade(vec3 nW){ float k = keyLight(keyNormal(nW));
+vec3 keyShade(vec3 nW){ vec3 nK = keyNormal(nW); float d = pow(max(dot(nK, keyDir), 0.0), 1.1);
+  vec3 k = (dot(keyDir, keyDir) < 0.5) ? vec3(1.0) : vec3(keyFloor) + (1.0 - keyFloor) * d * keyCol;   // the lit part carries the key's colour
 #ifdef MACRON
   k *= 1.0 - aoAmt * vMacroN.w;
 #endif
   return k; }
+/* a specular highlight from the key, Blinn style on the key normal - the view direction comes in view space (-posV) */
+vec3 keySpec(vec3 nW, vec3 vW){ if(specAmt <= 0.0 || dot(keyDir, keyDir) < 0.5) return vec3(0.0);
+  vec3 h = normalize(keyDir + normalize(vW)); return keyCol * specAmt * 0.6 * pow(max(dot(normalize(keyNormal(nW)), h), 0.0), 24.0); }
 vec3 protonLight(vec3 p){ vec3 acc = vec3(0.0);
   /* A compact falloff, exactly zero at pLightR. The old 1/(1+4d*d) never reached zero, and since the
      lights are the protons nearest the CAMERA, every atom you approached picked up their red - the
@@ -1241,9 +1249,12 @@ void main(void){
   vec3 nF = vec3(vUV, -zcF);
   vec3 colF = vColor;
 #ifdef PLIGHT
-  colF *= keyShade(vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)));   // the key from above on the MOLECULE's normal (see keyNormal)
-#endif
+  { vec3 nWF = vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)); colF *= keyShade(nWF);   // the key from above on the MOLECULE's normal (see keyNormal)
+    vec3 vV = -normalize(vCenterV + nF * vRad); colF += keySpec(nWF, vec3(dot(vWB0, vV), dot(vWB1, vV), dot(vWB2, vV))); }
+  colF *= 1.0 - selfShade * smoothstep(0.55, 1.0, r2);
+#else
   colF *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);
+#endif
   /* The SAME ink rim as the crisp path, scaled by the atom's size on screen the same way (see rimK
      there). When the crisp rim was made to thin out on small discs this path kept the fat fixed band,
      which darkens a quarter of a 3 px disc - so a cell brightened the moment it swapped to the crisp
@@ -1343,9 +1354,12 @@ void main(void){
   gl_FragDepthEXT = clip.z / clip.w * 0.5 + 0.5;
   vec3 col = vColor;
 #ifdef PLIGHT
-  col *= keyShade(vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)));   // the key from above on the MOLECULE's normal (see keyNormal)
-#endif
+  { vec3 nWn = vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)); col *= keyShade(nWn);   // the key from above on the MOLECULE's normal (see keyNormal)
+    vec3 vV = -normalize(posV); col += keySpec(nWn, vec3(dot(vWB0, vV), dot(vWB1, vV), dot(vWB2, vV))); }
+  col *= 1.0 - selfShade * smoothstep(0.55, 1.0, r2);        // each sphere's own rim shade (dev slider)
+#else
   col *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);              // subtle self-shade
+#endif
   if(focusAmt > 0.001){   // O: grayscale this fragment unless it is part of the selection → the coloured region is the EXACT silhouette
     bool fsel;
     if(focusMode > 2.5){   // mode 3 = a cofactor GROUP: only the overlay atoms tagged with that group keep colour
@@ -1383,7 +1397,11 @@ void main(void){
   if(protonOutline < 0.5){
     float fres = pow(1.0 - zc, 2.3);
     float shim = 0.5 + 0.5*sin(uT*2.3 + vWCen.x*0.14 + vWCen.y*0.10 + vWCen.z*0.12);
+#ifdef PLIGHT
+    col += vec3(0.10, 0.24, 0.55) * fres * (0.34 + 0.5*shim) * rimAmt;
+#else
     col += vec3(0.10, 0.24, 0.55) * fres * (0.34 + 0.5*shim);
+#endif
   }
   if(protonOutline > 0.5 && vFlag > 0.5){
     float pf = pow(1.0 - zc, 1.6);                           // broad, soft Fresnel (zc = sqrt(1-r2)) → hazy edge
@@ -3974,10 +3992,19 @@ void main(void){
   // The soft key light: a WORLD direction pointing at the light, from above the membrane (+Y) with a lean
   // toward the default view. gKeyPos is where the dev-mode sun gizmo sits.
   const gKeyDir = new BABYLON.Vector3(0.18, 1.0, 0.42).normalize();
-  let gKeyFloor = 0.5, gMacroMix = 0.69, gAoAmt = 0.35, gBands = 10;   // the shading sliders (dev panel, 12.9.2026): shadow floor, macro-normal share (0.69 = the old 0.45 : 1.0 blend), buriedness darkening, painterly colour bands
-  let gKeyEl = 66, gKeyAz = 23;   // the key light's elevation and azimuth in degrees (dev sliders) - the default vector (0.18, 1.0, 0.42) is elevation 66, azimuth 23 from +z toward +x
-  const setKeyDir = () => { const el = gKeyEl*Math.PI/180, az = gKeyAz*Math.PI/180; gKeyDir.set(Math.cos(el)*Math.sin(az), Math.sin(el), Math.cos(el)*Math.cos(az)).normalize(); };
-  const bindPLight = eff => { eff.setArray3('pLight', gPL); eff.setFloat('pLightN', gPLN); eff.setFloat('pLightR', gPLR); eff.setVector3('keyDir', gKeyDir); eff.setFloat('keyFloor', gKeyFloor); eff.setFloat('macroMix', gMacroMix); eff.setFloat('aoAmt', gAoAmt); };
+  /* The lighting settings (dev panel section 'Valaistus'). Defaults are the owner's own values (12.9.2026). LIGHT_DEF holds
+     them for the section's reset button; setKeyDir rebuilds gKeyDir from elevation/azimuth (or from the camera when the
+     headlight switch is on - then the key rides above and left of the viewer). */
+  const LIGHT_DEF = { keyFloor:0.67, macroMix:1.0, aoAmt:0.74, bands:10, keyEl:66, keyAz:205, keyWarm:0, spec:0.0, rim:1.0, selfShade:0.14, edge:1.5, paper:0.05, lift:1.35, follow:false };
+  let gKeyFloor = LIGHT_DEF.keyFloor, gMacroMix = LIGHT_DEF.macroMix, gAoAmt = LIGHT_DEF.aoAmt, gBands = LIGHT_DEF.bands;
+  let gKeyEl = LIGHT_DEF.keyEl, gKeyAz = LIGHT_DEF.keyAz, gKeyWarm = LIGHT_DEF.keyWarm, gSpec = LIGHT_DEF.spec, gRim = LIGHT_DEF.rim, gSelfShade = LIGHT_DEF.selfShade;
+  let gEdgeAmt = LIGHT_DEF.edge, gPaperAmt = LIGHT_DEF.paper, gPaintLift = LIGHT_DEF.lift, gKeyFollow = LIGHT_DEF.follow;
+  const gKeyCol = new BABYLON.Color3(1, 1, 1);
+  const setKeyDir = () => { const el = gKeyEl*Math.PI/180, az = gKeyAz*Math.PI/180; gKeyDir.set(Math.cos(el)*Math.sin(az), Math.sin(el), Math.cos(el)*Math.cos(az)).normalize();
+    const w = gKeyWarm; gKeyCol.set(1 + 0.10*Math.max(0, w) - 0.15*Math.max(0, -w), 1 - 0.06*Math.abs(w), 1 - 0.20*Math.max(0, w) + 0.10*Math.max(0, -w)); };   // warm (+) = amber key, cool (-) = a bluish one
+  setKeyDir();
+  const bindPLight = eff => { eff.setArray3('pLight', gPL); eff.setFloat('pLightN', gPLN); eff.setFloat('pLightR', gPLR); eff.setVector3('keyDir', gKeyDir); eff.setFloat('keyFloor', gKeyFloor); eff.setFloat('macroMix', gMacroMix); eff.setFloat('aoAmt', gAoAmt);
+    eff.setColor3('keyCol', gKeyCol); eff.setFloat('specAmt', gSpec); eff.setFloat('rimAmt', gRim); eff.setFloat('selfShade', gSelfShade); };
   const bindFocus = eff => { eff.setFloat('focusAmt', gFocusDimAmt); eff.setFloat('focusMode', gFocusMode); eff.setVector3('focusCenterV', gFocusCenterV); eff.setFloat('focusR', gDimRadius); eff.setArray('focusSet', gFocusSet); eff.setFloat('focusGroup', gFocusGroup); eff.setFloat('focusDark', gFocusDark); };
   let gShortcuts = null;        // dev-mode keyboard-shortcut cheatsheet panel
   let gZoomP = null;  // world point under the cursor to zoom TOWARD (null → zoom to the viewport centre)
@@ -4761,6 +4788,9 @@ void main(void){
     gInsideCell = inside;
     if(inside){ gDepthK = 0.75; gDepthLo = 0.30; gDepthStart = 40; gDepthSpread = 3500; }
     else { gDepthK = 0.40; gDepthLo = 0.50; gDepthStart = 0; gDepthSpread = 120; } });
+  scene.onBeforeRenderObservable.add(() => {   // 'valo mukana kamerassa': the key light sits above and to the left of the viewer, wherever the camera turns
+    if(!gKeyFollow) return; const up = cam.getDirection(BABYLON.Axis.Y), rt = cam.getDirection(BABYLON.Axis.X), fw = cam.getDirection(BABYLON.Axis.Z);
+    gKeyDir.copyFrom(up.scale(0.85).add(rt.scale(-0.35)).subtract(fw.scale(0.45))).normalize(); });
   scene.onBeforeRenderObservable.add(() => {   // middle-drag look-around: apply the pending turn with inertia (Babylon: offset applied, then *= inertia)
     if(Math.abs(mdYaw) < 1e-5 && Math.abs(mdPitch) < 1e-5){ mdYaw = mdPitch = 0; return; }
     dragLook(mdYaw, mdPitch); mdYaw *= cam.inertia; mdPitch *= cam.inertia;
@@ -5085,7 +5115,7 @@ void main(void){
   // rims). Outside it EVERYTHING drops to the cheap opaque disc material — one radius governs both, so
   // there is exactly one quality boundary in the scene. Set to the real value once CELL is known.
   let gCrisp = 132;
-  let gMega  = 600;           // megacheap radius: past this the membrane is a bare slab and proteins thin hard (1.5x closer than the ~895 half-period it used to hit)
+  let gMega  = 1509;          // megacheap radius (owner's setting 12.9.2026, was 600): past this the membrane is a bare slab and proteins thin hard (1.5x closer than the ~895 half-period it used to hit)
   let gMemBlend = 60;         // width of the lipid/slab overlap band at the megacheap edge (the gather thins across it, the slab's hole ends at its start)
   let cofListPanel = null;               // right-side cofactor-type list (built later); shown only in ETC mode
   const gCofOfAtom = new Map();          // element*2^24 + atom index → its cofactor group (a click on that atom selects the cofactor, owner 12.9.2026)
@@ -5576,7 +5606,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // sphere per atom, per-instance radius via IMPRAD. Movable (per-model drag + PSII gizmo).
   const vdwMat = new BABYLON.ShaderMaterial('vdwLOD', scene, 'imp', {
     attributes:['position','instanceColor','instR','modelId','macroN','world0','world1','world2','world3'],
-    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
+    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade'],
     samplers:['cofDepth'],
     defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define COFHIDE','#define DEPTHSHADE','#define PLIGHT','#define MACRON'] });
   vdwMat.setFloat('radius',1.0); vdwMat.setFloat('isShell',0); vdwMat.setFloat('shellMin',0); vdwMat.setFloat('bubbleR',1e9);
@@ -5589,7 +5619,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); bindCof(eff); bindPLight(eff); });
   const vdwMatStatic = new BABYLON.ShaderMaterial('vdwLODs', scene, 'imp', {
     attributes:['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
-    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','memCut','cutLo','cutHi','selModel','tileOff','memDrift','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
+    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','memCut','cutLo','cutHi','selModel','tileOff','memDrift','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade'],
     samplers:['cofDepth'],
     defines:['#define IMPRAD','#define MEMFADE','#define COFHIDE','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT'] });   // LIPTPL: one instance per lipid, atoms baked per vertex   // MEMFADE = cross-cut fade, LIPWRAP = the sheet repeats around the camera
   vdwMatStatic.setFloat('radius',1.0); vdwMatStatic.setFloat('isShell',0); vdwMatStatic.setFloat('shellMin',0); vdwMatStatic.setFloat('bubbleR',1e9);
@@ -5621,7 +5651,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   };
   const vdwFarMat = mkFar('vdwLODfar',
     ['position','instanceColor','instR','modelId','macroN','world0','world1','world2','world3'],
-    ['macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
+    ['macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade'],
     ['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define CHEAP','#define DEPTHSHADE','#define PLIGHT','#define MACRON']);
   vdwFarMat.setFloat('selModel', -1);
   vdwFarMat.onBindObservable.add(()=>{ const eff=vdwFarMat.getEffect(); if(!eff)return;
@@ -5633,7 +5663,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); bindPLight(eff); });
   const vdwStaticFarMat = mkFar('vdwLODsfar',
     ['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
-    ['memCut','cutLo','cutHi','tileOff','memDrift','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
+    ['memCut','cutLo','cutHi','tileOff','memDrift','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade'],
     ['#define IMPRAD','#define MEMFADE','#define CHEAP','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT']);
   vdwStaticFarMat.onBindObservable.add(mesh=>{ const eff=vdwStaticFarMat.getEffect(); if(!eff)return;
     eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
@@ -6403,7 +6433,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // with the orbitals revealed inside when the camera is in range.
     const chlSphMat = new BABYLON.ShaderMaterial('chlSphMat', scene, 'imp', {
       attributes:['position','instanceColor','instR','world0','world1','world2','world3'],
-      uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','selModel','selCol','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
+      uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','selModel','selCol','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade'],
       defines:['#define PLIGHT'] });
     chlSphMat.setFloat('radius',1.0); chlSphMat.setFloat('protonOutline',0); chlSphMat.setFloat('depthBias',0);
     chlSphMat.setFloat('selModel',-1); chlSphMat.setColor3('selCol', new BABYLON.Color3(0.6,0.72,0.53));
@@ -6964,7 +6994,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // count can never exceed it (a fixed 2048 cap used to drop whole swathes when a template was busy).
     const sphTpl = [];
     // cell mode: the closed membranes within memR of the camera come on top of the sheet's own count, per template
-    const CELL_EXTRA = SOLU ? Math.ceil(2*Math.PI*gMega*gMega/(S*S)*4.0/NTPL) + 64 : 0;   // several organelle membranes can be in reach at once (a Golgi stack, a mitochondrion's cristae)
+    const CELL_EXTRA = SOLU ? Math.ceil(2*Math.PI*600*600/(S*S)*4.0/NTPL) + 64 : 0;   // the streams are sized for a 600-unit disc times four whatever gMega is (the owner runs 1509 - the gather simply stops at the cap, which is what the slider gave)   // several organelle membranes can be in reach at once (a Golgi stack, a mitochondrion's cristae)
     const tplYlo = new Float32Array(NTPL), tplYhi = new Float32Array(NTPL);   // each template's atom offsets span this in y: base to tip of the lipid
     let LIP_H = 0;   // the tallest lipid - the protein-shell pre-test per block widens by it
     { const corner = [-1,-1, 1,-1, 1,1, -1,1];
@@ -7786,7 +7816,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // glow = the proton corona: same stateless positioning, but the fragment draws a soft additive red disc
     const wMat=(rad, solid, glow, bias, outline, haze)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':''),scene,'imp',{
         attributes:['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
-        uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','depthBias',
+        uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','depthBias',
                   'cellWrap','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
@@ -10533,20 +10563,6 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const sdSld = document.createElement('input'); sdSld.type='range'; sdSld.min='0'; sdSld.max='100'; sdSld.value='18'; sdSld.style.cssText='width:100%;cursor:pointer;';
   const sdValEl = sdRow.querySelector('#dev-sd-val');
   sdSld.oninput = () => { gSlabDark = +sdSld.value/100; sdValEl.textContent = String(+sdSld.value); };
-  /* The shading sliders (owner 12.9.2026): the key light's shadow floor, how much of the lighting follows the molecule's
-     surface rather than each atom's sphere, how much buried atoms darken, the painterly pass's colour bands, and the key
-     light's direction. All live - the values are bound every frame. */
-  const shadeRows = [];
-  const mkShadeSlider = (label, min, max, step, get, set, fmt) => { const row = document.createElement('div'); const val = document.createElement('b'); row.textContent = label + ': '; row.appendChild(val);
-    const sld = document.createElement('input'); sld.type = 'range'; sld.min = String(min); sld.max = String(max); sld.step = String(step); sld.value = String(get()); sld.style.cssText = 'width:100%;cursor:pointer;';
-    const show = () => { val.textContent = fmt ? fmt(get()) : String(get()); }; show();
-    sld.oninput = () => { set(+sld.value); show(); }; shadeRows.push(row, sld); return sld; };
-  mkShadeSlider('varjon syvyys (valon pohja)', 0, 100, 1, () => Math.round(gKeyFloor*100), v => { gKeyFloor = v/100; }, v => v + ' %');
-  mkShadeSlider('muodon valo (molekyylin pinta vs. atomin pallo)', 0, 100, 1, () => Math.round(gMacroMix*100), v => { gMacroMix = v/100; }, v => v + ' %');
-  mkShadeSlider('uurteiden tummuus', 0, 100, 1, () => Math.round(gAoAmt*100), v => { gAoAmt = v/100; }, v => v + ' %');
-  mkShadeSlider('väritasot (maalauksellinen)', 2, 24, 1, () => gBands, v => { gBands = v; });
-  mkShadeSlider('valon korkeus', 0, 90, 1, () => gKeyEl, v => { gKeyEl = v; setKeyDir(); }, v => v + '°');
-  mkShadeSlider('valon suunta', 0, 360, 1, () => gKeyAz, v => { gKeyAz = v; setKeyDir(); }, v => v + '°');
   // Proton light reach on atoms (world units, 0 = off).
   const plRow = document.createElement('div'); plRow.innerHTML = 'protonivalon kantama: <b id="dev-pl-val">0</b>';
   const plSld = document.createElement('input'); plSld.type='range'; plSld.min='0'; plSld.max='30'; plSld.value='0'; plSld.style.cssText='width:100%;cursor:pointer;';
@@ -10605,7 +10621,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   devPanel.appendChild(backRow); devPanel.appendChild(qRow); devPanel.appendChild(qSld);   // render-resolution slider - it was built but had fallen out of the panel
   devPanel.appendChild(czRow); devPanel.appendChild(czSld);
   devPanel.appendChild(mgRow); devPanel.appendChild(mgSld);
-  devPanel.appendChild(blRow); devPanel.appendChild(blSld); devPanel.appendChild(sdRow); devPanel.appendChild(sdSld); for(const el of shadeRows) devPanel.appendChild(el); devPanel.appendChild(plRow); devPanel.appendChild(plSld); devPanel.appendChild(bRow); devPanel.appendChild(bSld); devPanel.appendChild(bhRow); devPanel.appendChild(bhSld);
+  devPanel.appendChild(blRow); devPanel.appendChild(blSld); devPanel.appendChild(sdRow); devPanel.appendChild(sdSld); devPanel.appendChild(plRow); devPanel.appendChild(plSld); devPanel.appendChild(bRow); devPanel.appendChild(bSld); devPanel.appendChild(bhRow); devPanel.appendChild(bhSld);
   // Membrane slab tier on/off (see gSlabLod).
   const slRow = document.createElement('div'); const slBtn = document.createElement('button');
   const syncSl = () => { slBtn.textContent = gSlabLod ? 'laatta-LoD: ON' : 'laatta-LoD: OFF'; slBtn.style.cssText = cullStyle(gSlabLod); };
@@ -10618,6 +10634,39 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   syncRm(); rmRow.appendChild(rmBtn);
   devPanel.appendChild(cullRow); devPanel.appendChild(selRow); devPanel.appendChild(phRow); devPanel.appendChild(slRow); devPanel.appendChild(rmRow);   // (cullRow had been built but never attached)
   devPanel.appendChild(psRow); devPanel.appendChild(psSld); devPanel.appendChild(ppRow);
+  /* ── VALAISTUS - the lighting section (owner 12.9.2026: 'make a separate section for the lighting settings'). Every
+     value is bound each frame, so the sliders are live; the reset button puts the section back to LIGHT_DEF. */
+  { const sec = document.createElement('div'); sec.style.cssText = 'margin-top:8px;padding-top:6px;border-top:2px solid var(--brown);display:flex;flex-direction:column;gap:7px;';
+    const head = document.createElement('div'); head.textContent = 'Valaistus'; head.style.cssText = 'font-weight:bold;letter-spacing:0.04em;'; sec.appendChild(head);
+    const ctl = [];   // [refresh] per slider, for the reset button
+    const mkSl = (label, min, max, step, get, set, fmt) => { const row = document.createElement('div'); const val = document.createElement('b'); row.textContent = label + ': '; row.appendChild(val);
+      const sld = document.createElement('input'); sld.type = 'range'; sld.min = String(min); sld.max = String(max); sld.step = String(step); sld.style.cssText = 'width:100%;cursor:pointer;';
+      const show = () => { sld.value = String(get()); val.textContent = fmt ? fmt(get()) : String(get()); }; show();
+      sld.oninput = () => { set(+sld.value); val.textContent = fmt ? fmt(get()) : String(get()); }; sec.appendChild(row); sec.appendChild(sld); ctl.push(show); };
+    const pct = v => v + ' %', deg = v => v + '°';
+    mkSl('varjon syvyys (valon pohja)', 0, 100, 1, () => Math.round(gKeyFloor*100), v => { gKeyFloor = v/100; }, pct);
+    mkSl('muodon valo (molekyylin pinta vs. atomin pallo)', 0, 100, 1, () => Math.round(gMacroMix*100), v => { gMacroMix = v/100; }, pct);
+    mkSl('uurteiden tummuus', 0, 100, 1, () => Math.round(gAoAmt*100), v => { gAoAmt = v/100; }, pct);
+    mkSl('pallon oma varjo', 0, 60, 1, () => Math.round(gSelfShade*100), v => { gSelfShade = v/100; }, pct);
+    mkSl('kiilto', 0, 100, 1, () => Math.round(gSpec*100), v => { gSpec = v/100; }, pct);
+    mkSl('reunahohde (sininen)', 0, 200, 1, () => Math.round(gRim*100), v => { gRim = v/100; }, pct);
+    mkSl('valon lämpö (kylmä .. lämmin)', -100, 100, 1, () => Math.round(gKeyWarm*100), v => { gKeyWarm = v/100; setKeyDir(); }, v => (v > 0 ? '+' : '') + v);
+    mkSl('valon korkeus', 0, 90, 1, () => gKeyEl, v => { gKeyEl = v; setKeyDir(); }, deg);
+    mkSl('valon suunta', 0, 360, 1, () => gKeyAz, v => { gKeyAz = v; setKeyDir(); }, deg);
+    mkSl('väritasot (maalauksellinen)', 2, 24, 1, () => gBands, v => { gBands = v; });
+    mkSl('mustereuna', 0, 400, 5, () => Math.round(gEdgeAmt*100), v => { gEdgeAmt = v/100; }, pct);
+    mkSl('paperin rae', 0, 30, 1, () => Math.round(gPaperAmt*100), v => { gPaperAmt = v/100; }, pct);
+    mkSl('kirkkauden nosto', 50, 250, 5, () => Math.round(gPaintLift*100), v => { gPaintLift = v/100; }, pct);
+    const btns = document.createElement('div'); btns.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+    const mkBtn = (text, on, fn) => { const b = document.createElement('button'); const sync = () => { b.textContent = text(); b.style.cssText = cullStyle(on()); }; b.onclick = () => { fn(); sync(); for(const f of ctl) f(); }; sync(); btns.appendChild(b); return sync; };
+    const syncs = [];
+    syncs.push(mkBtn(() => 'valo mukana kamerassa: ' + (gKeyFollow ? 'ON' : 'OFF'), () => gKeyFollow, () => { gKeyFollow = !gKeyFollow; if(!gKeyFollow) setKeyDir(); }));
+    syncs.push(mkBtn(() => 'litteä (ei varjostusta)', () => gKeyFloor >= 0.999, () => { gKeyFloor = gKeyFloor >= 0.999 ? LIGHT_DEF.keyFloor : 1.0; }));
+    const pOn = () => window.gPainterlyOn ? window.gPainterlyOn() : true;   // (painterlyOn is declared later in this function - reached through window, never directly)
+    syncs.push(mkBtn(() => 'maalauksellinen: ' + (pOn() ? 'ON' : 'OFF'), pOn, () => { if(window.gTogglePainterly) window.gTogglePainterly(); }));
+    syncs.push(mkBtn(() => 'palauta valaistus', () => false, () => { gKeyFloor = LIGHT_DEF.keyFloor; gMacroMix = LIGHT_DEF.macroMix; gAoAmt = LIGHT_DEF.aoAmt; gBands = LIGHT_DEF.bands; gKeyEl = LIGHT_DEF.keyEl; gKeyAz = LIGHT_DEF.keyAz;
+      gKeyWarm = LIGHT_DEF.keyWarm; gSpec = LIGHT_DEF.spec; gRim = LIGHT_DEF.rim; gSelfShade = LIGHT_DEF.selfShade; gEdgeAmt = LIGHT_DEF.edge; gPaperAmt = LIGHT_DEF.paper; gPaintLift = LIGHT_DEF.lift; gKeyFollow = LIGHT_DEF.follow; setKeyDir(); for(const f of syncs) f(); }));
+    sec.appendChild(btns); devPanel.appendChild(sec); }
   { const vr = document.createElement('div'); vr.id = 'dev-valo-row'; vr.textContent = 'valoreaktiot: -'; devPanel.appendChild(vr); }
   devPanel.appendChild(mvRow); devPanel.appendChild(mvSld);
   devPanel.appendChild(zxRow); devPanel.appendChild(zxSld);
@@ -12506,14 +12555,16 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setFloat('sat', gSat); eff.setFloat('hi', gHi); eff.setFloat('sh', gSh); };
   // Painterly / comic-book grade — runs last, over the anti-aliased frame. Toggle with "P".
   let painterlyOn = true;
+  window.gPainterlyOn = () => painterlyOn;
+  window.gTogglePainterly = () => { painterlyOn = !painterlyOn; if(painterlyOn) cam.attachPostProcess(painterly); else cam.detachPostProcess(painterly); };   // K key and the dev panel's Valaistus button
   const painterly = new BABYLON.PostProcess('painterly', 'painterly',
     ['texel', 'edgeAmt', 'bands', 'paperAmt', 'bright'], null, 1.0, cam);
   painterly.onApply = eff => {
     eff.setFloat2('texel', 1 / engine.getRenderWidth(), 1 / engine.getRenderHeight());
-    eff.setFloat('edgeAmt', 1.5);    // ink line strength
+    eff.setFloat('edgeAmt', gEdgeAmt);   // ink line strength (dev slider)
     eff.setFloat('bands', gBands);   // flat colour bands per channel - 10, not 6 (12.9.2026): six levels swallowed the key light's whole 0.5..1.0 range into two steps, which is most of why every molecule read as FLAT; ten keeps the painted look and lets the shading through
-    eff.setFloat('paperAmt', 0.05);  // paper grain
-    eff.setFloat('bright', 1.35);    // brightness lift (was coming out dark)
+    eff.setFloat('paperAmt', gPaperAmt); // paper grain (dev slider)
+    eff.setFloat('bright', gPaintLift);  // brightness lift (dev slider)
   };
   // "Lantern" mode → runs LAST, dimming the finished frame everywhere except a soft round spotlight that
   // follows the excited electron's screen position, so the electron alone lights up the atoms around it.
@@ -12596,10 +12647,7 @@ void main(void){
   window.addEventListener('keydown', e => {
     if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // don't hijack typing in dev inputs
     const k = e.key;
-    if(k === 'k' || k === 'K'){   // was P - P now rolls the camera
-      painterlyOn = !painterlyOn;
-      if(painterlyOn) cam.attachPostProcess(painterly); else cam.detachPostProcess(painterly);
-    }
+    if(k === 'k' || k === 'K'){ window.gTogglePainterly(); }   // was P - P now rolls the camera
     else if(k === 'i' || k === 'I'){ resetView(); }                                     // I → default starting view
     else if(k === 'h' || k === 'H'){ document.documentElement.classList.toggle('ui-hidden'); }   // H → hide/show all UI
     else if(k === 'o' || k === 'O'){ gFocusDim = true; }                                 // O held → spotlight the selection

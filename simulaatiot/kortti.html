@@ -803,6 +803,10 @@ uniform vec3 keyDir;
 uniform float keyFloor;    // dev slider 'varjon syvyys': what the shadow side keeps (1 = no shading at all)
 uniform float macroMix;    // dev slider 'muodon valo': how much of the key normal is the MOLECULE's surface normal (0 = each sphere on its own)
 uniform float aoAmt;       // dev slider 'uurteiden tummuus': how much a buried atom darkens
+uniform vec3 keyCol;       // dev slider 'valon lampo': the key's colour (warm amber .. cool blue), on the lit side only
+uniform float specAmt;     // dev slider 'kiilto': a specular highlight from the key
+uniform float rimAmt;      // dev slider 'reunahohde': the electric-blue grazing sheen
+uniform float selfShade;   // dev slider 'pallon oma varjo': each sphere's rim darkening
 #ifdef MACRON
 varying vec4 vMacroN;
 #endif
@@ -819,11 +823,15 @@ vec3 keyNormal(vec3 nW){
   if(lM > 0.5) return normalize(nW * (1.0 - macroMix) + m * (macroMix / lM));
 #endif
   return nW; }
-float keyShade(vec3 nW){ float k = keyLight(keyNormal(nW));
+vec3 keyShade(vec3 nW){ vec3 nK = keyNormal(nW); float d = pow(max(dot(nK, keyDir), 0.0), 1.1);
+  vec3 k = (dot(keyDir, keyDir) < 0.5) ? vec3(1.0) : vec3(keyFloor) + (1.0 - keyFloor) * d * keyCol;   // the lit part carries the key's colour
 #ifdef MACRON
   k *= 1.0 - aoAmt * vMacroN.w;
 #endif
   return k; }
+/* a specular highlight from the key, Blinn style on the key normal - the view direction comes in view space (-posV) */
+vec3 keySpec(vec3 nW, vec3 vW){ if(specAmt <= 0.0 || dot(keyDir, keyDir) < 0.5) return vec3(0.0);
+  vec3 h = normalize(keyDir + normalize(vW)); return keyCol * specAmt * 0.6 * pow(max(dot(normalize(keyNormal(nW)), h), 0.0), 24.0); }
 vec3 protonLight(vec3 p){ vec3 acc = vec3(0.0);
   /* A compact falloff, exactly zero at pLightR. The old 1/(1+4d*d) never reached zero, and since the
      lights are the protons nearest the CAMERA, every atom you approached picked up their red - the
@@ -879,9 +887,12 @@ void main(void){
   vec3 nF = vec3(vUV, -zcF);
   vec3 colF = vColor;
 #ifdef PLIGHT
-  colF *= keyShade(vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)));   // the key from above on the MOLECULE's normal (see keyNormal)
-#endif
+  { vec3 nWF = vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)); colF *= keyShade(nWF);   // the key from above on the MOLECULE's normal (see keyNormal)
+    vec3 vV = -normalize(vCenterV + nF * vRad); colF += keySpec(nWF, vec3(dot(vWB0, vV), dot(vWB1, vV), dot(vWB2, vV))); }
+  colF *= 1.0 - selfShade * smoothstep(0.55, 1.0, r2);
+#else
   colF *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);
+#endif
   /* The SAME ink rim as the crisp path, scaled by the atom's size on screen the same way (see rimK
      there). When the crisp rim was made to thin out on small discs this path kept the fat fixed band,
      which darkens a quarter of a 3 px disc - so a cell brightened the moment it swapped to the crisp
@@ -981,9 +992,12 @@ void main(void){
   gl_FragDepthEXT = clip.z / clip.w * 0.5 + 0.5;
   vec3 col = vColor;
 #ifdef PLIGHT
-  col *= keyShade(vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)));   // the key from above on the MOLECULE's normal (see keyNormal)
-#endif
+  { vec3 nWn = vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)); col *= keyShade(nWn);   // the key from above on the MOLECULE's normal (see keyNormal)
+    vec3 vV = -normalize(posV); col += keySpec(nWn, vec3(dot(vWB0, vV), dot(vWB1, vV), dot(vWB2, vV))); }
+  col *= 1.0 - selfShade * smoothstep(0.55, 1.0, r2);        // each sphere's own rim shade (dev slider)
+#else
   col *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);              // subtle self-shade
+#endif
   if(focusAmt > 0.001){   // O: grayscale this fragment unless it is part of the selection → the coloured region is the EXACT silhouette
     bool fsel;
     if(focusMode > 2.5){   // mode 3 = a cofactor GROUP: only the overlay atoms tagged with that group keep colour
@@ -1021,7 +1035,11 @@ void main(void){
   if(protonOutline < 0.5){
     float fres = pow(1.0 - zc, 2.3);
     float shim = 0.5 + 0.5*sin(uT*2.3 + vWCen.x*0.14 + vWCen.y*0.10 + vWCen.z*0.12);
+#ifdef PLIGHT
+    col += vec3(0.10, 0.24, 0.55) * fres * (0.34 + 0.5*shim) * rimAmt;
+#else
     col += vec3(0.10, 0.24, 0.55) * fres * (0.34 + 0.5*shim);
+#endif
   }
   if(protonOutline > 0.5 && vFlag > 0.5){
     float pf = pow(1.0 - zc, 1.6);                           // broad, soft Fresnel (zc = sqrt(1-r2)) → hazy edge
