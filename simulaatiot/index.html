@@ -3631,17 +3631,14 @@ varying float vZ;
 varying vec3 vWP;
 float hash1(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }
 vec2 hash2(vec2 c){ return vec2(hash1(c), hash1(c + vec2(19.3, 7.7))); }
-/* The far tier's look from a picture (owner 11.9.2026): the cheap-tier screenshot tiled over the slab, one dot per lipid. The
-   picture holds about 180 dots across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). Multi-scale like the
-   lattice grain - as the dots shrink toward a pixel the tile doubles, two neighbouring levels blended by the pixel footprint,
-   so a whole organelle stays mottled far away instead of going flat. */
+/* The far tier's look from the owner's picture: tiled over the slab, one dot per lipid. The picture holds about 180 dots
+   across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). */
 vec3 laatta(vec2 pq){
+  /* ONE scale only: the picture at its true size, one dot per lipid (T = 360 grain pitches = 180 lipids per tile). It used to
+     re-tile itself at 2x, 4x, 8x... as the dots shrank toward a pixel, so a whole organelle stayed mottled from far away - the
+     owner saw that as something made up (12.9.2026: 'use only my png'). Now the mipmaps simply average the picture with distance. */
   float T = max(grainPitch, 0.5) * 360.0;
-  vec2 q0 = pq / T;
-  float px = (fwidth(q0.x) + fwidth(q0.y)) * 180.0;
-  float lg = max(0.0, log2(max(px * 4.0, 1e-6)));
-  float L = floor(lg), tL = lg - L;
-  return mix(texture2D(grainTex, pq / (T * exp2(L))).rgb, texture2D(grainTex, pq / (T * exp2(L + 1.0))).rgb, tL);
+  return texture2D(grainTex, pq / T).rgb;
 }
 void main(void){
   /* inside holeR of the camera every lipid is drawn at full density, so the slab steps aside there -
@@ -3782,17 +3779,14 @@ float poreRatio(vec3 d){
 /* the pore's depth cue, the CPU's poreShade line for line: the outer membrane darkens toward the rim, the inner one
    carries the shadow of the hole above it */
 float poreShade(float r){ return poreInner > 0.5 ? 1.0 - 0.55 * (1.0 - smoothstep(1.0, 2.4, r)) : 1.0 - 0.45 * (1.0 - smoothstep(1.0, 1.8, r)); }
-/* The far tier's look from a picture (owner 11.9.2026): the cheap-tier screenshot tiled over the slab, one dot per lipid. The
-   picture holds about 180 dots across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). Multi-scale like the
-   lattice grain - as the dots shrink toward a pixel the tile doubles, two neighbouring levels blended by the pixel footprint,
-   so a whole organelle stays mottled far away instead of going flat. */
+/* The far tier's look from the owner's picture: tiled over the slab, one dot per lipid. The picture holds about 180 dots
+   across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). */
 vec3 laatta(vec2 pq){
+  /* ONE scale only: the picture at its true size, one dot per lipid (T = 360 grain pitches = 180 lipids per tile). It used to
+     re-tile itself at 2x, 4x, 8x... as the dots shrank toward a pixel, so a whole organelle stayed mottled from far away - the
+     owner saw that as something made up (12.9.2026: 'use only my png'). Now the mipmaps simply average the picture with distance. */
   float T = max(grainPitch, 0.5) * 360.0;
-  vec2 q0 = pq / T;
-  float px = (fwidth(q0.x) + fwidth(q0.y)) * 180.0;
-  float lg = max(0.0, log2(max(px * 4.0, 1e-6)));
-  float L = floor(lg), tL = lg - L;
-  return mix(texture2D(grainTex, pq / (T * exp2(L))).rgb, texture2D(grainTex, pq / (T * exp2(L + 1.0))).rgb, tL);
+  return texture2D(grainTex, pq / T).rgb;
 }
 uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the camera-side half inside the cut box is not drawn, like the lipids (owner 12.9.2026)
 void main(void){
