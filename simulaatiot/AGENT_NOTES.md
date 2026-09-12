@@ -487,6 +487,12 @@ save "C:\Users\akuka\OneDrive\DATA\GitHub_Repos\Solukko\simulaatiot\<nimi>.glb" 
 
 Huom: simulaattori piirtaa molekyylit mol2-atomeista (kuoret, orbitaalit), ei GLB-pinnoista - GLB on tarpeen vain, jos sita kaytetaan johonkin muuhun (esim. VR-lavasteet).
 
+ChimeraX-sessiot (.cxs) tallennetaan kansioon `simulaatiot\chimerax\` - se on .gitignoressa (isoja, sivusto ei tarvitse niita), mutta siirtyy OneDriven mukana:
+
+```
+save "C:\Users\akuka\OneDrive\DATA\GitHub_Repos\Solukko\simulaatiot\chimerax\<nimi>.cxs"
+```
+
 ## DNA Webcyten tumassa (11.9.2026): nukleotidit ketjun lenkkeina
 - Lahde `DNA.mol2` (ChimeraX: `open 1D28; delete solvent; addh; save ... format mol2`), 12 ep B-DNA vetyineen.
 - `python tyokalut/dna_nukleotidit.py` sovittaa emasparin ruuviaskeleen (Kabsch, 35,7 astetta / 3,32 Å) ja kirjoittaa `nukleotidit.mol2`: 8 mallia `nuk-<A|B>-<DA|DT|DG|DC>`, kukin OMAN emasparinsa kehyksessa (origo kierteen akselilla, z akseli, x viitesuunta) - emaspari i = kehys_i * malli, molemmat juosteet jakavat kehyksen. `nukleotidit.json` = nousu ja kierto.
