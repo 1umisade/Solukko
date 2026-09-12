@@ -3609,6 +3609,7 @@ uniform float halfH;
 uniform float blendW;
 uniform sampler2D grainTex;   // the owner's far-tier texture (laatta_*.jpg)
 uniform float texOn;         // 1 = read it, 0 = the lattice grain below
+uniform float texMean;       // the texture's mean luminance (CPU, once at load) - the picture only modulates brightness
 varying float vZ;
 varying vec3 vWP;
 float hash1(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453); }
@@ -3659,7 +3660,7 @@ void main(void){
   tone = mix(tone, 0.80, clamp(px * 1.5, 0.0, 1.0));
   float dt = clamp((distance(vWP, camPos) - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);
   vec3 col = slabCol * tone;
-  if(texOn > 0.5) col = laatta(pq);   // the owner's texture instead of the procedural grain
+  if(texOn > 0.5) col = slabCol * (0.80 * dot(laatta(pq), vec3(0.299, 0.587, 0.114)) / max(texMean, 1e-3));   // the owner's picture as a brightness pattern only - the COLOUR is always the crisp lipids' own mean (owner 12.9.2026), at the grain's mean tone
   gl_FragColor = vec4(col * (1.0 - slabDark) * mix(1.0, depthLo, dt * depthK), 1.0);
 }`;
 /* CELL MODE far tier: the slab shader above, for a closed membrane - any axis-aligned ellipsoid (centre cen, the
@@ -3776,9 +3777,12 @@ vec3 laatta(vec2 pq){
   float L = floor(lg), tL = lg - L;
   return mix(texture2D(grainTex, pq / (T * exp2(L))).rgb, texture2D(grainTex, pq / (T * exp2(L + 1.0))).rgb, tL);
 }
+uniform float texMean;       // the texture's mean luminance (CPU, once at load) - the picture only modulates brightness
+uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the camera-side half inside the cut box is not drawn, like the lipids (owner 12.9.2026)
 void main(void){
   float dCam = distance(vWP, camPos);
   if(holeR > 0.0 && dCam < holeR) discard;
+  if(memCut.z * step(0.0, (vWP.z - memCut.x)*memCut.y) * (step(cutLo.x, vWP.x) * step(vWP.x, cutHi.x) * step(cutLo.y, vWP.y) * step(vWP.y, cutHi.y) * step(cutLo.z, vWP.z) * step(vWP.z, cutHi.z)) > 0.5) discard;
   bool onFacet = facetOn > 0.5 && distance(vWP.xz, cen.xz) < facetR;
   if(onFacet && abs(vWP.x - footCen.x) < footHalf.x && abs(vWP.z - footCen.y) < footHalf.y) discard;
   if(clipOn > 0.5 && length((vWP - clipC) * clipInvS) > clipR - 6.0) discard;   // the thylakoid cap ends at the inner envelope
@@ -3808,7 +3812,7 @@ void main(void){
   float lit = 0.62 + 0.38 * abs(dot(nrm, normalize(camPos - vWP)));
   float dt = clamp((dCam - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);
   vec3 col = slabCol * tone;
-  if(texOn > 0.5) col = laatta(pq);   // the owner's texture instead of the procedural grain
+  if(texOn > 0.5) col = slabCol * (0.80 * dot(laatta(pq), vec3(0.299, 0.587, 0.114)) / max(texMean, 1e-3));   // the owner's picture as a brightness pattern only - the COLOUR is always the crisp lipids' own mean (owner 12.9.2026), at the grain's mean tone
   gl_FragColor = vec4(col * (1.0 - slabDark) * lit * shadeP * mix(1.0, depthLo, dt * depthK), 1.0);
 }`;
   const bgMat = new BABYLON.ShaderMaterial('bgMat', scene, 'bg', { attributes:['position'], uniforms:['cBg','focusAmt','focusDark'] });
@@ -3858,6 +3862,7 @@ void main(void){
   let panning = false, panDepth = 1, modelDrag = -1, modelDragDepth = 1, rotating = false;
   let mdYaw = 0, mdPitch = 0;   // middle-drag look-around (Webcyte): pending yaw / pitch in radians, applied each frame and decayed by cam.inertia like Babylon's own inertial offsets   // pan state · which molecule a left-drag is moving (+its depth) · middle-drag rotate
   let joyPan = false, joyOX = 0, joyOY = 0;   // BOTH-buttons directional pan · press-point (screen px) the joystick offset is measured from
+  let rightPan = false, rightMoved = false, rdX = 0, rdY = 0;   // RIGHT-drag grab-pans the floor (owner 12.9.2026); a right TAP is the move order
   // Custom cursors (the grab PNG). setCursor writes the style ONLY when it actually changes — re-assigning a
   // url() cursor every mousemove makes the browser re-fetch the image and FLICKER, so we guard every write.
   const GRAB_CUR = "url('./cursor_grab.png') 20 24, grab";        // open hand → hovering something draggable/clickable
@@ -4490,7 +4495,7 @@ void main(void){
       scene.stopAnimation(cam);   // any interaction cancels the one-shot focus swivel → it never fights a drag
       if(gFocusRadiusObs){ scene.onBeforeRenderObservable.remove(gFocusRadiusObs); gFocusRadiusObs = null; }   // stop pinning radius the moment the user grabs the camera
       if((e.buttons & 3) === 3 && dragAtom < 0){   // BOTH mouse buttons held → directional (joystick) pan, anchored here
-        joyPan = true; joyOX = scene.pointerX; joyOY = scene.pointerY;
+        joyPan = true; joyOX = scene.pointerX; joyOY = scene.pointerY; rightPan = false;
         rtsBoxing = false; rotating = false; dragging = true;   // cancel a left-started box - suppress edge-pan while joystick-panning
         return;
       }
@@ -4509,10 +4514,10 @@ void main(void){
           rtsBoxSX = scene.pointerX; rtsBoxSY = scene.pointerY; rtsBoxCX = rtsBoxSX; rtsBoxCY = rtsBoxSY; dragging = true; }
         return;
       }
-      if(e.button === 2){   // RIGHT: while a spawn item/element is armed → end spawning; otherwise SC2 move command
+      if(e.button === 2){   // RIGHT: while a spawn item/element is armed → end spawning; otherwise a grab-pan (drag) or the SC2 move command (tap, on release)
         if(spawnEl || gArmedItem){ disarmSpawn(); return; }   // left-click keeps spawning; right-click disarms
-        if(gSel.size) moveSelectedTo(scene.pointerX, scene.pointerY);   // sets the glide target + drops the ping
-        if(gSelMol.size) moveMoleculesTo(scene.pointerX, scene.pointerY);   // selected molecules → move to the point and stop
+        rightPan = true; rightMoved = false; rdX = scene.pointerX; rdY = scene.pointerY; dragging = true;
+        panDepth = gLookPivot ? gLookPivot.r : Math.abs(cam.radius);   // the floor under the pivot follows the cursor 1:1 (the look-around pivot sits 20 units out - use the real radius)
         return;
       }
     }
@@ -4521,7 +4526,11 @@ void main(void){
       if(joyPan){ if((e.buttons & 3) !== 3){ joyPan = false; setPanCursor(false); }   // a button released → end joystick pan
         return; }                                                                       // swallow the release (no select / move / spawn)
       if(e.button === 1){ rotating = false; return; }   // middle-drag rotate ends (inertia carries on)
-      if(e.button === 2){ return; }   // right-button up → nothing (the move order already fired on press)
+      if(e.button === 2){ if(rightPan){ rightPan = false;
+          if(!rightMoved){   // a right TAP (no drag) = the move order
+            if(gSel.size) moveSelectedTo(scene.pointerX, scene.pointerY);   // sets the glide target + drops the ping
+            if(gSelMol.size) moveMoleculesTo(scene.pointerX, scene.pointerY); } }   // selected molecules → move to the point and stop
+        return; }
       if(dragAtom >= 0){ dragAtom = -1; cam.attachControl(canvas, true); cam.inputs.attached.pointers.buttons = []; return; }   // finished moving a spawned atom
       if(e.button === 0 && rtsBoxing){ rtsBoxing = false;
         if(rtsBoxMoved){ selectBox(rtsBoxSX, rtsBoxSY, rtsBoxCX, rtsBoxCY, e.shiftKey); }   // a drag → box-select the group
@@ -4552,6 +4561,8 @@ void main(void){
     }
     else if(p.type === BABYLON.PointerEventTypes.POINTERMOVE){
       if(joyPan) return;   // both-buttons joystick pan → the frame observer applies it (offset from the press point)
+      if(rightPan){ if(!rightMoved){ const mdx = scene.pointerX - rdX, mdy = scene.pointerY - rdY; if(mdx*mdx + mdy*mdy > 16){ rightMoved = true; setCursor(GRABBING_CUR); } }
+        if(rightMoved){ panBy(e.movementX || 0, e.movementY || 0); showTips(); } return; }   // RIGHT-drag = grab-pan
       if(rotating && SOLU && gLookPivot){   // MIDDLE-drag in the cell = LOOK AROUND. Drag right → look right, drag down → look down,
         // about the screen axes of the drag's start (dragLook), never about world Z - so a steep view does not spin round the pole.
         // Same inertia semantics as Babylon's offsets: the pending angle is applied and decays by cam.inertia each frame (observer below).
@@ -5844,13 +5855,17 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const gLaatta = {};
   const laattaTex = (mat, kind) => {
     let t = gLaatta[kind];
-    if(!t){ t = gLaatta[kind] = { tex: null, ok: 1, mats: [] };
-      t.tex = new BABYLON.Texture('./laatta_' + kind + '.jpg', scene, false, true, BABYLON.Texture.TRILINEAR_SAMPLINGMODE, null, () => {
+    if(!t){ t = gLaatta[kind] = { tex: null, ok: 1, mean: 0.5, mats: [] };
+      t.tex = new BABYLON.Texture('./laatta_' + kind + '.jpg', scene, false, true, BABYLON.Texture.TRILINEAR_SAMPLINGMODE, () => {
+        /* the picture's mean luminance, so the shader can use it as a pure brightness pattern around the lipids' own colour */
+        Promise.resolve(t.tex.readPixels()).then(px => { if(!px || !px.length) return; let sum = 0, n = 0;
+          for(let i = 0; i < px.length; i += 64){ sum += 0.299*px[i] + 0.587*px[i+1] + 0.114*px[i+2]; n++; }
+          if(n) t.mean = sum / n / 255; }).catch(() => {}); }, () => {
         console.warn('laatta_' + kind + '.jpg puuttuu - laatta piirtaa proseduraalisen rakeen'); t.ok = 0;
         t.tex = BABYLON.RawTexture.CreateRGBATexture(new Uint8Array([255,255,255,255]), 1, 1, scene); for(const m of t.mats) m.setTexture('grainTex', t.tex); });
       t.tex.wrapU = t.tex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE; t.tex.anisotropicFilteringLevel = 8; }
-    t.mats.push(mat); mat.setTexture('grainTex', t.tex); mat.setFloat('texOn', t.ok);
-    mat.onBindObservable.add(() => { const eff = mat.getEffect(); if(eff) eff.setFloat('texOn', t.ok); });
+    t.mats.push(mat); mat.setTexture('grainTex', t.tex); mat.setFloat('texOn', t.ok); mat.setFloat('texMean', t.mean);
+    mat.onBindObservable.add(() => { const eff = mat.getEffect(); if(eff){ eff.setFloat('texOn', t.ok); eff.setFloat('texMean', t.mean); } });
   };
   const gHulls = [];
   const gProtSlab = [];   // per model: true = far enough that its atoms are replaced by the hull
@@ -6426,7 +6441,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       slab.position.copyFrom(bilayerCen);
       slab.isPickable = false; slab.renderingGroupId = 0; slab.alwaysSelectAsActiveMesh = true;
       const sm = new BABYLON.ShaderMaterial('memSlabMat', scene, 'slab', {
-        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW','texOn'], samplers:['grainTex'] });
+        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW','texOn','texMean'], samplers:['grainTex'] });
       sm.backFaceCulling = false;
       sm.setColor3('slabCol', new BABYLON.Color3(0.35,0.33,0.22));   // placeholder until the real lipid mean lands below
       sm.setFloat('grainPitch', S*0.5);   // the grain's cell size: half the real lipid pitch - smaller, denser 'lipids'
@@ -6993,7 +7008,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const _e0 = [0,0,0];
       for(const M of MEMS){
         const mat = new BABYLON.ShaderMaterial('cellShellMat'+M.id, scene, 'cellshell', {
-          attributes:['position','surf','texOn'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP'] });
+          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','texMean','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi'] });
         mat.setFloat('poreAng', NE_PORE_R/M.R); mat.setFloat('poreInner', M.inner ? 1 : 0); mat.setFloat('baseShade', M.baseShade);
         mat.setFloat('clipOn', M.clipTo ? 1 : 0);
         if(M.clipTo){ const K = M.clipTo; mat.setVector3('clipC', K.C); mat.setVector3('clipInvS', new BABYLON.Vector3(1/K.s[0], 1/K.s[1], 1/K.s[2])); mat.setFloat('clipR', K.R); }
@@ -7009,6 +7024,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread);
           const hole = (gMembrane && gMemSpanX > 0 && !M.nolat) ? Math.max(0, deriveLod().memR + gMemCellR - gMemBlend) : 0;   // no lipids under the cell wall, so no hole
           eff.setFloat('holeR', hole); eff.setVector3('camPos', cp); eff.setFloat('slabDark', gSlabDark); eff.setFloat('blendW', gMemBlend);
+          eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi);
           let side;   // which face of this bilayer the camera is on: +1 outside, -1 inside
           if(M.facet && Math.hypot(cp.x-bilayerCen.x, cp.z-bilayerCen.z) < facetR) side = cp.y < bilayerCen.y ? 1 : -1;
           else { const ex = (cp.x - M.C.x)*M.invS[0], ey = (cp.y - M.C.y)*M.invS[1], ez = (cp.z - M.C.z)*M.invS[2]; side = SOLU_CELL.pnorm(M, ex,ey,ez) > M.R ? 1 : -1; }
@@ -8339,7 +8355,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         _p[0]=bnc(c[i*3]  +v[i*3]  *T, bLo.x, bHi.x); _p[1]=bncY(c[i*3+1], v[i*3+1], T); _p[2]=bnc(c[i*3+2]+v[i*3+2]*T, bLo.z, bHi.z);
         if(gCellDrop && gCellDrop(_p[0],_p[1],_p[2])){ _p[0]=_p[1]=_p[2]=1e9; return _p; }   // cell mode: not drawn, so never hit
         const md=(base+i)*4; _p[0]+=gMolDisp[md]; _p[1]+=gMolDisp[md+1]; _p[2]+=gMolDisp[md+2];
-        repelShells(_p); return _p; };
+        repelShells(_p);
+        if(gPlaneDim && gPsuLo && Math.abs(_p[2] - gTasoZ) > 2.0 && _p[0] >= gPsuLo.x && _p[0] <= gPsuHi.x && _p[1] >= gPsuLo.y && _p[1] <= gPsuHi.y && _p[2] >= gPsuLo.z && _p[2] <= gPsuHi.z){ _p[0]=_p[1]=_p[2]=1e9; }   // Hiukkastaso: culled by the shader (tasoDim), so never hovered or picked (owner 12.9.2026)
+        return _p; };
       const near = (c,v,i) => { const px=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x)-cp.x; if(px*px>R2) return false;
         const py=bncY(c[i*3+1], v[i*3+1], T)-cp.y; if(px*px+py*py>R2) return false;
         const pz=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z)-cp.z; if(px*px+py*py+pz*pz>R2) return false;
@@ -9527,20 +9545,31 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       ax:new BABYLON.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize(), w:0.15+Math.random()*0.2 }); }
   /* PSU BOX (owner 10.9.2026 'put the photosynthetic unit in a box'): the loose proteins bounce inside a box around
      the membrane complexes (their hulls plus a margin), not the whole free-molecule box, so the unit stays together.
-     Clamped inside the big box; drawn as a teal wireframe in dev mode. */
-  { let lx=Infinity, ly=Infinity, lz=Infinity, hx=-Infinity, hy=-Infinity, hz=-Infinity, any=false;
-    const loose=new Set(gBouncers.map(b=>b.mi));   // the box just barely holds the membrane complexes AND the loose proteins (RuBisCO, FNR, ...) where they start (owner 11.9.2026: 'tighter')
-    for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !(gMemBound[mi] || loose.has(mi))) continue; const c=mInfo[mi]; if(!c) continue; any=true;
+     Clamped inside the big box; drawn as a teal wireframe in dev mode. RE-FITTED once a second to the membrane
+     complexes' LIVE centres (12.9.2026: they are re-placed after this first runs, so a one-off box ended up beside
+     them and the Puolikas cut / Hiukkastaso cull worked in the wrong place); the loose proteins count with the
+     extents they START in, so the walls never close in on them as they drift. */
+  { const loose=new Set(gBouncers.map(b=>b.mi)), M=15, MY=15;
+    let lxL=Infinity, lyL=Infinity, lzL=Infinity, hxL=-Infinity, hyL=-Infinity, hzL=-Infinity;   // the loose proteins' starting extents
+    for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !loose.has(mi)) continue; const c=mInfo[mi]; if(!c) continue;
       const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];
-      lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
-    if(any && gBoxLo){ const M=15, MY=15;   // a thin margin: the box only just contains them
-      if(gTasoZ < lz) lz = gTasoZ - 5; if(gTasoZ > hz) hz = gTasoZ + 5;   // the particle plane must lie inside the box
-      gPsuLo=new BABYLON.Vector3(Math.max(gBoxLo.x, lx-M), Math.max(gBoxLo.y, ly-MY), Math.max(gBoxLo.z, lz-M));
-      gPsuHi=new BABYLON.Vector3(Math.min(gBoxHi.x, hx+M), Math.min(gBoxHi.y, hy+MY), Math.min(gBoxHi.z, hz+M));
-      const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {width:gPsuHi.x-gPsuLo.x, height:gPsuHi.y-gPsuLo.y, depth:gPsuHi.z-gPsuLo.z}, scene);
-      bx.position.set((gPsuLo.x+gPsuHi.x)/2, (gPsuLo.y+gPsuHi.y)/2, (gPsuLo.z+gPsuHi.z)/2);
-      const bm=new BABYLON.StandardMaterial('devPsuBoxMat', scene); bm.wireframe=true; bm.emissiveColor=new BABYLON.Color3(0.35,0.85,0.75); bm.disableLighting=true;
-      bx.material=bm; bx.isPickable=false; bx.setEnabled(gDev); gDevPsuBox=bx; } }
+      lxL=Math.min(lxL, px-h.maxR); hxL=Math.max(hxL, px+h.maxR); lyL=Math.min(lyL, py-h.maxR); hyL=Math.max(hyL, py+h.maxR); lzL=Math.min(lzL, pz-h.maxR); hzL=Math.max(hzL, pz+h.maxR); }
+    const fit = () => { if(!gBoxLo) return; let lx=lxL, ly=lyL, lz=lzL, hx=hxL, hy=hyL, hz=hzL, any=isFinite(lx);
+      for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !gMemBound[mi]) continue; const c=mInfo[mi]; if(!c) continue; any=true;
+        const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];   // the complex where it stands NOW
+        lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
+      if(!any) return;
+      { const hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5); lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
+      if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
+      gPsuLo.set(Math.max(gBoxLo.x, lx-M), Math.max(gBoxLo.y, ly-MY), Math.max(gBoxLo.z, lz-M));
+      gPsuHi.set(Math.min(gBoxHi.x, hx+M), Math.min(gBoxHi.y, hy+MY), Math.min(gBoxHi.z, hz+M));
+      if(!gDevPsuBox){ const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {size:1}, scene);
+        const bm=new BABYLON.StandardMaterial('devPsuBoxMat', scene); bm.wireframe=true; bm.emissiveColor=new BABYLON.Color3(0.35,0.85,0.75); bm.disableLighting=true;
+        bx.material=bm; bx.isPickable=false; bx.setEnabled(gDev); gDevPsuBox=bx; }
+      gDevPsuBox.position.set((gPsuLo.x+gPsuHi.x)/2, (gPsuLo.y+gPsuHi.y)/2, (gPsuLo.z+gPsuHi.z)/2);
+      gDevPsuBox.scaling.set(gPsuHi.x-gPsuLo.x, gPsuHi.y-gPsuLo.y, gPsuHi.z-gPsuLo.z); };
+    fit(); let lastFit = performance.now();
+    scene.onBeforeRenderObservable.add(() => { const t = performance.now(); if(t - lastFit > 1000){ lastFit = t; fit(); } }); }
   { const _q=new BABYLON.Quaternion(), _dq=new BABYLON.Quaternion();
     scene.onBeforeRenderObservable.add(() => {
       if(!gBouncers.length || !gBoxLo || gizmoDragging) return;
