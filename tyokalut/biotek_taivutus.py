@@ -32,6 +32,9 @@ def taiv(w):
     if w.endswith('nen'):
         b = w[:-3] + 'se'
         return [w, b+'n', w[:-3]+'st'+A, b+'ss'+A, b+'st'+A, b+'en', b+'t', w[:-3]+'sten', w[:-3]+'si'+A, w[:-3]+'siss'+A]
+    if w.endswith('sidos'):   # fosfodiesterisidos -> fosfodiesterisidoksen
+        b = w[:-1] + 'ks'
+        return [w, b+'en', w+'ta', b+'essa', b+'esta', b+'een', b+'eksi', b+'ella', b+'et', w+'ten', b+'ia', b+'issa']
     if w.endswith('luku'):   # massaluku -> massaluvun (k -> v)
         b = w[:-2] + 'v'
         return [w, b+'un', w+'a', b+'ussa', b+'usta', w+'un', b+'ut', w+'jen', w+'ja', b+'uissa']
