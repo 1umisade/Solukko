@@ -1093,6 +1093,9 @@ uniform float protonOutline;   // 1.0 for the nucleon mesh → red rim on proton
 uniform float depthBias;   // nuclei: push toward camera (view units) so they clear their OWN orbitals (0 elsewhere)
 uniform vec3 selCenter;    // the focused atom (its static nucleus is hidden → the spinning highlight shows instead)
 uniform float coneCos;     // reveal only atoms within this cosine of the view axis (negative disables the cone)
+#ifdef GLASS2
+uniform float glassPass;   // two-pass glass (12.9.2026): 0 = the OPAQUE pass (solid fragments only, depth written), 1 = the BLENDED pass (translucent fragments only, no depth write)
+#endif
 #ifdef DEPTHSHADE
 uniform float focalD;      // camera-to-pivot distance = the reference depth the shading is measured from
 uniform float depthK;      // depth-shading amount 0..1 (dev slider)
@@ -1274,6 +1277,20 @@ void main(void){
   }
 #endif
   if(alpha < 0.004) discard;                                  // fully transparent → skip (also keeps depth clean)
+#ifdef GLASS2
+  /* TWO PASSES. A translucent fragment that writes depth z-rejects every atom drawn after it that lies behind
+     it - and thin instances draw in buffer order, not back to front - so a glass shell (the reveal bubble) or
+     an anti-aliased rim showed the BACKGROUND where the atoms behind should have been (owner 12.9.2026:
+     'the vdW of an atom in the foreground doesn't render the vdW of the atoms in the background'). Now the
+     material draws twice: the opaque pass keeps only solid fragments and writes depth, the blended pass keeps
+     only translucent ones and writes none, so nothing behind glass is ever lost. Split here, before the
+     shading, so the pass that does not own a fragment pays nothing for it. */
+  { float aSplit = alpha;
+#ifdef COFHIDE
+    if(cofClear > 0.5) aSplit *= min(cofAlpha, cofOutAlpha);   // a see-through atom is translucent whatever its rim says
+#endif
+    if(glassPass < 0.5){ if(aSplit < 0.985) discard; } else if(aSplit >= 0.985) discard; }
+#endif
   if(depthBias > 0.0 && distance(vWCen, selCenter) < 0.35) discard;   // selected atom → its spinning highlight nucleus draws instead
   // Bias the nucleus toward the camera so it beats its OWN orbitals (but not atoms clearly in front).
   // CLAMPED so it never crosses the near plane - a flat shove would push an atom you are zoomed right
@@ -5288,6 +5305,34 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     mat.alpha = 0.999; mat.alphaMode = BABYLON.Constants.ALPHA_COMBINE; mat.forceDepthWrite = true;
     return mat;
   };
+  /* TWO-PASS GLASS (12.9.2026). A realAlpha material writes depth for its translucent fragments too, and thin
+     instances are drawn in buffer order, so a glass shell drawn before the atoms behind it z-rejected them - the
+     background showed through the shell instead of the atoms. Every glass-capable vdW material is now drawn
+     TWICE per mesh: two sub-meshes over the same geometry with a MultiMaterial [A, B]. A is the material itself,
+     made opaque again (the opaque queue, depth written, only solid fragments survive the shader's split); B is
+     its clone in the blended queue with depth write off, keeping only the translucent fragments. B shares A's
+     compiled effect (same shader, same options - Babylon's effect cache hands back the one program), so A's
+     per-frame uniform handlers, mirrored onto B's bind, land in the program B draws with. glassable() marks a
+     material at construction (the uniform and the define must be in the options before the first compile);
+     glassSplit() converts a mesh once its material is set; soloMM() is the far twins' [far, null] pair, so a
+     cell can swap tiers without rebuilding its sub-meshes (a null sub-material is simply not drawn). */
+  const glassable = mat => { mat._options.uniforms.push('glassPass'); mat._options.defines.push('#define GLASS2'); mat.setFloat('glassPass', 0); return mat; };
+  const isGlassable = mat => !!(mat && mat._options && mat._options.uniforms.includes('glassPass'));
+  const glassMM = A => { if(A._glassMM) return A._glassMM;
+    const B = A.clone(A.name + '_lasi'); B.setFloat('glassPass', 1); realAlpha(B); B.forceDepthWrite = false; B.disableDepthWrite = true;
+    B.onBindObservable.add(mesh => { for(const o of A.onBindObservable.observers) o.callback(mesh); });   // A's live uniforms, into the shared program, right before B draws
+    A.alpha = 1; A.forceDepthWrite = true;   // back in the opaque queue
+    /* a STORED uniform set on A later (setFloat and friends outside a bind handler - shellSkip, selModel, ...) must
+       reach B too, or B's bind would re-apply its clone-time copy: forward every setter, glassPass excepted */
+    for(const fn of ['setFloat','setFloats','setInt','setFloat3','setVector2','setVector3','setVector4','setColor3','setColor4','setMatrix','setMatrices','setArray2','setArray3','setArray4','setTexture'])
+      if(typeof A[fn] === 'function'){ const orig = A[fn]; A[fn] = function(name, ...rest){ orig.call(A, name, ...rest); if(name !== 'glassPass') B[fn](name, ...rest); return A; }; }
+    const MM = new BABYLON.MultiMaterial(A.name + '_2p', scene); MM.subMaterials.push(A, B); A._glassMM = MM; return MM; };
+  const glassA = mesh => (mesh.material && mesh.material.subMaterials) ? mesh.material.subMaterials[0] : mesh.material;   // the material behind a two-pass mesh (its setters reach both passes)
+  const soloMM = A => { if(A._soloMM) return A._soloMM; const MM = new BABYLON.MultiMaterial(A.name + '_1p', scene); MM.subMaterials.push(A, null); A._soloMM = MM; return MM; };
+  const glassSplit = mesh => { const A = mesh.material; if(!isGlassable(A)) return mesh;
+    const nV = mesh.getTotalVertices(), nI = mesh.getTotalIndices(); mesh.subMeshes = [];
+    new BABYLON.SubMesh(0, 0, nV, 0, nI, mesh); new BABYLON.SubMesh(1, 0, nV, 0, nI, mesh);
+    mesh.material = glassMM(A); return mesh; };
   const impostorMat = (name, radius, isShell, protonOutline, movable, nucleon) => {
     const opts = {
       attributes: ['position','instanceColor','world0','world1','world2','world3'].concat(movable ? ['modelId'] : []),
@@ -5349,7 +5394,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   spawnVdwMat.onBindObservable.add(() => { const eff=spawnVdwMat.getEffect(); if(!eff) return;
     eff.setFloat('uT', gWaveT); eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd);
     eff.setFloat('revealFade', gRevealFade); eff.setVector3('selCenter', selCenter); });
-  realAlpha(spawnVdwMat);
+  realAlpha(spawnVdwMat); glassable(spawnVdwMat);
   // Every atom's nucleus is visible: bias it toward the camera so it shows on top of its OWN
   // orbitals, drawn after them (group 1) without writing depth so it can't punch through atoms
   // that are genuinely in front. selCenter bound live → the focused atom's static nucleus is
@@ -5489,7 +5534,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define COFHIDE','#define DEPTHSHADE','#define PLIGHT'] });
   vdwMat.setFloat('radius',1.0); vdwMat.setFloat('isShell',0); vdwMat.setFloat('shellMin',0); vdwMat.setFloat('bubbleR',1e9);
   vdwMat.setFloat('protonOutline',0); vdwMat.setFloat('depthBias',0); vdwMat.setFloat('coneCos',-1.0);
-  vdwMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); vdwMat.backFaceCulling=false; realAlpha(vdwMat);
+  vdwMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); vdwMat.backFaceCulling=false; realAlpha(vdwMat); glassable(vdwMat);
   vdwMat.onBindObservable.add(()=>{ const eff=vdwMat.getEffect(); if(!eff)return;
     eff.setFloat('isShell', gShell); eff.setFloat('shellMin', gShellMin); eff.setFloat('revealFade', gRevealFade); eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 1 → vdW goes 50% transparent where its atom reveals orbitals
     eff.setFloat('uT',gWaveT); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0); eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd);
@@ -5502,7 +5547,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     defines:['#define IMPRAD','#define MEMFADE','#define COFHIDE','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT'] });   // LIPTPL: one instance per lipid, atoms baked per vertex   // MEMFADE = cross-cut fade, LIPWRAP = the sheet repeats around the camera
   vdwMatStatic.setFloat('radius',1.0); vdwMatStatic.setFloat('isShell',0); vdwMatStatic.setFloat('shellMin',0); vdwMatStatic.setFloat('bubbleR',1e9);
   vdwMatStatic.setFloat('protonOutline',0); vdwMatStatic.setFloat('depthBias',0); vdwMatStatic.setFloat('coneCos',-1.0);
-  vdwMatStatic.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); vdwMatStatic.backFaceCulling=false; realAlpha(vdwMatStatic); vdwMatStatic.setFloat('selModel', -1);
+  vdwMatStatic.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); vdwMatStatic.backFaceCulling=false; realAlpha(vdwMatStatic); glassable(vdwMatStatic); vdwMatStatic.setFloat('selModel', -1);
   vdwMatStatic.onBindObservable.add(mesh=>{ const eff=vdwMatStatic.getEffect(); if(!eff)return;
     eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
     eff.setFloat('memDrift', gMemDrift);
@@ -5576,7 +5621,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define ETCHL','#define DEPTHSHADE','#define ETCTHIN'] });
     etcMat.setFloat('radius',1.0); etcMat.setFloat('selModel', -1); etcMat.setFloat('isShell',0); etcMat.setFloat('shellMin',0); etcMat.setFloat('bubbleR',1e9);
     etcMat.setFloat('protonOutline',0); etcMat.setFloat('depthBias',0); etcMat.setFloat('coneCos',-1.0);
-    etcMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); etcMat.backFaceCulling=false; realAlpha(etcMat);
+    etcMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); etcMat.backFaceCulling=false; realAlpha(etcMat); glassable(etcMat);
     etcMat.depthFunction = BABYLON.Engine.ALWAYS;   // cofactors ALWAYS draw (never occluded by the protein in front) → visible at every angle, not just when the reveal tunnel happens to clear
     etcMat.onBindObservable.add(()=>{ const eff=etcMat.getEffect(); if(!eff)return;
       eff.setFloat('uT',gWaveT); eff.setFloat('boil', gBoil); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', 0);   // always keep the vivid per-type colours (ignore the parent pastel mode); boil so the cofactor spheres wobble like the protein
@@ -5585,7 +5630,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       eff.setFloat('hlGroup', gHlGroup); eff.setFloat('hlBright', gHlBright);   // brighten the hovered / flashing cofactor group
       eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter); eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); });
     etcOverlay = BABYLON.MeshBuilder.CreatePlane('etcOverlay',{size:2},scene);
-    etcOverlay.material=etcMat; etcOverlay.isPickable=false; etcOverlay.alwaysSelectAsActiveMesh=true;
+    etcOverlay.material=etcMat; glassSplit(etcOverlay); etcOverlay.isPickable=false; etcOverlay.alwaysSelectAsActiveMesh=true;
     etcOverlay.thinInstanceSetBuffer('matrix', new Float32Array(etcM),16,true);
     etcOverlay.thinInstanceSetBuffer('instanceColor', new Float32Array(etcC),4,true);
     etcOverlay.thinInstanceSetBuffer('instR', new Float32Array(etcR),1,true);
@@ -5717,7 +5762,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const ix=Math.floor(k/(gny*gnz)), iy=Math.floor((k%(gny*gnz))/gnz), iz=k%gnz;
     const cx=bMiX+(ix+0.5)*CELL, cy=bMiY+(iy+0.5)*CELL, cz=bMiZ+(iz+0.5)*CELL;
     let sphere=null;
-    if(c.sphM.length){ sphere=BABYLON.MeshBuilder.CreatePlane('cs'+k,{size:2},scene); sphere.material=vdwMat; sphere.isPickable=false;
+    if(c.sphM.length){ sphere=BABYLON.MeshBuilder.CreatePlane('cs'+k,{size:2},scene); sphere.material=vdwMat; glassSplit(sphere); sphere.isPickable=false;
       sphere.thinInstanceSetBuffer('matrix', new Float32Array(c.sphM),16,true);
       sphere.thinInstanceSetBuffer('instanceColor', new Float32Array(c.sphC),4,true);
       sphere.thinInstanceSetBuffer('instR', new Float32Array(c.sphR),1,true);
@@ -6263,12 +6308,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       defines:['#define PLIGHT'] });
     chlSphMat.setFloat('radius',1.0); chlSphMat.setFloat('protonOutline',0); chlSphMat.setFloat('depthBias',0);
     chlSphMat.setFloat('selModel',-1); chlSphMat.setColor3('selCol', new BABYLON.Color3(0.6,0.72,0.53));
-    chlSphMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); chlSphMat.backFaceCulling=false; realAlpha(chlSphMat);
+    chlSphMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); chlSphMat.backFaceCulling=false; realAlpha(chlSphMat); glassable(chlSphMat);
     chlSphMat.onBindObservable.add(()=>{ const eff=chlSphMat.getEffect(); if(!eff)return;
       eff.setFloat('isShell',gShell); eff.setFloat('shellMin',gShellMin); eff.setFloat('bubbleR',gBubbleR); eff.setFloat('coneCos',gConeCos);
       eff.setFloat('uT',gWaveT); eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); eff.setVector3('selCenter', selCenter); bindPLight(eff); });
     const chlSph = BABYLON.MeshBuilder.CreatePlane('chlSph',{size:2},scene);
-    chlSph.material=chlSphMat; chlSph.isPickable=false; chlSph.alwaysSelectAsActiveMesh=true; chlSph.renderingGroupId=1;
+    chlSph.material=chlSphMat; glassSplit(chlSph); chlSph.isPickable=false; chlSph.alwaysSelectAsActiveMesh=true; chlSph.renderingGroupId=1;
     { const sm=new Float32Array(N*16), sc=new Float32Array(N*4), sr=new Float32Array(N);
       for(let k=0;k<N;k++){ const e=chl.el[k], c=info(e).c, o=k*16;
         sm[o]=1;sm[o+5]=1;sm[o+10]=1;sm[o+15]=1; sm[o+12]=rest[k*3]; sm[o+13]=rest[k*3+1]; sm[o+14]=rest[k*3+2];
@@ -6841,7 +6886,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const far = near.clone('lipTplF'+T);
         far.makeGeometryUnique();   // NOT shared: thin-instance buffers (world0..3, memAnc) are stored on the geometry, so twins on one geometry overwrite each other's instances
         for(const m of [near, far]){ m.isPickable=false; m.alwaysSelectAsActiveMesh=true; m.renderingGroupId=1; m.setEnabled(false); }
-        near.material = vdwMatStatic; far.material = vdwStaticFarMat;
+        near.material = vdwMatStatic; glassSplit(near); far.material = vdwStaticFarMat;
         const cap = Math.max(1, tplN[T]) + CELL_EXTRA;   // cell mode: the plasma membrane and the nuclear envelope write into the same streams
         const nM=new Float32Array(cap*16), fM=new Float32Array(cap*16), nA=new Float32Array(cap), fA=new Float32Array(cap), nT=new Float32Array(cap*4), fT=new Float32Array(cap*4), nS=new Float32Array(cap).fill(1), fS=new Float32Array(cap).fill(1);
         near.thinInstanceSetBuffer('matrix', nM, 16, false); near.thinInstanceSetBuffer('memAnc', nA, 1, false); near.thinInstanceSetBuffer('tint', nT, 4, false); near.thinInstanceSetBuffer('shade', nS, 1, false);
@@ -7651,7 +7696,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       // — otherwise the orbitals built below are drawn correctly but sit hidden inside an opaque ball.
       m.setFloat('radius',rad);m.setFloat('isShell',1);m.setFloat('shellMin',0.18);m.setFloat('revealFade',0.95);
       m.setFloat('bubbleR',1e9);m.setFloat('protonOutline',outline?1:0);m.setFloat('depthBias',bias||0);m.setFloat('coneCos',-1.0);m.setFloat('shellSkip',-1);m.backFaceCulling=false;
-      realAlpha(m);
+      realAlpha(m); if(!glow && !solid) glassable(m);   // glass-capable (bubbleR = gCrisp below) → two passes
       // AFTER realAlpha, which sets the blend mode to COMBINE - the corona has to be additive to read as light
       if(glow){ m.alphaMode = BABYLON.Constants.ALPHA_ADD; m.disableDepthWrite = true; }
       m.onBindObservable.add(()=>{const eff=m.getEffect();if(!eff)return; eff.setFloat('uT',gWaveT); eff.setFloat('planeDim', gPlaneDim ? 1 : 0); eff.setFloat('planeZ', gTasoZ); eff.setVector3('psuLo', gPsuLo || bLo); eff.setVector3('psuHi', gPsuHi || bHi);
@@ -7665,7 +7710,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
                  eff.setMatrix3x3('shellRot', gShellRot); eff.setFloatArray('shellR2', gShellR2); }
         eff.setColor3('fogColor',scene.fogColor);eff.setFloat('fogStart',scene.fogStart);eff.setFloat('fogEnd',scene.fogEnd);}); return m; };
     // `off` gives each atom its rigid offset from the molecule centre (0 for O, the two O–H vectors for H)
-    const mkImp=(nm,rad,col,cnt,off)=>{ const mesh=BABYLON.MeshBuilder.CreatePlane(nm,{size:2},scene); mesh.material=wMat(rad,false); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
+    const mkImp=(nm,rad,col,cnt,off)=>{ const mesh=BABYLON.MeshBuilder.CreatePlane(nm,{size:2},scene); mesh.material=wMat(rad,false); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
       // Group 1, like every other vdW shell in the scene: the ORBITALS live in group 0 and are drawn
       // first, then the glass shell blends over them. Left in group 0 the sphere and the lobes sort
       // against each other arbitrarily, and the sphere's depth write simply rejected the lobes inside it.
@@ -7721,7 +7766,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       tasoita(c, v, n);   // dev plane: the first TASO_N of this species too
       for(const a of atoms){
         const mesh=BABYLON.MeshBuilder.CreatePlane(nm+a.tag,{size:2},scene);
-        mesh.material=wMat(a.r, (a.solid===undefined ? solid : a.solid), !!a.glow, a.bias, a.outline); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
+        mesh.material=wMat(a.r, (a.solid===undefined ? solid : a.solid), !!a.glow, a.bias, a.outline); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
         mesh.renderingGroupId=1;
         const cb=new Float32Array(n*4), mb=new Float32Array(n*16), og=new Float32Array(n*3), vl=new Float32Array(n*3);
         const mid=new Float32Array(n);
@@ -8100,7 +8145,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     FREE_P.v.fill(0);
     { const z = new Float32Array(P_N*3); for(const nm of ['pH','pN','pG']){ const m=scene.getMeshByName(nm); if(m) m.thinInstanceSetBuffer('wVel', z, 3, true); } }
     const gAtpShell = gHulls.findIndex(h => h.mi === gAtpMid);
-    if(gAtpShell >= 0) for(const nm of ['pH','pN','pG']){ const m=scene.getMeshByName(nm); if(m && m.material) m.material.setFloat('shellSkip', gAtpShell); }
+    if(gAtpShell >= 0) for(const nm of ['pH','pN','pG']){ const m=scene.getMeshByName(nm); if(m && m.material) glassA(m).setFloat('shellSkip', gAtpShell); }
     const CH_R = 24, ROTOR_STEP = 2*Math.PI/14;   // channel radius about the rotor axis, and one c-subunit of turn per proton
     const _pp = [0,0,0];
     /* Shell lookup grid: testing every proton against every shell was 360000 calls a frame (43 ms). A
@@ -8978,8 +9023,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         else if(far && vis && d2 < nr*nr) far = false;
         else if(!far && !(vis && d2 < (nr+24)*(nr+24))) far = true;
         if(cell.farOn !== far && matSwaps < 12){ matSwaps++; cell.farOn = far;
-          cell.sphere.material = far ? (cell.macro ? vdwFarMat : vdwStaticFarMat)
-                                     : (cell.macro ? vdwMat : vdwMatStatic); }
+          cell.sphere.material = far ? soloMM(cell.macro ? vdwFarMat : vdwStaticFarMat)
+                                     : glassMM(cell.macro ? vdwMat : vdwMatStatic); }   // both are two-sub-mesh MultiMaterials (see glassSplit)
       }
       if(cell.nucOn !== wantNuc){ cell.nucOn = wantNuc; if(cell.nuc) cell.nuc.setEnabled(wantNuc); }
     }
@@ -10801,7 +10846,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   spawnBondMesh.material = bondSpawnMat; spawnBondMesh.isPickable = false; spawnBondMesh.alwaysSelectAsActiveMesh = true; spawnBondMesh.thinInstanceCount = 0;
   // One vdW-shell impostor (billboard quad) for ALL spawned atoms, mixed radii via IMPRAD.
   const spawnVdwMesh = BABYLON.MeshBuilder.CreatePlane('spwVdw', {size:2}, scene);
-  spawnVdwMesh.material = spawnVdwMat; spawnVdwMesh.isPickable = false; spawnVdwMesh.alwaysSelectAsActiveMesh = true; spawnVdwMesh.thinInstanceCount = 0;
+  spawnVdwMesh.material = spawnVdwMat; glassSplit(spawnVdwMesh); spawnVdwMesh.isPickable = false; spawnVdwMesh.alwaysSelectAsActiveMesh = true; spawnVdwMesh.thinInstanceCount = 0;
   const spawnMeshFor = sym => {
     let rec = spawnMeshes.get(sym); if(rec) return rec;
     const nuc = BABYLON.MeshBuilder.CreatePlane('spwN_'+sym,{size:2},scene);
@@ -12780,7 +12825,7 @@ void main(void){
       const bindLink = eff => { eff.setTexture('linkTex', linkTex); eff.setFloat('linkTexW', TEXW); };
       const dnaShell = new BABYLON.ShaderMaterial('dnaShell', scene, 'imp', withLinks(vdwMat));
       dnaShell.setFloat('radius',1.0); dnaShell.setFloat('isShell',0); dnaShell.setFloat('shellMin',0); dnaShell.setFloat('bubbleR',1e9); dnaShell.setFloat('protonOutline',0); dnaShell.setFloat('depthBias',0); dnaShell.setFloat('coneCos',-1.0);
-      dnaShell.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); dnaShell.backFaceCulling = false; realAlpha(dnaShell);
+      dnaShell.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); dnaShell.backFaceCulling = false; realAlpha(dnaShell); dnaShell.setFloat('glassPass', 0);   // its options came from vdwMat, GLASS2 included → glassSplit in mkMesh
       dnaShell.onBindObservable.add(() => { const eff = dnaShell.getEffect(); if(!eff) return;
         eff.setFloat('isShell', gShell); eff.setFloat('shellMin', gShellMin); eff.setFloat('revealFade', gRevealFade); eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);
         eff.setFloat('uT', gWaveT); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0); eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd);
@@ -12810,7 +12855,7 @@ void main(void){
       // static geometry per chunk, every instance tagged with its base pair (linkId) and the identity model slot
       const PC = [1.0, 0.5, 0.5], NC = [0.62, 0.62, 0.62], BLOB_R = 5.5, BLOB_COL = [0.75, 0.80, 0.88];
       const mkMesh = (nm, sphere, mat) => { const m = sphere ? BABYLON.MeshBuilder.CreateSphere(nm, {segments:3, diameter:1}, scene) : BABYLON.MeshBuilder.CreatePlane(nm, {size:2}, scene);
-        m.material = mat; m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.renderingGroupId = sphere ? 0 : 1; m.doNotSyncBoundingInfo = true; m.setEnabled(false); return m; };   // lobes (sphere meshes) in group 0 BEFORE the glass shells and nucleons in group 1, exactly like the protein meshes (co/cb = 0, cs/cn = 1) - in group 1 the shells' depth write hid every lobe inside its own shell, and a hydrogen's only lobe is its 1s inside the shell, so the DNA looked hydrogen-free (owner 11.9.2026)
+        m.material = mat; if(!sphere) glassSplit(m); m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.renderingGroupId = sphere ? 0 : 1; m.doNotSyncBoundingInfo = true; m.setEnabled(false); return m; };   // lobes (sphere meshes) in group 0 BEFORE the glass shells and nucleons in group 1, exactly like the protein meshes (co/cb = 0, cs/cn = 1) - in group 1 the shells' depth write hid every lobe inside its own shell, and a hydrogen's only lobe is its 1s inside the shell, so the DNA looked hydrogen-free (owner 11.9.2026)
       const chunks = [];
       for(let c=0;c<NCH;c++){ const bp0 = c*CHUNK, bp1 = Math.min(N_BP, bp0+CHUNK);
         let nS=0, nN=0, nC=0, nB=0, nF=0;

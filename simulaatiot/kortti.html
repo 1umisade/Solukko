@@ -731,6 +731,9 @@ uniform float protonOutline;   // 1.0 for the nucleon mesh → red rim on proton
 uniform float depthBias;   // nuclei: push toward camera (view units) so they clear their OWN orbitals (0 elsewhere)
 uniform vec3 selCenter;    // the focused atom (its static nucleus is hidden → the spinning highlight shows instead)
 uniform float coneCos;     // reveal only atoms within this cosine of the view axis (negative disables the cone)
+#ifdef GLASS2
+uniform float glassPass;   // two-pass glass (12.9.2026): 0 = the OPAQUE pass (solid fragments only, depth written), 1 = the BLENDED pass (translucent fragments only, no depth write)
+#endif
 #ifdef DEPTHSHADE
 uniform float focalD;      // camera-to-pivot distance = the reference depth the shading is measured from
 uniform float depthK;      // depth-shading amount 0..1 (dev slider)
@@ -912,6 +915,20 @@ void main(void){
   }
 #endif
   if(alpha < 0.004) discard;                                  // fully transparent → skip (also keeps depth clean)
+#ifdef GLASS2
+  /* TWO PASSES. A translucent fragment that writes depth z-rejects every atom drawn after it that lies behind
+     it - and thin instances draw in buffer order, not back to front - so a glass shell (the reveal bubble) or
+     an anti-aliased rim showed the BACKGROUND where the atoms behind should have been (owner 12.9.2026:
+     'the vdW of an atom in the foreground doesn't render the vdW of the atoms in the background'). Now the
+     material draws twice: the opaque pass keeps only solid fragments and writes depth, the blended pass keeps
+     only translucent ones and writes none, so nothing behind glass is ever lost. Split here, before the
+     shading, so the pass that does not own a fragment pays nothing for it. */
+  { float aSplit = alpha;
+#ifdef COFHIDE
+    if(cofClear > 0.5) aSplit *= min(cofAlpha, cofOutAlpha);   // a see-through atom is translucent whatever its rim says
+#endif
+    if(glassPass < 0.5){ if(aSplit < 0.985) discard; } else if(aSplit >= 0.985) discard; }
+#endif
   if(depthBias > 0.0 && distance(vWCen, selCenter) < 0.35) discard;   // selected atom → its spinning highlight nucleus draws instead
   // Bias the nucleus toward the camera so it beats its OWN orbitals (but not atoms clearly in front).
   // CLAMPED so it never crosses the near plane - a flat shove would push an atom you are zoomed right
