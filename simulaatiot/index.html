@@ -718,6 +718,12 @@ attribute vec4 world2;
 attribute vec4 world3;
 #ifdef IMPRAD
 attribute float instR;   // per-instance radius multiplier (vdW LOD spheres — one mesh, mixed elements)
+#ifdef MACRON
+attribute vec4 macroN;   // xyz = the MOLECULE's surface normal at this atom (its baked frame), w = how buried the atom is (0 = on the surface, 1 = deep) - see macroField()
+#endif
+#ifdef MACRON
+varying vec4 vMacroN;    // world-space macro normal + buriedness → the key light shades the molecule's SHAPE, not each little sphere (owner 12.9.2026: 'no lighting on the DNA surface, everything looks flat')
+#endif
 #endif
 #ifdef LIPTPL
 /* Template-instanced lipid spheres: the mesh holds one quad per ATOM of one lipid rotamer, with that
@@ -894,7 +900,8 @@ void main(void){
   float tasoDim = 0.0;   // dev plane: 1 = this molecule is off the plane while the dim switch is on
   mat4 W = mat4(world0, world1, world2, world3);
 #ifdef LINKS
-  { mat4 LM = linkMat(linkId); vec3 pc = vec3(W[0].w, W[1].w, W[2].w); W[0].w = 0.0; W[1].w = 0.0; W[2].w = 0.0; W = LM * W;   // the link's frame first - a nucleon's atom centre rides in the w slots, so it is moved separately (no semicolons in GLSL comments)
+  mat3 linkRot = mat3(1.0);
+  { mat4 LM = linkMat(linkId); linkRot = mat3(LM); vec3 pc = vec3(W[0].w, W[1].w, W[2].w); W[0].w = 0.0; W[1].w = 0.0; W[2].w = 0.0; W = LM * W;   // the link's frame first - a nucleon's atom centre rides in the w slots, so it is moved separately (no semicolons in GLSL comments)
     if(dot(pc, pc) > 0.0){ vec3 q = (LM * vec4(pc, 1.0)).xyz; W[0].w = q.x; W[1].w = q.y; W[2].w = q.z; } }
 #endif
 #ifdef LIPWRAP
@@ -1014,6 +1021,16 @@ void main(void){
 #else
   vMemAnc = memAnc;      // per-instance lipid anchor
 #endif
+#endif
+#ifdef MACRON
+  { vec3 mN = macroN.xyz;   // the surface normal, carried through the same frames as the atom
+#ifdef LINKS
+    mN = linkRot * mN;
+#endif
+#ifdef MODELMOVE
+    mN = mat3(modelXform[int(modelId + 0.5)]) * mN;
+#endif
+    vMacroN = vec4(mN, macroN.w); }
 #endif
 #ifdef MODELMOVE
   wc   = (modelXform[int(modelId + 0.5)] * vec4(wc,   1.0)).xyz;
@@ -1145,8 +1162,30 @@ uniform float pLightR;     // falloff radius - the distance at which the light h
    read as a light in the scene rather than a screen effect. Soft: the floor is 0.72, so nothing goes
    into shadow, it just rounds. A material that never sets keyDir gets a zero vector and stays flat. */
 uniform vec3 keyDir;
+uniform float keyFloor;    // dev slider 'varjon syvyys': what the shadow side keeps (1 = no shading at all)
+uniform float macroMix;    // dev slider 'muodon valo': how much of the key normal is the MOLECULE's surface normal (0 = each sphere on its own)
+uniform float aoAmt;       // dev slider 'uurteiden tummuus': how much a buried atom darkens
+#ifdef MACRON
+varying vec4 vMacroN;
+#endif
 float keyLight(vec3 nW){ if(dot(keyDir, keyDir) < 0.5) return 1.0;
-  return 0.60 + 0.40 * pow(max(dot(normalize(nW), keyDir), 0.0), 1.2); }   // a firmer key than the old 0.72 floor: the shadow side drops to 60 percent
+  return keyFloor + (1.0 - keyFloor) * pow(max(dot(normalize(nW), keyDir), 0.0), 1.1); }   // the shadow side drops to keyFloor (0.5 by default, was 0.6) - with the MACRO normals below the light reads as a shape, so it can afford to be firm
+/* MACRO LIGHTING (12.9.2026). Lighting each atom's own little sphere makes a molecule of a hundred thousand of them look
+   FLAT: every sphere has the same lit side, wherever it sits on the molecule. So each atom also carries the normal of the
+   molecule's surface where it is (a protein: the direction away from its neighbours' centroid; DNA: radial from the helix
+   axis; a lipid: its own axis) and the key light is taken on a blend of that and the sphere normal - the sphere keeps its
+   roundness, the molecule gets its shading. w = buriedness darkens crevices and grooves a little (a poor man's AO). */
+vec3 keyNormal(vec3 nW){
+#ifdef MACRON
+  vec3 m = vMacroN.xyz; float lM = length(m);   // (the membrane lipids keep their own sphere normals: a flat sheet has no shape to bring out, and its brightness is what the slab picture is calibrated against)
+  if(lM > 0.5) return normalize(nW * (1.0 - macroMix) + m * (macroMix / lM));
+#endif
+  return nW; }
+float keyShade(vec3 nW){ float k = keyLight(keyNormal(nW));
+#ifdef MACRON
+  k *= 1.0 - aoAmt * vMacroN.w;
+#endif
+  return k; }
 vec3 protonLight(vec3 p){ vec3 acc = vec3(0.0);
   /* A compact falloff, exactly zero at pLightR. The old 1/(1+4d*d) never reached zero, and since the
      lights are the protons nearest the CAMERA, every atom you approached picked up their red - the
@@ -1202,7 +1241,7 @@ void main(void){
   vec3 nF = vec3(vUV, -zcF);
   vec3 colF = vColor;
 #ifdef PLIGHT
-  colF *= keyLight(vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)));   // soft key from above, in world space
+  colF *= keyShade(vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)));   // the key from above on the MOLECULE's normal (see keyNormal)
 #endif
   colF *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);
   /* The SAME ink rim as the crisp path, scaled by the atom's size on screen the same way (see rimK
@@ -1304,7 +1343,7 @@ void main(void){
   gl_FragDepthEXT = clip.z / clip.w * 0.5 + 0.5;
   vec3 col = vColor;
 #ifdef PLIGHT
-  col *= keyLight(vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)));   // soft key from above, in world space
+  col *= keyShade(vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)));   // the key from above on the MOLECULE's normal (see keyNormal)
 #endif
   col *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);              // subtle self-shade
   if(focusAmt > 0.001){   // O: grayscale this fragment unless it is part of the selection → the coloured region is the EXACT silhouette
@@ -3935,7 +3974,10 @@ void main(void){
   // The soft key light: a WORLD direction pointing at the light, from above the membrane (+Y) with a lean
   // toward the default view. gKeyPos is where the dev-mode sun gizmo sits.
   const gKeyDir = new BABYLON.Vector3(0.18, 1.0, 0.42).normalize();
-  const bindPLight = eff => { eff.setArray3('pLight', gPL); eff.setFloat('pLightN', gPLN); eff.setFloat('pLightR', gPLR); eff.setVector3('keyDir', gKeyDir); };
+  let gKeyFloor = 0.5, gMacroMix = 0.69, gAoAmt = 0.35, gBands = 10;   // the shading sliders (dev panel, 12.9.2026): shadow floor, macro-normal share (0.69 = the old 0.45 : 1.0 blend), buriedness darkening, painterly colour bands
+  let gKeyEl = 66, gKeyAz = 23;   // the key light's elevation and azimuth in degrees (dev sliders) - the default vector (0.18, 1.0, 0.42) is elevation 66, azimuth 23 from +z toward +x
+  const setKeyDir = () => { const el = gKeyEl*Math.PI/180, az = gKeyAz*Math.PI/180; gKeyDir.set(Math.cos(el)*Math.sin(az), Math.sin(el), Math.cos(el)*Math.cos(az)).normalize(); };
+  const bindPLight = eff => { eff.setArray3('pLight', gPL); eff.setFloat('pLightN', gPLN); eff.setFloat('pLightR', gPLR); eff.setVector3('keyDir', gKeyDir); eff.setFloat('keyFloor', gKeyFloor); eff.setFloat('macroMix', gMacroMix); eff.setFloat('aoAmt', gAoAmt); };
   const bindFocus = eff => { eff.setFloat('focusAmt', gFocusDimAmt); eff.setFloat('focusMode', gFocusMode); eff.setVector3('focusCenterV', gFocusCenterV); eff.setFloat('focusR', gDimRadius); eff.setArray('focusSet', gFocusSet); eff.setFloat('focusGroup', gFocusGroup); eff.setFloat('focusDark', gFocusDark); };
   let gShortcuts = null;        // dev-mode keyboard-shortcut cheatsheet panel
   let gZoomP = null;  // world point under the cursor to zoom TOWARD (null → zoom to the viewport centre)
@@ -4558,6 +4600,7 @@ void main(void){
         else { const mol = pickMolecule();   // a TAP on a spawned molecule selects it (then M starts it, S stops it)
           if(!gSelEnabled){ }   // selections switched off (dev panel): a click selects nothing
           else if(mol){ selectMolecule(mol, e.shiftKey); }
+          else if(rtsDownModel >= 0 && !camInsideModel(rtsDownModel) && (() => { const fa = pickAtomFar(); return fa && fa.cof >= 0 && (gSel.clear(), gSelMol.clear(), updateSelectionUI(), clearAtomSel(), deselectModel(), showEtcSel(fa.cof), true); })()){ }   // the tap landed on a COFACTOR's atom → that cofactor (owner 12.9.2026)
           else if(rtsDownModel >= 0 && !camInsideModel(rtsDownModel)){   // a click on a protein complex → select it (Shift adds / toggles) - never the one you are standing inside
             if(e.shiftKey){ if(gSel.has(rtsDownModel)) gSel.delete(rtsDownModel); else gSel.add(rtsDownModel); }
             else { gSel.clear(); gSelMol.clear(); gSel.add(rtsDownModel); focusOnModel(rtsDownModel); }   // a fresh pick centres the camera on it
@@ -5045,6 +5088,7 @@ void main(void){
   let gMega  = 600;           // megacheap radius: past this the membrane is a bare slab and proteins thin hard (1.5x closer than the ~895 half-period it used to hit)
   let gMemBlend = 60;         // width of the lipid/slab overlap band at the megacheap edge (the gather thins across it, the slab's hole ends at its start)
   let cofListPanel = null;               // right-side cofactor-type list (built later); shown only in ETC mode
+  const gCofOfAtom = new Map();          // element*2^24 + atom index → its cofactor group (a click on that atom selects the cofactor, owner 12.9.2026)
   const etcGroups = [];                  // whole cofactor molecules {cx,cy,cz,r,type,atoms} → mid-range picking
   let etcGroupPos = null;                // {gx,gy,gz} per cofactor ATOM (indices match etcGroups[].atoms)
   let etcSel = -1;                       // index into etcGroups of the selected cofactor (−1 = none)
@@ -5531,10 +5575,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // vdW space-filling sphere materials (shown when the graphics toggle is in "vdW" mode). One
   // sphere per atom, per-instance radius via IMPRAD. Movable (per-model drag + PSII gizmo).
   const vdwMat = new BABYLON.ShaderMaterial('vdwLOD', scene, 'imp', {
-    attributes:['position','instanceColor','instR','modelId','world0','world1','world2','world3'],
-    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir'],
+    attributes:['position','instanceColor','instR','modelId','macroN','world0','world1','world2','world3'],
+    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
     samplers:['cofDepth'],
-    defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define COFHIDE','#define DEPTHSHADE','#define PLIGHT'] });
+    defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define COFHIDE','#define DEPTHSHADE','#define PLIGHT','#define MACRON'] });
   vdwMat.setFloat('radius',1.0); vdwMat.setFloat('isShell',0); vdwMat.setFloat('shellMin',0); vdwMat.setFloat('bubbleR',1e9);
   vdwMat.setFloat('protonOutline',0); vdwMat.setFloat('depthBias',0); vdwMat.setFloat('coneCos',-1.0);
   vdwMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); vdwMat.backFaceCulling=false; realAlpha(vdwMat); glassable(vdwMat);
@@ -5545,7 +5589,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); bindCof(eff); bindPLight(eff); });
   const vdwMatStatic = new BABYLON.ShaderMaterial('vdwLODs', scene, 'imp', {
     attributes:['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
-    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','memCut','cutLo','cutHi','selModel','tileOff','memDrift','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir'],
+    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','memCut','cutLo','cutHi','selModel','tileOff','memDrift','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
     samplers:['cofDepth'],
     defines:['#define IMPRAD','#define MEMFADE','#define COFHIDE','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT'] });   // LIPTPL: one instance per lipid, atoms baked per vertex   // MEMFADE = cross-cut fade, LIPWRAP = the sheet repeats around the camera
   vdwMatStatic.setFloat('radius',1.0); vdwMatStatic.setFloat('isShell',0); vdwMatStatic.setFloat('shellMin',0); vdwMatStatic.setFloat('bubbleR',1e9);
@@ -5576,9 +5620,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     return m;
   };
   const vdwFarMat = mkFar('vdwLODfar',
-    ['position','instanceColor','instR','modelId','world0','world1','world2','world3'],
-    ['macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir'],
-    ['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define CHEAP','#define DEPTHSHADE','#define PLIGHT']);
+    ['position','instanceColor','instR','modelId','macroN','world0','world1','world2','world3'],
+    ['macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
+    ['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define CHEAP','#define DEPTHSHADE','#define PLIGHT','#define MACRON']);
   vdwFarMat.setFloat('selModel', -1);
   vdwFarMat.onBindObservable.add(()=>{ const eff=vdwFarMat.getEffect(); if(!eff)return;
     eff.setFloat('uT',gWaveT); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0);
@@ -5589,7 +5633,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); bindPLight(eff); });
   const vdwStaticFarMat = mkFar('vdwLODsfar',
     ['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
-    ['memCut','cutLo','cutHi','tileOff','memDrift','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir'],
+    ['memCut','cutLo','cutHi','tileOff','memDrift','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
     ['#define IMPRAD','#define MEMFADE','#define CHEAP','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT']);
   vdwStaticFarMat.onBindObservable.add(mesh=>{ const eff=vdwStaticFarMat.getEffect(); if(!eff)return;
     eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
@@ -5663,6 +5707,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         for(const i of g.atoms){ const dx=gx[i]-g.cx, dy=gy[i]-g.cy, dz=gz[i]-g.cz, d=dx*dx+dy*dy+dz*dz; if(d>r2) r2=d; }
         g.r = Math.sqrt(r2) + 2.0; }
       etcGroupPos = { gx, gy, gz };
+      for(let i=0;i<NA;i++) gCofOfAtom.set(etcEl[i]*16777216 + etcIdx[i], gid[i]);
       // ── Reactive-site / collision spheres ── one per cofactor group, at its LIVE world centre (follows a
       //    moved model). Used for cheap narrow-phase reactions and shown as wireframes in dev mode.
       const groupMid = new Float32Array(etcGroups.length);
@@ -5759,6 +5804,37 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Build per-cell SPHERE meshes now (the only geometry shown in the default vdW mode); the heavier
   // detail meshes stream in later via buildDetail(). Each entry is tagged with its cell key so the
   // deferred pass can attach the detail meshes to the right cell.
+  /* MACRO FIELD (12.9.2026): for every vdW atom, the direction away from the centroid of its heavy-atom neighbours within
+     MF_R (a surface atom's neighbours all lie on one side, so this points OUT of the molecule) and how many neighbours it has
+     against the model's busiest atom (buried = 1). A hash grid of heavy atoms per model, MF_G wide, so an atom checks 27 cells.
+     Hydrogens are skipped as neighbours (half the atoms, no shape information). Fed to the shader as the macroN attribute. */
+  const MF_G = 6, MF_R = 8, MF_R2 = MF_R*MF_R, MF_K = 1024;
+  const mfGrid = new Map();
+  const mfKey = (mi, x, y, z) => ((mi*MF_K + Math.floor((x-bMiX)/MF_G)+4)*MF_K + Math.floor((y-bMiY)/MF_G)+4)*MF_K + Math.floor((z-bMiZ)/MF_G)+4;
+  { const codeH = codeOf('H');
+    for(let e=0;e<nEl;e++){ if(e === codeH || !atomCount[e]) continue; const sb=sphBuf[e];
+      for(let a=0;a<atomCount[e];a++){ const x=sb[a*16+12], y=sb[a*16+13], z=sb[a*16+14], mi=modelOf(x,y,z), k=mfKey(mi,x,y,z);
+        let arr = mfGrid.get(k); if(!arr){ arr = []; mfGrid.set(k, arr); } arr.push(x, y, z); } } }
+  const mfMax = new Float32Array(MAX_MODELS);
+  const macroField = (mm) => { const n = mm.length/16, out = new Float32Array(n*4);
+    for(let i=0;i<n;i++){ const x=mm[i*16+12], y=mm[i*16+13], z=mm[i*16+14], mi=modelOf(x,y,z);
+      let sx=0, sy=0, sz=0, cnt=0;
+      const ix=Math.floor((x-bMiX)/MF_G)+4, iy=Math.floor((y-bMiY)/MF_G)+4, iz=Math.floor((z-bMiZ)/MF_G)+4;
+      for(let dx=-1; dx<=1; dx++) for(let dy=-1; dy<=1; dy++) for(let dz=-1; dz<=1; dz++){
+        const arr = mfGrid.get(((mi*MF_K + ix+dx)*MF_K + iy+dy)*MF_K + iz+dz); if(!arr) continue;
+        for(let q=0;q<arr.length;q+=3){ const ex=arr[q]-x, ey=arr[q+1]-y, ez=arr[q+2]-z; if(ex*ex+ey*ey+ez*ez > MF_R2) continue; sx+=arr[q]; sy+=arr[q+1]; sz+=arr[q+2]; cnt++; } }
+      let nx, ny, nz;
+      if(cnt >= 4){ nx = x - sx/cnt; ny = y - sy/cnt; nz = z - sz/cnt; }
+      else { const c = mInfo[mi] || mInfo[0]; nx = x - c.cx; ny = y - c.cy; nz = z - c.cz; }   // a lone atom: away from the model's centre
+      const l = Math.hypot(nx, ny, nz);
+      if(l < 0.05){ const c = mInfo[mi] || mInfo[0]; nx = x - c.cx; ny = y - c.cy; nz = z - c.cz; const l2 = Math.hypot(nx,ny,nz) || 1; nx/=l2; ny/=l2; nz/=l2; }   // exactly at its neighbours' centroid (deep inside): the model's own outward direction
+      else { nx/=l; ny/=l; nz/=l; }
+      out[i*4]=nx; out[i*4+1]=ny; out[i*4+2]=nz; out[i*4+3]=cnt;   // w = the raw count for now, normalised per model below
+      if(cnt > mfMax[mi]) mfMax[mi] = cnt; }
+    return out; };
+  const macroNorm = (mm, out) => { const n = mm.length/16;   // second pass: buriedness = count / the model's busiest atom
+    for(let i=0;i<n;i++){ const mi=modelOf(mm[i*16+12], mm[i*16+13], mm[i*16+14]), mx = mfMax[mi] || 1; out[i*4+3] = Math.min(1, out[i*4+3]/mx); } return out; };
+  { for(const [k,c] of cells) if(c.sphM.length) c.macroN = macroField(c.sphM); await yield_(); }   // pass 1 (the counts' maxima)
   const cellList = [];
   const cellHalfDiag = 0.5*Math.hypot(CELL,CELL,CELL);
   for(const [k,c] of cells){
@@ -5770,6 +5846,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       sphere.thinInstanceSetBuffer('instanceColor', new Float32Array(c.sphC),4,true);
       sphere.thinInstanceSetBuffer('instR', new Float32Array(c.sphR),1,true);
       sphere.thinInstanceSetBuffer('modelId', mdlBuf(c.sphM),1,true);
+      sphere.thinInstanceSetBuffer('macroN', macroNorm(c.sphM, c.macroN),4,true); c.macroN = null;   // the molecule's surface normal + buriedness per atom (see macroField)
       sphere.renderingGroupId=1; sphere.alwaysSelectAsActiveMesh=true; sphere.setEnabled(false); }
     const sphFull = sphere ? (c.sphM.length/16)|0 : 0;   // full instance count → the distance LOD thins from this
     const entry = { cx,cy,cz, mi:modelOf(cx,cy,cz), meshes:[], nuc:null, sphere, macro:true, r:cellHalfDiag, visOn:false, nucOn:false, sphOn:false, k, sphFull, sphCount:sphFull };   // mi → which model transforms this cell (cull must match the shaders)
@@ -5925,7 +6002,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      (90, 163, 68), sd 11, half-width 1.0: LAATTA_K = grain pitches per tile, TEX_CONTRAST = contrast about the picture's own
      mean, TEX_GAIN = per-channel gain (blue is the most sensitive - the grade's saturation step amplifies it). Dev-tunable
      live: window.__laatta(K, [r,g,b], contrast). Nothing is generated: it is the owner's picture, scaled and colour-matched. */
-  let LAATTA_K = 65, TEX_GAIN = [1.09, 0.98, 1.2], TEX_CONTRAST = 0.65;
+  let LAATTA_K = 65, TEX_GAIN = [1.0, 0.795, 1.05], TEX_CONTRAST = 0.65;   // re-measured 12.9.2026 after the key light's floor (0.60 -> 0.50) and the painterly bands (6 -> 10) moved the cheap tier to (81, 132, 57): the slab now reads (81, 133, 58)
   const gLaattaMats = [];
   const laattaBind = () => { for(const m of gLaattaMats){ m.setFloat('laattaK', LAATTA_K); m.setVector3('texGain', new BABYLON.Vector3(TEX_GAIN[0], TEX_GAIN[1], TEX_GAIN[2])); m.setFloat('texContrast', TEX_CONTRAST);
       const t = gLaatta.vihrea, mn = (t && t.mean) || [0.5, 0.5, 0.5]; m.setVector3('texMean', new BABYLON.Vector3(mn[0], mn[1], mn[2])); } };
@@ -6326,7 +6403,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // with the orbitals revealed inside when the camera is in range.
     const chlSphMat = new BABYLON.ShaderMaterial('chlSphMat', scene, 'imp', {
       attributes:['position','instanceColor','instR','world0','world1','world2','world3'],
-      uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','selModel','selCol','pLight','pLightN','pLightR','keyDir'],
+      uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','selModel','selCol','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt'],
       defines:['#define PLIGHT'] });
     chlSphMat.setFloat('radius',1.0); chlSphMat.setFloat('protonOutline',0); chlSphMat.setFloat('depthBias',0);
     chlSphMat.setFloat('selModel',-1); chlSphMat.setColor3('selCol', new BABYLON.Color3(0.6,0.72,0.53));
@@ -7709,7 +7786,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // glow = the proton corona: same stateless positioning, but the fragment draws a soft additive red disc
     const wMat=(rad, solid, glow, bias, outline, haze)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':''),scene,'imp',{
         attributes:['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
-        uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','depthBias',
+        uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','depthBias',
                   'cellWrap','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
@@ -10456,6 +10533,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const sdSld = document.createElement('input'); sdSld.type='range'; sdSld.min='0'; sdSld.max='100'; sdSld.value='18'; sdSld.style.cssText='width:100%;cursor:pointer;';
   const sdValEl = sdRow.querySelector('#dev-sd-val');
   sdSld.oninput = () => { gSlabDark = +sdSld.value/100; sdValEl.textContent = String(+sdSld.value); };
+  /* The shading sliders (owner 12.9.2026): the key light's shadow floor, how much of the lighting follows the molecule's
+     surface rather than each atom's sphere, how much buried atoms darken, the painterly pass's colour bands, and the key
+     light's direction. All live - the values are bound every frame. */
+  const shadeRows = [];
+  const mkShadeSlider = (label, min, max, step, get, set, fmt) => { const row = document.createElement('div'); const val = document.createElement('b'); row.textContent = label + ': '; row.appendChild(val);
+    const sld = document.createElement('input'); sld.type = 'range'; sld.min = String(min); sld.max = String(max); sld.step = String(step); sld.value = String(get()); sld.style.cssText = 'width:100%;cursor:pointer;';
+    const show = () => { val.textContent = fmt ? fmt(get()) : String(get()); }; show();
+    sld.oninput = () => { set(+sld.value); show(); }; shadeRows.push(row, sld); return sld; };
+  mkShadeSlider('varjon syvyys (valon pohja)', 0, 100, 1, () => Math.round(gKeyFloor*100), v => { gKeyFloor = v/100; }, v => v + ' %');
+  mkShadeSlider('muodon valo (molekyylin pinta vs. atomin pallo)', 0, 100, 1, () => Math.round(gMacroMix*100), v => { gMacroMix = v/100; }, v => v + ' %');
+  mkShadeSlider('uurteiden tummuus', 0, 100, 1, () => Math.round(gAoAmt*100), v => { gAoAmt = v/100; }, v => v + ' %');
+  mkShadeSlider('väritasot (maalauksellinen)', 2, 24, 1, () => gBands, v => { gBands = v; });
+  mkShadeSlider('valon korkeus', 0, 90, 1, () => gKeyEl, v => { gKeyEl = v; setKeyDir(); }, v => v + '°');
+  mkShadeSlider('valon suunta', 0, 360, 1, () => gKeyAz, v => { gKeyAz = v; setKeyDir(); }, v => v + '°');
   // Proton light reach on atoms (world units, 0 = off).
   const plRow = document.createElement('div'); plRow.innerHTML = 'protonivalon kantama: <b id="dev-pl-val">0</b>';
   const plSld = document.createElement('input'); plSld.type='range'; plSld.min='0'; plSld.max='30'; plSld.value='0'; plSld.style.cssText='width:100%;cursor:pointer;';
@@ -10514,7 +10605,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   devPanel.appendChild(backRow); devPanel.appendChild(qRow); devPanel.appendChild(qSld);   // render-resolution slider - it was built but had fallen out of the panel
   devPanel.appendChild(czRow); devPanel.appendChild(czSld);
   devPanel.appendChild(mgRow); devPanel.appendChild(mgSld);
-  devPanel.appendChild(blRow); devPanel.appendChild(blSld); devPanel.appendChild(sdRow); devPanel.appendChild(sdSld); devPanel.appendChild(plRow); devPanel.appendChild(plSld); devPanel.appendChild(bRow); devPanel.appendChild(bSld); devPanel.appendChild(bhRow); devPanel.appendChild(bhSld);
+  devPanel.appendChild(blRow); devPanel.appendChild(blSld); devPanel.appendChild(sdRow); devPanel.appendChild(sdSld); for(const el of shadeRows) devPanel.appendChild(el); devPanel.appendChild(plRow); devPanel.appendChild(plSld); devPanel.appendChild(bRow); devPanel.appendChild(bSld); devPanel.appendChild(bhRow); devPanel.appendChild(bhSld);
   // Membrane slab tier on/off (see gSlabLod).
   const slRow = document.createElement('div'); const slBtn = document.createElement('button');
   const syncSl = () => { slBtn.textContent = gSlabLod ? 'laatta-LoD: ON' : 'laatta-LoD: OFF'; slBtn.style.cssText = cullStyle(gSlabLod); };
@@ -10704,8 +10795,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     if(!etcGroups.length) return -1;   // cofactors are pickable in any mode (not only ETC-ketju) → far selection works
     const ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), cam);
     const o=ray.origin, d=ray.direction; let best=-1, bt=Infinity;
+    const sw = { x:0, y:0, z:0 };
     for(let i=0;i<etcGroups.length;i++){ const g=etcGroups[i];
-      const px=g.cx-o.x, py=g.cy-o.y, pz=g.cz-o.z, tca=px*d.x+py*d.y+pz*d.z;
+      if(gReactSites) gReactSites.siteWorld(i, sw); else { sw.x=g.cx; sw.y=g.cy; sw.z=g.cz; }   // where the cofactor IS (the model may have been moved, flattened, turned)
+      const px=sw.x-o.x, py=sw.y-o.y, pz=sw.z-o.z, tca=px*d.x+py*d.y+pz*d.z;
       if(tca <= 0) continue;
       const d2 = px*px+py*py+pz*pz - tca*tca; if(d2 > g.r*g.r) continue;
       const t = tca - Math.sqrt(g.r*g.r - d2);
@@ -10818,6 +10911,25 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     return { center: new BABYLON.Vector3(bcx, bcy, bcz), world: wc, e: bE, idx: bA };
   };
 
+  /* The nearest vdW sphere under the cursor at ANY distance (pickAtom stops at the reveal bubble): a left tap asks this
+     whether the surface it landed on belongs to a cofactor - then the cofactor is selected - or to the protein around it
+     (owner 12.9.2026: 'select the cofactor, or the protein itself if I click a non-cofactor part'). Broad phase only. */
+  const pickAtomFar = () => {
+    const ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), cam);
+    const hox = ray.origin.x - gPsiiOffset.x, hoy = ray.origin.y - gPsiiOffset.y, hoz = ray.origin.z - gPsiiOffset.z;
+    const dx = ray.direction.x, dy = ray.direction.y, dz = ray.direction.z;
+    const nMdl = mols.length, mLo = [], mLd = [];
+    for(let mi=0; mi<nMdl; mi++){ BABYLON.Matrix.FromArrayToRef(gModelXform, mi*16, _pkM); _pkM.invertToRef(_pkInv);
+      const lo = new BABYLON.Vector3(), ld = new BABYLON.Vector3();
+      BABYLON.Vector3.TransformCoordinatesFromFloatsToRef(hox, hoy, hoz, _pkInv, lo); BABYLON.Vector3.TransformNormalFromFloatsToRef(dx, dy, dz, _pkInv, ld); mLo[mi] = lo; mLd[mi] = ld; }
+    let bestT = Infinity, bE = -1, bA = -1;
+    for(let e=0;e<nEl;e++){ const r = info(e).vr*FILL_SCALE, r2 = r*r, sb = sphBuf[e], cnt = atomCount[e];
+      for(let a=0;a<cnt;a++){ const bx = sb[a*16+12], by = sb[a*16+13], bz = sb[a*16+14];
+        const mi = modelOf(bx, by, bz), lo = mLo[mi] || mLo[0], ld = mLd[mi] || mLd[0];
+        const px = bx-lo.x, py = by-lo.y, pz = bz-lo.z, tca = px*ld.x + py*ld.y + pz*ld.z; if(tca <= 0) continue;
+        const d2 = px*px + py*py + pz*pz - tca*tca; if(d2 > r2) continue;
+        const t = tca - Math.sqrt(r2 - d2); if(t > 0 && t < bestT){ bestT = t; bE = e; bA = a; } } }
+    return bE < 0 ? null : { e: bE, idx: bA, t: bestT, cof: gCofOfAtom.get(bE*16777216 + bA) ?? -1 }; };
   let hoverT = 0;
   // Hover outline — identical geometry to the selection outline (orbital + bonding lobes).
   const setHL = atom => {
@@ -12399,7 +12511,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   painterly.onApply = eff => {
     eff.setFloat2('texel', 1 / engine.getRenderWidth(), 1 / engine.getRenderHeight());
     eff.setFloat('edgeAmt', 1.5);    // ink line strength
-    eff.setFloat('bands', 6.0);      // flat colour bands per channel
+    eff.setFloat('bands', gBands);   // flat colour bands per channel - 10, not 6 (12.9.2026): six levels swallowed the key light's whole 0.5..1.0 range into two steps, which is most of why every molecule read as FLAT; ten keeps the painted look and lets the shading through
     eff.setFloat('paperAmt', 0.05);  // paper grain
     eff.setFloat('bright', 1.35);    // brightness lift (was coming out dark)
   };
@@ -12893,10 +13005,12 @@ void main(void){
         const cM=new Float32Array(nC*16), cCol=new Float32Array(nC*3), cCen=new Float32Array(nC*3), cOid=new Float32Array(nC), cMid=new Float32Array(nC), cL=new Float32Array(nC);
         const bM=new Float32Array(nB*16), bCol=new Float32Array(nB*3), bCen=new Float32Array(nB*3), bOid=new Float32Array(nB), bTap=new Float32Array(nB), bMid=new Float32Array(nB), bL=new Float32Array(nB);
         const fM=new Float32Array(nF*16), fC=new Float32Array(nF*4), fR=new Float32Array(nF), fMid=new Float32Array(nF), fL=new Float32Array(nF);
+        const sN=new Float32Array(nS*4), fN=new Float32Array(nF*4);   // macro normals: radial from the helix axis (the link frame's z), atoms deep in the grooves count as buried
+        const radialN = (out, i, q) => { const r = Math.hypot(q[0], q[1]) || 1; out[i*4]=q[0]/r; out[i*4+1]=q[1]/r; out[i*4+2]=0; out[i*4+3]=Math.max(0, Math.min(1, 1 - r/9)); };
         let iS=0, iN=0, iC=0, iB=0, iF=0;
         for(const [i, t] of per){
           for(const a of t.at){ const o=iS*16; sM.fill(0,o,o+16); sM[o]=1; sM[o+5]=1; sM[o+10]=1; sM[o+15]=1; sM[o+12]=a.q[0]; sM[o+13]=a.q[1]; sM[o+14]=a.q[2];
-            sC[iS*4]=a.col[0]; sC[iS*4+1]=a.col[1]; sC[iS*4+2]=a.col[2]; sC[iS*4+3]=0; sR[iS]=a.rad; sMid[iS]=LINK_SLOT; sL[iS]=i; iS++;
+            sC[iS*4]=a.col[0]; sC[iS*4+1]=a.col[1]; sC[iS*4+2]=a.col[2]; sC[iS*4+3]=0; sR[iS]=a.rad; sMid[iS]=LINK_SLOT; sL[iS]=i; radialN(sN, iS, a.q); iS++;
             for(let j=0;j<a.A;j++){ const p=iN*16; nM.fill(0,p,p+16); nM[p]=1; nM[p+5]=1; nM[p+10]=1; nM[p+15]=1;
               nM[p+12]=a.q[0]+fcc[j][0]*SPACING; nM[p+13]=a.q[1]+fcc[j][1]*SPACING; nM[p+14]=a.q[2]+fcc[j][2]*SPACING; nM[p+3]=a.q[0]; nM[p+7]=a.q[1]; nM[p+11]=a.q[2];   // the atom centre in the w slots, as the protein nucleons do
               const proton = Math.floor((j+1)*a.Z/a.A) > Math.floor(j*a.Z/a.A), col = proton ? PC : NC;
@@ -12907,13 +13021,13 @@ void main(void){
           for(let q=0;q<ob.m.length/16;q++){ const o=iB*16; for(let j=0;j<16;j++) bM[o+j]=ob.m[q*16+j]; bM[o+12]+=cen[0]; bM[o+13]+=cen[1]; bM[o+14]+=cen[2];
             bCol[iB*3]=ob.col[q*3]; bCol[iB*3+1]=ob.col[q*3+1]; bCol[iB*3+2]=ob.col[q*3+2]; bCen[iB*3]=ob.cen[q*3]+cen[0]; bCen[iB*3+1]=ob.cen[q*3+1]+cen[1]; bCen[iB*3+2]=ob.cen[q*3+2]+cen[2]; bOid[iB]=ob.oid[q]; bTap[iB]=ob.tap ? ob.tap[q] : 1; bMid[iB]=LINK_SLOT; bL[iB]=i; iB++; }
           { const o=iF*16; fM.fill(0,o,o+16); fM[o]=1; fM[o+5]=1; fM[o+10]=1; fM[o+15]=1; fM[o+12]=cen[0]; fM[o+13]=cen[1]; fM[o+14]=cen[2];
-            fC[iF*4]=BLOB_COL[0]; fC[iF*4+1]=BLOB_COL[1]; fC[iF*4+2]=BLOB_COL[2]; fC[iF*4+3]=0; fR[iF]=BLOB_R; fMid[iF]=LINK_SLOT; fL[iF]=i; iF++; }
+            fC[iF*4]=BLOB_COL[0]; fC[iF*4+1]=BLOB_COL[1]; fC[iF*4+2]=BLOB_COL[2]; fC[iF*4+3]=0; fR[iF]=BLOB_R; fMid[iF]=LINK_SLOT; fL[iF]=i; radialN(fN, iF, cen); iF++; }
         }
-        const shells = mkMesh('dnaS'+c, false, dnaShell); shells.thinInstanceSetBuffer('matrix', sM, 16, true); shells.thinInstanceSetBuffer('instanceColor', sC, 4, true); shells.thinInstanceSetBuffer('instR', sR, 1, true); shells.thinInstanceSetBuffer('modelId', sMid, 1, true); shells.thinInstanceSetBuffer('linkId', sL, 1, true);
+        const shells = mkMesh('dnaS'+c, false, dnaShell); shells.thinInstanceSetBuffer('macroN', sN, 4, true); shells.thinInstanceSetBuffer('matrix', sM, 16, true); shells.thinInstanceSetBuffer('instanceColor', sC, 4, true); shells.thinInstanceSetBuffer('instR', sR, 1, true); shells.thinInstanceSetBuffer('modelId', sMid, 1, true); shells.thinInstanceSetBuffer('linkId', sL, 1, true);
         const nucs = mkMesh('dnaN'+c, false, dnaNuc); nucs.thinInstanceSetBuffer('matrix', nM, 16, true); nucs.thinInstanceSetBuffer('instanceColor', nCc, 4, true); nucs.thinInstanceSetBuffer('modelId', nMid, 1, true); nucs.thinInstanceSetBuffer('linkId', nL, 1, true);
         const cores = mkMesh('dnaC'+c, true, dnaOrb); cores.thinInstanceSetBuffer('matrix', cM, 16, true); cores.thinInstanceSetBuffer('ocol', cCol, 3, true); cores.thinInstanceSetBuffer('ocen', cCen, 3, true); cores.thinInstanceSetBuffer('oid', cOid, 1, true); cores.thinInstanceSetBuffer('modelId', cMid, 1, true); cores.thinInstanceSetBuffer('linkId', cL, 1, true);
         const bonds = mkMesh('dnaB'+c, true, dnaBond); bonds.thinInstanceSetBuffer('matrix', bM, 16, true); bonds.thinInstanceSetBuffer('bcol', bCol, 3, true); bonds.thinInstanceSetBuffer('ocen', bCen, 3, true); bonds.thinInstanceSetBuffer('oid', bOid, 1, true); bonds.thinInstanceSetBuffer('taper', bTap, 1, true); bonds.thinInstanceSetBuffer('modelId', bMid, 1, true); bonds.thinInstanceSetBuffer('linkId', bL, 1, true);
-        const blobs = mkMesh('dnaF'+c, false, dnaShell); blobs.thinInstanceSetBuffer('matrix', fM, 16, true); blobs.thinInstanceSetBuffer('instanceColor', fC, 4, true); blobs.thinInstanceSetBuffer('instR', fR, 1, true); blobs.thinInstanceSetBuffer('modelId', fMid, 1, true); blobs.thinInstanceSetBuffer('linkId', fL, 1, true);
+        const blobs = mkMesh('dnaF'+c, false, dnaShell); blobs.thinInstanceSetBuffer('macroN', fN, 4, true); blobs.thinInstanceSetBuffer('matrix', fM, 16, true); blobs.thinInstanceSetBuffer('instanceColor', fC, 4, true); blobs.thinInstanceSetBuffer('instR', fR, 1, true); blobs.thinInstanceSetBuffer('modelId', fMid, 1, true); blobs.thinInstanceSetBuffer('linkId', fL, 1, true);
         chunks.push({ bp0, bp1, shells, nucs, cores, bonds, blobs, tier:-1 });
         if(c % 4 === 3) await yield_();
       }

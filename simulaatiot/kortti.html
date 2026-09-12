@@ -356,6 +356,12 @@ attribute vec4 world2;
 attribute vec4 world3;
 #ifdef IMPRAD
 attribute float instR;   // per-instance radius multiplier (vdW LOD spheres — one mesh, mixed elements)
+#ifdef MACRON
+attribute vec4 macroN;   // xyz = the MOLECULE's surface normal at this atom (its baked frame), w = how buried the atom is (0 = on the surface, 1 = deep) - see macroField()
+#endif
+#ifdef MACRON
+varying vec4 vMacroN;    // world-space macro normal + buriedness → the key light shades the molecule's SHAPE, not each little sphere (owner 12.9.2026: 'no lighting on the DNA surface, everything looks flat')
+#endif
 #endif
 #ifdef LIPTPL
 /* Template-instanced lipid spheres: the mesh holds one quad per ATOM of one lipid rotamer, with that
@@ -532,7 +538,8 @@ void main(void){
   float tasoDim = 0.0;   // dev plane: 1 = this molecule is off the plane while the dim switch is on
   mat4 W = mat4(world0, world1, world2, world3);
 #ifdef LINKS
-  { mat4 LM = linkMat(linkId); vec3 pc = vec3(W[0].w, W[1].w, W[2].w); W[0].w = 0.0; W[1].w = 0.0; W[2].w = 0.0; W = LM * W;   // the link's frame first - a nucleon's atom centre rides in the w slots, so it is moved separately (no semicolons in GLSL comments)
+  mat3 linkRot = mat3(1.0);
+  { mat4 LM = linkMat(linkId); linkRot = mat3(LM); vec3 pc = vec3(W[0].w, W[1].w, W[2].w); W[0].w = 0.0; W[1].w = 0.0; W[2].w = 0.0; W = LM * W;   // the link's frame first - a nucleon's atom centre rides in the w slots, so it is moved separately (no semicolons in GLSL comments)
     if(dot(pc, pc) > 0.0){ vec3 q = (LM * vec4(pc, 1.0)).xyz; W[0].w = q.x; W[1].w = q.y; W[2].w = q.z; } }
 #endif
 #ifdef LIPWRAP
@@ -652,6 +659,16 @@ void main(void){
 #else
   vMemAnc = memAnc;      // per-instance lipid anchor
 #endif
+#endif
+#ifdef MACRON
+  { vec3 mN = macroN.xyz;   // the surface normal, carried through the same frames as the atom
+#ifdef LINKS
+    mN = linkRot * mN;
+#endif
+#ifdef MODELMOVE
+    mN = mat3(modelXform[int(modelId + 0.5)]) * mN;
+#endif
+    vMacroN = vec4(mN, macroN.w); }
 #endif
 #ifdef MODELMOVE
   wc   = (modelXform[int(modelId + 0.5)] * vec4(wc,   1.0)).xyz;
@@ -783,8 +800,30 @@ uniform float pLightR;     // falloff radius - the distance at which the light h
    read as a light in the scene rather than a screen effect. Soft: the floor is 0.72, so nothing goes
    into shadow, it just rounds. A material that never sets keyDir gets a zero vector and stays flat. */
 uniform vec3 keyDir;
+uniform float keyFloor;    // dev slider 'varjon syvyys': what the shadow side keeps (1 = no shading at all)
+uniform float macroMix;    // dev slider 'muodon valo': how much of the key normal is the MOLECULE's surface normal (0 = each sphere on its own)
+uniform float aoAmt;       // dev slider 'uurteiden tummuus': how much a buried atom darkens
+#ifdef MACRON
+varying vec4 vMacroN;
+#endif
 float keyLight(vec3 nW){ if(dot(keyDir, keyDir) < 0.5) return 1.0;
-  return 0.60 + 0.40 * pow(max(dot(normalize(nW), keyDir), 0.0), 1.2); }   // a firmer key than the old 0.72 floor: the shadow side drops to 60 percent
+  return keyFloor + (1.0 - keyFloor) * pow(max(dot(normalize(nW), keyDir), 0.0), 1.1); }   // the shadow side drops to keyFloor (0.5 by default, was 0.6) - with the MACRO normals below the light reads as a shape, so it can afford to be firm
+/* MACRO LIGHTING (12.9.2026). Lighting each atom's own little sphere makes a molecule of a hundred thousand of them look
+   FLAT: every sphere has the same lit side, wherever it sits on the molecule. So each atom also carries the normal of the
+   molecule's surface where it is (a protein: the direction away from its neighbours' centroid; DNA: radial from the helix
+   axis; a lipid: its own axis) and the key light is taken on a blend of that and the sphere normal - the sphere keeps its
+   roundness, the molecule gets its shading. w = buriedness darkens crevices and grooves a little (a poor man's AO). */
+vec3 keyNormal(vec3 nW){
+#ifdef MACRON
+  vec3 m = vMacroN.xyz; float lM = length(m);   // (the membrane lipids keep their own sphere normals: a flat sheet has no shape to bring out, and its brightness is what the slab picture is calibrated against)
+  if(lM > 0.5) return normalize(nW * (1.0 - macroMix) + m * (macroMix / lM));
+#endif
+  return nW; }
+float keyShade(vec3 nW){ float k = keyLight(keyNormal(nW));
+#ifdef MACRON
+  k *= 1.0 - aoAmt * vMacroN.w;
+#endif
+  return k; }
 vec3 protonLight(vec3 p){ vec3 acc = vec3(0.0);
   /* A compact falloff, exactly zero at pLightR. The old 1/(1+4d*d) never reached zero, and since the
      lights are the protons nearest the CAMERA, every atom you approached picked up their red - the
@@ -840,7 +879,7 @@ void main(void){
   vec3 nF = vec3(vUV, -zcF);
   vec3 colF = vColor;
 #ifdef PLIGHT
-  colF *= keyLight(vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)));   // soft key from above, in world space
+  colF *= keyShade(vec3(dot(vWB0, nF), dot(vWB1, nF), dot(vWB2, nF)));   // the key from above on the MOLECULE's normal (see keyNormal)
 #endif
   colF *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);
   /* The SAME ink rim as the crisp path, scaled by the atom's size on screen the same way (see rimK
@@ -942,7 +981,7 @@ void main(void){
   gl_FragDepthEXT = clip.z / clip.w * 0.5 + 0.5;
   vec3 col = vColor;
 #ifdef PLIGHT
-  col *= keyLight(vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)));   // soft key from above, in world space
+  col *= keyShade(vec3(dot(vWB0, n), dot(vWB1, n), dot(vWB2, n)));   // the key from above on the MOLECULE's normal (see keyNormal)
 #endif
   col *= 1.0 - 0.14 * smoothstep(0.55, 1.0, r2);              // subtle self-shade
   if(focusAmt > 0.001){   // O: grayscale this fragment unless it is part of the selection → the coloured region is the EXACT silhouette
