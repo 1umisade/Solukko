@@ -5161,7 +5161,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Membrane half-cut → fade out the CAMERA-SIDE leaflet so it stops occluding the complexes. This used to be
   // permanently on (wantCut hardcoded true); now it is button-controlled and OFF by default, so the full
   // bilayer shows until you choose to cut the near half. gCut[2] eases in/out over MEM_FADE_S when toggled.
-  let gMemCut = false;   // full bilayer by default (both leaflets); the Puolikas button cuts the near half
+  let gMemCut = true;    // Puolikas ON by default (owner 12.9.2026): the camera-side half of the membrane inside the light-reaction box is cut away, the button restores it
   // "Membrane only" perf mode: hide the peripheral (soluble) proteins, keep the ones EMBEDDED in the membrane.
   // A model is membrane-integral when its scene Y sits near the bilayer plane (|y| small); peripheral ones are
   // offset into the stroma / lumen (|y| large — see the MODELS table).
@@ -9620,7 +9620,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const px=_fp.x, py=_fp.y, pz=_fp.z;
         lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
       if(!any) return;
-      { const hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5) + MZ; lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
+      { let hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5) + MZ;
+        if(typeof POSE !== 'undefined') hz2 = Math.max(hz2, Math.abs(POSE.pos.z - gTasoZ));   // the box reaches the camera where the Kalvostoon flight lands (owner 12.9.2026), so the cut and the cull cover everything between the camera and the plane
+        lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
       if(!gDevPsuBox){ const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {size:1}, scene);
