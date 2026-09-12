@@ -10145,17 +10145,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   mvSld.type='range'; mvSld.min='5'; mvSld.max='400'; mvSld.value='5'; mvSld.style.cssText='width:100%;cursor:pointer;';
   const mvValEl = mvRow.querySelector('#dev-mv-val');
   mvSld.oninput = () => { gPanSpeed = +mvSld.value/100; mvValEl.textContent = gPanSpeed.toFixed(2)+'×'; };
-  const zmRow = document.createElement('div');
-  zmRow.innerHTML = 'zoomausnopeus: <b id="dev-zm-val">0.50×</b>';
   // The wheel's full step, world units per notch. The geometric ten-notch ramp runs from a tenth of this to 16x it.
   const zxRow = document.createElement('div'); zxRow.innerHTML = 'zoomin maksiminopeus: <b id="dev-zx-val">63</b> / napsautus';
   const zxSld = document.createElement('input'); zxSld.type='range'; zxSld.min='5'; zxSld.max='300'; zxSld.value='63'; zxSld.style.cssText='width:100%;cursor:pointer;';
   const zxValEl = zxRow.querySelector('#dev-zx-val');
   zxSld.oninput = () => { gZoomMax = +zxSld.value; zxValEl.textContent = String(gZoomMax); };
-  const zmSld = document.createElement('input');
-  zmSld.type='range'; zmSld.min='5'; zmSld.max='400'; zmSld.value='50'; zmSld.style.cssText='width:100%;cursor:pointer;';
-  const zmValEl = zmRow.querySelector('#dev-zm-val');
-  zmSld.oninput = () => { gZoomSpeed = +zmSld.value/100; zmValEl.textContent = gZoomSpeed.toFixed(2)+'×'; };
+  // (the 'zoomausnopeus' slider is gone - owner 12.9.2026; gZoomSpeed stays at its 0.5 default, zoomin maksiminopeus is the one zoom control)
   const rtRow = document.createElement('div');
   rtRow.innerHTML = 'kääntymisnopeus: <b id="dev-rt-val">155°/s</b>';
   const rtSld = document.createElement('input');
@@ -10412,7 +10407,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   devPanel.appendChild(psRow); devPanel.appendChild(psSld); devPanel.appendChild(ppRow);
   { const vr = document.createElement('div'); vr.id = 'dev-valo-row'; vr.textContent = 'valoreaktiot: -'; devPanel.appendChild(vr); }
   devPanel.appendChild(mvRow); devPanel.appendChild(mvSld);
-  devPanel.appendChild(zmRow); devPanel.appendChild(zmSld); devPanel.appendChild(zxRow); devPanel.appendChild(zxSld);
+  devPanel.appendChild(zxRow); devPanel.appendChild(zxSld);
   devPanel.appendChild(rtRow); devPanel.appendChild(rtSld);
   devPanel.appendChild(zpG.row); devPanel.appendChild(zpG.sld);
   devPanel.appendChild(brG.row); devPanel.appendChild(brG.sld);
