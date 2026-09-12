@@ -18,3 +18,6 @@ __pycache__/
 # Luentokalvoilta poimitut kuvat: siirtyvät OneDriven mukana, eivät kuulu julkiseen repoon.
 /tyokalut/kuvat/
 /geneesi/
+
+# ChimeraX-sessiot (.cxs): isoja, sivusto ei tarvitse - siirtyvat OneDriven mukana
+/simulaatiot/chimerax/
