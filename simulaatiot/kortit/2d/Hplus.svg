@@ -12,8 +12,8 @@
 <g fill="#111" stroke="#111" stroke-linecap="round" stroke-linejoin="round">
 <circle cx="0.0" cy="0.0" r="50.0" stroke="none"/>
 </g>
-<g fill="#e8221c" stroke="#e8221c" stroke-linecap="round" stroke-linejoin="round">
-<circle cx="0.0" cy="0.0" r="45.0" stroke="none"/>
+<g stroke-linejoin="round">
+<circle cx="0.0" cy="0.0" r="45.0" fill="#d7d7d7" stroke="none"/>
 </g>
 <g stroke="#111" stroke-width="6" stroke-linecap="round">
 </g>

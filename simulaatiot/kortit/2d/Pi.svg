@@ -8,6 +8,19 @@
 <radialGradient id="gS" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#efe499"/><stop offset="1" stop-color="#e3cf46"/></radialGradient>
 <radialGradient id="gMg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#b8e4b8"/><stop offset="1" stop-color="#7fcf7f"/></radialGradient>
 <radialGradient id="gX" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e0e0e0"/><stop offset="1" stop-color="#b0b0b0"/></radialGradient>
+<linearGradient id="l0" gradientUnits="userSpaceOnUse" x1="0.2" y1="75.0" x2="-0.0" y2="0.0"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#f4b36a"/></linearGradient>
+<linearGradient id="l1" gradientUnits="userSpaceOnUse" x1="0.2" y1="75.0" x2="-0.2" y2="-75.0"><stop offset="0.34" stop-color="#ec736c"/><stop offset="0.66" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l2" gradientUnits="userSpaceOnUse" x1="0.2" y1="75.0" x2="75.0" y2="-0.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l3" gradientUnits="userSpaceOnUse" x1="0.2" y1="75.0" x2="-75.0" y2="0.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l4" gradientUnits="userSpaceOnUse" x1="-0.0" y1="0.0" x2="-0.2" y2="-75.0"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l5" gradientUnits="userSpaceOnUse" x1="-0.0" y1="0.0" x2="75.0" y2="-0.2"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l6" gradientUnits="userSpaceOnUse" x1="-0.0" y1="0.0" x2="-75.0" y2="0.2"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l7" gradientUnits="userSpaceOnUse" x1="-0.2" y1="-75.0" x2="75.0" y2="-0.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l8" gradientUnits="userSpaceOnUse" x1="-0.2" y1="-75.0" x2="-75.0" y2="0.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l9" gradientUnits="userSpaceOnUse" x1="0.2" y1="75.0" x2="-0.0" y2="0.0"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#f4b36a"/></linearGradient>
+<linearGradient id="l10" gradientUnits="userSpaceOnUse" x1="-0.0" y1="0.0" x2="-0.2" y2="-75.0"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l11" gradientUnits="userSpaceOnUse" x1="-0.0" y1="0.0" x2="75.0" y2="-0.2"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l12" gradientUnits="userSpaceOnUse" x1="-0.0" y1="0.0" x2="-75.0" y2="0.2"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
 </defs>
 <g fill="#111" stroke="#111" stroke-linecap="round" stroke-linejoin="round">
 <line x1="0.2" y1="75.0" x2="-0.0" y2="0.0" stroke-width="70.0"/>
@@ -29,25 +42,25 @@
 <circle cx="75.0" cy="-0.2" r="56.0" stroke="none"/>
 <circle cx="-75.0" cy="0.2" r="56.0" stroke="none"/>
 </g>
-<g fill="#e8221c" stroke="#e8221c" stroke-linecap="round" stroke-linejoin="round">
-<line x1="0.2" y1="75.0" x2="-0.0" y2="0.0" stroke-width="60.0"/>
-<line x1="-0.0" y1="0.0" x2="-0.2" y2="-75.0" stroke-width="60.0"/>
-<line x1="-0.0" y1="0.0" x2="75.0" y2="-0.2" stroke-width="60.0"/>
-<line x1="-0.0" y1="0.0" x2="-75.0" y2="0.2" stroke-width="60.0"/>
-<line x1="0.2" y1="75.0" x2="-0.0" y2="0.0" stroke-width="60.0"/>
-<line x1="0.2" y1="75.0" x2="-0.2" y2="-75.0" stroke-width="60.0"/>
-<line x1="0.2" y1="75.0" x2="75.0" y2="-0.2" stroke-width="60.0"/>
-<line x1="0.2" y1="75.0" x2="-75.0" y2="0.2" stroke-width="60.0"/>
-<line x1="-0.0" y1="0.0" x2="-0.2" y2="-75.0" stroke-width="60.0"/>
-<line x1="-0.0" y1="0.0" x2="75.0" y2="-0.2" stroke-width="60.0"/>
-<line x1="-0.0" y1="0.0" x2="-75.0" y2="0.2" stroke-width="60.0"/>
-<line x1="-0.2" y1="-75.0" x2="75.0" y2="-0.2" stroke-width="60.0"/>
-<line x1="-0.2" y1="-75.0" x2="-75.0" y2="0.2" stroke-width="60.0"/>
-<circle cx="0.2" cy="75.0" r="51.0" stroke="none"/>
-<circle cx="-0.0" cy="0.0" r="54.0" stroke="none"/>
-<circle cx="-0.2" cy="-75.0" r="51.0" stroke="none"/>
-<circle cx="75.0" cy="-0.2" r="51.0" stroke="none"/>
-<circle cx="-75.0" cy="0.2" r="51.0" stroke="none"/>
+<g stroke-linejoin="round">
+<line x1="0.2" y1="75.0" x2="-0.0" y2="0.0" stroke="url(#l0)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="0.2" y1="75.0" x2="-0.2" y2="-75.0" stroke="url(#l1)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="0.2" y1="75.0" x2="75.0" y2="-0.2" stroke="url(#l2)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="0.2" y1="75.0" x2="-75.0" y2="0.2" stroke="url(#l3)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.0" y1="0.0" x2="-0.2" y2="-75.0" stroke="url(#l4)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.0" y1="0.0" x2="75.0" y2="-0.2" stroke="url(#l5)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.0" y1="0.0" x2="-75.0" y2="0.2" stroke="url(#l6)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.2" y1="-75.0" x2="75.0" y2="-0.2" stroke="url(#l7)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.2" y1="-75.0" x2="-75.0" y2="0.2" stroke="url(#l8)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="0.2" y1="75.0" x2="-0.0" y2="0.0" stroke="url(#l9)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.0" y1="0.0" x2="-0.2" y2="-75.0" stroke="url(#l10)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.0" y1="0.0" x2="75.0" y2="-0.2" stroke="url(#l11)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-0.0" y1="0.0" x2="-75.0" y2="0.2" stroke="url(#l12)" stroke-width="60.0" stroke-linecap="round"/>
+<circle cx="0.2" cy="75.0" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-0.0" cy="0.0" r="54.0" fill="#f4b36a" stroke="none"/>
+<circle cx="-0.2" cy="-75.0" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="75.0" cy="-0.2" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-75.0" cy="0.2" r="51.0" fill="#ec736c" stroke="none"/>
 </g>
 <g stroke="#111" stroke-width="6" stroke-linecap="round">
 <line x1="0.2" y1="75.0" x2="-0.0" y2="0.0"/>

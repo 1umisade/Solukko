@@ -21,7 +21,7 @@ HALO = 30                        # hehkun paksuus atomin/sidoksen ympari
 SILTA = 2.0 * 1.5 * S            # hehkusilta, kun sitoutumattomat atomit ovat alle 2 sidospituuden paassa
 ULKO = 5                         # hehkun mustan aariviivan paksuus
 SIDOS = 6                        # sidosviivan paksuus
-HEHKU = '#e8221c'
+HEHKU = '#e8221c'              # (ei enaa kaytossa: hehku on alkuaineen varinen, ks. piirra)
 
 
 def lighten(hexc, f=0.45):
@@ -106,21 +106,40 @@ def piirra(atoms, bonds, rings=(), lisa_merkki=None):
         o.append('<radialGradient id="g%s" cx="40%%" cy="35%%" r="70%%"><stop offset="0" stop-color="%s"/><stop offset="1" stop-color="%s"/></radialGradient>' % (sym, lighten(c), c))
     o.append('<radialGradient id="gX" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e0e0e0"/><stop offset="1" stop-color="#b0b0b0"/></radialGradient>')
     o.append('</defs>')
-    # 1) hehku: ensin musta (aariviiva), sitten punainen paalle -> yhtenainen mollukka mustalla reunalla
-    for vari, extra in ((('#111', ULKO)), (HEHKU, 0)):
-        o.append('<g fill="%s" stroke="%s" stroke-linecap="round" stroke-linejoin="round">' % (vari, vari))
-        for i, j, k in bonds:
-            a, b = atoms[i], atoms[j]
-            o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke-width="%.1f"/>' % (a['x'], a['y'], b['x'], b['y'], 2 * (HALO + extra)))
-        for i in range(len(atoms)):   # hehkusilta lahekkaisten sitoutumattomien atomien valiin: molekyylin sisaan ei jaa pikkureikia
-            for j in range(i + 1, len(atoms)):
-                if math.hypot(atoms[i]['x'] - atoms[j]['x'], atoms[i]['y'] - atoms[j]['y']) < SILTA:
-                    o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke-width="%.1f"/>' % (atoms[i]['x'], atoms[i]['y'], atoms[j]['x'], atoms[j]['y'], 2 * (HALO + extra)))
-        for a in atoms:
-            o.append('<circle cx="%.1f" cy="%.1f" r="%.1f" stroke="none"/>' % (a['x'], a['y'], r_of(a) + HALO + extra))
-        for ring in rings:
-            o.append('<polygon points="%s" stroke-width="%.1f"/>' % (' '.join('%.1f,%.1f' % (atoms[i]['x'], atoms[i]['y']) for i in ring), 2 * (HALO + extra)))
-        o.append('</g>')
+    # 1) hehku: ensin musta (aariviiva) yhtena mollukkana, sitten vdW-hehku paalle ATOMIN ALKUAINEEN VARISSA (omistaja
+    #    12.9.2026: 'color the vdw in 2d as the color of the element'): jokaisen sidoksen ja sillan hehku on kaksi
+    #    puolikasta, kumpikin oman paan atomin varissa, ja atomin oma ympyra sen varissa - vedyt vaaleanharmaita,
+    #    happi punainen, typpi sininen. Vari on hehkusavy (vaalennettu), jotta mustat sidokset ja kirjaimet erottuvat.
+    hehku = lambda a: lighten(VARI.get(a['sym'], '#b0b0b0'), 0.30)
+    liukut = []   # sidoksen/sillan hehku liukuu a:n varista b:n variin (kaksi puolikasta jatti teravat saumat)
+    def puolikkaat(a, b, extra):
+        gid = 'l%d' % len(liukut)
+        L = math.hypot(b['x'] - a['x'], b['y'] - a['y']) or 1.0   # a:n vari a:n oman hehkuympyran reunaan asti, siita liukuen b:n variin b:n reunalla
+        oa = min(0.45, (r_of(a) + HALO) / L); ob = max(0.55, 1 - (r_of(b) + HALO) / L)
+        liukut.append('<linearGradient id="%s" gradientUnits="userSpaceOnUse" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"><stop offset="%.2f" stop-color="%s"/><stop offset="%.2f" stop-color="%s"/></linearGradient>' % (gid, a['x'], a['y'], b['x'], b['y'], oa, hehku(a), ob, hehku(b)))
+        o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="url(#%s)" stroke-width="%.1f" stroke-linecap="round"/>' % (a['x'], a['y'], b['x'], b['y'], gid, 2 * (HALO + extra)))
+    o.append('<g fill="#111" stroke="#111" stroke-linecap="round" stroke-linejoin="round">')
+    for i, j, k in bonds:
+        a, b = atoms[i], atoms[j]
+        o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke-width="%.1f"/>' % (a['x'], a['y'], b['x'], b['y'], 2 * (HALO + ULKO)))
+    sillat = [(i, j) for i in range(len(atoms)) for j in range(i + 1, len(atoms)) if math.hypot(atoms[i]['x'] - atoms[j]['x'], atoms[i]['y'] - atoms[j]['y']) < SILTA]   # hehkusilta lahekkaisten sitoutumattomien atomien valiin: molekyylin sisaan ei jaa pikkureikia
+    for i, j in sillat:
+        o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke-width="%.1f"/>' % (atoms[i]['x'], atoms[i]['y'], atoms[j]['x'], atoms[j]['y'], 2 * (HALO + ULKO)))
+    for a in atoms:
+        o.append('<circle cx="%.1f" cy="%.1f" r="%.1f" stroke="none"/>' % (a['x'], a['y'], r_of(a) + HALO + ULKO))
+    for ring in rings:
+        o.append('<polygon points="%s" stroke-width="%.1f"/>' % (' '.join('%.1f,%.1f' % (atoms[i]['x'], atoms[i]['y']) for i in ring), 2 * (HALO + ULKO)))
+    o.append('</g>')
+    o.append('<g stroke-linejoin="round">')
+    for ring in rings:   # renkaan sisus: renkaan atomien keskivari
+        cs = [VARI.get(atoms[i]['sym'], '#b0b0b0') for i in ring]
+        r_, g_, b_ = (sum(int(c[k:k + 2], 16) for c in cs) // len(cs) for k in (1, 3, 5))
+        o.append('<polygon points="%s" fill="%s" stroke="%s" stroke-width="%.1f"/>' % (' '.join('%.1f,%.1f' % (atoms[i]['x'], atoms[i]['y']) for i in ring), lighten('#%02x%02x%02x' % (r_, g_, b_), 0.30), lighten('#%02x%02x%02x' % (r_, g_, b_), 0.30), 2 * HALO))
+    for i, j in sillat: puolikkaat(atoms[i], atoms[j], 0)   # sillat alimmaksi: ne vain tayttavat reiat, sidosten hehku ja atomit paalle
+    for i, j, k in bonds: puolikkaat(atoms[i], atoms[j], 0)
+    for a in atoms:   # atomin oma hehku paallimmaiseksi, jotta sen vari voittaa naapurin sidospuolikkaan
+        o.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s" stroke="none"/>' % (a['x'], a['y'], r_of(a) + HALO, hehku(a)))
+    o.append('</g>')
     # 2) sidokset
     o.append('<g stroke="#111" stroke-width="%d" stroke-linecap="round">' % SIDOS)
     for i, j, k in bonds:
@@ -141,6 +160,7 @@ def piirra(atoms, bonds, rings=(), lisa_merkki=None):
             merkki = ('+' if q > 0 else '−') * min(abs(q), 1) if abs(q) == 1 else ('%d%s' % (abs(q), '+' if q > 0 else '−'))
             o.append('<text x="%.1f" y="%.1f" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="%d" fill="#111">%s</text>' % (a['x'] + r * 0.95, a['y'] - r * 0.75, int(r * 0.9), merkki))
     if lisa_merkki: o.append(lisa_merkki)
+    if liukut: o.insert(o.index('</defs>'), chr(10).join(liukut))   # sidoshehkujen liukuvarit defs-lohkoon
     o.append('</svg>')
     return '\n'.join(o)
 

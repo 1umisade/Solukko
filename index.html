@@ -1228,13 +1228,13 @@ body.is-mobile .comment-area { position: static; width: 100%; }
    colour, so it reads as a cut-out of the H. Plain text-shadow, because a background-image clipped to a stroked glyph
    only works in some browsers (owner 10.9.2026 saw a black blob). The colour follows the card: paper, the green or
    orange grade tint, dark mode. */
-.flashcard, #word-link-tooltip, .overview-card { --index-cut: #fdf6ef; }   /* new_bg.png average */
+.flashcard, #word-link-tooltip, .wl-lapsi, .overview-card { --index-cut: #fdf6ef; }   /* new_bg.png average */
 .flashcard.graded-known   { --index-cut: #d3dcce; }   /* paper under rgba(154,184,161,.42) */
 .flashcard.graded-unknown { --index-cut: #f7cfb3; }   /* paper under rgba(239,154,95,.42) */
 body.dark-mode .flashcard { --index-cut: #3a312b; }
 body.dark-mode .flashcard.graded-known   { --index-cut: #303d35; }
 body.dark-mode .flashcard.graded-unknown { --index-cut: #3f3022; }
-body.dark-mode #word-link-tooltip { --index-cut: #4e453d; }
+body.dark-mode #word-link-tooltip, body.dark-mode .wl-lapsi { --index-cut: #4e453d; }
 .mol-link sub { position: relative; z-index: 1; font-size: 0.66em; line-height: 0; margin-left: -0.34em; margin-right: 0.04em; font-weight: 700; vertical-align: -0.364em;   /* subscripts only (owner 10.9.2026). -0.34em / -0.364em put the digit's ink centre exactly on the element's bottom-right ink corner (measured from Lora's glyph metrics: H advance 0.78em, ink right 0.73em; bold digit ink 0.47em wide, 0.73em tall at the sub size) */
   text-shadow: 0.07em 0 0 var(--index-cut, #fdf6ef), -0.07em 0 0 var(--index-cut, #fdf6ef), 0 0.07em 0 var(--index-cut, #fdf6ef), 0 -0.07em 0 var(--index-cut, #fdf6ef),
     0.05em 0.05em 0 var(--index-cut, #fdf6ef), -0.05em -0.05em 0 var(--index-cut, #fdf6ef), 0.05em -0.05em 0 var(--index-cut, #fdf6ef), -0.05em 0.05em 0 var(--index-cut, #fdf6ef), 0 0 0.04em var(--index-cut, #fdf6ef); }
@@ -1244,16 +1244,21 @@ body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { --index-cut
 .word-link.wl-show::after, .word-link:hover::after { border-top-color: #fff5e0; }
 body.dark-mode .word-link.wl-show, body.dark-mode .word-link:hover { background-color: #4a3f34; box-shadow: 0 0 0 4px #4a3f34, 0 0 0 6px #a97f4e, 0 4px 12px rgba(0,0,0,0.3); }
 body.dark-mode .word-link.wl-show::after, body.dark-mode .word-link:hover::after { border-top-color: #4a3f34; }
-#word-link-tooltip { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: auto;   /* the Laajenna button has to be clickable */ white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
-body.dark-mode #word-link-tooltip { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
-#word-link-tooltip * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+#word-link-tooltip, .wl-lapsi { position: fixed; z-index: 99999; width: min(540px, calc(100vw - 24px)); max-width: min(540px, calc(100vw - 24px)); min-width: 200px; background: url('new_bg.png?v=2') center top / cover no-repeat; border: 1px solid #d4cec4; border-radius: 12px; padding: 0.9rem 1.15rem; box-shadow: 0 8px 28px rgba(0,0,0,0.15); font-family: 'Lora', Georgia, serif; font-size: 1.05rem; line-height: 1.75; color: #1a1612; letter-spacing: 0.04em; display: none; pointer-events: auto;   /* the Laajenna button has to be clickable */ white-space: normal; overflow-wrap: anywhere; word-break: normal; max-height: none; overflow: visible; }
+body.dark-mode #word-link-tooltip, body.dark-mode .wl-lapsi { background: linear-gradient(rgba(40,30,22,0.82), rgba(40,30,22,0.82)), url('new_bg.png?v=2') center top / cover no-repeat; border-color: #6d5f52; color: #eadfce; }
+#word-link-tooltip *, .wl-lapsi * { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.wl-termi { font-weight: 700; color: #56533c; margin: 0 0 0.35em; padding-bottom: 0.25em; border-bottom: 1px dashed #c9bda8; letter-spacing: 0.06em; }   /* the linked term as the popup's title (owner 12.9.2026) */
+body.dark-mode .wl-termi { color: #eadfce; border-bottom-color: #6d5f52; }
+.wl-mol .wl-termi { text-align: center; border-bottom: none; padding-bottom: 0; margin-bottom: 0.2em; }
+.wl-lapsi .word-link, #word-link-tooltip .word-link { cursor: help; text-decoration: underline dotted #a06a35; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }   /* links inside a popup open the next popup on hover; the dotted line says so, since a popup never flashes its links */
+body.dark-mode .wl-lapsi .word-link, body.dark-mode #word-link-tooltip .word-link { text-decoration-color: #a97f4e; }
 .answer-body, .wl-body { overflow: hidden; transition: height 0.38s cubic-bezier(0.25,0.8,0.3,1); }
 .answer-expand { margin: 1em auto 0 0 !important; }   /* vasempaan reunaan, vastauksen kanssa linjaan */
 .wl-expand, .answer-expand { display: block; margin: 0.7em 0 0; padding: 0.32em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.86em; cursor: pointer; }
 .wl-expand:hover, .answer-expand:hover { background: #eadcc2; }
 body.dark-mode .wl-expand, body.dark-mode .answer-expand { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
 body.dark-mode .wl-expand:hover, body.dark-mode .answer-expand:hover { background: #5c4e40; }
-#word-link-tooltip.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
+#word-link-tooltip.mol-only, .wl-lapsi.mol-only { min-width: 0; padding: 10px; }   /* molecule popup: just the render, no text width */
 .wl-mol-view { position: relative; width: 260px; height: 260px; margin: 0 auto; }
 .wl-mol .wl-2d { display: block; width: 260px; height: 260px; border-radius: 0;   /* the generic tooltip img rule excludes .wl-2d, otherwise its width/height auto made the canvas a wide strip */ background: #f2e6c9; margin: 0 auto; object-fit: contain; }
 .wl-mol .wl-3d-wait { position: absolute; inset: 0; border-radius: 0; background: #f2e6c9; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; font-family: 'Lora', serif; font-size: 0.82rem; color: #8a7d6b; text-align: center; padding: 12px; box-sizing: border-box; }   /* loading card: stays under the 3-D frame (the frame covers it), so a frame that never appears still shows a card, never bare paper */
@@ -1269,7 +1274,7 @@ body.dark-mode .wl-mol-tiedot { border-top-color: #6d5f52; }
 .wl-tiedot { display: block; margin: 0; padding: 0.22em 0.9em; border: 1px solid #c9bda8; border-radius: 999px; background: #fff5e0; color: #56533c; font-family: 'Lora', serif; font-size: 0.8em; line-height: 1.4; cursor: pointer; }
 .wl-tiedot:hover { background: #eadcc2; }
 body.dark-mode .wl-dim-switch { background: #4a3f34; border-color: #6d5f52; } body.dark-mode .wl-dim { color: #eadfce; } body.dark-mode .wl-dim.on { background: #a98564; color: #fff; } body.dark-mode .wl-tiedot { background: #4a3f34; border-color: #6d5f52; color: #eadfce; }
-#word-link-tooltip img:not(.wl-2d), #word-link-tooltip svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
+#word-link-tooltip img:not(.wl-2d), .wl-lapsi img:not(.wl-2d), #word-link-tooltip svg, .wl-lapsi svg, #word-link-tooltip:not(.mol-only) video { max-width: 100%; max-height: 220px; width: auto !important; height: auto !important; object-fit: contain; display: block; margin: 0.5rem auto; border-radius: 8px; }
 </style>
 <style id="calendar-css">
 .sim-intro { max-width: 720px; margin: 0 auto 22px; text-align: center; font-family: 'Lora', serif; font-size: 1.05rem; color: #56533c; line-height: 1.6; }
@@ -6963,7 +6968,7 @@ function scrollToCard(smooth){
 // ════════════════════════════════════════════════════════════
 // SANALINKIT   (WORD-LINKS — highlighted terms inside a card; hover/tap one to pop the linked card's definition in a tooltip)
 // ════════════════════════════════════════════════════════════
-let _wordLinks=[], _curCardFrontLower='';   // the current card's own front term (cleaned, lowercased) — used to never link a word back to itself
+let _wordLinks=[], _curCardFrontLower='', _wlOmaKortti=null;   // _wlOmaKortti: the card a popup shows - its text never links back to that card   // the current card's own front term (cleaned, lowercased) — used to never link a word back to itself
 function _escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
 function buildWordLinks(){
@@ -7150,7 +7155,7 @@ function _wrapTextNode(textNode){
       const lower=m[0].toLowerCase();
       let ci=_wlMap.get(lower); const mol=_molMap.get(lower)||null;
       if(ci===undefined || ci<0) ci=-1;
-      if(ci>=0 && (_wlCards[ci]===currentCard || lower===_curCardFrontLower)) ci=-1;   // don't link to the card being shown / a same-term card
+      if(ci>=0 && (_wlCards[ci]===currentCard || _wlCards[ci]===_wlOmaKortti || lower===_curCardFrontLower)) ci=-1;   // don't link to the card being shown / a same-term card / the popup's own card
       if(ci<0 && !mol) continue;
       matches.push({start:m.index,end:m.index+m[0].length,text:m[0],cardIndex:ci,mol});
     }
@@ -7236,6 +7241,50 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
       return '<div class="wl-body">'+_tipSuppea+'</div><button type="button" class="wl-expand">Laajenna</button>'; }
     _tipLaaja=null; _tipSuppea=null; return '<div class="wl-body">'+prepareTooltipHtml(back||sup||front)+'</div>';
   }
+  /* the term a popup is about: the card's first linkkisana (its nominative), else the question itself */
+  function termiOf(card){ const ls=(getField(card,['linkkisanat','Linkkisanat'])||'').replace(/<[^>]*>/g,'').split(',')[0].trim(); if(ls) return ls;
+    return (getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim(); }
+  const _esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  /* a card's popup text: the title line, suppea first and laaja behind Laajenna (st receives the two versions) */
+  function tipSisalto(card, st){
+    const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
+    const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
+    const sup=card.suppea||'';
+    const _pl=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+    const otsikko='<div class="wl-termi">'+_esc(termiOf(card))+'</div>';
+    if(_pl(sup) && _pl(back) && _pl(sup)!==_pl(back)){ st.suppea=prepareTooltipHtml(sup); st.laaja=prepareTooltipHtml(back);
+      return otsikko+'<div class="wl-body">'+st.suppea+'</div><button type="button" class="wl-expand">Laajenna</button>'; }
+    st.suppea=null; st.laaja=null; return otsikko+'<div class="wl-body">'+prepareTooltipHtml(back||sup||front)+'</div>';
+  }
+  /* word links inside a popup (owner 12.9.2026: 'create popups if hovered on linked words') - never back to the popup's own card */
+  function linkitaTip(el, card){ _wlOmaKortti=card||null; try{ el.querySelectorAll('.wl-body').forEach(b=>applyWordLinks(b)); } finally{ _wlOmaKortti=null; } }
+  /* NESTED popups: a link inside a popup opens the next level (lapset[0] under the main popup, lapset[1] under that ...).
+     Each level is placed by its own link and stays while the pointer is on it or on a deeper level. */
+  const lapset=[];
+  function lapsiTip(L){ if(!lapset[L]){ const d=document.createElement('div'); d.className='wl-lapsi'; d.style.zIndex=String(100000+L); d.style.display='none'; tip.parentElement.appendChild(d); lapset[L]=d;
+      d.addEventListener('click', e=>{ const b=e.target.closest('.wl-expand'); if(!b||!(d._laaja&&d._suppea)) return; e.stopPropagation();
+        const body=d.querySelector('.wl-body'); if(!body) return; const laajenee=(b.textContent.trim()==='Laajenna');
+        body.innerHTML=laajenee?d._laaja:d._suppea; dimParentheses(body); linkitaTip(d, d._card); b.textContent=laajenee?'Pienennä':'Laajenna'; d._lukittu=true; placeTip(d._target,true,d); });
+      d.addEventListener('scroll',()=>{}); }
+    return lapset[L]; }
+  function tasoOf(el){ if(!el) return -1; if(tip.contains(el)) return 0; for(let i=0;i<lapset.length;i++) if(lapset[i]&&lapset[i].contains(el)) return i+1; return -1; }   // -1 = the card, 0 = the main popup, k = lapset[k-1]
+  function suljeLapset(from){ for(let i=from;i<lapset.length;i++){ const d=lapset[i]; if(d&&d.style.display!=='none'){ d.style.display='none'; d.innerHTML=''; d._target=null; d._card=null; d._laaja=d._suppea=null; d._lukittu=false; } if(d) d._hold=0; } }
+  function pidaLapset(n){   // levels 0..n-1 stay, deeper ones close after the same 260 ms grace as the main popup
+    for(let i=n;i<lapset.length;i++){ const d=lapset[i]; if(!d||d.style.display==='none') continue; if(!d._hold) d._hold=Date.now()+260; if(Date.now()>d._hold){ suljeLapset(i); break; } }
+    for(let i=0;i<n&&i<lapset.length;i++) if(lapset[i]) lapset[i]._hold=0; }
+  function naytaLapsi(L, link){
+    const d=lapsiTip(L);
+    if(d._target!==link){ d._target=link; d._lukittu=false; d._hold=0;
+      const mol=link.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol], idx=parseInt(link.dataset.cardIndex), card=!isNaN(idx)?_wlCards[idx]:null;
+      const st={}; let html='';
+      if(molData){ molData.key=molData.key||Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData)||'';   // a molecule inside a popup: its formula (the one 3-D frame belongs to the main popup)
+        html='<div class="wl-mol"><div class="wl-termi">'+_esc(molData.nimi||mol)+'</div>'+(molData.kuva2d?'<div class="wl-mol-view"><img class="wl-2d" src="simulaatiot/kortit/'+molData.kuva2d+'" alt=""></div>':'')+(card?'<div class="wl-mol-tiedot">'+tipSisalto(card,st).replace(/^<div class="wl-termi">.*?<\/div>/,'')+'</div>':'')+'</div>'; }
+      else if(card) html=tipSisalto(card,st);
+      else { suljeLapset(L); return; }
+      d._card=card||null; d._laaja=st.laaja||null; d._suppea=st.suppea||null; d.innerHTML=html; d.classList.toggle('mol-only', !!molData && !card); dimParentheses(d); linkitaTip(d, card);
+      const cc=link.closest('#word-link-tooltip, .wl-lapsi'); if(cc){ d.style.fontSize=getComputedStyle(cc).fontSize; }   // same size as the popup it opened from
+      suljeLapset(L+1); }
+    placeTip(link, d._lukittu, d); }
   function showTip(target){
     const mol=target.dataset.mol, molData=mol&&_molekyylit&&_molekyylit[mol];
     const idx=parseInt(target.dataset.cardIndex);
@@ -7245,6 +7294,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
         molData.key = molData.key || Object.keys(_molekyylit).find(k=>_molekyylit[k]===molData) || ''; _tipMolData=molData;
         _molDim=molData.kuva2d ? '2d' : '3d'; _molAuto2d=(_molDim==='2d');   // open on the formula while the frame builds the model, flip to muoto the moment it is up (owner 12.9.2026: '2d by default if the 3d is loading, once shown default to that'); no formula → straight to muoto
         tip.innerHTML='<div class="wl-mol">'
+          +'<div class="wl-termi">'+_esc(molData.nimi||mol)+'</div>'
           +'<div class="wl-mol-view"></div>'
           +'<div class="wl-mol-foot"><div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">kaava</button><button type="button" class="wl-dim" data-dim="3d">muoto</button></div>'
           +(!isNaN(idx)&&_wlCards[idx]?'<button type="button" class="wl-tiedot">Tiedot</button>':'')+'</div>'
@@ -7258,40 +7308,32 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const card=_wlCards[idx]; if(!card) return;
     if(target!==_tipTarget){   // rebuild content only when the hovered word changes (not every frame)
       _tipTarget=target; _tipLukittu=false; _tipTiedot=false; tip.classList.remove('mol-only','tiedot-auki');
-      const front=getField(card,['Front','front','Question','question','Text','text','Content','content'])||card.question||'';
-      const back=getField(card,['Back','back','Answer','answer','Extra','extra'])||card.answer||'';
-      const sup=card.suppea||'';
-      const _pl=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
-      if(_pl(sup) && _pl(back) && _pl(sup)!==_pl(back)){        // two answers: short one first, the rest behind a button
-        _tipSuppea=prepareTooltipHtml(sup); _tipLaaja=prepareTooltipHtml(back);
-        tip.innerHTML='<div class="wl-body">'+_tipSuppea+'</div><button type="button" class="wl-expand">Laajenna</button>';
-      } else {
-        tip.innerHTML=prepareTooltipHtml(back||sup||front);   // only the definition (no front/term field)
-        _tipLaaja=null; _tipSuppea=null;
-      }
+      const st={}; tip.innerHTML=tipSisalto(card, st); _tipSuppea=st.suppea||null; _tipLaaja=st.laaja||null;   // title + suppea (laaja behind Laajenna)
       dimParentheses(tip);                             // dim the parentheses like the card text
+      linkitaTip(tip, card);                           // words inside the popup link on (nested popups)
+      suljeLapset(0);
       const cc=target.closest('.card-content'); if(cc){ const fs=parseFloat(getComputedStyle(cc).fontSize); if(fs) tip.style.fontSize=(fs*0.8).toFixed(2)+'px'; }   // tooltip text is always 20% smaller than the card text it sits in
     }
     placeTip(target,_tipLukittu);
   }
-  function placeTip(target,pidaPaikallaan){
+  function placeTip(target,pidaPaikallaan,el){ el=el||tip;
     // The popup never covers its word: it goes BELOW (preferred) or ABOVE, whichever has room, is capped to
     // that room and scrolls inside when the text is longer (owner 10.9.2026). A box growing in place
     // (Laajenna) keeps its side and corner.
-    tip.style.display='block'; tip.style.width=(tip.classList.contains('mol-only') && !tip.classList.contains('tiedot-auki'))?'auto':'min(520px, calc(100vw - 24px))';
+    el.style.display='block'; el.style.width=(el.classList.contains('mol-only') && !el.classList.contains('tiedot-auki'))?'auto':'min(520px, calc(100vw - 24px))';
     const r=target.getBoundingClientRect(), vw=window.innerWidth, vh=window.innerHeight, M=8, G=8;
     const tilaAlla=vh-r.bottom-G-M, tilaYlla=r.top-G-M;
     let alle;
-    if(pidaPaikallaan && tip.dataset.puoli) alle=(tip.dataset.puoli==='alle');
-    else { tip.style.maxHeight='none'; const th0=tip.offsetHeight; alle = th0<=tilaAlla || tilaAlla>=tilaYlla; }
-    tip.dataset.puoli=alle?'alle':'ylle';
-    tip.style.maxHeight=Math.max(80, alle?tilaAlla:tilaYlla)+'px'; tip.style.overflowY='auto';
-    const tw=tip.offsetWidth, th=tip.offsetHeight;
-    let l=pidaPaikallaan ? (parseFloat(tip.style.left)||r.left) : r.left;
+    if(pidaPaikallaan && el.dataset.puoli) alle=(el.dataset.puoli==='alle');
+    else { el.style.maxHeight='none'; const th0=el.offsetHeight; alle = th0<=tilaAlla || tilaAlla>=tilaYlla; }
+    el.dataset.puoli=alle?'alle':'ylle';
+    el.style.maxHeight=Math.max(80, alle?tilaAlla:tilaYlla)+'px'; el.style.overflowY='auto';
+    const tw=el.offsetWidth, th=el.offsetHeight;
+    let l=pidaPaikallaan ? (parseFloat(el.style.left)||r.left) : r.left;
     if(l+tw>vw-12) l=vw-tw-12; l=Math.max(M,l);
     const t=alle ? r.bottom+G : r.top-G-th;
-    tip.style.left=l+'px'; tip.style.top=Math.max(M,t)+'px';
-    molKehys.asemoi();
+    el.style.left=l+'px'; el.style.top=Math.max(M,t)+'px';
+    if(el===tip) molKehys.asemoi();
   }
   tip.addEventListener('scroll',()=>molKehys.asemoi());   // the 3-D frame rides along when the popup scrolls
   tip.addEventListener('click',e=>{
@@ -7303,7 +7345,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
       let osio=tip.querySelector('.wl-mol-tiedot');
       if(osio){ osio.remove(); _tipTiedot=false; tip.classList.remove('tiedot-auki'); td.textContent='Tiedot'; _tipLaaja=null; _tipSuppea=null; }
       else { const card=_wlCards[parseInt(_tipTarget.dataset.cardIndex)]; if(!card) return;
-        osio=document.createElement('div'); osio.className='wl-mol-tiedot'; osio.innerHTML=_molTiedotHtml(card); tip.querySelector('.wl-mol').appendChild(osio); dimParentheses(osio);
+        osio=document.createElement('div'); osio.className='wl-mol-tiedot'; osio.innerHTML=_molTiedotHtml(card); tip.querySelector('.wl-mol').appendChild(osio); dimParentheses(osio); linkitaTip(osio, card);
         const cc=_tipTarget.closest('.card-content'); if(cc){ const fs=parseFloat(getComputedStyle(cc).fontSize); if(fs) osio.style.fontSize=(fs*0.8).toFixed(2)+'px'; }   // same 20 % smaller text as the plain tooltip
         _tipTiedot=true; tip.classList.add('tiedot-auki'); td.textContent='Sulje tiedot'; }
       placeTip(_tipTarget,true); return; }
@@ -7312,7 +7354,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const body=tip.querySelector('.wl-body'); if(!body) return;
     const laajenee=(b.textContent.trim()==='Laajenna');
     const vanhaK=body.getBoundingClientRect().height;
-    body.style.height=''; body.innerHTML=laajenee?_tipLaaja:_tipSuppea; dimParentheses(tip);
+    body.style.height=''; body.innerHTML=laajenee?_tipLaaja:_tipSuppea; dimParentheses(tip); linkitaTip(tip, _tipTarget&&_wlCards[parseInt(_tipTarget.dataset.cardIndex)]);
     b.textContent=laajenee?'Pienennä':'Laajenna';
     const uusiK=body.getBoundingClientRect().height;
     _tipLukittu=true;
@@ -7327,14 +7369,19 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
   });
 
   function updateTip(){
-    const hovered=document.body.classList.contains('is-mobile') ? null : document.querySelector('.word-link:hover');   // mobile: only long-press (touchPinnedLink), no hover
-    const overTip = _tipTarget && tip.style.display==='block' && (tip.matches(':hover') || molKehys.hover());
+    const hoverit=document.body.classList.contains('is-mobile') ? [] : [...document.querySelectorAll('.word-link:hover')];   // mobile: only long-press (touchPinnedLink), no hover
+    const hovered=hoverit[hoverit.length-1]||null;        // the innermost hovered link (a popup's link sits inside the popup, which may itself sit over a card link)
+    const taso=tasoOf(hovered);                           // -1: a link on the card, 0: inside the main popup, k: inside lapset[k-1]
+    let syvin=-1;                                         // the deepest popup the pointer is on
+    if(_tipTarget && tip.style.display==='block' && (tip.matches(':hover') || molKehys.hover())) syvin=0;
+    lapset.forEach((d,i)=>{ if(d && d.style.display!=='none' && d.matches(':hover')) syvin=i+1; });
     if(touchPinnedLink){ showTip(touchPinnedLink); }
-    else if(hovered){ _tipHold=0; showTip(hovered); }
-    else if(overTip){ _tipHold=0; }                       // pointer is reading the tooltip — leave it be
+    else if(hovered && taso<0){ _tipHold=0; showTip(hovered); pidaLapset(0); }
+    else if(hovered){ _tipHold=0; naytaLapsi(taso, hovered); pidaLapset(taso+1); }   // a link inside popup `taso` opens lapset[taso]
+    else if(syvin>=0){ _tipHold=0; pidaLapset(syvin); }   // pointer is reading a popup — that one and its parents stay
     else if(_tipTarget){
       if(!_tipHold) _tipHold=Date.now()+260;              // grace period for crossing the gap to the tooltip
-      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only','tiedot-auki'); tip.innerHTML=''; molKehys.piilota(); _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; }
+      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only','tiedot-auki'); tip.innerHTML=''; molKehys.piilota(); _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; suljeLapset(0); }
     }
     requestAnimationFrame(updateTip);
   }
@@ -7350,13 +7397,14 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     if(Math.abs(t.clientX-_wlSX)>10 || Math.abs(t.clientY-_wlSY)>10) _wlMoved=true;   // a scroll/drag, not a tap
   }, {passive:true});
   document.addEventListener('touchend', e=>{
-    if(e.target.closest('#word-link-tooltip')){ _wlTapLink=null; return; }   // tapping the tooltip (e.g. Laajenna) is not "tap elsewhere"
+    if(e.target.closest('#word-link-tooltip, .wl-lapsi')){ _wlTapLink=null; return; }   // tapping the tooltip (e.g. Laajenna) is not "tap elsewhere"
     const link=e.target.closest('.word-link');
     if(link && link===_wlTapLink && !_wlMoved){              // a tap on a linked word → toggle its definition
-      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; }
-      else { touchPinnedLink=link; showTip(link); }
+      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; suljeLapset(0); }
+      else if(tasoOf(link)>=0){ naytaLapsi(tasoOf(link), link); }   // a tap on a link inside a popup: the next level
+      else { touchPinnedLink=link; showTip(link); suljeLapset(0); }
     } else if(touchPinnedLink && !link){                     // tap anywhere else closes it
-      touchPinnedLink=null; tip.style.display='none'; _tipTarget=null;
+      touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; suljeLapset(0);
     }
     _wlTapLink=null;
   }, {passive:true});

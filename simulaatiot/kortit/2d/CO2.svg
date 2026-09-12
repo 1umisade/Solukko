@@ -8,6 +8,10 @@
 <radialGradient id="gS" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#efe499"/><stop offset="1" stop-color="#e3cf46"/></radialGradient>
 <radialGradient id="gMg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#b8e4b8"/><stop offset="1" stop-color="#7fcf7f"/></radialGradient>
 <radialGradient id="gX" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e0e0e0"/><stop offset="1" stop-color="#b0b0b0"/></radialGradient>
+<linearGradient id="l0" gradientUnits="userSpaceOnUse" x1="0.0" y1="0.0" x2="75.0" y2="-0.0"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l1" gradientUnits="userSpaceOnUse" x1="0.0" y1="0.0" x2="-75.0" y2="-0.0"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l2" gradientUnits="userSpaceOnUse" x1="0.0" y1="0.0" x2="75.0" y2="-0.0"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l3" gradientUnits="userSpaceOnUse" x1="0.0" y1="0.0" x2="-75.0" y2="-0.0"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
 </defs>
 <g fill="#111" stroke="#111" stroke-linecap="round" stroke-linejoin="round">
 <line x1="0.0" y1="0.0" x2="75.0" y2="-0.0" stroke-width="70.0"/>
@@ -18,14 +22,14 @@
 <circle cx="75.0" cy="-0.0" r="56.0" stroke="none"/>
 <circle cx="-75.0" cy="-0.0" r="56.0" stroke="none"/>
 </g>
-<g fill="#e8221c" stroke="#e8221c" stroke-linecap="round" stroke-linejoin="round">
-<line x1="0.0" y1="0.0" x2="75.0" y2="-0.0" stroke-width="60.0"/>
-<line x1="0.0" y1="0.0" x2="-75.0" y2="-0.0" stroke-width="60.0"/>
-<line x1="0.0" y1="0.0" x2="75.0" y2="-0.0" stroke-width="60.0"/>
-<line x1="0.0" y1="0.0" x2="-75.0" y2="-0.0" stroke-width="60.0"/>
-<circle cx="0.0" cy="0.0" r="51.0" stroke="none"/>
-<circle cx="75.0" cy="-0.0" r="51.0" stroke="none"/>
-<circle cx="-75.0" cy="-0.0" r="51.0" stroke="none"/>
+<g stroke-linejoin="round">
+<line x1="0.0" y1="0.0" x2="75.0" y2="-0.0" stroke="url(#l0)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="0.0" y1="0.0" x2="-75.0" y2="-0.0" stroke="url(#l1)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="0.0" y1="0.0" x2="75.0" y2="-0.0" stroke="url(#l2)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="0.0" y1="0.0" x2="-75.0" y2="-0.0" stroke="url(#l3)" stroke-width="60.0" stroke-linecap="round"/>
+<circle cx="0.0" cy="0.0" r="51.0" fill="#bababa" stroke="none"/>
+<circle cx="75.0" cy="-0.0" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-75.0" cy="-0.0" r="51.0" fill="#ec736c" stroke="none"/>
 </g>
 <g stroke="#111" stroke-width="6" stroke-linecap="round">
 <line x1="-0.0" y1="-7.0" x2="75.0" y2="-7.0"/>

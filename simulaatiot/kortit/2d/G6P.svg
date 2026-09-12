@@ -8,6 +8,165 @@
 <radialGradient id="gS" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#efe499"/><stop offset="1" stop-color="#e3cf46"/></radialGradient>
 <radialGradient id="gMg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#b8e4b8"/><stop offset="1" stop-color="#7fcf7f"/></radialGradient>
 <radialGradient id="gX" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e0e0e0"/><stop offset="1" stop-color="#b0b0b0"/></radialGradient>
+<linearGradient id="l0" gradientUnits="userSpaceOnUse" x1="-214.8" y1="-115.4" x2="-205.7" y2="-41.0"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#f4b36a"/></linearGradient>
+<linearGradient id="l1" gradientUnits="userSpaceOnUse" x1="-214.8" y1="-115.4" x2="-280.2" y2="-31.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l2" gradientUnits="userSpaceOnUse" x1="-214.8" y1="-115.4" x2="-131.3" y2="-50.1"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l3" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-196.6" y2="33.5"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l4" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-280.2" y2="-31.9"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l5" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-131.3" y2="-50.1"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l6" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-86.2" y2="9.9"><stop offset="0.42" stop-color="#f4b36a"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l7" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-168.9" y2="75.1"><stop offset="0.44" stop-color="#f4b36a"/><stop offset="0.63" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l8" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-290.0" y2="17.2"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.56" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l9" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-112.2" y2="52.6"><stop offset="0.41" stop-color="#f4b36a"/><stop offset="0.66" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l10" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-68.0" y2="-36.7"><stop offset="0.39" stop-color="#f4b36a"/><stop offset="0.67" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l11" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-280.2" y2="-31.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l12" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-131.3" y2="-50.1"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l13" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-86.2" y2="9.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l14" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-168.9" y2="75.1"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l15" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-290.0" y2="17.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l16" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-112.2" y2="52.6"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l17" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-68.0" y2="-36.7"><stop offset="0.35" stop-color="#ec736c"/><stop offset="0.69" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l18" gradientUnits="userSpaceOnUse" x1="-280.2" y1="-31.9" x2="-290.0" y2="17.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l19" gradientUnits="userSpaceOnUse" x1="-131.3" y1="-50.1" x2="-86.2" y2="9.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l20" gradientUnits="userSpaceOnUse" x1="-131.3" y1="-50.1" x2="-11.7" y2="0.8"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l21" gradientUnits="userSpaceOnUse" x1="-131.3" y1="-50.1" x2="-168.9" y2="75.1"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.66" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l22" gradientUnits="userSpaceOnUse" x1="-131.3" y1="-50.1" x2="-112.2" y2="52.6"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.57" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l23" gradientUnits="userSpaceOnUse" x1="-131.3" y1="-50.1" x2="-68.0" y2="-36.7"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l24" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-11.7" y2="0.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l25" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="17.6" y2="-68.2"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l26" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="33.4" y2="60.7"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l27" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-168.9" y2="75.1"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.57" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l28" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-112.2" y2="52.6"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l29" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-68.0" y2="-36.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l30" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="37.7" y2="-6.8"><stop offset="0.41" stop-color="#bababa"/><stop offset="0.64" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l31" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-16.1" y2="68.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l32" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="17.6" y2="-68.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l33" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="92.1" y2="-77.3"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l34" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="107.8" y2="51.6"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l35" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="33.4" y2="60.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l36" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="4.0" y2="129.7"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l37" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="-112.2" y2="52.6"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.60" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l38" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="-68.0" y2="-36.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l39" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="37.7" y2="-6.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l40" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l41" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="89.6" y2="98.2"><stop offset="0.36" stop-color="#bababa"/><stop offset="0.68" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l42" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="-16.1" y2="68.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l43" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="92.1" y2="-77.3"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l44" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="121.4" y2="-146.4"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.61" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l45" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="137.2" y2="-17.4"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l46" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="33.4" y2="60.7"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l47" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="-68.0" y2="-36.7"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l48" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="37.7" y2="-6.8"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l49" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="141.5" y2="-84.9"><stop offset="0.41" stop-color="#ec736c"/><stop offset="0.64" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l50" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="83.9" y2="-179.4"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.65" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l51" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l52" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="-16.1" y2="68.2"><stop offset="0.36" stop-color="#ec736c"/><stop offset="0.68" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l53" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="121.4" y2="-146.4"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l54" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="137.2" y2="-17.4"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l55" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="211.6" y2="-26.5"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l56" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="107.8" y2="51.6"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l57" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="37.7" y2="-6.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l58" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="141.5" y2="-84.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l59" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="83.9" y2="-179.4"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.56" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l60" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l61" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="221.4" y2="-75.5"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.65" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l62" gradientUnits="userSpaceOnUse" x1="121.4" y1="-146.4" x2="137.2" y2="-17.4"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l63" gradientUnits="userSpaceOnUse" x1="121.4" y1="-146.4" x2="141.5" y2="-84.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l64" gradientUnits="userSpaceOnUse" x1="121.4" y1="-146.4" x2="83.9" y2="-179.4"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l65" gradientUnits="userSpaceOnUse" x1="121.4" y1="-146.4" x2="87.7" y2="-9.9"><stop offset="0.36" stop-color="#ec736c"/><stop offset="0.68" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l66" gradientUnits="userSpaceOnUse" x1="121.4" y1="-146.4" x2="221.4" y2="-75.5"><stop offset="0.42" stop-color="#ec736c"/><stop offset="0.63" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l67" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="211.6" y2="-26.5"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l68" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="107.8" y2="51.6"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l69" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="152.9" y2="111.5"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l70" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="33.4" y2="60.7"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l71" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="37.7" y2="-6.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l72" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="141.5" y2="-84.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l73" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l74" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="221.4" y2="-75.5"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.56" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l75" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="89.6" y2="98.2"><stop offset="0.41" stop-color="#bababa"/><stop offset="0.64" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l76" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="200.3" y2="95.5"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.65" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l77" gradientUnits="userSpaceOnUse" x1="211.6" y1="-26.5" x2="107.8" y2="51.6"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l78" gradientUnits="userSpaceOnUse" x1="211.6" y1="-26.5" x2="141.5" y2="-84.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l79" gradientUnits="userSpaceOnUse" x1="211.6" y1="-26.5" x2="87.7" y2="-9.9"><stop offset="0.41" stop-color="#ec736c"/><stop offset="0.64" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l80" gradientUnits="userSpaceOnUse" x1="211.6" y1="-26.5" x2="221.4" y2="-75.5"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l81" gradientUnits="userSpaceOnUse" x1="211.6" y1="-26.5" x2="200.3" y2="95.5"><stop offset="0.42" stop-color="#ec736c"/><stop offset="0.63" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l82" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="152.9" y2="111.5"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l83" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="33.4" y2="60.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l84" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="4.0" y2="129.7"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.61" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l85" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="37.7" y2="-6.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l86" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="141.5" y2="-84.9"><stop offset="0.36" stop-color="#bababa"/><stop offset="0.68" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l87" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l88" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="89.6" y2="98.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l89" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="200.3" y2="95.5"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.56" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l90" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="-16.1" y2="68.2"><stop offset="0.41" stop-color="#bababa"/><stop offset="0.64" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l91" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="41.6" y2="162.7"><stop offset="0.39" stop-color="#bababa"/><stop offset="0.65" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l92" gradientUnits="userSpaceOnUse" x1="152.9" y1="111.5" x2="33.4" y2="60.7"><stop offset="0.39" stop-color="#ec736c"/><stop offset="0.61" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l93" gradientUnits="userSpaceOnUse" x1="152.9" y1="111.5" x2="87.7" y2="-9.9"><stop offset="0.37" stop-color="#ec736c"/><stop offset="0.67" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l94" gradientUnits="userSpaceOnUse" x1="152.9" y1="111.5" x2="89.6" y2="98.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l95" gradientUnits="userSpaceOnUse" x1="152.9" y1="111.5" x2="200.3" y2="95.5"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l96" gradientUnits="userSpaceOnUse" x1="152.9" y1="111.5" x2="41.6" y2="162.7"><stop offset="0.42" stop-color="#ec736c"/><stop offset="0.63" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l97" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="4.0" y2="129.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l98" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="-112.2" y2="52.6"><stop offset="0.35" stop-color="#bababa"/><stop offset="0.69" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l99" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="-68.0" y2="-36.7"><stop offset="0.36" stop-color="#bababa"/><stop offset="0.68" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l100" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="37.7" y2="-6.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l101" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l102" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="89.6" y2="98.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l103" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="-16.1" y2="68.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l104" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="41.6" y2="162.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.56" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l105" gradientUnits="userSpaceOnUse" x1="4.0" y1="129.7" x2="-112.2" y2="52.6"><stop offset="0.37" stop-color="#ec736c"/><stop offset="0.68" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l106" gradientUnits="userSpaceOnUse" x1="4.0" y1="129.7" x2="37.7" y2="-6.8"><stop offset="0.36" stop-color="#ec736c"/><stop offset="0.68" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l107" gradientUnits="userSpaceOnUse" x1="4.0" y1="129.7" x2="89.6" y2="98.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l108" gradientUnits="userSpaceOnUse" x1="4.0" y1="129.7" x2="-16.1" y2="68.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l109" gradientUnits="userSpaceOnUse" x1="4.0" y1="129.7" x2="41.6" y2="162.7"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l110" gradientUnits="userSpaceOnUse" x1="-168.9" y1="75.1" x2="-290.0" y2="17.2"><stop offset="0.34" stop-color="#d7d7d7"/><stop offset="0.66" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l111" gradientUnits="userSpaceOnUse" x1="-168.9" y1="75.1" x2="-112.2" y2="52.6"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l112" gradientUnits="userSpaceOnUse" x1="-112.2" y1="52.6" x2="-68.0" y2="-36.7"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l113" gradientUnits="userSpaceOnUse" x1="-112.2" y1="52.6" x2="-16.1" y2="68.2"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l114" gradientUnits="userSpaceOnUse" x1="-68.0" y1="-36.7" x2="37.7" y2="-6.8"><stop offset="0.41" stop-color="#d7d7d7"/><stop offset="0.59" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l115" gradientUnits="userSpaceOnUse" x1="-68.0" y1="-36.7" x2="-16.1" y2="68.2"><stop offset="0.38" stop-color="#d7d7d7"/><stop offset="0.62" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l116" gradientUnits="userSpaceOnUse" x1="37.7" y1="-6.8" x2="141.5" y2="-84.9"><stop offset="0.35" stop-color="#d7d7d7"/><stop offset="0.65" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l117" gradientUnits="userSpaceOnUse" x1="37.7" y1="-6.8" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l118" gradientUnits="userSpaceOnUse" x1="37.7" y1="-6.8" x2="89.6" y2="98.2"><stop offset="0.38" stop-color="#d7d7d7"/><stop offset="0.62" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l119" gradientUnits="userSpaceOnUse" x1="37.7" y1="-6.8" x2="-16.1" y2="68.2"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l120" gradientUnits="userSpaceOnUse" x1="141.5" y1="-84.9" x2="83.9" y2="-179.4"><stop offset="0.41" stop-color="#d7d7d7"/><stop offset="0.59" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l121" gradientUnits="userSpaceOnUse" x1="141.5" y1="-84.9" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l122" gradientUnits="userSpaceOnUse" x1="141.5" y1="-84.9" x2="221.4" y2="-75.5"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l123" gradientUnits="userSpaceOnUse" x1="87.7" y1="-9.9" x2="221.4" y2="-75.5"><stop offset="0.30" stop-color="#d7d7d7"/><stop offset="0.70" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l124" gradientUnits="userSpaceOnUse" x1="87.7" y1="-9.9" x2="89.6" y2="98.2"><stop offset="0.42" stop-color="#d7d7d7"/><stop offset="0.58" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l125" gradientUnits="userSpaceOnUse" x1="87.7" y1="-9.9" x2="-16.1" y2="68.2"><stop offset="0.35" stop-color="#d7d7d7"/><stop offset="0.65" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l126" gradientUnits="userSpaceOnUse" x1="89.6" y1="98.2" x2="200.3" y2="95.5"><stop offset="0.41" stop-color="#d7d7d7"/><stop offset="0.59" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l127" gradientUnits="userSpaceOnUse" x1="89.6" y1="98.2" x2="-16.1" y2="68.2"><stop offset="0.41" stop-color="#d7d7d7"/><stop offset="0.59" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l128" gradientUnits="userSpaceOnUse" x1="89.6" y1="98.2" x2="41.6" y2="162.7"><stop offset="0.45" stop-color="#d7d7d7"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l129" gradientUnits="userSpaceOnUse" x1="-16.1" y1="68.2" x2="41.6" y2="162.7"><stop offset="0.41" stop-color="#d7d7d7"/><stop offset="0.59" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l130" gradientUnits="userSpaceOnUse" x1="-214.8" y1="-115.4" x2="-205.7" y2="-41.0"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#f4b36a"/></linearGradient>
+<linearGradient id="l131" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-196.6" y2="33.5"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l132" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-280.2" y2="-31.9"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l133" gradientUnits="userSpaceOnUse" x1="-205.7" y1="-41.0" x2="-131.3" y2="-50.1"><stop offset="0.45" stop-color="#f4b36a"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l134" gradientUnits="userSpaceOnUse" x1="-131.3" y1="-50.1" x2="-86.2" y2="9.9"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l135" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-11.7" y2="0.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l136" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="17.6" y2="-68.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l137" gradientUnits="userSpaceOnUse" x1="17.6" y1="-68.2" x2="92.1" y2="-77.3"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l138" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="121.4" y2="-146.4"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l139" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="137.2" y2="-17.4"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l140" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="211.6" y2="-26.5"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l141" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="107.8" y2="51.6"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l142" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="152.9" y2="111.5"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l143" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="33.4" y2="60.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l144" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="4.0" y2="129.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#ec736c"/></linearGradient>
+<linearGradient id="l145" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="-11.7" y2="0.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#bababa"/></linearGradient>
+<linearGradient id="l146" gradientUnits="userSpaceOnUse" x1="-196.6" y1="33.5" x2="-168.9" y2="75.1"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l147" gradientUnits="userSpaceOnUse" x1="-280.2" y1="-31.9" x2="-290.0" y2="17.2"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l148" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-112.2" y2="52.6"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l149" gradientUnits="userSpaceOnUse" x1="-86.2" y1="9.9" x2="-68.0" y2="-36.7"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l150" gradientUnits="userSpaceOnUse" x1="-11.7" y1="0.8" x2="37.7" y2="-6.8"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l151" gradientUnits="userSpaceOnUse" x1="92.1" y1="-77.3" x2="141.5" y2="-84.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l152" gradientUnits="userSpaceOnUse" x1="121.4" y1="-146.4" x2="83.9" y2="-179.4"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l153" gradientUnits="userSpaceOnUse" x1="137.2" y1="-17.4" x2="87.7" y2="-9.9"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l154" gradientUnits="userSpaceOnUse" x1="211.6" y1="-26.5" x2="221.4" y2="-75.5"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l155" gradientUnits="userSpaceOnUse" x1="107.8" y1="51.6" x2="89.6" y2="98.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l156" gradientUnits="userSpaceOnUse" x1="152.9" y1="111.5" x2="200.3" y2="95.5"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l157" gradientUnits="userSpaceOnUse" x1="33.4" y1="60.7" x2="-16.1" y2="68.2"><stop offset="0.45" stop-color="#bababa"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
+<linearGradient id="l158" gradientUnits="userSpaceOnUse" x1="4.0" y1="129.7" x2="41.6" y2="162.7"><stop offset="0.45" stop-color="#ec736c"/><stop offset="0.55" stop-color="#d7d7d7"/></linearGradient>
 </defs>
 <g fill="#111" stroke="#111" stroke-linecap="round" stroke-linejoin="round">
 <line x1="-214.8" y1="-115.4" x2="-205.7" y2="-41.0" stroke-width="70.0"/>
@@ -200,196 +359,196 @@
 <circle cx="41.6" cy="162.7" r="50.0" stroke="none"/>
 <polygon points="-11.7,0.8 33.4,60.7 107.8,51.6 137.2,-17.4 92.1,-77.3 17.6,-68.2" stroke-width="70.0"/>
 </g>
-<g fill="#e8221c" stroke="#e8221c" stroke-linecap="round" stroke-linejoin="round">
-<line x1="-214.8" y1="-115.4" x2="-205.7" y2="-41.0" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-196.6" y2="33.5" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-280.2" y2="-31.9" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-131.3" y2="-50.1" stroke-width="60.0"/>
-<line x1="-131.3" y1="-50.1" x2="-86.2" y2="9.9" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-11.7" y2="0.8" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="17.6" y2="-68.2" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="92.1" y2="-77.3" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="121.4" y2="-146.4" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="137.2" y2="-17.4" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="211.6" y2="-26.5" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="107.8" y2="51.6" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="152.9" y2="111.5" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="33.4" y2="60.7" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="4.0" y2="129.7" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="-11.7" y2="0.8" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-168.9" y2="75.1" stroke-width="60.0"/>
-<line x1="-280.2" y1="-31.9" x2="-290.0" y2="17.2" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="121.4" y1="-146.4" x2="83.9" y2="-179.4" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="211.6" y1="-26.5" x2="221.4" y2="-75.5" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="152.9" y1="111.5" x2="200.3" y2="95.5" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="4.0" y1="129.7" x2="41.6" y2="162.7" stroke-width="60.0"/>
-<line x1="-214.8" y1="-115.4" x2="-205.7" y2="-41.0" stroke-width="60.0"/>
-<line x1="-214.8" y1="-115.4" x2="-280.2" y2="-31.9" stroke-width="60.0"/>
-<line x1="-214.8" y1="-115.4" x2="-131.3" y2="-50.1" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-196.6" y2="33.5" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-280.2" y2="-31.9" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-131.3" y2="-50.1" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-86.2" y2="9.9" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-168.9" y2="75.1" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-290.0" y2="17.2" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="-205.7" y1="-41.0" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-280.2" y2="-31.9" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-131.3" y2="-50.1" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-86.2" y2="9.9" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-168.9" y2="75.1" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-290.0" y2="17.2" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="-196.6" y1="33.5" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="-280.2" y1="-31.9" x2="-290.0" y2="17.2" stroke-width="60.0"/>
-<line x1="-131.3" y1="-50.1" x2="-86.2" y2="9.9" stroke-width="60.0"/>
-<line x1="-131.3" y1="-50.1" x2="-11.7" y2="0.8" stroke-width="60.0"/>
-<line x1="-131.3" y1="-50.1" x2="-168.9" y2="75.1" stroke-width="60.0"/>
-<line x1="-131.3" y1="-50.1" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="-131.3" y1="-50.1" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-11.7" y2="0.8" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="17.6" y2="-68.2" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="33.4" y2="60.7" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-168.9" y2="75.1" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="-86.2" y1="9.9" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="17.6" y2="-68.2" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="92.1" y2="-77.3" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="107.8" y2="51.6" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="33.4" y2="60.7" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="4.0" y2="129.7" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="-11.7" y1="0.8" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="92.1" y2="-77.3" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="121.4" y2="-146.4" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="137.2" y2="-17.4" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="33.4" y2="60.7" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="83.9" y2="-179.4" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="17.6" y1="-68.2" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="121.4" y2="-146.4" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="137.2" y2="-17.4" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="211.6" y2="-26.5" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="107.8" y2="51.6" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="83.9" y2="-179.4" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="92.1" y1="-77.3" x2="221.4" y2="-75.5" stroke-width="60.0"/>
-<line x1="121.4" y1="-146.4" x2="137.2" y2="-17.4" stroke-width="60.0"/>
-<line x1="121.4" y1="-146.4" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="121.4" y1="-146.4" x2="83.9" y2="-179.4" stroke-width="60.0"/>
-<line x1="121.4" y1="-146.4" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="121.4" y1="-146.4" x2="221.4" y2="-75.5" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="211.6" y2="-26.5" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="107.8" y2="51.6" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="152.9" y2="111.5" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="33.4" y2="60.7" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="221.4" y2="-75.5" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="137.2" y1="-17.4" x2="200.3" y2="95.5" stroke-width="60.0"/>
-<line x1="211.6" y1="-26.5" x2="107.8" y2="51.6" stroke-width="60.0"/>
-<line x1="211.6" y1="-26.5" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="211.6" y1="-26.5" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="211.6" y1="-26.5" x2="221.4" y2="-75.5" stroke-width="60.0"/>
-<line x1="211.6" y1="-26.5" x2="200.3" y2="95.5" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="152.9" y2="111.5" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="33.4" y2="60.7" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="4.0" y2="129.7" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="200.3" y2="95.5" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="107.8" y1="51.6" x2="41.6" y2="162.7" stroke-width="60.0"/>
-<line x1="152.9" y1="111.5" x2="33.4" y2="60.7" stroke-width="60.0"/>
-<line x1="152.9" y1="111.5" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="152.9" y1="111.5" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="152.9" y1="111.5" x2="200.3" y2="95.5" stroke-width="60.0"/>
-<line x1="152.9" y1="111.5" x2="41.6" y2="162.7" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="4.0" y2="129.7" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="33.4" y1="60.7" x2="41.6" y2="162.7" stroke-width="60.0"/>
-<line x1="4.0" y1="129.7" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="4.0" y1="129.7" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="4.0" y1="129.7" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="4.0" y1="129.7" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="4.0" y1="129.7" x2="41.6" y2="162.7" stroke-width="60.0"/>
-<line x1="-168.9" y1="75.1" x2="-290.0" y2="17.2" stroke-width="60.0"/>
-<line x1="-168.9" y1="75.1" x2="-112.2" y2="52.6" stroke-width="60.0"/>
-<line x1="-112.2" y1="52.6" x2="-68.0" y2="-36.7" stroke-width="60.0"/>
-<line x1="-112.2" y1="52.6" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="-68.0" y1="-36.7" x2="37.7" y2="-6.8" stroke-width="60.0"/>
-<line x1="-68.0" y1="-36.7" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="37.7" y1="-6.8" x2="141.5" y2="-84.9" stroke-width="60.0"/>
-<line x1="37.7" y1="-6.8" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="37.7" y1="-6.8" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="37.7" y1="-6.8" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="141.5" y1="-84.9" x2="83.9" y2="-179.4" stroke-width="60.0"/>
-<line x1="141.5" y1="-84.9" x2="87.7" y2="-9.9" stroke-width="60.0"/>
-<line x1="141.5" y1="-84.9" x2="221.4" y2="-75.5" stroke-width="60.0"/>
-<line x1="87.7" y1="-9.9" x2="221.4" y2="-75.5" stroke-width="60.0"/>
-<line x1="87.7" y1="-9.9" x2="89.6" y2="98.2" stroke-width="60.0"/>
-<line x1="87.7" y1="-9.9" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="89.6" y1="98.2" x2="200.3" y2="95.5" stroke-width="60.0"/>
-<line x1="89.6" y1="98.2" x2="-16.1" y2="68.2" stroke-width="60.0"/>
-<line x1="89.6" y1="98.2" x2="41.6" y2="162.7" stroke-width="60.0"/>
-<line x1="-16.1" y1="68.2" x2="41.6" y2="162.7" stroke-width="60.0"/>
-<circle cx="-214.8" cy="-115.4" r="51.0" stroke="none"/>
-<circle cx="-205.7" cy="-41.0" r="54.0" stroke="none"/>
-<circle cx="-196.6" cy="33.5" r="51.0" stroke="none"/>
-<circle cx="-280.2" cy="-31.9" r="51.0" stroke="none"/>
-<circle cx="-131.3" cy="-50.1" r="51.0" stroke="none"/>
-<circle cx="-86.2" cy="9.9" r="51.0" stroke="none"/>
-<circle cx="-11.7" cy="0.8" r="51.0" stroke="none"/>
-<circle cx="17.6" cy="-68.2" r="51.0" stroke="none"/>
-<circle cx="92.1" cy="-77.3" r="51.0" stroke="none"/>
-<circle cx="121.4" cy="-146.4" r="51.0" stroke="none"/>
-<circle cx="137.2" cy="-17.4" r="51.0" stroke="none"/>
-<circle cx="211.6" cy="-26.5" r="51.0" stroke="none"/>
-<circle cx="107.8" cy="51.6" r="51.0" stroke="none"/>
-<circle cx="152.9" cy="111.5" r="51.0" stroke="none"/>
-<circle cx="33.4" cy="60.7" r="51.0" stroke="none"/>
-<circle cx="4.0" cy="129.7" r="51.0" stroke="none"/>
-<circle cx="-168.9" cy="75.1" r="45.0" stroke="none"/>
-<circle cx="-290.0" cy="17.2" r="45.0" stroke="none"/>
-<circle cx="-112.2" cy="52.6" r="45.0" stroke="none"/>
-<circle cx="-68.0" cy="-36.7" r="45.0" stroke="none"/>
-<circle cx="37.7" cy="-6.8" r="45.0" stroke="none"/>
-<circle cx="141.5" cy="-84.9" r="45.0" stroke="none"/>
-<circle cx="83.9" cy="-179.4" r="45.0" stroke="none"/>
-<circle cx="87.7" cy="-9.9" r="45.0" stroke="none"/>
-<circle cx="221.4" cy="-75.5" r="45.0" stroke="none"/>
-<circle cx="89.6" cy="98.2" r="45.0" stroke="none"/>
-<circle cx="200.3" cy="95.5" r="45.0" stroke="none"/>
-<circle cx="-16.1" cy="68.2" r="45.0" stroke="none"/>
-<circle cx="41.6" cy="162.7" r="45.0" stroke="none"/>
-<polygon points="-11.7,0.8 33.4,60.7 107.8,51.6 137.2,-17.4 92.1,-77.3 17.6,-68.2" stroke-width="60.0"/>
+<g stroke-linejoin="round">
+<polygon points="-11.7,0.8 33.4,60.7 107.8,51.6 137.2,-17.4 92.1,-77.3 17.6,-68.2" fill="#c2aead" stroke="#c2aead" stroke-width="60.0"/>
+<line x1="-214.8" y1="-115.4" x2="-205.7" y2="-41.0" stroke="url(#l0)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-214.8" y1="-115.4" x2="-280.2" y2="-31.9" stroke="url(#l1)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-214.8" y1="-115.4" x2="-131.3" y2="-50.1" stroke="url(#l2)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-196.6" y2="33.5" stroke="url(#l3)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-280.2" y2="-31.9" stroke="url(#l4)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-131.3" y2="-50.1" stroke="url(#l5)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-86.2" y2="9.9" stroke="url(#l6)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-168.9" y2="75.1" stroke="url(#l7)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-290.0" y2="17.2" stroke="url(#l8)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-112.2" y2="52.6" stroke="url(#l9)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-68.0" y2="-36.7" stroke="url(#l10)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-280.2" y2="-31.9" stroke="url(#l11)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-131.3" y2="-50.1" stroke="url(#l12)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-86.2" y2="9.9" stroke="url(#l13)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-168.9" y2="75.1" stroke="url(#l14)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-290.0" y2="17.2" stroke="url(#l15)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-112.2" y2="52.6" stroke="url(#l16)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-68.0" y2="-36.7" stroke="url(#l17)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-280.2" y1="-31.9" x2="-290.0" y2="17.2" stroke="url(#l18)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-131.3" y1="-50.1" x2="-86.2" y2="9.9" stroke="url(#l19)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-131.3" y1="-50.1" x2="-11.7" y2="0.8" stroke="url(#l20)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-131.3" y1="-50.1" x2="-168.9" y2="75.1" stroke="url(#l21)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-131.3" y1="-50.1" x2="-112.2" y2="52.6" stroke="url(#l22)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-131.3" y1="-50.1" x2="-68.0" y2="-36.7" stroke="url(#l23)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-11.7" y2="0.8" stroke="url(#l24)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="17.6" y2="-68.2" stroke="url(#l25)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="33.4" y2="60.7" stroke="url(#l26)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-168.9" y2="75.1" stroke="url(#l27)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-112.2" y2="52.6" stroke="url(#l28)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-68.0" y2="-36.7" stroke="url(#l29)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="37.7" y2="-6.8" stroke="url(#l30)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-16.1" y2="68.2" stroke="url(#l31)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="17.6" y2="-68.2" stroke="url(#l32)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="92.1" y2="-77.3" stroke="url(#l33)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="107.8" y2="51.6" stroke="url(#l34)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="33.4" y2="60.7" stroke="url(#l35)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="4.0" y2="129.7" stroke="url(#l36)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="-112.2" y2="52.6" stroke="url(#l37)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="-68.0" y2="-36.7" stroke="url(#l38)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="37.7" y2="-6.8" stroke="url(#l39)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="87.7" y2="-9.9" stroke="url(#l40)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="89.6" y2="98.2" stroke="url(#l41)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="-16.1" y2="68.2" stroke="url(#l42)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="92.1" y2="-77.3" stroke="url(#l43)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="121.4" y2="-146.4" stroke="url(#l44)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="137.2" y2="-17.4" stroke="url(#l45)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="33.4" y2="60.7" stroke="url(#l46)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="-68.0" y2="-36.7" stroke="url(#l47)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="37.7" y2="-6.8" stroke="url(#l48)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="141.5" y2="-84.9" stroke="url(#l49)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="83.9" y2="-179.4" stroke="url(#l50)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="87.7" y2="-9.9" stroke="url(#l51)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="-16.1" y2="68.2" stroke="url(#l52)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="121.4" y2="-146.4" stroke="url(#l53)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="137.2" y2="-17.4" stroke="url(#l54)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="211.6" y2="-26.5" stroke="url(#l55)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="107.8" y2="51.6" stroke="url(#l56)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="37.7" y2="-6.8" stroke="url(#l57)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="141.5" y2="-84.9" stroke="url(#l58)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="83.9" y2="-179.4" stroke="url(#l59)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="87.7" y2="-9.9" stroke="url(#l60)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="221.4" y2="-75.5" stroke="url(#l61)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="121.4" y1="-146.4" x2="137.2" y2="-17.4" stroke="url(#l62)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="121.4" y1="-146.4" x2="141.5" y2="-84.9" stroke="url(#l63)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="121.4" y1="-146.4" x2="83.9" y2="-179.4" stroke="url(#l64)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="121.4" y1="-146.4" x2="87.7" y2="-9.9" stroke="url(#l65)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="121.4" y1="-146.4" x2="221.4" y2="-75.5" stroke="url(#l66)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="211.6" y2="-26.5" stroke="url(#l67)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="107.8" y2="51.6" stroke="url(#l68)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="152.9" y2="111.5" stroke="url(#l69)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="33.4" y2="60.7" stroke="url(#l70)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="37.7" y2="-6.8" stroke="url(#l71)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="141.5" y2="-84.9" stroke="url(#l72)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="87.7" y2="-9.9" stroke="url(#l73)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="221.4" y2="-75.5" stroke="url(#l74)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="89.6" y2="98.2" stroke="url(#l75)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="200.3" y2="95.5" stroke="url(#l76)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="211.6" y1="-26.5" x2="107.8" y2="51.6" stroke="url(#l77)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="211.6" y1="-26.5" x2="141.5" y2="-84.9" stroke="url(#l78)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="211.6" y1="-26.5" x2="87.7" y2="-9.9" stroke="url(#l79)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="211.6" y1="-26.5" x2="221.4" y2="-75.5" stroke="url(#l80)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="211.6" y1="-26.5" x2="200.3" y2="95.5" stroke="url(#l81)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="152.9" y2="111.5" stroke="url(#l82)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="33.4" y2="60.7" stroke="url(#l83)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="4.0" y2="129.7" stroke="url(#l84)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="37.7" y2="-6.8" stroke="url(#l85)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="141.5" y2="-84.9" stroke="url(#l86)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="87.7" y2="-9.9" stroke="url(#l87)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="89.6" y2="98.2" stroke="url(#l88)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="200.3" y2="95.5" stroke="url(#l89)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="-16.1" y2="68.2" stroke="url(#l90)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="41.6" y2="162.7" stroke="url(#l91)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="152.9" y1="111.5" x2="33.4" y2="60.7" stroke="url(#l92)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="152.9" y1="111.5" x2="87.7" y2="-9.9" stroke="url(#l93)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="152.9" y1="111.5" x2="89.6" y2="98.2" stroke="url(#l94)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="152.9" y1="111.5" x2="200.3" y2="95.5" stroke="url(#l95)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="152.9" y1="111.5" x2="41.6" y2="162.7" stroke="url(#l96)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="4.0" y2="129.7" stroke="url(#l97)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="-112.2" y2="52.6" stroke="url(#l98)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="-68.0" y2="-36.7" stroke="url(#l99)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="37.7" y2="-6.8" stroke="url(#l100)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="87.7" y2="-9.9" stroke="url(#l101)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="89.6" y2="98.2" stroke="url(#l102)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="-16.1" y2="68.2" stroke="url(#l103)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="41.6" y2="162.7" stroke="url(#l104)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="4.0" y1="129.7" x2="-112.2" y2="52.6" stroke="url(#l105)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="4.0" y1="129.7" x2="37.7" y2="-6.8" stroke="url(#l106)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="4.0" y1="129.7" x2="89.6" y2="98.2" stroke="url(#l107)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="4.0" y1="129.7" x2="-16.1" y2="68.2" stroke="url(#l108)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="4.0" y1="129.7" x2="41.6" y2="162.7" stroke="url(#l109)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-168.9" y1="75.1" x2="-290.0" y2="17.2" stroke="url(#l110)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-168.9" y1="75.1" x2="-112.2" y2="52.6" stroke="url(#l111)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-112.2" y1="52.6" x2="-68.0" y2="-36.7" stroke="url(#l112)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-112.2" y1="52.6" x2="-16.1" y2="68.2" stroke="url(#l113)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-68.0" y1="-36.7" x2="37.7" y2="-6.8" stroke="url(#l114)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-68.0" y1="-36.7" x2="-16.1" y2="68.2" stroke="url(#l115)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="37.7" y1="-6.8" x2="141.5" y2="-84.9" stroke="url(#l116)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="37.7" y1="-6.8" x2="87.7" y2="-9.9" stroke="url(#l117)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="37.7" y1="-6.8" x2="89.6" y2="98.2" stroke="url(#l118)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="37.7" y1="-6.8" x2="-16.1" y2="68.2" stroke="url(#l119)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="141.5" y1="-84.9" x2="83.9" y2="-179.4" stroke="url(#l120)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="141.5" y1="-84.9" x2="87.7" y2="-9.9" stroke="url(#l121)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="141.5" y1="-84.9" x2="221.4" y2="-75.5" stroke="url(#l122)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="87.7" y1="-9.9" x2="221.4" y2="-75.5" stroke="url(#l123)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="87.7" y1="-9.9" x2="89.6" y2="98.2" stroke="url(#l124)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="87.7" y1="-9.9" x2="-16.1" y2="68.2" stroke="url(#l125)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="89.6" y1="98.2" x2="200.3" y2="95.5" stroke="url(#l126)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="89.6" y1="98.2" x2="-16.1" y2="68.2" stroke="url(#l127)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="89.6" y1="98.2" x2="41.6" y2="162.7" stroke="url(#l128)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-16.1" y1="68.2" x2="41.6" y2="162.7" stroke="url(#l129)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-214.8" y1="-115.4" x2="-205.7" y2="-41.0" stroke="url(#l130)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-196.6" y2="33.5" stroke="url(#l131)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-280.2" y2="-31.9" stroke="url(#l132)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-205.7" y1="-41.0" x2="-131.3" y2="-50.1" stroke="url(#l133)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-131.3" y1="-50.1" x2="-86.2" y2="9.9" stroke="url(#l134)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-11.7" y2="0.8" stroke="url(#l135)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="17.6" y2="-68.2" stroke="url(#l136)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="17.6" y1="-68.2" x2="92.1" y2="-77.3" stroke="url(#l137)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="121.4" y2="-146.4" stroke="url(#l138)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="137.2" y2="-17.4" stroke="url(#l139)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="211.6" y2="-26.5" stroke="url(#l140)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="107.8" y2="51.6" stroke="url(#l141)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="152.9" y2="111.5" stroke="url(#l142)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="33.4" y2="60.7" stroke="url(#l143)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="4.0" y2="129.7" stroke="url(#l144)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="-11.7" y2="0.8" stroke="url(#l145)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-196.6" y1="33.5" x2="-168.9" y2="75.1" stroke="url(#l146)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-280.2" y1="-31.9" x2="-290.0" y2="17.2" stroke="url(#l147)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-112.2" y2="52.6" stroke="url(#l148)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-86.2" y1="9.9" x2="-68.0" y2="-36.7" stroke="url(#l149)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="-11.7" y1="0.8" x2="37.7" y2="-6.8" stroke="url(#l150)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="92.1" y1="-77.3" x2="141.5" y2="-84.9" stroke="url(#l151)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="121.4" y1="-146.4" x2="83.9" y2="-179.4" stroke="url(#l152)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="137.2" y1="-17.4" x2="87.7" y2="-9.9" stroke="url(#l153)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="211.6" y1="-26.5" x2="221.4" y2="-75.5" stroke="url(#l154)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="107.8" y1="51.6" x2="89.6" y2="98.2" stroke="url(#l155)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="152.9" y1="111.5" x2="200.3" y2="95.5" stroke="url(#l156)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="33.4" y1="60.7" x2="-16.1" y2="68.2" stroke="url(#l157)" stroke-width="60.0" stroke-linecap="round"/>
+<line x1="4.0" y1="129.7" x2="41.6" y2="162.7" stroke="url(#l158)" stroke-width="60.0" stroke-linecap="round"/>
+<circle cx="-214.8" cy="-115.4" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-205.7" cy="-41.0" r="54.0" fill="#f4b36a" stroke="none"/>
+<circle cx="-196.6" cy="33.5" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-280.2" cy="-31.9" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-131.3" cy="-50.1" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-86.2" cy="9.9" r="51.0" fill="#bababa" stroke="none"/>
+<circle cx="-11.7" cy="0.8" r="51.0" fill="#bababa" stroke="none"/>
+<circle cx="17.6" cy="-68.2" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="92.1" cy="-77.3" r="51.0" fill="#bababa" stroke="none"/>
+<circle cx="121.4" cy="-146.4" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="137.2" cy="-17.4" r="51.0" fill="#bababa" stroke="none"/>
+<circle cx="211.6" cy="-26.5" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="107.8" cy="51.6" r="51.0" fill="#bababa" stroke="none"/>
+<circle cx="152.9" cy="111.5" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="33.4" cy="60.7" r="51.0" fill="#bababa" stroke="none"/>
+<circle cx="4.0" cy="129.7" r="51.0" fill="#ec736c" stroke="none"/>
+<circle cx="-168.9" cy="75.1" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="-290.0" cy="17.2" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="-112.2" cy="52.6" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="-68.0" cy="-36.7" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="37.7" cy="-6.8" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="141.5" cy="-84.9" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="83.9" cy="-179.4" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="87.7" cy="-9.9" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="221.4" cy="-75.5" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="89.6" cy="98.2" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="200.3" cy="95.5" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="-16.1" cy="68.2" r="45.0" fill="#d7d7d7" stroke="none"/>
+<circle cx="41.6" cy="162.7" r="45.0" fill="#d7d7d7" stroke="none"/>
 </g>
 <g stroke="#111" stroke-width="6" stroke-linecap="round">
 <line x1="-207.9" y1="-116.3" x2="-198.8" y2="-41.8"/>
