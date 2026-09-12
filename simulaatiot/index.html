@@ -4437,8 +4437,10 @@ void main(void){
      about the live screen axes every event, like the arrow keys, rolled ~40 degrees over one long diagonal drag.) */
   let mdUp = null;
   const dragLook = (ya, pa) => {
+    cam.getViewMatrix(true);   // forced: brings cam.position up to date with this frame's radius and target (a zoom notch changes them before the camera updates) - otherwise the turn is built on last frame's position and the zoom is turned into the target creeping toward the camera
     const pos = cam.position, t = cam.getTarget(); let U = mdUp || cam.getDirection(BABYLON.Axis.Y).normalize();
-    _flF.set(t.x-pos.x, t.y-pos.y, t.z-pos.z); const dist = _flF.length() || 50; _flF.scaleInPlace(1/dist);   // forward
+    _flF.set(t.x-pos.x, t.y-pos.y, t.z-pos.z); const L = _flF.length() || 1; _flF.scaleInPlace(1/L);   // forward
+    const dist = cam.radius || L;   // the RADIUS, not |target - position|: cam.position is last frame's until the camera updates, so with a zoom in flight the measured length was the old radius and setTarget kept restoring it - every notch undone while the turn's inertia ran (owner 12.9.2026: 'zoom after a middle drag does not start right away')
     let e = Math.asin(Math.max(-1, Math.min(1, BABYLON.Vector3.Dot(_flF, U)))); const eMax = Math.PI/2 - 0.03;
     if(Math.abs(e) > 1.05){ cam.getDirectionToRef(BABYLON.Axis.Y, _flU); mdUp = _flU.normalize().clone(); U = mdUp; e = 0; }   // the gaze has climbed 60 degrees toward this drag's pole: re-base the axis on the CURRENT screen-up (no visible change - that up is what the picture already shows) so the pole is a quarter turn away again and a long drag never spins
     pa = Math.max(-eMax, Math.min(eMax, e + pa)) - e;                     // never over the pole
@@ -4491,7 +4493,7 @@ void main(void){
       }
       if(e.button === 1){   // MIDDLE = rotate the camera. Driven manually (inertial offsets) so it works in
         rotating = true; dragging = true;                          // every browser, independent of Babylon's button filtering.
-        cam.inertialAlphaOffset = cam.inertialBetaOffset = 0; mdYaw = mdPitch = 0; mdUp = cam.getDirection(BABYLON.Axis.Y).normalize();
+        cam.inertialAlphaOffset = cam.inertialBetaOffset = 0; mdYaw = mdPitch = 0; mdUp = cam.getDirection(BABYLON.Axis.Y).normalize(); gZoomVel = 0;   // grabbing the camera ends any zoom still bleeding out
         if(SOLU && !gLookPivot && !gFHold){ const f = cam.getForwardRay(1).direction; gLookPivot = { r: cam.radius }; scene.stopAnimation(cam);
           cam.setTarget(cam.position.add(f.scale(LOOK_R))); }   // the look-around pivot, 20 units ahead (the position stays)
         setCursor(GRABBING_CUR);
@@ -4604,6 +4606,13 @@ void main(void){
   let wheelStep = 0, wheelLastT = 0;
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
+    /* The look-around pivot (middle drag, cell mode) sits only LOOK_R = 20 units ahead, and it is put back out only once the
+       turn's inertia has died. A notch before that took the 20-unit radius as the depth of the point under the cursor, and the
+       pivot-shift toward that point then ate the whole dolly: the target crept toward the camera and the camera stood still
+       until the inertia ran out (owner 12.9.2026: 'zoom after a middle drag does not start right away'). So a notch puts the
+       pivot back out FIRST, before the cursor depth below is read. Here on the wheel event, not in zoomBy: the inertial tail
+       calls zoomBy for a second or two after the last notch, and a drag started in that tail lost its fresh pivot to it. */
+    if(gLookPivot && !rotating){ const r = gLookPivot.r; gLookPivot = null; const fw = cam.getForwardRay(1).direction; cam.setTarget(cam.position.add(fw.scale(r))); }
     const nowT = performance.now(), gap = nowT - wheelLastT;
     if(gap > WHEEL_CHAIN_MS) wheelStep = 0;
     wheelLastT = nowT;
