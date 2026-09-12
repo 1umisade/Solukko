@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-169 -167 343 289" width="343" height="289">
+<defs>
+<radialGradient id="gC" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#c9c9c9"/><stop offset="1" stop-color="#9d9d9d"/></radialGradient>
+<radialGradient id="gH" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#dfdfdf"/><stop offset="1" stop-color="#c6c6c6"/></radialGradient>
+<radialGradient id="gN" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#a4b5ea"/><stop offset="1" stop-color="#5a79d9"/></radialGradient>
+<radialGradient id="gO" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#f0918b"/><stop offset="1" stop-color="#e5382d"/></radialGradient>
+<radialGradient id="gP" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#f6c38a"/><stop offset="1" stop-color="#f0932b"/></radialGradient>
+<radialGradient id="gS" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#efe499"/><stop offset="1" stop-color="#e3cf46"/></radialGradient>
+<radialGradient id="gMg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#b8e4b8"/><stop offset="1" stop-color="#7fcf7f"/></radialGradient>
+<radialGradient id="gX" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e0e0e0"/><stop offset="1" stop-color="#b0b0b0"/></radialGradient>
+</defs>
+<g fill="#111" stroke="#111" stroke-linecap="round" stroke-linejoin="round">
+<line x1="-66.1" y1="8.0" x2="-0.2" y2="-27.9" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="63.8" y2="11.2" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="1.6" y2="-102.8" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="-38.4" y2="49.7" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="-97.3" y2="-31.0" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="-105.2" y2="39.2" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="86.0" y2="-33.6" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="45.5" y2="57.8" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="110.3" y2="29.4" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="-0.2" y2="-27.9" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="63.8" y2="11.2" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="1.6" y2="-102.8" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="-38.4" y2="49.7" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="-97.3" y2="-31.0" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="-105.2" y2="39.2" stroke-width="70.0"/>
+<line x1="-66.1" y1="8.0" x2="45.5" y2="57.8" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="63.8" y2="11.2" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="1.6" y2="-102.8" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="-38.4" y2="49.7" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="-97.3" y2="-31.0" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="-105.2" y2="39.2" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="86.0" y2="-33.6" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="45.5" y2="57.8" stroke-width="70.0"/>
+<line x1="-0.2" y1="-27.9" x2="110.3" y2="29.4" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="1.6" y2="-102.8" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="-38.4" y2="49.7" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="86.0" y2="-33.6" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="45.5" y2="57.8" stroke-width="70.0"/>
+<line x1="63.8" y1="11.2" x2="110.3" y2="29.4" stroke-width="70.0"/>
+<line x1="1.6" y1="-102.8" x2="-97.3" y2="-31.0" stroke-width="70.0"/>
+<line x1="1.6" y1="-102.8" x2="86.0" y2="-33.6" stroke-width="70.0"/>
+<line x1="-38.4" y1="49.7" x2="-97.3" y2="-31.0" stroke-width="70.0"/>
+<line x1="-38.4" y1="49.7" x2="-105.2" y2="39.2" stroke-width="70.0"/>
+<line x1="-38.4" y1="49.7" x2="86.0" y2="-33.6" stroke-width="70.0"/>
+<line x1="-38.4" y1="49.7" x2="45.5" y2="57.8" stroke-width="70.0"/>
+<line x1="-97.3" y1="-31.0" x2="-105.2" y2="39.2" stroke-width="70.0"/>
+<line x1="86.0" y1="-33.6" x2="45.5" y2="57.8" stroke-width="70.0"/>
+<line x1="86.0" y1="-33.6" x2="110.3" y2="29.4" stroke-width="70.0"/>
+<line x1="45.5" y1="57.8" x2="110.3" y2="29.4" stroke-width="70.0"/>
+<circle cx="-66.1" cy="8.0" r="56.0" stroke="none"/>
+<circle cx="-0.2" cy="-27.9" r="56.0" stroke="none"/>
+<circle cx="63.8" cy="11.2" r="56.0" stroke="none"/>
+<circle cx="1.6" cy="-102.8" r="56.0" stroke="none"/>
+<circle cx="-38.4" cy="49.7" r="50.0" stroke="none"/>
+<circle cx="-97.3" cy="-31.0" r="50.0" stroke="none"/>
+<circle cx="-105.2" cy="39.2" r="50.0" stroke="none"/>
+<circle cx="86.0" cy="-33.6" r="50.0" stroke="none"/>
+<circle cx="45.5" cy="57.8" r="50.0" stroke="none"/>
+<circle cx="110.3" cy="29.4" r="50.0" stroke="none"/>
+</g>
+<g fill="#e8221c" stroke="#e8221c" stroke-linecap="round" stroke-linejoin="round">
+<line x1="-66.1" y1="8.0" x2="-0.2" y2="-27.9" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="63.8" y2="11.2" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="1.6" y2="-102.8" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="-38.4" y2="49.7" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="-97.3" y2="-31.0" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="-105.2" y2="39.2" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="86.0" y2="-33.6" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="45.5" y2="57.8" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="110.3" y2="29.4" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="-0.2" y2="-27.9" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="63.8" y2="11.2" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="1.6" y2="-102.8" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="-38.4" y2="49.7" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="-97.3" y2="-31.0" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="-105.2" y2="39.2" stroke-width="60.0"/>
+<line x1="-66.1" y1="8.0" x2="45.5" y2="57.8" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="63.8" y2="11.2" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="1.6" y2="-102.8" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="-38.4" y2="49.7" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="-97.3" y2="-31.0" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="-105.2" y2="39.2" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="86.0" y2="-33.6" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="45.5" y2="57.8" stroke-width="60.0"/>
+<line x1="-0.2" y1="-27.9" x2="110.3" y2="29.4" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="1.6" y2="-102.8" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="-38.4" y2="49.7" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="86.0" y2="-33.6" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="45.5" y2="57.8" stroke-width="60.0"/>
+<line x1="63.8" y1="11.2" x2="110.3" y2="29.4" stroke-width="60.0"/>
+<line x1="1.6" y1="-102.8" x2="-97.3" y2="-31.0" stroke-width="60.0"/>
+<line x1="1.6" y1="-102.8" x2="86.0" y2="-33.6" stroke-width="60.0"/>
+<line x1="-38.4" y1="49.7" x2="-97.3" y2="-31.0" stroke-width="60.0"/>
+<line x1="-38.4" y1="49.7" x2="-105.2" y2="39.2" stroke-width="60.0"/>
+<line x1="-38.4" y1="49.7" x2="86.0" y2="-33.6" stroke-width="60.0"/>
+<line x1="-38.4" y1="49.7" x2="45.5" y2="57.8" stroke-width="60.0"/>
+<line x1="-97.3" y1="-31.0" x2="-105.2" y2="39.2" stroke-width="60.0"/>
+<line x1="86.0" y1="-33.6" x2="45.5" y2="57.8" stroke-width="60.0"/>
+<line x1="86.0" y1="-33.6" x2="110.3" y2="29.4" stroke-width="60.0"/>
+<line x1="45.5" y1="57.8" x2="110.3" y2="29.4" stroke-width="60.0"/>
+<circle cx="-66.1" cy="8.0" r="51.0" stroke="none"/>
+<circle cx="-0.2" cy="-27.9" r="51.0" stroke="none"/>
+<circle cx="63.8" cy="11.2" r="51.0" stroke="none"/>
+<circle cx="1.6" cy="-102.8" r="51.0" stroke="none"/>
+<circle cx="-38.4" cy="49.7" r="45.0" stroke="none"/>
+<circle cx="-97.3" cy="-31.0" r="45.0" stroke="none"/>
+<circle cx="-105.2" cy="39.2" r="45.0" stroke="none"/>
+<circle cx="86.0" cy="-33.6" r="45.0" stroke="none"/>
+<circle cx="45.5" cy="57.8" r="45.0" stroke="none"/>
+<circle cx="110.3" cy="29.4" r="45.0" stroke="none"/>
+</g>
+<g stroke="#111" stroke-width="6" stroke-linecap="round">
+<line x1="-66.1" y1="8.0" x2="-0.2" y2="-27.9"/>
+<line x1="-0.2" y1="-27.9" x2="63.8" y2="11.2"/>
+<line x1="-7.2" y1="-28.0" x2="-5.4" y2="-103.0"/>
+<line x1="6.7" y1="-27.7" x2="8.6" y2="-102.7"/>
+<line x1="-66.1" y1="8.0" x2="-38.4" y2="49.7"/>
+<line x1="-66.1" y1="8.0" x2="-97.3" y2="-31.0"/>
+<line x1="-66.1" y1="8.0" x2="-105.2" y2="39.2"/>
+<line x1="63.8" y1="11.2" x2="86.0" y2="-33.6"/>
+<line x1="63.8" y1="11.2" x2="45.5" y2="57.8"/>
+<line x1="63.8" y1="11.2" x2="110.3" y2="29.4"/>
+</g>
+<circle cx="-66.1" cy="8.0" r="21" fill="url(#gC)" stroke="#111" stroke-width="3"/>
+<text x="-66.1" y="9.0" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="24" fill="#111">C</text>
+<circle cx="-0.2" cy="-27.9" r="21" fill="url(#gC)" stroke="#111" stroke-width="3"/>
+<text x="-0.2" y="-26.9" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="24" fill="#111">C</text>
+<circle cx="63.8" cy="11.2" r="21" fill="url(#gC)" stroke="#111" stroke-width="3"/>
+<text x="63.8" y="12.2" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="24" fill="#111">C</text>
+<circle cx="1.6" cy="-102.8" r="21" fill="url(#gO)" stroke="#111" stroke-width="3"/>
+<text x="1.6" y="-101.9" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="24" fill="#111">O</text>
+<circle cx="-38.4" cy="49.7" r="15" fill="url(#gH)" stroke="#111" stroke-width="3"/>
+<text x="-38.4" y="50.4" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="17" fill="#111">H</text>
+<circle cx="-97.3" cy="-31.0" r="15" fill="url(#gH)" stroke="#111" stroke-width="3"/>
+<text x="-97.3" y="-30.3" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="17" fill="#111">H</text>
+<circle cx="-105.2" cy="39.2" r="15" fill="url(#gH)" stroke="#111" stroke-width="3"/>
+<text x="-105.2" y="39.9" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="17" fill="#111">H</text>
+<circle cx="86.0" cy="-33.6" r="15" fill="url(#gH)" stroke="#111" stroke-width="3"/>
+<text x="86.0" y="-32.9" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="17" fill="#111">H</text>
+<circle cx="45.5" cy="57.8" r="15" fill="url(#gH)" stroke="#111" stroke-width="3"/>
+<text x="45.5" y="58.4" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="17" fill="#111">H</text>
+<circle cx="110.3" cy="29.4" r="15" fill="url(#gH)" stroke="#111" stroke-width="3"/>
+<text x="110.3" y="30.1" text-anchor="middle" dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="17" fill="#111">H</text>
+</svg>

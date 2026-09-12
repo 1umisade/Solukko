@@ -67,9 +67,12 @@ def lisaa_simulaattoriin(key, nimi, tiedosto, kaava):
     def sub(old, new):
         nonlocal s, n
         assert s.count(old) == 1, (s.count(old), old[:60]); s = s.replace(old, new); n += 1
-    sub("['PQ','plastokinoni','quinone.mol2'] ];", "['PQ','plastokinoni','quinone.mol2'], ['%s','%s','%s'] ];" % (key, nimi, tiedosto))
-    sub("CHL:'klorofylli', PQ:'plastokinoni' };", "CHL:'klorofylli', PQ:'plastokinoni', %s:'%s' };" % (key, nimi))
-    sub("CHL:'klorofylli a', PQ:'plastokinoni' };", "CHL:'klorofylli a', PQ:'plastokinoni', %s:'%s' };" % (key, kaava))
+    # rivin loppuun ennen sulkevaa merkkia, mika tahansa viimeinen alkio (ryhmat_3d.lisaa_tauluun; G6P:n jalkeen vanha ankkuri ei enaa osunut)
+    from ryhmat_3d import lisaa_tauluun
+    for alku, alkio, loppu, tunnus in (('const SMALL = [', ", ['%s','%s','%s']" % (key, nimi, tiedosto), '];', "['%s',"),
+                                       ('const NAME_FI = {', ", %s:'%s'" % (key, nimi), '};', " %s:'"),
+                                       ('const FORMULA = {', ", %s:'%s'" % (key, kaava), '};', " %s:'")):
+        s, ok = lisaa_tauluun(s, alku, [(key, alkio)], loppu, tunnus); n += ok
     io.open(P, 'w', encoding='utf-8', newline='').write(s); print('  simulaatiot/index.html: %d taulua paivitetty' % n)
 
 

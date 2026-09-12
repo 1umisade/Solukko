@@ -662,11 +662,13 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .flashcard:not(.front-basic):not(.answer-shown):not(.celebrating) { display: flex; flex-direction: column; justify-content: safe center; }   /* cloze / special fronts: centre on the Y axis too */
 .flashcard.front-basic #question-content { line-height: 1.25; }
 /* external 3D viewer embed at the bottom of the front (cards with a 3D field) */
-.card-embed-3d { width: 100%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; }   /* front: full size; wrapper clips the iframe so its rounded corners have no dark fringe */
+.card-embed-3d { width: 100%; margin: 1.2rem auto 0; border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }   /* front: the 2-D formula and the live 3-D model side by side as two equal squares; wrapper clips the iframe so its rounded corners have no dark fringe */
+.card-embed-3d:not(:has(.embed-2d)) { grid-template-columns: 1fr; }   /* an unknown species: the model alone */
 .answer-shown .card-embed-3d { width: 100%; }   /* back: full width */
+.embed-2d { width: 100%; aspect-ratio: 1 / 1; height: auto; object-fit: contain; background: #efe9dd; padding: 6%; box-sizing: border-box; display: block; }   /* the model molecule's structural formula (simulaatiot/kortit/2d) */
 .embed-3d-frame { width: 100%; aspect-ratio: 1 / 1; height: auto; border: none; border-radius: 0; background: #efe9dd; display: block; pointer-events: none; }   /* front: no interaction — clicks flip the card */
-.answer-shown .embed-3d-frame { pointer-events: auto; aspect-ratio: 2 / 1; }   /* back: full width, half the front's height; allow rotating the model */
-body.dark-mode .embed-3d-frame { background: #2a2622; }
+.answer-shown .embed-3d-frame { pointer-events: auto; }   /* back: allow rotating the model */
+body.dark-mode .embed-3d-frame, body.dark-mode .embed-2d { background: #2a2622; }
 .dim-paren { color: rgba(26,22,18,0.5); }   /* dim by colour, not opacity: an opacity span faded the word-link bubbles inside it, which looked like cut-off bubbles (owner 10.9.2026) */
 body.dark-mode .dim-paren { color: rgba(234,223,206,0.55); }
 
@@ -2957,7 +2959,7 @@ body.dark-mode .cal-ev { color:#241f1b; }
 // ① KONFIGURAATIO & TILA   (config constants + global state variables)
 // ════════════════════════════════════════════════════════════
 const APKG_FILE = 'SOLUKKO.apkg';
-const EMBED_3D_BASE = 'https://geneesi.com/?model=';   // cards with a non-empty 3D field embed this on the front; the field value is appended. Swap for the real viewer URL.
+const EMBED_3D_BASE = 'simulaatiot/kortti.html?tila=kortti&laji=';   // cards with a non-empty 3D-malli field (a simulator species key, e.g. ETANOLI) embed the live model on the front, next to its 2-D formula from simulaatiot/kortit/2d (owner 12.9.2026: functional-group cards)
 let allCards  = [];
 let allDeckNames = [];
 let mediaMap  = {};
@@ -4273,7 +4275,9 @@ async function renderCurrentCard(){
   // Cards with a non-empty 3D field embed the external viewer at the bottom of the front, fed with that value
   { const _3d=getField(card,['3Dfilename','3D filename','3Dfile','3d','3D','3D-malli','3D-Malli']).replace(/<[^>]*>/g,'').trim();
     if(_3d){ const _qc=document.getElementById('question-content'); const _emb=document.createElement('div'); _emb.className='card-embed-3d';
-      _emb.innerHTML='<iframe class="embed-3d-frame" src="'+EMBED_3D_BASE+encodeURIComponent(_3d)+'" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>';
+      const _m=_molekyylit&&_molekyylit[_3d];   // a known species: its 2-D formula (kaava2d.py SVG) on the left, the live 3-D model on the right
+      _emb.innerHTML=(_m&&_m.kuva2d ? '<img class="embed-2d" src="simulaatiot/kortit/'+_m.kuva2d+'" alt="'+(_m.nimi||_3d)+' rakennekaava" title="2D: rakennekaava">' : '')
+        +'<iframe class="embed-3d-frame" src="'+EMBED_3D_BASE+encodeURIComponent(_3d)+'&v='+Math.floor(Date.now()/3.6e6)+'" loading="lazy" title="3D: '+(_m?_m.nimi:_3d)+' - vedä kääntääksesi, rulla zoomaa" referrerpolicy="no-referrer"></iframe>';
       _qc.appendChild(_emb); }
   }
   const _ac=document.getElementById('answer-content');
@@ -7050,6 +7054,7 @@ const molKehys=(function(){
     f.addEventListener('load', ()=>aseta(0.45, 0.68)); aseta(0.1, 0.4);
     document.body.appendChild(f); return f; }
   window.addEventListener('message', e=>{ const d=e.data; if(!d||!d.solukkoKortti) return;
+    if(!f || e.source!==f.contentWindow) return;   // only the popup's own frame: a card's embedded model frame (3D-malli field) posts the same messages
     if(d.solukkoKortti==='alustettu'){ alustettu=true; aseta(0.7, 0.95); if(haluttu){ f.contentWindow.postMessage({solukkoLaji:haluttu},'*'); aseta(0.78, 0.95); } }
     if(d.solukkoKortti==='valmis'){ valmisLajit.add(d.laji); if(kunValmisFn) kunValmisFn(d.laji); }   // per-species readiness (owner 12.9.2026: a popup opens on the formula until ITS model is built, then flips to muoto)
     if(d.solukkoKortti==='valmis' && d.laji===haluttu && kohde){ nakyva=true; vaihe=1; piirraPalkki(); f.style.opacity='1'; f.style.pointerEvents='auto'; clearTimeout(varaTO); clearInterval(palkkiTO); }   // the loading card stays underneath: the opaque frame covers it

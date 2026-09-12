@@ -639,5 +639,646 @@
    "glukoosi-6-fosfaatille"
   ],
   "kuva2d": "2d/G6P.svg"
+ },
+ "ETAANI": {
+  "nimi": "etaani",
+  "kaava": "C₂H₆",
+  "kaavat": [
+   "C₂H₆"
+  ],
+  "sanat": [
+   "etaani",
+   "etaanin",
+   "etaania",
+   "etaanissa",
+   "etaanista",
+   "etaaniin",
+   "etaaniksi",
+   "etaanilla",
+   "etaanille",
+   "etaanit",
+   "etaanien",
+   "etaaneja",
+   "etaaneissa"
+  ],
+  "kuva2d": "2d/ETAANI.svg"
+ },
+ "PROPAANI": {
+  "nimi": "propaani",
+  "kaava": "C₃H₈",
+  "kaavat": [
+   "C₃H₈"
+  ],
+  "sanat": [
+   "propaani",
+   "propaanin",
+   "propaania",
+   "propaanissa",
+   "propaanista",
+   "propaaniin",
+   "propaaniksi",
+   "propaanilla",
+   "propaanille",
+   "propaanit",
+   "propaanien",
+   "propaaneja",
+   "propaaneissa"
+  ],
+  "kuva2d": "2d/PROPAANI.svg"
+ },
+ "TOLUEENI": {
+  "nimi": "tolueeni",
+  "kaava": "C₇H₈",
+  "kaavat": [
+   "C₇H₈"
+  ],
+  "sanat": [
+   "tolueeni",
+   "tolueenin",
+   "tolueenia",
+   "tolueenissa",
+   "tolueenista",
+   "tolueeniin",
+   "tolueeniksi",
+   "tolueenilla",
+   "tolueenille",
+   "tolueenit",
+   "tolueenien",
+   "tolueeneja",
+   "tolueeneissa",
+   "metyylibentseeni",
+   "metyylibentseenin",
+   "metyylibentseeniä",
+   "metyylibentseenissä",
+   "metyylibentseenistä",
+   "metyylibentseeniin",
+   "metyylibentseeniksi",
+   "metyylibentseenillä",
+   "metyylibentseenille",
+   "metyylibentseenit",
+   "metyylibentseenien",
+   "metyylibentseenejä",
+   "metyylibentseeneissä",
+   "metyylibentseenia",
+   "metyylibentseenissa",
+   "metyylibentseenista",
+   "metyylibentseenilla",
+   "metyylibentseeneja",
+   "metyylibentseeneissa"
+  ],
+  "kuva2d": "2d/TOLUEENI.svg"
+ },
+ "ASETALDEHYDI": {
+  "nimi": "asetaldehydi",
+  "kaava": "CH₃CHO",
+  "kaavat": [
+   "CH₃CHO"
+  ],
+  "sanat": [
+   "asetaldehydi",
+   "asetaldehydin",
+   "asetaldehydiä",
+   "asetaldehydissä",
+   "asetaldehydistä",
+   "asetaldehydiin",
+   "asetaldehydiksi",
+   "asetaldehydillä",
+   "asetaldehydille",
+   "asetaldehydit",
+   "asetaldehydien",
+   "asetaldehydejä",
+   "asetaldehydeissä",
+   "asetaldehydia",
+   "asetaldehydissa",
+   "asetaldehydista",
+   "asetaldehydilla",
+   "asetaldehydeja",
+   "asetaldehydeissa",
+   "etanaali",
+   "etanaalin",
+   "etanaalia",
+   "etanaalissa",
+   "etanaalista",
+   "etanaaliin",
+   "etanaaliksi",
+   "etanaalilla",
+   "etanaalille",
+   "etanaalit",
+   "etanaalien",
+   "etanaaleja",
+   "etanaaleissa"
+  ],
+  "kuva2d": "2d/ASETALDEHYDI.svg"
+ },
+ "ASETONI": {
+  "nimi": "asetoni",
+  "kaava": "CH₃COCH₃",
+  "kaavat": [
+   "CH₃COCH₃"
+  ],
+  "sanat": [
+   "asetoni",
+   "asetonin",
+   "asetonia",
+   "asetonissa",
+   "asetonista",
+   "asetoniin",
+   "asetoniksi",
+   "asetonilla",
+   "asetonille",
+   "asetonit",
+   "asetonien",
+   "asetoneja",
+   "asetoneissa",
+   "propanoni",
+   "propanonin",
+   "propanonia",
+   "propanonissa",
+   "propanonista",
+   "propanoniin",
+   "propanoniksi",
+   "propanonilla",
+   "propanonille",
+   "propanonit",
+   "propanonien",
+   "propanoneja",
+   "propanoneissa"
+  ],
+  "kuva2d": "2d/ASETONI.svg"
+ },
+ "ASETAATTI": {
+  "nimi": "asetaatti",
+  "kaava": "CH₃COO⁻",
+  "kaavat": [
+   "CH₃COO⁻"
+  ],
+  "sanat": [
+   "asetaatti",
+   "asetaatin",
+   "asetaattia",
+   "asetaatissa",
+   "asetaatista",
+   "asetaattiin",
+   "asetaatiksi",
+   "asetaatilla",
+   "asetaatille",
+   "asetaatit",
+   "asetaattien",
+   "asetaatteja",
+   "asetaateissa",
+   "asetaatti-ioni",
+   "asetaatti-ionin",
+   "asetaatti-ionia",
+   "asetaatti-ionissa",
+   "asetaatti-ionista",
+   "asetaatti-ioniin",
+   "asetaatti-ioniksi",
+   "asetaatti-ionilla",
+   "asetaatti-ionille",
+   "asetaatti-ionit",
+   "asetaatti-ionien",
+   "asetaatti-ioneja",
+   "asetaatti-ioneissa"
+  ],
+  "kuva2d": "2d/ASETAATTI.svg"
+ },
+ "ETANOLI": {
+  "nimi": "etanoli",
+  "kaava": "C₂H₅OH",
+  "kaavat": [
+   "C₂H₅OH"
+  ],
+  "sanat": [
+   "etanoli",
+   "etanolin",
+   "etanolia",
+   "etanolissa",
+   "etanolista",
+   "etanoliin",
+   "etanoliksi",
+   "etanolilla",
+   "etanolille",
+   "etanolit",
+   "etanolien",
+   "etanoleja",
+   "etanoleissa"
+  ],
+  "kuva2d": "2d/ETANOLI.svg"
+ },
+ "ETENOLI": {
+  "nimi": "etenoli",
+  "kaava": "CH₂=CHOH",
+  "kaavat": [
+   "CH₂=CHOH"
+  ],
+  "sanat": [
+   "etenoli",
+   "etenolin",
+   "etenolia",
+   "etenolissa",
+   "etenolista",
+   "etenoliin",
+   "etenoliksi",
+   "etenolilla",
+   "etenolille",
+   "etenolit",
+   "etenolien",
+   "etenoleja",
+   "etenoleissa",
+   "vinyylialkoholi",
+   "vinyylialkoholin",
+   "vinyylialkoholia",
+   "vinyylialkoholissa",
+   "vinyylialkoholista",
+   "vinyylialkoholiin",
+   "vinyylialkoholiksi",
+   "vinyylialkoholilla",
+   "vinyylialkoholille",
+   "vinyylialkoholit",
+   "vinyylialkoholien",
+   "vinyylialkoholeja",
+   "vinyylialkoholeissa"
+  ],
+  "kuva2d": "2d/ETENOLI.svg"
+ },
+ "DME": {
+  "nimi": "dimetyylieetteri",
+  "kaava": "CH₃OCH₃",
+  "kaavat": [
+   "CH₃OCH₃"
+  ],
+  "sanat": [
+   "dimetyylieetteri",
+   "dimetyylieetterin",
+   "dimetyylieetteriä",
+   "dimetyylieetterissä",
+   "dimetyylieetteristä",
+   "dimetyylieetteriin",
+   "dimetyylieetteriksi",
+   "dimetyylieetterillä",
+   "dimetyylieetterille",
+   "dimetyylieetterit",
+   "dimetyylieetterien",
+   "dimetyylieetterejä",
+   "dimetyylieettereissä",
+   "dimetyylieetteria",
+   "dimetyylieetterissa",
+   "dimetyylieetterista",
+   "dimetyylieetterilla",
+   "dimetyylieettereja",
+   "dimetyylieettereissa"
+  ],
+  "kuva2d": "2d/DME.svg"
+ },
+ "ETYYLIASETAATTI": {
+  "nimi": "etyyliasetaatti",
+  "kaava": "CH₃COOC₂H₅",
+  "kaavat": [
+   "CH₃COOC₂H₅"
+  ],
+  "sanat": [
+   "etyyliasetaatti",
+   "etyyliasetaatin",
+   "etyyliasetaattia",
+   "etyyliasetaatissa",
+   "etyyliasetaatista",
+   "etyyliasetaattiin",
+   "etyyliasetaatiksi",
+   "etyyliasetaatilla",
+   "etyyliasetaatille",
+   "etyyliasetaatit",
+   "etyyliasetaattien",
+   "etyyliasetaatteja",
+   "etyyliasetaateissa"
+  ],
+  "kuva2d": "2d/ETYYLIASETAATTI.svg"
+ },
+ "METYYLIASETAATTI": {
+  "nimi": "metyyliasetaatti",
+  "kaava": "CH₃COOCH₃",
+  "kaavat": [
+   "CH₃COOCH₃"
+  ],
+  "sanat": [
+   "metyyliasetaatti",
+   "metyyliasetaatin",
+   "metyyliasetaattia",
+   "metyyliasetaatissa",
+   "metyyliasetaatista",
+   "metyyliasetaattiin",
+   "metyyliasetaatiksi",
+   "metyyliasetaatilla",
+   "metyyliasetaatille",
+   "metyyliasetaatit",
+   "metyyliasetaattien",
+   "metyyliasetaatteja",
+   "metyyliasetaateissa"
+  ],
+  "kuva2d": "2d/METYYLIASETAATTI.svg"
+ },
+ "ETIKKAHAPPOANHYDRIDI": {
+  "nimi": "etikkahappoanhydridi",
+  "kaava": "(CH₃CO)₂O",
+  "kaavat": [
+   "(CH₃CO)₂O"
+  ],
+  "sanat": [
+   "etikkahappoanhydridi",
+   "etikkahappoanhydridin",
+   "etikkahappoanhydridiä",
+   "etikkahappoanhydridissä",
+   "etikkahappoanhydridistä",
+   "etikkahappoanhydridiin",
+   "etikkahappoanhydridiksi",
+   "etikkahappoanhydridillä",
+   "etikkahappoanhydridille",
+   "etikkahappoanhydridit",
+   "etikkahappoanhydridien",
+   "etikkahappoanhydridejä",
+   "etikkahappoanhydrideissä",
+   "etikkahappoanhydridia",
+   "etikkahappoanhydridissa",
+   "etikkahappoanhydridista",
+   "etikkahappoanhydridilla",
+   "etikkahappoanhydrideja",
+   "etikkahappoanhydrideissa"
+  ],
+  "kuva2d": "2d/ETIKKAHAPPOANHYDRIDI.svg"
+ },
+ "METYYLIAMMONIUM": {
+  "nimi": "metyyliammoniumioni",
+  "kaava": "CH₃NH₃⁺",
+  "kaavat": [
+   "CH₃NH₃⁺"
+  ],
+  "sanat": [
+   "metyyliammoniumioni",
+   "metyyliammoniumionin",
+   "metyyliammoniumionia",
+   "metyyliammoniumionissa",
+   "metyyliammoniumionista",
+   "metyyliammoniumioniin",
+   "metyyliammoniumioniksi",
+   "metyyliammoniumionilla",
+   "metyyliammoniumionille",
+   "metyyliammoniumionit",
+   "metyyliammoniumionien",
+   "metyyliammoniumioneja",
+   "metyyliammoniumioneissa"
+  ],
+  "kuva2d": "2d/METYYLIAMMONIUM.svg"
+ },
+ "ASETAMIDI": {
+  "nimi": "asetamidi",
+  "kaava": "CH₃CONH₂",
+  "kaavat": [
+   "CH₃CONH₂"
+  ],
+  "sanat": [
+   "asetamidi",
+   "asetamidin",
+   "asetamidia",
+   "asetamidissa",
+   "asetamidista",
+   "asetamidiin",
+   "asetamidiksi",
+   "asetamidilla",
+   "asetamidille",
+   "asetamidit",
+   "asetamidien",
+   "asetamideja",
+   "asetamideissa"
+  ],
+  "kuva2d": "2d/ASETAMIDI.svg"
+ },
+ "ETAANIIMIINI": {
+  "nimi": "etaani-imiini",
+  "kaava": "CH₃CH=NH",
+  "kaavat": [
+   "CH₃CH=NH"
+  ],
+  "sanat": [
+   "etaani-imiini",
+   "etaani-imiinin",
+   "etaani-imiiniä",
+   "etaani-imiinissä",
+   "etaani-imiinistä",
+   "etaani-imiiniin",
+   "etaani-imiiniksi",
+   "etaani-imiinillä",
+   "etaani-imiinille",
+   "etaani-imiinit",
+   "etaani-imiinien",
+   "etaani-imiinejä",
+   "etaani-imiineissä"
+  ],
+  "kuva2d": "2d/ETAANIIMIINI.svg"
+ },
+ "NMETYYLIETAANIIMIINI": {
+  "nimi": "N-metyylietaani-imiini",
+  "kaava": "CH₃CH=NCH₃",
+  "kaavat": [
+   "CH₃CH=NCH₃"
+  ],
+  "sanat": [
+   "N-metyylietaani-imiini",
+   "N-metyylietaani-imiinin",
+   "N-metyylietaani-imiiniä",
+   "N-metyylietaani-imiinissä",
+   "N-metyylietaani-imiinistä",
+   "N-metyylietaani-imiiniin",
+   "N-metyylietaani-imiiniksi",
+   "N-metyylietaani-imiinillä",
+   "N-metyylietaani-imiinille",
+   "N-metyylietaani-imiinit",
+   "N-metyylietaani-imiinien",
+   "N-metyylietaani-imiinejä",
+   "N-metyylietaani-imiineissä"
+  ],
+  "kuva2d": "2d/NMETYYLIETAANIIMIINI.svg"
+ },
+ "METYYLIGUANIDINIUM": {
+  "nimi": "metyyliguanidiniumioni",
+  "kaava": "CH₃NHC(NH₂)₂⁺",
+  "kaavat": [
+   "CH₃NHC(NH₂)₂⁺"
+  ],
+  "sanat": [
+   "metyyliguanidiniumioni",
+   "metyyliguanidiniumionin",
+   "metyyliguanidiniumionia",
+   "metyyliguanidiniumionissa",
+   "metyyliguanidiniumionista",
+   "metyyliguanidiniumioniin",
+   "metyyliguanidiniumioniksi",
+   "metyyliguanidiniumionilla",
+   "metyyliguanidiniumionille",
+   "metyyliguanidiniumionit",
+   "metyyliguanidiniumionien",
+   "metyyliguanidiniumioneja",
+   "metyyliguanidiniumioneissa"
+  ],
+  "kuva2d": "2d/METYYLIGUANIDINIUM.svg"
+ },
+ "METYYLIIMIDATSOLI": {
+  "nimi": "4-metyyli-imidatsoli",
+  "kaava": "C₄H₆N₂",
+  "kaavat": [
+   "C₄H₆N₂"
+  ],
+  "sanat": [
+   "4-metyyli-imidatsoli",
+   "4-metyyli-imidatsolin",
+   "4-metyyli-imidatsolia",
+   "4-metyyli-imidatsolissa",
+   "4-metyyli-imidatsolista",
+   "4-metyyli-imidatsoliin",
+   "4-metyyli-imidatsoliksi",
+   "4-metyyli-imidatsolilla",
+   "4-metyyli-imidatsolille",
+   "4-metyyli-imidatsolit",
+   "4-metyyli-imidatsolien",
+   "4-metyyli-imidatsoleja",
+   "4-metyyli-imidatsoleissa"
+  ],
+  "kuva2d": "2d/METYYLIIMIDATSOLI.svg"
+ },
+ "METAANITIOLI": {
+  "nimi": "metaanitioli",
+  "kaava": "CH₃SH",
+  "kaavat": [
+   "CH₃SH"
+  ],
+  "sanat": [
+   "metaanitioli",
+   "metaanitiolin",
+   "metaanitiolia",
+   "metaanitiolissa",
+   "metaanitiolista",
+   "metaanitioliin",
+   "metaanitioliksi",
+   "metaanitiolilla",
+   "metaanitiolille",
+   "metaanitiolit",
+   "metaanitiolien",
+   "metaanitioleja",
+   "metaanitioleissa"
+  ],
+  "kuva2d": "2d/METAANITIOLI.svg"
+ },
+ "DMDS": {
+  "nimi": "dimetyylidisulfidi",
+  "kaava": "CH₃SSCH₃",
+  "kaavat": [
+   "CH₃SSCH₃"
+  ],
+  "sanat": [
+   "dimetyylidisulfidi",
+   "dimetyylidisulfidin",
+   "dimetyylidisulfidia",
+   "dimetyylidisulfidissa",
+   "dimetyylidisulfidista",
+   "dimetyylidisulfidiin",
+   "dimetyylidisulfidiksi",
+   "dimetyylidisulfidilla",
+   "dimetyylidisulfidille",
+   "dimetyylidisulfidit",
+   "dimetyylidisulfidien",
+   "dimetyylidisulfideja",
+   "dimetyylidisulfideissa"
+  ],
+  "kuva2d": "2d/DMDS.svg"
+ },
+ "METYYLITIOASETAATTI": {
+  "nimi": "S-metyylitioasetaatti",
+  "kaava": "CH₃COSCH₃",
+  "kaavat": [
+   "CH₃COSCH₃"
+  ],
+  "sanat": [
+   "S-metyylitioasetaatti",
+   "S-metyylitioasetaatin",
+   "S-metyylitioasetaattia",
+   "S-metyylitioasetaatissa",
+   "S-metyylitioasetaatista",
+   "S-metyylitioasetaattiin",
+   "S-metyylitioasetaatiksi",
+   "S-metyylitioasetaatilla",
+   "S-metyylitioasetaatille",
+   "S-metyylitioasetaatit",
+   "S-metyylitioasetaattien",
+   "S-metyylitioasetaatteja",
+   "S-metyylitioasetaateissa"
+  ],
+  "kuva2d": "2d/METYYLITIOASETAATTI.svg"
+ },
+ "METYYLIFOSFAATTI": {
+  "nimi": "metyylifosfaatti",
+  "kaava": "CH₃OPO₃²⁻",
+  "kaavat": [
+   "CH₃OPO₃²⁻"
+  ],
+  "sanat": [
+   "metyylifosfaatti",
+   "metyylifosfaatin",
+   "metyylifosfaattia",
+   "metyylifosfaatissa",
+   "metyylifosfaatista",
+   "metyylifosfaattiin",
+   "metyylifosfaatiksi",
+   "metyylifosfaatilla",
+   "metyylifosfaatille",
+   "metyylifosfaatit",
+   "metyylifosfaattien",
+   "metyylifosfaatteja",
+   "metyylifosfaateissa"
+  ],
+  "kuva2d": "2d/METYYLIFOSFAATTI.svg"
+ },
+ "DIMETYYLIDIFOSFAATTI": {
+  "nimi": "dimetyylidifosfaatti",
+  "kaava": "(CH₃O)₂P₂O₅²⁻",
+  "kaavat": [
+   "(CH₃O)₂P₂O₅²⁻"
+  ],
+  "sanat": [
+   "dimetyylidifosfaatti",
+   "dimetyylidifosfaatin",
+   "dimetyylidifosfaattia",
+   "dimetyylidifosfaatissa",
+   "dimetyylidifosfaatista",
+   "dimetyylidifosfaattiin",
+   "dimetyylidifosfaatiksi",
+   "dimetyylidifosfaatilla",
+   "dimetyylidifosfaatille",
+   "dimetyylidifosfaatit",
+   "dimetyylidifosfaattien",
+   "dimetyylidifosfaatteja",
+   "dimetyylidifosfaateissa"
+  ],
+  "kuva2d": "2d/DIMETYYLIDIFOSFAATTI.svg"
+ },
+ "ASETYYLIFOSFAATTI": {
+  "nimi": "asetyylifosfaatti",
+  "kaava": "CH₃COOPO₃²⁻",
+  "kaavat": [
+   "CH₃COOPO₃²⁻"
+  ],
+  "sanat": [
+   "asetyylifosfaatti",
+   "asetyylifosfaatin",
+   "asetyylifosfaattia",
+   "asetyylifosfaatissa",
+   "asetyylifosfaatista",
+   "asetyylifosfaattiin",
+   "asetyylifosfaatiksi",
+   "asetyylifosfaatilla",
+   "asetyylifosfaatille",
+   "asetyylifosfaatit",
+   "asetyylifosfaattien",
+   "asetyylifosfaatteja",
+   "asetyylifosfaateissa"
+  ],
+  "kuva2d": "2d/ASETYYLIFOSFAATTI.svg"
  }
 }

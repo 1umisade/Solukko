@@ -34,7 +34,7 @@ Nimi: **`Solukko`**
 | 2 | `Suppea vastaus` | Yksi lyhyt lause (ydin, ≤ ~15 sanaa) |
 | 3 | `Laaja vastaus` | Täysi, tenttikelpoinen vastaus |
 | 4 | `tenttitodennakoisyys` | **`1`, `2` tai `3`** — pelkkä numero, ei tähtimerkkejä |
-| 5 | `3D-malli` | Valinnainen mallin nimi (upotetaan kortin etupuolelle) |
+| 5 | `3D-malli` | Valinnainen: simulaattorin lajiavain (`ETANOLI`, `ATP`, `H2O`…, ks. `simulaatiot/kortit/molekyylit.json`). Sivusto upottaa kortin etupuolelle lajin 2D-rakennekaavan ja elävän 3D-mallin vierekkäin. Uusi laji: `tyokalut/molekyyli_3d.py` |
 | 6 | `linkkisanat` | Sanalinkkien laukaisijat — **vain termikorteissa** |
 
 Kortin malli (template):

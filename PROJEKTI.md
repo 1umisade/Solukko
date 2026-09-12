@@ -81,6 +81,12 @@ Korttityyppi on **`Solukko`**, id `1727391050`, kuusi kenttää:
   kuorimalli. Valinta muistetaan (`localStorage solukko-molDim`). Ei videoita: omistaja poisti ne 10.9.2026. Laukaisijat tulevat `simulaatiot/kortit/molekyylit.json`:ista (`_molMap`, `_wrapMolHtml`
   index.html:ssä) — uusi laji = uusi rivi JSONiin + video. HTML-muotoiset kaavat kaaritaan DOM-solmuina
   (`_wrapMolHtml`), koska tekstisolmuregex ei näe `<sub>`-tagien yli.
+- **`3D-malli`-kenttä** on simulaattorin lajiavain (`ETANOLI`, `ASETONI`, `ATP`…). Sivusto upottaa kortin etupuolelle
+  kaksi neliötä vierekkäin: lajin 2D-rakennekaavan (`simulaatiot/kortit/2d/<avain>.svg`) ja elävän 3D-mallin
+  (`simulaatiot/kortti.html?tila=kortti&laji=<avain>`, `EMBED_3D_BASE` index.html:ssä). Etupuolella malli ei ota hiirtä
+  (klikkaus kääntää kortin), vastauspuolella sitä voi pyörittää. Ensimmäinen käyttö: funktionaalisten ryhmien 25
+  termikorttia Solu L1:ssä (12.9.2026, `tyokalut/ryhmat_kortit.py`), joiden mallimolekyylit (`tyokalut/ryhmat_3d.py`:
+  etanoli, asetoni, asetaatti, metaanitioli…) ovat samalla popupin lajeja.
 - Mitat: suppea ≤ 15 sanaa, laaja 45–65 sanaa. Ei puolipisteitä, käytä pistettä.
 - Termistö on lyöty lukkoon (`lähetti-RNA` ei `mRNA`, `tuma` ei `nucleus`, `solulima` ei
   `sytoplasma`, `genomi` ei `perimä`, `vesikatkaisu` ei `hydrolyysi`, …). Koko taulukko on `kurssit/CLAUDE.md` §10.
