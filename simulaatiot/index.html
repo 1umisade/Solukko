@@ -8759,9 +8759,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         /* N / M roll is not an ArcRotate angle - it lives in cam.upVector. Read it back as the signed angle,
            about the view axis, between the camera's real screen-up and LEVEL up (world Z with the forward
            component removed). 0 = level horizon, the sign follows R (+) and F (-). */
-        let roll = 0; { const t = cam.getTarget(), fw = t.subtract(p).normalize(), up = cam.getDirection(BABYLON.Axis.Y).normalize();
-          const lv = new BABYLON.Vector3(0, 0, 1); lv.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(lv, fw)));
+        let roll = 0; const _t = cam.getTarget(), _fw = _t.subtract(p).normalize(), _up = cam.getDirection(BABYLON.Axis.Y).normalize();
+        { const fw = _fw, up = _up, lv = new BABYLON.Vector3(0, 0, 1); lv.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(lv, fw)));
           if(lv.lengthSquared() > 1e-6){ lv.normalize(); roll = Math.atan2(BABYLON.Vector3.Dot(BABYLON.Vector3.Cross(lv, up), fw), BABYLON.Vector3.Dot(up, lv)) * DEG; } }
+        const v3 = v => v.x.toFixed(3)+', '+v.y.toFixed(3)+', '+v.z.toFixed(3);   // the full rotation as the view axis and the screen-up (owner 12.9.2026): with sij. these pin the camera exactly, whatever the up vector's history
         if(!gInstr){ gInstr = new BABYLON.SceneInstrumentation(scene);
           gInstr.captureFrameTime = true; gInstr.captureActiveMeshesEvaluationTime = true; gInstr.captureRenderTime = true;
           scene.onAfterRenderObservable.add(() => { gDraws = gInstr.drawCallsCounter.current; }); }
@@ -8781,6 +8782,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
                     + '<br>hsl '+eng2.getHardwareScalingLevel().toFixed(2) : '')
           +'<br>sij. '+p.x.toFixed(0)+', '+p.y.toFixed(0)+', '+p.z.toFixed(0)
           +'<br>α '+(cam.alpha*DEG).toFixed(1)+'°  β '+(cam.beta*DEG).toFixed(1)+'°  kierto '+roll.toFixed(1)+'°'
+          +'<br>katse '+v3(_fw)+'<br>ylä '+v3(_up)
           +(window.__padState ? '<br>ohjaimia '+window.__padState.n+' ('+window.__padState.mapping+')  L2 '+window.__padState.L2+'  R2 '+window.__padState.R2+'  L1 '+window.__padState.L1+'  R1 '+window.__padState.R1+'<br>tikut '+window.__padState.axes.join(' ')+'<br>'+window.__padState.ids.join(' | ') : '<br>ohjain: ei')
           +'<br>et. '+Math.abs(cam.radius).toFixed(0);
         // Drop the dev slider panel below this readout — both are pinned right:16px, so the panel's own
@@ -8845,7 +8847,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       gProtSlab[h.mi] = want;
       if(h.slab.isEnabled() !== want){ h.slab.setEnabled(want);
         if(want){ const o=h.mi*3;   // the model's own colour, dimmed like packed atoms against a flat fill
-          h.sMat.emissiveColor.set(gModelCol[o]*0.72, gModelCol[o+1]*0.72, gModelCol[o+2]*0.72); } }
+          const m = mols[h.mi];
+          if(m && m.cfg && m.cfg.match === 'chlorophyll' && gSlabN){   // the chlorophyll's slab wears the thylakoid membrane's slab green, not its neon cofactor green (owner 12.9.2026)
+            let r = gSlabR/gSlabN, g = gSlabG/gSlabN, b = gSlabB/gSlabN;   // the lipids' own mean...
+            const tn = SOLU && SOLU_CELL && SOLU_CELL.THY && SOLU_CELL.THY.tint;   // ...tinted exactly as the thylakoid shell tints it
+            if(tn){ const a = 0.72, f = 0.5 + 0.6*(0.3*r + 0.59*g + 0.11*b); r = r*(1-a) + tn[0]*f*a; g = g*(1-a) + tn[1]*f*a; b = b*(1-a) + tn[2]*f*a; }
+            const K = (1 - gSlabDark) * 0.80;   // the shell's own darkening and the grain's mean tone, so the two read as one green
+            h.sMat.emissiveColor.set(r*K, g*K, b*K); }
+          else h.sMat.emissiveColor.set(gModelCol[o]*0.72, gModelCol[o+1]*0.72, gModelCol[o+2]*0.72); } }
     }
     if(gMemSlab){
       /* Colour the slab from what the lipid spheres actually render, not from raw element colours: the
