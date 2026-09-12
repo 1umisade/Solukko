@@ -83,3 +83,7 @@ K("Mikä on proteaasi?",
   "Proteaasit katkaisevat peptidisidoksen lisäämällä siihen veden. Ruoansulatuksen proteaasit, kuten pepsiini ja trypsiini, hajottavat ravinnon proteiinit aminohapoiksi. Solun sisällä proteaasit hajottavat vaurioituneet ja tarpeettomat proteiinit, aktivoivat esiasteita katkaisemalla niistä palan ja säätelevät signaaleja. Proteiinien puhdistuksessa solun omat proteaasit ovat uhka, joka torjutaan proteaasi-inhibiittoreilla ja kylmällä. Kutsutaan myös: peptidaasi.",
   3, L('proteaasi', ['peptidaasi', 'peptidaasin', 'peptidaasit', 'proteolyysi', 'proteolyysin', 'proteolyysiä', 'proteolyyttinen', 'proteolyyttisen'])),
 ]
+
+# toinen kierros (omistaja 12.9.2026: jokaikinen sana): solu_sanasto2.py:n lista jatkoksi, numerointi jatkuu
+import solu_sanasto2
+KORTIT += solu_sanasto2.L2

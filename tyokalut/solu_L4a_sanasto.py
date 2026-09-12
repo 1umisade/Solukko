@@ -39,3 +39,7 @@ K("Mikä on nukleotiditrifosfaatti?",
   "Nukleotiditrifosfaatissa sokerin 5'-hiileen on liittynyt kolme fosfaattia peräkkäin, ja niiden väliset fosfoanhydridisidokset ovat energiarikkaita. RNA-polymeraasi ja DNA-polymeraasi käyttävät trifosfaatteja rakennusaineina: liittäminen ketjuun vapauttaa kaksi fosfaattia pyrofosfaattina, ja sen energia ajaa reaktion. ATP ja GTP ovat lisäksi solun yleiskäyttöisiä energian kantajia, ja sykliset nukleotidit toimivat viestimolekyyleinä. Kutsutaan myös: NTP, dNTP.",
   2, L('nukleotiditrifosfaatti', ['trifosfaatti', 'trifosfaatin', 'trifosfaattia', 'trifosfaatit', 'NTP', 'dNTP', 'GTP', 'GTP:n', 'GTP:tä', 'pyrofosfaatti', 'pyrofosfaatin', 'pyrofosfaattia'])),
 ]
+
+# toinen kierros (omistaja 12.9.2026: jokaikinen sana): solu_sanasto2.py:n lista jatkoksi, numerointi jatkuu
+import solu_sanasto2
+KORTIT += solu_sanasto2.L4a

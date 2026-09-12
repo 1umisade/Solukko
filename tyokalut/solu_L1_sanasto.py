@@ -181,3 +181,7 @@ K("Mikä on gramvärjäys?",
   "Gramvärjäyksessä bakteerit värjätään kristallivioletilla, käsitellään jodilla ja huuhdellaan alkoholilla. Gram-positiivisilla on paksu peptidoglykaanikerros, joka pidättää värin, ja ne näkyvät violetteina. Gram-negatiivisilla peptidoglykaani on ohut ja sitä ympäröi ulkokalvo, joten väri huuhtoutuu ja solut värjäytyvät vastavärillä punaisiksi. Menetelmän kehitti Hans Christian Gram 1884, ja se ohjaa yhä antibiootin valintaa.",
   2, L('gramvärjäys', ['gram-positiivinen', 'gram-positiivisen', 'gram-positiivista', 'gram-positiiviset', 'gram-positiivisia', 'grampositiivinen', 'grampositiiviset'])),
 ]
+
+# toinen kierros (omistaja 12.9.2026: jokaikinen sana): solu_sanasto2.py:n lista jatkoksi, numerointi jatkuu
+import solu_sanasto2
+KORTIT += solu_sanasto2.L1

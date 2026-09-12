@@ -60,3 +60,7 @@ K("Mikä on vetyperoksidi?",
   "",
   2, L('vetyperoksidi')),
 ]
+
+# toinen kierros (omistaja 12.9.2026: jokaikinen sana): solu_sanasto2.py:n lista jatkoksi, numerointi jatkuu
+import solu_sanasto2
+KORTIT += solu_sanasto2.L3

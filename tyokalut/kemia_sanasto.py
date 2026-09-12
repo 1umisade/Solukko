@@ -197,7 +197,7 @@ K("Mikä on keskimääräiskenttä?",
   "",
   1, L('keskimääräiskenttä', ['self-consistent field', 'SCF', 'keskimääräiskenttämenetelmä', 'keskimääräiskenttämenetelmän'])),
 K("Mikä on Einsteinin massa-energia-yhtälö?",
-  "E = mc<sup>2</sup>: energia ja massa vastaavat toisiaan. Planckin yhtälön kanssa se antaa fotonille liikemäärän.",
+  "E = mc<sup>2</sup>: energia ja massa vastaavat toisiaan. Antaa fotonille liikemäärän.",
   "",
   1, L(['suhteellisuusteoria', 'suhteellisuusteorian', 'suhteellisuusteoriaa', 'suhteellisuusteoriassa', 'massa-energia-yhtälö', 'massa-energia-yhtälön', 'E = mc²', 'E=mc²'])),
 K("Mikä on hiukkas-aaltoluonne?",
@@ -206,3 +206,8 @@ K("Mikä on hiukkas-aaltoluonne?",
   2, L(['hiukkasluonne', 'hiukkasluonteen', 'hiukkasluonnetta', 'aaltoluonne', 'aaltoluonteen', 'aaltoluonnetta', 'aaltoliikeluonne', 'aaltoliikeluonteen', 'aaltoliikeluonnetta', 'kaksoisluonne', 'kaksoisluonteen', 'kaksoisluonnetta'])),
 ]),
 ]
+
+# toinen kierros (omistaja 12.9.2026: jokaikinen sana): kemia_sanasto2.py:n listat jatkoksi, numerointi jatkuu
+import kemia_sanasto2
+for _l, _lisa in zip(LUENNOT, kemia_sanasto2.LUENNOT):
+    _l["KORTIT"] += _lisa

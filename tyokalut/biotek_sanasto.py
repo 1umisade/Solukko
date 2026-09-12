@@ -248,3 +248,9 @@ K("Mikä on hormonipitoisuuden määritys?",
   "",
   2),
 ])
+
+# toinen kierros (omistaja 12.9.2026: jokaikinen sana): biotek_sanasto2.py:n listat jatkoksi, numerointi jatkuu
+import biotek_sanasto2
+L1["KORTIT"] += biotek_sanasto2.L1
+L2["KORTIT"] += biotek_sanasto2.L2
+L3["KORTIT"] += biotek_sanasto2.L3

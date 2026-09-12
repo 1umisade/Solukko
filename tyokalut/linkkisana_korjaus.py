@@ -3,14 +3,12 @@
 linkata tumaan vaan eukaryoottiin', kromosomin pilus 'ilmiselva virhe'). Sama sana saa olla linkkisanana vain yhdella
 kortilla, koska sivusto linkittaa ensimmaiseen osumaan. POISTOT: (kysymyksen alku, poistettava sanan alku).
   1. patchaa SOLUKKO.apkg:n paikallaan
-  2. kirjoittaa kurssit/Linkkisana-korjaus.apkg, jossa ovat VAIN muutetut muistiinpanot samoilla guideilla -> Ankiin tuotaessa
-     paivittaa ne (File > Import, Update existing notes)
+  2. (korjaus-apkg:ta ei enaa kirjoiteta, omistaja 12.9.2026) - samat muutokset tehdaan Ankiin kasin
 Idempotentti. Aja: python tyokalut/linkkisana_korjaus.py"""
 import zipfile, sqlite3, tempfile, os, shutil, json, re, time, io
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(REPO, 'SOLUKKO.apkg')
-OUT = os.path.join(REPO, 'kurssit', 'Linkkisana-korjaus.apkg')
 SEP = '\x1f'
 POISTOT = [('(1.020) Mikä on tuma?', 'tumallis'), ('(1.020) Mikä on tuma?', 'tumallinen'),
            ('(1.033) Mikä on kromosomi?', 'pilu')]
@@ -19,7 +17,8 @@ LISAYKSET = [('(1.033) Mikä on kromosomi?', ['kromosomi', 'kromosomin', 'kromos
               'kromosomit', 'kromosomien', 'kromosomeja', 'kromosomeissa', 'kromosomisto', 'kromosomiston', 'kromosomistoa'])]
 # POISTA_KORTIT: kaksoismaaritelmat, jotka on poistettu sanastomoduuleista mutta jaavat omistajan Ankiin (tuonti ei poista);
 # poistetaan SOLUKKO.apkg:sta joka ajolla, kunnes omistaja poistaa ne Ankista kasin
-POISTA_KORTIT = ['(3.107) Mikä on kromosomi?']
+POISTA_KORTIT = ['(3.107) Mikä on kromosomi?',
+                 '(2.034) Mikä on lähetti-RNA-rokote?']   # biotek L2:n kaksoiskortti omistajan L1-kortille, nimetty uudelleen nukleiinihapporokotteeksi 12.9.2026
 # luentopakan oma Esittely (vain kurssipakalla saa olla, kurssit/CLAUDE.md §6): tuli takaisin vanhasta Vesikatkaisu-korjaus.apkg:sta
 POISTA_ESITTELY_PAKAT = ['Luento 2 - Vesi']
 
@@ -58,22 +57,5 @@ if __name__ == '__main__':
                 else: zout.writestr(it, zin.read(it.filename))
         os.replace(tmp, SRC); print('SOLUKKO.apkg patchattu:', len(muutetut), 'muistiinpanoa')
     else: print('SOLUKKO.apkg: ei muutettavaa')
-    con = sqlite3.connect(db); cur = con.cursor(); q = ','.join(str(n) for n in paketti)
-    cur.execute("update notes set mod=?, usn=-1 where id in (%s)" % q, (now,))
-    cur.execute("delete from cards where nid not in (%s)" % q); cur.execute("delete from notes where id not in (%s)" % q)
-    cur.execute("delete from revlog"); cur.execute("delete from graves"); cur.execute("update cards set mod=?, usn=-1", (now,))
-    con.commit()
-    used = set()
-    for (flds,) in cur.execute("select flds from notes"):
-        for m in re.findall(r'src\s*=\s*["\']([^"\']+)["\']', flds): used.add(os.path.basename(m))
-    con.close()
-    mediamap = json.loads(io.open(os.path.join(work, 'media'), encoding='utf-8').read() or '{}'); uusi = {}; i = 0
-    if os.path.exists(OUT): os.remove(OUT)
-    with zipfile.ZipFile(OUT, 'w', zipfile.ZIP_DEFLATED) as z:
-        z.write(db, 'collection.anki21')
-        for num, name in mediamap.items():
-            if name in used and os.path.exists(os.path.join(work, num)):
-                z.write(os.path.join(work, num), str(i)); uusi[str(i)] = name; i += 1
-        z.writestr('media', json.dumps(uusi, ensure_ascii=False))
-    print('kirjoitettu', os.path.relpath(OUT, REPO), '-', len(paketti), 'muistiinpanoa')
+    # korjaus-apkg:ta ei enaa kirjoiteta (omistaja 12.9.2026: vain SOLUKKO.apkg) - Ankiin muutokset tehdaan kasin
     shutil.rmtree(work, ignore_errors=True)
