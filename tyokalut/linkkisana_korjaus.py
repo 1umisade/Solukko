@@ -20,6 +20,8 @@ LISAYKSET = [('(1.033) Mikä on kromosomi?', ['kromosomi', 'kromosomin', 'kromos
 # POISTA_KORTIT: kaksoismaaritelmat, jotka on poistettu sanastomoduuleista mutta jaavat omistajan Ankiin (tuonti ei poista);
 # poistetaan SOLUKKO.apkg:sta joka ajolla, kunnes omistaja poistaa ne Ankista kasin
 POISTA_KORTIT = ['(3.107) Mikä on kromosomi?']
+# luentopakan oma Esittely (vain kurssipakalla saa olla, kurssit/CLAUDE.md §6): tuli takaisin vanhasta Vesikatkaisu-korjaus.apkg:sta
+POISTA_ESITTELY_PAKAT = ['Luento 2 - Vesi']
 
 if __name__ == '__main__':
     work = tempfile.mkdtemp()
@@ -27,9 +29,12 @@ if __name__ == '__main__':
     db = os.path.join(work, 'collection.anki21'); con = sqlite3.connect(db); cur = con.cursor()
     models = json.loads(cur.execute("select models from col").fetchone()[0])
     now = int(time.time()); muutetut = []; paketti = []   # paketti: kaikki saannon kortit, myos jo korjatut (Ankiin)
+    decks = json.loads(cur.execute("select decks from col").fetchone()[0])
     for nid, flds in cur.execute("select id, flds from notes").fetchall():
         q = re.sub('<[^>]*>', '', flds.split(SEP)[0]).replace('&nbsp;', ' ').strip()
-        if q in POISTA_KORTIT:
+        did = cur.execute("select did from cards where nid=?", (nid,)).fetchone()
+        pakka = decks[str(did[0])]['name'].split('::')[-1] if did else ''
+        if q in POISTA_KORTIT or (q == 'Esittely' and pakka in POISTA_ESITTELY_PAKAT):
             cur.execute("delete from cards where nid=?", (nid,)); cur.execute("delete from notes where id=?", (nid,)); muutetut.append(nid)
             print('  poistettu kortti', q, '(poista se myos Ankista kasin)')
     for nid, mid, flds in cur.execute("select id, mid, flds from notes").fetchall():
