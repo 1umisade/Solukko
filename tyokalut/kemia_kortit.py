@@ -6,7 +6,7 @@ Aja: python tyokalut/kemia_kortit.py"""
 import os, sys
 SC = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, SC)
 from pakka_rakenna import rakenna, REPO
-import kemia1_kortit
+import kemia1_kortit, kemia_sanasto
 
 if __name__ == '__main__':
-    rakenna(os.path.join(REPO, 'kurssit', 'Kemian peruskurssi I'), '::Kemian peruskurssi I', kemia1_kortit.LUENNOT, 'solukko-kemia1')
+    rakenna(os.path.join(REPO, 'kurssit', 'Kemian peruskurssi I'), '::Kemian peruskurssi I', kemia1_kortit.LUENNOT + kemia_sanasto.LUENNOT, 'solukko-kemia1')

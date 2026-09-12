@@ -59,6 +59,9 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
     parent = next(d for d in decks.values() if d['name'].endswith(parent_loppu))
     sisar = next(d for d in decks.values() if d['name'].endswith(sisar_loppu)) if sisar_loppu else parent
     now = int(time.time())
+    # uuden noten id: juokseva luku nykyhetken ms-leimasta tai tietokannan suurimmasta id:sta ylospain (kaksi rakentajaa
+    # perakkain samalla sekunnilla tormasi ennen: now*1000 + luento*1000 osui edellisen ajon ideihin)
+    seuraava = [max(now * 1000, (cur.execute("select max(id) from notes").fetchone()[0] or 0) + 1, (cur.execute("select max(id) from cards").fetchone()[0] or 0) + 1)]
     muut = {}
     for nid, guid, flds in cur.execute("select id, guid, flds from notes").fetchall():
         f = flds.split(SEP)
@@ -74,6 +77,7 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
     kaikki_nid = {}
     for li, M in enumerate(luennot):
         LEHTI, NRO, KORTIT = _g(M, 'LEHTI'), str(_g(M, 'NRO')), _g(M, 'KORTIT')
+        ALKU = (M.get('ALKU', 0) if isinstance(M, dict) else getattr(M, 'ALKU', 0))   # numeroinnin alku: lisays olemassa olevaan pakkaan jatkaa sen numeroita (esim. 300 -> 1.301...)
         name = parent['name'] + '::' + LEHTI
         target = next((d for d in decks.values() if d['name'] == name), None)
         if target: did = int(target['id'])
@@ -93,7 +97,7 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
                 if w in muut and muut[w][0] != guid: print('  HUOM linkkisana on jo kortilla "%s": %s' % (muut[w][1], w))
             laaja = k['l']
             if k['kuva']: lisaa_media(k['kuva']); laaja += '<br><img src="%s">' % k['kuva']
-            fields = ['(%s.%03d) %s' % (NRO, i + 1, k['q']), k['s'], laaja, k['tt'], '', k['ls']]
+            fields = ['(%s.%03d) %s' % (NRO, ALKU + i + 1, k['q']), k['s'], laaja, k['tt'], '', k['ls']]
             jak[k['tt']] += 1; termit += bool(k['ls'])
             sfld = re.sub('<[^>]*>', '', fields[0]).strip(); csum = int(hashlib.sha1(sfld.encode('utf-8')).hexdigest()[:8], 16)
             row = cur.execute("select id, flds from notes where guid=?", (guid,)).fetchone()
@@ -102,9 +106,9 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
                 if row[1] != SEP.join(fields):
                     cur.execute("update notes set flds=?, sfld=?, csum=?, mod=?, usn=-1 where id=?", (SEP.join(fields), sfld, csum, now, nid)); paivitetyt += 1
             else:
-                nid = now * 1000 + li * 1000 + i * 2
+                nid = seuraava[0]; seuraava[0] += 2
                 cur.execute("insert into notes values (?,?,?,?,?,?,?,?,?,?,?)", (nid, guid, MID, now, -1, '', SEP.join(fields), sfld, csum, 0, ''))
-                cur.execute("insert into cards values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (nid + 1, nid, did, 0, now, -1, 0, 0, i + 1, 0, 0, 0, 0, 0, 0, 0, 0, ''))
+                cur.execute("insert into cards values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (nid + 1, nid, did, 0, now, -1, 0, 0, ALKU + i + 1, 0, 0, 0, 0, 0, 0, 0, 0, ''))
                 uudet += 1
             nids.append(nid)
         # muiden korttien linkkisanat tunnetaan nyt myos taman luennon osalta (seuraavat luennot eivat saa toistaa niita)
@@ -134,7 +138,8 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
         for (flds,) in cur.execute("select flds from notes"):
             for m in re.findall(r'src\s*=\s*["\']([^"\']+)["\']', flds): used.add(os.path.basename(m))
         con.close()
-        out = os.path.join(kansio, LEHTI.replace(':', ',') + '.apkg')
+        TIEDOSTO = (M.get('TIEDOSTO') if isinstance(M, dict) else getattr(M, 'TIEDOSTO', None)) or LEHTI   # lisayspaketti olemassa olevaan pakkaan saa oman tiedostonimen
+        out = os.path.join(kansio, TIEDOSTO.replace(':', ',') + '.apkg')
         if os.path.exists(out): os.remove(out)
         mm = {}; i = 0
         with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:

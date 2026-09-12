@@ -7,8 +7,8 @@ Aja: python tyokalut/biotek_kortit.py"""
 import os, sys
 SC = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, SC)
 from pakka_rakenna import rakenna, REPO
-import biotek_L2_kortit, biotek_L3_kortit
+import biotek_L2_kortit, biotek_L3_kortit, biotek_sanasto
 
 if __name__ == '__main__':
-    rakenna(os.path.join(REPO, 'kurssit', 'Johdatus biotekniikkaan'), '::Johdatus biotekniikkaan', [biotek_L2_kortit, biotek_L3_kortit],
+    rakenna(os.path.join(REPO, 'kurssit', 'Johdatus biotekniikkaan'), '::Johdatus biotekniikkaan', [biotek_L2_kortit, biotek_L3_kortit, biotek_sanasto.L1, biotek_sanasto.L2, biotek_sanasto.L3],
             'solukko-biotek', sisar_loppu='::Johdatus biotekniikkaan::Luento 1 - Mitä biotekniikka on')

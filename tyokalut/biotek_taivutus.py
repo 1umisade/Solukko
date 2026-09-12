@@ -38,9 +38,18 @@ def taiv(w):
     if w.endswith('luku'):   # massaluku -> massaluvun (k -> v)
         b = w[:-2] + 'v'
         return [w, b+'un', w+'a', b+'ussa', b+'usta', w+'un', b+'ut', w+'jen', w+'ja', b+'uissa']
-    if w.endswith('o') or w.endswith('ö'):   # jakso -> jakson, jaksoa, jaksojen
-        v = w[-1]
-        return [w, w+'n', w+A, w+'ss'+A, w+'st'+A, w+v+'n', w+'t', w+'jen', w+'j'+A, w+'iss'+A]
+    if w.endswith('u') or w.endswith('y'):   # sivuketju -> sivuketjun, sivuketjua, sivuketjujen (hiilivety -> hiilivedyn: ty -> dy)
+        v = w[-1]; b = w
+        for vahva, heikko in (('nk', 'ng'), ('kk', 'k'), ('tt', 't'), ('pp', 'p'), ('t', 'd'), ('k', ''), ('p', 'v')):
+            if w[:-1].endswith(vahva) and not (vahva in ('t', 'k', 'p') and w[:-1].endswith(vahva * 2)):
+                b = w[:-1][:-len(vahva)] + heikko + v; break
+        return [w, b+'n', w+A, b+'ss'+A, b+'st'+A, w+v+'n', b+'t', w+'jen', w+'j'+A, b+'iss'+A]
+    if w.endswith('o') or w.endswith('ö'):   # jakso -> jakson, jaksoa, jaksojen; astevaihtelu: hiilirunko -> hiilirungon, olomuoto -> olomuodon
+        v = w[-1]; b = w
+        for vahva, heikko in (('nk', 'ng'), ('kk', 'k'), ('tt', 't'), ('pp', 'p'), ('t', 'd'), ('k', ''), ('p', 'v')):
+            if w[:-1].endswith(vahva) and not (vahva in ('t', 'k', 'p') and w[:-1].endswith(vahva * 2)):
+                b = w[:-1][:-len(vahva)] + heikko + v; break
+        return [w, b+'n', w+A, b+'ss'+A, b+'st'+A, w+v+'n', b+'t', w+'jen', w+'j'+A, b+'iss'+A]
     if w.endswith('e'):
         b = w + 'e'
         return [w, b+'n', w+'tt'+A, b+'ss'+A, b+'st'+A, b+'seen', b+'t', w+'iden', w+'it'+A, w+'iss'+A]
