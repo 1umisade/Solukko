@@ -4676,21 +4676,11 @@ void main(void){
   /* 'Kalvostoon' (owner, 2026-09-09): a slow flight from wherever the camera is into the thylakoid scene - the sheet's
      old default view, now inside the host chloroplast - over FLY_S seconds, eased, target and position together.
      Any control (a press, a wheel notch, a key) breaks it off. */
-  /* The destination is the owner's exact dev-readout view (12.9.2026): sij. 33, 224, -904 · α -448.7° β 68.5° kierto 1.3° · et. 386.
-     Rebuilt the way the readout was made: ArcRotate puts the position at target + r·(cos α sin β, cos β, sin α sin β) in
-     the frame where cam.upVector is Y (setMatUp's yToUp matrix); β is the angle between cam.upVector and the offset,
-     and the roll is the angle of the real SCREEN-up (cam.upVector with its view-axis component removed) from level
-     (world Z) about the view axis. So the up vector is U = -cos β·fw + sin β·screenUp, where fw itself comes from
-     (α, β) in U's frame - a fixed point, settled by substitution from level up (a few rounds, checked at load). */
-  const POSE = (() => { const pos = new BABYLON.Vector3(33, 224, -904), a = -448.7*Math.PI/180, b = 68.5*Math.PI/180, roll = 1.3*Math.PI/180, r = 386;
-    const off = new BABYLON.Vector3(Math.cos(a)*Math.sin(b), Math.cos(b), Math.sin(a)*Math.sin(b));   // the unit offset (target -> position) in the up-is-Y frame
-    let up = new BABYLON.Vector3(0, 0, 1), fw = null; const m = new BABYLON.Matrix(), o = new BABYLON.Vector3();
-    for(let i=0;i<24;i++){ BABYLON.Matrix.RotationAlignToRef(BABYLON.Vector3.Up(), up, m); BABYLON.Vector3.TransformCoordinatesToRef(off, m, o);
-      fw = o.scale(-1);   // the view axis this up vector gives
-      const lv = new BABYLON.Vector3(0, 0, 1); lv.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(lv, fw))); lv.normalize();
-      const sUp = lv.scale(Math.cos(roll)).add(BABYLON.Vector3.Cross(fw, lv).scale(Math.sin(roll)));   // the screen-up the readout's roll means
-      const nu = fw.scale(-Math.cos(b)).add(sUp.scale(Math.sin(b))).normalize();
-      const done = BABYLON.Vector3.Distance(nu, up) < 1e-7; up = nu; if(done) break; }
+  /* The destination is the owner's exact dev-readout view (12.9.2026, second readout): sij. 19, 166, -1003 ·
+     katse 0.054, -0.191, 0.980 · ylä -0.312, 0.929, 0.198 · et. 426. The readout's katse/ylä lines ARE the rotation:
+     target = sij. + katse·et., cam.upVector = ylä (the screen-up is a valid up vector - β comes out 90°, the roll stays). */
+  const POSE = (() => { const pos = new BABYLON.Vector3(19, 166, -1003), fw = new BABYLON.Vector3(0.054, -0.191, 0.980).normalize(), up = new BABYLON.Vector3(-0.312, 0.929, 0.198), r = 426;
+    up.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(up, fw))).normalize();   // exactly perpendicular to the view axis (the readout is rounded to three decimals)
     return { pos, tgt: pos.add(fw.scale(r)), up }; })();
   { const FLY_S = 14, TGT = POSE.tgt, POS = POSE.pos, UP = POSE.up;
     let fly = null;
