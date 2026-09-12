@@ -202,3 +202,7 @@ ja nakyy myos kemiaeditorin palettissa. Esimerkki: G6P (glukoosi-6-fosfaatti, CI
 ## DNA Webcytessa
 
 Tuman 1000 emasparin B-DNA on oikeita atomeja ja jokainen nukleotidi oma lenkkinsa: `tyokalut/dna_nukleotidit.py` tekee `simulaatiot/DNA.mol2`:sta (ChimeraX, 1D28 + addh) 8 nukleotidimallia (`nukleotidit.mol2`), ja katselija asettelee 2000 lenkkia joka frame huojuvalle koysiakselille tekstuuripohjaisella LINKS-shaderpolulla (kuoret, ytimet, orbitaalit ja kaukotaso samoilla shadereilla kuin proteiinit). Yksityiskohdat simulaatiot/AGENT_NOTES.md.
+
+## Valoreaktiot kalvostossa (simulaatiot, 12.9.2026)
+
+Kalvostotilassa fotonit virittavat oikeita klorofylleja, eksitoni vaeltaa P680:lle/P700:lle, elektronit hyppivat kofaktorilta toiselle (PheoD1, QA, QB, Rieske, hemit, PC, A0, FX/FA/FB, Fd, FNR), OEC halkaisee oikeita vesimolekyyleja O2:ksi ja protoneiksi lumeniin, PQ- ja PC-sukkulat kuljettavat oikean lastin. Roolit paatellaan rakenteiden geometriasta. Yksityiskohdat ja dev-koukut (`window.__valo()`): simulaatiot/AGENT_NOTES.md, kohta "Valoreaktiot kalvostossa".
