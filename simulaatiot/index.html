@@ -5072,7 +5072,6 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(gDevBox) gDevBox.setEnabled(gDev);
       if(gDevPlane) gDevPlane.setEnabled(gDev);
       if(gDevPsuBox) gDevPsuBox.setEnabled(gDev);
-      { const pdb = document.getElementById('plane-dim-btn'); if(pdb) pdb.style.display = gDev ? '' : 'none'; }   // the Tasohiukkaset button is a dev tool
       applyDevMode(); }); }
   { const etcBtn = document.getElementById('etc-btn');   // highlight the electron-transport cofactors on top of everything
     if(etcBtn) etcBtn.addEventListener('click', () => { gEtc = !gEtc;
@@ -11605,8 +11604,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       document.documentElement.classList.add('nopills');
       pb.addEventListener('click', () => { const on = document.documentElement.classList.toggle('nopills'); pb.classList.toggle('on', !on); });
       document.body.appendChild(pb); }
-    { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Tasohiukkaset'; tb.title = 'Dev: PSU-laatikon sisällä piirretään vain tason 100 hiukkasta joka lajia, muut jätetään piirtämättä';
-      tb.style.display = gDev ? '' : 'none';   // a dev tool: shown while Dev is on
+    { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 100 hiukkasta joka lajia, muut jätetään piirtämättä';   // in the gear menu for everyone (owner 12.9.2026)
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn','membrane-btn',
