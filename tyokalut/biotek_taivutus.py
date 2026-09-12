@@ -32,6 +32,12 @@ def taiv(w):
     if w.endswith('nen'):
         b = w[:-3] + 'se'
         return [w, b+'n', w[:-3]+'st'+A, b+'ss'+A, b+'st'+A, b+'en', b+'t', w[:-3]+'sten', w[:-3]+'si'+A, w[:-3]+'siss'+A]
+    if w.endswith('luku'):   # massaluku -> massaluvun (k -> v)
+        b = w[:-2] + 'v'
+        return [w, b+'un', w+'a', b+'ussa', b+'usta', w+'un', b+'ut', w+'jen', w+'ja', b+'uissa']
+    if w.endswith('o') or w.endswith('ö'):   # jakso -> jakson, jaksoa, jaksojen
+        v = w[-1]
+        return [w, w+'n', w+A, w+'ss'+A, w+'st'+A, w+v+'n', w+'t', w+'jen', w+'j'+A, w+'iss'+A]
     if w.endswith('e'):
         b = w + 'e'
         return [w, b+'n', w+'tt'+A, b+'ss'+A, b+'st'+A, b+'seen', b+'t', w+'iden', w+'it'+A, w+'iss'+A]
