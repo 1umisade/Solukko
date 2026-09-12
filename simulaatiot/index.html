@@ -3880,7 +3880,8 @@ void main(void){
   let panning = false, panDepth = 1, modelDrag = -1, modelDragDepth = 1, rotating = false;
   let mdYaw = 0, mdPitch = 0;   // middle-drag look-around (Webcyte): pending yaw / pitch in radians, applied each frame and decayed by cam.inertia like Babylon's own inertial offsets   // pan state · which molecule a left-drag is moving (+its depth) · middle-drag rotate
   let joyPan = false, joyOX = 0, joyOY = 0;   // BOTH-buttons directional pan · press-point (screen px) the joystick offset is measured from
-  let rightPan = false, rightMoved = false, rdX = 0, rdY = 0;   // RIGHT-drag grab-pans the floor (owner 12.9.2026); a right TAP is the move order
+  let rightPan = false, rightMoved = false, rdX = 0, rdY = 0;   // RIGHT-drag grab-pans the floor (owner 12.9.2026); a right TAP is the move order - only with gRightMove on
+  let gRightMove = false;   // the right-tap move order is OFF by default (owner 12.9.2026); the dev button 'oikea napautus siirtaa' turns it on
   // Custom cursors (the grab PNG). setCursor writes the style ONLY when it actually changes — re-assigning a
   // url() cursor every mousemove makes the browser re-fetch the image and FLICKER, so we guard every write.
   const GRAB_CUR = "url('./cursor_grab.png') 20 24, grab";        // open hand → hovering something draggable/clickable
@@ -4545,7 +4546,7 @@ void main(void){
         return; }                                                                       // swallow the release (no select / move / spawn)
       if(e.button === 1){ rotating = false; return; }   // middle-drag rotate ends (inertia carries on)
       if(e.button === 2){ if(rightPan){ rightPan = false;
-          if(!rightMoved){   // a right TAP (no drag) = the move order
+          if(!rightMoved && gRightMove){   // a right TAP (no drag) = the move order (dev switch, off by default)
             if(gSel.size) moveSelectedTo(scene.pointerX, scene.pointerY);   // sets the glide target + drops the ping
             if(gSelMol.size) moveMoleculesTo(scene.pointerX, scene.pointerY); } }   // selected molecules → move to the point and stop
         return; }
@@ -9615,7 +9616,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      complexes' LIVE centres (12.9.2026: they are re-placed after this first runs, so a one-off box ended up beside
      them and the Puolikas cut / Hiukkastaso cull worked in the wrong place); the loose proteins count with the
      extents they START in, so the walls never close in on them as they drift. */
-  { const loose=new Set(gBouncers.map(b=>b.mi)), M=15, MY=15, _fm=new BABYLON.Matrix(), _fc=new BABYLON.Vector3(), _fp=new BABYLON.Vector3();
+  { const loose=new Set(gBouncers.map(b=>b.mi)), M=300, MY=300, MZ=300, _fm=new BABYLON.Matrix(), _fc=new BABYLON.Vector3(), _fp=new BABYLON.Vector3();   // margins: a LOT bigger than the old 15 (owner 12.9.2026) - room for the loose proteins to roam, and the cut / the plane cull reach well past the complexes
     let lxL=Infinity, lyL=Infinity, lzL=Infinity, hxL=-Infinity, hyL=-Infinity, hzL=-Infinity;   // the loose proteins' starting extents
     for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !loose.has(mi)) continue; const c=mInfo[mi]; if(!c) continue;
       const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];
@@ -9626,9 +9627,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const px=_fp.x, py=_fp.y, pz=_fp.z;
         lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
       if(!any) return;
-      { const hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5); lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
+      { const hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5) + MZ; lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
-      gPsuLo.set(lx-M, ly-MY, lz-M); gPsuHi.set(hx+M, hy+MY, hz+M);   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
+      gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
       if(!gDevPsuBox){ const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {size:1}, scene);
         const bm=new BABYLON.StandardMaterial('devPsuBoxMat', scene); bm.wireframe=true; bm.emissiveColor=new BABYLON.Color3(0.35,0.85,0.75); bm.disableLighting=true;
         bx.material=bm; bx.isPickable=false; bx.setEnabled(gDev); gDevPsuBox=bx; }
@@ -10498,7 +10499,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const syncSl = () => { slBtn.textContent = gSlabLod ? 'laatta-LoD: ON' : 'laatta-LoD: OFF'; slBtn.style.cssText = cullStyle(gSlabLod); };
   slBtn.onclick = () => setSlabLod(!gSlabLod);
   syncSl(); gSlabSync.push(syncSl); slRow.appendChild(slBtn);
-  devPanel.appendChild(cullRow); devPanel.appendChild(selRow); devPanel.appendChild(phRow); devPanel.appendChild(slRow);   // (cullRow had been built but never attached)
+  // Right-tap move order on/off (see gRightMove) - off by default, the right button only pans.
+  const rmRow = document.createElement('div'); const rmBtn = document.createElement('button');
+  const syncRm = () => { rmBtn.textContent = gRightMove ? 'oikea napautus siirtää valinnan: ON' : 'oikea napautus siirtää valinnan: OFF'; rmBtn.style.cssText = cullStyle(gRightMove); };
+  rmBtn.onclick = () => { gRightMove = !gRightMove; syncRm(); };
+  syncRm(); rmRow.appendChild(rmBtn);
+  devPanel.appendChild(cullRow); devPanel.appendChild(selRow); devPanel.appendChild(phRow); devPanel.appendChild(slRow); devPanel.appendChild(rmRow);   // (cullRow had been built but never attached)
   devPanel.appendChild(psRow); devPanel.appendChild(psSld); devPanel.appendChild(ppRow);
   { const vr = document.createElement('div'); vr.id = 'dev-valo-row'; vr.textContent = 'valoreaktiot: -'; devPanel.appendChild(vr); }
   devPanel.appendChild(mvRow); devPanel.appendChild(mvSld);
