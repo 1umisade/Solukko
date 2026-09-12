@@ -3633,12 +3633,17 @@ float hash1(vec2 c){ return fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5453);
 vec2 hash2(vec2 c){ return vec2(hash1(c), hash1(c + vec2(19.3, 7.7))); }
 /* The far tier's look from the owner's picture: tiled over the slab, one dot per lipid. The picture holds about 180 dots
    across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). */
+uniform float laattaK;       // the tile's width in grain pitches (calibrated against the cheap tier, see LAATTA_K)
+uniform vec3 texGain;        // per-channel gain and...
+uniform float texContrast;   // ...contrast about the picture's mean, so the picture lands on the cheap tier's colour and flatness at the handover (measured, see the calibration note)
+uniform vec3 texMean;        // the picture's mean colour (read once at load)
 vec3 laatta(vec2 pq){
-  /* ONE scale only: the picture at its true size, one dot per lipid (T = 360 grain pitches = 180 lipids per tile). It used to
+  /* ONE scale only: the picture at the size the cheap tier has at the handover (laattaK grain pitches per tile). It used to
      re-tile itself at 2x, 4x, 8x... as the dots shrank toward a pixel, so a whole organelle stayed mottled from far away - the
      owner saw that as something made up (12.9.2026: 'use only my png'). Now the mipmaps simply average the picture with distance. */
-  float T = max(grainPitch, 0.5) * 360.0;
-  return texture2D(grainTex, pq / T).rgb;
+  float T = max(grainPitch, 0.5) * laattaK;
+  vec3 c = texture2D(grainTex, pq / T).rgb;
+  return (texMean + (c - texMean) * texContrast) * texGain;
 }
 void main(void){
   /* inside holeR of the camera every lipid is drawn at full density, so the slab steps aside there -
@@ -3781,12 +3786,17 @@ float poreRatio(vec3 d){
 float poreShade(float r){ return poreInner > 0.5 ? 1.0 - 0.55 * (1.0 - smoothstep(1.0, 2.4, r)) : 1.0 - 0.45 * (1.0 - smoothstep(1.0, 1.8, r)); }
 /* The far tier's look from the owner's picture: tiled over the slab, one dot per lipid. The picture holds about 180 dots
    across, so one tile spans 180 lipid pitches (grainPitch is half a pitch). */
+uniform float laattaK;       // the tile's width in grain pitches (calibrated against the cheap tier, see LAATTA_K)
+uniform vec3 texGain;        // per-channel gain and...
+uniform float texContrast;   // ...contrast about the picture's mean, so the picture lands on the cheap tier's colour and flatness at the handover (measured, see the calibration note)
+uniform vec3 texMean;        // the picture's mean colour (read once at load)
 vec3 laatta(vec2 pq){
-  /* ONE scale only: the picture at its true size, one dot per lipid (T = 360 grain pitches = 180 lipids per tile). It used to
+  /* ONE scale only: the picture at the size the cheap tier has at the handover (laattaK grain pitches per tile). It used to
      re-tile itself at 2x, 4x, 8x... as the dots shrank toward a pixel, so a whole organelle stayed mottled from far away - the
      owner saw that as something made up (12.9.2026: 'use only my png'). Now the mipmaps simply average the picture with distance. */
-  float T = max(grainPitch, 0.5) * 360.0;
-  return texture2D(grainTex, pq / T).rgb;
+  float T = max(grainPitch, 0.5) * laattaK;
+  vec3 c = texture2D(grainTex, pq / T).rgb;
+  return (texMean + (c - texMean) * texContrast) * texGain;
 }
 uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the camera-side half inside the cut box is not drawn, like the lipids (owner 12.9.2026)
 void main(void){
@@ -5905,7 +5915,23 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      own colour (texOn 0). Nothing is generated. A missing file falls back to the grain too. */
   const gLaatta = {};
   const gNoTex = BABYLON.RawTexture.CreateRGBATexture(new Uint8Array([255,255,255,255]), 1, 1, scene);
+  /* CALIBRATION against the cheap tier (12.9.2026, owner: 'the difference between slab and cheap is still too great - my png
+     was just a screenshot of the cheap LoD'). Two things made it differ: (1) the picture was tiled over 180 lipids, three
+     times coarser than the cheap tier's grain where the two meet; (2) the screenshot already carries the toon post-process
+     (saturation, contrast, ink), and drawing it in the scene sends it through that grade AGAIN - so it came out more
+     saturated and much more contrasty, with the ink pass outlining its blobs. Measured in the page with a canvas grab of a
+     clean thylakoid patch at 590 units (free molecules hidden): the cheap tier reads mean (91, 163, 68), luminance sd 9.7,
+     autocorrelation half-width 1.1 px; the picture at tile 60 read (84, 159, 45), sd 33. The three numbers below put it on
+     (90, 163, 68), sd 11, half-width 1.0: LAATTA_K = grain pitches per tile, TEX_CONTRAST = contrast about the picture's own
+     mean, TEX_GAIN = per-channel gain (blue is the most sensitive - the grade's saturation step amplifies it). Dev-tunable
+     live: window.__laatta(K, [r,g,b], contrast). Nothing is generated: it is the owner's picture, scaled and colour-matched. */
+  let LAATTA_K = 65, TEX_GAIN = [1.09, 0.98, 1.2], TEX_CONTRAST = 0.65;
+  const gLaattaMats = [];
+  const laattaBind = () => { for(const m of gLaattaMats){ m.setFloat('laattaK', LAATTA_K); m.setVector3('texGain', new BABYLON.Vector3(TEX_GAIN[0], TEX_GAIN[1], TEX_GAIN[2])); m.setFloat('texContrast', TEX_CONTRAST);
+      const t = gLaatta.vihrea, mn = (t && t.mean) || [0.5, 0.5, 0.5]; m.setVector3('texMean', new BABYLON.Vector3(mn[0], mn[1], mn[2])); } };
+  window.__laatta = (k, g, c) => { if(k) LAATTA_K = k; if(g) TEX_GAIN = typeof g === 'number' ? [g, g, g] : g; if(c !== undefined) TEX_CONTRAST = c; laattaBind(); return { LAATTA_K, TEX_GAIN, TEX_CONTRAST }; };
   const laattaTex = (mat, kind) => {
+    gLaattaMats.push(mat); laattaBind();
     if(!kind){ mat.setTexture('grainTex', gNoTex); mat.setFloat('texOn', 0); return; }
     let t = gLaatta[kind];
     if(!t){ t = gLaatta[kind] = { tex: null, ok: 1, mean: null, mats: [] };
@@ -5913,7 +5939,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         /* the picture's mean colour - the chlorophyll's far slab wears it, so it matches the membrane it sits in */
         Promise.resolve(t.tex.readPixels()).then(px => { if(!px || !px.length) return; let r = 0, g = 0, b = 0, n = 0;
           for(let i = 0; i < px.length; i += 64){ r += px[i]; g += px[i+1]; b += px[i+2]; n++; }
-          if(n) t.mean = [r/n/255, g/n/255, b/n/255]; }).catch(() => {}); }, () => {
+          if(n){ t.mean = [r/n/255, g/n/255, b/n/255]; laattaBind(); } }).catch(() => {}); }, () => {
         console.warn('laatta_' + kind + '.jpg puuttuu - laatta piirtaa proseduraalisen rakeen'); t.ok = 0;
         t.tex = gNoTex; for(const m of t.mats) m.setTexture('grainTex', t.tex); });
       t.tex.wrapU = t.tex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE; t.tex.anisotropicFilteringLevel = 8; }
@@ -6494,7 +6520,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       slab.position.copyFrom(bilayerCen);
       slab.isPickable = false; slab.renderingGroupId = 0; slab.alwaysSelectAsActiveMesh = true;
       const sm = new BABYLON.ShaderMaterial('memSlabMat', scene, 'slab', {
-        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW','texOn'], samplers:['grainTex'] });
+        attributes:['position'], uniforms:['world','view','projection','slabCol','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','midY','halfH','blendW','texOn','laattaK','texGain','texContrast','texMean'], samplers:['grainTex'] });
       sm.backFaceCulling = false;
       sm.setColor3('slabCol', new BABYLON.Color3(0.35,0.33,0.22));   // placeholder until the real lipid mean lands below
       sm.setFloat('grainPitch', S*0.5);   // the grain's cell size: half the real lipid pitch - smaller, denser 'lipids'
@@ -7061,7 +7087,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const _e0 = [0,0,0];
       for(const M of MEMS){
         const mat = new BABYLON.ShaderMaterial('cellShellMat'+M.id, scene, 'cellshell', {
-          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi'] });
+          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','laattaK','texGain','texContrast','texMean','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi'] });
         mat.setFloat('poreAng', NE_PORE_R/M.R); mat.setFloat('poreInner', M.inner ? 1 : 0); mat.setFloat('baseShade', M.baseShade);
         mat.setFloat('clipOn', M.clipTo ? 1 : 0);
         if(M.clipTo){ const K = M.clipTo; mat.setVector3('clipC', K.C); mat.setVector3('clipInvS', new BABYLON.Vector3(1/K.s[0], 1/K.s[1], 1/K.s[2])); mat.setFloat('clipR', K.R); }
