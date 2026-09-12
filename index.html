@@ -289,6 +289,13 @@ body.dark-mode #card-screen.card-fs-on::backdrop { background: linear-gradient(r
 #card-screen.card-fs-on #comment-col { display: none !important; }
 #card-screen.card-fs-on #flashcard-wrap { margin: 0 !important; }
 #card-screen.card-fs-on .flashcard { border-radius: 0 !important; padding: 2.5rem clamp(1.2rem, 6vw, 7rem) 150px; --card-bg: url('new_bg.png?v=2'); box-shadow: none !important; }   /* old card paper background, no vignette */
+/* Kokonäytön kortti: kysymys istuu keskellä hieman yläpuolella, ei karkaa yläreunaan (omistaja 12.9.2026). Flex-sarake, jonka vapaa tila
+   jaetaan kysymyksen yläpuolelle ja loppuvälikkeen (::after, 12vh) yläpuolelle - välike painaa sisällön keskikohdan yläpuolelle. Kun laaja
+   vastaus ei mahdu, auto-marginaalit kutistuvat nollaan ja kortti vierii tavallisesti ylhäältä alkaen. */
+#card-screen.card-fs-on #flashcard:not(.celebrating) { display: flex; flex-direction: column; }
+#card-screen.card-fs-on #flashcard:not(.celebrating) > #question-content { margin-top: auto; flex: 0 0 auto; }
+#card-screen.card-fs-on #flashcard:not(.celebrating) > .answer-section { flex: 0 0 auto; }
+#card-screen.card-fs-on #flashcard:not(.celebrating)::after { content: ''; display: block; flex: 0 0 12vh; margin-top: auto; }
 #card-screen.card-fs-on .card-content { font-size: 1.5rem; }
 body.is-mobile #card-screen.card-fs-on .card-content { font-size: 1.0125rem; }   /* mobile study-view card text (35% bigger than the previous 0.75rem) */
 #card-screen.card-fs-on .top-bar,
@@ -4261,6 +4268,7 @@ async function renderCurrentCard(){
   document.getElementById('question-content').className='card-content'+(isEnhancedCloze||isSpecial?' left-align':'');
   document.getElementById('answer-content').innerHTML=aHtml;
   document.getElementById('answer-content').style.minHeight='';   // new card: drop the height reserved for the previous one
+  document.getElementById('question-content').style.marginTop='';   // new card: the question floats back to its resting place (fullscreen: centre, a bit above)
   dimParentheses(document.getElementById('question-content'));
   dimParentheses(document.getElementById('answer-content'));
   applyWordLinks(document.getElementById('question-content'));
@@ -5589,16 +5597,26 @@ function _applyAnswerMode(anim){   // swap the answer text + the middle button i
     const _edellinen=ac.querySelector('.answer-body');
     const _vanhaK=_edellinen?_edellinen.getBoundingClientRect().height:0;
     ac.style.minHeight='';
+    // Fullscreen: the question rests at centre-ish (flex auto margins, CSS). Reserving the laaja height would shove it to the top
+    // edge already in suppea mode (owner 12.9.2026), so instead the question's current offset is frozen while the long answer
+    // is open - it grows downward and the card scrolls - and released (back to centre) when the answer is folded again.
+    const _fs=inFullscreen(), _q=document.getElementById('question-content'), _fc=document.getElementById('flashcard');
     const _rakenna=(sisalto)=>{
       ac.innerHTML='';
       const d=document.createElement('div'); d.className='answer-body'; d.innerHTML=sisalto;
       ac.appendChild(d); ac.appendChild(_nappi()); return d;
     };
+    let _qOff=0;
+    if(_fs&&_q&&_fc){   // resting offset = where the question sits with the short answer (or, unflipped, alone) and free margins
+      if(_q.style.marginTop){ _rakenna(currentCard._suppeaHtml); _q.style.marginTop=''; }
+      _qOff=_q.getBoundingClientRect().top-_fc.getBoundingClientRect().top+_fc.scrollTop-parseFloat(getComputedStyle(_fc).paddingTop);
+    }
     _rakenna(currentCard._laajaHtml);
     const _varattu=ac.scrollHeight;
     const _body=_rakenna(html);
     const _uusiK=_body.getBoundingClientRect().height;
-    ac.style.minHeight=_varattu+'px';
+    if(!_fs) ac.style.minHeight=_varattu+'px';
+    if(_q) _q.style.marginTop=(_fs&&_answerMode==='laaja')?Math.max(0,_qOff)+'px':'';
     if(anim && _vanhaK && Math.abs(_vanhaK-_uusiK)>1){   // ease the box open/closed; the button rides along
       _body.style.height=_vanhaK+'px';
       void _body.offsetHeight;                         // pakota taitto, jotta siirtymä lähtee heti eikä jää ruudunpiirron varaan
