@@ -87,6 +87,7 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
             cur.execute("update col set decks=?", (json.dumps(decks),)); print('uusi pakka:', name)
         uudet = paivitetyt = 0; nids = []; omat = {}; jak = {'1': 0, '2': 0, '3': 0}; termit = 0
         for i, k in enumerate(KORTIT):
+            if k is None: continue   # None pitaa numeron varattuna (poistettu kortti, jonka jalkeiset ovat jo omistajan Ankissa numeroituina)
             n = sanoja(k['l']); s = sanoja(k['s'])
             if (k['l'] and not 45 <= n <= 65) or s > 16: print('  HUOM pituus (%s): %s laaja %d suppea %d' % (NRO, k['q'], n, s))
             if ';' in re.sub('<[^>]*>', '', k['s'] + k['l']): print('  HUOM puolipiste:', k['q'])

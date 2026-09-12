@@ -34,6 +34,7 @@ K("Mikä on kalvorakkula?",
   "Pieni kalvon rajaama pussi, joka kuljettaa aineita soluelinten välillä ja solukalvolle.",
   "Kalvorakkula kuroutuu irti yhdestä kalvosta ja sulautuu toiseen, ja kuljettaa sisällään ja kalvossaan proteiineja ja lipidejä: endoplasmisesta kalvostosta Golgin laitteeseen, sieltä lysosomeihin tai solukalvolle, ja endosytoosissa solukalvolta sisään. Rakkulan kuori, kuten klatriini, ja sen pinnan tunnistusproteiinit määräävät, mihin se sulautuu. Hermosolun välittäjäaine varastoidaan rakkuloihin, jotka tyhjenevät eksosytoosilla. Kutsutaan myös: vesikkeli, rakkula.",
   3, L('kalvorakkula', ['vesikkeli', 'vesikkelin', 'vesikkeliä', 'vesikkelissä', 'vesikkelit', 'vesikkelien', 'vesikkeleitä', 'rakkula', 'rakkulan', 'rakkulaa', 'rakkulassa', 'rakkulat', 'rakkuloiden', 'rakkuloita', 'rakkuloissa'])),
+None,   # 3.107 oli kromosomi-kaksoiskortti (poistettu 12.9.2026, kromosomi on L1:n 1.033); numero pysyy varattuna
 K("Mikä on sukusolu?",
   "Haploidi solu, munasolu tai siittiö, jossa on vain yksi kromosomi kustakin parista.",
   "Sukusolut syntyvät meioosissa, jossa kromosomiluku puolittuu: ihmisen sukusolussa on 23 kromosomia. Munasolu on suuri ja liikkumaton, siittiö pieni ja siimallinen. Hedelmöityksessä kaksi sukusolua yhtyy diploidiksi tsygootiksi, jonka 46 kromosomista puolet on äidiltä ja puolet isältä. Meioosin rekombinaatio sekoittaa vanhempien geenejä, mikä tuottaa jälkeläisiin vaihtelua. Kutsutaan myös: gameetti.",
