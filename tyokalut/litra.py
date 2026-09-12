@@ -17,14 +17,14 @@ OUT = os.path.join(REPO, 'kurssit', 'Litra-korjaus.apkg')
 SEP = chr(31)
 
 RX_PER = re.compile(r'(?<=[A-Za-zµ])/([lL])\b')                               # mol/l, osmol/L, g/l, mg/l ...
-RX_NUM = re.compile(r'(?<=\d)(\s|&nbsp;| )?(m|d|µ|u)?([lL])\b(?!-)')      # 10 ml, 2 dl, 5 l, 0,5L (ei L-muoto)
+RX_NUM = re.compile(r'(?<=\d)(\s|&nbsp;| )(m|d|µ|u)?([lL])\b(?!-)|(?<=\d)(m|d|µ)([lL])\b(?!-)')      # 10 ml, 2 dl, 5 l, 10ml (ei L-muoto); luku + paljas l ilman valia ('2l + 1' kvanttiluvuissa) ei ole litra
 RX_MIN = re.compile(r'\b([lL])(?=/min\b)')                                     # l/min
-ETSI = re.compile(r'[A-Za-zµ]/[lL]\b|\d(\s|&nbsp;| )?[mdµu]?[lL]\b(?!-)|\b[lL]/min\b')
+ETSI = re.compile(r'[A-Za-zµ]/[lL]\b|\d(\s|&nbsp;| )[mdµu]?[lL]\b(?!-)|\d[mdµ][lL]\b(?!-)|\b[lL]/min\b')
 
 
 def korvaa(t):
     t = RX_PER.sub('/ℓ', t)
-    t = RX_NUM.sub(lambda m: (m.group(1) or '') + (m.group(2) or '').replace('u', 'µ') + 'ℓ', t)
+    t = RX_NUM.sub(lambda m: (m.group(1) or '') + (m.group(2) or m.group(4) or '').replace('u', 'µ') + 'ℓ', t)
     t = RX_MIN.sub('ℓ', t)
     return t
 
