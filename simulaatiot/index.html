@@ -9545,24 +9545,24 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       ax:new BABYLON.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize(), w:0.15+Math.random()*0.2 }); }
   /* PSU BOX (owner 10.9.2026 'put the photosynthetic unit in a box'): the loose proteins bounce inside a box around
      the membrane complexes (their hulls plus a margin), not the whole free-molecule box, so the unit stays together.
-     Clamped inside the big box; drawn as a teal wireframe in dev mode. RE-FITTED once a second to the membrane
+     Drawn as a teal wireframe in dev mode. RE-FITTED once a second to the membrane
      complexes' LIVE centres (12.9.2026: they are re-placed after this first runs, so a one-off box ended up beside
      them and the Puolikas cut / Hiukkastaso cull worked in the wrong place); the loose proteins count with the
      extents they START in, so the walls never close in on them as they drift. */
-  { const loose=new Set(gBouncers.map(b=>b.mi)), M=15, MY=15;
+  { const loose=new Set(gBouncers.map(b=>b.mi)), M=15, MY=15, _fm=new BABYLON.Matrix(), _fc=new BABYLON.Vector3(), _fp=new BABYLON.Vector3();
     let lxL=Infinity, lyL=Infinity, lzL=Infinity, hxL=-Infinity, hyL=-Infinity, hzL=-Infinity;   // the loose proteins' starting extents
     for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !loose.has(mi)) continue; const c=mInfo[mi]; if(!c) continue;
       const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];
       lxL=Math.min(lxL, px-h.maxR); hxL=Math.max(hxL, px+h.maxR); lyL=Math.min(lyL, py-h.maxR); hyL=Math.max(hyL, py+h.maxR); lzL=Math.min(lzL, pz-h.maxR); hzL=Math.max(hzL, pz+h.maxR); }
     const fit = () => { if(!gBoxLo) return; let lx=lxL, ly=lyL, lz=lzL, hx=hxL, hy=hyL, hz=hzL, any=isFinite(lx);
-      for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !gMemBound[mi]) continue; const c=mInfo[mi]; if(!c) continue; any=true;
-        const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];   // the complex where it stands NOW
+      for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || !m.cfg || m.shuttle || m.cfg.dna || gOrganelleModels.has(mi) || loose.has(mi)) continue; const c=mInfo[mi]; if(!c) continue; any=true;
+        BABYLON.Matrix.FromArrayToRef(gModelXform, mi*16, _fm); BABYLON.Vector3.TransformCoordinatesToRef(_fc.set(c.cx, c.cy, c.cz), _fm, _fp);   // the complex's centroid where it stands NOW - through its full transform, exactly as its hull is placed (a rotated model's centroid is not c + offset)
+        const px=_fp.x, py=_fp.y, pz=_fp.z;
         lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
       if(!any) return;
       { const hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5); lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
-      gPsuLo.set(Math.max(gBoxLo.x, lx-M), Math.max(gBoxLo.y, ly-MY), Math.max(gBoxLo.z, lz-M));
-      gPsuHi.set(Math.min(gBoxHi.x, hx+M), Math.min(gBoxHi.y, hy+MY), Math.min(gBoxHi.z, hz+M));
+      gPsuLo.set(lx-M, ly-MY, lz-M); gPsuHi.set(hx+M, hy+MY, hz+M);   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
       if(!gDevPsuBox){ const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {size:1}, scene);
         const bm=new BABYLON.StandardMaterial('devPsuBoxMat', scene); bm.wireframe=true; bm.emissiveColor=new BABYLON.Color3(0.35,0.85,0.75); bm.disableLighting=true;
         bx.material=bm; bx.isPickable=false; bx.setEnabled(gDev); gDevPsuBox=bx; }
