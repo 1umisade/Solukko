@@ -113,7 +113,7 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
             nids.append(nid)
         # muiden korttien linkkisanat tunnetaan nyt myos taman luennon osalta (seuraavat luennot eivat saa toistaa niita)
         for w, g in omat.items(): muut.setdefault(w, (g, LEHTI))
-        kaikki_nid[LEHTI] = nids
+        kaikki_nid[li] = nids   # avain moduulin jarjestysnumero, ei LEHTI: sanastomoduuli jakaa luennon LEHTI:n
         print('%s %s: %d korttia (%d termi-), tt3/2/1 = %d/%d/%d, %d uutta, %d paivitettya' % (NRO, LEHTI, len(nids), termit, jak['3'], jak['2'], jak['1'], uudet, paivitetyt))
     con.commit(); con.close()
     io.open(os.path.join(work, 'media'), 'w', encoding='utf-8').write(json.dumps(mediamap, ensure_ascii=False))
@@ -127,8 +127,11 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
         for num in mediamap:
             if num not in vanhat: zout.write(os.path.join(work, num), num)
     os.replace(tmp, SRC); print('SOLUKKO.apkg patchattu')
-    for M in luennot:
-        LEHTI = _g(M, 'LEHTI'); nids = kaikki_nid[LEHTI]; q = ','.join(str(n) for n in nids)
+    for li, M in enumerate(luennot):
+        # Lisaysmoduulit (TIEDOSTO) eivat saa omaa apkg:ta: omistaja 12.9.2026 'poista kaikki korjaus-apkg:t ja sanastolisaykset,
+        # jata VAIN SOLUKKO.apkg' - sanastokortit ovat SOLUKKO.apkg:ssa luentopakkansa alla
+        if (M.get('TIEDOSTO') if isinstance(M, dict) else getattr(M, 'TIEDOSTO', None)): continue
+        LEHTI = _g(M, 'LEHTI'); nids = kaikki_nid[li]; q = ','.join(str(n) for n in nids)
         w2 = tempfile.mkdtemp(); db2 = os.path.join(w2, 'collection.anki21'); shutil.copyfile(db, db2)
         con = sqlite3.connect(db2); cur = con.cursor()
         cur.execute("update notes set mod=?, usn=-1 where id in (%s)" % q, (now,))
@@ -138,8 +141,7 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
         for (flds,) in cur.execute("select flds from notes"):
             for m in re.findall(r'src\s*=\s*["\']([^"\']+)["\']', flds): used.add(os.path.basename(m))
         con.close()
-        TIEDOSTO = (M.get('TIEDOSTO') if isinstance(M, dict) else getattr(M, 'TIEDOSTO', None)) or LEHTI   # lisayspaketti olemassa olevaan pakkaan saa oman tiedostonimen
-        out = os.path.join(kansio, TIEDOSTO.replace(':', ',') + '.apkg')
+        out = os.path.join(kansio, LEHTI.replace(':', ',') + '.apkg')
         if os.path.exists(out): os.remove(out)
         mm = {}; i = 0
         with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
