@@ -17,6 +17,9 @@ POISTOT = [('(1.020) Mikä on tuma?', 'tumallis'), ('(1.020) Mikä on tuma?', 't
 # LISAYKSET: (kysymyksen alku, lisattavat sanat) - kromosomi maaritellaan omistajan L1-kortilla, ei L3:n sanastossa
 LISAYKSET = [('(1.033) Mikä on kromosomi?', ['kromosomi', 'kromosomin', 'kromosomia', 'kromosomissa', 'kromosomista', 'kromosomiin',
               'kromosomit', 'kromosomien', 'kromosomeja', 'kromosomeissa', 'kromosomisto', 'kromosomiston', 'kromosomistoa'])]
+# POISTA_KORTIT: kaksoismaaritelmat, jotka on poistettu sanastomoduuleista mutta jaavat omistajan Ankiin (tuonti ei poista);
+# poistetaan SOLUKKO.apkg:sta joka ajolla, kunnes omistaja poistaa ne Ankista kasin
+POISTA_KORTIT = ['(3.107) Mikä on kromosomi?']
 
 if __name__ == '__main__':
     work = tempfile.mkdtemp()
@@ -24,6 +27,11 @@ if __name__ == '__main__':
     db = os.path.join(work, 'collection.anki21'); con = sqlite3.connect(db); cur = con.cursor()
     models = json.loads(cur.execute("select models from col").fetchone()[0])
     now = int(time.time()); muutetut = []; paketti = []   # paketti: kaikki saannon kortit, myos jo korjatut (Ankiin)
+    for nid, flds in cur.execute("select id, flds from notes").fetchall():
+        q = re.sub('<[^>]*>', '', flds.split(SEP)[0]).replace('&nbsp;', ' ').strip()
+        if q in POISTA_KORTIT:
+            cur.execute("delete from cards where nid=?", (nid,)); cur.execute("delete from notes where id=?", (nid,)); muutetut.append(nid)
+            print('  poistettu kortti', q, '(poista se myos Ankista kasin)')
     for nid, mid, flds in cur.execute("select id, mid, flds from notes").fetchall():
         f = flds.split(SEP); q = re.sub('<[^>]*>', '', f[0]).replace('&nbsp;', ' ').strip()
         names = [x['name'].lower() for x in models[str(mid)]['flds']]
