@@ -1,21 +1,24 @@
 # -*- coding: utf-8 -*-
-"""Funktionaalisten ryhmien termikortit (Lehninger kuva 1-16, Solu L1 dia 77) Luento 1 -pakkaan, kortin 1.092 peraan
-(numerot 1.0921-1.0945: sivusto lajittelee liukuluvulla, joten ne asettuvat 1.092:n ja 1.093:n valiin eika muita
-tarvitse numeroida uudelleen). Jokaisella kortilla on 3D-malli-kentassa mallimolekyylin avain (ryhmat_3d.py), jolloin
-sivusto upottaa kortin etupuolelle sen 2D-kaavan ja elavan 3D-mallin, ja laaja vastaus mainitsee molekyylin nimeltä,
-joten sana avaa popupin.
+"""Funktionaalisten ryhmien termikortit (Lehninger kuva 1-16) Kemian peruskurssi I:n omaan luentopakkaan
+'Luento 4 - Funktionaaliset ryhmät' (numerot 4.001-4.025). Olivat 12.9.2026 Solu L1:ssa numeroilla 1.0921-1.0945;
+omistaja 13.9.2026: 'nämä kortit pitäis olla kemian pakassa' -> guidit sailyvat, kortit siirretaan uuteen pakkaan.
+Jokaisella kortilla on 3D-malli-kentassa mallimolekyylin avain (ryhmat_3d.py), jolloin sivusto upottaa kortin
+etupuolelle sen 2D-kaavan ja elavan 3D-mallin, ja laaja vastaus mainitsee molekyylin nimeltä, joten sana avaa popupin.
 
-Sama kolmen vaiheen kierros kuin tyokalut/litra.py: 1) SOLUKKO.apkg patchataan paikallaan (sivusto nayttaa kortit heti),
-2) kurssit/BKEM5030 .../Luento 1 - Funktionaaliset ryhmat (lisays).apkg sisaltaa VAIN nama kortit samoilla guideilla
--> Ankiin tuonti lisaa ne kerran ja paivittaa paikallaan uudella ajolla. Idempotentti: toinen ajo paivittaa, ei monista.
+1) SOLUKKO.apkg patchataan paikallaan: pakka luodaan tarvittaessa, kortit lisataan tai paivitetaan guidin mukaan ja
+   siirretaan pakkaan; 2) kurssit/Kemian peruskurssi I/Luento 4 - Funktionaaliset ryhmät.apkg on luennon oma apkg
+   (VAIN nama kortit samoilla guideilla). Idempotentti. HUOM: Ankin tuonti paivittaa kentat mutta ei siirra vanhoja
+   kortteja pakasta toiseen - omistaja siirtaa ne Ankissa kerran itse (selaa '(4.0' -> Vaihda pakkaa).
 Aja: python tyokalut/ryhmat_kortit.py"""
 import zipfile, sqlite3, tempfile, os, shutil, json, re, time, sys, hashlib
 sys.stdout.reconfigure(encoding='utf-8')
 SC = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(SC)
 SRC = os.path.join(REPO, 'SOLUKKO.apkg')
-OUT = os.path.join(REPO, 'kurssit', 'BKEM5030 Solu- ja biomolekyylit - teoria', 'Luento 1 - Funktionaaliset ryhmat (lisays).apkg')
+LEHTI = 'Luento 4 - Funktionaaliset ryhmät'
+OUT = os.path.join(REPO, 'kurssit', 'Kemian peruskurssi I', LEHTI + '.apkg')
 SEP = chr(31); MID = 1727391050   # Solukko-korttityyppi
-DECK_LOPPU = 'Solu- ja biomolekyylit - teoria (BKEM5030)::Luento 1 - Elämä, perusteet ja periaatteet'
+PARENT_LOPPU = '::Kemian peruskurssi I'   # kurssipakka, jonka alle luentopakka tulee
+SISAR_LOPPU = '::Kemian peruskurssi I::Luento 1 - Johdanto'   # uuden pakan asetusten malli
 sys.path.insert(0, SC)
 import ryhmat_3d
 
@@ -140,7 +143,6 @@ K("Mikä on asyylifosfaatti?",
   "Asyylifosfaatissa karboksyylihappo ja fosfaatti ovat liittyneet yhteen vettä menettäen, joten karbonyylihiili on sitoutunut fosfaatin happeen (R–CO–O–PO<sub>3</sub><sup>2−</sup>). Sekoitettu anhydridi on hyvin energiarikas: sen fosforyyli siirtyy helposti ADP:lle. Glykolyysissä 1,3-bisfosfoglyseraatti on asyylifosfaatti, joka tuottaa ATP:n substraattitason fosforylaatiossa. Asetyylifosfaatti on yksinkertaisin asyylifosfaatti. Kutsutaan myös: sekoitettu anhydridi.",
   2, 'ASETYYLIFOSFAATTI', 'asyylifosfaatti', ['sekoitettu anhydridi', 'sekoitetun anhydridin', 'sekoitettua anhydridiä', 'sekoitetut anhydridit']),
 ]
-ALKU = 921   # (1.0921) ... kortin 1.092 peraan
 
 
 def guid_for(q):
@@ -160,8 +162,16 @@ if __name__ == '__main__':
     with zipfile.ZipFile(SRC) as z: z.extractall(work)
     db = os.path.join(work, 'collection.anki21'); con = sqlite3.connect(db); cur = con.cursor()
     decks = json.loads(cur.execute("select decks from col").fetchone()[0])
-    did = [int(k) for k, v in decks.items() if v['name'].endswith(DECK_LOPPU)]; assert len(did) == 1, did; did = did[0]
-    now = int(time.time()); uudet = paivitetyt = 0; nids = []
+    now = int(time.time()); uudet = paivitetyt = siirretyt = 0; nids = []
+    parent = next(d for d in decks.values() if d['name'].endswith(PARENT_LOPPU))
+    name = parent['name'] + '::' + LEHTI
+    target = next((d for d in decks.values() if d['name'] == name), None)
+    if target: did = int(target['id'])
+    else:   # uusi luentopakka sisarpakan asetuksilla (kuten pakka_rakenna.rakenna)
+        sisar = next((d for d in decks.values() if d['name'].endswith(SISAR_LOPPU)), parent)
+        did = max(int(k) for k in decks) + 1
+        target = dict(sisar); target.update({'id': did, 'name': name, 'mod': now, 'usn': -1}); decks[str(did)] = target
+        cur.execute("update col set decks=?", (json.dumps(decks),)); print('uusi pakka:', name)
     # linkkisanat eivat saa osua toiselle kortille (kurssit/CLAUDE.md §4)
     omat = {}; muut = {}
     for nid, guid, flds in cur.execute("select id, guid, flds from notes").fetchall():
@@ -177,13 +187,15 @@ if __name__ == '__main__':
             if w in omat and omat[w] != guid: print('  HUOM linkkisana kahdella uudella kortilla:', w)
             omat[w] = guid
             if w in muut and muut[w] != guid: print('  HUOM linkkisana on jo kortilla', muut[w], ':', w)
-        fields = ['(1.0%d) %s' % (ALKU + i, k[0]), k[1], k[2], k[3], k[4], k[5]]
+        fields = ['(4.%03d) %s' % (i + 1, k[0]), k[1], k[2], k[3], k[4], k[5]]
         sfld = re.sub('<[^>]*>', '', fields[0]).strip(); csum = int(hashlib.sha1(sfld.encode('utf-8')).hexdigest()[:8], 16)
         row = cur.execute("select id, flds from notes where guid=?", (guid,)).fetchone()
         if row:
             nid = row[0]
             if row[1] != SEP.join(fields):
                 cur.execute("update notes set flds=?, sfld=?, csum=?, mod=?, usn=-1 where id=?", (SEP.join(fields), sfld, csum, now, nid)); paivitetyt += 1
+            if cur.execute("select count(*) from cards where nid=? and did!=?", (nid, did)).fetchone()[0]:   # Solu L1:sta kemian pakkaan
+                cur.execute("update cards set did=?, mod=?, usn=-1 where nid=?", (did, now, nid)); siirretyt += 1
         else:
             nid = now * 1000 + i * 2
             cur.execute("insert into notes values (?,?,?,?,?,?,?,?,?,?,?)", (nid, guid, MID, now, -1, '', SEP.join(fields), sfld, csum, 0, ''))
@@ -191,15 +203,15 @@ if __name__ == '__main__':
             uudet += 1
         nids.append(nid)
     con.commit(); con.close()
-    print('SOLUKKO.apkg: %d uutta, %d paivitettya korttia' % (uudet, paivitetyt))
-    if uudet or paivitetyt:
+    print('SOLUKKO.apkg: %d uutta, %d paivitettya, %d siirrettya korttia' % (uudet, paivitetyt, siirretyt))
+    if uudet or paivitetyt or siirretyt:
         tmp = SRC + '.uusi'
         with zipfile.ZipFile(SRC) as zin, zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as zout:
             for it in zin.infolist():
                 if it.filename == 'collection.anki21': zout.write(db, 'collection.anki21')
                 else: zout.writestr(it, zin.read(it.filename))
         os.replace(tmp, SRC)
-    # ── lisayspaketti: vain nama kortit ──────────────────────────────────────────────
+    # ── luennon oma apkg: vain nama kortit ──────────────────────────────────────────────
     con = sqlite3.connect(db); cur = con.cursor()
     q = ','.join(str(n) for n in nids)
     cur.execute("update notes set mod=?, usn=-1 where id in (%s)" % q, (now,))
