@@ -11026,6 +11026,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     let bestT = Infinity, bE = -1, bA = -1;
     for(let e=0;e<nEl;e++){
       const hr = Math.max(orbExtent(e), 2.6), vr2 = hr*hr, sb = sphBuf[e], cnt = atomCount[e];   // reach covers σ-lobe tips too
+      const sr = info(e).vr*FILL_SCALE, sr2 = sr*sr;   // the atom's vdW sphere: it OCCLUDES (13.9.2026, owner: 'dont make me able to hover over hidden things' - a buried atom's lobes were hit through the surface atoms' spheres, which the pick ignored)
       const oc = orbCount(e), ob = orbBuf[e], cb = cylBuf[e], cs = cylAtStart[e], cl = cylAtList[e];
       const bub2 = (BUBBLE_R + hr) * (BUBBLE_R + hr);
       for(let a=0;a<cnt;a++){
@@ -11040,6 +11041,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const d2 = px*px+py*py+pz*pz - tca*tca;
         if(d2 > vr2) continue;                                   // ray misses the atom's bounding sphere
         if(tca - Math.sqrt(vr2 - d2) >= bestT) continue;         // can't beat the current nearest hit
+        if(d2 < sr2){ const ts = tca - Math.sqrt(sr2 - d2); if(ts > 0 && ts < bestT){ bestT = ts; bE = e; bA = a; } }   // the sphere itself: the nearest surface wins, so nothing behind it can be hovered
         // narrow phase: intersect the atom's orbital lobes AND its bonding σ/knob/π lobes (ray already in this model's frame)
         const base = a*oc*16;
         for(let i=0;i<oc;i++){

@@ -263,7 +263,8 @@
       const pl = BABYLON.MeshBuilder.CreatePlane('valoLblP'+k, { width:18, height:5 }, scene); pl.material = mat; pl.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL; pl.isPickable = false; pl.alwaysSelectAsActiveMesh = true; pl.renderingGroupId = 3; onTop(pl); pl.setEnabled(false); labels.push({ tex, pl, txt:'' }); }
     const fmtE = e => e.toFixed(2).replace('.', ',') + ' αJ';
     const setLabel = (L, txt, p) => { if(L.txt !== txt){ L.txt = txt; L.tex.clear(); L.tex.drawText(txt, null, null, 'bold 30px Courier New', '#f4ecd2', 'transparent', true); } L.pl.position.set(p[0], p[1] + 3.5, p[2]); L.pl.setEnabled(true); };
-    const tickLabels = () => { const cp = cam.position, cand = [];
+    const LABELS_ON = false;   // owner 13.9.2026: 'remove the energy labels (attojoules)' - the 2D update_label mirror is kept but never drawn
+    const tickLabels = () => { if(!LABELS_ON){ for(let k=0;k<LBL_N;k++) if(labels[k].pl.isEnabled()) labels[k].pl.setEnabled(false); return; } const cp = cam.position, cand = [];
       for(const m of antenna){ if(!m.alive || !m.ExcitedSprite || !m.ExcitedSprite.visible || m.EnergyLevel <= 0) continue; const p = m.global_position; cand.push({ d: (cp.x-p[0])**2+(cp.y-p[1])**2+(cp.z-p[2])**2, e: m.EnergyLevel, p }); }
       for(const b of V.get_nodes_in_group('electron')){ if(b.parent_is_BindSites || b.EnergyLevel <= 0 || !b.kin) continue; const p = b.global_position; cand.push({ d: (cp.x-p[0])**2+(cp.y-p[1])**2+(cp.z-p[2])**2, e: b.EnergyLevel, p }); }
       cand.sort((a, b) => a.d - b.d); let n = 0; for(const c of cand){ if(n >= LBL_N || c.d > 250*250) break; setLabel(labels[n++], fmtE(c.e), c.p); } for(let k=n;k<LBL_N;k++) labels[k].pl.setEnabled(false); };
