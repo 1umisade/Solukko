@@ -702,7 +702,8 @@ void main(void){
   vUV = position.xy * qexp;
   vColor = instanceColor.rgb;
 #ifdef LIPTPL
-  vColor = mix(vColor, tint.rgb * (0.5 + 0.6 * dot(vColor, vec3(0.3, 0.59, 0.11))), tint.a) * shade;   // the organelle's hue, keeping the lipid's own light and dark, and the depth cue
+  { float ta = tint.a; if(ta > 0.0 && instanceColor.g < 0.65) ta = min(0.97, ta * 1.35);   // the HEAD atoms (O, P, N - the orange ones) take the hue almost fully: a membrane's underside is its heads, and it must read as a shaded green, never brown (owner 13.9.2026)
+    vColor = mix(vColor, tint.rgb * (0.5 + 0.6 * dot(vColor, vec3(0.3, 0.59, 0.11))), ta) * shade; }   // the organelle's hue, keeping the lipid's own light and dark, and the depth cue
 #endif
   vFlag = instanceColor.a;
   vMid = -1.0;

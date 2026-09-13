@@ -1054,7 +1054,8 @@ void main(void){
   vUV = position.xy * qexp;
   vColor = instanceColor.rgb;
 #ifdef LIPTPL
-  vColor = mix(vColor, tint.rgb * (0.5 + 0.6 * dot(vColor, vec3(0.3, 0.59, 0.11))), tint.a) * shade;   // the organelle's hue, keeping the lipid's own light and dark, and the depth cue
+  { float ta = tint.a; if(ta > 0.0 && instanceColor.g < 0.65) ta = min(0.97, ta * 1.35);   // the HEAD atoms (O, P, N - the orange ones) take the hue almost fully: a membrane's underside is its heads, and it must read as a shaded green, never brown (owner 13.9.2026)
+    vColor = mix(vColor, tint.rgb * (0.5 + 0.6 * dot(vColor, vec3(0.3, 0.59, 0.11))), ta) * shade; }   // the organelle's hue, keeping the lipid's own light and dark, and the depth cue
 #endif
   vFlag = instanceColor.a;
   vMid = -1.0;
@@ -9885,7 +9886,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      complexes' LIVE centres (12.9.2026: they are re-placed after this first runs, so a one-off box ended up beside
      them and the Puolikas cut / Hiukkastaso cull worked in the wrong place); the loose proteins count with the
      extents they START in, so the walls never close in on them as they drift. */
-  { const loose=new Set(gBouncers.map(b=>b.mi)), M=300, MY=300, MZ=300, _fm=new BABYLON.Matrix(), _fc=new BABYLON.Vector3(), _fp=new BABYLON.Vector3();   // margins: a LOT bigger than the old 15 (owner 12.9.2026) - room for the loose proteins to roam, and the cut / the plane cull reach well past the complexes
+  { const loose=new Set(gBouncers.map(b=>b.mi)), M=40, MY=40, MZ=40, _fm=new BABYLON.Matrix(), _fc=new BABYLON.Vector3(), _fp=new BABYLON.Vector3();   // TIGHT margins (owner 13.9.2026: 'shrink the box so it just contains every photosynthesis protein')
+    /* The loose proteins (RuBisCO, FNR, ferredoxin...) are pulled next to the membrane complexes before the box is fitted, so the
+       box can be small: each keeps its side of the membrane but sits just clear of the complexes' extent in y, and within their
+       x/z span. They bounce inside the box afterwards, so this is only where they start. */
+    { let lx=Infinity, ly=Infinity, lz=Infinity, hx=-Infinity, hy=-Infinity, hz=-Infinity;
+      for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || !m.cfg || m.shuttle || m.cfg.dna || gOrganelleModels.has(mi) || loose.has(mi)) continue; const c=mInfo[mi]; if(!c) continue;
+        BABYLON.Matrix.FromArrayToRef(gModelXform, mi*16, _fm); BABYLON.Vector3.TransformCoordinatesToRef(_fc.set(c.cx, c.cy, c.cz), _fm, _fp);
+        lx=Math.min(lx, _fp.x-h.maxR); hx=Math.max(hx, _fp.x+h.maxR); ly=Math.min(ly, _fp.y-h.maxR); hy=Math.max(hy, _fp.y+h.maxR); lz=Math.min(lz, _fp.z-h.maxR); hz=Math.max(hz, _fp.z+h.maxR); }
+      if(isFinite(lx)){ const midY = (ly+hy)/2;
+        for(const b of gBouncers){ const mi=b.mi, c=mInfo[mi], h=gHulls.find(q => q.mi === mi); if(!c || !h) continue; const R=h.maxR;
+          let px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1];
+          py = py >= midY ? hy + R + 12 : ly - R - 12;   // just clear of the complexes, on its own side
+          px = Math.max(lx + R, Math.min(hx - R, px));    // inside the complexes' x span (z is the particle plane already)
+          gModelOff[mi*3]=px-c.cx; gModelOff[mi*3+1]=py-c.cy; gModelOff[mi*3+2]=gTasoZ-c.cz; rebuildModelXform(mi); } } }
     let lxL=Infinity, lyL=Infinity, lzL=Infinity, hxL=-Infinity, hyL=-Infinity, hzL=-Infinity;   // the loose proteins' starting extents
     for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || m.shuttle || !loose.has(mi)) continue; const c=mInfo[mi]; if(!c) continue;
       const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];
@@ -9897,8 +9911,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
       if(!any) return;
       { let hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5) + MZ;
-        if(typeof POSE !== 'undefined'){ hz2 = Math.max(hz2, Math.abs(POSE.pos.z - gTasoZ) + 200);   // the box reaches the camera where the Kalvostoon flight lands, with 200 to spare (owner 13.9.2026: 'make the box reach the spot where the camera lands') - so the cut, the cull and the box-only view all hold there
-          lx = Math.min(lx, POSE.pos.x - 200 - M); hx = Math.max(hx, POSE.pos.x + 200 - M); ly = Math.min(ly, POSE.pos.y - 200 - MY); hy = Math.max(hy, POSE.pos.y + 200 - MY); }
+        // (the box no longer reaches the Kalvostoon camera spot - owner 13.9.2026: as small as the proteins allow)
         lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
