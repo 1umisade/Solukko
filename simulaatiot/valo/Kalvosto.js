@@ -211,8 +211,8 @@
       if(name === 'proton'){ const P = get.gValoProtons(); if(!P) return null; let i = slot && slot._proton != null ? slot._proton : -1; if(slot) slot._proton = null; let from = at;
         /* 13.9.2026 (owner: 'the protons seem to be popping in and out of existence'): a proton is never conjured up at a point - one released from a
            slot is the one that rode there (it stays where the slot is), one the OEC makes from water is the nearest free lumen proton, taken
-           from where it is (within 150 units - none there, none made) */
-        if(i < 0){ i = P.nearestFree(at[0], at[1], at[2], -1, 150); if(i < 0) return null; const o = i*3; from = [P.pos[o], P.pos[o+1], P.pos[o+2]]; }
+           brought to the OEC from wherever it is (every water split makes its proton) */
+        if(i < 0){ i = P.nearestFree(at[0], at[1], at[2], -1, 1e9); if(i < 0) i = P.anyFree(0); if(i < 0) return null; }   // (owner 13.9.2026: 'always make the proton, dont care about the 100') - the nearest free lumen proton, wherever it is, appears at the OEC
         P.grab(i); P.place(i, from[0], from[1], from[2]);
         const b = new MB('proton', { position: from }); b.kin = { kind:'proton', i }; b.born = V.time; return b; }
       if(FREE_KEY[name]){ const F = get.gValoFree(); if(!F) return null; const key = FREE_KEY[name]; let i = slot && slot._instance != null ? slot._instance : -1; if(slot) slot._instance = null;
