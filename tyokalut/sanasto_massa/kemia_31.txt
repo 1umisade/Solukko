@@ -1,0 +1,14 @@
+# Kemian peruskurssi I, Luento 3.1 - massakierros
+alakulma	1	Taulukon alaosan kulma: raskaat metallit vasemmassa alakulmassa.
+alkalimetalli	2	Ryhmän 1 alkuaine: litium, natrium, kalium… Yksi pintaelektroni, muodostaa +1-kationin.	Mikä on alkalimetalli?
+atomitilavuus	1	Moolin atomeja viemä tilavuus, Meyerin taulukon peruste.
+deuterium	2	Vedyn isotooppi, jonka ytimessä on protoni ja neutroni. Raskas vety.	Mikä on deuterium?
+hylkintä	1	Samanmerkkisten varausten työntövoima: elektronien hylkintä.
+ioninmuodostus	1	Ionin syntyminen elektronin luovutuksessa tai vastaanotossa.
+sadasosa	1	Yksi sadasta, prosentti.
+satatuhat	1	100 000: atomin halkaisija on satatuhatta kertaa ytimen.
+suositus	1	Ohje käytännöstä: IUPACin suositus.
+viiib	1	Vanha ryhmämerkintä, joka kattoi ryhmät 8–10 (rauta, koboltti, nikkeli).	Mitä VIIIB tarkoittaa?
+yhteismäärä	1	Kokonaislukumäärä: nukleonien yhteismäärä on massaluku.
+yleisnimitys	1	Yhteinen nimi ryhmälle: nukleoni protonille ja neutronille.
+yläkulma	1	Taulukon yläosan kulma: epämetallit oikeassa yläkulmassa.

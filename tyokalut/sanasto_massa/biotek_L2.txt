@@ -1,0 +1,312 @@
+# Johdatus biotekniikkaan, Luento 2 - massakierros
+adsorptio	2	Aineen tarttuminen pinnalle, kuten proteiinin sitoutuminen kromatografiageeliin.	Mitä adsorptio on?
+agaralusta	1	Agarilla hyydytetty kasvatusalusta maljalla.
+ainesosa	1	Kokonaisuuden osa: elintarvikkeen ainesosat.
+aineenvaihduntaproteiini	1	Aineenvaihduntaan osallistuva proteiini, entsyymi.
+aivoveritulppa	1	Aivovaltimon tukkiva hyytymä, jota liuotetaan trombolyytillä. Kutsutaan myös: aivoinfarkti.
+alaluokka	1	Luokan osaryhmä: IgG:n alaluokat IgG1–IgG4.
+aldehydidehydrogenaasi	2	Entsyymi, joka hapettaa asetaldehydin etikkahapoksi alkoholin hajotuksessa. Lyhenne ALDH.	Mikä on aldehydidehydrogenaasi?
+alhainen	1	Matala: alhainen lämpötila, alhainen pitoisuus.
+alipaine	1	Ympäristöä pienempi paine, jota käytetään suodatuksessa ja kylmäkuivauksessa.
+alkoholidehydrogenaasi	2	Entsyymi, joka hapettaa etanolin asetaldehydiksi maksassa. Lyhenne ADH.	Mikä on alkoholidehydrogenaasi?
+altistua	1	Joutua vaikutuksen alaiseksi: solut altistuvat leikkausvoimille sekoituksessa.
+alumiinisuola	1	Alumiinin suola, rokotteiden vanha adjuvantti ja veden puhdistuksen saostin.
+ananas	1	Hedelmä, josta bromelaiini-proteaasi saadaan.
+apiksabaani	2	Suun kautta otettava antikoagulantti, hyytymistekijä Xa:n estäjä (Eliquis).	Mikä on apiksabaani?
+apina	1	Kädellinen, jonka soluja (Vero) käytetään rokotetuotannossa.
+arvokas	1	Suuriarvoinen: lääkeproteiinit ovat arvokkaita tuotteita.
+autoimmuuni-ihosairaus	1	Ihoon kohdistuva autoimmuunisairaus, kuten psoriaasi.
+biohajoavuus	1	Kyky hajota mikrobien toimesta luonnossa.
+bioreaktoriprosessi	1	Bioreaktorissa toteutettu tuotantoprosessi.
+botuliinitoksiini	2	Clostridium botulinum -bakteerin hermomyrkky, tehokkain tunnettu toksiini. Pieninä annoksina lääke ja Botox.	Mikä on botuliinitoksiini?
+desinfiointi	2	Tautia aiheuttavien mikrobien tuhoaminen pinnoilta kemikaalilla, ei itiöitä. Kutsutaan myös: desinfektio.	Mitä desinfiointi on?
+desinfiointiaine	1	Mikrobeja tappava kemikaali, kuten etanoli tai hypokloriitti.
+determinantti	2	Antigeenin kohta, johon vasta-aine sitoutuu. Kutsutaan myös: epitooppi.	Mikä on determinantti?
+difteriatoksiini	2	Kurkkumätäbakteerin proteiinimyrkky, joka pysäyttää proteiinisynteesin. Toksoidirokotteen malli.	Mikä on difteriatoksiini?
+edustaja	1	Ryhmänsä esimerkki: E. coli on bakteerien tyypillinen edustaja.
+ei-toivottu	1	Haitallinen, tarkoittamaton: ei-toivottu sivuvaikutus.
+elintarvikeentsyymi	1	Ruoan valmistuksessa käytetty entsyymi.
+eläinproteiini	1	Eläinperäinen proteiini, kuten maidon tai lihan proteiini.
+emulgaattori	2	Aine, joka sekoittaa rasvan ja veden tasaiseksi seokseksi, kuten lesitiini.	Mikä on emulgaattori?
+emäksinen	1	pH yli 7: emäksinen liuos, emäksinen aminohappo.	Mitä emäksinen tarkoittaa?
+enantioselektiivinen	1	Vain toista enantiomeeriä tuottava tai käyttävä.
+epidermaalinen	2	Ihon pintakerrokseen liittyvä: epidermaalinen kasvutekijä EGF ohjaa ihosolujen jakautumista.	Mitä epidermaalinen tarkoittaa?
+epäpuhtaus	2	Tuotteeseen jäänyt vieras aine, kuten isäntäsolun proteiini tai DNA, joka poistetaan puhdistuksessa.	Mikä on epäpuhtaus?
+epästabiili	1	Helposti hajoava: lähetti-RNA on epästabiilia.
+erotusmenetelmä	2	Tapa erottaa aineet toisistaan: sentrifugointi, suodatus, saostus, kromatografia. Kutsutaan myös: erottelumenetelmä.	Mikä on erotusmenetelmä?
+erotusperiaate	1	Ominaisuus, johon erottelu perustuu: koko, varaus, hydrofobisuus tai affiniteetti.
+erytromysiini	2	Streptomyces-bakteerin makrolidiantibiootti, joka estää bakteerin proteiinisynteesin.	Mikä on erytromysiini?
+fibriiniverkko	1	Fibriinisäikeiden verkko, joka tukkii haavan hyytymässä.
+fibrinogeeni	2	Plasman proteiini, jonka trombiini muuttaa fibriiniksi hyytymisessä.	Mikä on fibrinogeeni?
+geelielektroforeesi	2	Molekyylien erottelu geelissä sähkökentässä koon ja varauksen mukaan.	Mikä on geelielektroforeesi?
+gmp-vaatimus	2	Lääkevalmistuksen hyvien tuotantotapojen viranomaisvaatimukset. Kutsutaan myös: GMP, Good Manufacturing Practice.	Mikä on GMP-vaatimus?
+hajunpoisto	1	Hajujen poistaminen poistoilmasta suodattamalla tai pesemällä.
+hakeutua	1	Suuntautua kohti: hydrofobiset ryhmät hakeutuvat yhteen, lääke kohteeseen.
+hallitusti	1	Säädellysti, valvotusti: reaktio etenee hallitusti.
+hamsteri	1	Jyrsijä, jonka munasarjasoluista CHO-solulinja on peräisin.
+hepariini	2	Polysakkaridi, joka estää veren hyytymistä. Antikoagulantti leikkauksissa ja dialyysissä.	Mikä on hepariini?
+hermotoksiini	2	Hermostoon vaikuttava myrkky, kuten botuliini tai tetanustoksiini. Kutsutaan myös: neurotoksiini.	Mikä on hermotoksiini?
+hiilirengas	1	Hiiliatomeista muodostuva rengas, kuten bentseeni tai steroidin renkaat.
+hilseillä	1	Irrottaa hilsettä: psoriaasissa iho hilseilee.
+hoitokohde	1	Sairaus tai molekyyli, johon hoito suunnataan.
+homesuku	1	Homeiden suku, kuten Aspergillus tai Penicillium.
+huokoinen	1	Reikiä sisältävä, läpäisevä: huokoinen suodatin, huokoinen geeli.
+hybridi	1	Kahden erilaisen yhdistelmä: hybridisolu, hybridientsyymi.
+hybridoomasolu	1	B-solun ja myeloomasolun sulautuma, joka tuottaa monoklonaalista vasta-ainetta rajattomasti.
+hydroksihappo	1	Karboksyylihappo, jossa on hydroksyyliryhmä, kuten maito- ja sitruunahappo.
+hyytyä	1	Muuttua kiinteäksi: veri hyytyy, maito juoksettuu.
+hyökätä	1	Kohdistaa vahingollinen toiminta: immuunijärjestelmä hyökkää patogeeniin.
+hyönteinen	1	Kuusijalkainen niveljalkainen. Hyönteissolut ovat tuottoisäntiä, hyönteiset tuholaisia.
+hälytysmerkki	1	Vaarasta kertova signaali: interferoni on virusinfektion hälytysmerkki.
+häntäosa	1	Molekyylin häntä: vasta-aineen Fc-osa, joka määrää eliniän veressä.
+hävikki	1	Menetetty osuus: saannon hävikki puhdistusvaiheissa.
+ihmiskudos	1	Ihmisen kudos, kudosnäytteen tai kudosteknologian kohde.
+ihonhoito	1	Ihon hoito kosmetiikalla, johon lisätään bioteknisiä aineita.
+imeytyä	1	Siirtyä elimistöön: suun kautta otettu lääke imeytyy suolesta, proteiinit eivät.
+immunologia	2	Immuunijärjestelmän tiede: vasta-aineet, solut ja puolustuksen säätely.	Mitä immunologia on?
+immuunipuolustus	1	Elimistön puolustus taudinaiheuttajia vastaan, immuunijärjestelmän toiminta.
+immuunireaktio	2	Immuunijärjestelmän vaste vieraaseen aineeseen, kuten vasta-aineiden muodostus lääkeproteiinia vastaan.	Mikä on immuunireaktio?
+inaktivointi	1	Toimintakyvyn poisto: viruksen inaktivointi kuumalla tai kemikaalilla.
+infektioalttius	1	Herkkyys saada infektioita, esimerkiksi immuunivastetta hillitsevän lääkkeen sivuvaikutuksena.
+infektoida	1	Tartuttaa: virus infektoi solun, bakulovirus hyönteissolun.
+ioninvaihto	2	Kromatografia, jossa varatut molekyylit sitoutuvat vastakkaisesti varattuun geeliin ja eluoidaan suolalla. Kutsutaan myös: ioninvaihtokromatografia.	Mitä ioninvaihto on?
+itiö	2	Bakteerin tai sienen kestomuoto, joka sietää kuumuutta ja kuivuutta. Sterilointi tuhoaa itiötkin.	Mikä on itiö?
+jae	1	Erotettu osa, fraktio kromatografiassa tai sentrifugoinnissa.
+jakautumiskyky	1	Solun kyky jakautua: hybridoomasolun rajaton jakautumiskyky myeloomasolusta.
+jatkokäsittely	1	Tuotteen käsittely talteenoton jälkeen: puhdistus, konsentrointi, formulointi.
+jauhe	1	Hienojakoinen kiinteä aine: kylmäkuivattu proteiini on jauhetta.
+juoksutinmaha	1	Vasikan mahan osa, josta juustonjuoksute (kymosiini) perinteisesti eristettiin.
+juoksuttaa	1	Saostaa maidon kaseiini juustoksi kymosiinilla.
+jäykkäkouristus	2	Clostridium tetani -bakteerin toksiinin aiheuttama lihaskouristustauti, jota vastaan rokotetaan toksoidilla. Kutsutaan myös: tetanus.	Mikä on jäykkäkouristus?
+kannellinen	1	Kannella varustettu: kannellinen petrimalja.
+kantajaproteiini	1	Proteiini, joka kuljettaa toista molekyyliä tai johon hapteeni liitetään immunisoinnissa.
+karpalo	1	Marja, jonka aineet estävät bakteerien tarttumista virtsateihin.
+karva	1	Ihon karvat, jotka proteaasi irrottaa nahanvalmistuksessa.
+kaseiini	2	Maidon pääproteiini, joka saostuu juustoksi happamassa tai kymosiinilla.	Mikä on kaseiini?
+kasviaines	1	Kasvista peräisin oleva raaka-aine, kuten selluloosa.
+kasvuvaatimus	1	Ravinteet ja olosuhteet, joita mikrobi tarvitsee kasvaakseen.
+kauneustuote	1	Kosmetiikkatuote.
+keliakia	2	Autoimmuunisairaus, jossa vehnän gluteeni vaurioittaa ohutsuolen limakalvoa.	Mikä on keliakia?
+kerrostua	1	Asettua kerroksiksi: sentrifugoinnissa faasit kerrostuvat tiheyden mukaan.
+kiihdyttää	1	Nopeuttaa: entsyymi kiihdyttää reaktiota.
+kiinanhamsteri	1	Jyrsijä, jonka munasarjasoluista CHO-solulinja on eristetty.
+kiinnitys	1	Kiinnittäminen alustaan: entsyymin kiinnitys kantajaan.
+kilpailuetu	1	Etu kilpailijoihin nähden, kuten patentti tai halvempi tuotanto.
+kilogramma	1	Massan yksikkö kg.
+koetulos	1	Kokeen antama tulos.
+kohdeproteiini	1	Proteiini, joka on lääkkeen tai vasta-aineen kohde.
+kohdistaa	1	Suunnata kohteeseen: lääke kohdistetaan kasvaimeen.
+kohtauksittainen	1	Kohtauksina esiintyvä, kuten migreeni.
+koleratoksiini	2	Vibrio cholerae -bakteerin toksiini, joka avaa suolen kloridikanavat ja aiheuttaa ripulin.	Mikä on koleratoksiini?
+kolmannes	1	Kolmasosa.
+kolmiarvoinen	1	Kolme happoryhmää tai kolme varausta omaava: sitruunahappo on kolmiarvoinen happo.
+komponentti	1	Osa kokonaisuutta: elatusaineen komponentit, rokotteen komponentit.
+korvaus	1	Puuttuvan tilalle annettava: entsyymikorvaushoito, hormonikorvaus.
+korvikeruoka	1	Alkuperäisen korvaava ravinto, kuten äidinmaidonvastike.
+kudosplasminogeeniaktivaattori	2	Entsyymi, joka aktivoi plasminogeenin liuottamaan hyytymiä. Rekombinanttinen tPA hoitaa infarktia.	Mikä on kudosplasminogeeniaktivaattori?
+kudossiivu	1	Ohut kudosleike mikroskopiaa tai immunohistokemiaa varten.
+kudosviljelmä	2	Laboratoriossa kasvatettu solu- tai kudosviljelmä.	Mikä on kudosviljelmä?
+kukinto	1	Kasvin kukkien ryhmä. Krysanteemin kukinnoista saadaan pyretriiniä.
+kuolemisvaihe	1	Kasvukäyrän loppuvaihe, jossa solut kuolevat ravinteiden loputtua.
+kuormittaa	1	Rasittaa: tuottoproteiini kuormittaa isäntäsolua, tuotanto ympäristöä.
+kuume	1	Kohonnut ruumiinlämpö, jonka endotoksiini ja sytokiinit laukaisevat.
+kuumuus	1	Korkea lämpötila, joka denaturoi proteiinit.
+kuutiometri	1	Tilavuuden yksikkö m³ = 1000 ℓ. Tuotantofermentorit ovat kymmeniä kuutiometrejä.
+käyttäjä	1	Tuotteen käyttävä taho: lääkkeen käyttäjä, entsyymin käyttäjä.
+käärmeenpurema	1	Myrkkykäärmeen purema, jota hoidetaan vastamyrkyllä eli hevosen vasta-aineilla.
+laboratoriopullo	1	Kasvatuspullo laboratoriomittakaavassa.
+lac-promoottori	2	Lac-operonin promoottori, jota käytetään indusoitavana tuottopromoottorina E. colissa.	Mikä on lac-promoottori?
+lag-vaihe	1	Kasvukäyrän viivevaihe ennen jakautumisen alkua.
+laimennus	1	Pitoisuuden pienentäminen lisäämällä liuotinta.
+laktoferriini	2	Rautaa sitova maidon proteiini, joka estää bakteerien kasvua. Lisätään äidinmaidonvastikkeeseen.	Mikä on laktoferriini?
+lamauttaa	1	Estää liike: hermotoksiini lamauttaa lihakset.
+laskostaa	1	Saattaa laskostumaan: kaperoni laskostaa proteiinin.
+lauhduttaa	1	Tiivistää höyry nesteeksi jäähdyttämällä.
+lehmänmaito	1	Naudan maito, meijerituotteiden raaka-aine.
+leikkausvoima	2	Nesteen virtauksen aiheuttama voima, joka voi rikkoa herkkiä soluja sekoituksessa.	Mikä on leikkausvoima?
+lipopolysakkaridi	2	Gram-negatiivisen bakteerin ulkokalvon lipidi-sokerimolekyyli, endotoksiini. Lyhenne LPS.	Mikä on lipopolysakkaridi?
+lisäkilpirauhashormoni	2	Kalsiumtasapainoa säätelevä hormoni, jonka rekombinanttia muotoa käytetään osteoporoosiin.	Mikä on lisäkilpirauhashormoni?
+liuottaa	1	Saada liukenemaan: trombolyytti liuottaa hyytymän.
+luonnollinen	1	Luonnossa esiintyvä, ei muokattu: luonnollinen entsyymi, luonnollinen isäntä.
+lähisukuinen	1	Läheistä sukua oleva laji tai proteiini.
+lähtömateriaali	1	Raaka-aine, josta tuote valmistetaan tai puhdistetaan.
+lämmin	1	Lämpötilaltaan korkea: lämmin kasvatus 37 °C.
+lämpöherkkä	1	Lämmössä hajoava: lämpöherkkä proteiini steriloidaan suodattamalla.
+lämmönpoisto	1	Kasvatuksen tuottaman lämmön johtaminen pois jäähdytyksellä.
+lämpöshokkivaste	2	Solun reaktio kuumuuteen: kaperonien tuotanto proteiinien suojaamiseksi.	Mikä on lämpöshokkivaste?
+lämpövaurio	1	Kuumuuden aiheuttama vaurio, kuten proteiinin denaturaatio.
+lääkeproteiini	1	Lääkkeenä käytetty proteiini, kuten insuliini tai vasta-aine.
+lääkevalmiste	1	Käyttövalmis lääke apuaineineen.
+lääkevalmistus	1	Lääkkeiden tuotanto viranomaisvaatimusten mukaan.
+magnesiumsuola	1	Magnesiumin suola, kovan veden aine ja ravinne.
+malja	1	Matala astia, petrimalja.
+matriisi	1	Kantava perusaine: kromatografian matriisi, soluväliaineen matriisi.
+menettely	1	Toimintatapa vaiheittain.
+mieto	1	Lievä, laimea: mieto happo, miedot olosuhteet.
+mikrobikasvatus	1	Mikrobien kasvatus elatusaineessa.
+mikrobikasvu	1	Mikrobipopulaation lisääntyminen.
+mikrobimassa	1	Kasvatuksessa kertynyt mikrobien massa, biomassa.
+milligramma	1	Tuhannesosagramma, mg.
+minimaalinen	1	Pienin mahdollinen: minimaalinen elatusaine.
+moolimassa	2	Aineen massa moolia kohti, g/mol. Proteiineilla kymmeniä tuhansia. Kutsutaan myös: molekyylimassa.	Mikä on moolimassa?
+ms-tauti	2	Autoimmuunisairaus, jossa hermojen myeliini tuhoutuu. Hoidetaan interferonilla ja vasta-aineilla. Kutsutaan myös: multippeliskleroosi.	Mikä on MS-tauti?
+munasarjasolu	1	Munasarjasta peräisin oleva solu, kuten CHO.
+munasarjasolulinja	1	Munasarjasoluista tehty solulinja, CHO.
+munuaispotilas	1	Munuaisten vajaatoimintaa sairastava, joka saa erytropoietiinia.
+muokkauskohde	1	Molekyylin kohta, jota muokataan.
+muokkauskyky	1	Kyky muokata: isäntäsolun kyky tehdä translaation jälkeisiä muokkauksia.
+muovimalja	1	Kertakäyttöinen petrimalja muovista.
+muovipussi	1	Kertakäyttöisen bioreaktorin steriili pussi.
+murtumariski	1	Luunmurtuman todennäköisyys, osteoporoosin haitta.
+muste	1	Väriaine kirjoitukseen. Entsyymit poistavat mustetta jätepaperista.
+myeliini	2	Hermosäiettä eristävä rasvainen vaippa, joka nopeuttaa impulssia. Tuhoutuu MS-taudissa.	Mikä on myeliini?
+myynti	1	Tuotteen kaupallinen luovutus: lääkkeen myynti.
+nahka	1	Eläimen käsitelty vuota, jonka valmistuksessa entsyymejä käytetään.
+nisäkässolulinja	1	Nisäkässoluista tehty jatkuvasti kasvava linja, kuten CHO tai HEK293.
+nivelkalvo	1	Nivelen sisäpinnan kalvo, jonka nivelreuma tulehduttaa.
+normaalipaine	1	Ilmakehän paine, 101 kPa.
+normalisoitua	1	Palata normaaliksi.
+nukka	1	Kankaan pinnan irtokuidut, jotka sellulaasi poistaa.
+oligosakkaridi	2	Muutaman sokerin ketju. Äidinmaidon oligosakkaridit ravitsevat vauvan suolistobakteereja.	Mikä on oligosakkaridi?
+optimoida	1	Säätää parhaaksi: kasvatusolot optimoidaan tuoton maksimoimiseksi.
+pahanlaatuinen	1	Leviävä ja tappava kasvain, syöpä.
+pahoinvointi	1	Kuvotus, lääkkeen sivuvaikutus.
+paikkaspesifinen	1	Tiettyyn kohtaan kohdistuva, kuten paikkaspesifinen mutageneesi.
+paineastia	1	Painetta kestävä säiliö, kuten autoklaavi tai fermentori.
+paineistaa	1	Nostaa paine: autoklaavi paineistetaan höyryllä.
+papaija	1	Hedelmä, josta papaiini-proteaasi saadaan.
+papilloomavirusrokote	2	HPV-rokote, viruksenkaltaisista partikkeleista tehty, ehkäisee kohdunkaulan syöpää.	Mikä on papilloomavirusrokote?
+pekilo-home	1	Paecilomyces-home, josta Suomessa tehtiin Pekilo-rehuproteiinia sulfiittijätelipeästä.
+perinteisesti	1	Vanhan tavan mukaan: perinteisesti tuotettu.
+perna	1	Vatsaontelon elin, jossa imusolut kohtaavat antigeenin. Immunisoidun hiiren pernasoluista tehdään hybridoomat.
+pernasolu	1	Pernan imusolu, hybridoomatekniikan B-solujen lähde.
+pet-hydrolaasi	2	Entsyymi, joka pilkkoo PET-muovin monomeereikseen. Kutsutaan myös: PETaasi.	Mikä on PET-hydrolaasi?
+pidentyä	1	Tulla pidemmäksi: lääkkeen elinikä pidentyy Fc-osalla.
+pienentää	1	Tehdä pienemmäksi: pienentää kustannuksia.
+pintareseptori	1	Solun pinnan reseptori, vasta-ainelääkkeiden kohde.
+pitkäkestoinen	1	Kauan vaikuttava: pitkäkestoinen hoito.
+pitkävaikutteinen	1	Pitkään vaikuttava lääke, kuten viikoittain annosteltava semaglutidi.
+poimia	1	Valita joukosta: parhaat variantit poimitaan seulonnassa.
+polio	2	Poliovirus, joka aiheuttaa halvauksen. Hävitetty lähes kokonaan rokotuksin.	Mikä on polio?
+porausneste	1	Öljynporauksessa käytetty neste, jonka polymeerejä entsyymit hajottavat.
+potentiaalinen	1	Mahdollinen: potentiaalinen lääkeaine.
+proinsuliini	2	Insuliinin esiaste, josta C-peptidi leikataan pois aktiivisen insuliinin syntymiseksi.	Mikä on proinsuliini?
+puhdistusaine	1	Likaa irrottava aine, pesuaine.
+puhdistusmenetelmä	1	Tapa puhdistaa tuote: kromatografia, suodatus, saostus.
+puhdistusvaihe	1	Yksi puhdistuksen askel.
+puhkaista	1	Rikkoa reikä: komplementti puhkaisee bakteerin kalvon.
+pullo	1	Astia nesteelle: ravistelupullo, kasvatuspullo.
+pylväs	1	Kromatografiakolonni, putki täynnä geeliä. Kutsutaan myös: kolonni.	Mikä on pylväs kromatografiassa?
+pystyttää	1	Rakentaa ja saattaa toimintaan: tuotantoprosessin pystytys.
+pähkinä	1	Allergeeninen ruoka-aine.
+pääsovellusalue	1	Tärkein käyttöalue.
+päänsärkysairaus	1	Toistuva päänsärkytauti, kuten migreeni.
+quorn	1	Fusarium-sienestä tehty lihankorvike, mykoproteiini.
+raju	1	Voimakas: rajut olosuhteet denaturoivat proteiinin.
+ravintoarvo	1	Ruoan ravitsemuksellinen hyöty.
+reaktioketju	1	Peräkkäisten reaktioiden sarja, kuten hyytymisen kaskadi.
+reaktioliuos	1	Liuos, jossa reaktio tapahtuu.
+reaktiovaihe	1	Yksi reaktion askel.
+reaktori	1	Astia, jossa reaktio tai kasvatus tehdään: bioreaktori, entsyymireaktori.
+rekombinanttisesti	1	Rekombinantti-DNA-tekniikalla: rekombinanttisesti tuotettu.
+rihmamainen	1	Rihmoina kasvava: rihmamaiset sienet, Streptomyces.
+rikastaa	1	Lisätä pitoisuutta: tuote rikastetaan, elatusaine rikastetaan.
+rikkoutua	1	Hajota: solut rikkoutuvat homogenoinnissa.
+romahdus	1	Äkillinen luhistuminen: kasvatuksen romahdus kontaminaatiossa.
+ruisku	1	Väline nesteen ruiskuttamiseen kehoon.
+ruiskuttaa	1	Antaa ruiskulla: insuliini ruiskutetaan ihon alle.
+saanto	2	Tuotteen määrä suhteessa lähtöaineeseen tai alkuperäiseen määrään, usein prosentteina.	Mikä on saanto?
+saostaa	1	Erottaa liuoksesta kiinteänä: proteiinit saostetaan ammoniumsulfaatilla.
+saostua	1	Erkaantua liuoksesta kiinteänä.
+saostus	1	Aineen erottaminen kiinteänä liuoksesta, esimerkiksi suolalla tai etanolilla.
+satunnaismutaatio	1	Sattumanvarainen, kohdentamaton mutaatio, jota ohjattu evoluutio käyttää.
+sekundaarimetaboliitti	1	Kasvun jälkeen tuotettu aineenvaihduntatuote, kuten antibiootti.
+selkiytyä	1	Muuttua kirkkaaksi: mehu selkiytyy pektinaasilla.
+sellutehdas	1	Tehdas, joka valmistaa puusta sellua.
+sidekudosproteiini	1	Sidekudoksen proteiini, kuten kollageeni.
+siemensolu	1	Esikasvatuksen solu, josta tuotantokasvatus siirrostetaan.
+sietää	1	Kestää haittaamatta: entsyymi sietää lämpöä.
+siirappi	1	Väkevä sokeriliuos, kuten fruktoosisiirappi.
+siitepöly	1	Kasvin hedelmöittävä jauhe ja yleinen allergeeni.
+sikiövaurio	1	Sikiön kehityshäiriö, jonka talidomidi aiheutti.
+sitoutumistesti	1	Määritys, joka mittaa molekyylin sitoutumista kohteeseen.
+sivureaktio	1	Ei-toivottu rinnakkainen reaktio, joka vähentää saantoa.
+soijakastike	1	Fermentoitu soijamauste, Aspergillus oryzaen tuote.
+sokerirakenne	1	Proteiiniin liitetyn sokeriketjun rakenne.
+sokeroida	1	Liittää sokeriketju: nisäkässolu sokeroi proteiinin oikein.
+solukasvatus	1	Solujen kasvatus laboratoriossa tai reaktorissa. Kutsutaan myös: soluviljely.
+solumyrkky	1	Soluja tappava aine, kuten syöpälääke tai toksiini. Kutsutaan myös: sytotoksiini.
+soluprosessi	1	Solun sisäinen tapahtumasarja.
+sopeuttaa	1	Saada sopeutumaan: tuottokanta sopeutetaan kasvatusoloihin.
+sose	1	Hedelmistä tai vihanneksista hienonnettu massa, jota pektinaasi nesteyttää.
+stationäärivaihe	1	Kasvukäyrän tasannevaihe, jossa kasvu ja kuolema ovat tasapainossa.
+stereospesifinen	1	Vain tiettyä stereoisomeeriä tuottava tai tunnistava.
+steriili	1	Mikrobiton: steriili liuos, steriili työskentely.
+steriilisuodatin	1	0,2 mikrometrin suodatin, joka poistaa mikrobit lämpöherkästä liuoksesta.
+stressihormoni	1	Stressissä erittyvä hormoni, kuten kortisoli ja adrenaliini.
+sukupuoli	1	Yksilön lisääntymisrooli, jonka hormonit määräävät.
+sulatus-pakastus-sykli	1	Toistuva sulatus ja pakastus, joka vaurioittaa proteiinia.
+suodattaa	1	Erottaa kiinteä aine nesteestä huokoisen materiaalin läpi.
+suoja-aine	1	Vaurioilta suojaava lisäaine, kuten sokeri kylmäkuivauksessa.
+suojaus	1	Suojaaminen: kylmäsuojaus, immuunisuojaus.
+suspensio	2	Seos, jossa kiinteät hiukkaset tai solut leijuvat nesteessä. Suspensiokasvatus ravistelussa.	Mikä on suspensio?
+suure	1	Mitattava ominaisuus, kuten lämpötila tai pitoisuus.
+syöpäepäily	1	Epäily kasvaimesta, joka varmistetaan koepalalla.
+syöpävariantti	1	Kasvaimen geenimuunnos, joka ohjaa hoidon valintaa.
+syöttö	1	Aineen lisäys reaktoriin: ravinteen syöttö, ilman syöttö.
+sähköpulssi	1	Lyhyt sähköisku, joka avaa solukalvon DNA:lle elektroporaatiossa.
+säiliö	1	Suuri astia: fermentorin säiliö.
+säilöntä	1	Pilaantumisen esto: säilöntä hapolla, suolalla tai kylmällä.
+säilöntäaine	1	Pilaantumista estävä lisäaine, kuten bentsoaatti tai nisiini.
+säätöjärjestelmä	1	Anturit ja säätimet, jotka pitävät prosessin olosuhteet vakiona.
+tabletti	1	Suun kautta otettava puristettu lääkemuoto.
+tasalaatuinen	1	Erästä toiseen samanlainen.
+tekninen	1	Tekniikkaan liittyvä: tekninen entsyymi teollisuuteen.
+teollisuusolosuhde	1	Teollisen prosessin olot: suuri mittakaava, kuumuus, liuottimet.
+tetrasykliini	2	Laajakirjoinen antibiootti Streptomycesistä, joka estää bakteerin proteiinisynteesin.	Mikä on tetrasykliini?
+teurastus	1	Eläimen tappaminen lihaksi. Teurasjäte on raaka-aine.
+tietynmuotoinen	1	Määrätyn muotoinen: vasta-aine tunnistaa tietynmuotoisen kohdan.
+tilavuusprosentti	1	Aineen tilavuuden osuus liuoksen tilavuudesta, kuten alkoholin til-%.
+toksoidirokote	2	Rokote, jonka antigeeni on inaktivoitu toksiini: jäykkäkouristus ja kurkkumätä.	Mikä on toksoidirokote?
+tonni	1	Tuhat kilogrammaa. Teollisuusentsyymejä tuotetaan tuhansia tonneja.
+trombi	2	Verisuonen sisälle syntynyt hyytymä, joka voi tukkia suonen. Kutsutaan myös: veritulppa.	Mikä on trombi?
+tunnistusosa	1	Molekyylin osa, joka tunnistaa kohteen, kuten vasta-aineen Fab.
+tuottoisa	1	Paljon tuottava: tuottoisa kanta.
+tuottokandidaatti	1	Tuottoon ehdolla oleva organismi tai kanta.
+tuottomäärä	1	Tuotettu määrä: tuottomäärä grammoina litrassa.
+tuottosolu	1	Tuottoon käytetty solu.
+tuottotapa	1	Tapa tuottaa: rekombinanttinen tai perinteinen.
+tuottoympäristö	1	Olosuhteet, joissa tuotto tapahtuu.
+turvallisuusriski	1	Vaaran mahdollisuus, kuten kontaminaatio tai toksisuus.
+tyhjiö	1	Ilmaton tila: kylmäkuivaus tyhjiössä.
+työkaluentsyymi	1	Molekyylibiologian työvälineeksi käytetty entsyymi: polymeraasi, ligaasi, restriktioentsyymi.
+umami-mauste	1	Natriumglutamaatti, umamin makua antava lisäaine.
+uranuurtaja	1	Alansa ensimmäinen kehittäjä: Pasteur mikrobiologian uranuurtaja.
+vaaraton	1	Ilman vaaraa: heikennetty kanta on vaaraton.
+vaatimus	1	Edellytys, jonka on täytyttävä: laatuvaatimus.
+vaikeuttaa	1	Tehdä vaikeammaksi: viskositeetti vaikeuttaa sekoitusta.
+vaippa	1	Ympäröivä kuori: fermentorin vesivaippa, viruksen vaippa, myeliinivaippa.
+vakioaika	1	Muuttumaton aika, kuten inkubaatioaika.
+vakiolämpötila	1	Muuttumaton lämpötila kasvatuksessa.
+valjastaa	1	Ottaa käyttöön: mikrobit valjastetaan tuotantoon.
+valkuaistahra	1	Proteiinitahra, kuten veri tai muna, jonka proteaasi poistaa.
+valuttaa	1	Antaa valua: neste valutetaan pois.
+valvoa	1	Seurata ja tarkistaa: viranomainen valvoo lääketuotantoa.
+vasikka	1	Naudan poikanen, kymosiinin perinteinen lähde.
+vastamyrkky	2	Myrkkyä neutraloiva valmiste, kuten hevosen vasta-aineet käärmeenmyrkkyä vastaan. Kutsutaan myös: antitoksiini.	Mikä on vastamyrkky?
+vektorivirus	1	Geenin kuljettajaksi muokattu virus.
+vesiympäristö	1	Vesipohjaiset olot, joissa entsyymit toimivat.
+viestiproteiini	1	Viestiä välittävä proteiini: sytokiini, kasvutekijä, peptidihormoni.
+viikuna	1	Hedelmä, josta fisiini-proteaasi saadaan.
+viive	1	Odotusaika: kasvun viivevaihe.
+vilja	1	Viljakasvin jyvät: vehnä, ohra, riisi, maissi.
+viljelmä	1	Kasvatettu solu- tai mikrobipopulaatio.
+virusinfektio	1	Viruksen aiheuttama tartunta.
+voimistaa	1	Tehdä voimakkaammaksi: adjuvantti voimistaa immuunivastetta.
+vuorokausi	1	24 tuntia: nisäkässolun jakautumisaika.
+väkevöidä	1	Lisätä pitoisuutta poistamalla liuotinta: tuote väkevöidään suodattamalla.
+värjäys	1	Värin antaminen näkyväksi: solujen värjäys, gramvärjäys, immunohistokemiallinen värjäys.
+yhdistellä	1	Yhdistää eri osia: geenejä yhdistellään, hoitoja yhdistellään.
+yhteensopimaton	1	Ei sovi yhteen: yhteensopimaton veriryhmä hylkii.
+ylitoimiva	1	Liikaa toimiva: ylitoimiva reseptori ajaa syöpää.
+äärimmäinen	1	Erittäin suuri tai pieni: äärimmäinen pH tai lämpötila.

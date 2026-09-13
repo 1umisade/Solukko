@@ -1,0 +1,69 @@
+# Kemian peruskurssi I, Luento 3.2 - massakierros
+bohr	2	Niels Bohr, joka esitti 1913 atomimallin, jossa elektronit kiertävät ydintä vain sallituilla radoilla.	Kuka oli Bohr?
+broglie	2	Louis de Broglie, joka esitti 1924, että hiukkasilla on aallonpituus λ = h/mv.	Kuka oli de Broglie?
+d-elektroni	1	d-orbitaalilla oleva elektroni, siirtymämetallien ominaisuuksien perusta.
+d-kuori	1	d-orbitaalien joukko tietyllä pääkvanttiluvulla, kuten 3d.
+d-orbitaali	2	Sivukvanttiluvun l = 2 orbitaali, viisi kappaletta, nelilehtinen muoto. Täyttyvät siirtymämetalleilla.	Mikä on d-orbitaali?
+edestakainen	1	Molempiin suuntiin kulkeva: seisova aalto heijastuu edestakaisin.
+einstein	2	Albert Einstein, joka selitti valosähköisen ilmiön fotoneilla 1905 ja esitti E = mc².	Kuka oli Einstein?
+emittoitunut	1	Säteillyt, lähetetty: emittoitunut fotoni.
+energeettisesti	1	Energian kannalta: energeettisesti edullinen tila.
+epätarkka	1	Ei täsmällinen: paikan ja liikemäärän epätarkkuus.
+f-orbitaali	2	Sivukvanttiluvun l = 3 orbitaali, seitsemän kappaletta. Täyttyvät lantanoideilla ja aktinoideilla.	Mikä on f-orbitaali?
+hehkulamppu	1	Kuuman langan valonlähde, jonka spektri on jatkuva.
+heijastua	1	Palautua pinnasta: aalto heijastuu kiinteästä päästä.
+heisenberg	2	Werner Heisenberg, joka muotoili epätarkkuusperiaatteen 1927.	Kuka oli Heisenberg?
+interferoida	1	Yhdistyä aaltoina vahvistaen tai sammuttaen toisiaan.
+kaksilehtinen	1	Kahdesta lohkosta koostuva: p-orbitaalin muoto.
+kulmaosa	1	Aaltofunktion kulmista riippuva osa, joka määrää orbitaalin muodon.
+kuu	1	Maan kiertolainen, jonka rata on klassisen mekaniikan esimerkki.
+kvantittuneisuus	1	Suureen esiintyminen vain erillisinä arvoina.
+käsipaino	1	Nostettava paino, jonka aaltoluonne on merkityksetön.
+liikemäärä	2	Massan ja nopeuden tulo p = mv. Fotonilla p = h/λ.	Mikä on liikemäärä?
+luonne	1	Olemus: valon aaltoluonne ja hiukkasluonne.
+lyhytaaltoinen	1	Lyhyen aallonpituuden säteily, kuten UV ja röntgen, suurienergistä.
+matalaenerginen	1	Vähän energiaa sisältävä: matalaenerginen tila.
+materia	1	Aine, kaikki, millä on massa.
+miehitys	1	Elektronien sijoittuminen orbitaaleille: orbitaalin miehitys.
+mielekäs	1	Fysikaalisesti järkevä: aaltofunktion mielekäs ratkaisu.
+mielivaltainen	1	Mikä tahansa ilman rajoitusta: energia ei voi olla mielivaltainen.
+monielektroninen	1	Useita elektroneja sisältävä atomi.
+nanosekunti	1	Sekunnin miljardisosa, virittyneen tilan tyypillinen elinaika.
+nelilehtinen	1	Neljästä lohkosta koostuva: d-orbitaalin muoto.
+niels	1	Niels Bohrin etunimi.
+oletus	1	Lähtökohdaksi otettu väite: Bohrin oletus ympyräradoista.
+outo	1	Arkijärjelle vieras: kvanttimekaniikan oudot piirteet.
+paketti	1	Erillinen määrä: energia tulee paketteina, kvantteina.
+perättäinen	1	Peräkkäinen: aallon perättäiset huiput.
+pilvi	1	Elektronipilvi, todennäköisyysjakauma.
+pitkäaaltoinen	1	Pitkän aallonpituuden säteily, kuten radioaallot, pienienergistä.
+planck	2	Max Planck, joka esitti 1900 energian kvantittumisen ja Planckin vakion.	Kuka oli Planck?
+p-orbitaali	2	Sivukvanttiluvun l = 1 orbitaali, kolme kappaletta x-, y- ja z-akselin suuntaan, kaksilehtinen.	Mikä on p-orbitaali?
+prisma	1	Lasikappale, joka hajottaa valon spektriksi.
+pudota	1	Siirtyä alemmalle tasolle: elektroni putoaa ja emittoi fotonin.
+rataimpulssimomentti	1	Elektronin kiertoliikkeen impulssimomentti, jonka sivukvanttiluku määrää.
+sateenkaari	1	Auringonvalon jatkuva spektri vesipisaroissa taittuneena.
+samansuuntainen	1	Samaan suuntaan: samansuuntaiset spinit Hundin säännössä.
+sammua	1	Kumoutua: väärän aallonpituuden aallot sammuvat interferenssissä.
+schrödinger	2	Erwin Schrödinger, joka esitti 1926 aaltofunktion yhtälön, kvanttimekaniikan perustan.	Kuka oli Schrödinger?
+s-elektroni	1	s-orbitaalilla oleva elektroni.
+sijoittua	1	Asettua paikalleen: elektronit sijoittuvat orbitaaleille.
+sisäkuori	1	Ytimen lähellä oleva täysi elektronikuori.
+skandium	1	Alkuaine Sc, ensimmäinen siirtymämetalli, jolla 3d-orbitaali täyttyy.	Mikä on skandium?
+solmupinta	2	Pinta, jolla aaltofunktion arvo on nolla ja elektronin todennäköisyys nolla.	Mikä on solmupinta?
+sopimus	1	Sovittu käytäntö: orbitaalin raja on sopimus 90 % todennäköisyydestä.
+s-orbitaali	2	Sivukvanttiluvun l = 0 orbitaali, pallomainen, yksi jokaisella kuorella.	Mikä on s-orbitaali?
+strontium	1	Alkuaine Sr, jonka suolat antavat ilotulitteille punaisen värin.	Mikä on strontium?
+säteillä	1	Lähettää säteilyä: virittynyt atomi säteilee fotonin.
+säteittäinen	1	Säteen suuntainen, radiaalinen: säteittäinen todennäköisyysjakauma.
+tähti	1	Taivaankappale, jonka spektristä alkuaineet tunnistetaan.
+vastakkaisspininen	1	Vastakkaisen spinin omaava: orbitaalin kaksi elektronia ovat vastakkaisspinisiä.
+viivasto	1	Spektrin viivojen joukko, kullekin alkuaineelle ominainen.
+vinottain	1	Viistoon: diagonaalikaavion nuolet kulkevat vinottain.
+väliaine	1	Aine, jossa aalto etenee. Sähkömagneettinen aalto ei tarvitse väliainetta.
+yhteisvaikutus	1	Usean tekijän yhdessä aiheuttama vaikutus: ydinvarauksen ja elektronien hylkinnän yhteisvaikutus.
+yksikäsitteinen	1	Vain yhden arvon saava: aaltofunktion on oltava yksikäsitteinen.
+yksinkertaistus	1	Todellisuuden pelkistys: keskimääräiskenttä on yksinkertaistus.
+yksitellen	1	Yksi kerrallaan: elektronit lisätään yksitellen.
+z-akseli	1	Koordinaatiston pystyakseli, jonka suuntaan magneettikenttä ja p<sub>z</sub>-orbitaali osoittavat.
+äärettömyys	1	Rajaton etäisyys, jossa aaltofunktion on hävittävä.

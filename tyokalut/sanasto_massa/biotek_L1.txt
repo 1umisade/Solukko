@@ -1,0 +1,230 @@
+# Johdatus biotekniikkaan, Luento 1 - massakierros
+ainutlaatuinen	1	Vain yhdellä oleva: DNA-sormenjälki on yksilölle ainutlaatuinen.
+alfaglykosidisidos	1	Alfa-asennossa oleva glykosidisidos, kuten tärkkelyksessä. Amylaasi katkaisee sen.
+alkutila	1	Lähtötilanne ennen muutosta.
+antioksidantti	2	Hapettumista estävä aine, joka neutraloi vapaita radikaaleja, kuten C- ja E-vitamiini.	Mikä on antioksidantti?
+arvioida	1	Määrittää likimäärin tai punnita: riskin arviointi, tulosten arviointi.
+arvonlisäys	1	Raaka-aineen arvon kasvattaminen jalostamalla: biotekniikka nostaa maatalouden tuotteiden arvoa.
+bakteriofagi	2	Bakteereja infektoiva virus, geenitekniikan ensimmäisiä työkaluja. Kutsutaan myös: faagi.	Mikä on bakteriofagi?
+beetasolu	2	Haiman Langerhansin saarekkeen insuliinia erittävä solu, joka tuhoutuu tyypin 1 diabeteksessa.	Mikä on beetasolu?
+biohajoava	2	Mikrobien luonnossa hajottama: biohajoava muovi hajoaa vedeksi ja hiilidioksidiksi.	Mitä biohajoava tarkoittaa?
+biopohjainen	2	Uusiutuvasta eloperäisestä raaka-aineesta valmistettu, kuten biopohjainen muovi tärkkelyksestä.	Mitä biopohjainen tarkoittaa?
+biopolymeeri	2	Eliön tuottama polymeeri: proteiinit, polysakkaridit, nukleiinihapot ja bakteerien polyesterit.	Mikä on biopolymeeri?
+biotiede	1	Elämää tutkivat tieteet: biologia, biokemia, genetiikka, mikrobiologia.
+charpentier	2	Emmanuelle Charpentier, joka kehitti Jennifer Doudnan kanssa CRISPR-Cas9-geenisakset. Nobel 2020.	Kuka on Charpentier?
+dideoksinukleotidi	2	Nukleotidi ilman 3'-hydroksyylia, joka pysäyttää DNA-ketjun pidennyksen. Sangerin sekvensoinnin perusta.	Mikä on dideoksinukleotidi?
+dna-aluke	2	Lyhyt yksijuosteinen DNA, josta polymeraasi aloittaa synteesin PCR:ssä ja sekvensoinnissa. Kutsutaan myös: aluke, primer.	Mikä on DNA-aluke?
+dna-koetin	2	Leimattu DNA-jakso, joka pariutuu kohdesekvenssin kanssa ja paljastaa sen. Kutsutaan myös: koetin.	Mikä on DNA-koetin?
+dna-synteesi	1	DNA:n valmistus polymeraasilla tai kemiallisesti.
+doudna	2	Jennifer Doudna, joka kehitti Charpentierin kanssa CRISPR-Cas9-geenimuokkauksen. Nobel 2020.	Kuka on Doudna?
+elintarvikesovellus	1	Biotekniikan käyttö ruoan valmistuksessa: entsyymit, mikrobit, GM-kasvit.
+eloperäinen	1	Eliöistä peräisin oleva, orgaaninen: eloperäinen jäte, eloperäinen raaka-aine.
+erilaistaa	1	Ohjata solu erikoistumaan: kantasolut erilaistetaan halutuiksi soluiksi.
+faagi	1	Bakteriofagi lyhyesti.	Mikä on faagi?
+faagipartikkeli	1	Yksittäinen bakteriofagihiukkanen.
+fab-osa	2	Vasta-aineen antigeenia sitova haara, joka syntyy papaiinipilkkomisessa. Kutsutaan myös: Fab-fragmentti.	Mikä on Fab-osa?
+fagemidi	2	Plasmidi, jossa on faagin pakkaussignaali. Faaginäyttökirjastojen vektori.	Mikä on fagemidi?
+florey	2	Howard Florey, joka kehitti penisilliinin lääkkeeksi ja tuotantoon 1940-luvulla. Nobel 1945 Flemingin ja Chainin kanssa.	Kuka oli Florey?
+fosforipitoinen	1	Fosforia sisältävä: nukleiinihapot ovat fosforipitoisia.
+fragmentti	2	Katkaistu pala: DNA-fragmentti restriktiokatkaisusta, proteiinifragmentti.	Mikä on fragmentti?
+geenikloonaus	2	Geenin eristäminen ja monistaminen vektorissa isäntäsolussa.	Mitä geenikloonaus on?
+geenisekvenssi	1	Geenin emäsjärjestys.
+geenisiirto	2	Geenin vieminen eliöön, jossa sitä ei luonnostaan ole. Kutsutaan myös: geeninsiirto.	Mitä geenisiirto on?
+giii-proteiini	2	Filamenttisen faagin kuoriproteiini, johon faaginäytössä liitetään esiteltävä peptidi.	Mikä on gIII-proteiini?
+glp	1	GLP-1, suolen hormoni, joka lisää insuliinin eritystä. Diabetes- ja laihdutuslääkkeiden malli.	Mikä on GLP?
+haiman amylaasi	1	Haiman erittämä tärkkelystä pilkkova entsyymi.
+haitta-aine	1	Haitallinen aine ruoassa tai ympäristössä, kuten toksiini tai raskasmetalli.
+hapattaa	1	Käyttää happamaksi: maitohappobakteerit hapattavat maidon.
+happielektrodi	2	Anturi, joka mittaa liuenneen hapen pitoisuutta bioreaktorissa.	Mikä on happielektrodi?
+happosalpaaja	2	Mahan happoeritystä vähentävä lääke, kuten protonipumpun estäjä.	Mikä on happosalpaaja?
+hedelmöittyä	1	Tulla hedelmöitetyksi: munasolu hedelmöittyy siittiöstä.
+hiivakäyminen	1	Hiivan käyminen, jossa sokerista tulee etanolia ja hiilidioksidia.
+hiljentää	2	Estää geenin ilmentyminen: RNA-interferenssi hiljentää geenin.	Mitä hiljentäminen tarkoittaa?
+hämähäkinseitti	2	Hämähäkin proteiinikuitu, terästä lujempi painoonsa nähden. Tuotetaan rekombinantisti.	Mikä on hämähäkinseitti?
+hävittää	1	Poistaa kokonaan: isorokko hävitettiin rokotuksin.
+ihmisgenomi	2	Ihmisen koko perimä, 3 miljardia emäsparia, sekvensoitu 2003.	Mikä on ihmisgenomi?
+ihmisinsuliini	1	Ihmisen insuliini, ensimmäinen rekombinanttilääke 1982.
+implantti	2	Kehoon asetettava keinotekoinen osa, kuten tekonivel tai stentti, biomateriaalista.	Mikä on implantti?
+informatiikka	1	Tiedon käsittelyn tiede. Bioinformatiikka sovellettuna biologiaan.
+insinööri	1	Tekniikan ammattilainen. Biotekniikan insinööri suunnittelee bioprosesseja.
+insinööritiede	1	Tekniikan tieteet, joiden menetelmiä biotekniikka ja synteettinen biologia soveltavat.
+isyystesti	2	DNA-tunnistus, jolla lapsen ja isän sukulaisuus todetaan toistojaksoista.	Mikä on isyystesti?
+jatkuvatoiminen	1	Keskeytyksettä toimiva: jatkuvatoiminen bioreaktori.
+jeffreys	2	Alec Jeffreys, joka kehitti DNA-sormenjälkitekniikan 1984.	Kuka on Jeffreys?
+jerne	2	Niels Jerne, immunologi, joka jakoi Nobelin 1984 Köhlerin ja Milsteinin kanssa.	Kuka oli Jerne?
+jäte	1	Käytöstä poistettu aines, jonka biotekniikka voi muuttaa raaka-aineeksi.
+jäterasva	1	Ruoanlaiton jäterasva, biodieselin raaka-aine.
+kaikkikykyinen	2	Kantasolu, joka voi erilaistua miksi tahansa solutyypiksi, kuten alkion varhaiset solut. Kutsutaan myös: totipotentti.	Mitä kaikkikykyinen tarkoittaa?
+kaksonen	1	Samasta raskaudesta syntynyt sisarus. Identtisillä kaksosilla on sama DNA.
+kantajaemo	1	Naaras, joka kantaa toisen alkion, kuten kloonatun lampaan synnyttäjä.
+kasvatustekniikka	1	Solujen ja mikrobien kasvatuksen menetelmät.
+kasviperäinen	1	Kasvista peräisin oleva: kasviperäinen raaka-aine.
+katkaisuentsyymi	1	Restriktioentsyymi, DNA:n katkaisija.
+kaupallinen	1	Myyntiin tarkoitettu: kaupallinen tuote, kaupallinen lääke.
+kehitysbiologia	2	Yksilönkehityksen tutkimus: miten munasolusta tulee eliö.	Mitä kehitysbiologia on?
+keinotekoinen	1	Ihmisen tekemä, ei luonnollinen: keinotekoinen kromosomi, keinotekoinen genomi.
+keksintö	1	Uusi hyödyllinen ratkaisu, joka voidaan patentoida.
+kemianpalkinto	1	Nobelin kemianpalkinto.
+kenttäolo	1	Laboratorion ulkopuoliset olosuhteet, joissa pikatestin on toimittava.
+keskeyttää	1	Lopettaa kesken: raskauden keskeytys, kokeen keskeytys.
+ketjunpäättämismenetelmä	2	Sangerin sekvensointi: dideoksinukleotidit päättävät ketjut satunnaisesti ja pituudet luetaan.	Mikä on ketjunpäättämismenetelmä?
+koch	2	Robert Koch, joka osoitti bakteerien aiheuttavan tuberkuloosin ja koleran ja muotoili Kochin postulaatit.	Kuka oli Koch?
+koeasetelma	1	Kokeen suunnitelma: ryhmät, kontrollit, mittaukset.
+kohdemolekyyli	1	Molekyyli, johon lääke tai vasta-aine sitoutuu. Kutsutaan myös: kohde.
+kohdennus	1	Vaikutuksen suuntaaminen tiettyyn kohteeseen, kuten lääkkeen kohdennus syöpäsoluun.
+koneoppimismalli	1	Datasta oppinut tekoälymalli, kuten AlphaFold.
+koodipyörä	1	Ympyräkaavio, josta kodonin aminohappo luetaan.
+kopiomäärä	1	Kopioiden lukumäärä: geenin kopiomäärä genomissa.
+korjausjärjestelmä	1	DNA-vaurioita korjaavat entsyymit.
+kotikäyttöinen	1	Kotona käytettäväksi tarkoitettu, kuten raskaustesti.
+kromatogrammi	2	Kromatografian tulosviiva, jossa piikit vastaavat eroteltuja aineita. Sekvensoinnissa väripiikit emäksiä.	Mikä on kromatogrammi?
+kuumennus	1	Lämpötilan nosto: PCR:n kuumennus erottaa juosteet.
+kuvantamisdata	1	Kuvantamisesta saatu mittausaineisto, jota tekoäly tulkitsee.
+käymismenetelmä	1	Mikrobien käymiseen perustuva valmistustapa.
+käymisteollisuus	1	Käymiseen perustuva teollisuus: olut, viini, juusto, antibiootit.
+käännekohta	1	Merkittävä muutoskohta historiassa, kuten yhdistelmä-DNA-tekniikan synty 1973.
+laboratoriolaite	1	Laboratorion väline, kuten sentrifugi, PCR-laite tai sekvensaattori.
+lehmä	1	Nauta, maidon tuottaja ja siirtogeenisten eläinten kohde.
+lemmikki	1	Kotieläin seuraksi. Eläinlääketieteen diagnostiikan kohde.
+lievittää	1	Vähentää oireita: lääke lievittää tautia parantamatta.
+liikakäyttö	1	Liiallinen käyttö: antibioottien liikakäyttö tuottaa resistenssiä.
+luoda	1	Tehdä uutta: synteettinen biologia luo uusia reittejä.
+luonnonvara	1	Luonnon hyödynnettävä aines: metsä, vesi, maaperä.
+luovuttajaeläin	1	Eläin, jolta solu tai elin otetaan, kuten kloonauksen tumanluovuttaja.
+lyhytketjuinen	1	Lyhyestä ketjusta koostuva: lyhytketjuiset rasvahapot.
+maa-aines	1	Maaperän aine, jota mikrobit puhdistavat bioremediaatiossa.
+maaperä	1	Maan pintakerros, jossa mikrobit ja kasvit elävät.
+maanviljely	1	Kasvien viljely ravinnoksi, alkoi 10 000 vuotta sitten.
+maissi	1	Viljakasvi, jonka Bt-lajikkeet ovat yleisimpiä GM-kasveja.
+margariini	1	Kasvirasvalevite. Benecol sisältää kolesterolia alentavaa kasvistanolia.
+markkina	1	Kauppapaikka: lääkemarkkinat, biotekniikan markkinat.
+merkitsevyys	1	Tilastollinen todennäköisyys, ettei tulos ole sattumaa.
+merkkigeeni	2	Vektorin geeni, jonka avulla muokatut solut tunnistetaan, kuten antibioottiresistenssi tai fluoresenssi.	Mikä on merkkigeeni?
+metsäsektori	1	Metsätalous ja -teollisuus, joka hyödyntää entsyymejä ja biojalostusta.
+mikrobientsyymi	1	Mikrobin tuottama entsyymi, teollisuusentsyymien lähde.
+mikrobikanta	1	Mikrobilajin tietty linja, kuten tuottokanta.
+mikrobituotanto	1	Tuotteiden valmistus mikrobeilla.
+mittausdata	1	Mittauksista kertynyt aineisto.
+monistus	1	Kopioiden tekeminen, kuten DNA:n monistus PCR:llä.
+monistuskierros	1	PCR:n yksi sykli: denaturaatio, alukkeiden liittyminen, pidennys. Kaksinkertaistaa DNA:n.
+mooren laki	1	Havainto, että tietokoneiden teho kaksinkertaistuu parissa vuodessa. Sekvensointi halpenee nopeammin.
+mullis	2	Kary Mullis, joka keksi PCR:n 1983. Nobel 1993.	Kuka oli Mullis?
+munkki	1	Luostarin asukas. Mendel oli augustinolaismunkki.
+muokata	1	Muuttaa tarkoituksella: geeniä muokataan, proteiinia muokataan.
+muuntaa	1	Muuttaa toiseksi: entsyymi muuntaa lähtöaineen tuotteeksi.
+muuntogeeninen	2	Eliö, jonka perimää on muokattu geenitekniikalla. Kutsutaan myös: GM, geenimuunneltu.	Mitä muuntogeeninen tarkoittaa?
+nanoteknologia	2	Nanometrimittakaavan rakenteiden tekniikka, kuten nanopartikkelit lääkkeiden kantajina.	Mitä nanoteknologia on?
+nauta	1	Kotieläin, jonka maito, liha ja rekombinanttiproteiinit ovat biotekniikan tuotteita.
+nykygenetiikka	1	Molekyylitason genetiikka sekvensoinnista geenimuokkaukseen.
+ohjaus-rna	2	CRISPR-Cas9:n RNA, joka ohjaa Cas9-entsyymin kohde-DNA:han. Kutsutaan myös: guide-RNA.	Mikä on ohjaus-RNA?
+ohjelmoida	1	Antaa ohjeet: solu ohjelmoidaan tuottamaan, tekoäly ohjelmoidaan oppimaan.
+okazakin fragmentti	2	Replikaation jälkeisen juosteen lyhyet pätkät, jotka ligaasi liittää yhteen.	Mikä on Okazakin fragmentti?
+olutpano	1	Oluen valmistus mallastamalla, keittämällä ja käyttämällä. Kutsutaan myös: oluenpano.
+optinen	1	Valoon perustuva: optinen mittaus, optinen mikroskooppi.
+paise	1	Märkäpesäke, bakteeri-infektion tulehdus, jota penisilliini hoitaa.
+palovamma	1	Kuumuuden aiheuttama ihovaurio, jota kudosteknologian iho korjaa.
+parantaa	1	Tehdä terveeksi tai paremmaksi: lääke parantaa, jalostus parantaa satoa.
+pcr-testi	2	PCR:llä tehty taudinmääritys, joka tunnistaa mikrobin nukleiinihapon, kuten koronatesti.	Mikä on PCR-testi?
+peptidihormoni	2	Aminohappoketjusta koostuva hormoni, kuten insuliini ja kasvuhormoni. Tuotetaan rekombinantisti.	Mikä on peptidihormoni?
+perinnöllisyys	1	Ominaisuuksien siirtyminen sukupolvelta toiselle geeneissä.
+perusprosessi	1	Bioprosessin perusvaihe: kasvatus, tuotto, talteenotto, puhdistus.
+perusväline	1	Työkalu, jota ilman ei tulla toimeen: PCR ja sekvensointi ovat molekyylibiologian perusvälineitä.
+pikamolekyyli	1	Nopeasti reagoiva tai lyhytikäinen molekyyli.
+pinnoite	1	Pinnan päällyste, kuten implantin biomateriaalipinnoite.
+pintapiikki	1	Viruksen pinnan ulkoneva proteiini, kuten koronaviruksen piikkiproteiini.
+polyhydroksialkanoaatti	2	Bakteerien varastopolyesteri, biohajoava biomuovi. Lyhenne PHA.	Mikä on polyhydroksialkanoaatti?
+polylaktidi	2	Maitohaposta polymeroitu biohajoava muovi. Lyhenne PLA.	Mikä on polylaktidi?
+polymeraasientsyymi	1	Polymeraasi, nukleiinihappoa rakentava entsyymi.
+polymeroida	1	Liittää monomeerit polymeeriksi: maitohappo polymeroidaan polylaktidiksi.
+probioottijugurtti	1	Elävää hyötybakteeria sisältävä jugurtti.
+pylväskuvaaja	1	Kaavio, jossa määrät esitetään pylväinä.
+raivotautirokote	1	Pasteurin 1885 kehittämä rokote raivotautia vastaan.
+rasvaliukoinen	1	Rasvaan liukeneva, hydrofobinen: A-, D-, E- ja K-vitamiinit.
+rasvarakkula	1	Rasvasta muodostuva pisara tai lipidipallo.
+raueta	1	Lakata olemasta voimassa: patentti raukeaa 20 vuoden kuluttua.
+ravintokuitu	2	Ihmisen sulattamaton hiilihydraatti, kuten selluloosa, jota suolistomikrobit käyttävät.	Mikä on ravintokuitu?
+redundantti	2	Ylimääräinen, toistettu: geneettinen koodi on redundantti, useampi kodoni samalle aminohapolle.	Mitä redundantti tarkoittaa?
+resepti	1	Ohje valmistukseen: babylonialaisten olutresepti, lääkemääräys.
+rikkakasvimyrkky	1	Rikkakasveja tappava aine, jota GM-kasvit kestävät. Kutsutaan myös: herbisidi.
+rikostutkinta	1	Rikoksen selvittäminen, jossa DNA-tunnistus tunnistaa tekijän.
+rinnakkaissekvensointi	2	Miljoonien DNA-jaksojen samanaikainen sekvensointi. Kutsutaan myös: NGS, massiivinen rinnakkaissekvensointi.	Mitä rinnakkaissekvensointi on?
+rinnakkaisvalmiste	2	Alkuperäislääkkeen kopio patentin rauettua. Biologisilla lääkkeillä biosimilaari.	Mikä on rinnakkaisvalmiste?
+riski	1	Haitan mahdollisuus: GM-kasvien ympäristöriski, lääkkeen riski.
+riskisijoitus	1	Tuottoa tavoitteleva sijoitus epävarmaan yritykseen. Kutsutaan myös: riskipääoma.
+risteyttää	1	Yhdistää kaksi yksilöä jälkeläisiksi jalostuksessa.
+rna-jakso	1	RNA-molekyylin osa, sekvenssi.
+ruoantähde	1	Syömättä jäänyt ruoka, biojätettä.
+ruokatuotanto	1	Ravinnon valmistus, johon biotekniikka tuo entsyymejä ja mikrobeja.
+ruokkia	1	Antaa ravintoa: soluja ruokitaan elatusaineella.
+räjähdysaine	1	Räjähtävä yhdiste, kuten TNT, jonka asetonia tuotettiin fermentoimalla.
+saastua	1	Likaantua haitallisilla aineilla: maaperä saastuu öljystä.
+sakset	1	Leikkuri: restriktioentsyymit ja CRISPR ovat geenisakset.
+sammakko	1	Sammakkoeläin, jonka munasoluja käytetään tutkimuksessa.
+sato	1	Viljelykasvin tuotto, jota jalostus lisää.
+savitaulu	1	Babylonialaisten kirjoitusalusta, jolle olutreseptit tallennettiin.
+sentrioli	2	Sentrosomin sylinterimäinen mikrotubulusrakenne, joka järjestää sukkularihmaston.	Mikä on sentrioli?
+sika	1	Kotieläin, jonka haimasta insuliinia eristettiin ennen rekombinanttituottoa.
+sirppi	1	Kaareva terä. Sirppisolut ovat sirpin muotoisia punasoluja.
+solueste	1	Solukalvo esteenä aineiden pääsylle soluun.
+solukko	1	Solujen muodostama kokonaisuus, kudos. Solukkoviljely kasvattaa kasvisoluja alustalla.
+solukkoviljely	2	Kasvisolujen tai -kudoksen kasvatus steriilillä alustalla kokonaisiksi kasveiksi.	Mitä solukkoviljely on?
+soluklooni	1	Yhdestä solusta jakautumalla syntynyt identtisten solujen joukko.
+solunäyte	1	Tutkimusta varten otetut solut.
+solupohjainen	1	Soluihin perustuva: solupohjainen hoito, solupohjainen määritys.
+soluterapia	2	Sairauden hoito siirtämällä soluja, kuten kantasoluja tai muokattuja T-soluja.	Mitä soluterapia on?
+solutyhjennetty	1	Elin, jonka solut on poistettu ja tukirakenne jätetty. Kudosteknologian tukiranka.
+solutyyppi	1	Solun laji tehtävän mukaan: hermosolu, lihassolu, ihosolu.
+sopivuus	1	Yhteensopivuus: elimen sopivuus vastaanottajalle.
+suunnitella	1	Laatia suunnitelma: proteiini suunnitellaan tietokoneella.
+suurtila	1	Suuri maatila, jossa tuotanto on teollista.
+sydäntautiriski	1	Sydän- ja verisuonitautien todennäköisyys, jota kolesteroli nostaa.
+synonyymi	1	Samaa tarkoittava sana: biotekniikka ja bioteknologia.
+sääntömukaisuus	1	Säännön noudattaminen: viranomaisvaatimukset lääketuotannossa.
+tappaa	1	Surmata: antibiootti tappaa bakteerit.
+taudinaiheuttajamikrobi	1	Tautia aiheuttava mikrobi, patogeeni.
+tehottomuus	1	Tehon puute: insuliinin tehottomuus tyypin 2 diabeteksessa.
+teollistua	1	Muuttua teolliseksi: käyminen teollistui 1800-luvulla.
+teollisuusala	1	Teollisuuden haara, kuten lääke- tai elintarviketeollisuus.
+teollisuusbiotekniikka	2	Biotekniikka teollisessa tuotannossa: entsyymit, kemikaalit ja polttoaineet mikrobeilla. Kutsutaan myös: valkoinen biotekniikka.	Mitä teollisuusbiotekniikka on?
+teollisuuskemikaali	1	Suuressa mittakaavassa tuotettu kemikaali, kuten etanoli tai sitruunahappo.
+terveyshyöty	1	Terveyttä edistävä vaikutus, kuten kolesterolin lasku.
+terveyssovellus	1	Biotekniikan käyttö terveydenhoidossa: lääkkeet, diagnostiikka, hoidot.
+tietojenkäsittely	1	Tiedon käsittely tietokoneella, bioinformatiikan perusta.
+todentaa	1	Osoittaa todeksi: tuotteen aitous todennetaan DNA-testillä.
+toimiala	1	Elinkeinon ala: bioala, lääkeala.
+tomaatti	1	Vihannes, jonka Flavr Savr oli ensimmäinen GM-elintarvike.
+torjunta	1	Haitan estäminen: tuholaistorjunta, tautien torjunta.
+tuholainen	1	Viljelykasveja vahingoittava eläin, kuten hyönteinen.
+tukirakenne	1	Kannatteleva rakenne, kuten kudosteknologian tukiranka.
+tunnistuselementti	1	Määrityksen molekyyli, joka tunnistaa kohteen: vasta-aine, aptameeri, DNA-koetin.
+tunnistusmolekyyli	1	Kohteen tunnistava molekyyli, kuten vasta-aine.
+tuotanto-ominaisuus	1	Eliön hyödynnettävä piirre, kuten maidontuotto tai sadon määrä.
+tutkimusmalli	1	Tutkimuksessa käytetty malli, kuten malliorganismi tai soluviljelmä.
+tutkimustyökalu	1	Tutkimuksen apuväline, kuten PCR, CRISPR tai vasta-aine.
+tyydyttää	1	Täyttää tarve: ruoantuotanto tyydyttää ravinnontarpeen.
+työjuhta	1	Kova työntekijä. E. coli on molekyylibiologian työjuhta.
+täsmähoito	2	Sairauden molekyylimekanismiin kohdistettu hoito. Kutsutaan myös: kohdennettu hoito.	Mikä on täsmähoito?
+täsmämuutos	1	Tarkasti kohdennettu muutos genomissa, kuten CRISPR-muokkaus.
+vaarattomampi	1	Vähemmän vaarallinen: heikennetty rokote on vaarattomampi.
+vaate	1	Tekstiili, jonka käsittelyssä entsyymejä käytetään.
+vainaja	1	Kuollut henkilö, joka tunnistetaan DNA:sta.
+vakiotuote	1	Vakiintunut tuote, kuten rekombinantti-insuliini.
+valiini	2	Haaraketjuinen hydrofobinen aminohappo. Lyhenne Val, V. Sirppisoluanemiassa korvaa glutamaatin.	Mikä on valiini?
+valikoivasti	1	Valiten: entsyymi toimii valikoivasti substraattiinsa.
+valmiste	1	Valmistettu tuote, kuten lääkevalmiste.
+vastustuskyky	2	Kyky torjua tautia tai ainetta: immuniteetti tai bakteerin antibioottiresistenssi.	Mitä vastustuskyky tarkoittaa?
+vehnä	1	Tärkein viljakasvi, jalostettu villistä heinästä.
+viallinen	1	Virheellinen: viallinen geeni aiheuttaa sairauden.
+viejähaarake	2	Hermosolun pitkä haarake, joka johtaa impulssin pois solusta. Kutsutaan myös: aksoni.	Mikä on viejähaarake?
+virtsarakko	1	Virtsaa keräävä elin. Kudosteknologialla on kasvatettu virtsarakkoja.
+virustauti	1	Viruksen aiheuttama sairaus, kuten influenssa tai isorokko.
+virstanpylväs	1	Merkittävä saavutus kehityksessä, kuten ihmisgenomin sekvensointi.
+väriaineleimattu	1	Fluoresoivalla väriaineella merkitty, kuten sekvensoinnin dideoksinukleotidit.
+väripiikki	1	Kromatogrammin värillinen huippu, joka sekvensoinnissa vastaa yhtä emästä.
+weissman	2	Drew Weissman, joka kehitti Katalin Karikón kanssa muokatun lähetti-RNA:n rokotteisiin. Nobel 2023.	Kuka on Weissman?
+yksilöllinen	1	Yksilölle ominainen: yksilöllinen lääkitys, yksilöllinen DNA-profiili.
+yksinoikeus	1	Oikeus, joka on vain yhdellä: patentti antaa yksinoikeuden keksintöön.
+ympyrädiagrammi	1	Kaavio, jossa osuudet esitetään ympyrän sektoreina.
+ympäristöala	1	Ympäristönsuojelun ja -tekniikan ala.
+öljypohjainen	1	Raakaöljystä valmistettu, kuten tavallinen muovi. Vastakohta: biopohjainen.
+öljyvahinko	1	Öljypäästö ympäristöön, jota mikrobit puhdistavat bioremediaatiossa.

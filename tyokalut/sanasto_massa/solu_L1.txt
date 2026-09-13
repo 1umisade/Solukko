@@ -99,7 +99,6 @@ glutamiini	2	Poolinen aminohappo, glutamaatin amidi. Lyhenne Gln, Q. Typen kulje
 glykaani	2	Sokeriketju, joka on liitetty proteiiniin tai lipidiin. Kutsutaan myös: sokeriosa.	Mikä on glykaani?
 glykolyysi	3	Glukoosin pilkkominen kahdeksi pyruvaatiksi solulimassa, tuottaa 2 ATP ja 2 NADH. Aineenvaihdunnan vanhin reitti.	Mikä on glykolyysi?
 glyseroli	2	Kolmen hiilen kolmiarvoinen alkoholi, rasvojen ja fosfolipidien runko.	Mikä on glyseroli?
-gram-negatiivinen	2	Bakteeri, jolla on ohut soluseinä ja ulkokalvo eikä pidätä gramväriä, kuten E. coli.	Mikä on gram-negatiivinen bakteeri?
 haara	1	Ketjusta erkaneva sivuketju, kuten glykogeenin haarat tai haaraketjuinen aminohappo.
 haitallinen	1	Vahingoittava: haitallinen mutaatio tai aineenvaihduntatuote.
 hapan	2	Happamuus: liuos, jonka pH on alle 7, tai aminohappo, jonka sivuketju on karboksyylihappo.
@@ -290,7 +289,6 @@ makea	1	Sokerin maku. Makeuden aistii kielen makureseptori.
 maksimi	1	Suurin arvo: reaktionopeuden maksimi V<sub>max</sub>, absorption maksimi.
 maku	1	Aistimus, jonka kielen reseptorit tuottavat liuenneista aineista: makea, suolainen, hapan, karvas, umami.
 makureseptori	2	Kielen makusilmujen reseptoriproteiini, joka tunnistaa maun molekyylin, kuten sokerin tai glutamaatin.	Mikä on makureseptori?
-malliorganismi	3	Tutkimukseen valittu laji, jonka tulokset yleistetään muihin: E. coli, hiiva, banaanikärpänen, hiiri, lituruoho.	Mikä on malliorganismi?
 menestyä	1	Selviytyä ja lisääntyä: parhaiten sopeutuneet menestyvät.
 menettää	1	Kadottaa: proteiini menettää rakenteensa denaturaatiossa, atomi elektronin hapettuessa.
 meri	1	Suolainen valtameri, jossa elämä syntyi ja jossa suurin osa siitä yhä elää.
@@ -582,7 +580,6 @@ tärinä	1	Nopea edestakainen liike, kuten sidosten värähtely lämmössä.
 tärkeysjärjestys	1	Järjestys merkityksen mukaan, kuten CIP-säännöissä substituenttien prioriteetti.
 täydellinen	1	Kokonainen, virheetön: täydellinen palaminen, täydellinen kopio.
 täydentää	1	Tehdä kokonaiseksi: vastinjuoste täydentää juosteen.
-ulkoelektroni	2	Atomin uloimman kuoren elektroni, joka osallistuu sidoksiin. Kutsutaan myös: valenssielektroni.	Mikä on ulkoelektroni?
 ulkoinen	1	Ulkopuolelta tuleva tai ulkopuolella oleva: ulkoinen signaali, ulkoinen kalvo.
 ulkopinta	1	Rakenteen ulkopuolen pinta: solun ulkopinta, proteiinin pinta.
 ulkopuoli	1	Rajan ulkopuolella oleva: solun ulkopuoli.

@@ -1,0 +1,20 @@
+# Kemian peruskurssi I, Luento 1 - massakierros
+aisti	1	Havaintokyky: näkö, kuulo, haju, maku, tunto. Havainto alkaa aistista.
+ehdottaa	1	Esittää vaihtoehdoksi: hypoteesi ehdottaa selitystä.
+eteneminen	1	Kulku vaiheesta toiseen: reaktion eteneminen, tutkimuksen eteneminen.
+johdin	1	Sähköä johtava materiaali, kuten metallilanka tai suolaliuos.
+kokeilu	1	Koe, jolla asiaa testataan.
+kromi	1	Alkuaine Cr, joka tekee teräksestä ruostumatonta.	Mikä on kromi?
+laatia	1	Tehdä suunnitelma tai kaava: koesuunnitelma laaditaan.
+mittaustieto	1	Mittauksesta saatu tieto, data.
+natriumkloridiliuos	1	Ruokasuolan vesiliuos, suolavesi.
+paristo	2	Sähkökemiallinen kenno, jossa hapetus-pelkistysreaktio tuottaa sähkövirtaa.	Mikä on paristo?
+pinnoitus	1	Metallin päällystäminen toisella metallilla sähkökemiallisesti korroosiolta suojaamiseksi.
+polttokenno	2	Laite, joka muuttaa polttoaineen, kuten vedyn, kemiallisen energian suoraan sähköksi.	Mikä on polttokenno?
+reagointi	1	Reagoiminen, reaktioon osallistuminen.
+sopusointu	1	Yhtäpitävyys: havainnot sopusoinnussa ennusteen kanssa.
+taustaoletus	1	Ääneen lausumaton oletus, jolla koe rakentuu.
+todistusvoima	1	Kokeen kyky erottaa vaihtoehtoiset selitykset.
+tosiasia	1	Todeksi osoitettu asia.
+uudelleenjärjestyminen	1	Atomien järjestyminen uusiksi yhdisteiksi reaktiossa.
+yksinkertaistaa	1	Tehdä yksinkertaisemmaksi: malli yksinkertaistaa todellisuutta.

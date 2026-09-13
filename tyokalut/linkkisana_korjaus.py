@@ -18,7 +18,10 @@ LISAYKSET = [('(1.033) Mikä on kromosomi?', ['kromosomi', 'kromosomin', 'kromos
 # POISTA_KORTIT: kaksoismaaritelmat, jotka on poistettu sanastomoduuleista mutta jaavat omistajan Ankiin (tuonti ei poista);
 # poistetaan SOLUKKO.apkg:sta joka ajolla, kunnes omistaja poistaa ne Ankista kasin
 POISTA_KORTIT = ['(3.107) Mikä on kromosomi?',
-                 '(2.034) Mikä on lähetti-RNA-rokote?']   # biotek L2:n kaksoiskortti omistajan L1-kortille, nimetty uudelleen nukleiinihapporokotteeksi 12.9.2026
+                 '(2.034) Mikä on lähetti-RNA-rokote?',
+                 '(32.034) Mikä on valenssielektroni?',
+                 '(1.997) Mikä on ulkoelektroni?',
+                 '(1.514) Mikä on gram-negatiivinen bakteeri?', '(1.705) Mikä on malliorganismi?']   # massakierroksen kaksoiskortit omistajan korteille   # ulkoelektroni on pintaelektroni-kortin linkkisana   # nimetty pintaelektroniksi (omistaja 13.9.2026)   # biotek L2:n kaksoiskortti omistajan L1-kortille, nimetty uudelleen nukleiinihapporokotteeksi 12.9.2026
 # luentopakan oma Esittely (vain kurssipakalla saa olla, kurssit/CLAUDE.md §6): tuli takaisin vanhasta Vesikatkaisu-korjaus.apkg:sta
 POISTA_ESITTELY_PAKAT = ['Luento 2 - Vesi']
 

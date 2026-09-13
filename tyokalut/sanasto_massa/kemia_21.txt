@@ -1,0 +1,76 @@
+# Kemian peruskurssi I, Luento 2.1 - massakierros
+ammattilainen	1	Alan osaaja, kuten kemisti tai insinööri.
+antaja	1	Luovuttaja: elektronin antaja pelkistin.
+arabimaa	1	Arabialainen maa. Alkemiaa harjoitettiin arabimaissa keskiajalla.
+arvovalta	1	Auktoriteetti: Aristoteleen arvovalta esti atomiopin.
+atomioppi	1	Atomiteoria, oppi aineen atomirakenteesta.
+avogadro	2	Amedeo Avogadro, joka esitti 1811, että yhtä suurissa kaasutilavuuksissa on yhtä monta hiukkasta.	Kuka oli Avogadro?
+boyle	2	Robert Boyle, ensimmäinen moderni kemisti, joka määritteli alkuaineen ja teki kvantitatiivisia kokeita 1660-luvulla.	Kuka oli Boyle?
+demokritos	2	Antiikin filosofi, jonka mukaan aine koostuu jakamattomista atomeista (atomos).	Kuka oli Demokritos?
+empedokles	2	Antiikin filosofi, jonka mukaan kaikki koostuu neljästä elementistä: maasta, ilmasta, vedestä ja tulesta.	Kuka oli Empedokles?
+flogistonaine	1	Flogiston, oletettu palamisen aine.
+gallium	1	Alkuaine Ga, jonka Mendelejev ennusti taulukostaan ennen sen löytymistä.	Mikä on gallium?
+gay-lussac	2	Joseph Gay-Lussac, joka havaitsi 1808 kaasujen reagoivan yksinkertaisissa tilavuussuhteissa.	Kuka oli Gay-Lussac?
+germanium	1	Alkuaine Ge, jonka Mendelejev ennusti (ekapii) ennen löytymistä 1886.	Mikä on germanium?
+harjoittaa	1	Tehdä toimintaa: alkemiaa harjoitettiin Aleksandriassa.
+helium	1	Alkuaine He, jalokaasu, jonka ydin on alfahiukkanen.	Mikä on helium?
+hiukkassuihku	1	Hiukkasten virta, kuten katodisäde tai alfahiukkasten suihku.
+hylätä	1	Luopua käsityksestä: flogistonteoria hylättiin.
+hyötynäkökulma	1	Käytännön hyödyn painottaminen: iatrokemia toi hyötynäkökulman.
+irlantilainen	1	Irlannista kotoisin oleva: Boyle oli irlantilainen.
+italialainen	1	Italiasta kotoisin oleva: Avogadro ja Cannizzaro.
+jyrkkä	1	Voimakas ja äkillinen: jyrkkä sironta, jyrkkä pH:n muutos.
+järjestysperuste	1	Ominaisuus, jonka mukaan järjestetään: Mendelejevin taulukon järjestysperuste oli atomipaino.
+kaasutilavuus	1	Kaasun tilavuus, jossa Avogadron mukaan on vakiomäärä hiukkasia.
+kalkkiutua	1	Muuttua kalkiksi: metalli kalkkiutuu eli hapettuu oksidiksi.
+kalsiitti	1	Kalsiumkarbonaatin kidemuoto, kalkkikiven mineraali.	Mikä on kalsiitti?
+kivilaji	1	Mineraaleista koostuva kivi, kuten graniitti tai kalkkikivi.
+koeaine	1	Kokeessa tutkittu aine, kuten Proustin kuparikarbonaatti.
+kokeellisuus	1	Kokeisiin nojaaminen tiedon lähteenä.
+kulta	1	Alkuaine Au, jalometalli. Alkemistit yrittivät tehdä sitä, Rutherford pommitti sen kalvoa.	Mikä on kulta?
+kvartsi	1	Piidioksidin kidemuoto, yleinen mineraali.	Mikä on kvartsi?
+kyseenalaistaa	1	Asettaa epäilyksen alaiseksi: Boyle kyseenalaisti neljän elementin opin.
+käsitteistö	1	Alan käsitteiden kokonaisuus, joka yhtenäistyi 1800-luvulla.
+käsitys	1	Näkemys asiasta: käsitys aineesta.
+laboratoriotekniikka	1	Laboratorion työmenetelmät, joita alkemistit kehittivät: tislaus, suodatus, kiteytys.
+lavoisier	2	Antoine Lavoisier, modernin kemian isä: massan säilymisen laki, palaminen happeen yhtymisenä, nimistön uudistus.	Kuka oli Lavoisier?
+löytö	1	Uuden asian havaitseminen: elektronin löytö 1897.
+mahdoton	1	Ei mahdollinen: kullan valmistus osoittautui mahdottomaksi.
+mesopotamialainen	1	Mesopotamian asukas, joka oppi tuottamaan kuparia ja pronssia.
+millikan	2	Robert Millikan, joka mittasi elektronin varauksen öljypisarakokeella 1909.	Kuka oli Millikan?
+muotoilla	1	Ilmaista täsmällisesti: Lavoisier muotoili massan säilymisen lain.
+mystiikka	1	Salaperäinen, ei-tieteellinen ajattelu, josta alkemia irtautui.
+nojata	1	Perustua: tiede nojaa kokeisiin.
+oivallus	1	Äkillinen ymmärrys: Avogadron oivallus kaksiatomisista kaasuista.
+omaksua	1	Ottaa käyttöön: kemistit omaksuivat yhtenäiset atomipainot.
+ostwald	1	Wilhelm Ostwald, joka kehitti typpihapon valmistuksen ammoniakista. Kutsutaan myös: Ostwaldin menetelmä.	Kuka oli Ostwald?
+paperiarkki	1	Ohut paperi, joka pysäyttää alfahiukkaset.
+paracelsus	2	1500-luvun lääkäri, joka valjasti kemian lääkkeiden valmistukseen (iatrokemia).	Kuka oli Paracelsus?
+perintö	1	Jälkeen jäänyt anti: alkemian perintö kemialle olivat laboratoriotekniikat.
+pommittaa	1	Ampua hiukkasilla: Rutherford pommitti kultakalvoa alfahiukkasilla.
+punnita	1	Mitata massa vaa'alla: Lavoisier punnitsi reaktiot tarkasti.
+pyrkimys	1	Tavoite: alkemian pyrkimys muuntaa metalleja kullaksi.
+päättely	1	Johtopäätöksen teko havainnoista.
+radium	1	Radioaktiivinen alkuaine Ra, alfahiukkasten lähde Rutherfordin kokeissa.	Mikä on radium?
+ranskalainen	1	Ranskasta kotoisin oleva: Lavoisier, Proust, Gay-Lussac.
+rusinapullamalli	2	Thomsonin atomimalli: elektronit upotettuina tasaiseen positiiviseen massaan kuin rusinat pullassa.	Mikä on rusinapullamalli?
+rutherford	2	Ernest Rutherford, joka päätteli kultakalvokokeesta 1911 atomin pienen tiheän ytimen.	Kuka oli Rutherford?
+saksalainen	1	Saksasta kotoisin oleva: Agricola, Meyer, Planck.
+sekoitussuhde	1	Aineiden määrien suhde seoksessa tai reaktiossa.
+selittäjä	1	Selityksen antaja: teoria on ilmiön selittäjä.
+stoikiometria	2	Reaktioon osallistuvien aineiden määräsuhteiden laskenta reaktioyhtälön perusteella.	Mitä stoikiometria on?
+sulattaa	1	Muuttaa kiinteä nesteeksi kuumentamalla: malmi sulatetaan metalliksi.
+tasapainottaa	1	Saattaa tasapainoon: reaktioyhtälö tasapainotetaan kertoimilla.
+taulukoida	1	Koota taulukoksi: atomipainot taulukoitiin.
+teos	1	Julkaistu kirja, kuten Agricolan De re metallica.
+thomson	2	J. J. Thomson, joka löysi elektronin katodisädekokeilla 1897 ja esitti rusinapullamallin.	Kuka oli Thomson?
+tieteellistyä	1	Muuttua tieteeksi: kemia tieteellistyi 1600–1700-luvuilla.
+tilavuussuhde	1	Kaasujen tilavuuksien suhde reaktiossa, Gay-Lussacin lain sisältö.
+tina	1	Alkuaine Sn, pronssin toinen metalli.	Mikä on tina?
+tutkimusala	1	Tieteen haara, kuten kemia tai fysiikka.
+tyhjiöputki	1	Ilmaton lasiputki, jossa katodisäteet havaittiin.
+upottaa	1	Sijoittaa sisään: Thomsonin mallissa elektronit on upotettu positiiviseen massaan.
+uudistaa	1	Tehdä uudeksi: Lavoisier uudisti kemian nimistön.
+vakuuttaa	1	Saada uskomaan: Cannizzaro vakuutti kemistit atomipainoista.
+yhtenäistää	1	Tehdä yhdenmukaiseksi: atomimassat yhtenäistettiin 1860.
+öljypisarakoe	2	Millikanin koe, jossa varattujen öljypisaroiden leijunta sähkökentässä paljasti alkeisvarauksen.	Mikä on öljypisarakoe?
