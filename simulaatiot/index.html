@@ -3910,11 +3910,12 @@ vec3 laatta(vec2 pq){
 }
 uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the camera-side half inside the cut box is not drawn, like the lipids (owner 12.9.2026)
 uniform float viewBox;   // 1 = only what is inside the box is drawn
+uniform float boxKeep;   // 1 on the thylakoid the unit sits on: its shell is not clipped to the box (the membrane stays whole outside the box)
 void main(void){
   float dCam = distance(vWP, camPos);
   if(holeR > 0.0 && dCam < holeR) discard;
   if(memCut.z * step(0.0, (vWP.z - memCut.x)*memCut.y) * (step(cutLo.x, vWP.x) * step(vWP.x, cutHi.x) * step(cutLo.y, vWP.y) * step(vWP.y, cutHi.y) * step(cutLo.z, vWP.z) * step(vWP.z, cutHi.z)) > 0.5) discard;
-  if(viewBox > 0.5 && (vWP.x < cutLo.x || vWP.x > cutHi.x || vWP.y < cutLo.y || vWP.y > cutHi.y || vWP.z < cutLo.z || vWP.z > cutHi.z)) discard;   // box-only view: the shells end at the box
+  if(viewBox > 0.5 && boxKeep < 0.5) discard;   // box-only view: no other membrane is drawn at all (a big envelope poking into the box drew as a hatched sliver) - the unit's own thylakoid stays whole, inside the box and beyond it
   bool onFacet = facetOn > 0.5 && distance(vWP.xz, cen.xz) < facetR;
   if(onFacet && abs(vWP.x - footCen.x) < footHalf.x && abs(vWP.z - footCen.y) < footHalf.y) discard;
   if(clipOn > 0.5 && length((vWP - clipC) * clipInvS) > clipR - 6.0) discard;   // the thylakoid cap ends at the inner envelope
@@ -5732,7 +5733,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   vdwStaticFarMat.onBindObservable.add(mesh=>{ const eff=vdwStaticFarMat.getEffect(); if(!eff)return;
     eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
     eff.setFloat('memDrift', gMemDrift); bindPLight(eff);
-    eff.setFloat('uT',gWaveT); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);
+    eff.setFloat('uT',gWaveT); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', 0);
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo);
     eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread);
     eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); });
@@ -6833,7 +6834,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       mat.onBindObservable.add(()=>{ const eff=mat.getEffect(); if(!eff) return;
         eff.setFloat('memDrift', gMemDrift);
         eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 2 → membrane orbitals only inside the close forward cone
-        eff.setFloat('uT', gWaveT); eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);
+        eff.setFloat('uT', gWaveT); eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', 0);
         eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd); });
       return realAlpha(mat);
     };
@@ -7264,9 +7265,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const _e0 = [0,0,0];
       for(const M of MEMS){
         const mat = new BABYLON.ShaderMaterial('cellShellMat'+M.id, scene, 'cellshell', {
-          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','laattaK','texGain','texContrast','texMean','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi','viewBox'] });
+          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','laattaK','texGain','texContrast','texMean','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi','viewBox','boxKeep'] });
         mat.setFloat('poreAng', NE_PORE_R/M.R); mat.setFloat('poreInner', M.inner ? 1 : 0); mat.setFloat('baseShade', M.baseShade);
-        mat.setFloat('clipOn', M.clipTo ? 1 : 0);
+        mat.setFloat('clipOn', M.clipTo ? 1 : 0); mat.setFloat('boxKeep', M === SOLU_CELL.THY ? 1 : 0);
         if(M.clipTo){ const K = M.clipTo; mat.setVector3('clipC', K.C); mat.setVector3('clipInvS', new BABYLON.Vector3(1/K.s[0], 1/K.s[1], 1/K.s[2])); mat.setFloat('clipR', K.R); }
         mat.backFaceCulling = false;
         const hh = M.halfH || ySpan;   // the cell wall is thicker than a bilayer
@@ -7311,6 +7312,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         oHasRot.fill(0, 0, nC);   // the sheet's candidates carry no frame
         const memR = L.memR;
         for(const M of MEMS){ if(M.nolat) continue;   // the cell wall has no lipids
+          if(gViewBox && M !== SOLU_CELL.THY) continue;   // box-only view (owner 13.9.2026): only THE membrane the light-reaction unit sits on keeps its lipids - and it keeps them beyond the box too, whole: only Puolikas's half-cut is confined to the box
           const reach = memR + 3*S*M.BL;
           if(Math.hypot(cp.x-M.C.x, cp.y-M.C.y, cp.z-M.C.z) > M.reach + reach) continue;   // its bounding sphere is out of reach
           if(distTo(M, cp) > reach) continue;
@@ -7591,7 +7593,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 2 → membrane nuclei only inside the close cone
       eff.setFloat('uT',gWaveT); eff.setColor3('fogColor',scene.fogColor);
       eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd);
-      eff.setVector3('selCenter', selCenter); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);
+      eff.setVector3('selCenter', selCenter); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', 0);
       eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || _zeroOff);
       eff.setMatrix3x3('tileRot', (mesh && mesh.metadata && mesh.metadata.rot) || _ident9);   // a cell-membrane tile stands on its local normal
       eff.setFloat('memDrift', gMemDrift); });
