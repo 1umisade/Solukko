@@ -208,6 +208,7 @@ function parseMol2(text){
       if(t === '@<TRIPOS>MOLECULE'){ cur = {name:null}; mols.push(cur); section = 'HDR'; }
       else if(t === '@<TRIPOS>ATOM')  section = 'ATOM';
       else if(t === '@<TRIPOS>BOND')  section = 'BOND';
+      else if(t === '@<TRIPOS>SUBSTRUCTURE'){ section = 'SUB'; cur.subCh = new Map(); cur.subNm = new Map(); }   // residue id -> chain letter / residue name (13.9.2026: the chains ARE in the file - column 6 of this table)
       else section = 'OTHER';
       continue;
     }
@@ -236,6 +237,9 @@ function parseMol2(text){
       cur.cat[k] = catOf(p[7] || ''); cur.sid[k] = +p[6] || 0; cur.cof[k] = ETC_RES[p[7]] || 0;   // 0 = not a cofactor, else type code 1-9
       if(p[7] === 'TYR') cur.tyr[k] = 1;
       cur.lip[k] = LIPID_RES[p[7]] || 0;
+    } else if(section === 'SUB'){
+      const p = ln.trim().split(/\s+/);
+      if(p.length >= 6){ cur.subCh.set(+p[0], p[5]); cur.subNm.set(+p[0], p[1].replace(/\d+$/, '')); }
     } else if(section === 'BOND'){
       const p = ln.trim().split(/\s+/);
       if(p.length < 4 || cur.bi >= cur.nb) continue;
