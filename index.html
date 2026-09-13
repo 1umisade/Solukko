@@ -574,6 +574,7 @@ body.dark-mode .mona-top-bubble::before { border-right-color: #3a312b; }
 @media (max-width: 900px) {   /* mobile (portrait): review shows ONLY the grid + course title + esittely — no card preview, no Mona */
   #deck-title-bar { font-size: 1.4rem; }
   #grid-header { padding: 4px 2px 10px; }
+  #back-btn-fixed { position: static; }   /* mobile: the back button stays in the header, which showDeck() scrolls off the top - a fixed button would sit on Mona's welcome bubble */
   #review-cols { flex-direction: column; align-items: center; gap: 0; }
   #grid-col { order: 1; position: static; max-height: none; overflow: visible; width: 100%; padding: 0; }
   #card-col { order: 2; position: static; height: auto; flex: none; width: 100%; }
@@ -3572,7 +3573,7 @@ function showBackPeek(){
   if(!cardAnswerShown) return;   // back side only
   const p=document.getElementById('card-peek'), b=document.getElementById('card-peek-bubble');
   if(!p) return;
-  if(b) b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia';
+  if(b) b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia.';
   p.classList.remove('peek-out'); p.style.display=''; p.style.transition=''; p.style.transform=''; p.style.transformOrigin=''; p.style.visibility='visible'; playPeekIn(p);   // clear the leftover flip transform so it stays in view
 }
 function peekHint(text){   // grade-button hover: temporarily swap the bottom peeker bubble text, restore on leave
@@ -4316,7 +4317,7 @@ async function renderCurrentCard(){
     : _laajuusTextForHtml(_ac.innerHTML);   // old cards: generic "Vastauksen pituus"
   const _frontText = (_laajuusText ? (_laajuusText+'. ') : '') + 'Klikkaa korttia tarkistaaksesi.';   // laajuus + click prompt
   _frontHintText = _frontText;   // Mona's front bubble shows this
-  _scopeText = _laajuusText; if(typeof updateScopeMona==='function') updateScopeMona();   // the bottom-right study-view Mona shows the answer's extent
+  _scopeText = _laajuusText ? _laajuusText+'.' : ''; if(typeof updateScopeMona==='function') updateScopeMona();   // the bottom-right study-view Mona shows the answer's extent (a full sentence, with the period)
   if(typeof updateFsCardButtons==='function') updateFsCardButtons();   // own card in fullscreen (desktop) → Ehdota button instead of the comment button
   if(_bub) _bub.textContent=_frontText;
   // ── Two answers (new note type): after reveal, the middle button shows Laaja/Suppea and space TOGGLES between them ──
@@ -4657,7 +4658,7 @@ function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.s
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 let _frontMonaTimer=null, _backBubbleTimer=null;
 const _BACK_BUBBLE_TEXT='Tiesitkö?';                       // resting: Mona asks this
-const _SLIDE_YES_TEXT='Hyvä sinä ❤️ Kysyn huomenna uudestaan.';   // near/onto the Kyllä (right) button
+const _SLIDE_YES_TEXT='Hyvä sinä! ❤️ Kysyn huomenna uudestaan.';   // near/onto the Kyllä (right) button
 const _SLIDE_NO_TEXT='Ei hätää! Kysyn kohta uudestaan.';          // near/onto the Ei (left) button
 // front side: no bar — Mona centred, bubble centred above her; both fade in after 1s
 function _keycapDip(el){ if(!el) return; el.classList.remove('keycap-press'); void el.offsetWidth; el.classList.add('keycap-press'); setTimeout(()=>el.classList.remove('keycap-press'),180); }
