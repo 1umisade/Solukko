@@ -195,6 +195,8 @@ kuulu kortin leipätekstiin: ne mainitaan **vain sen termin omalla kortilla** ri
 | **soluseinä** | soluseinämä | |
 | **ribosomaalinen RNA** | rRNA | |
 | **vesikatkaisu** | hydrolyysi | myös johdokset: *vesikatkaista*, *vesikatkaisureaktio* (käyttäjän linjaus 10.9.2026) |
+| **pintaelektroni** | valenssielektroni, ulkoelektroni | myös yhdyssanoissa: *pintaelektronirakenne* (käyttäjän linjaus 13.9.2026) |
+| **elektronoitumisaste** | hapetusaste | (käyttäjän linjaus 13.9.2026) |
 
 Pääsääntö: **suomenkielinen sana voittaa** vierasperäisen. Poikkeukset merkitään taulukkoon.
 

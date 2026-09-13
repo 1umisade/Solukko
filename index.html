@@ -441,6 +441,7 @@ body.dark-mode #card-loading .cl-text { color: #eadfce; }
 .pb-knob img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.32)); pointer-events: none; -webkit-user-drag: none; }
 .pb-bubble { position: absolute; left: 50%; bottom: calc(100% + 26px); transform: translateX(-50%); z-index: 9999; width: max-content; max-width: min(88vw, 300px); text-align: center; background: #fffef9; color: #56533c; border: 2px solid #d4cec4; border-radius: 16px; padding: 0.45rem 0.8rem; font-family: 'Lora', serif; font-size: 0.9rem; line-height: 1.3; box-shadow: 0 6px 20px rgba(0,0,0,0.16); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
 .pb-bubble.show { opacity: 1; }
+.pb-bubble:empty { display: none; }   /* resting text is empty: no bubble until Mona nears a button */
 .pb-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 9px solid transparent; border-top-color: #fffef9; }   /* tail points down to Mona */
 body.dark-mode .pb-bubble { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .pb-bubble::after { border-top-color: #3a312b; }
@@ -3573,7 +3574,7 @@ function showBackPeek(){
   if(!cardAnswerShown) return;   // back side only
   const p=document.getElementById('card-peek'), b=document.getElementById('card-peek-bubble');
   if(!p) return;
-  if(b) b.textContent='Tiesitkö? Paina kyllä- tai ei-nappia.';
+  if(b) b.textContent='Paina kyllä- tai ei-nappia.';
   p.classList.remove('peek-out'); p.style.display=''; p.style.transition=''; p.style.transform=''; p.style.transformOrigin=''; p.style.visibility='visible'; playPeekIn(p);   // clear the leftover flip transform so it stays in view
 }
 function peekHint(text){   // grade-button hover: temporarily swap the bottom peeker bubble text, restore on leave
@@ -4657,7 +4658,7 @@ function fsDragGrade(correct){   // dragging Mona onto a button: click sound, th
 function resetFsKnob(){ const k=_fsKnob(); if(k){ k.style.transition='none'; k.style.left='50%'; k.style.transform=''; } const b=_pbBubble(); if(b){ b.style.transition='opacity 0.4s ease'; b.style.left='50%'; b.style.transform=''; } fsHot(null); }   // recentre Mona and her bubble (clear the click-slide transform)
 function updateFsSlider(){ resetFsKnob(); updateProgress(); }
 let _frontMonaTimer=null, _backBubbleTimer=null;
-const _BACK_BUBBLE_TEXT='Tiesitkö?';                       // resting: Mona asks this
+const _BACK_BUBBLE_TEXT='';                                // resting: no bubble (owner 13.9.2026: the 'Tiesitkö?' bubble should not exist anymore) - she speaks only near a button
 const _SLIDE_YES_TEXT='Hyvä sinä! ❤️ Kysyn huomenna uudestaan.';   // near/onto the Kyllä (right) button
 const _SLIDE_NO_TEXT='Ei hätää! Kysyn kohta uudestaan.';          // near/onto the Ei (left) button
 // front side: no bar — Mona centred, bubble centred above her; both fade in after 1s
