@@ -4067,11 +4067,11 @@ function buildDeckGrid(decks, list){
         const b=document.createElement('b'); b.textContent=p+'. periodissa';
         pl.appendChild(b); pl.appendChild(document.createTextNode(' alkavat kurssit:'));
         c.appendChild(pl);
-        const osa=_kaikki.filter(it=>String(it.period)===String(p));
+        const osa=_kaikki.filter(it=>String(it.period)===String(p)).sort((a,b)=>a.cleanName.localeCompare(b.cleanName,'fi'));   // aakkosjärjestys (omistaja 13.9.2026)
         if(osa.length) c.appendChild(_rivi(osa.map(it=>it.btn)));
         else { const e=document.createElement('div'); e.className='period-empty'; e.textContent='Ei kursseja.'; c.appendChild(_rivi([e])); }
       });
-      const _numeroimattomat=_kaikki.filter(it=>!it.period);
+      const _numeroimattomat=_kaikki.filter(it=>!it.period).sort((a,b)=>a.cleanName.localeCompare(b.cleanName,'fi'));
       if(_numeroimattomat.length) c.appendChild(_rivi(_numeroimattomat.map(it=>it.btn)));
       row.appendChild(c);
     }
