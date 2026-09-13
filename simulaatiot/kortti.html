@@ -565,13 +565,15 @@ void main(void){
   bool cellDrop = false; float cellShrink = 1.0;
   { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
     if(wrapScale > 1.0){ vec3 mid = 0.5 * (boxLo + boxHi); wCen = mid + (wCen - mid) * wrapScale; }   // the far set: the box stretched about its centre
-    vec3 k = wrapP.x > 0.0 ? floor((cellCam - wCen) / wrapP + 0.5) : vec3(0.0);
+    bool homeInPsu = wrapScale <= 1.0 && all(greaterThanEqual(wCen, psuLo)) && all(lessThanEqual(wCen, psuHi));   // its home is inside the light-reaction box (owner 13.9.2026: everything in the box at full quality, at any distance)
+    vec3 k = (wrapP.x > 0.0 && !homeInPsu) ? floor((cellCam - wCen) / wrapP + 0.5) : vec3(0.0);   // ...so it is drawn THERE, not at the copy nearest the camera
     wCen += k * wrapP;
     bool copy = dot(k, k) > 0.5 || wrapScale > 1.0;
+    if(wrapScale > 1.0 && all(greaterThanEqual(wCen, psuLo)) && all(lessThanEqual(wCen, psuHi))) cellDrop = true;   // the far set keeps out of the box - the near set fills it
     if(copy || cellClipAll > 0.5) cellDrop = !cytosol(wCen);
     if(!cellDrop && inThyBand(wCen)) cellDrop = true;
     float dCam = distance(wCen, cellCam);
-    if(copy && cellFade > 0.0) cellShrink = 1.0 - smoothstep(cellFade - 70.0, cellFade, dCam);
+    if(copy && cellFade > 0.0 && !homeInPsu) cellShrink = 1.0 - smoothstep(cellFade - 70.0, cellFade, dCam);   // no fade inside the box
     if(fadeNear > 0.0){ if(dCam < fadeNear) cellDrop = true; else cellShrink *= smoothstep(fadeNear, fadeNear + 70.0, dCam); } }   // the far set takes over where the near set fades
 #endif
   /* SPIN. Every free molecule tumbles about its own random axis. The angle is a signed mix of the
