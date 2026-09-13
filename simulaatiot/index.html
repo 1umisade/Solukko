@@ -10036,13 +10036,23 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             let x = sh.cur[0]+hx*step, y = sh.cur[1]+hy*step, z = sh.cur[2]+hz*step;
             if(sh.pq) y = to[1] + (sh.cur[1]-to[1])*Math.max(0, 1-dt*0.6);
             else { const cap = MEMBRANE_Y - gMemHalfT - sh.R; if(y > cap && dSite > 40){ y = cap; hy = -Math.abs(hy); } /* under the lipid layer on the way, free to rise into the pocket once there: PSI's docking point sits above the cap and the plastocyanin hovered 14 units short of it forever (owner 12.9.2026) */ if(gBoxLo && y < gBoxLo.y + sh.R){ y = gBoxLo.y + sh.R; hy = Math.abs(hy); } }
-            if(dSite > 60){ hz = 0; z = gTasoZ + (z - gTasoZ)*Math.max(0, 1 - dt*2); }   // on the particle plane on the way, off it only into the pocket (a site can sit 30 units off the plane)
+            let onShell = false;   // set below when a complex's shell pushes this frame - then the plane easing waits, so the carrier can slide round the shell
+            if(dSite > 60 && !sh.onShell){ z = gTasoZ + (z - gTasoZ)*Math.max(0, 1 - dt*2); }   // on the particle plane on the way, off it only into the pocket (a site can sit 30 units off the plane). The heading keeps its z part: a plastoquinone's heading has no y, and with z zeroed too it was one-dimensional - normalised back to +-1 every frame, so the pull toward b6f could never turn it round and a PQH2 that left the pocket the wrong way ran to the box wall and back (13.9.2026)
             if(gBoxLo){ if(x < gBoxLo.x+sh.R){ x = gBoxLo.x+sh.R; hx = Math.abs(hx); } else if(x > gBoxHi.x-sh.R){ x = gBoxHi.x-sh.R; hx = -Math.abs(hx); }
               if(z < gBoxLo.z+sh.R){ z = gBoxLo.z+sh.R; hz = Math.abs(hz); } else if(z > gBoxHi.z-sh.R){ z = gBoxHi.z-sh.R; hz = -Math.abs(hz); } }
             for(let sI=0;sI<gHulls.length;sI++){ const hh=gHulls[sI]; if(!gMemBound[hh.mi] || mols[hh.mi].shuttle || hh.mi === sh.hostA || hh.mi === sh.hostB || sameKind(hh.mi, sh.hostB) || sameKind(hh.mi, sh.hostA)) continue;   // the row copies sit ON the originals once the RTS floor flattens z, so a copy's shell must not wall off the host's pocket (owner 12.9.2026)
               const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2]; const ex=x-ox, ey=y-oy, ez=z-oz, dd=Math.hypot(ex,ey,ez), minD=sh.R+hh.maxR; if(dd >= minD || dd < 1e-6) continue;
               const nx=ex/dd, ny=ey/dd, nz=ez/dd; x=ox+nx*minD; if(!sh.pq) y=oy+ny*minD; z=oz+nz*minD;
-              const hn=hx*nx+hy*ny+hz*nz; if(hn < 0){ hx-=2*hn*nx; hy-=2*hn*ny; hz-=2*hn*nz; if(sh.pq) hy = 0; } }
+              onShell = true;
+              /* SLIDE round the shell, do not bounce off it: the heading loses its inward part and keeps the rest, so the pull toward the
+                 site (added again next frame) walks the carrier round the obstacle. A mirror bounce plus the pull was a standoff - four
+                 plastocyanins sat on NDH-1's shell between b6f and PSI for good, under the lipid cap with the site straight through the
+                 shell (13.9.2026). Sideways is preferred: the tangent toward the site, or a random one if the site is dead ahead. */
+              const hn=hx*nx+hy*ny+hz*nz; if(hn < 0){ hx-=hn*nx; hy-=hn*ny; hz-=hn*nz; if(sh.pq) hy = 0;
+                if(hx*hx+hy*hy+hz*hz < 0.04){ let tx=(to[0]-x), ty=sh.pq ? 0 : (to[1]-y), tz=(to[2]-z); const tn=tx*nx+ty*ny+tz*nz; tx-=tn*nx; ty-=tn*ny; tz-=tn*nz; let tl=Math.hypot(tx,ty,tz);
+                  if(tl < 1e-3){ tx=Math.random()-0.5; ty=sh.pq ? 0 : Math.random()-0.5; tz=Math.random()-0.5; const t2=tx*nx+ty*ny+tz*nz; tx-=t2*nx; ty-=t2*ny; tz-=t2*nz; tl=Math.hypot(tx,ty,tz)||1; }
+                  hx=tx/tl; hy=ty/tl; hz=tz/tl; } } }
+            sh.onShell = onShell;
             sh.h[0]=hx; sh.h[1]=hy; sh.h[2]=hz; sh.cur[0]=x; sh.cur[1]=y; sh.cur[2]=z;
             if(!sh.pq){ _q.set(gModelQuat[sh.mi*4], gModelQuat[sh.mi*4+1], gModelQuat[sh.mi*4+2], gModelQuat[sh.mi*4+3]);   // a protein tumbles a little as it goes
               BABYLON.Quaternion.RotationAxisToRef(_axv, 0.25*dt, _dq); _dq.multiplyToRef(_q, _q); _q.normalize();
@@ -10258,7 +10268,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     cMat.alphaMode = BABYLON.Constants.ALPHA_ADD; cMat.needAlphaBlending = () => true; cMat.disableDepthWrite = true; cMat.backFaceCulling = false; cMat.depthFunction = BABYLON.Engine.ALWAYS;
     cMat.onBindObservable.add(() => { const eff = cMat.getEffect(); if(eff) eff.setFloat('uT', gWaveT); });
     const onTop = m => { m.onBeforeRenderObservable.add(() => eng.setDepthFunction(BABYLON.Constants.ALWAYS)); m.onAfterRenderObservable.add(() => eng.setDepthFunction(BABYLON.Constants.LEQUAL)); };
-    const E_N = 48, elecs = []; window.gValoElecs = elecs;   // enough for a full chain in flight: ten plastocyanins and five PQH2 can hold 20 between them. Published for the lantern (each live electron is a spotlight)
+    const E_N = 64, elecs = []; window.gValoElecs = elecs;   // enough for a full chain in flight: ten plastocyanins and ten PQH2 can hold 30 between them, b6f and the PSII pockets a dozen more (48 ran dry under a photon barrage, 13.9.2026). Published for the lantern (each live electron is a spotlight)
     for(let k=0;k<E_N;k++){ const mesh = BABYLON.MeshBuilder.CreateSphere('valoE'+k, { segments:12, diameter:4.6 }, scene); mesh.material = eMat; mesh.isPickable = false; mesh.alwaysSelectAsActiveMesh = true; mesh.renderingGroupId = 3; onTop(mesh);
       const corona = BABYLON.MeshBuilder.CreatePlane('valoEc'+k, { size:22 }, scene); corona.material = cMat; corona.isPickable = false; corona.alwaysSelectAsActiveMesh = true; corona.renderingGroupId = 3; corona.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL; onTop(corona);
       mesh.setEnabled(false); corona.setEnabled(false); elecs.push({ mesh, corona, on:false, site:null, mov:null, ph: Math.random()*6.283, x:0, y:0, z:0 }); }
@@ -10294,7 +10304,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     /* ── PSII ── */
     const chargeSepII = u => { if(u.p680ox || u.pheoE || u.qaE || u.pheo < 0 || u.qa < 0) return false;
       const e = eSpawn(SG(u.p680[0])); if(!e) return false; u.p680ox = true; u.pheoE = e; flashAt(SW(SG(u.p680[0]), _c));
-      eMove(e, SG(u.pheo), 0.35, () => { u.pheoE = null; u.qaE = e; eMove(e, SG(u.qa), 0.35, null); }); return true; };
+      const toPheo = () => eMove(e, SG(u.pheo), 0.3, () => { u.pheoE = null; u.qaE = e; eMove(e, SG(u.qa), 0.35, null); });
+      if(u.chlD1 >= 0) eMove(e, SG(u.chlD1), 0.2, toPheo); else toPheo(); return true; };   // P680 -> ChlD1 -> PheoD1 -> QA: the accessory chlorophyll is a real stop on the way (owner 13.9.2026: 'hop between those exact molecules')
     const splitWater = u => { u.busyOEC = true; const oec = S(u.mi, u.oecC); SW(oec, _a); const F = gValoFree;
       if(F){ const skip = new Set(); for(let k=0;k<2;k++){ const i = F.nearest('w', _a[0], _a[1]-6, _a[2], -1, skip); if(i < 0) break; skip.add(i); pullFree('w', { i }, oec, 1.3, 'park'); } }
       after(1.6, () => { SW(oec, _a); flashAt(_a);
@@ -10421,7 +10432,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       sep: k => (k >= units.length ? chargeSepI(psis[k - units.length]) : chargeSepII(units[k])),   // dev: force a charge separation
       b6f: b6fs.map(u => ({ mi:u.mi, f:u.f, bL:u.bL, bH:u.bH, cn:u.cn, rieske:u.rieske, fE:!!u.fE, qi:u.qi.length, qiH:u.qiH })),
       psi: psis.map(u => ({ mi:u.mi, p700:u.p700, a0:u.a0, a1:u.a1, fx:u.fx, fa:u.fa, fb:u.fb, p700ox:u.p700ox, busy:u.busy, fbE:!!u.fbE, ant:u.ant.length })),
-      fd: fds.map(f => ({ mi:f.mi, e:!!f.e, w: SW(f.site, [0,0,0]).map(v => +v.toFixed(0)) })), fnr: fnrs.map(f => ({ mi:f.mi, e:f.e.length })), shuttles: gShuttles.map(sh => { const B = wpt(sh.hostB, sh.B, [0,0,0]); return { mi:sh.mi, pq:sh.pq, phase:sh.phase, cargo: sh.cargoE ? (sh.cargoE.length ?? 1) : 0, unitKey: sh.unitKey, waitT: +sh.waitT.toFixed(1), R: +sh.R.toFixed(0), cur: sh.cur.map(v => +v.toFixed(0)), tgt: [B[0]+sh.offB[0], B[1]+sh.offB[1], B[2]+sh.offB[2]].map(v => +v.toFixed(0)), cap: +(MEMBRANE_Y - gMemHalfT - sh.R).toFixed(0), dB: +Math.hypot(sh.cur[0]-B[0]-sh.offB[0], sh.cur[1]-B[1]-sh.offB[1], sh.cur[2]-B[2]-sh.offB[2]).toFixed(0), h: sh.h.map(v => +v.toFixed(2)) }; }),
+      fd: fds.map(f => ({ mi:f.mi, e:!!f.e, w: SW(f.site, [0,0,0]).map(v => +v.toFixed(0)) })), fnr: fnrs.map(f => ({ mi:f.mi, e:f.e.length })), shuttles: gShuttles.map(sh => { const B = wpt(sh.hostB, sh.B, [0,0,0]); const hits = []; for(let sI=0;sI<gHulls.length;sI++){ const hh=gHulls[sI]; if(hh.mi === sh.mi) continue; const dd=Math.hypot(sh.cur[0]-gShellCen[sI*3], sh.cur[1]-gShellCen[sI*3+1], sh.cur[2]-gShellCen[sI*3+2]); if(dd < sh.R+hh.maxR+2) hits.push([hh.mi, labelOf(hh.mi), +hh.maxR.toFixed(0), +dd.toFixed(0)]); }   // dev: the shells this carrier is touching (a carrier stuck on one shows here)
+      return { hits, mi:sh.mi, pq:sh.pq, phase:sh.phase, cargo: sh.cargoE ? (sh.cargoE.length ?? 1) : 0, unitKey: sh.unitKey, waitT: +sh.waitT.toFixed(1), R: +sh.R.toFixed(0), cur: sh.cur.map(v => +v.toFixed(0)), tgt: [B[0]+sh.offB[0], B[1]+sh.offB[1], B[2]+sh.offB[2]].map(v => +v.toFixed(0)), cap: +(MEMBRANE_Y - gMemHalfT - sh.R).toFixed(0), dB: +Math.hypot(sh.cur[0]-B[0]-sh.offB[0], sh.cur[1]-B[1]-sh.offB[1], sh.cur[2]-B[2]-sh.offB[2]).toFixed(0), h: sh.h.map(v => +v.toFixed(2)) }; }),
       excitons: excitons.length, electrons: elecs.filter(e => e.on).length, heldP: heldP.length, parked: parked.length, heldF: heldF.length, released: released.length, stats });
     } }
   /* ── RTS floor ── flatten every model onto ONE plane (perpendicular to the membrane, at the models'
@@ -12756,7 +12768,7 @@ precision highp float;
 varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform vec2 elecUV;
-#define LN_MAX 48
+#define LN_MAX 64
 uniform vec2 elecUVs[LN_MAX];   // the light-reaction electrons on screen (owner 13.9.2026: 'in lantern mode I should see the electrons from photolysis travel the carriers to FNR')
 uniform float nElecs;
 uniform float lanternOn;
@@ -12775,7 +12787,7 @@ void main(void){
   gl_FragColor = vec4(c, 1.0);
 }`;
   const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect'], null, 1.0, cam);
-  const _lnUV = new Float32Array(48*2);
+  const _lnUV = new Float32Array(64*2);
   { const _lvp = new BABYLON.Viewport(0, 0, 1, 1);
     lanternPP.onApply = eff => {
       const w = engine.getRenderWidth(), h = engine.getRenderHeight();
@@ -12785,7 +12797,7 @@ void main(void){
       eff.setFloat2('elecUV', onScreen ? p.x / w : -10.0, onScreen ? 1.0 - p.y / h : -10.0);
       let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
       if(gLantern && window.gValoElecs){ const tm = scene.getTransformMatrix();
-        for(const e of window.gValoElecs){ if(!e.on || n >= 48) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
+        for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
           if(q.z < 0.0 || q.z > 1.0) continue; _lnUV[n*2] = q.x / w; _lnUV[n*2+1] = 1.0 - q.y / h; n++; } }
       eff.setArray2('elecUVs', _lnUV); eff.setFloat('nElecs', n);
       eff.setFloat('lanternOn', gLantern ? 1.0 : 0.0);
