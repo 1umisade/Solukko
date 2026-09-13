@@ -359,9 +359,6 @@ attribute float instR;   // per-instance radius multiplier (vdW LOD spheres — 
 #ifdef MACRON
 attribute vec4 macroN;   // xyz = the MOLECULE's surface normal at this atom (its baked frame), w = how buried the atom is (0 = on the surface, 1 = deep) - see macroField()
 #endif
-#if defined(MACRON) || defined(WATERBOX)
-varying vec4 vMacroN;    // world-space macro normal + buriedness → the key light shades the molecule's SHAPE, not each little sphere (owner 12.9.2026: 'no lighting on the DNA surface, everything looks flat')
-#endif
 #endif
 #ifdef LIPTPL
 /* Template-instanced lipid spheres: the mesh holds one quad per ATOM of one lipid rotamer, with that
@@ -371,6 +368,9 @@ varying vec4 vMacroN;    // world-space macro normal + buriedness → the key li
 attribute vec3 atomOff;
 attribute vec4 tint;     // cell mode: the organelle's hue and how much of it (0 = the lipid's own colour)
 attribute float shade;   // cell mode: 1 on the sheet, darker on enclosed membranes and around the nuclear pores
+#endif
+#if defined(MACRON) || defined(WATERBOX)
+varying vec4 vMacroN;    // world-space macro normal + buriedness → the key light shades the molecule's SHAPE, not each little sphere (owner 12.9.2026). OUTSIDE the IMPRAD block: the free molecules (WATERBOX) are compiled without IMPRAD, and with the varying inside it their whole vdW material failed to compile (13.9.2026 - 'why do the free floaters have no vdW')
 #endif
 uniform mat4 view;
 uniform mat4 projection;
