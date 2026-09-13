@@ -10148,8 +10148,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(x<lo.x+R){ x=lo.x+R; b.vx=Math.abs(b.vx); } else if(x>hi.x-R){ x=hi.x-R; b.vx=-Math.abs(b.vx); }
         if(y<lo.y+R){ y=lo.y+R; b.vy=Math.abs(b.vy); } else if(y>hi.y-R){ y=hi.y-R; b.vy=-Math.abs(b.vy); }
         if(z<lo.z+R){ z=lo.z+R; b.vz=Math.abs(b.vz); } else if(z>hi.z-R){ z=hi.z-R; b.vz=-Math.abs(b.vz); }
-        if(hT > 0 && !(_car && (_car.pulled(b.kin) || _car.homing(b.kin)))){ const top=MEMBRANE_Y+hT+R, bot=MEMBRANE_Y-hT-R;   // the lipid layer is a wall - except for a carrier PULLED to a dock or a protein steered home (the 2D in-transit layer; PSI's stromal face, and the FNR sink on it, lie under the layer in this sheet)
-          if(y < top && y > bot){ if(y >= MEMBRANE_Y){ y=top; b.vy=Math.abs(b.vy); } else { y=bot; b.vy=-Math.abs(b.vy); } } }
+        if(hT > 0 && !(_car && (_car.pulled(b.kin) || _car.homing(b.kin)))){ const my = memSurfY(x, z), top=my+hT+R, bot=my-hT-R;   // the wall is the membrane UNDER the protein - the cap's surface, not the flat plane (13.9.2026, owner: 'why is ferredoxin floating through the membrane': PSI's stromal dock sits under the flat plane since the pole moved)   // the lipid layer is a wall - except for a carrier PULLED to a dock or a protein steered home (the 2D in-transit layer; PSI's stromal face, and the FNR sink on it, lie under the layer in this sheet)
+          if(y < top && y > bot){ if(y >= my){ y=top; b.vy=Math.abs(b.vy); } else { y=bot; b.vy=-Math.abs(b.vy); } } }
         const _hostMi = _car ? _car.hostMi(b.kin) : -1;   // pulled to a dock, it may enter its host's shell (the dock can sit inside it: a ferredoxin sits on FB)
         for(let sI=0;sI<gHulls.length;sI++){ const h=gHulls[sI]; if(h.mi===mi || h.mi===_hostMi) continue;   // membrane proteins and the other bouncers alike
           const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2];

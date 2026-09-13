@@ -367,7 +367,7 @@
       // sprites, glows, labels
       for(const s of sprites){ if(!s.body || !s.body.alive) continue; const p = s.body._pos; s.mesh.position.set(p[0], p[1], p[2]); s.corona.position.set(p[0], p[1], p[2]); const g = 0.5 + Math.min(1.5, s.body.EnergyLevel*V.SCRIPTS.electron.ENERGY_GLOW_FACTOR); s.corona.scaling.set(g, g, g); }
       for(const s of oSprites){ if(!s.body || !s.body.alive) continue; const p = s.body._pos; s.mesh.position.set(p[0], p[1], p[2]); }
-      { let n = 0; for(const m of antenna){ if(!m.alive || !m.ExcitedSprite || !m.ExcitedSprite.visible) continue; if(n >= eks.cap) break; const p = m.global_position; putGlow(eks, n++, 2.6 + 0.8*Math.sin(get.gWaveT()*9 + m.id), p[0], p[1], p[2]); } showGlow(eks, n); }
+      showGlow(eks, 0);   // (the excitation's glow spheres are gone - the painterly pass inked them as bright ringed bubbles; the lantern's electric green pool on the Mg is the excitation now, owner 13.9.2026)
       { let hn = 0; for(let q = heats.length-1; q >= 0; q--){ const H = heats[q]; H.t += dt; if(H.t > 0.5){ heats.splice(q, 1); continue; } if(hn < heat.cap) putGlow(heat, hn++, 3 + 14*(H.t/0.5), H.x, H.y, H.z); } showGlow(heat, hn);
         let fn = 0; for(let q = flashes.length-1; q >= 0; q--){ const Fl = flashes[q]; Fl.t += dt; if(Fl.t > 0.35){ flashes.splice(q, 1); continue; } if(fn < flashG.cap) putGlow(flashG, fn++, 3 + 16*(Fl.t/0.35), Fl.x, Fl.y, Fl.z); } showGlow(flashG, fn);
         let rn = 0; for(let q = rings.length-1; q >= 0; q--){ const R = rings[q]; R.t += dt; if(R.t > 1.0){ rings.splice(q, 1); continue; } if(rn < ringG.cap) putGlow(ringG, rn++, 2 + 12*R.t, R.x, R.y, R.z); } showGlow(ringG, rn); }
