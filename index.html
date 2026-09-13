@@ -7400,12 +7400,15 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     else if(syvin>=0){ _tipHold=0; pidaLapset(syvin); }   // pointer is reading a popup — that one and its parents stay
     else if(_tipTarget){
       if(!_tipHold) _tipHold=Date.now()+260;              // grace period for crossing the gap to the tooltip
-      if(Date.now()>_tipHold){ tip.style.display='none'; tip.classList.remove('mol-only','tiedot-auki'); tip.innerHTML=''; molKehys.piilota(); _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; suljeLapset(0); }
+      if(Date.now()>_tipHold) suljeTip();
     }
     requestAnimationFrame(updateTip);
   }
   requestAnimationFrame(updateTip);
 
+  // Full teardown of the popup - the 3-D frame (molKehys) is laid OVER the tooltip and positioned separately, so hiding
+  // the tooltip alone leaves the molecule render on screen (owner 13.9.2026: mobile popup would not close on tap-away).
+  function suljeTip(){ tip.style.display='none'; tip.classList.remove('mol-only','tiedot-auki'); tip.innerHTML=''; molKehys.piilota(); _tipTarget=null; _tipLaaja=null; _tipSuppea=null; _tipHold=0; _tipLukittu=false; _tipTiedot=false; suljeLapset(0); }
   let _wlTapLink=null, _wlSX=0, _wlSY=0, _wlMoved=false;      // mobile: a tap on a linked word opens/closes its definition
   document.addEventListener('touchstart', e=>{
     _wlTapLink=e.target.closest('.word-link'); _wlMoved=false;
@@ -7419,11 +7422,11 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     if(e.target.closest('#word-link-tooltip, .wl-lapsi')){ _wlTapLink=null; return; }   // tapping the tooltip (e.g. Laajenna) is not "tap elsewhere"
     const link=e.target.closest('.word-link');
     if(link && link===_wlTapLink && !_wlMoved){              // a tap on a linked word → toggle its definition
-      if(touchPinnedLink===link){ touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; suljeLapset(0); }
+      if(touchPinnedLink===link){ touchPinnedLink=null; suljeTip(); }
       else if(tasoOf(link)>=0){ naytaLapsi(tasoOf(link), link); }   // a tap on a link inside a popup: the next level
       else { touchPinnedLink=link; showTip(link); suljeLapset(0); }
     } else if(touchPinnedLink && !link){                     // tap anywhere else closes it
-      touchPinnedLink=null; tip.style.display='none'; _tipTarget=null; suljeLapset(0);
+      touchPinnedLink=null; suljeTip();
     }
     _wlTapLink=null;
   }, {passive:true});
