@@ -5180,6 +5180,7 @@ void main(void){
   let etcSel = -1;                       // index into etcGroups of the selected cofactor (−1 = none)
   let updateCofInfo = null;              // set later → populates the selected-cofactor info panel (3D image, single-unit mass, PubChem link)
   const gCut = new Float32Array([0, 1, 0]);   // membrane cross-cut: [cutZ, cutSign, strength] (bound as memCut[])
+  let gFreeFade = 0, gFreeFadeMax = 0;   // how far a free molecule is drawn (dev slider 'vapaiden molekyylien kantama'); the max is half the wrap box's thinnest side - past it no copy exists to draw
   let gViewBox = 0;   // 1 while the camera is inside the light-reaction box: lipids, shells, free molecules, proteins, DNA outside the box are not drawn (viewBox uniform + CPU culls)
   const inViewBox = (x, y, z, r) => !gViewBox || (x + r >= gPsuLo.x && x - r <= gPsuHi.x && y + r >= gPsuLo.y && y - r <= gPsuHi.y && z + r >= gPsuLo.z && z - r <= gPsuHi.z);
   const gCutLo = new BABYLON.Vector3(-1e9, -1e9, -1e9), gCutHi = new BABYLON.Vector3(1e9, 1e9, 1e9);   // the cut's box (cell mode: the light-reaction box, so the rest of the cell keeps its membranes)
@@ -7384,17 +7385,18 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       gCellDrop = (x,y,z) => { const L = gBoxLo, H = gBoxHi; if(!L) return false;
         if(inThyBand(x,y,z)) return true;   // never inside the thylakoid's bilayer
         if(x >= L.x && x <= H.x && y >= L.y && y <= H.y && z >= L.z && z <= H.z) return false;   // the base box: the physics lives here, it is always shown
-        if(Math.hypot(x-cam.position.x, y-cam.position.y, z-cam.position.z) > CELL_FADE) return true;   // a copy past the fade is gone
+        if(Math.hypot(x-cam.position.x, y-cam.position.y, z-cam.position.z) > gFreeFade) return true;   // a copy past the fade is gone
         return !cytosol(x,y,z); };
       gCellWrap = true;
       const orgA = new Float32Array(32*4), orgB = new Float32Array(32*4), _wrap = new BABYLON.Vector3(), _zero = new BABYLON.Vector3(0,0,0);
       SOLU_CELL.ORG.forEach((M, i) => { if(i >= 32) return; orgA[i*4]=M.C.x; orgA[i*4+1]=M.C.y; orgA[i*4+2]=M.C.z; orgA[i*4+3]=M.R; orgB[i*4]=M.invS[0]; orgB[i*4+1]=M.invS[1]; orgB[i*4+2]=M.invS[2]; orgB[i*4+3]=M.hazeOk ? 1 : 0; });
       const CELL_FADE = gBoxLo ? Math.min(gBoxHi.x-gBoxLo.x, gBoxHi.y-gBoxLo.y, gBoxHi.z-gBoxLo.z)*0.5 - 6 : 370;   // half the box's thinnest side: the copies fade out before their edge shows
+      gFreeFadeMax = CELL_FADE; gFreeFade = CELL_FADE; if(window.__ffSync) window.__ffSync();   // the slider's ceiling and its default (the dev panel is built before this block runs - it re-reads through __ffSync)
       const _thyA = THY ? new BABYLON.Vector4(THY.C.x, THY.C.y, THY.C.z, THY.R) : new BABYLON.Vector4(0,0,0,0);
       const _thyB = HIN ? new BABYLON.Vector4(HIN.C.x, HIN.C.y, HIN.C.z, HIN.R) : new BABYLON.Vector4(0,0,0,1);
       const _thyS = HIN ? new BABYLON.Vector3(1/HIN.s[0], 1/HIN.s[1], 1/HIN.s[2]) : new BABYLON.Vector3(1,1,1);
       gCellBind = (eff, haze) => { if(gBoxLo && !haze) _wrap.set(gBoxHi.x-gBoxLo.x, gBoxHi.y-gBoxLo.y, gBoxHi.z-gBoxLo.z); else _wrap.set(0,0,0);
-        eff.setVector4('thyA', _thyA); eff.setVector4('thyB', _thyB); eff.setVector3('thyInvS', _thyS); eff.setFloat('cellFade', haze ? 0 : CELL_FADE); eff.setFloat('cellP', MEMS[0].p || 0);
+        eff.setVector4('thyA', _thyA); eff.setVector4('thyB', _thyB); eff.setVector3('thyInvS', _thyS); eff.setFloat('cellFade', haze ? 0 : gFreeFade); eff.setFloat('cellP', MEMS[0].p || 0);
         eff.setVector3('cellWrap', _wrap); eff.setVector3('cellCam', cam.position); eff.setVector3('cellCen', CEN); eff.setFloat('cellR', SOLU_CELL.R);
         eff.setFloat('cellFacetY', bilayerCen.y); eff.setFloat('cellMemT', mT); eff.setFloat('cellClipAll', haze ? 1 : 0);
         eff.setArray4('orgA', orgA); eff.setArray4('orgB', orgB); eff.setFloat('nOrg', Math.min(32, SOLU_CELL.ORG.length)); };
@@ -10632,6 +10634,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   mgSld.type='range'; mgSld.min='200'; mgSld.max='5000'; mgSld.style.cssText='width:100%;cursor:pointer;';
   const mgValEl = mgRow.querySelector('#dev-mg-val');
   mgSld.oninput = () => { gMega = +mgSld.value; mgValEl.textContent = String(gMega); };
+  // Free molecules' reach (owner 13.9.2026): how far from the camera a free molecule is still drawn. The ceiling is half the wrap
+  // box's thinnest side - beyond it there is no copy to draw (see CELL_FADE) - so the slider only ever brings them closer.
+  const ffRow = document.createElement('div'); ffRow.innerHTML = 'vapaiden molekyylien kantama: <b id="dev-ff-val">0</b>';
+  const ffSld = document.createElement('input'); ffSld.type='range'; ffSld.min='60'; ffSld.max=String(Math.max(60, Math.round(gFreeFadeMax))); ffSld.step='10'; ffSld.style.cssText='width:100%;cursor:pointer;';
+  const ffValEl = ffRow.querySelector('#dev-ff-val');
+  ffSld.oninput = () => { gFreeFade = +ffSld.value; ffValEl.textContent = String(Math.round(gFreeFade)) + ' / ' + Math.round(gFreeFadeMax); };
+  window.__ffSync = () => { ffSld.max = String(Math.max(60, Math.round(gFreeFadeMax))); ffSld.value = String(Math.round(gFreeFade)); ffValEl.textContent = String(Math.round(gFreeFade)) + ' / ' + Math.round(gFreeFadeMax); };
+  window.__ffSync();
   mgSld.value = String(Math.round(gMega)); mgValEl.textContent = String(Math.round(gMega));
   // The width of the band where lipids thin out over the slab at the 2→3 boundary.
   const blRow = document.createElement('div');
@@ -10702,7 +10712,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // not shown any more.
   devPanel.appendChild(backRow); devPanel.appendChild(qRow); devPanel.appendChild(qSld);   // render-resolution slider - it was built but had fallen out of the panel
   devPanel.appendChild(czRow); devPanel.appendChild(czSld);
-  devPanel.appendChild(mgRow); devPanel.appendChild(mgSld);
+  devPanel.appendChild(mgRow); devPanel.appendChild(mgSld); devPanel.appendChild(ffRow); devPanel.appendChild(ffSld);
   devPanel.appendChild(blRow); devPanel.appendChild(blSld); devPanel.appendChild(sdRow); devPanel.appendChild(sdSld); devPanel.appendChild(plRow); devPanel.appendChild(plSld); devPanel.appendChild(bRow); devPanel.appendChild(bSld); devPanel.appendChild(bhRow); devPanel.appendChild(bhSld);
   // Membrane slab tier on/off (see gSlabLod).
   const slRow = document.createElement('div'); const slBtn = document.createElement('button');
