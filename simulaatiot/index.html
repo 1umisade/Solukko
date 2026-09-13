@@ -10374,7 +10374,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     psis.forEach((u, k) => { const L = 'psi' + k, mi = u.mi;
       u.psi = new Mol({ name:'photosystem_I', tags:['photosystem_I_dock'], lane:L, mi, p:[mInfo[mi].cx, mInfo[mi].cy, mInfo[mi].cz], hooks:{
         bindCond: (body, slot) => { if(body.has('plastocyanin')) return body.filled('electron'); if(body.has('ferredoxin')) return !body.filled('electron'); return true; },   // photosystem_I.gd
-        relCond: slot => { if(slot.name === 'plastocyanin') return !!(slot.holder && !slot.holder.filled('electron') && u.p700M.filled('electron'));
+        relCond: slot => { if(slot.name === 'plastocyanin') return !!(slot.holder && !slot.holder.filled('electron'));   // (photosystem_I.gd also waits for P700 to be filled; here an excited P700 can fire before the empty carrier leaves, and the dock would deadlock)
           if(slot.name === 'ferredoxin') return !!(slot.holder && slot.holder.filled('electron')); return true; } } });
       const c = mInfo[mi];
       u.pcSlot = u.psi.slot('plastocyanin', { p: [c.cx, c.y0, c.cz], place: 13, near: NEAR_DOCK }); u.pcSlot.side = -1;
@@ -10477,8 +10477,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const pcSoftTarget = m => { if(m.filled('electron')){ const u = psis[(Math.random()*psis.length)|0]; m.soft = u ? u.pcSlot : null; return; }
       let best = null, fewest = Infinity; for(const u of b6fs){ const n = countHeading('plastocyanin', u.pcSlot); if(n < fewest){ fewest = n; best = u.pcSlot; } } m.soft = best; };   // plastocyanin.gd: the least-crowded cytochrome slot
     const fdSoftTarget = m => { if(!m.filled('electron')){ const u = psis[(Math.random()*psis.length)|0]; m.soft = u ? u.fdSlot : null; return; }
-      if(fdToNdh && ndhs.length){ m.soft = ndhs[(Math.random()*ndhs.length)|0].fdSlot; } else { m.soft = fnrs.length ? fnrs[(Math.random()*fnrs.length)|0].fdSlot : null; }
-      fdToNdh = !fdToNdh; };
+      if(fdToNdh && ndhs.length){ m.soft = ndhs[(Math.random()*ndhs.length)|0].fdSlot; } else { m.soft = fnrs.length ? fnrs[(Math.random()*fnrs.length)|0].fdSlot : null; } };   // (the toggle flips when a delivery is done - see undock - not on every call: check_soft_target runs often here)
     for(const m of carriers) m.hooks.softTarget();   // _ready_call_deferred: every carrier picks its first destination
 
     /* ── the sprites: free electrons (bigelec glint + corona), oxygen atoms, exciton / heat / flash glows ── */
@@ -10508,6 +10507,19 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const heatAt = p => { heats.push({ x:p[0], y:p[1], z:p[2], t:0 }); if(heats.length > heat.cap) heats.shift(); stats.lampo++; };
     const flashAt = p => { flashes.push({ x:p[0], y:p[1], z:p[2], t:0 }); if(flashes.length > flashG.cap) flashes.shift(); };
     const ringAt = p => { rings.push({ x:p[0], y:p[1], z:p[2], t:0 }); if(rings.length > ringG.cap) rings.shift(); };   // shock_wave_animation: a ring on every electron bind
+
+    /* ── the energy readouts ('2,92 αJ' beside an excited pigment or a flying electron - chlorophyll_A.gd / electron.gd update_label): a pool of
+       billboards handed each frame to the excited things nearest the camera ── */
+    const LBL_N = 16, labels = [];
+    for(let k=0;k<LBL_N;k++){ const tex = new BABYLON.DynamicTexture('valoLbl'+k, { width:160, height:44 }, scene, false); tex.hasAlpha = true;
+      const mat = new BABYLON.StandardMaterial('valoLblMat'+k, scene); mat.diffuseTexture = tex; mat.emissiveColor = BABYLON.Color3.White(); mat.disableLighting = true; mat.useAlphaFromDiffuseTexture = true; mat.backFaceCulling = false; mat.disableDepthWrite = true; mat.depthFunction = BABYLON.Engine.ALWAYS;
+      const pl = BABYLON.MeshBuilder.CreatePlane('valoLblP'+k, { width:18, height:5 }, scene); pl.material = mat; pl.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL; pl.isPickable = false; pl.alwaysSelectAsActiveMesh = true; pl.renderingGroupId = 3; onTop(pl); pl.setEnabled(false); labels.push({ tex, pl, txt:'' }); }
+    const fmtE = e => e.toFixed(2).replace('.', ',') + ' αJ';
+    const setLabel = (L, txt, x, y, z) => { if(L.txt !== txt){ L.txt = txt; L.tex.clear(); L.tex.drawText(txt, null, null, 'bold 30px Courier New', '#f4ecd2', 'transparent', true); } L.pl.position.set(x, y + 3.5, z); L.pl.setEnabled(true); };
+    const tickLabels = () => { const cp = cam.position, cand = [];
+      for(const m of antenna){ if(!m.excited || m.energy <= 0) continue; m.world(_c); cand.push({ d: (cp.x-_c[0])*(cp.x-_c[0])+(cp.y-_c[1])*(cp.y-_c[1])+(cp.z-_c[2])*(cp.z-_c[2]), e: m.energy, x:_c[0], y:_c[1], z:_c[2] }); }
+      for(const b of bodies){ if(!b.alive || !b.has('electron') || b.energy <= 0) continue; cand.push({ d: (cp.x-b.x)*(cp.x-b.x)+(cp.y-b.y)*(cp.y-b.y)+(cp.z-b.z)*(cp.z-b.z), e: b.energy, x:b.x, y:b.y, z:b.z }); }
+      cand.sort((a, b) => a.d - b.d); let n = 0; for(const c of cand){ if(n >= LBL_N || c.d > 250*250) break; setLabel(labels[n++], fmtE(c.e), c.x, c.y, c.z); } for(let k=n;k<LBL_N;k++) labels[k].pl.setEnabled(false); };
 
     /* ── the cofactor overlay shows a slot's state (the 2D modulate): an empty electron carrier is dim, a filled one full colour, an excited pigment bright ── */
     const SLOT_W = Math.max(1, G.length), slotData = new Uint8Array(SLOT_W); slotData.fill(128);
@@ -10542,7 +10554,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       s.mol = m; s.mesh.setEnabled(true); bodies.push(m); return m; };
     const killBody = m => { m.alive = false; if(m.body && m.body.kind === 'free' && !m.consumed){ const F = gValoFree; if(F){ gMolHold[F.base[m.body.key] + m.body.i] = 0; F.setOff(m.body.key, m.body.i, 0, 0, 0); } }
       if(m.body && m.body.s){ m.body.s.mol = null; m.body.s.mesh.setEnabled(false); if(m.body.s.corona) m.body.s.corona.setEnabled(false); }
-      const i = bodies.indexOf(m); if(i >= 0) bodies.splice(i, 1); const j = ALL.indexOf(m); if(j >= 0) ALL.splice(j, 1); if(followed === m) followed = null; for(const s of ALL) if(s.pulled) s.pulled.delete(m); };
+      const i = bodies.indexOf(m); if(i >= 0) bodies.splice(i, 1); const j = ALL.indexOf(m); if(j >= 0) ALL.splice(j, 1); if(followed === m && !m.consumed){ followed = null; if(followOn) followArm = true; } for(const s of ALL) if(s.pulled) s.pulled.delete(m); };
 
     /* ══ PULL (when_body_enters_nearby_area -> try_PULLING / PULLING_conditions) ══ a slot that can take a nearby free body sets its hard target */
     const slotTakes = (slot, body) => { const base = slot.name.replace(/_LUMENAL2?$|_STROMAL2?$/, '').replace(/_\d+$/, '').replace(/_2$/, ''); return body.has(base); };
@@ -10567,6 +10579,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(slot.name === 'VDE') slot.vdeT = 0;
       owner.hooks.bindAct(slot, carrier); carrier.hooks.bindAct(slot, carrier); };
     const undock = (carrier, slot) => { slot.occupied = false; slot.holder = null; carrier.dockedAt = null; carrier.flags.exiting = true; carrier.exitT = 0;
+      if(carrier.has('ferredoxin')){ const o = slot.owner().name; if(o === 'FNR') fdToNdh = true; else if(o === 'NDH-1') fdToNdh = false; }   // ferredoxin.gd: FNR and NDH-1 in turn
       if(carrier.body && carrier.body.kind === 'bnc'){ const b = carrier.body.b; b.dockedAt = null; const sp = carrier.speed || SPEED.mid; b.vx = (Math.random()-0.5)*sp; b.vy = (b.side || 1)*sp*0.7; b.vz = 0; }
       carrier.hooks.softTarget(); };
 
@@ -10613,12 +10626,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       m.hooks.softTarget = () => { const ts = units.map(u => u.tyrM && u.tyrM.slotNamed('O2')).filter(Boolean); m.soft = m.excited && ts.length ? ts[(Math.random()*ts.length)|0] : null; }; bodies.push(m); return m; };
     const tickExcitation = dt => { let n = 0;
       for(const m of antenna){ if(!m.alive) continue;
-        if(m.flags.shaking){ m.flags.shaking += dt; if(m.flags.shaking > 0.6){ m.flags.shaking = 0; m.excited = false; m.energy = 0; heatAt(m.world(_c)); } continue; }
-        if(m.has('zeaxanthin') && Math.random() < dt/60){ m.tags.delete('zeaxanthin'); m.tag('violaxanthin'); }   // zeaxanthin epoxidase: back to violaxanthin in a minute or so
+        if(m.flags.shaking){ m.flags.shaking += dt; if(m.flags.shaking > 0.6){ m.flags.shaking = 0; m.excited = false; m.energy = 0; heatAt(m.world(_c)); if(followed === m && followOn){ followed = null; followArm = true; } } continue; }   // (the followed excitation died as heat: the next photon is followed instead)
+        if(m.has('zeaxanthin') && Math.random() < dt/40){ m.tags.delete('zeaxanthin'); m.tag('violaxanthin'); }   // zeaxanthin epoxidase: back to violaxanthin in a minute or so
         if(!m.excited) continue;
+        m.heatT += dt; if(m.heatT >= HEAT_S && !m.has('reaction_centre')){ m.transfer = null; m.flags.shaking = 0.001; continue; }   // use it or lose it: 5 s from the excitation, hops or not
         if(m.transfer){ const T = m.transfer; T.t += dt; if(T.t >= HOP){ m.transfer = null; const to = T.to; if(to.alive && tryExciting(to, m.energy, m)){ m.excited = false; m.energy = 0; if(to.has('reaction_centre')) tryReleasing(to); to.hooks.softTarget(); } } }
-        else { m.heatT += dt; if(m.heatT >= HEAT_S){ m.flags.shaking = 0.001; continue; }   // use it or lose it
-          if(!(m.has('reaction_centre'))){ const to = excitationAcceptor(m); if(to) m.transfer = { to, t:0 }; } }
+        else { if(m.has('reaction_centre')){ if(m.heatT >= HEAT_S){ m.flags.shaking = 0.001; continue; } } else { const to = excitationAcceptor(m); if(to) m.transfer = { to, t:0 }; } }
         if(n < eks.cap){ m.world(_c); putGlow(eks, n++, 2.6 + 0.8*Math.sin(gWaveT*9 + m.id), _c[0], _c[1], _c[2]); } }
       showGlow(eks, n); };
     // a photon absorbed by chlorophyll group gi (the photon block calls this)
@@ -10696,16 +10709,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(const b of homers){ const ci = mInfo[b.mi], x = ci.cx + gModelOff[b.mi*3], y = ci.cy + gModelOff[b.mi*3+1]; const dx = b.home[0]-x, dy = b.home[1]-y, d = Math.hypot(dx, dy) || 1e-3, sp = SPEED.large; const f = 1 - Math.pow(0.94, dt*60);
         const vx = b.vx + (dx/d*sp - b.vx)*f, vy = b.vy + (dy/d*sp - b.vy)*f, l = Math.hypot(vx, vy) || 1; b.vx = vx/l*sp; b.vy = vy/l*sp; }
       for(const c of carriers){ if(!c.alive) continue;
+        if(c.body.kind === 'bnc'){ const mi = c.mi, ci = mInfo[mi]; c.x = ci.cx + gModelOff[mi*3]; c.y = ci.cy + gModelOff[mi*3+1]; c.z = ci.cz + gModelOff[mi*3+2]; }   // where the bouncer is now (docked or not - a docked one is pinned by the bouncer loop)
+        else if(c.body.kind === 'sh'){ const sh = c.body.sh; c.x = sh.cur[0]; c.y = sh.cur[1]; c.z = sh.cur[2]; }
         if(!c.dockedAt && !c.hard){ c.retT = (c.retT || 0) + dt; if(c.retT > 3 && (!c.soft || c.soft.holder || c.soft.occupied)){ c.retT = 0; c.hooks.softTarget(); } }   // check_soft_target again while the slot it heads for is taken (2D re-runs it on every nearby event)
         if(c.flags.exiting){ c.exitT = (c.exitT || 0) + dt; if(c.exitT > 1.5){ c.flags.exiting = false; c.exitT = 0; } }
-        if(c.dockedAt){ const slot = c.dockedAt; if(slot.name === 'VDE'){ slot.vdeT += dt; const u = units.find(q => q.vdeSlot === slot); if(u) for(const m of antenna) if(m.ps === u && m.has('violaxanthin') && Math.random() < dt*0.5){ m.tags.delete('violaxanthin'); m.tag('zeaxanthin'); } } continue; }
-        if(c.body.kind === 'bnc'){ const b = c.body.b, mi = c.mi, ci = mInfo[mi]; c.x = ci.cx + gModelOff[mi*3]; c.y = ci.cy + gModelOff[mi*3+1]; c.z = ci.cz + gModelOff[mi*3+2];
+        if(c.dockedAt){ const slot = c.dockedAt; if(slot.name === 'VDE'){ slot.vdeT += dt; const u = units.find(q => q.vdeSlot === slot); if(u) for(const m of antenna) if(m.ps === u && m.has('violaxanthin') && Math.random() < dt*0.03){ m.tags.delete('violaxanthin'); m.tag('zeaxanthin'); } } continue; }   // (slowly: the 2D scene had three xanthophylls per centre, PSII here has fifty - all zeaxanthin would quench every exciton)
+        if(c.body.kind === 'bnc'){ const b = c.body.b;
           const t = carrierTarget(c); if(t){ tgtWorld(t, _b);
-            const dx=_b[0]-c.x, dy=_b[1]-c.y, d=Math.hypot(dx,dy)||1e-3, sp = c.speed || Math.hypot(b.vx, b.vy); const k = c.hard ? 0.5 : 0.06, f = 1 - Math.pow(1-k, dt*60);
+            let dx=_b[0]-c.x, dy=_b[1]-c.y, d=Math.hypot(dx,dy)||1e-3; const dTgt = d; const sp = c.speed || Math.hypot(b.vx, b.vy); const k = c.hard ? 0.5 : 0.06, f = 1 - Math.pow(1-k, dt*60);
+            if(c.bestD == null || d < c.bestD - 2){ c.bestD = d; c.stuckT = 0; } else { c.stuckT = (c.stuckT || 0) + dt; }   // no headway for 3 s (a shell in the way): detour sideways for a while
+            if(c.detour){ c.detour.t -= dt; if(c.detour.t <= 0){ c.detour = null; c.bestD = null; } else { dx = c.detour.x; dy = c.detour.y; d = 1; } }
+            else if(c.stuckT > 3){ const sgn = Math.random() < 0.5 ? 1 : -1; c.detour = { x: -dy/d*sgn, y: dx/d*sgn, t: 2.5 }; c.stuckT = 0; }
             let vx = b.vx + (dx/d*sp - b.vx)*f, vy = b.vy + (dy/d*sp - b.vy)*f; const l = Math.hypot(vx, vy)||1; b.vx = vx/l*sp; b.vy = vy/l*sp;
-            if(t.world && d < b.R + 18 && !c.flags.exiting){ if(gValoShuttle.arrive({ mol:c })){ b.vx = b.vy = 0; b.dockedAt = t; } } }
-          if(c.dockedAt && b.dockedAt){ /* hold in contact with the host */ } }
-        else if(c.body.kind === 'sh'){ const sh = c.body.sh; c.x = sh.cur[0]; c.y = sh.cur[1]; c.z = sh.cur[2]; } } };
+            if(t.world && dTgt < b.R + 18 && !c.flags.exiting){ if(gValoShuttle.arrive({ mol:c })){ b.vx = b.vy = 0; b.dockedAt = t; c.detour = null; c.bestD = null; } } }
+        } } };
 
     /* ── per frame ── */
     let valoRow = null, dev = 0, dtNow = 0; const prof = { exc:0, pull:0, rel:0, all:0 };
@@ -10729,7 +10746,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const F = gValoFree;
       if(F){ for(let q = heldF.length-1; q >= 0; q--){ const h = heldF[q]; h.t += dt; const k = Math.min(1, h.t/h.dur), s = k*k*(3-2*k); h.to.world(_b);
           const x = h.from[0]+(_b[0]-h.from[0])*s, y = h.from[1]+(_b[1]-h.from[1])*s, z = h.from[2]+(_b[2]-h.from[2])*s; F.setWorld(h.key, h.i, x, y, z);
-          if(k >= 1){ heldF.splice(q, 1); if(h.then === 'slot'){ const slot = h.to; slot.flags.binding = false; if(slot.alive){ slot.occupied = true; slot.freeI = h.i; slot.holder = null; if(slot.name === 'H2O'){ slot.owner().water = 1; } if(slot.name === 'NADP' && !slot.owner().has('RuBisCO')){ /* an NADP+ docked at FNR: it is a Mol with electron / electron_2 / proton slots while it sits there */ const nm = new Mol({ name:'NADP', mi: slot.mi, p: slot.p, host: null }); nm.slot('electron'); nm.slot('electron_2'); const pr = nm.slot('proton'); pr.near = 250; pr.side = 1; nm.hooks.bindCond = (body, s2) => body.has('proton') ? (nm.filled('electron') || nm.filled('electron_2')) : true; nm.dockedAt = slot; slot.holder = nm; nm.freeI = h.i; nm.p = slot.p; nm.mi = slot.mi; }
+          if(k >= 1){ heldF.splice(q, 1); if(h.then === 'slot'){ const slot = h.to; slot.flags.binding = false; if(slot.alive){ slot.occupied = true; slot.freeI = h.i; slot.holder = null; if(slot.name === 'H2O'){ slot.owner().water = 1; } if(slot.name === 'NADP' && !slot.owner().has('RuBisCO')){ /* an NADP+ docked at FNR: it is a Mol with electron / electron_2 / proton slots while it sits there */ const nm = new Mol({ name:'NADP', mi: slot.mi, p: slot.p, host: null }); nm.slot('electron'); nm.slot('electron_2'); const pr = nm.slot('proton'); pr.near = 250; pr.side = 1; nm.hooks.bindCond = (body, s2) => body.has('proton') ? (nm.filled('electron') || nm.filled('electron_2')) : true; nm.hooks.relCond = () => false; nm.dockedAt = slot; slot.holder = nm; nm.freeI = h.i; nm.p = slot.p; nm.mi = slot.mi; }
                 slot.owner().hooks.bindAct(slot, { has: t => t === slot.name.replace(/_\d+$/, '') || (t === 'NADP' && h.key === 'nadp'), filled: () => true, flags:{} }); slot.host.hooks.softTarget(); } else { gMolHold[F.base[h.key] + h.i] = 0; } }
             else if(h.then === 'park') parkedF.push({ key:h.key, i:h.i, t:0 }); else releaseFree(h.key, h.i, x, y, z, [(Math.random()-0.5)*8, 6, (Math.random()-0.5)*8], h.life); } }
         // a molecule sitting in a slot rides the slot
@@ -10751,6 +10768,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       let hn = 0; for(let q = heats.length-1; q >= 0; q--){ const H = heats[q]; H.t += dt; if(H.t > 0.5){ heats.splice(q, 1); continue; } if(hn < heat.cap) putGlow(heat, hn++, 3 + 14*(H.t/0.5), H.x, H.y, H.z); } showGlow(heat, hn);
       let fn = 0; for(let q = flashes.length-1; q >= 0; q--){ const Fl = flashes[q]; Fl.t += dt; if(Fl.t > 0.35){ flashes.splice(q, 1); continue; } if(fn < flashG.cap) putGlow(flashG, fn++, 3 + 16*(Fl.t/0.35), Fl.x, Fl.y, Fl.z); } showGlow(flashG, fn);
       let rn = 0; for(let q = rings.length-1; q >= 0; q--){ const R = rings[q]; R.t += dt; if(R.t > 1.0){ rings.splice(q, 1); continue; } if(rn < ringG.cap) putGlow(ringG, rn++, 2 + 12*R.t, R.x, R.y, R.z); } showGlow(ringG, rn);
+      tickLabels();
       // the camera follow
       if(followOn && followed && followed.alive !== false){ followed.world(_c); const t = cam.target; const f = 1 - Math.pow(0.1, dt*3); t.x += (_c[0]-t.x)*f; t.y += (_c[1]-t.y)*f; t.z += (_c[2]-t.z)*f; }
       // the lantern: every free electron and every filled electron slot is a spotlight
@@ -10769,7 +10787,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       ndh: ndhs.map(n => ({ mi:n.mi, fd: n.fdSlot.holder ? 'Fd' : '-', fes: n.fes.map(m => m.filled('electron') ? 1 : 0).join(''), pq: n.pqSlot.holder ? n.pqSlot.holder.slots.map(s => s.occupied ? 1 : 0).join('') : '-' })),
       atp: atps.map(a => ({ adp: a.filled('ADP'), pi: a.filled('phosphate'), protons: a.protons })), rub: rubs.map(r => r.slots.map(s => s.name + (s.occupied ? '*' : '')).join(' ')),
       carriers: carriers.map(c => ({ name:c.name, mi:c.mi, at: [c.x|0, c.y|0, c.z|0], docked: c.dockedAt ? c.dockedAt.owner().name + '/' + c.dockedAt.name : null, hard: c.hard ? c.hard.owner().name + '/' + c.hard.name : null, soft: c.soft ? (c.soft.owner ? c.soft.owner().name + '/' + c.soft.name : 'point') : null, slots: c.slots.map(s => s.occupied ? 1 : 0).join(''), exiting: !!c.flags.exiting })),
-      excited: antenna.filter(m => m.excited).length, antenna: antenna.length, heldP: heldP.length, parked: parked.length, heldF: heldF.length, released: released.length, followed: followed ? followed.name : null,
+      excited: antenna.filter(m => m.excited).length, antenna: antenna.length, follow: { on: followOn, arm: followArm, at: followed ? followed.world([0,0,0]).map(v => +v.toFixed(0)) : null }, heldP: heldP.length, parked: parked.length, heldF: heldF.length, released: released.length, followed: followed ? followed.name : null,
       kick: (k, n) => { const u = (k >= units.length ? psis[k - units.length] : units[k]); if(!u) return 0; let c = 0; for(let i=0;i<(n||1);i++){ const g = u.ant[(Math.random()*u.ant.length)|0]; if(gValoExcite(g, 0, 0, 0)) c++; } return c; },
       sep: k => { const u = (k >= units.length ? psis[k - units.length] : units[k]); if(!u) return false; const rc = u.p680M || u.p700M; return tryExciting(rc, PHOTON_E, null); },
       follow: on => window.gValoFollow(on) });
