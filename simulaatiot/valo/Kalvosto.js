@@ -86,7 +86,7 @@
 
     /* ── the environment the base class asks for ── */
     V.env.frameWorld = wpt;
-    V.env.membraneY = () => get.MEMBRANE_Y();
+    V.env.membraneY = (x, z) => (get.memSurfY && x !== undefined) ? get.memSurfY(x, z) : get.MEMBRANE_Y();   // (x, z) -> the membrane's height under that point: the thylakoid cap's surface in the cell (13.9.2026)
 
     /* ── building the scene: a body in a model's frame, a slot's position, a target point ── */
     const cofMols = new Map();   // etc group index -> body (the overlay paints these)
@@ -203,14 +203,18 @@
       for(let k=0;k<12;k++){ const mesh = BABYLON.MeshBuilder.CreateSphere('valoO'+k, { segments:10, diameter:3.0 }, scene); mesh.material = oMat; mesh.isPickable = false; mesh.alwaysSelectAsActiveMesh = true; mesh.renderingGroupId = 1; mesh.setEnabled(false); oSprites.push({ mesh, body: null }); } }
     const FREE_KEY = { H2O:'w', O2:'o2', NADP:'nadp', ADP:'adp', ATP:'atp', phosphate:'pi', CO2:'co2' };
     const PARK = () => { const lo = get.gBoxLo(); return [lo.x - 150, lo.y - 400, lo.z - 150]; };
-    const parkedP = [];   // simulated protons that ride inside a quinol / an NADPH (out of sight)
+    const parkedP = []; let protonsHomed = false;   // (parkedP: no longer used for protons - a bound proton rides its slot in plain sight, 13.9.2026)
     V.env.instantiate = (name, opts) => { const at = opts.position || [0,0,0], slot = opts.from_slot;
       if(name === 'electron'){ const s = sprites.find(s => !s.body); if(!s) return null; const b = new MB('electron', { position: at }); b.kin = { kind:'sprite', s }; s.body = b; s.mesh.setEnabled(true); s.corona.setEnabled(true); return b; }
       if(name === 'O'){ const s = oSprites.find(s => !s.body); if(!s) return null; const b = new MB('O', { position: at }); b.kin = { kind:'sprite', s }; s.body = b; s.mesh.setEnabled(true); b.direction = V.normalize([Math.random()-0.5, -1, 0]); return b; }
       if(name === 'photon'){ const b = new MB('photon', { position: at }); b.kin = { kind:'static' }; b.set_physics_process(false); b.born = V.frame; return b; }
-      if(name === 'proton'){ const P = get.gValoProtons(); if(!P) return null; let i = slot && slot._proton != null ? slot._proton : -1; if(slot) slot._proton = null;
-        if(i < 0) i = parkedP.length ? parkedP.pop() : P.anyFree(0); if(i < 0) return null; P.grab(i); P.place(i, at[0], at[1], at[2]);
-        const b = new MB('proton', { position: at }); b.kin = { kind:'proton', i }; b.born = V.time; return b; }
+      if(name === 'proton'){ const P = get.gValoProtons(); if(!P) return null; let i = slot && slot._proton != null ? slot._proton : -1; if(slot) slot._proton = null; let from = at;
+        /* 13.9.2026 (owner: 'the protons seem to be popping in and out of existence'): a proton is never conjured up at a point - one released from a
+           slot is the one that rode there (it stays where the slot is), one the OEC makes from water is the nearest free lumen proton, taken
+           from where it is (within 150 units - none there, none made) */
+        if(i < 0){ i = P.nearestFree(at[0], at[1], at[2], -1, 150); if(i < 0) return null; const o = i*3; from = [P.pos[o], P.pos[o+1], P.pos[o+2]]; }
+        P.grab(i); P.place(i, from[0], from[1], from[2]);
+        const b = new MB('proton', { position: from }); b.kin = { kind:'proton', i }; b.born = V.time; return b; }
       if(FREE_KEY[name]){ const F = get.gValoFree(); if(!F) return null; const key = FREE_KEY[name]; let i = slot && slot._instance != null ? slot._instance : -1; if(slot) slot._instance = null;
         if(i < 0){ if(!F.count(key)) return null; i = F.nearest(key, at[0], at[1], at[2], 0); if(i < 0) return null; get.gMolHold()[F.base[key] + i] = 1; }
         F.setWorld(key, i, at[0], at[1], at[2]); const b = new MB(name, { position: at }); b.kin = { kind:'free', key, i }; return b; }
@@ -221,13 +225,14 @@
     V.env.consumed = (b, BindSite) => { const kin = b.kin; if(!kin) return;
       if(kin.kind === 'sh' || kin.kind === 'bnc'){ BindSite._dormant = kin; kin.dormantAt = BindSite; kin.body = null; if(kin.b){ kin.b.vx = kin.b.vy = 0; kin.b.dockedAt = BindSite; } b.kin = null; }
       else if(kin.kind === 'free'){ BindSite._instance = kin.i; BindSite._key = kin.key; b.kin = null; }
-      else if(kin.kind === 'proton'){ const P = get.gValoProtons(); const pk = PARK(); P.place(kin.i, pk[0] + Math.random()*40, pk[1], pk[2] + Math.random()*40); parkedP.push(kin.i); b.kin = null; } };
-    V.env.dispose = b => { const kin = b.kin; if(!kin) return; b.kin = null;
+      else if(kin.kind === 'proton'){ BindSite._proton = kin.i; b.kin = null; } };   // the proton RIDES the slot, in plain sight - a quinol carries its two protons to b6f (the per-frame placement below); it used to be parked out of sight
+    V.env.dispose = b => { if(b.BindSites){ const P = get.gValoProtons(); for(const sl of b.BindSites) if(sl._proton != null && P){ const q = b._pos; P.release(sl._proton, q[0], q[1], q[2], (Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20); sl._proton = null; } }   // its protons go free where it is
+      const kin = b.kin; if(!kin) return; b.kin = null;
       if(kin.kind === 'sprite'){ kin.s.body = null; kin.s.mesh.setEnabled(false); if(kin.s.corona) kin.s.corona.setEnabled(false); }
       else if(kin.kind === 'free'){ const F = get.gValoFree(); const p = b._pos; released.push({ key: kin.key, i: kin.i, x: p[0], y: p[1], z: p[2], vx: (Math.random()-0.5)*8, vy: 6, vz: (Math.random()-0.5)*8, t: 0, life: 20 }); }
       else if(kin.kind === 'proton'){ const P = get.gValoProtons(); const p = b._pos; const d = b.direction; P.release(kin.i, p[0], p[1], p[2], d[0]*9, d[1]*9, d[2]*9); }
       else if(kin.kind === 'sh' || kin.kind === 'bnc'){ kin.body = null; } };
-    V.env.slotEmptied = BindSite => { if(BindSite._instance != null){ parkedF.push({ key: BindSite._key, i: BindSite._instance, t: 0 }); BindSite._instance = null; } if(BindSite._proton != null){ parkedP.push(BindSite._proton); BindSite._proton = null; } };
+    V.env.slotEmptied = BindSite => { if(BindSite._instance != null){ parkedF.push({ key: BindSite._key, i: BindSite._instance, t: 0 }); BindSite._instance = null; } if(BindSite._proton != null){ const P = get.gValoProtons(), q = BindSite.global_position; if(P) P.release(BindSite._proton, q[0], q[1], q[2], (Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20); BindSite._proton = null; } };
     const released = [], parkedF = [];
 
     /* ── the cosmetics the base class calls ── */
@@ -284,9 +289,11 @@
         if(s.pulled_bodies.some(b => b.alive)) continue; if(s.nearby_area.get_overlapping_bodies().some(b => b.molecule_name === nm && !b.parent_is_BindSites)) continue;   // one such body already in the area (a slot of that type does not count)
         const t = (spawnT.get(s) || 0) + dt; if(t < 0.5){ spawnT.set(s, t); continue; } spawnT.set(s, 0);
         const p = s.global_position;
-        if(nm === 'proton'){ const side = p[1] > get.MEMBRANE_Y() ? 1 : -1; let i = P.nearestFree(p[0], p[1], p[2], side, s.nearby_area.radius), at;
-          if(i >= 0){ const o = i*3; at = [P.pos[o], P.pos[o+1], P.pos[o+2]]; } else { i = parkedP.length ? parkedP.pop() : P.anyFree(side); if(i < 0) continue; at = [p[0] + (Math.random()-0.5)*60, p[1] + side*40, p[2]]; }   // none in reach: one from far away appears at the edge of the area (the free protons keep clear of the complexes)
-          P.grab(i); P.place(i, at[0], at[1], at[2]); const b = new MB('proton', { position: at }); b.kin = { kind:'proton', i }; b.born = V.time; }
+        if(nm === 'proton'){ const side = p[1] > V.env.membraneY(p[0], p[2]) ? 1 : -1; let i = P.nearestFree(p[0], p[1], p[2], side, s.nearby_area.radius), far = false;
+          if(V.get_nodes_in_group('proton').some(b => b.alive && !b.parent_is_BindSites && (b.soft_target === s || b.hard_target === s))) continue;   // one is already on its way here
+          if(i < 0){ i = P.nearestFree(p[0], p[1], p[2], side, 1e9); far = true; } if(i < 0) continue;   // none in reach: the nearest on that side sets off from where it is (it used to appear at the edge of the area - 'popping in')
+          const o = i*3, at = [P.pos[o], P.pos[o+1], P.pos[o+2]];
+          P.grab(i); const b = new MB('proton', { position: at }); b.kin = { kind:'proton', i }; b.born = V.time; if(far) b.soft_target = s; }
         else { const key = FREE_KEY[nm]; if(!F.count(key)) continue; const i = F.nearest(key, p[0], p[1], p[2], 0); if(i < 0) continue; F.pos(key, i, _b); if(d3(p, _b) > Math.max(s.nearby_area.radius, 700)) continue;   // (the free pools keep clear of the complexes; the nearest free water can be 300-600 away)
           if(nm === 'NADP' && host.molecule_name === 'RuBisCO'){ if(!nadphReady.includes(i)) continue; }   // RuBisCO takes only a reduced NADP (one that left FNR)
           get.gMolHold()[F.base[key] + i] = 1; const b = new MB(nm, { position: [_b[0], _b[1], _b[2]] }); b.kin = { kind:'free', key, i }; if(nm === 'NADP' && nadphReady.includes(i)){ slotOf(b, 'electron').modulate = 'white'; slotOf(b, 'electron_2').modulate = 'white'; nadphReady.splice(nadphReady.indexOf(i), 1); } } }
@@ -304,7 +311,10 @@
       const p = b._pos; p[0] += dx; p[1] += dy; p[2] += dz; let n = null;
       if(b.molecule_name === 'O' || b.molecule_name === 'O2' || b.molecule_name === 'proton' || kin.kind === 'free'){ const lo = get.gPsuLo() || get.gBoxLo(), hi = get.gPsuHi() || get.gBoxHi();
         if(lo){ if(p[0] < lo.x){ p[0] = lo.x; n = [1,0,0]; } if(p[0] > hi.x){ p[0] = hi.x; n = [-1,0,0]; } if(p[1] < lo.y){ p[1] = lo.y; n = [0,1,0]; } if(p[1] > hi.y){ p[1] = hi.y; n = [0,-1,0]; } }
-        if(b.molecule_name === 'O' || b.molecule_name === 'O2'){ const top = get.MEMBRANE_Y() - get.gMemHalfT() - 2; if(p[1] > top){ p[1] = top; n = [0,-1,0]; } p[2] = get.gTasoZ(); } }
+        if(b.molecule_name === 'O' || b.molecule_name === 'O2'){ const top = V.env.membraneY(p[0], p[2]) - get.gMemHalfT() - 2; if(p[1] > top){ p[1] = top; n = [0,-1,0]; } p[2] = get.gTasoZ(); }
+        if(b.molecule_name === 'proton' && !b.get_meta('exiting', false)){ const my = V.env.membraneY(p[0], p[2]), hT = get.gMemHalfT();   // the membrane is a wall for a proton body too: it keeps to the side it is on
+          if(b.side == null) b.side = p[1] - dy > my ? 1 : -1;
+          if(b.side > 0 && p[1] < my + hT){ p[1] = my + hT; n = [0,1,0]; } else if(b.side < 0 && p[1] > my - hT){ p[1] = my - hT; n = [0,-1,0]; } } }
       if(kin.kind === 'free') get.gValoFree().setWorld(kin.key, kin.i, p[0], p[1], p[2]);
       if(kin.kind === 'proton') get.gValoProtons().place(kin.i, p[0], p[1], p[2]);
       return n ? { normal: n, collider: null } : null; };
@@ -319,6 +329,13 @@
       if(get.gizmoDragging && get.gizmoDragging()) wasDragging = true; else if(wasDragging){ wasDragging = false; V.Sensors.staticDirty = true; }   // a dragged model: the static hash is stale
       V.tick(dt); V.Sensors.update(dt); prof.sens = performance.now() - t0;
       tickSpawners(dt);
+      { const P = get.gValoProtons(); if(P){
+        if(!protonsHomed && get.gPsuLo()){ protonsHomed = true; const bx = P.box(), hT = get.gMemHalfT();   // 100 protons, 50 in the stroma and 50 in the lumen, inside the box (owner 13.9.2026)
+          for(let i=0;i<P.n;i++){ const side = i < P.n/2 ? 1 : -1; let x, y, z; for(let k=0;k<40;k++){ x = bx[0] + Math.random()*(bx[3]-bx[0]); z = bx[2] + Math.random()*(bx[5]-bx[2]); const my = P.memY(x, z);
+              y = side > 0 ? my + hT + 6 + Math.random()*Math.max(10, bx[4] - my - hT - 12) : bx[1] + Math.random()*Math.max(10, my - hT - 6 - bx[1]); if(y > bx[1] && y < bx[4]) break; }
+            P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283, ph = Math.acos(2*Math.random()-1); P.release(i, x, y, z, sp*Math.sin(ph)*Math.cos(th), sp*Math.cos(ph), sp*Math.sin(ph)*Math.sin(th)); }
+          P.homeFlush(); }
+        for(const sl of V.all){ if(sl.alive && sl.parent_is_BindSites && sl._proton != null){ const q = sl.global_position; P.place(sl._proton, q[0], q[1], q[2]); } } } }   // a bound proton rides its slot
       for(const b of V.all){ if(!b.alive || !b.kin) continue; for(const t of [b.hard_target, b.soft_target]){ if(t instanceof Point && b.distance_to(t) <= t.radius + b.body_radius) t.when_body_enters_me(b); } }   // the target areas fire
       for(const b of V.all.slice()){ if(!b.alive) continue;
         if(b.kin && b.kin.kind === 'static' && V.frame - b.born > 2){ b.queue_free(); continue; }   // a photon nobody took (the pigment was busy): gone as heat

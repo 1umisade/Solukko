@@ -3572,6 +3572,12 @@ async function run(){
       { label:'PGR5', at: along(CHL[2], 400, 300, 100) }, { label:'PGRL1', at: along(CHL[2], -300, -300, -200) } ];
     return { R, facetR, Yc, CEN, MEMS, ORG, NE, VAC, CHL, MIT, GOL, ER, surf, gOf, pnorm, inside, PLACE, THY: LAYOUT_THY };
   })();
+  /* THE MEMBRANE'S HEIGHT at (x, z) (13.9.2026, owner: 'plastoquinones flying outside the membrane - they should strictly be allowed to move
+     within the membrane'): in cell mode the unit's membrane is the thylakoid cap, a sphere, so everything that used to take the flat
+     plane y = MEMBRANE_Y as the membrane - the quinone shuttles' height, the plastocyanins' ceiling, the free protons' wall and channel,
+     which side of the membrane a point is on - takes the cap's surface under that point instead. The sheet scene keeps the plane. */
+  const memSurfY = (x, z) => { const T = SOLU_CELL && SOLU_CELL.THY; if(!T) return MEMBRANE_Y;
+    const dx = x - T.C.x, dz = z - T.C.z, r2 = T.R*T.R - dx*dx - dz*dz; return r2 > 0 ? T.C.y + Math.sqrt(r2) : MEMBRANE_Y; };
 
   /* Count atoms + bond-halves per element (for typed-array sizing) */
   const nEl = EL_LIST.length;
@@ -4058,7 +4064,7 @@ void main(void){
   if(holeR > 0.0 && dCam < holeR) discard;
   if(memCut.z * step(0.0, (vWP.z - memCut.x)*memCut.y) * (step(cutLo.x, vWP.x) * step(vWP.x, cutHi.x) * step(cutLo.y, vWP.y) * step(vWP.y, cutHi.y) * step(cutLo.z, vWP.z) * step(vWP.z, cutHi.z)) > 0.5) discard;
   if(boxKeep > 0.5 && all(greaterThanEqual(vWP, cutLo)) && all(lessThanEqual(vWP, cutHi))) discard;   // the unit's thylakoid inside the light-reaction box is always its lipids in full - no shell under them
-  if(viewBox > 0.5 && boxKeep < 0.5) discard;   // box-only view: no other membrane is drawn at all (a big envelope poking into the box drew as a hatched sliver) - the unit's own thylakoid stays whole, inside the box and beyond it
+  if(viewBox > 0.5) discard;   // box-only view: NO shell is drawn at all, not even the unit's thylakoid beyond the box (owner 13.9.2026: 'only render the boxed scene once the camera is inside') - a big envelope poking into the box drew as a hatched sliver. No semicolons in this comment, the preprocessor splits on them
   bool onFacet = facetOn > 0.5 && distance(vWP.xz, cen.xz) < facetR;
   if(onFacet && abs(vWP.x - footCen.x) < footHalf.x && abs(vWP.z - footCen.y) < footHalf.y) discard;
   if(clipOn > 0.5 && length((vWP - clipC) * clipInvS) > clipR - 6.0) discard;   // the thylakoid cap ends at the inner envelope
@@ -8078,7 +8084,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gSpawnPlaneZ = gcz;
     gSpawnBounds = {x0:gcx-iw, x1:gcx+iw, y0:gcy-ih, y1:gcy+ih};
 
-    const NW=Math.round(20000*FILL), NP=Math.round(20000*Math.min(2,FILL)), NCO2=Math.round(20000*FILL), NO2=Math.round(5000*FILL), NNADP=Math.round(500*FILL), NATP=1000, NADP2=1000, NPI=1000, rnd=x=>{ const v=Math.sin(x*127.1)*43758.5453; return v-Math.floor(v); };   // free-floating water filling the container box
+    const NW=Math.round(20000*FILL), NP=SOLU ? 100 : Math.round(20000*Math.min(2,FILL)) /* cell mode (owner 13.9.2026): exactly 100 protons, 50 in the stroma and 50 in the lumen, inside the box - placed by the light reactions (valo/Kalvosto.js) once the box is known */, NCO2=Math.round(20000*FILL), NO2=Math.round(5000*FILL), NNADP=Math.round(500*FILL), NATP=1000, NADP2=1000, NPI=1000, rnd=x=>{ const v=Math.sin(x*127.1)*43758.5453; return v-Math.floor(v); };   // free-floating water filling the container box
     const wc=new Float32Array(NW*3), wv=new Float32Array(NW*3), wh1=new Float32Array(NW*3), wh2=new Float32Array(NW*3);
     for(let i=0;i<NW;i++){
       // Seed each axis from its OWN stream (i*3+n, not i+n) — with i+n consecutive molecules share draws
@@ -8617,7 +8623,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     scene.onBeforeRenderObservable.add(()=>{
       { const ov = document.getElementById('overlay'); if(ov && !ov.classList.contains('gone')) return; }
       const dt = Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; if(!gFreeOn || dt <= 0) return;
-      const memY = MEMBRANE_Y, hT = gMemHalfT, top = memY + hT, bot = memY - hT;
+      const memY = MEMBRANE_Y, hT = gMemHalfT;
+      // the protons' box: the visible box (owner 13.9.2026: 'within the box') - the free-molecule box cut down to the unit box where that is tighter
+      const pbLx = gPsuLo ? Math.max(bLo.x, gPsuLo.x) : bLo.x, pbLy = gPsuLo ? Math.max(bLo.y, gPsuLo.y) : bLo.y, pbLz = gPsuLo ? Math.max(bLo.z, gPsuLo.z) : bLo.z;
+      const pbHx = gPsuHi ? Math.min(bHi.x, gPsuHi.x) : bHi.x, pbHy = gPsuHi ? Math.min(bHi.y, gPsuHi.y) : bHi.y, pbHz = gPsuHi ? Math.min(bHi.z, gPsuHi.z) : bHi.z;
       // the channel: the rotor axis at membrane height, carried by the ATP model's transform
       let axX = 0, axZ = 0; const chOn = gAtpMid >= 0 && hT > 0;
       if(chOn){ const m = gModelXform, o = gAtpMid*16;
@@ -8630,9 +8639,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const cpx = cam.position.x, cpy = cam.position.y, cpz = cam.position.z, nearR2 = (gMega + 60)*(gMega + 60);
       for(let i=0;i<P_N;i++){ const o=i*3; if(pHold[i]) continue;   // held by the light reactions: placed by them, its displacement already written
         let x=pPos[o]+pVel[o]*dt, y=pPos[o+1]+pVel[o+1]*dt, z=pPos[o+2]+pVel[o+2]*dt;
-        if(x<bLo.x){ x=bLo.x; pVel[o]=Math.abs(pVel[o]); } else if(x>bHi.x){ x=bHi.x; pVel[o]=-Math.abs(pVel[o]); }
-        if(y<bLo.y){ y=bLo.y; pVel[o+1]=Math.abs(pVel[o+1]); } else if(y>bHi.y){ y=bHi.y; pVel[o+1]=-Math.abs(pVel[o+1]); }
-        if(z<bLo.z){ z=bLo.z; pVel[o+2]=Math.abs(pVel[o+2]); } else if(z>bHi.z){ z=bHi.z; pVel[o+2]=-Math.abs(pVel[o+2]); }
+        if(x<pbLx){ x=pbLx; pVel[o]=Math.abs(pVel[o]); } else if(x>pbHx){ x=pbHx; pVel[o]=-Math.abs(pVel[o]); }
+        if(y<pbLy){ y=pbLy; pVel[o+1]=Math.abs(pVel[o+1]); } else if(y>pbHy){ y=pbHy; pVel[o+1]=-Math.abs(pVel[o+1]); }
+        if(z<pbLz){ z=pbLz; pVel[o+2]=Math.abs(pVel[o+2]); } else if(z>pbHz){ z=pbHz; pVel[o+2]=-Math.abs(pVel[o+2]); }
+        const my = memSurfY(x, z), top = my + hT, bot = my - hT;   // the wall is the membrane under this proton (the cap's surface in the cell)
+        if(chOn && SOLU && y < bot && !pIn[i]){   // a lumen proton drifts toward ATP synthase's channel (the 2D level's proton.gd: a proton under the membrane heads for ATP synthase), so the pumping does not empty the stroma for good
+          pVel[o] += (axX - x)*0.04*dt; pVel[o+2] += (axZ - z)*0.04*dt; pVel[o+1] += (bot - y)*0.04*dt;
+          const sp = Math.hypot(pVel[o], pVel[o+1], pVel[o+2]); if(sp > 45){ const k = 45/sp; pVel[o]*=k; pVel[o+1]*=k; pVel[o+2]*=k; } }
         let inCh = false;
         if(chOn){ const dxa=x-axX, dza=z-axZ; inCh = dxa*dxa+dza*dza < CH_R*CH_R; }
         if(hT > 0 && y > bot && y < top){                        // in the lipid layer
@@ -8664,10 +8677,15 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       grab: i => { pHold[i] = 1; pIn[i] = 0; const o=i*3; pVel[o]=pVel[o+1]=pVel[o+2]=0; },
       release: (i, x, y, z, vx, vy, vz) => { gValoProtons.place(i, x, y, z); const o=i*3; pVel[o]=vx; pVel[o+1]=vy; pVel[o+2]=vz; pHold[i] = 0; pIn[i] = 0; },
       /* the free proton nearest a point on one side of the membrane (+1 stroma, -1 lumen, 0 either), skipping held ones and those in the channel */
-      nearestFree: (x, y, z, side, maxD) => { let b=-1, bd=(maxD||1e9)*(maxD||1e9); const top = MEMBRANE_Y + gMemHalfT, bot = MEMBRANE_Y - gMemHalfT;
-        for(let i=0;i<P_N;i++){ if(pHold[i] || pIn[i]) continue; const o=i*3, py=pPos[o+1]; if(side > 0 && py < top) continue; if(side < 0 && py > bot) continue;
+      nearestFree: (x, y, z, side, maxD) => { let b=-1, bd=(maxD||1e9)*(maxD||1e9);
+        for(let i=0;i<P_N;i++){ if(pHold[i] || pIn[i]) continue; const o=i*3, py=pPos[o+1], my = memSurfY(pPos[o], pPos[o+2]); if(side > 0 && py < my + gMemHalfT) continue; if(side < 0 && py > my - gMemHalfT) continue;
           const d=(pPos[o]-x)*(pPos[o]-x)+(py-y)*(py-y)+(pPos[o+2]-z)*(pPos[o+2]-z); if(d < bd){ bd=d; b=i; } } return b; },
-      anyFree: side => { const top = MEMBRANE_Y + gMemHalfT, bot = MEMBRANE_Y - gMemHalfT; for(let k=0;k<64;k++){ const i=(Math.random()*P_N)|0; if(pHold[i]||pIn[i]) continue; const py=pPos[i*3+1]; if(side>0 && py<top) continue; if(side<0 && py>bot) continue; return i; } return -1; } };
+      anyFree: side => { for(let k=0;k<64;k++){ const i=(Math.random()*P_N)|0; if(pHold[i]||pIn[i]) continue; const py=pPos[i*3+1], my = memSurfY(pPos[i*3], pPos[i*3+2]); if(side>0 && py<my+gMemHalfT) continue; if(side<0 && py>my-gMemHalfT) continue; return i; } return -1; },
+      /* a new HOME for a proton (13.9.2026): its origin moves too, so the analytic path the GPU draws starts there - a proton whose origin
+         lies outside the light-reaction box is drawn at the wrapped copy nearest the camera, i.e. somewhere else (the 'popping in and out') */
+      home: (i, x, y, z) => { const o=i*3; pOrg[o]=x; pOrg[o+1]=y; pOrg[o+2]=z; FREE_P.c[o]=x; FREE_P.c[o+1]=y; FREE_P.c[o+2]=z; gValoProtons.place(i, x, y, z); },
+      homeFlush: () => { const og = new Float32Array(pOrg); for(const nm of ['pH','pN','pG','pHF','pNF','pGF']){ const m=scene.getMeshByName(nm); if(m) m.thinInstanceSetBuffer('wOrig', og, 3, true); } },
+      memY: memSurfY, box: () => gPsuLo ? [Math.max(bLo.x, gPsuLo.x), Math.max(bLo.y, gPsuLo.y), Math.max(bLo.z, gPsuLo.z), Math.min(bHi.x, gPsuHi.x), Math.min(bHi.y, gPsuHi.y), Math.min(bHi.z, gPsuHi.z)] : [bLo.x, bLo.y, bLo.z, bHi.x, bHi.y, bHi.z] };
     let gCollideOn = true;
     let gSimActive = 0;   // how many molecules were simulated this frame (shown in the dev readout)
     let gSimMs = 0;       // smoothed cost of the collision pass, so a regression shows up in the readout
@@ -9322,7 +9340,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     if(SOLU && gPsuLo){ gCutLo.copyFrom(gPsuLo); gCutHi.copyFrom(gPsuHi);
       if(gBoxLo){ gCutLo.maximizeInPlace(gBoxLo); gCutHi.minimizeInPlace(gBoxHi); } }   // ...and only inside the box you can SEE (owner 13.9.2026: 'the membrane half is cut off noticeably away from the box'): the unit box reaches out to the Kalvostoon landing in depth, the drawn box does not
     else { gCutLo.set(-1e9, -1e9, -1e9); gCutHi.set(1e9, 1e9, 1e9); }
-    gViewBox = (SOLU && gPsuLo && cp.x >= gPsuLo.x && cp.x <= gPsuHi.x && cp.y >= gPsuLo.y && cp.y <= gPsuHi.y && cp.z >= gPsuLo.z && cp.z <= gPsuHi.z) ? 1 : 0;   // inside the light-reaction box NOTHING outside it is drawn (owner 13.9.2026)   // only inside the light-reaction box
+    gViewBox = (SOLU && gPsuLo && ((cp.x >= gPsuLo.x && cp.x <= gPsuHi.x && cp.y >= gPsuLo.y && cp.y <= gPsuHi.y && cp.z >= gPsuLo.z && cp.z <= gPsuHi.z)
+                                  || (gBoxLo && cp.x >= gBoxLo.x && cp.x <= gBoxHi.x && cp.y >= gBoxLo.y && cp.y <= gBoxHi.y && cp.z >= gBoxLo.z && cp.z <= gBoxHi.z))) ? 1 : 0;   // (owner 13.9.2026: 'once the camera is inside the bounding box hide the rest of the cell completely' - the box you see is the free-molecule box)   // inside the light-reaction box NOTHING outside it is drawn (owner 13.9.2026)   // only inside the light-reaction box
     /* MEGACHEAP PROTEINS. Decided once per model, not per cell, so a complex is never half hull and
        half atoms. Once it is too small on screen its atoms stop drawing entirely and its hull is filled in
        the model's own colour instead - the third tier for proteins, matching the slab for the membrane.
@@ -10213,8 +10232,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             if(sh.pq) hy = 0;
             const hl = Math.hypot(hx,hy,hz)||1; hx/=hl; hy/=hl; hz/=hl;
             let x = sh.cur[0]+hx*Math.min(step, dSite), y = sh.cur[1]+hy*Math.min(step, dSite), z = sh.cur[2]+hz*Math.min(step, dSite);
-            if(sh.pq){ const ty = haveT ? _tw[1] : MEMBRANE_Y; y = ty + (sh.cur[1]-ty)*Math.max(0, 1-dt*0.6); }
-            else { const cap = MEMBRANE_Y - gMemHalfT - sh.R; if(y > cap && dSite > 40){ y = cap; hy = -Math.abs(hy); } if(gBoxLo && y < gBoxLo.y + sh.R){ y = gBoxLo.y + sh.R; hy = Math.abs(hy); } }
+            if(sh.pq){ const my = memSurfY(x, z); let ty = my;   // a quinone lives IN the membrane: its height is the membrane's under it (the cap's surface), eased onto the pocket's over the last 80 units
+              if(haveT){ const k = Math.max(0, 1 - dSite/80); ty = my + (_tw[1] - my)*k; }
+              y = ty + (sh.cur[1]-ty)*Math.max(0, 1-dt*3); }
+            else { const cap = memSurfY(x, z) - gMemHalfT - sh.R; if(y > cap && dSite > 40){ y = cap; hy = -Math.abs(hy); } if(gBoxLo && y < gBoxLo.y + sh.R){ y = gBoxLo.y + sh.R; hy = Math.abs(hy); } }
             let onShell = false;   // set below when a complex's shell pushes this frame - then the plane easing waits, so the carrier can slide round the shell
             if(dSite > 60 && !sh.onShell){ z = gTasoZ + (z - gTasoZ)*Math.max(0, 1 - dt*2); }   // on the particle plane on the way, off it only into the pocket (a site can sit 30 units off the plane). The heading keeps its z part (13.9.2026: with hy = 0 and hz = 0 a quinone's heading was one-dimensional and could never turn round)
             if(gBoxLo){ if(x < gBoxLo.x+sh.R){ x = gBoxLo.x+sh.R; hx = Math.abs(hx); } else if(x > gBoxHi.x-sh.R){ x = gBoxHi.x-sh.R; hx = -Math.abs(hx); }
@@ -10324,7 +10345,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      protons and photons, runs the clock and the visuals). Loaded in <head>; this hands the level the sheet. */
   if(window.VALO && VALO.Kalvosto){
     VALO.Kalvosto.start({ scene, engine, cam, mols, mInfo, etcGroups, modelOf, gModelXform, gModelOff, gHulls, gShuttles, gBouncers, insideShell, glassA, etcOverlay,
-      get: { gSpeed: () => gSpeed, gWaveT: () => gWaveT, gLantern: () => gLantern, gBoxLo: () => gBoxLo, gBoxHi: () => gBoxHi, gPsuLo: () => gPsuLo, gPsuHi: () => gPsuHi, MEMBRANE_Y: () => MEMBRANE_Y, gMemHalfT: () => gMemHalfT, gTasoZ: () => gTasoZ,
+      get: { gSpeed: () => gSpeed, gWaveT: () => gWaveT, gLantern: () => gLantern, gBoxLo: () => gBoxLo, gBoxHi: () => gBoxHi, gPsuLo: () => gPsuLo, gPsuHi: () => gPsuHi, MEMBRANE_Y: () => MEMBRANE_Y, memSurfY: memSurfY, gMemHalfT: () => gMemHalfT, gTasoZ: () => gTasoZ,
              gProtonPasses: () => gProtonPasses, gizmoDragging: () => gizmoDragging, gValoFree: () => gValoFree, gValoProtons: () => gValoProtons, gMolHold: () => gMolHold, gValoExcite: () => gValoExcite },
       set: { gValoExcite: f => { gValoExcite = f; }, gValoShuttle: o => { gValoShuttle = o; } } }); }
   /* ── RTS floor ── flatten every model onto ONE plane (perpendicular to the membrane, at the models'
