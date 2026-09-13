@@ -126,7 +126,7 @@ const yield_ = () => new Promise(r => setTimeout(r, 0));
    so the viewer may mutate them). Anything not on the list still goes through the same functions on demand. */
 const PRE_FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_synthase.mol2','NDH-1.mol2',
   'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2',
-  'Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];   // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - are out, owner 13.9.2026)
+  'chlorophyll.mol2','quinone.mol2','nadph.mol2'];   // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - and the two epoxidases are out, owner 13.9.2026)
 const gPreText = new Map(), gPreParsed = new Map();
 const preText = fn => { let p = gPreText.get(fn); if(!p){ p = fetch('./' + fn).then(r => r.ok ? r.text() : null).catch(() => null); gPreText.set(fn, p); } return p; };
 const preParsed = fn => { let p = gPreParsed.get(fn); if(!p){ p = preText(fn).then(t => t === null ? null : parseMol2(t)); gPreParsed.set(fn, p); } return p; };

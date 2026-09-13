@@ -530,7 +530,7 @@ const yield_ = () => new Promise(r => setTimeout(r, 0));
    so the viewer may mutate them). Anything not on the list still goes through the same functions on demand. */
 const PRE_FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_synthase.mol2','NDH-1.mol2',
   'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2',
-  'Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];   // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - are out, owner 13.9.2026)
+  'chlorophyll.mol2','quinone.mol2','nadph.mol2'];   // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - and the two epoxidases are out, owner 13.9.2026)
 const gPreText = new Map(), gPreParsed = new Map();
 const preText = fn => { let p = gPreText.get(fn); if(!p){ p = fetch('./' + fn).then(r => r.ok ? r.text() : null).catch(() => null); gPreText.set(fn, p); } return p; };
 const preParsed = fn => { let p = gPreParsed.get(fn); if(!p){ p = preText(fn).then(t => t === null ? null : parseMol2(t)); gPreParsed.set(fn, p); } return p; };
@@ -3351,19 +3351,17 @@ async function run(){
     {match:'6l7o',   x:97,   y:35,   z:30,   rot:[51,-159,70],   label:'NDH-1'},
     {match:'6vm1',   x:760,  y:84,   z:0,    rot:[-69,102,33],   label:'ATP synthase'},
     {match:'1ag6',   x:-10,  y:-190, z:0,    label:'Plastocyanin'},
-    {match:'q39249', x:-600, y:-190, z:10,   label:'Violaxanthin de-epoxidase'},
     {match:'1a70',   x:230,  y:250,  z:20,   label:'Ferredoxin'},
     {match:'1gjr',   x:400,  y:290,  z:80,   label:'FNR'},
     {match:'1rcx',   x:600,  y:380,  z:-80,  label:'RuBisCO'},
     // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - are out: owner 13.9.2026 'remove all the non ETC proteins')
-    {match:'q9fgc7', x:-640, y:230,  z:0,    label:'Zeaxanthin epoxidase'},
     {match:'chlorophyll', x:-560, y:150, z:130, label:'Chlorophyll'},   // one CLA plucked from PSII → its own file
     {match:'plastoquinone', x:-495, y:150, z:135, label:'Plastoquinone'},   // one PL9 plucked from cytb6f → its own file, beside the lone chlorophyll
     {match:'nadph', x:-425, y:150, z:135, label:'NADPH'},   // one NADP+ plucked from FNR → its own file, beside the chlorophyll + quinone (coloured pink)
   ];
   const FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_synthase.mol2','NDH-1.mol2',
     'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2',
-   'Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];
+   'chlorophyll.mol2','quinone.mol2','nadph.mol2'];
   setLbl('Haetaan tylakoidimalleja…');
   const mols = [];
   for(let i=0;i<FILES.length;i++){ const fn=FILES[i];
@@ -3421,7 +3419,7 @@ async function run(){
        with them the second row put the heap at 3.3 GB steady and the owner's browser died 'Out of
        Memory' during the build (2026-09-06). The lighter ten are, which still doubles the membrane's
        b6f and ATP synthase and every loose protein at a fraction of the cost. */
-    { const DUP = ['Cytochrome b6f','ATP synthase','Violaxanthin de-epoxidase','Ferredoxin','FNR','Zeaxanthin epoxidase'];
+    { const DUP = ['Cytochrome b6f','ATP synthase','Ferredoxin','FNR'];
       /* MEMORY. Every atom instance carries CPU-side buffers (matrices, colours, orbital lobes, nucleons),
          so a full extra set of complexes costs on the order of a gigabyte of JS heap. Two extra rows put
          the heap at 4.6 GB against Chrome's 4 GB limit and the renderer died. DUP_ROWS is therefore what
@@ -8064,6 +8062,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // or the molecule strip), so the medium fills the space the membrane defines. (2026-09-06)
     if(lipids.length && gMemFootX < 1e8){ x0=Math.min(x0,bilayerCen.x-gMemFootX); x1=Math.max(x1,bilayerCen.x+gMemFootX);
       z0=Math.min(z0,bilayerCen.z-gMemFootZ); z1=Math.max(z1,bilayerCen.z+gMemFootZ); }
+    { const cx=(x0+x1)/2, hw=(x1-x0)/2; x0=cx-2*hw; x1=cx+2*hw; }   // twice as long ALONG the line of complexes (x), both ways - not up, not in depth (owner 13.9.2026: 'extend it in both directions of the line of proteins')
     const pad=25; x0-=pad;x1+=pad;y0-=pad;y1+=pad;z0-=pad;z1+=pad;
     /* TWICE THE REACH (owner 13.9.2026: 'render the free floaters at twice the distance'). A free molecule is drawn once, at
        the copy of the wrapped box nearest the camera, so it can only ever be seen to half the box's thinnest side - that is
@@ -10126,6 +10125,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           lx = Math.min(lx, POSE.pos.x - MZ - M); hx = Math.max(hx, POSE.pos.x + MZ - M); ly = Math.min(ly, POSE.pos.y - MZ - MY); hy = Math.max(hy, POSE.pos.y + MZ - MY); }
         lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
+      { const cx=(lx+hx)/2, hw=(hx-lx)/2; lx=cx-2*hw; hx=cx+2*hw; }   // twice as long along the line of complexes (x), both ways (owner 13.9.2026)
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
       if(!gDevPsuBox){ const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {size:1}, scene);
         const bm=new BABYLON.StandardMaterial('devPsuBoxMat', scene); bm.wireframe=true; bm.emissiveColor=new BABYLON.Color3(0.35,0.85,0.75); bm.disableLighting=true;
