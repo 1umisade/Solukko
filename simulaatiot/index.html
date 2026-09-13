@@ -3653,6 +3653,33 @@ void main(void){
   float k = (fil * flick + core + halo) * fade + headGlow;
   gl_FragColor = vec4(c * k, 1.0);
 }`;
+/* PROTEIN HULL SLAB (13.9.2026, owner: 'why are the slabs so flat, no depth shading?'). The far tier of a complex used to be
+   a StandardMaterial with lighting off and a flat emissive colour - a cut-out. Now it is lit like the atoms it stands in for:
+   the same key light (keyDir / keyFloor / keyCol from the Valaistus sliders) on the hull's smooth vertex normal, a wrap
+   darkening toward the limb so it reads round, an ink band at the silhouette for the toon pass, and the same front-to-back
+   depth shading as the atoms. */
+BABYLON.Effect.ShadersStore['hullVertexShader'] = `
+precision highp float;
+attribute vec3 position; attribute vec3 normal;
+uniform mat4 world; uniform mat4 view; uniform mat4 projection;
+varying vec3 vN; varying vec3 vWP; varying vec3 vV;
+void main(void){ vec4 wp = world * vec4(position, 1.0); vWP = wp.xyz; vN = normalize(mat3(world) * normal);
+  vec4 vp = view * wp; vV = vp.xyz; gl_Position = projection * vp; }`;
+BABYLON.Effect.ShadersStore['hullPixelShader'] = `
+precision highp float;
+uniform vec3 hcol; uniform vec3 keyDir; uniform vec3 keyCol; uniform float keyFloor; uniform vec3 camPos;
+uniform float focalD; uniform float depthK; uniform float depthLo; uniform float startOff; uniform float spread;
+varying vec3 vN; varying vec3 vWP; varying vec3 vV;
+void main(void){
+  vec3 n = normalize(vN); if(!gl_FrontFacing) n = -n;
+  float d = pow(max(dot(n, keyDir), 0.0), 1.1);
+  vec3 k = (dot(keyDir, keyDir) < 0.5) ? vec3(1.0) : vec3(keyFloor) + (1.0 - keyFloor) * d * keyCol;   // the atoms' key light, on the hull's normal
+  float f = 1.0 - max(dot(n, normalize(camPos - vWP)), 0.0);   // 0 facing the camera .. 1 at the silhouette
+  vec3 col = hcol * k * (1.0 - 0.28 * smoothstep(0.25, 0.9, f));   // a wrap darkening toward the limb, like the packed spheres' own shade
+  col = mix(col, hcol * 0.40, 0.9 * smoothstep(0.62, 0.92, f));      // an ink band at the silhouette - the atoms' 40 percent rim
+  float dt = clamp((length(vV) - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);   // front-to-back darkening, exactly as the atoms
+  col *= mix(1.0, depthLo, dt * depthK);
+  gl_FragColor = vec4(col, 1.0); }`;
 BABYLON.Effect.ShadersStore['slabVertexShader'] = `
 precision highp float;
 attribute vec3 position;
@@ -6054,6 +6081,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     mat.onBindObservable.add(() => { const eff = mat.getEffect(); if(eff) eff.setFloat('texOn', t.ok); });
   };
   const gHulls = [];
+  let gHullMat = null; const gHullWhite = new BABYLON.Color3(0.7, 0.7, 0.7);   // one lit material for every hull slab (see the hull shader), the colour per mesh in metadata.hcol
   const gProtSlab = [];   // per model: true = far enough that its atoms are replaced by the hull
   const SH_LAT = 32, SH_LON = 64;   // ~5.6 deg bearings
   {
@@ -6158,9 +6186,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
          surface detail flattened out - but at that distance the complex is a coloured blob anyway. It
          costs nothing to build because the collision shell already had to compute this exact shape. */
       const slab = mesh.clone('hullSlab'+mi);
-      const sMat = new BABYLON.StandardMaterial('hullSlabMat'+mi, scene);
-      sMat.diffuseColor = new BABYLON.Color3(0,0,0); sMat.disableLighting = true; sMat.backFaceCulling = true;
-      slab.material = sMat; slab.isPickable = false; slab.alwaysSelectAsActiveMesh = true; slab.setEnabled(false);
+      if(!gHullMat){ gHullMat = new BABYLON.ShaderMaterial('hullSlabMat', scene, 'hull', { attributes:['position','normal'],
+          uniforms:['world','view','projection','hcol','keyDir','keyCol','keyFloor','camPos','focalD','depthK','depthLo','startOff','spread'] });
+        gHullMat.backFaceCulling = true;
+        gHullMat.onBindObservable.add(m => { const eff = gHullMat.getEffect(); if(!eff) return; const hc = (m && m.metadata && m.metadata.hcol) || gHullWhite;
+          eff.setColor3('hcol', hc); eff.setVector3('keyDir', gKeyDir); eff.setColor3('keyCol', gKeyCol); eff.setFloat('keyFloor', gKeyFloor); eff.setVector3('camPos', cam.position);
+          eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); }); }
+      slab.material = gHullMat; slab.metadata = { hcol: new BABYLON.Color3(0.7, 0.7, 0.7) }; const sMat = { emissiveColor: slab.metadata.hcol };   // sMat.emissiveColor keeps its old name: the tier swap below sets the colour through it
+      slab.isPickable = false; slab.alwaysSelectAsActiveMesh = true; slab.setEnabled(false);
       gProtSlab[mi] = false;
       gHulls.push({ mesh, slab, sMat, mi, c:new BABYLON.Vector3(cx,cy,cz), D, maxR });
     }
