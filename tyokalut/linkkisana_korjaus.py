@@ -26,6 +26,10 @@ POISTA_KORTIT = ['(3.107) Mikä on kromosomi?',
                  '(22.012) Miten nimetään metallin yhdiste, kun metallilla on useita hapetuslukuja?']   # elektronoitumisaste (omistaja 13.9.2026): 1.518 on omistajan 1.188-kortin kaksoiskappale, 22.128 nimetty uudelleen   # massakierroksen kaksoiskortit omistajan korteille   # ulkoelektroni on pintaelektroni-kortin linkkisana   # nimetty pintaelektroniksi (omistaja 13.9.2026)   # biotek L2:n kaksoiskortti omistajan L1-kortille, nimetty uudelleen nukleiinihapporokotteeksi 12.9.2026
 # luentopakan oma Esittely (vain kurssipakalla saa olla, kurssit/CLAUDE.md §6): tuli takaisin vanhasta Vesikatkaisu-korjaus.apkg:sta
 POISTA_ESITTELY_PAKAT = ['Luento 2 - Vesi']
+# SIIVOTTU: linkkisiivous (omistaja 13.9.2026: 'monia kortteja linkkaa vaarin'): kysymys -> koko linkkisanalista. Sanastokierrokset
+# olivat antaneet yleissanoja (nopea, valo, ryhma, atomi...) loyhasti liittyville korteille; nyt jokainen sellainen sana sai oman
+# kortin (sanasto_massa) ja vanhoilta korteilta muodot poistetaan. Lista tehdaan skriptilla, jota ei ajeta uudestaan - json on totuus.
+SIIVOTTU = json.load(io.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'linkkisanat_siivottu.json'), encoding='utf-8'))
 
 if __name__ == '__main__':
     work = tempfile.mkdtemp()
@@ -60,10 +64,15 @@ if __name__ == '__main__':
         if any(q.startswith(k) for k, _ in POISTOT + LISAYKSET): paketti.append(nid)
         pois = [s for s in sanat if any(q.startswith(k) and s.lower().startswith(alku) for k, alku in POISTOT)]
         lisaa = [s for k, ss in LISAYKSET if q.startswith(k) for s in ss if s not in sanat]
+        uusi = ', '.join([s for s in sanat if s not in pois] + lisaa)
+        qn = re.sub(r'^\(\s*[\d.,]+\s*\)\s*', '', q)
+        if qn in SIIVOTTU:   # linkkisiivous: koko lista asetetaan (vanhojen korttien vieraat muodot pois, lemman omalle kortille lisatyt mukaan)
+            uusi = SIIVOTTU[qn]
+            if uusi.lower() != f[li].strip().lower(): pois = pois or ['(siivous)']
         if not pois and not lisaa: continue
-        f[li] = ', '.join([s for s in sanat if s not in pois] + lisaa)
+        f[li] = uusi
         cur.execute("update notes set flds=?, mod=?, usn=-1 where id=?", (SEP.join(f), now, nid)); muutetut.append(nid)
-        print('  %s: poistettu %s; lisatty %s' % (q[:40], ', '.join(pois) or '-', ', '.join(lisaa) or '-'))
+        if pois != ['(siivous)']: print('  %s: poistettu %s; lisatty %s' % (q[:40], ', '.join(pois) or '-', ', '.join(lisaa) or '-'))
     con.commit(); con.close()
     if muutetut:
         tmp = SRC + '.uusi'

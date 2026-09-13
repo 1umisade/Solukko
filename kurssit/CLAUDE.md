@@ -82,6 +82,19 @@ Eli yksikön **nominatiivi, genetiivi, partitiivi, inessiivi, elatiivi, illatiiv
   (`kovalenttinen sidos, kovalenttisen sidoksen, kovalenttista sidosta…`).
 - Synonyymit mukaan, kukin omine muotoineen.
 - **Vain termikorteissa** — kysymyskorteissa `linkkisanat` on tyhjä.
+- **Vain hakusanan ja sen synonyymien muotoja.** Kortille ei saa panna sanoja, jotka vain *liittyvät* aiheeseen
+  (`nopea` ei kuulu kortille "hyvä diagnostinen testi", `valo` ei kortille "signaali"): sivusto linkittää sanan
+  siihen korttiin, ja lukija päätyy väärään määritelmään. Jos sana tarvitsee määritelmän, se saa oman kortin
+  (omistaja 13.9.2026: "monia kortteja linkkaa väärin"). Siivous: `tyokalut/linkkisanat_siivottu.json`.
+
+---
+
+## 4b. Määritelmä on kokonainen lause
+
+Suppea vastaus kirjoitetaan selkokielellä ja **kokonaisina lauseina**, ei katkelmina: "Löysä tarkoittaa, että jokin
+ei ole tiukka. Esimerkiksi löysä kromatiini." — ei "Ei tiukka: löysä sitoutuminen, löysä kromatiini." (omistaja
+13.9.2026: "jotkut tekstit korteissa ovat hassuja. Kirjoita selkokielellä ja kokonaisilla lauseilla"). Termikortin
+ensimmäinen lause alkaa yleensä hakusanalla: "X on…" tai "X tarkoittaa, että…".
 
 ---
 

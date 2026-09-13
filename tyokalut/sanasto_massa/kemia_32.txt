@@ -4,66 +4,73 @@ broglie	2	Louis de Broglie, joka esitti 1924, että hiukkasilla on aallonpituus 
 d-elektroni	1	d-orbitaalilla oleva elektroni, siirtymämetallien ominaisuuksien perusta.
 d-kuori	1	d-orbitaalien joukko tietyllä pääkvanttiluvulla, kuten 3d.
 d-orbitaali	2	Sivukvanttiluvun l = 2 orbitaali, viisi kappaletta, nelilehtinen muoto. Täyttyvät siirtymämetalleilla.	Mikä on d-orbitaali?
-edestakainen	1	Molempiin suuntiin kulkeva: seisova aalto heijastuu edestakaisin.
+edestakainen	1	Edestakainen tarkoittaa, että liike kulkee molempiin suuntiin. Seisova aalto heijastuu edestakaisin.
 einstein	2	Albert Einstein, joka selitti valosähköisen ilmiön fotoneilla 1905 ja esitti E = mc².	Kuka oli Einstein?
-emittoitunut	1	Säteillyt, lähetetty: emittoitunut fotoni.
-energeettisesti	1	Energian kannalta: energeettisesti edullinen tila.
-epätarkka	1	Ei täsmällinen: paikan ja liikemäärän epätarkkuus.
+emittoitunut	1	Emittoitunut tarkoittaa säteiltyä. Esimerkiksi emittoitunut fotoni.
+energeettisesti	1	Energeettisesti tarkoittaa energian kannalta. Esimerkiksi energeettisesti edullinen tila.
+epätarkka	1	Epätarkka tarkoittaa, että jokin ei ole täsmällinen. Elektronin paikka ja liikemäärä ovat epätarkkoja.
 f-orbitaali	2	Sivukvanttiluvun l = 3 orbitaali, seitsemän kappaletta. Täyttyvät lantanoideilla ja aktinoideilla.	Mikä on f-orbitaali?
 hehkulamppu	1	Kuuman langan valonlähde, jonka spektri on jatkuva.
-heijastua	1	Palautua pinnasta: aalto heijastuu kiinteästä päästä.
+heijastua	1	Heijastua tarkoittaa, että aalto palautuu pinnasta. Aalto heijastuu kiinteästä päästä.
 heisenberg	2	Werner Heisenberg, joka muotoili epätarkkuusperiaatteen 1927.	Kuka oli Heisenberg?
 interferoida	1	Yhdistyä aaltoina vahvistaen tai sammuttaen toisiaan.
-kaksilehtinen	1	Kahdesta lohkosta koostuva: p-orbitaalin muoto.
+kaksilehtinen	1	Kaksilehtinen tarkoittaa, että muodossa on kaksi lohkoa. p-orbitaali on kaksilehtinen.
 kulmaosa	1	Aaltofunktion kulmista riippuva osa, joka määrää orbitaalin muodon.
 kuu	1	Maan kiertolainen, jonka rata on klassisen mekaniikan esimerkki.
 kvantittuneisuus	1	Suureen esiintyminen vain erillisinä arvoina.
 käsipaino	1	Nostettava paino, jonka aaltoluonne on merkityksetön.
 liikemäärä	2	Massan ja nopeuden tulo p = mv. Fotonilla p = h/λ.	Mikä on liikemäärä?
-luonne	1	Olemus: valon aaltoluonne ja hiukkasluonne.
+luonne	1	Luonne on asian olemus. Valolla on aaltoluonne ja hiukkasluonne.
 lyhytaaltoinen	1	Lyhyen aallonpituuden säteily, kuten UV ja röntgen, suurienergistä.
-matalaenerginen	1	Vähän energiaa sisältävä: matalaenerginen tila.
+matalaenerginen	1	Matalaenerginen tarkoittaa, että energiaa on vähän. Esimerkiksi matalaenerginen tila.
 materia	1	Aine, kaikki, millä on massa.
-miehitys	1	Elektronien sijoittuminen orbitaaleille: orbitaalin miehitys.
-mielekäs	1	Fysikaalisesti järkevä: aaltofunktion mielekäs ratkaisu.
-mielivaltainen	1	Mikä tahansa ilman rajoitusta: energia ei voi olla mielivaltainen.
+miehitys	1	Miehitys tarkoittaa, miten elektronit sijoittuvat orbitaaleille.
+mielekäs	1	Mielekäs tarkoittaa fysikaalisesti järkevää. Aaltofunktiolla on vain mielekkäät ratkaisut.
+mielivaltainen	1	Mielivaltainen tarkoittaa mitä tahansa ilman rajoitusta. Energia ei voi olla mielivaltainen.
 monielektroninen	1	Useita elektroneja sisältävä atomi.
 nanosekunti	1	Sekunnin miljardisosa, virittyneen tilan tyypillinen elinaika.
-nelilehtinen	1	Neljästä lohkosta koostuva: d-orbitaalin muoto.
+nelilehtinen	1	Nelilehtinen tarkoittaa, että muodossa on neljä lohkoa. d-orbitaali on nelilehtinen.
 niels	1	Niels Bohrin etunimi.
-oletus	1	Lähtökohdaksi otettu väite: Bohrin oletus ympyräradoista.
-outo	1	Arkijärjelle vieras: kvanttimekaniikan oudot piirteet.
-paketti	1	Erillinen määrä: energia tulee paketteina, kvantteina.
-perättäinen	1	Peräkkäinen: aallon perättäiset huiput.
+oletus	1	Oletus on väite, joka otetaan lähtökohdaksi. Bohrin oletus oli ympyräradat.
+outo	1	Outo tarkoittaa arkijärjelle vierasta. Kvanttimekaniikassa on outoja piirteitä.
+paketti	1	Paketti on erillinen määrä. Energia tulee paketteina eli kvantteina.
+perättäinen	1	Perättäinen tarkoittaa peräkkäistä. Esimerkiksi aallon perättäiset huiput.
 pilvi	1	Elektronipilvi, todennäköisyysjakauma.
 pitkäaaltoinen	1	Pitkän aallonpituuden säteily, kuten radioaallot, pienienergistä.
 planck	2	Max Planck, joka esitti 1900 energian kvantittumisen ja Planckin vakion.	Kuka oli Planck?
 p-orbitaali	2	Sivukvanttiluvun l = 1 orbitaali, kolme kappaletta x-, y- ja z-akselin suuntaan, kaksilehtinen.	Mikä on p-orbitaali?
 prisma	1	Lasikappale, joka hajottaa valon spektriksi.
-pudota	1	Siirtyä alemmalle tasolle: elektroni putoaa ja emittoi fotonin.
+pudota	1	Pudota tarkoittaa, että jokin siirtyy alemmalle tasolle. Elektroni putoaa ja emittoi fotonin.
 rataimpulssimomentti	1	Elektronin kiertoliikkeen impulssimomentti, jonka sivukvanttiluku määrää.
 sateenkaari	1	Auringonvalon jatkuva spektri vesipisaroissa taittuneena.
-samansuuntainen	1	Samaan suuntaan: samansuuntaiset spinit Hundin säännössä.
-sammua	1	Kumoutua: väärän aallonpituuden aallot sammuvat interferenssissä.
+samansuuntainen	1	Samansuuntainen tarkoittaa, että asiat osoittavat samaan suuntaan. Hundin säännössä spinit ovat samansuuntaiset.
+sammua	1	Sammua tarkoittaa, että aallot kumoavat toisensa. Väärän aallonpituuden aallot sammuvat interferenssissä.
 schrödinger	2	Erwin Schrödinger, joka esitti 1926 aaltofunktion yhtälön, kvanttimekaniikan perustan.	Kuka oli Schrödinger?
 s-elektroni	1	s-orbitaalilla oleva elektroni.
-sijoittua	1	Asettua paikalleen: elektronit sijoittuvat orbitaaleille.
+sijoittua	1	Sijoittua tarkoittaa, että jokin asettuu paikalleen. Elektronit sijoittuvat orbitaaleille.
 sisäkuori	1	Ytimen lähellä oleva täysi elektronikuori.
 skandium	1	Alkuaine Sc, ensimmäinen siirtymämetalli, jolla 3d-orbitaali täyttyy.	Mikä on skandium?
 solmupinta	2	Pinta, jolla aaltofunktion arvo on nolla ja elektronin todennäköisyys nolla.	Mikä on solmupinta?
-sopimus	1	Sovittu käytäntö: orbitaalin raja on sopimus 90 % todennäköisyydestä.
+sopimus	1	Sopimus on sovittu käytäntö. Orbitaalin raja on sopimus 90 prosentin todennäköisyydestä.
 s-orbitaali	2	Sivukvanttiluvun l = 0 orbitaali, pallomainen, yksi jokaisella kuorella.	Mikä on s-orbitaali?
 strontium	1	Alkuaine Sr, jonka suolat antavat ilotulitteille punaisen värin.	Mikä on strontium?
-säteillä	1	Lähettää säteilyä: virittynyt atomi säteilee fotonin.
-säteittäinen	1	Säteen suuntainen, radiaalinen: säteittäinen todennäköisyysjakauma.
+säteillä	1	Säteillä tarkoittaa, että jokin lähettää säteilyä. Virittynyt atomi säteilee fotonin.
+säteittäinen	1	Säteittäinen tarkoittaa säteen suuntaista. Esimerkiksi säteittäinen todennäköisyysjakauma. Kutsutaan myös: radiaalinen.
 tähti	1	Taivaankappale, jonka spektristä alkuaineet tunnistetaan.
-vastakkaisspininen	1	Vastakkaisen spinin omaava: orbitaalin kaksi elektronia ovat vastakkaisspinisiä.
+vastakkaisspininen	1	Vastakkaisspininen tarkoittaa, että spinit ovat vastakkaiset. Orbitaalin kaksi elektronia ovat vastakkaisspinisiä.
 viivasto	1	Spektrin viivojen joukko, kullekin alkuaineelle ominainen.
-vinottain	1	Viistoon: diagonaalikaavion nuolet kulkevat vinottain.
+vinottain	1	Vinottain tarkoittaa viistoon. Diagonaalikaavion nuolet kulkevat vinottain.
 väliaine	1	Aine, jossa aalto etenee. Sähkömagneettinen aalto ei tarvitse väliainetta.
-yhteisvaikutus	1	Usean tekijän yhdessä aiheuttama vaikutus: ydinvarauksen ja elektronien hylkinnän yhteisvaikutus.
-yksikäsitteinen	1	Vain yhden arvon saava: aaltofunktion on oltava yksikäsitteinen.
-yksinkertaistus	1	Todellisuuden pelkistys: keskimääräiskenttä on yksinkertaistus.
-yksitellen	1	Yksi kerrallaan: elektronit lisätään yksitellen.
+yhteisvaikutus	1	Yhteisvaikutus on usean tekijän yhdessä aiheuttama vaikutus. Esimerkiksi ydinvarauksen ja hylkinnän yhteisvaikutus.
+yksikäsitteinen	1	Yksikäsitteinen tarkoittaa, että jokin saa vain yhden arvon. Aaltofunktion on oltava yksikäsitteinen.
+yksinkertaistus	1	Yksinkertaistus on todellisuuden pelkistys. Keskimääräiskenttä on yksinkertaistus.
+yksitellen	1	Yksitellen tarkoittaa yksi kerrallaan. Elektronit lisätään orbitaaleille yksitellen.
 z-akseli	1	Koordinaatiston pystyakseli, jonka suuntaan magneettikenttä ja p<sub>z</sub>-orbitaali osoittavat.
 äärettömyys	1	Rajaton etäisyys, jossa aaltofunktion on hävittävä.
+# linkkisiivous 13.9.2026: sanat, jotka linkittivat vaaralle kortille, saavat oman kortin
+taajuus	2	Taajuus kertoo, kuinka monta värähdystä tapahtuu sekunnissa. Yksikkö on hertsi.	Mikä on taajuus?
+ydinvaraus	2	Ydinvaraus on atomiytimen positiivinen varaus. Se on yhtä suuri kuin protonien määrä.	Mikä on ydinvaraus?
+neliö	1	Neliö on luku kerrottuna itsellään. Esimerkiksi kolmen neliö on yhdeksän.	Mitä neliö tarkoittaa?
+matemaattinen	1	Matemaattinen tarkoittaa, että jokin perustuu laskemiseen ja lukuihin.	Mitä matemaattinen tarkoittaa?
+syy	1	Syy on se, minkä takia jokin tapahtuu.	Mitä syy tarkoittaa?
+kvantti	2	Kvantti on pienin mahdollinen energian annos. Energia siirtyy kvantteina, ei jatkuvasti.	Mikä on kvantti?

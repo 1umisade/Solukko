@@ -1,14 +1,18 @@
 # Kemian peruskurssi I, Luento 3.1 - massakierros
-alakulma	1	Taulukon alaosan kulma: raskaat metallit vasemmassa alakulmassa.
-alkalimetalli	2	Ryhmän 1 alkuaine: litium, natrium, kalium… Yksi pintaelektroni, muodostaa +1-kationin.	Mikä on alkalimetalli?
+alakulma	1	Alakulma on taulukon alaosan kulma. Raskaat metallit ovat jaksollisen järjestelmän vasemmassa alakulmassa.
+alkalimetalli	2	Alkalimetalli on ryhmän 1 alkuaine, kuten natrium. Sillä on yksi pintaelektroni ja se muodostaa +1-kationin.	Mikä on alkalimetalli?
 atomitilavuus	1	Moolin atomeja viemä tilavuus, Meyerin taulukon peruste.
 deuterium	2	Vedyn isotooppi, jonka ytimessä on protoni ja neutroni. Raskas vety.	Mikä on deuterium?
-hylkintä	1	Samanmerkkisten varausten työntövoima: elektronien hylkintä.
+hylkintä	1	Hylkintä on samanmerkkisten varausten työntövoima. Elektronit hylkivät toisiaan.
 ioninmuodostus	1	Ionin syntyminen elektronin luovutuksessa tai vastaanotossa.
 sadasosa	1	Yksi sadasta, prosentti.
-satatuhat	1	100 000: atomin halkaisija on satatuhatta kertaa ytimen.
-suositus	1	Ohje käytännöstä: IUPACin suositus.
+satatuhat	1	Satatuhatta on 100 000. Atomin halkaisija on satatuhatta kertaa ytimen halkaisija.
+suositus	1	Suositus on ohje käytännöstä. Esimerkiksi IUPACin suositus.
 viiib	1	Vanha ryhmämerkintä, joka kattoi ryhmät 8–10 (rauta, koboltti, nikkeli).	Mitä VIIIB tarkoittaa?
-yhteismäärä	1	Kokonaislukumäärä: nukleonien yhteismäärä on massaluku.
-yleisnimitys	1	Yhteinen nimi ryhmälle: nukleoni protonille ja neutronille.
-yläkulma	1	Taulukon yläosan kulma: epämetallit oikeassa yläkulmassa.
+yhteismäärä	1	Yhteismäärä on kokonaislukumäärä. Nukleonien yhteismäärä on massaluku.
+yleisnimitys	1	Yleisnimitys on ryhmän yhteinen nimi. Nukleoni on protonin ja neutronin yleisnimitys.
+yläkulma	1	Yläkulma on taulukon yläosan kulma. Epämetallit ovat jaksollisen järjestelmän oikeassa yläkulmassa.
+# linkkisiivous 13.9.2026: sanat, jotka linkittivat vaaralle kortille, saavat oman kortin
+symboli	1	Symboli on merkki, joka tarkoittaa jotakin. Esimerkiksi Fe on raudan symboli.	Mitä symboli tarkoittaa?
+elektronikuori	2	Elektronikuori on atomin ytimen ympärillä oleva kerros, jossa elektronit ovat. Kuoria merkitään numeroilla.	Mikä on elektronikuori?
+puolimetalli	1	Puolimetalli on alkuaine, jolla on sekä metallin että epämetallin ominaisuuksia. Esimerkiksi pii.	Mikä on puolimetalli?

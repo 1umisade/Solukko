@@ -5,25 +5,25 @@ bioteknologiayritys	1	Biotekniikkaa hyödyntävä yritys, kuten diagnostiikka- t
 diagnosointi	1	Sairauden tunnistaminen, diagnoosin teko.
 diffuusiomatka	2	Matka, jonka molekyylin on diffundoiduttava kohtaamiseen. Lyhyt matka mikrofluidiikassa nopeuttaa reaktion.	Mikä on diffuusiomatka?
 elintarvikeketju	1	Ruoan reitti tuottajalta kuluttajalle, jonka turvallisuutta diagnostiikka valvoo.
-ennenaikainen	1	Ennen odotettua aikaa: ennenaikainen synnytys, keskonen.
-epäkäytännöllinen	1	Hankala käyttää: laboratoriolaite kentällä.
+ennenaikainen	1	Ennenaikainen tarkoittaa, että jokin tapahtuu ennen odotettua aikaa. Esimerkiksi ennenaikainen synnytys.
+epäkäytännöllinen	1	Epäkäytännöllinen tarkoittaa, että jokin on hankala käyttää. Laboratoriolaite on kentällä epäkäytännöllinen.
 gmo-aines	1	Muuntogeenistä eliötä sisältävä aines, joka todetaan PCR:llä.
 hapenpuute	1	Hapen riittämättömyys kudoksessa, sydäninfarktin syy. Kutsutaan myös: iskemia.
 hba1c	1	Sokerihemoglobiini, diabeteksen hoitotasapainon mittari.
-hematologia	2	Veren ja verisolujen tutkimus: verenkuva, hyytyminen, veritaudit.	Mitä hematologia on?
+hematologia	2	Hematologia on tiede, joka tutkii verta ja verisoluja.	Mitä hematologia on?
 hiuksenohut	1	Erittäin ohut, kuten mikrofluidiikan kanavat.
 hoitokaappi	1	Keskosen inkubaattori.
-huijaus	1	Petos: Theranos-yhtiö väitti tekevänsä sata testiä yhdestä pisarasta.
+huijaus	1	Huijaus on petos. Theranos-yhtiö väitti tekevänsä sata testiä yhdestä veripisarasta.
 hyttynen	1	Verta imevä hyönteinen, malarian levittäjä.
 immunoassay	1	Immunomäärityksen englanninkielinen nimi.
 immunologi	1	Immunologian tutkija.
-ioniselektiivinen	1	Vain tiettyä ionia mittaava: ioniselektiivinen elektrodi.
+ioniselektiivinen	1	Ioniselektiivinen elektrodi mittaa vain tiettyä ionia.
 kalibraatio	1	Mittauksen sitominen standardiin, kalibrointi.
 kantaliuos	1	Väkevä perusliuos, josta laimennokset tehdään.
 kapillaarinen	1	Hiussuoniin tai kapillaarivirtaukseen liittyvä: kapillaarinen virtaus liuskalla.
-kehityssuunta	1	Alan tuleva kehitys: pienemmät, nopeammat ja halvemmat testit.
+kehityssuunta	1	Kehityssuunta kertoo, mihin ala on menossa. Testit muuttuvat pienemmiksi ja halvemmiksi.
 keskuslaboratorio	1	Sairaalan suuri keskitetty laboratorio automaattisine analysaattoreineen.
-kivuton	1	Kipua aiheuttamaton: sylkinäyte on kivuton.
+kivuton	1	Kivuton tarkoittaa, että jokin ei aiheuta kipua. Sylkinäytteen otto on kivuton.
 koronatesti	1	SARS-CoV-2:n antigeeni- tai PCR-testi.
 koti	1	Asunto, jossa kotitestit tehdään.
 kultapartikkeli	2	Nanokokoinen kultahiukkanen, jonka punainen väri toimii pikatestin leimana.	Mikä on kultapartikkeli?
@@ -33,35 +33,35 @@ kämmen	1	Käden sisäpinta. Lab-on-a-chip-laite on kämmenen kokoinen.
 laboratoriotulos	1	Laboratoriomäärityksen tulos.
 laitesuunnittelu	1	Mittalaitteen suunnittelu.
 laskimopunktio	1	Verinäytteen otto laskimosta neulalla.
-leimateknologia	1	Leiman tyyppi ja mittaustapa: entsyymi, fluoresenssi, luminesenssi, partikkeli.
-levittää	1	Saattaa laajemmalle: näyte leviää liuskalla.
+leimateknologia	1	Leimateknologia on leiman tyyppi ja sen mittaustapa. Esimerkiksi entsyymi tai fluoresenssi.
+levittää	1	Levittää tarkoittaa, että jokin saatetaan laajemmalle. Näyte leviää liuskalla.
 lyhyempiaaltoinen	1	Lyhyemmän aallonpituuden säteily, kuten fluoresenssin virittävä valo.
-lähettää	1	Emittoida: fluorofori lähettää valoa.
-lämmittää	1	Nostaa lämpötilaa: näyte lämmitetään inkubaatiossa.
+lähettää	1	Lähettää tarkoittaa, että jokin lähtee liikkeelle jostakin. Fluorofori lähettää valoa.
+lämmittää	1	Lämmittää tarkoittaa, että lämpötilaa nostetaan. Näyte lämmitetään inkubaatiossa.
 magneettihelmi	2	Magneettinen mikropartikkeli, jonka voi erotella magneetilla pesuvaiheessa.	Mikä on magneettihelmi?
 merkkiainepaneeli	1	Usean merkkiaineen samanaikainen määritys, kuten sydänpaneeli.
 mikrolitratilavuus	1	Mikrolitrojen tilavuus, kuten kaivon reaktiotilavuus.
 mikrometrikokoinen	1	Mikrometrien kokoinen, kuten mikropartikkeli.
-mittaustekniikka	1	Signaalin mittaamisen tapa: absorbanssi, fluoresenssi, luminesenssi.
+mittaustekniikka	1	Mittaustekniikka on tapa mitata signaali. Esimerkiksi absorbanssi tai fluoresenssi.
 munuaiskoe	1	Munuaisten toiminnan testi, kuten kreatiniini.
 muovikaivo	1	Mikrotiitterilevyn kaivo muovista.
 muovilevy	1	Muovinen mikrotiitterilevy.
 määrityskerta	1	Yksi määrityksen suoritus.
 määrityskohta	1	Sirun tai levyn kohta, jossa yksi määritys tehdään.
-määritystyyppi	1	Määrityksen laji: kilpaileva, ei-kilpaileva, homogeeninen, heterogeeninen.
+määritystyyppi	1	Määritystyyppi on määrityksen laji. Esimerkiksi kilpaileva tai ei-kilpaileva.
 nestemäärä	1	Nesteen tilavuus.
 nollasignaali	1	Signaali ilman analyyttiä, tausta.
 näytematriisi	2	Näytteen muu aines analyytin ympärillä, kuten veren proteiinit, joka voi häiritä mittausta.	Mikä on näytematriisi?
-näyteneste	1	Nestemäinen näyte: veri, virtsa, sylki.
+näyteneste	1	Näyteneste on nestemäinen näyte. Esimerkiksi veri, virtsa tai sylki.
 näytepitoisuus	1	Analyytin pitoisuus näytteessä.
-osoittautua	1	Paljastua: testi osoittautui herkäksi.
+osoittautua	1	Osoittautua tarkoittaa, että jokin paljastuu tietynlaiseksi. Testi osoittautui herkäksi.
 pesuri	1	Laite, joka pesee mikrotiitterilevyn kaivot.
 pintavoima	1	Nesteen pinnan jännitys, joka vetää nesteen kapeaan kanavaan.
 pisara	1	Pieni nestemäärä, kuten veripisara sormenpäästä.
-pitkittyä	1	Kestää odotettua kauemmin: pitkittynyt yskä.
+pitkittyä	1	Pitkittyä tarkoittaa, että jokin kestää odotettua kauemmin. Esimerkiksi pitkittynyt yskä.
 päätös	1	Ratkaisu, kuten hoitopäätös laboratoriotuloksen perusteella.
-rahoittaa	1	Antaa rahaa: riskisijoittajat rahoittavat startupin.
-rajallinen	1	Rajoitettu: pikatestin rajallinen herkkyys.
+rahoittaa	1	Rahoittaa tarkoittaa, että jollekin annetaan rahaa. Sijoittajat rahoittavat startupin.
+rajallinen	1	Rajallinen tarkoittaa rajoitettua. Pikatestin herkkyys on rajallinen.
 rakko	1	Virtsarakko, virtsan varasto.
 röntgen	1	Röntgensäteily ja -kuvaus.
 sairas	1	Tautia sairastava, jolla testin tulos on positiivinen.
@@ -69,8 +69,8 @@ sikiö	1	Kohdussa kehittyvä yksilö, jonka poikkeavuuksia seulotaan äidin vere
 sitoutumispaikka	1	Molekyylin kohta, johon toinen sitoutuu.
 solukasvatusliuos	1	Solujen kasvatusliuos, jossa fenolipuna ilmaisee pH:n.
 sormenpääveri	1	Sormenpäästä otettu kapillaariveri.
-sovittaa	1	Tehdä sopivaksi: menetelmä sovitetaan laitteeseen.
-suorittaa	1	Tehdä: määritys suoritetaan levyllä.
+sovittaa	1	Sovittaa tarkoittaa, että jokin tehdään sopivaksi. Menetelmä sovitetaan laitteeseen.
+suorittaa	1	Suorittaa tarkoittaa tehdä. Määritys suoritetaan levyllä.
 sydänlihasvaurio	1	Sydänlihaksen solujen tuho, jonka troponiini paljastaa.
 syöpäseulonta	1	Oireettoman väestön syöpätestaus, kuten Papa-testi ja suolistosyövän ulostetesti.
 tautiseuranta	1	Taudin kulun ja hoidon seuranta toistuvilla testeillä.
@@ -79,15 +79,23 @@ testaus	1	Testien tekeminen.
 testi	1	Määritys, joka antaa tuloksen taudista tai aineesta.
 theranos	2	Yhdysvaltalainen yritys, joka väitti mittaavansa satoja analyyttejä veripisarasta ja paljastui huijaukseksi 2015.	Mikä oli Theranos?
 toimintakoe	1	Elimen toiminnan testi, kuten kilpirauhasen toimintakoe.
-toimivuus	1	Kyky toimia: kontrolliviiva osoittaa testin toimivuuden.
-toteutus	1	Käytännön tekeminen: määrityksen toteutus.
-työvaihe	1	Yksi työn askel: pipetointi, inkubointi, pesu.
+toimivuus	1	Toimivuus on kyky toimia. Kontrolliviiva osoittaa testin toimivuuden.
+toteutus	1	Toteutus on käytännön tekeminen. Esimerkiksi määrityksen toteutus.
+työvaihe	1	Työvaihe on yksi työn askel. Esimerkiksi pipetointi ja pesu.
 vastaanotto	1	Lääkärin tapaamispaikka, jossa vieritestit tehdään.
 vastasyntynyt	1	Juuri syntynyt vauva, jolta seulotaan aineenvaihduntasairaudet.
 vaurio	1	Vahinko kudoksessa tai molekyylissä.
 viitearvo	1	Terveiden tulosten vaihteluväli, johon potilaan tulosta verrataan.
 viritys	1	Fluoroforin nostaminen korkeampaan energiatilaan valolla.
 virtaussytometri	2	Laite, joka mittaa yksittäisiä soluja nestevirrassa laserilla ja fluoresenssileimoilla.	Mikä on virtaussytometri?
-voileipä	1	Sandwich-määrityksen suomennos: analyytti kahden vasta-aineen välissä.
+voileipä	1	Voileipä on sandwich-määrityksen suomennos. Analyytti on kahden vasta-aineen välissä.
 väestö	1	Alueen ihmiset, seulonnan kohde.
 yskätauti	1	Yskää aiheuttava infektio, kuten hinkuyskä.
+# linkkisiivous 13.9.2026: sanat, jotka linkittivat vaaralle kortille, saavat oman kortin
+lääkäri	1	Lääkäri on henkilö, joka tutkii ja hoitaa sairauksia.	Mitä lääkäri tarkoittaa?
+sydän	1	Sydän on lihas, joka pumppaa verta kehossa.	Mitä sydän tarkoittaa?
+diagnoosi	2	Diagnoosi on lääkärin toteamus siitä, mikä sairaus potilaalla on.	Mikä on diagnoosi?
+magneetti	1	Magneetti on kappale, joka vetää rautaa puoleensa.	Mitä magneetti tarkoittaa?
+raskaus	1	Raskaus on aika, jolloin sikiö kasvaa kohdussa.	Mitä raskaus tarkoittaa?
+luminesenssi	2	Luminesenssi on valon säteilyä ilman kuumuutta. Esimerkiksi kemiallinen reaktio voi tuottaa valoa.	Mikä on luminesenssi?
+valvonta	1	Valvonta tarkoittaa, että jotakin tarkkaillaan ja siitä pidetään huolta.	Mitä valvonta tarkoittaa?

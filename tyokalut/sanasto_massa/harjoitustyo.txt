@@ -1,6 +1,6 @@
 # Biotekniikan harjoitustyö - massakierros
 aikaerotteinen	2	Fluoresenssin mittaus viiveellä virityksen jälkeen, kun taustan lyhytikäinen fluoresenssi on sammunut. Lantanidileimojen periaate.	Mitä aikaerotteinen tarkoittaa?
-alkaalinen	1	Emäksinen: alkaalinen fosfataasi toimii emäksisessä pH:ssa.
+alkaalinen	1	Alkaalinen tarkoittaa emäksistä. Alkaalinen fosfataasi toimii emäksisessä pH:ssa.
 autofluoresenssi	2	Näytteen oma fluoresenssi ilman leimaa, joka nostaa taustaa.	Mikä on autofluoresenssi?
 biotiiniliitännäinen	1	Biotiinilla merkitty molekyyli, biotiinikonjugaatti.
 entsyymileima	1	Määrityksen leimana käytetty entsyymi, kuten peroksidaasi tai alkaalinen fosfataasi.
@@ -8,7 +8,7 @@ erotusnopeus	1	Sitoutuneen ja vapaan erottelun nopeus tai off-rate.
 europium	2	Lantanidi Eu, jonka kelaatin pitkäikäinen fluoresenssi mitataan aikaerotteisesti.	Mikä on europium?
 fluorometri	1	Fluoresenssin mittauslaite.
 hrp	1	Piparjuuren peroksidaasi, entsyymileima.
-irreversiibeli	1	Palautumaton: irreversiibeli sitoutuminen tai reaktio.
+irreversiibeli	1	Irreversiibeli tarkoittaa palautumatonta. Esimerkiksi irreversiibeli sitoutuminen.
 kelaatti	2	Metalli-ionin ja sitä usealla sidoksella ympäröivän ligandin kompleksi, kuten europiumkelaatti.	Mikä on kelaatti?
 kolorimetri	1	Värin voimakkuuden mittauslaite.
 lantanidikelaatti	2	Lantanidin (Eu, Tb) kelaatti, jonka fluoresenssi on pitkäikäistä ja teräväviivaista. Aikaerotteisen määrityksen leima.	Mikä on lantanidikelaatti?
@@ -18,7 +18,7 @@ off-rate	1	Kompleksin hajoamisen nopeusvakio k<sub>off</sub>.
 on-rate	1	Kompleksin muodostumisen nopeusvakio k<sub>on</sub>.
 opd	1	o-fenyleenidiamiini, peroksidaasin värisubstraatti.
 peroksidaasi	2	Vetyperoksidilla hapettava entsyymi, jota käytetään leimana värin tai valon tuottoon.	Mikä on peroksidaasi?
-pinnoittaa	1	Päällystää pinta: kaivo pinnoitetaan vasta-aineella.
+pinnoittaa	1	Pinnoittaa tarkoittaa, että pinta päällystetään. Kaivo pinnoitetaan vasta-aineella.
 piparjuuri	1	Juurikasvi, josta peroksidaasileima eristetään.
 reaktiokinetiikka	2	Reaktionopeuksien ja niiden riippuvuuksien tutkimus.	Mitä reaktiokinetiikka on?
 sitoutumisaste	1	Sitoutuneen osuus kokonaismäärästä.
@@ -26,7 +26,7 @@ sitoutumiskapasiteetti	1	Suurin sitoutuva määrä, kaivon tai partikkelin kapas
 sitoutumismittaus	1	Sitoutumisen määrän tai nopeuden mittaus.
 sitoutumisnopeus	1	Sitoutumisen nopeus, on-rate.
 streptavidiini	2	Streptomyces-bakteerin proteiini, joka sitoo biotiinia lähes peruuttamattomasti. Leimojen kiinnitysväline.	Mikä on streptavidiini?
-termodynaaminen	1	Energiaan ja tasapainoon liittyvä: termodynaaminen affiniteetti.
-toinen laki	1	Termodynamiikan toinen pääsääntö: entropia kasvaa.
+termodynaaminen	1	Termodynaaminen tarkoittaa energiaan ja tasapainoon liittyvää. Esimerkiksi termodynaaminen affiniteetti.
+toinen laki	1	Termodynamiikan toinen pääsääntö sanoo, että entropia kasvaa.
 uv-valo	1	Ultraviolettivalo, jolla fluoresenssi viritetään.
 viritysvalo	1	Fluoroforin virittävä valo, lyhyempiaaltoinen kuin emissio.

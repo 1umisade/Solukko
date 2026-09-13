@@ -1,20 +1,20 @@
 # Solu- ja biomolekyylit, Luento 4a - massakierros
 aloituskohta	2	Kohta, josta replikaatio tai transkriptio alkaa: replikaation aloituskohta, transkription aloituskohta +1.	Mikä on aloituskohta?
-altistaa	1	Saattaa alttiiksi: säteily altistaa DNA:n vaurioille.
+altistaa	1	Altistaa tarkoittaa, että jokin saatetaan alttiiksi. Säteily altistaa DNA:n vaurioille.
 antikodoni	3	Siirtäjä-RNA:n kolmen emäksen jakso, joka pariutuu lähetti-RNA:n kodonin kanssa.	Mikä on antikodoni?
 apuproteiini	1	Pääproteiinia avustava proteiini, kuten sigmatekijä RNA-polymeraasille.
 asikloviiri	2	Herpesviruslääke, nukleosidianalogi, jonka viruksen kinaasi aktivoi ja joka pysäyttää virus-DNA:n synteesin.	Mikä on asikloviiri?
 atg	1	Aloituskodoni DNA:ssa (RNA:ssa AUG), joka koodaa metioniinia ja aloittaa translaation.	Mikä on ATG?
-avustaa	1	Auttaa: apuproteiinit avustavat polymeraasia.
+avustaa	1	Avustaa tarkoittaa auttaa. Apuproteiinit avustavat polymeraasia.
 cap-proteiini	2	Bakteerin kataboliittiaktivaattoriproteiini, joka cAMP:n kanssa tehostaa lac-operonin transkriptiota glukoosin puuttuessa.	Mikä on CAP-proteiini?
 ctp	1	Sytidiinitrifosfaatti, RNA-synteesin C-nukleotidi.	Mikä on CTP?
 denukleotidi	1	Deoksiribonukleotidi lyhennettynä.
-deoksi	1	Etuliite, joka tarkoittaa hapen puuttumista: deoksiriboosista puuttuu 2'-hydroksyyli.	Mitä deoksi- tarkoittaa?
+deoksi	1	Deoksi on etuliite, joka tarkoittaa hapen puuttumista. Deoksiriboosista puuttuu yksi hydroksyyli.	Mitä deoksi- tarkoittaa?
 dna-kopio	1	Replikaatiossa syntynyt DNA:n jäljennös.
 dna-vaurio	2	DNA:n rakenteen vaurio, kuten katkos, emäsmuutos tai tymiinidimeeri, jonka korjausentsyymit korjaavat.	Mikä on DNA-vaurio?
 dna-virus	2	Virus, jonka genomi on DNA:ta, kuten adenovirus ja herpesvirus.	Mikä on DNA-virus?
 dtmp	1	Deoksitymidiinimonofosfaatti, DNA:n T-nukleotidi.	Mikä on dTMP?
-elinaika	1	Aika olemassaolosta hajoamiseen: lähetti-RNA:n elinaika minuutteja, DNA:n solun ikä.
+elinaika	1	Elinaika on aika synnystä hajoamiseen. Lähetti-RNA:n elinaika on minuutteja.
 fosfodiesteriketju	1	Nukleotidien fosfodiesterisidoksin liittynyt runko. Kutsutaan myös: sokeri-fosfaattirunko.
 gc-rikas	1	Paljon guaniinia ja sytosiinia sisältävä DNA-jakso, joka on vakaampi kolmen vetysidoksen vuoksi.	Mitä GC-rikas tarkoittaa?
 geeniyhdistelmä	1	Geenien muunnosten yhdistelmä yksilössä, rekombinaation tuote.
@@ -23,70 +23,84 @@ hiusneula	2	RNA:n rakenne, jossa juoste taittuu ja pariutuu itsensä kanssa. Kut
 huippupalkinto	1	Alan arvostetuin tunnustus, kuten Nobelin palkinto.
 huppu	2	Eukaryootin lähetti-RNA:n 5'-päähän lisätty metyyliguanosiini, joka suojaa ja ohjaa ribosomille. Kutsutaan myös: 5'-cap.	Mikä on huppu?
 jono	1	Peräkkäisten yksiköiden sarja, kuten emäsjono eli sekvenssi.
-kaksirenkainen	1	Kahdesta renkaasta koostuva: puriinit adeniini ja guaniini.
-kantaa	1	Kuljettaa mukanaan: lähetti-RNA kantaa ohjeen, siirtäjä-RNA aminohapon.
-katkos	1	Juosteen katkeama: DNA:n yksijuoste- tai kaksoisjuostekatkos.
-kohtisuora	1	90 asteen kulmassa: B-DNA:n emäsparit ovat kohtisuorassa kierteen akseliin.
-kolmikko	1	Kolmen ryhmä: kodoni on emäskolmikko. Kutsutaan myös: tripletti.
-kompakti	1	Tiivis, vähän tilaa vievä: kompakti kaksoiskierre.
+kaksirenkainen	1	Kaksirenkainen tarkoittaa, että molekyylissä on kaksi rengasta. Puriinit ovat kaksirenkaisia.
+kantaa	1	Kantaa tarkoittaa, että jokin kuljettaa toista mukanaan. Lähetti-RNA kantaa geenin ohjeen.
+katkos	1	Katkos on juosteen katkeama. Esimerkiksi DNA:n kaksoisjuostekatkos.
+kohtisuora	1	Kohtisuora tarkoittaa 90 asteen kulmaa. DNA:n emäsparit ovat kohtisuorassa kierteen akseliin.
+kolmikko	1	Kolmikko on kolmen ryhmä. Kodoni on emäskolmikko. Kutsutaan myös: tripletti.
+kompakti	1	Kompakti tarkoittaa tiivistä ja vähän tilaa vievää. Esimerkiksi kompakti kaksoiskierre.
 korjauslukukyky	2	DNA-polymeraasin kyky tarkistaa liitetty nukleotidi ja poistaa väärä. Kutsutaan myös: oikoluku.	Mikä on korjauslukukyky?
-kuusirengas	1	Kuuden atomin rengas: pyrimidiinit ja puriinin toinen rengas.
+kuusirengas	1	Kuusirengas on kuuden atomin rengas. Pyrimidiineissä on kuusirengas.
 laci-repressori	1	LacI-geenin tuottama lac-operonin repressori.
 liittämisnopeus	1	Nukleotidien liittämisen nopeus polymeraasilla, nukleotidia sekunnissa.
-luettavuus	1	Geenin saatavuus transkriptiolle: avoin kromatiini on luettavaa.
-lyhetä	1	Tulla lyhyemmäksi: telomeerit lyhenevät jokaisessa jakautumisessa.
+luettavuus	1	Luettavuus tarkoittaa, että geeni on transkription saatavilla. Avoin kromatiini on luettavaa.
+lyhetä	1	Lyhetä tarkoittaa, että jokin tulee lyhyemmäksi. Telomeerit lyhenevät jakautumisissa.
 monokistroninen	2	Lähetti-RNA, joka koodaa yhden geenin. Eukaryoottien mRNA:t ovat monokistronisia.	Mitä monokistroninen tarkoittaa?
 normaalisolu	1	Terve, muuntumaton solu erotuksena syöpäsolusta.
 nusa-proteiini	2	Bakteerin transkriptiotekijä, joka sitoutuu RNA-polymeraasiin ja edistää terminaatiota.	Mikä on NusA-proteiini?
 oikoluku	2	Polymeraasin virheen tarkistus ja väärän nukleotidin poisto 3'→5'-eksonukleaasilla.	Mitä oikoluku on?
 ovalbumiinigeeni	1	Kananmunan valkuaisen pääproteiinin geeni, klassinen esimerkki introneista.
-paljastaa	1	Tuoda näkyviin: röntgenkuva paljasti kaksoiskierteen.
-pareittain	1	Pareina: emäkset pareittain, kromosomit pareittain.
-peräkkäin	1	Toinen toisensa jälkeen: nukleotidit peräkkäin.
-pidentää	1	Tehdä pidemmäksi: polymeraasi pidentää ketjua 3'-päästä.
+paljastaa	1	Paljastaa tarkoittaa, että jokin tuodaan näkyviin. Röntgenkuva paljasti kaksoiskierteen.
+pareittain	1	Pareittain tarkoittaa pareina. Emäkset ovat pareittain.
+peräkkäin	1	Peräkkäin tarkoittaa toinen toisensa jälkeen. Nukleotidit ovat ketjussa peräkkäin.
+pidentää	1	Pidentää tarkoittaa, että jokin tehdään pidemmäksi. Polymeraasi pidentää ketjua 3'-päästä.
 pituusyksikkö	1	Pituuden mitta, kuten nanometri tai emäspari DNA:lle.
 polykistroninen	2	Lähetti-RNA, joka koodaa useaa geeniä, kuten bakteerin operonin mRNA.	Mitä polykistroninen tarkoittaa?
-primaarirakenne	2	Polymeerin yksiköiden järjestys: proteiinin aminohappojärjestys, DNA:n emäsjärjestys.	Mikä on primaarirakenne?
+primaarirakenne	2	Primaarirakenne on polymeerin yksiköiden järjestys. Proteiinin primaarirakenne on aminohappojärjestys.	Mikä on primaarirakenne?
 puolustusentsyymi	1	Solua suojaava entsyymi, kuten restriktioentsyymi bakteerilla tai lysotsyymi.
-pysähtyä	1	Lakata etenemästä: polymeraasi pysähtyy terminaattoriin.
-päättää	1	Lopettaa: terminaattori päättää transkription.
-rasitus	1	Mekaaninen jännitys: kierteen rasitus replikaatiohaarukan edellä.
-rengasrakenteinen	1	Rengasmainen: plasmidi on rengasrakenteinen DNA.
-repressoida	2	Estää geenin luenta: repressori repressoi operonin.	Mitä repressoiminen tarkoittaa?
-rinnastaa	1	Asettaa rinnakkain vertailua varten: sekvenssien rinnastus.
-rna-geeni	2	Geeni, jonka lopputuote on RNA eikä proteiini: rRNA-, tRNA- ja säätely-RNA-geenit.	Mikä on RNA-geeni?
+pysähtyä	1	Pysähtyä tarkoittaa, että eteneminen lakkaa. Polymeraasi pysähtyy terminaattoriin.
+päättää	1	Päättää tarkoittaa, että jokin lopetetaan. Terminaattori päättää transkription.
+rasitus	1	Rasitus on mekaaninen jännitys. Kierteeseen tulee rasitus replikaatiohaarukan edellä.
+rengasrakenteinen	1	Rengasrakenteinen tarkoittaa rengasmaista. Plasmidi on rengasrakenteinen DNA.
+repressoida	2	Repressoida tarkoittaa, että geenin luenta estetään. Repressori repressoi operonin.	Mitä repressoiminen tarkoittaa?
+rinnastaa	1	Rinnastaa tarkoittaa, että sekvenssit asetetaan rinnakkain vertailua varten.
+rna-geeni	2	RNA-geeni on geeni, jonka lopputuote on RNA eikä proteiini. Esimerkiksi tRNA-geeni.	Mikä on RNA-geeni?
 rna-genomi	1	Viruksen RNA:sta koostuva perimä, kuten influenssa- ja koronaviruksella.
 rna-kopio	1	Transkriptiossa DNA:sta tehty RNA.
 rna-synteesi	1	RNA:n valmistus, transkriptio.
 semikonservatiivinen	3	Replikaatiotapa, jossa kumpikin tytär-DNA sisältää yhden vanhan ja yhden uuden juosteen.	Mitä semikonservatiivinen tarkoittaa?
 sense-juoste	2	Koodaava juoste, jonka emäsjärjestys on sama kuin lähetti-RNA:n. Kutsutaan myös: koodaava juoste.	Mikä on sense-juoste?
 signalointi	2	Viestintä molekyyleillä solujen välillä ja sisällä. Kutsutaan myös: signalointi, viestinvälitys.	Mitä signalointi on?
-silmukoida	1	Poistaa intronit ja liittää eksonit: esi-mRNA silmukoidaan.
+silmukoida	1	Silmukoida tarkoittaa, että intronit poistetaan ja eksonit liitetään yhteen.
 sokerifosfaattirunko	2	DNA:n ja RNA:n selkäranka, jossa sokeri ja fosfaatti vuorottelevat fosfodiesterisidoksin.	Mikä on sokeri-fosfaattirunko?
-stabiilisuus	1	Vakaus: DNA:n stabiilisuus on RNA:ta suurempi. Kutsutaan myös: stabiilius.
-sula	1	Nestemäinen: DNA sulaa eli juosteet erkanevat kuumennettaessa.
+stabiilisuus	1	Stabiilisuus on vakautta. DNA on RNA:ta stabiilimpi. Kutsutaan myös: stabiilius.
+sula	1	Sula tarkoittaa nestemäistä. DNA sulaa, kun juosteet erkanevat kuumennettaessa.
 sytidiini	1	Sytosiinin nukleosidi, sytosiini + riboosi.	Mikä on sytidiini?
 säätely-rna	2	RNA, joka säätelee geenien ilmentymistä, kuten mikro-RNA ja pitkät ei-koodaavat RNA:t.	Mikä on säätely-RNA?
 säätelymolekyyli	1	Toimintaa säätelevä molekyyli, kuten repressori, cAMP tai hormoni.
-taivuttaa	1	Kaartaa: proteiini taivuttaa DNA:ta sitoutuessaan.
-tallentua	1	Jäädä säilöön: perimä tallentuu DNA:han.
+taivuttaa	1	Taivuttaa tarkoittaa, että jokin kaarretaan. Proteiini taivuttaa DNA:ta sitoutuessaan.
+tallentua	1	Tallentua tarkoittaa, että jokin jää säilöön. Perimä tallentuu DNA:han.
 tehostaja	2	DNA-jakso, johon sitoutuneet tekijät lisäävät transkriptiota kaukaakin. Kutsutaan myös: enhanceri.	Mikä on tehostaja?
-tilantarve	1	Vaadittu tila: emäsparin tilantarve määrää kierteen mitat.
-tukkia	1	Estää kulku: repressori tukkii promoottorin.
+tilantarve	1	Tilantarve on vaadittu tila. Emäsparin tilantarve määrää kierteen mitat.
+tukkia	1	Tukkia tarkoittaa, että kulku estetään. Repressori tukkii promoottorin.
 tunnistuskohta	2	DNA:n jakso, johon proteiini sitoutuu spesifisesti, kuten restriktioentsyymin kohta.	Mikä on tunnistuskohta?
-tunnuskirjain	1	Emästä tai aminohappoa merkitsevä kirjain: A, T, G, C.
+tunnuskirjain	1	Tunnuskirjain on kirjain, joka merkitsee emästä tai aminohappoa. Esimerkiksi A, T, G ja C.
 typpiheterorengas	1	Typpeä sisältävä rengas, nukleoemästen rakenne.
-typpipitoinen	1	Typpeä sisältävä: emäkset ovat typpipitoisia.
+typpipitoinen	1	Typpipitoinen tarkoittaa, että aine sisältää typpeä. Emäkset ovat typpipitoisia.
 uag	1	Lopetuskodoni (amber), joka päättää translaation. Muut ovat UAA ja UGA.	Mikä on UAG?
 udp-glukoosi	2	Glukoosin aktivoitu muoto glykogeenin ja muiden sokeripolymeerien synteesissä.	Mikä on UDP-glukoosi?
 uridiini	1	Urasiilin nukleosidi, urasiili + riboosi.	Mikä on uridiini?
 utp	1	Uridiinitrifosfaatti, RNA-synteesin U-nukleotidi.	Mikä on UTP?
-vaihto	1	Korvaaminen toisella: emäksen vaihto on pistemutaatio.
+vaihto	1	Vaihto tarkoittaa, että jokin korvataan toisella. Emäksen vaihto on pistemutaatio.
 vastinkromosomi	2	Kromosomiparin toinen jäsen, sama geenisisältö eri vanhemmalta. Kutsutaan myös: homologinen kromosomi.	Mikä on vastinkromosomi?
-vedetön	1	Ilman vettä: kuivissa oloissa DNA ottaa A-muodon.
+vedetön	1	Vedetön tarkoittaa, että vettä ei ole. Kuivissa oloissa DNA ottaa A-muodon.
 vektori	3	DNA-molekyyli, kuten plasmidi tai virus, jolla vieras geeni viedään soluun.	Mikä on vektori geenitekniikassa?
-vienti	1	Kuljetus ulos: lähetti-RNA:n vienti tumasta.
-vihje	1	Johtolanka: Chargaffin säännöt olivat vihje emäspariutumisesta.
-yksirenkainen	1	Yhdestä renkaasta koostuva: pyrimidiinit sytosiini, tymiini ja urasiili.
-yleiskäyttöinen	1	Moneen tarkoitukseen sopiva: RNA on yleiskäyttöinen molekyyli.
-ylivoimainen	1	Selvästi parempi: DNA:n vakaus on RNA:han nähden ylivoimainen.
+vienti	1	Vienti on kuljetusta ulos. Esimerkiksi lähetti-RNA:n vienti tumasta.
+vihje	1	Vihje on johtolanka. Chargaffin säännöt olivat vihje emäspariutumisesta.
+yksirenkainen	1	Yksirenkainen tarkoittaa, että molekyylissä on yksi rengas. Pyrimidiinit ovat yksirenkaisia.
+yleiskäyttöinen	1	Yleiskäyttöinen tarkoittaa, että jokin sopii moneen tarkoitukseen. RNA on yleiskäyttöinen molekyyli.
+ylivoimainen	1	Ylivoimainen tarkoittaa selvästi parempaa. DNA:n vakaus on ylivoimainen RNA:han nähden.
+# linkkisiivous 13.9.2026: sanat, jotka linkittivat vaaralle kortille, saavat oman kortin
+potilas	1	Potilas on ihminen, jota tutkitaan tai hoidetaan sairauden takia.	Mikä on potilas?
+sytosiini	2	Sytosiini on DNA:n ja RNA:n emäs, joka pariutuu guaniinin kanssa. Lyhenne C.	Mikä on sytosiini?
+guaniini	2	Guaniini on DNA:n ja RNA:n emäs, joka pariutuu sytosiinin kanssa. Lyhenne G.	Mikä on guaniini?
+tytärsolu	2	Tytärsolu on solu, joka syntyy, kun emosolu jakautuu kahtia.	Mikä on tytärsolu?
+puriini	2	Puriini on kaksirenkainen emäs. Adeniini ja guaniini ovat puriineja.	Mikä on puriini?
+pyrimidiini	2	Pyrimidiini on yksirenkainen emäs. Sytosiini, tymiini ja urasiili ovat pyrimidiinejä.	Mikä on pyrimidiini?
+-	poistettu 13.9.2026: molekyylibiologia määritellään jo toisella kortilla
+nanometri	1	Nanometri on metrin miljardisosa. Molekyylien koko ilmoitetaan nanometreinä. Lyhenne nm.	Mikä on nanometri?
+hiv	2	HIV on retrovirus, joka tuhoaa auttaja-T-soluja ja aiheuttaa AIDSin.	Mikä on HIV?
+nukleosidi	2	Nukleosidi on emäs ja sokeri ilman fosfaattia. Esimerkiksi adenosiini.	Mikä on nukleosidi?
+fyysikko	1	Fyysikko on fysiikan tutkija.	Mitä fyysikko tarkoittaa?
+viruslääke	2	Viruslääke on lääke, joka estää viruksen lisääntymisen solussa.	Mikä on viruslääke?
+kinaasi	3	Kinaasi on entsyymi, joka liittää fosfaattiryhmän toiseen molekyyliin. Se on fosfataasin vastakohta.	Mikä on kinaasi?

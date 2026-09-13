@@ -1,22 +1,27 @@
 # Kemian peruskurssi I, Luento 2.2 - massakierros
-arkikäyttö	1	Jokapäiväinen käyttö: arkikäytössä vesi, ei divetyoksidi.
+arkikäyttö	1	Arkikäyttö on jokapäiväistä käyttöä. Arkikäytössä sanotaan vesi, ei divetyoksidi.
 bromi	1	Alkuaine Br, halogeeni. Anioni bromidi.	Mikä on bromi?
-halogeeni	2	Ryhmän 17 alkuaine: fluori, kloori, bromi, jodi. Muodostavat helposti -idi-anioneja.	Mikä on halogeeni?
+halogeeni	2	Halogeeni on ryhmän 17 alkuaine, kuten fluori ja kloori. Halogeenit muodostavat helposti -idi-anioneja.	Mikä on halogeeni?
 ido-pääte	1	Ligandin pääte täysin systemaattisessa nimessä: oksido, hydrido, kloridi → klorido.
-idi-pääte	1	Yksiatomisen anionin pääte: kloridi, oksidi, sulfidi, nitridi.	Mikä on -idi-pääte?
-iitti-pääte	1	Happiköyhemmän oksoanionin pääte: sulfiitti, nitriitti, kloriitti.	Mikä on -iitti-pääte?
-aatti-pääte	1	Happirikkaamman oksoanionin pääte: sulfaatti, nitraatti, kloraatti.	Mikä on -aatti-pääte?
-ioninimi	1	Ionin nimi: kationi alkuaineen nimellä, anioni kantaosa + pääte.
-ium-pääte	1	Moniatomisen kationin pääte: ammonium, oksonium.	Mikä on -ium-pääte?
+idi-pääte	1	Idi-pääte on yksiatomisen anionin pääte. Esimerkiksi kloridi ja oksidi.	Mikä on -idi-pääte?
+iitti-pääte	1	Iitti-pääte on happiköyhemmän oksoanionin pääte. Esimerkiksi sulfiitti ja nitriitti.	Mikä on -iitti-pääte?
+aatti-pääte	1	Aatti-pääte on happirikkaamman oksoanionin pääte. Esimerkiksi sulfaatti ja nitraatti.	Mikä on -aatti-pääte?
+ioninimi	1	Ioninimi on ionin nimi. Kationi nimetään alkuaineen nimellä ja anioni kantaosalla ja päätteellä.
+ium-pääte	1	Ium-pääte on moniatomisen kationin pääte. Esimerkiksi ammonium.	Mikä on -ium-pääte?
 kaksitoista	1	Luku 12, kreikaksi dodeka.
 kovalenttiyhdiste	1	Molekyyliyhdiste, jonka atomit jakavat elektroneja, kuten vesi ja typpioksidit.
 mangaani	1	Alkuaine Mn, siirtymämetalli, jolla on monta elektronoitumisastetta: mangaanidioksidi MnO<sub>2</sub>.	Mikä on mangaani?
 puolikas	1	Puolet, kreikaksi hemi.
 puolitoista	1	1½, kreikaksi seskvi.
-rautakloridi	1	Raudan ja kloorin yhdiste: rauta(II)kloridi FeCl<sub>2</sub> tai rauta(III)kloridi FeCl<sub>3</sub>.
-ruskea	1	Väri: typpidioksidi on ruskea kaasu.
-selkeys	1	Yksiselitteisyys: nimistön selkeys.
+rautakloridi	1	Rautakloridi on raudan ja kloorin yhdiste. Rauta(II)kloridi on FeCl2 ja rauta(III)kloridi FeCl3.
+ruskea	1	Ruskea on väri. Typpidioksidi on ruskea kaasu.
+selkeys	1	Selkeys tarkoittaa, että asian voi ymmärtää vain yhdellä tavalla. Esimerkiksi nimistön selkeys.
 tio-etuliite	1	Etuliite, joka tarkoittaa rikin korvanneen hapen: tiosulfaatti.	Mikä on tio-etuliite?
 typpitrihydridi	1	Ammoniakin systemaattinen nimi NH<sub>3</sub>.
-vastakkaismerkkinen	1	Vastakkaisen etumerkin omaava: ioniyhdisteen kationi ja anioni.
+vastakkaismerkkinen	1	Vastakkaismerkkinen tarkoittaa, että etumerkit ovat vastakkaiset. Ioniyhdisteen kationi ja anioni ovat vastakkaismerkkisiä.
 yksitoista	1	Luku 11, kreikaksi hendeka.
+# linkkisiivous 13.9.2026: sanat, jotka linkittivat vaaralle kortille, saavat oman kortin
+epämetalli	2	Epämetalli on alkuaine, joka ottaa helposti elektroneja eikä johda sähköä. Esimerkiksi happi.	Mikä on epämetalli?
+sulfiitti	1	Sulfiitti on rikin oksoanioni SO3 2-. Siinä on vähemmän happea kuin sulfaatissa.	Mikä on sulfiitti?
+yksiselitteinen	1	Yksiselitteinen tarkoittaa, että asian voi ymmärtää vain yhdellä tavalla.	Mitä yksiselitteinen tarkoittaa?
+nimi	1	Nimi on sana, jolla jokin tunnistetaan.	Mitä nimi tarkoittaa?

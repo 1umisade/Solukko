@@ -1,7 +1,7 @@
 # Molekyylibiologia - teoria, Luento 2 - massakierros
 aluke	2	Lyhyt yksijuosteinen nukleiinihappo, josta polymeraasi aloittaa synteesin. Kutsutaan myös: primer.	Mikä on aluke?
 annealing	2	Alukkeiden tai juosteiden pariutuminen kohdesekvenssiin jäähdytettäessä. Kutsutaan myös: hybridisaatio, kiinnittyminen.	Mitä annealing tarkoittaa?
-autonominen	1	Itsenäisesti toimiva: autonomisesti replikoituva plasmidi.
+autonominen	1	Autonominen tarkoittaa itsenäisesti toimivaa. Esimerkiksi autonomisesti replikoituva plasmidi.
 camv	2	Kukkakaalin mosaiikkivirus, jonka 35S-promoottori on kasvigeenitekniikan yleisin vahva promoottori.	Mikä on CaMV?
 cap	1	Lähetti-RNA:n 5'-huppu tai bakteerin CAP-proteiini.
 dna-kirjasto	2	Kokoelma klooneja, jotka yhdessä kattavat genomin tai solun lähetti-RNA:t. Kutsutaan myös: geenikirjasto.	Mikä on DNA-kirjasto?
@@ -11,15 +11,15 @@ episomi	2	Plasmidi, joka voi olla vapaana tai liittyä isännän kromosomiin, ku
 erottumispiste	1	Kohta, jossa juosteet erkanevat replikaatiossa.
 geelielektroforeesi	1	DNA:n erottelu geelissä sähkökentässä koon mukaan.
 hairpin	1	Hiusneularakenne, RNA:n tai DNA:n itsensä kanssa pariutuva silmukka.
-irrottautuminen	1	Irtoaminen: RNA-polymeraasin irrottautuminen promoottorista.
-keskiverto	1	Keskimääräinen: keskiverto geeni.
-kohesiivinen	2	Tarttuva: restriktioentsyymin jättämä yksijuosteinen pää, joka pariutuu vastaavan kanssa. Kutsutaan myös: tarrapää.	Mitä kohesiivinen pää tarkoittaa?
+irrottautuminen	1	Irrottautuminen tarkoittaa irtoamista. Esimerkiksi RNA-polymeraasin irrottautuminen promoottorista.
+keskiverto	1	Keskiverto tarkoittaa keskimääräistä. Esimerkiksi keskiverto geeni.
+kohesiivinen	2	Kohesiivinen pää on restriktioentsyymin jättämä yksijuosteinen pää, joka pariutuu vastaavan kanssa. Kutsutaan myös: tarrapää.	Mitä kohesiivinen pää tarkoittaa?
 laskukaava	1	Kaava laskemiseen, kuten alukkeen sulamislämpötilan kaava.
 linkkeri	2	Lyhyt synteettinen DNA, jossa on restriktiokohta, liitetään tasapäiseen DNA:han kloonausta varten.	Mikä on linkkeri?
-lämpöshokkitransformaatio	2	Plasmidin vienti bakteeriin: kalsiumkloridilla käsitellyt solut kuumennetaan hetkeksi 42 asteeseen.	Mikä on lämpöshokkitransformaatio?
-löysä	1	Ei tiukka: löysä sitoutuminen, löysä kromatiini.
+lämpöshokkitransformaatio	2	Lämpöshokkitransformaatio vie plasmidin bakteeriin. Kalsiumkloridilla käsitellyt solut kuumennetaan hetkeksi 42 asteeseen.	Mikä on lämpöshokkitransformaatio?
+löysä	1	Löysä tarkoittaa, että jokin ei ole tiukka. Esimerkiksi löysä kromatiini.
 met-gtp-hattu	1	Lähetti-RNA:n 7-metyyliguanosiinihuppu.
-nosto	1	Siirto: pesäkkeiden nosto maljalta kalvolle.
+nosto	1	Nosto tarkoittaa siirtoa. Esimerkiksi pesäkkeiden nosto maljalta kalvolle.
 npc	2	Tumahuokoskompleksi, tumakotelon proteiiniportti. Lyhenne sanoista nuclear pore complex.	Mikä on NPC?
 pararetrovirus	2	DNA-virus, joka replikoituu RNA-välivaiheen ja käänteiskopioinnin kautta, kuten CaMV ja hepatiitti B.	Mikä on pararetrovirus?
 profaagi	2	Bakteerin kromosomiin liittynyt faagin genomi, joka periytyy jakautumisessa. Lysogeeninen tila.	Mikä on profaagi?

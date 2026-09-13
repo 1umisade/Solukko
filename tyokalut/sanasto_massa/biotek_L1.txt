@@ -1,32 +1,32 @@
 # Johdatus biotekniikkaan, Luento 1 - massakierros
-ainutlaatuinen	1	Vain yhdellä oleva: DNA-sormenjälki on yksilölle ainutlaatuinen.
+ainutlaatuinen	1	Ainutlaatuinen tarkoittaa, että vain yhdellä on sellainen. DNA-sormenjälki on yksilölle ainutlaatuinen.
 alfaglykosidisidos	1	Alfa-asennossa oleva glykosidisidos, kuten tärkkelyksessä. Amylaasi katkaisee sen.
 alkutila	1	Lähtötilanne ennen muutosta.
 antioksidantti	2	Hapettumista estävä aine, joka neutraloi vapaita radikaaleja, kuten C- ja E-vitamiini.	Mikä on antioksidantti?
-arvioida	1	Määrittää likimäärin tai punnita: riskin arviointi, tulosten arviointi.
-arvonlisäys	1	Raaka-aineen arvon kasvattaminen jalostamalla: biotekniikka nostaa maatalouden tuotteiden arvoa.
+arvioida	1	Arvioida tarkoittaa, että jokin määritetään likimäärin tai punnitaan. Esimerkiksi riskin arviointi.
+arvonlisäys	1	Arvonlisäys tarkoittaa, että raaka-aineen arvo kasvaa jalostamalla. Biotekniikka nostaa maatalouden tuotteiden arvoa.
 bakteriofagi	2	Bakteereja infektoiva virus, geenitekniikan ensimmäisiä työkaluja. Kutsutaan myös: faagi.	Mikä on bakteriofagi?
 beetasolu	2	Haiman Langerhansin saarekkeen insuliinia erittävä solu, joka tuhoutuu tyypin 1 diabeteksessa.	Mikä on beetasolu?
-biohajoava	2	Mikrobien luonnossa hajottama: biohajoava muovi hajoaa vedeksi ja hiilidioksidiksi.	Mitä biohajoava tarkoittaa?
+biohajoava	2	Biohajoava aine hajoaa luonnossa mikrobien avulla. Biohajoava muovi hajoaa vedeksi ja hiilidioksidiksi.	Mitä biohajoava tarkoittaa?
 biopohjainen	2	Uusiutuvasta eloperäisestä raaka-aineesta valmistettu, kuten biopohjainen muovi tärkkelyksestä.	Mitä biopohjainen tarkoittaa?
-biopolymeeri	2	Eliön tuottama polymeeri: proteiinit, polysakkaridit, nukleiinihapot ja bakteerien polyesterit.	Mikä on biopolymeeri?
-biotiede	1	Elämää tutkivat tieteet: biologia, biokemia, genetiikka, mikrobiologia.
+biopolymeeri	2	Biopolymeeri on eliön tuottama polymeeri. Esimerkiksi proteiinit ja polysakkaridit.	Mikä on biopolymeeri?
+biotiede	1	Biotieteet ovat elämää tutkivia tieteitä. Esimerkiksi biologia, biokemia ja genetiikka.
 charpentier	2	Emmanuelle Charpentier, joka kehitti Jennifer Doudnan kanssa CRISPR-Cas9-geenisakset. Nobel 2020.	Kuka on Charpentier?
 dideoksinukleotidi	2	Nukleotidi ilman 3'-hydroksyylia, joka pysäyttää DNA-ketjun pidennyksen. Sangerin sekvensoinnin perusta.	Mikä on dideoksinukleotidi?
 dna-aluke	2	Lyhyt yksijuosteinen DNA, josta polymeraasi aloittaa synteesin PCR:ssä ja sekvensoinnissa. Kutsutaan myös: aluke, primer.	Mikä on DNA-aluke?
 dna-koetin	2	Leimattu DNA-jakso, joka pariutuu kohdesekvenssin kanssa ja paljastaa sen. Kutsutaan myös: koetin.	Mikä on DNA-koetin?
 dna-synteesi	1	DNA:n valmistus polymeraasilla tai kemiallisesti.
 doudna	2	Jennifer Doudna, joka kehitti Charpentierin kanssa CRISPR-Cas9-geenimuokkauksen. Nobel 2020.	Kuka on Doudna?
-elintarvikesovellus	1	Biotekniikan käyttö ruoan valmistuksessa: entsyymit, mikrobit, GM-kasvit.
-eloperäinen	1	Eliöistä peräisin oleva, orgaaninen: eloperäinen jäte, eloperäinen raaka-aine.
-erilaistaa	1	Ohjata solu erikoistumaan: kantasolut erilaistetaan halutuiksi soluiksi.
+elintarvikesovellus	1	Elintarvikesovellus on biotekniikan käyttöä ruoan valmistuksessa. Esimerkiksi entsyymit ja mikrobit.
+eloperäinen	1	Eloperäinen tarkoittaa, että aine on peräisin eliöistä. Esimerkiksi eloperäinen jäte.
+erilaistaa	1	Erilaistaa tarkoittaa, että solu ohjataan erikoistumaan. Kantasolut erilaistetaan halutuiksi soluiksi.
 faagi	1	Bakteriofagi lyhyesti.	Mikä on faagi?
 faagipartikkeli	1	Yksittäinen bakteriofagihiukkanen.
 fab-osa	2	Vasta-aineen antigeenia sitova haara, joka syntyy papaiinipilkkomisessa. Kutsutaan myös: Fab-fragmentti.	Mikä on Fab-osa?
 fagemidi	2	Plasmidi, jossa on faagin pakkaussignaali. Faaginäyttökirjastojen vektori.	Mikä on fagemidi?
 florey	2	Howard Florey, joka kehitti penisilliinin lääkkeeksi ja tuotantoon 1940-luvulla. Nobel 1945 Flemingin ja Chainin kanssa.	Kuka oli Florey?
-fosforipitoinen	1	Fosforia sisältävä: nukleiinihapot ovat fosforipitoisia.
-fragmentti	2	Katkaistu pala: DNA-fragmentti restriktiokatkaisusta, proteiinifragmentti.	Mikä on fragmentti?
+fosforipitoinen	1	Fosforipitoinen tarkoittaa, että aine sisältää fosforia. Nukleiinihapot ovat fosforipitoisia.
+fragmentti	2	Fragmentti on katkaistu pala. Esimerkiksi DNA-fragmentti restriktiokatkaisusta.	Mikä on fragmentti?
 geenikloonaus	2	Geenin eristäminen ja monistaminen vektorissa isäntäsolussa.	Mitä geenikloonaus on?
 geenisekvenssi	1	Geenin emäsjärjestys.
 geenisiirto	2	Geenin vieminen eliöön, jossa sitä ei luonnostaan ole. Kutsutaan myös: geeninsiirto.	Mitä geenisiirto on?
@@ -34,14 +34,14 @@ giii-proteiini	2	Filamenttisen faagin kuoriproteiini, johon faaginäytössä lii
 glp	1	GLP-1, suolen hormoni, joka lisää insuliinin eritystä. Diabetes- ja laihdutuslääkkeiden malli.	Mikä on GLP?
 haiman amylaasi	1	Haiman erittämä tärkkelystä pilkkova entsyymi.
 haitta-aine	1	Haitallinen aine ruoassa tai ympäristössä, kuten toksiini tai raskasmetalli.
-hapattaa	1	Käyttää happamaksi: maitohappobakteerit hapattavat maidon.
+hapattaa	1	Hapattaa tarkoittaa, että ruoka käytetään happamaksi. Maitohappobakteerit hapattavat maidon.
 happielektrodi	2	Anturi, joka mittaa liuenneen hapen pitoisuutta bioreaktorissa.	Mikä on happielektrodi?
 happosalpaaja	2	Mahan happoeritystä vähentävä lääke, kuten protonipumpun estäjä.	Mikä on happosalpaaja?
-hedelmöittyä	1	Tulla hedelmöitetyksi: munasolu hedelmöittyy siittiöstä.
+hedelmöittyä	1	Hedelmöittyä tarkoittaa, että munasolu ja siittiö yhtyvät.
 hiivakäyminen	1	Hiivan käyminen, jossa sokerista tulee etanolia ja hiilidioksidia.
-hiljentää	2	Estää geenin ilmentyminen: RNA-interferenssi hiljentää geenin.	Mitä hiljentäminen tarkoittaa?
+hiljentää	2	Hiljentää tarkoittaa, että geenin ilmentyminen estetään. RNA-interferenssi hiljentää geenin.	Mitä hiljentäminen tarkoittaa?
 hämähäkinseitti	2	Hämähäkin proteiinikuitu, terästä lujempi painoonsa nähden. Tuotetaan rekombinantisti.	Mikä on hämähäkinseitti?
-hävittää	1	Poistaa kokonaan: isorokko hävitettiin rokotuksin.
+hävittää	1	Hävittää tarkoittaa, että jokin poistetaan kokonaan. Isorokko hävitettiin rokotuksin.
 ihmisgenomi	2	Ihmisen koko perimä, 3 miljardia emäsparia, sekvensoitu 2003.	Mikä on ihmisgenomi?
 ihmisinsuliini	1	Ihmisen insuliini, ensimmäinen rekombinanttilääke 1982.
 implantti	2	Kehoon asetettava keinotekoinen osa, kuten tekonivel tai stentti, biomateriaalista.	Mikä on implantti?
@@ -49,7 +49,7 @@ informatiikka	1	Tiedon käsittelyn tiede. Bioinformatiikka sovellettuna biologia
 insinööri	1	Tekniikan ammattilainen. Biotekniikan insinööri suunnittelee bioprosesseja.
 insinööritiede	1	Tekniikan tieteet, joiden menetelmiä biotekniikka ja synteettinen biologia soveltavat.
 isyystesti	2	DNA-tunnistus, jolla lapsen ja isän sukulaisuus todetaan toistojaksoista.	Mikä on isyystesti?
-jatkuvatoiminen	1	Keskeytyksettä toimiva: jatkuvatoiminen bioreaktori.
+jatkuvatoiminen	1	Jatkuvatoiminen tarkoittaa, että laite toimii keskeytyksettä. Esimerkiksi jatkuvatoiminen bioreaktori.
 jeffreys	2	Alec Jeffreys, joka kehitti DNA-sormenjälkitekniikan 1984.	Kuka on Jeffreys?
 jerne	2	Niels Jerne, immunologi, joka jakoi Nobelin 1984 Köhlerin ja Milsteinin kanssa.	Kuka oli Jerne?
 jäte	1	Käytöstä poistettu aines, jonka biotekniikka voi muuttaa raaka-aineeksi.
@@ -58,46 +58,46 @@ kaikkikykyinen	2	Kantasolu, joka voi erilaistua miksi tahansa solutyypiksi, kute
 kaksonen	1	Samasta raskaudesta syntynyt sisarus. Identtisillä kaksosilla on sama DNA.
 kantajaemo	1	Naaras, joka kantaa toisen alkion, kuten kloonatun lampaan synnyttäjä.
 kasvatustekniikka	1	Solujen ja mikrobien kasvatuksen menetelmät.
-kasviperäinen	1	Kasvista peräisin oleva: kasviperäinen raaka-aine.
+kasviperäinen	1	Kasviperäinen tarkoittaa, että aine on peräisin kasvista.
 katkaisuentsyymi	1	Restriktioentsyymi, DNA:n katkaisija.
-kaupallinen	1	Myyntiin tarkoitettu: kaupallinen tuote, kaupallinen lääke.
-kehitysbiologia	2	Yksilönkehityksen tutkimus: miten munasolusta tulee eliö.	Mitä kehitysbiologia on?
-keinotekoinen	1	Ihmisen tekemä, ei luonnollinen: keinotekoinen kromosomi, keinotekoinen genomi.
+kaupallinen	1	Kaupallinen tarkoittaa, että tuote on tarkoitettu myyntiin.
+kehitysbiologia	2	Kehitysbiologia tutkii, miten munasolusta kehittyy eliö.	Mitä kehitysbiologia on?
+keinotekoinen	1	Keinotekoinen tarkoittaa, että ihminen on tehnyt sen. Esimerkiksi keinotekoinen kromosomi.
 keksintö	1	Uusi hyödyllinen ratkaisu, joka voidaan patentoida.
 kemianpalkinto	1	Nobelin kemianpalkinto.
 kenttäolo	1	Laboratorion ulkopuoliset olosuhteet, joissa pikatestin on toimittava.
-keskeyttää	1	Lopettaa kesken: raskauden keskeytys, kokeen keskeytys.
-ketjunpäättämismenetelmä	2	Sangerin sekvensointi: dideoksinukleotidit päättävät ketjut satunnaisesti ja pituudet luetaan.	Mikä on ketjunpäättämismenetelmä?
+keskeyttää	1	Keskeyttää tarkoittaa, että jokin lopetetaan kesken. Esimerkiksi kokeen keskeytys.
+ketjunpäättämismenetelmä	2	Ketjunpäättämismenetelmä on Sangerin sekvensointi. Dideoksinukleotidit päättävät ketjut ja pituudet luetaan.	Mikä on ketjunpäättämismenetelmä?
 koch	2	Robert Koch, joka osoitti bakteerien aiheuttavan tuberkuloosin ja koleran ja muotoili Kochin postulaatit.	Kuka oli Koch?
-koeasetelma	1	Kokeen suunnitelma: ryhmät, kontrollit, mittaukset.
+koeasetelma	1	Koeasetelma on kokeen suunnitelma. Siihen kuuluvat ryhmät, kontrollit ja mittaukset.
 kohdemolekyyli	1	Molekyyli, johon lääke tai vasta-aine sitoutuu. Kutsutaan myös: kohde.
 kohdennus	1	Vaikutuksen suuntaaminen tiettyyn kohteeseen, kuten lääkkeen kohdennus syöpäsoluun.
 koneoppimismalli	1	Datasta oppinut tekoälymalli, kuten AlphaFold.
 koodipyörä	1	Ympyräkaavio, josta kodonin aminohappo luetaan.
-kopiomäärä	1	Kopioiden lukumäärä: geenin kopiomäärä genomissa.
+kopiomäärä	1	Kopiomäärä on kopioiden lukumäärä. Esimerkiksi geenin kopiomäärä genomissa.
 korjausjärjestelmä	1	DNA-vaurioita korjaavat entsyymit.
 kotikäyttöinen	1	Kotona käytettäväksi tarkoitettu, kuten raskaustesti.
 kromatogrammi	2	Kromatografian tulosviiva, jossa piikit vastaavat eroteltuja aineita. Sekvensoinnissa väripiikit emäksiä.	Mikä on kromatogrammi?
-kuumennus	1	Lämpötilan nosto: PCR:n kuumennus erottaa juosteet.
+kuumennus	1	Kuumennus on lämpötilan nosto. PCR:n kuumennus erottaa DNA-juosteet.
 kuvantamisdata	1	Kuvantamisesta saatu mittausaineisto, jota tekoäly tulkitsee.
 käymismenetelmä	1	Mikrobien käymiseen perustuva valmistustapa.
-käymisteollisuus	1	Käymiseen perustuva teollisuus: olut, viini, juusto, antibiootit.
+käymisteollisuus	1	Käymisteollisuus valmistaa tuotteita mikrobien käymisellä. Esimerkiksi olut, juusto ja antibiootit.
 käännekohta	1	Merkittävä muutoskohta historiassa, kuten yhdistelmä-DNA-tekniikan synty 1973.
 laboratoriolaite	1	Laboratorion väline, kuten sentrifugi, PCR-laite tai sekvensaattori.
 lehmä	1	Nauta, maidon tuottaja ja siirtogeenisten eläinten kohde.
 lemmikki	1	Kotieläin seuraksi. Eläinlääketieteen diagnostiikan kohde.
-lievittää	1	Vähentää oireita: lääke lievittää tautia parantamatta.
-liikakäyttö	1	Liiallinen käyttö: antibioottien liikakäyttö tuottaa resistenssiä.
-luoda	1	Tehdä uutta: synteettinen biologia luo uusia reittejä.
-luonnonvara	1	Luonnon hyödynnettävä aines: metsä, vesi, maaperä.
+lievittää	1	Lievittää tarkoittaa, että oireita vähennetään. Lääke lievittää tautia parantamatta sitä.
+liikakäyttö	1	Liikakäyttö on liiallista käyttöä. Antibioottien liikakäyttö tuottaa resistenssiä.
+luoda	1	Luoda tarkoittaa, että tehdään jotakin uutta. Synteettinen biologia luo uusia reittejä.
+luonnonvara	1	Luonnonvara on luonnon aines, jota ihminen hyödyntää. Esimerkiksi metsä ja vesi.
 luovuttajaeläin	1	Eläin, jolta solu tai elin otetaan, kuten kloonauksen tumanluovuttaja.
-lyhytketjuinen	1	Lyhyestä ketjusta koostuva: lyhytketjuiset rasvahapot.
+lyhytketjuinen	1	Lyhytketjuinen tarkoittaa, että molekyylin ketju on lyhyt. Esimerkiksi lyhytketjuiset rasvahapot.
 maa-aines	1	Maaperän aine, jota mikrobit puhdistavat bioremediaatiossa.
 maaperä	1	Maan pintakerros, jossa mikrobit ja kasvit elävät.
 maanviljely	1	Kasvien viljely ravinnoksi, alkoi 10 000 vuotta sitten.
 maissi	1	Viljakasvi, jonka Bt-lajikkeet ovat yleisimpiä GM-kasveja.
 margariini	1	Kasvirasvalevite. Benecol sisältää kolesterolia alentavaa kasvistanolia.
-markkina	1	Kauppapaikka: lääkemarkkinat, biotekniikan markkinat.
+markkina	1	Markkina on kauppapaikka, jossa tuotteita myydään. Esimerkiksi lääkemarkkinat.
 merkitsevyys	1	Tilastollinen todennäköisyys, ettei tulos ole sattumaa.
 merkkigeeni	2	Vektorin geeni, jonka avulla muokatut solut tunnistetaan, kuten antibioottiresistenssi tai fluoresenssi.	Mikä on merkkigeeni?
 metsäsektori	1	Metsätalous ja -teollisuus, joka hyödyntää entsyymejä ja biojalostusta.
@@ -110,55 +110,55 @@ monistuskierros	1	PCR:n yksi sykli: denaturaatio, alukkeiden liittyminen, pidenn
 mooren laki	1	Havainto, että tietokoneiden teho kaksinkertaistuu parissa vuodessa. Sekvensointi halpenee nopeammin.
 mullis	2	Kary Mullis, joka keksi PCR:n 1983. Nobel 1993.	Kuka oli Mullis?
 munkki	1	Luostarin asukas. Mendel oli augustinolaismunkki.
-muokata	1	Muuttaa tarkoituksella: geeniä muokataan, proteiinia muokataan.
-muuntaa	1	Muuttaa toiseksi: entsyymi muuntaa lähtöaineen tuotteeksi.
+muokata	1	Muokata tarkoittaa, että jotakin muutetaan tarkoituksella. Geeniä voidaan muokata.
+muuntaa	1	Muuntaa tarkoittaa, että jokin muutetaan toiseksi. Entsyymi muuntaa lähtöaineen tuotteeksi.
 muuntogeeninen	2	Eliö, jonka perimää on muokattu geenitekniikalla. Kutsutaan myös: GM, geenimuunneltu.	Mitä muuntogeeninen tarkoittaa?
 nanoteknologia	2	Nanometrimittakaavan rakenteiden tekniikka, kuten nanopartikkelit lääkkeiden kantajina.	Mitä nanoteknologia on?
 nauta	1	Kotieläin, jonka maito, liha ja rekombinanttiproteiinit ovat biotekniikan tuotteita.
 nykygenetiikka	1	Molekyylitason genetiikka sekvensoinnista geenimuokkaukseen.
 ohjaus-rna	2	CRISPR-Cas9:n RNA, joka ohjaa Cas9-entsyymin kohde-DNA:han. Kutsutaan myös: guide-RNA.	Mikä on ohjaus-RNA?
-ohjelmoida	1	Antaa ohjeet: solu ohjelmoidaan tuottamaan, tekoäly ohjelmoidaan oppimaan.
+ohjelmoida	1	Ohjelmoida tarkoittaa, että jollekin annetaan ohjeet. Solu ohjelmoidaan tuottamaan proteiinia.
 okazakin fragmentti	2	Replikaation jälkeisen juosteen lyhyet pätkät, jotka ligaasi liittää yhteen.	Mikä on Okazakin fragmentti?
 olutpano	1	Oluen valmistus mallastamalla, keittämällä ja käyttämällä. Kutsutaan myös: oluenpano.
-optinen	1	Valoon perustuva: optinen mittaus, optinen mikroskooppi.
+optinen	1	Optinen tarkoittaa, että jokin perustuu valoon. Esimerkiksi optinen mittaus.
 paise	1	Märkäpesäke, bakteeri-infektion tulehdus, jota penisilliini hoitaa.
 palovamma	1	Kuumuuden aiheuttama ihovaurio, jota kudosteknologian iho korjaa.
-parantaa	1	Tehdä terveeksi tai paremmaksi: lääke parantaa, jalostus parantaa satoa.
+parantaa	1	Parantaa tarkoittaa, että jokin tehdään terveeksi tai paremmaksi. Lääke parantaa sairauden.
 pcr-testi	2	PCR:llä tehty taudinmääritys, joka tunnistaa mikrobin nukleiinihapon, kuten koronatesti.	Mikä on PCR-testi?
 peptidihormoni	2	Aminohappoketjusta koostuva hormoni, kuten insuliini ja kasvuhormoni. Tuotetaan rekombinantisti.	Mikä on peptidihormoni?
 perinnöllisyys	1	Ominaisuuksien siirtyminen sukupolvelta toiselle geeneissä.
-perusprosessi	1	Bioprosessin perusvaihe: kasvatus, tuotto, talteenotto, puhdistus.
-perusväline	1	Työkalu, jota ilman ei tulla toimeen: PCR ja sekvensointi ovat molekyylibiologian perusvälineitä.
+perusprosessi	1	Perusprosessi on bioprosessin perusvaihe. Vaiheita ovat kasvatus, tuotto, talteenotto ja puhdistus.
+perusväline	1	Perusväline on työkalu, jota ilman ei tulla toimeen. PCR on molekyylibiologian perusväline.
 pikamolekyyli	1	Nopeasti reagoiva tai lyhytikäinen molekyyli.
 pinnoite	1	Pinnan päällyste, kuten implantin biomateriaalipinnoite.
 pintapiikki	1	Viruksen pinnan ulkoneva proteiini, kuten koronaviruksen piikkiproteiini.
 polyhydroksialkanoaatti	2	Bakteerien varastopolyesteri, biohajoava biomuovi. Lyhenne PHA.	Mikä on polyhydroksialkanoaatti?
 polylaktidi	2	Maitohaposta polymeroitu biohajoava muovi. Lyhenne PLA.	Mikä on polylaktidi?
 polymeraasientsyymi	1	Polymeraasi, nukleiinihappoa rakentava entsyymi.
-polymeroida	1	Liittää monomeerit polymeeriksi: maitohappo polymeroidaan polylaktidiksi.
+polymeroida	1	Polymeroida tarkoittaa, että monomeerit liitetään polymeeriksi. Maitohappo polymeroidaan polylaktidiksi.
 probioottijugurtti	1	Elävää hyötybakteeria sisältävä jugurtti.
 pylväskuvaaja	1	Kaavio, jossa määrät esitetään pylväinä.
 raivotautirokote	1	Pasteurin 1885 kehittämä rokote raivotautia vastaan.
-rasvaliukoinen	1	Rasvaan liukeneva, hydrofobinen: A-, D-, E- ja K-vitamiinit.
+rasvaliukoinen	1	Rasvaliukoinen aine liukenee rasvaan mutta ei veteen. Esimerkiksi A- ja D-vitamiini.
 rasvarakkula	1	Rasvasta muodostuva pisara tai lipidipallo.
-raueta	1	Lakata olemasta voimassa: patentti raukeaa 20 vuoden kuluttua.
+raueta	1	Raueta tarkoittaa, että jokin lakkaa olemasta voimassa. Patentti raukeaa 20 vuoden kuluttua.
 ravintokuitu	2	Ihmisen sulattamaton hiilihydraatti, kuten selluloosa, jota suolistomikrobit käyttävät.	Mikä on ravintokuitu?
-redundantti	2	Ylimääräinen, toistettu: geneettinen koodi on redundantti, useampi kodoni samalle aminohapolle.	Mitä redundantti tarkoittaa?
-resepti	1	Ohje valmistukseen: babylonialaisten olutresepti, lääkemääräys.
+redundantti	2	Redundantti tarkoittaa, että sama asia on toistettu. Geneettinen koodi on redundantti: useampi kodoni vastaa samaa aminohappoa.	Mitä redundantti tarkoittaa?
+resepti	1	Resepti on ohje valmistukseen. Esimerkiksi olutresepti tai lääkemääräys.
 rikkakasvimyrkky	1	Rikkakasveja tappava aine, jota GM-kasvit kestävät. Kutsutaan myös: herbisidi.
 rikostutkinta	1	Rikoksen selvittäminen, jossa DNA-tunnistus tunnistaa tekijän.
 rinnakkaissekvensointi	2	Miljoonien DNA-jaksojen samanaikainen sekvensointi. Kutsutaan myös: NGS, massiivinen rinnakkaissekvensointi.	Mitä rinnakkaissekvensointi on?
 rinnakkaisvalmiste	2	Alkuperäislääkkeen kopio patentin rauettua. Biologisilla lääkkeillä biosimilaari.	Mikä on rinnakkaisvalmiste?
-riski	1	Haitan mahdollisuus: GM-kasvien ympäristöriski, lääkkeen riski.
+riski	1	Riski on haitan mahdollisuus. Esimerkiksi lääkkeen riski.
 riskisijoitus	1	Tuottoa tavoitteleva sijoitus epävarmaan yritykseen. Kutsutaan myös: riskipääoma.
 risteyttää	1	Yhdistää kaksi yksilöä jälkeläisiksi jalostuksessa.
 rna-jakso	1	RNA-molekyylin osa, sekvenssi.
 ruoantähde	1	Syömättä jäänyt ruoka, biojätettä.
 ruokatuotanto	1	Ravinnon valmistus, johon biotekniikka tuo entsyymejä ja mikrobeja.
-ruokkia	1	Antaa ravintoa: soluja ruokitaan elatusaineella.
+ruokkia	1	Ruokkia tarkoittaa, että annetaan ravintoa. Soluja ruokitaan elatusaineella.
 räjähdysaine	1	Räjähtävä yhdiste, kuten TNT, jonka asetonia tuotettiin fermentoimalla.
-saastua	1	Likaantua haitallisilla aineilla: maaperä saastuu öljystä.
-sakset	1	Leikkuri: restriktioentsyymit ja CRISPR ovat geenisakset.
+saastua	1	Saastua tarkoittaa, että jokin likaantuu haitallisilla aineilla. Maaperä saastuu öljystä.
+sakset	1	Sakset ovat leikkuri. Restriktioentsyymit ja CRISPR ovat geenisakset.
 sammakko	1	Sammakkoeläin, jonka munasoluja käytetään tutkimuksessa.
 sato	1	Viljelykasvin tuotto, jota jalostus lisää.
 savitaulu	1	Babylonialaisten kirjoitusalusta, jolle olutreseptit tallennettiin.
@@ -170,51 +170,51 @@ solukko	1	Solujen muodostama kokonaisuus, kudos. Solukkoviljely kasvattaa kasvis
 solukkoviljely	2	Kasvisolujen tai -kudoksen kasvatus steriilillä alustalla kokonaisiksi kasveiksi.	Mitä solukkoviljely on?
 soluklooni	1	Yhdestä solusta jakautumalla syntynyt identtisten solujen joukko.
 solunäyte	1	Tutkimusta varten otetut solut.
-solupohjainen	1	Soluihin perustuva: solupohjainen hoito, solupohjainen määritys.
+solupohjainen	1	Solupohjainen tarkoittaa, että jokin perustuu soluihin. Esimerkiksi solupohjainen hoito.
 soluterapia	2	Sairauden hoito siirtämällä soluja, kuten kantasoluja tai muokattuja T-soluja.	Mitä soluterapia on?
 solutyhjennetty	1	Elin, jonka solut on poistettu ja tukirakenne jätetty. Kudosteknologian tukiranka.
-solutyyppi	1	Solun laji tehtävän mukaan: hermosolu, lihassolu, ihosolu.
-sopivuus	1	Yhteensopivuus: elimen sopivuus vastaanottajalle.
-suunnitella	1	Laatia suunnitelma: proteiini suunnitellaan tietokoneella.
+solutyyppi	1	Solutyyppi on solun laji tehtävän mukaan. Esimerkiksi hermosolu ja lihassolu.
+sopivuus	1	Sopivuus tarkoittaa yhteensopivuutta. Esimerkiksi siirrettävän elimen sopivuus vastaanottajalle.
+suunnitella	1	Suunnitella tarkoittaa, että laaditaan suunnitelma. Proteiini suunnitellaan tietokoneella.
 suurtila	1	Suuri maatila, jossa tuotanto on teollista.
 sydäntautiriski	1	Sydän- ja verisuonitautien todennäköisyys, jota kolesteroli nostaa.
-synonyymi	1	Samaa tarkoittava sana: biotekniikka ja bioteknologia.
-sääntömukaisuus	1	Säännön noudattaminen: viranomaisvaatimukset lääketuotannossa.
-tappaa	1	Surmata: antibiootti tappaa bakteerit.
+synonyymi	1	Synonyymi on sana, joka tarkoittaa samaa kuin toinen. Biotekniikka ja bioteknologia ovat synonyymejä.
+sääntömukaisuus	1	Sääntömukaisuus tarkoittaa, että sääntöjä noudatetaan. Lääketuotannossa noudatetaan viranomaisvaatimuksia.
+tappaa	1	Tappaa tarkoittaa surmata. Antibiootti tappaa bakteerit.
 taudinaiheuttajamikrobi	1	Tautia aiheuttava mikrobi, patogeeni.
-tehottomuus	1	Tehon puute: insuliinin tehottomuus tyypin 2 diabeteksessa.
-teollistua	1	Muuttua teolliseksi: käyminen teollistui 1800-luvulla.
+tehottomuus	1	Tehottomuus tarkoittaa, että teho puuttuu. Esimerkiksi insuliinin tehottomuus tyypin 2 diabeteksessa.
+teollistua	1	Teollistua tarkoittaa, että toiminta muuttuu teolliseksi. Käyminen teollistui 1800-luvulla.
 teollisuusala	1	Teollisuuden haara, kuten lääke- tai elintarviketeollisuus.
-teollisuusbiotekniikka	2	Biotekniikka teollisessa tuotannossa: entsyymit, kemikaalit ja polttoaineet mikrobeilla. Kutsutaan myös: valkoinen biotekniikka.	Mitä teollisuusbiotekniikka on?
+teollisuusbiotekniikka	2	Teollisuusbiotekniikka käyttää mikrobeja ja entsyymejä teollisessa tuotannossa. Kutsutaan myös: valkoinen biotekniikka.	Mitä teollisuusbiotekniikka on?
 teollisuuskemikaali	1	Suuressa mittakaavassa tuotettu kemikaali, kuten etanoli tai sitruunahappo.
 terveyshyöty	1	Terveyttä edistävä vaikutus, kuten kolesterolin lasku.
-terveyssovellus	1	Biotekniikan käyttö terveydenhoidossa: lääkkeet, diagnostiikka, hoidot.
+terveyssovellus	1	Terveyssovellus on biotekniikan käyttöä terveydenhoidossa. Esimerkiksi lääkkeet ja diagnostiikka.
 tietojenkäsittely	1	Tiedon käsittely tietokoneella, bioinformatiikan perusta.
-todentaa	1	Osoittaa todeksi: tuotteen aitous todennetaan DNA-testillä.
-toimiala	1	Elinkeinon ala: bioala, lääkeala.
+todentaa	1	Todentaa tarkoittaa, että jokin osoitetaan todeksi. Tuotteen aitous todennetaan DNA-testillä.
+toimiala	1	Toimiala on elinkeinon ala. Esimerkiksi lääkeala.
 tomaatti	1	Vihannes, jonka Flavr Savr oli ensimmäinen GM-elintarvike.
-torjunta	1	Haitan estäminen: tuholaistorjunta, tautien torjunta.
+torjunta	1	Torjunta tarkoittaa, että haitta estetään. Esimerkiksi tuholaistorjunta.
 tuholainen	1	Viljelykasveja vahingoittava eläin, kuten hyönteinen.
 tukirakenne	1	Kannatteleva rakenne, kuten kudosteknologian tukiranka.
-tunnistuselementti	1	Määrityksen molekyyli, joka tunnistaa kohteen: vasta-aine, aptameeri, DNA-koetin.
+tunnistuselementti	1	Tunnistuselementti on määrityksen molekyyli, joka tunnistaa kohteen. Esimerkiksi vasta-aine tai DNA-koetin.
 tunnistusmolekyyli	1	Kohteen tunnistava molekyyli, kuten vasta-aine.
 tuotanto-ominaisuus	1	Eliön hyödynnettävä piirre, kuten maidontuotto tai sadon määrä.
 tutkimusmalli	1	Tutkimuksessa käytetty malli, kuten malliorganismi tai soluviljelmä.
 tutkimustyökalu	1	Tutkimuksen apuväline, kuten PCR, CRISPR tai vasta-aine.
-tyydyttää	1	Täyttää tarve: ruoantuotanto tyydyttää ravinnontarpeen.
+tyydyttää	1	Tyydyttää tarkoittaa, että tarve täytetään. Ruoantuotanto tyydyttää ravinnontarpeen.
 työjuhta	1	Kova työntekijä. E. coli on molekyylibiologian työjuhta.
 täsmähoito	2	Sairauden molekyylimekanismiin kohdistettu hoito. Kutsutaan myös: kohdennettu hoito.	Mikä on täsmähoito?
 täsmämuutos	1	Tarkasti kohdennettu muutos genomissa, kuten CRISPR-muokkaus.
-vaarattomampi	1	Vähemmän vaarallinen: heikennetty rokote on vaarattomampi.
+vaarattomampi	1	Vaarattomampi tarkoittaa vähemmän vaarallista. Heikennetty rokote on vaarattomampi.
 vaate	1	Tekstiili, jonka käsittelyssä entsyymejä käytetään.
 vainaja	1	Kuollut henkilö, joka tunnistetaan DNA:sta.
 vakiotuote	1	Vakiintunut tuote, kuten rekombinantti-insuliini.
 valiini	2	Haaraketjuinen hydrofobinen aminohappo. Lyhenne Val, V. Sirppisoluanemiassa korvaa glutamaatin.	Mikä on valiini?
-valikoivasti	1	Valiten: entsyymi toimii valikoivasti substraattiinsa.
+valikoivasti	1	Valikoivasti tarkoittaa valiten. Entsyymi toimii valikoivasti substraattiinsa.
 valmiste	1	Valmistettu tuote, kuten lääkevalmiste.
-vastustuskyky	2	Kyky torjua tautia tai ainetta: immuniteetti tai bakteerin antibioottiresistenssi.	Mitä vastustuskyky tarkoittaa?
+vastustuskyky	2	Vastustuskyky on kyky torjua tauti tai aine. Esimerkiksi immuniteetti tai antibioottiresistenssi.	Mitä vastustuskyky tarkoittaa?
 vehnä	1	Tärkein viljakasvi, jalostettu villistä heinästä.
-viallinen	1	Virheellinen: viallinen geeni aiheuttaa sairauden.
+viallinen	1	Viallinen tarkoittaa virheellistä. Viallinen geeni aiheuttaa sairauden.
 viejähaarake	2	Hermosolun pitkä haarake, joka johtaa impulssin pois solusta. Kutsutaan myös: aksoni.	Mikä on viejähaarake?
 virtsarakko	1	Virtsaa keräävä elin. Kudosteknologialla on kasvatettu virtsarakkoja.
 virustauti	1	Viruksen aiheuttama sairaus, kuten influenssa tai isorokko.
@@ -222,9 +222,52 @@ virstanpylväs	1	Merkittävä saavutus kehityksessä, kuten ihmisgenomin sekvens
 väriaineleimattu	1	Fluoresoivalla väriaineella merkitty, kuten sekvensoinnin dideoksinukleotidit.
 väripiikki	1	Kromatogrammin värillinen huippu, joka sekvensoinnissa vastaa yhtä emästä.
 weissman	2	Drew Weissman, joka kehitti Katalin Karikón kanssa muokatun lähetti-RNA:n rokotteisiin. Nobel 2023.	Kuka on Weissman?
-yksilöllinen	1	Yksilölle ominainen: yksilöllinen lääkitys, yksilöllinen DNA-profiili.
-yksinoikeus	1	Oikeus, joka on vain yhdellä: patentti antaa yksinoikeuden keksintöön.
+yksilöllinen	1	Yksilöllinen tarkoittaa, että jokin on ominainen yhdelle yksilölle. Esimerkiksi yksilöllinen lääkitys.
+yksinoikeus	1	Yksinoikeus on oikeus, joka on vain yhdellä. Patentti antaa yksinoikeuden keksintöön.
 ympyrädiagrammi	1	Kaavio, jossa osuudet esitetään ympyrän sektoreina.
 ympäristöala	1	Ympäristönsuojelun ja -tekniikan ala.
 öljypohjainen	1	Raakaöljystä valmistettu, kuten tavallinen muovi. Vastakohta: biopohjainen.
 öljyvahinko	1	Öljypäästö ympäristöön, jota mikrobit puhdistavat bioremediaatiossa.
+# linkkisiivous 13.9.2026: sanat, jotka linkittivat vaaralle kortille, saavat oman kortin
+näyte	2	Näyte on pieni määrä ainetta, joka otetaan tutkittavaksi. Esimerkiksi verinäyte.	Mikä on näyte?
+immuniteetti	2	Immuniteetti on elimistön vastustuskyky taudinaiheuttajia vastaan. Kutsutaan myös: vastustuskyky.	Mikä on immuniteetti?
+todennäköisyys	1	Todennäköisyys kertoo, kuinka varmasti jokin tapahtuu. Se ilmoitetaan lukuna nollan ja yhden välillä.	Mikä on todennäköisyys?
+teoria	2	Teoria on tieteellinen selitys, jota monet kokeet tukevat. Esimerkiksi evoluutioteoria.	Mikä on teoria?
+juusto	1	Juusto on maidosta valmistettu ruoka. Entsyymi juoksuttaa maidon ja bakteerit kypsyttävät sen.	Mitä juusto tarkoittaa?
+maatalous	1	Maatalous on elinkeino, jossa viljellään kasveja ja kasvatetaan eläimiä ruoaksi.	Mitä maatalous tarkoittaa?
+virtsa	1	Virtsa on neste, jonka munuaiset suodattavat verestä. Siitä voidaan tutkia sairauksia.	Mitä virtsa tarkoittaa?
+penisilliini	2	Penisilliini on ensimmäinen antibiootti. Se estää bakteerin soluseinän rakentumisen.	Mikä on penisilliini?
+hinta	1	Hinta on rahamäärä, joka tuotteesta maksetaan.	Mitä hinta tarkoittaa?
+asetoni	1	Asetoni on pieni ketoni, jota käytetään liuottimena. Sen kaava on CH3COCH3.	Mikä on asetoni?
+viini	1	Viini on juoma, jonka hiiva käyttää rypäleiden sokerista.	Mitä viini tarkoittaa?
+ongelma	1	Ongelma on kysymys tai vaikeus, joka pitää ratkaista.	Mitä ongelma tarkoittaa?
+sykli	1	Sykli on tapahtumasarja, joka toistuu alusta uudelleen. Esimerkiksi solusykli.	Mitä sykli tarkoittaa?
+terveyshuolto	1	Terveydenhuolto on järjestelmä, joka hoitaa ihmisten sairauksia ja terveyttä.	Mitä terveyshuolto tarkoittaa?
+vakiintua	1	Vakiintua tarkoittaa, että jokin muuttuu pysyväksi tai yleiseksi.	Mitä vakiintua tarkoittaa?
+kotieläin	1	Kotieläin on eläin, jota ihminen kasvattaa. Esimerkiksi lehmä ja kana.	Mitä kotieläin tarkoittaa?
+synteettinen	1	Synteettinen tarkoittaa, että aine on valmistettu keinotekoisesti eikä otettu luonnosta.	Mitä synteettinen tarkoittaa?
+värillinen	1	Värillinen tarkoittaa, että jollakin on väri. Esimerkiksi värillinen liuos.	Mitä värillinen tarkoittaa?
+tahra	1	Tahra on likainen kohta esimerkiksi vaatteessa.	Mitä tahra tarkoittaa?
+riisi	1	Riisi on viljakasvi, jonka jyviä syödään ruoaksi.	Mitä riisi tarkoittaa?
+viljely	1	Viljely on kasvien kasvattamista pellolla tai solujen kasvattamista laboratoriossa.	Mitä viljely tarkoittaa?
+kierrätys	1	Kierrätys tarkoittaa, että jäte käytetään uudelleen raaka-aineena.	Mitä kierrätys tarkoittaa?
+leipä	1	Leipä on viljasta leivottu ruoka. Hiiva kohottaa taikinan.	Mitä leipä tarkoittaa?
+jugurtti	1	Jugurtti on maidosta valmistettu ruoka, jonka maitohappobakteerit ovat hapattaneet.	Mitä jugurtti tarkoittaa?
+-	poistettu 13.9.2026: fysiikka määritellään jo toisella kortilla
+haitta	1	Haitta on huono puoli tai vahinko.	Mitä haitta tarkoittaa?
+valtakumous	1	Vallankumous on suuri ja nopea muutos. Esimerkiksi kemian vallankumous 1700-luvulla.	Mitä valtakumous tarkoittaa?
+tuhohyönteinen	1	Tuhohyönteinen on hyönteinen, joka vahingoittaa viljelykasveja.	Mitä tuhohyönteinen tarkoittaa?
+etikka	1	Etikka on hapan neste, jossa on etikkahappoa. Sitä käytetään ruoassa.	Mitä etikka tarkoittaa?
+hybridooma	2	Hybridooma on solu, joka on tehty yhdistämällä vasta-ainetta tuottava B-solu ja syöpäsolu.	Mikä on hybridooma?
+hyväksyä	1	Hyväksyä tarkoittaa, että jokin todetaan kelvolliseksi. Esimerkiksi lääkevirasto hyväksyy lääkkeen.	Mitä hyväksyä tarkoittaa?
+aitous	1	Aitous tarkoittaa, että tuote on sitä, mitä se väittää olevansa.	Mitä aitous tarkoittaa?
+luotettavasti	1	Luotettavasti tarkoittaa, että tulokseen voi luottaa.	Mitä luotettavasti tarkoittaa?
+talous	1	Talous on rahan ja tuotannon kokonaisuus.	Mitä talous tarkoittaa?
+laatu	1	Laatu kertoo, kuinka hyvä jokin on.	Mitä laatu tarkoittaa?
+kasvuhormoni	1	Kasvuhormoni on aivolisäkkeen hormoni, joka saa kehon kasvamaan.	Mikä on kasvuhormoni?
+lammas	1	Lammas on kotieläin, josta saadaan villaa ja lihaa. Dolly oli kloonattu lammas.	Mitä lammas tarkoittaa?
+lajike	1	Lajike on kasvilajin jalostettu muoto, jolla on tietyt ominaisuudet. Esimerkiksi perunalajike.	Mikä on lajike?
+matematiikka	1	Matematiikka on tiede, joka tutkii lukuja, muotoja ja niiden suhteita.	Mitä matematiikka tarkoittaa?
+villi	1	Villi tarkoittaa luonnossa elävää, jota ihminen ei ole kesyttänyt tai jalostanut.	Mitä villi tarkoittaa?
+soija	1	Soija on palkokasvi, jonka pavuista tehdään esimerkiksi soijamaitoa.	Mitä soija tarkoittaa?
+eläin	1	Eläin on eliö, joka liikkuu ja syö muita eliöitä. Esimerkiksi hiiri ja ihminen.	Mitä eläin tarkoittaa?
