@@ -777,6 +777,7 @@ vec3 shake(vec3 p){ return p + 0.12*vec3(sin(uT*1.3+p.x*0.12+p.y*0.08), sin(uT*1
 attribute vec3 wOrig;
 attribute vec3 wVel;
 uniform float planeDim; uniform float planeZ; uniform vec3 psuLo; uniform vec3 psuHi;   // dev: with planeDim on, a free molecule inside the PSU box that is not on the plane z = planeZ is not drawn
+uniform float viewBox;   // 1 = the camera is inside the box: a free molecule OUTSIDE it is not drawn
 uniform vec3 boxLo;
 uniform vec3 boxHi;
 uniform float memY;
@@ -940,7 +941,8 @@ void main(void){
   wCen = repelShells(wCen);   // the protein shells still win: they are applied last
 #endif
 #endif
-  tasoDim = planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * (step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z));   // judged on the FINAL centre (after the CPU displacement and the shell repel - the protons live entirely in that displacement): off the plane and inside the PSU box -> culled
+  { float inB = step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z);
+    tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * inB, viewBox * (1.0 - inB)); }   // the plane switch culls off-plane molecules INSIDE the box, the box-only view culls everything OUTSIDE it   // judged on the FINAL centre (after the CPU displacement and the shell repel - the protons live entirely in that displacement): off the plane and inside the PSU box -> culled
   base = wCen + W[3].xyz;
 #endif
 #ifdef LIPTILE
@@ -1121,8 +1123,10 @@ uniform float cofOutCol;      // grey level of a revealed atom's outline (0 = bl
 #ifdef MEMFADE
 uniform vec3 memCut;       // [cutZ, cutSign, strength] → membrane lipids in front of the plane fade away
 uniform vec3 cutLo; uniform vec3 cutHi;   // the cut applies inside this box only (cell mode: the light-reaction box, sheet: everything)
+uniform float viewBox;     // 1 = the camera is inside the light-reaction box: only what is inside the box is drawn
 varying float vMemAnc;     // per-lipid anchor Z → the cut hides WHOLE lipids, never slices one in half
 varying vec3 vMemW;
+float outsideBox(vec3 p){ return 1.0 - step(cutLo.x, p.x) * step(p.x, cutHi.x) * step(cutLo.y, p.y) * step(p.y, cutHi.y) * step(cutLo.z, p.z) * step(p.z, cutHi.z); }
 #endif
 #ifdef ETCHL
 varying float vGid;        // this cofactor atom's group index
@@ -1207,6 +1211,9 @@ varying vec3 vWB1;
 varying vec3 vWB2;
 uniform float boil;      // line-boil amount (0 = off) → warps the silhouette, object-locked
 void main(void){
+#ifdef MEMFADE
+  if(viewBox > 0.5 && outsideBox(vMemW) > 0.5) discard;   // box-only view: a lipid outside the light-reaction box is not drawn
+#endif
 #ifdef PGLOW
   /* Proton corona: a soft additive red disc, bigger than the vdW shell, drawn with the same stateless
      positioning as the proton itself so it can never drift off it. Alpha only feeds the ADD blend. */
@@ -1304,6 +1311,7 @@ void main(void){
   // (No screen-door dither anywhere.) Depth-write stays on, so fully opaque fragments still occlude.
   float alpha = 1.0;
 #ifdef MEMFADE
+  if(viewBox > 0.5 && (vMemW.x < cutLo.x || vMemW.x > cutHi.x || vMemW.y < cutLo.y || vMemW.y > cutHi.y || vMemW.z < cutLo.z || vMemW.z > cutHi.z)) discard;   // box-only view
   alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
 #endif
   float edge = smoothstep(bubbleR - 8.0, bubbleR, dist);      // 0 inside the reveal radius, 1 beyond it
@@ -1671,7 +1679,7 @@ varying float vSel;
 varying vec3 vBcol;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi; uniform float viewBox;
 varying float vMemAnc; attribute float memAnc;   // per-lipid anchor Z → whole-lipid cross-cut
 #endif
 #ifdef LIPWRAP
@@ -1824,7 +1832,7 @@ varying vec3 vNrmV;
 varying vec3 vLocalDir;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi; uniform float viewBox;
 varying float vMemAnc;
 #endif
 varying float vOid;
@@ -1927,6 +1935,7 @@ void main(void){
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
+  if(viewBox > 0.5 && (vMemW.x < cutLo.x || vMemW.x > cutHi.x || vMemW.y < cutLo.y || vMemW.y > cutHi.y || vMemW.z < cutLo.z || vMemW.z > cutHi.z)) discard;   // box-only view
   alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));   // fade in inside the bubble
@@ -1997,7 +2006,8 @@ void main(void){
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));
+  if(viewBox > 0.5 && (vMemW.x < cutLo.x || vMemW.x > cutHi.x || vMemW.y < cutLo.y || vMemW.y > cutHi.y || vMemW.z < cutLo.z || vMemW.z > cutHi.z)) discard;   // box-only view   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));   // fade in inside the bubble
   if(alpha < 0.004) discard;
@@ -2056,7 +2066,7 @@ varying float vSel;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi; uniform float viewBox;
 varying float vMemAnc; attribute float memAnc;   // per-lipid anchor Z → whole-lipid cross-cut
 #endif
 #ifdef LIPWRAP
@@ -2205,7 +2215,7 @@ varying float vSel;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi; uniform float viewBox;
 varying float vMemAnc;
 #endif
 uniform float selModel;   // index of the SELECTED complex (-1 = none)
@@ -2301,6 +2311,7 @@ void main(void){
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
+  if(viewBox > 0.5 && (vMemW.x < cutLo.x || vMemW.x > cutHi.x || vMemW.y < cutLo.y || vMemW.y > cutHi.y || vMemW.z < cutLo.z || vMemW.z > cutHi.z)) discard;   // box-only view
   alpha *= 1.0 - memCut.z * step(0.0,(vMemAnc - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // whole-lipid cut (per-molecule anchor) — only memCut.z (the fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));   // fade in inside the camera sphere
@@ -2368,7 +2379,7 @@ varying float vOid;
 varying float vCang;
 varying float vMid;      // spawn orbitals are not model-tagged (always -1) but the shared orb fragment reads vMid
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi; uniform float viewBox;
 #endif
 vec3 shakeOff(vec3 p){ return 0.12*vec3(sin(uT*1.3+p.x*0.12+p.y*0.08), sin(uT*1.1+p.y*0.12+p.z*0.08), sin(uT*1.6+p.z*0.12+p.x*0.08)); }
 void main(void){
@@ -2432,7 +2443,7 @@ varying float vSel;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi; uniform float viewBox;
 #endif
 vec3 gElecP = vec3(0.0);   // the current electron's surface point (view space), set before each elecBolt
 float elecBolt(vec3 N, vec3 e, vec3 uref){
@@ -2511,7 +2522,8 @@ void main(void){
   // TRUE ALPHA — this pass is additive, so coverage scales the glow instead of keying a dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));
+  if(viewBox > 0.5 && (vMemW.x < cutLo.x || vMemW.x > cutHi.x || vMemW.y < cutLo.y || vMemW.y > cutHi.y || vMemW.z < cutLo.z || vMemW.z > cutHi.z)) discard;   // box-only view   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));
   if(coneCos > -0.5) alpha *= 1.0 - smoothstep(coneCos*0.86, coneCos, vCang);
@@ -2547,7 +2559,7 @@ varying float vSel;
 varying vec3 vBcol;
 varying float vCang;
 #ifdef MEMFADE
-varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;
+varying vec3 vMemW; uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi; uniform float viewBox;
 #endif
 vec3 gElecP = vec3(0.0);   // the current electron's surface point (view space), set before each elecBolt
 float elecBolt(vec3 N, vec3 e, vec3 uref){
@@ -2626,7 +2638,8 @@ void main(void){
   // TRUE ALPHA — additive pass, so coverage scales the glow instead of keying a dither.
   float alpha = 1.0;
 #ifdef MEMFADE
-  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
+  alpha *= 1.0 - memCut.z * step(0.0,(vMemW.z - memCut.x)*memCut.y) * (step(cutLo.x, vMemW.x) * step(vMemW.x, cutHi.x) * step(cutLo.y, vMemW.y) * step(vMemW.y, cutHi.y) * step(cutLo.z, vMemW.z) * step(vMemW.z, cutHi.z));
+  if(viewBox > 0.5 && (vMemW.x < cutLo.x || vMemW.x > cutHi.x || vMemW.y < cutLo.y || vMemW.y > cutHi.y || vMemW.z < cutLo.z || vMemW.z > cutHi.z)) discard;   // box-only view   // hard cut plane — only memCut.z (the 2.5 s fade) is ever partial
 #endif
   alpha *= 1.0 - smoothstep(bubbleR - 8.0, bubbleR, length(vViewPos));
   if(coneCos > -0.5) alpha *= 1.0 - smoothstep(coneCos*0.86, coneCos, vCang);
@@ -3896,10 +3909,12 @@ vec3 laatta(vec2 pq){
   return (texMean + (c - texMean) * texContrast) * texGain;
 }
 uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the camera-side half inside the cut box is not drawn, like the lipids (owner 12.9.2026)
+uniform float viewBox;   // 1 = only what is inside the box is drawn
 void main(void){
   float dCam = distance(vWP, camPos);
   if(holeR > 0.0 && dCam < holeR) discard;
   if(memCut.z * step(0.0, (vWP.z - memCut.x)*memCut.y) * (step(cutLo.x, vWP.x) * step(vWP.x, cutHi.x) * step(cutLo.y, vWP.y) * step(vWP.y, cutHi.y) * step(cutLo.z, vWP.z) * step(vWP.z, cutHi.z)) > 0.5) discard;
+  if(viewBox > 0.5 && (vWP.x < cutLo.x || vWP.x > cutHi.x || vWP.y < cutLo.y || vWP.y > cutHi.y || vWP.z < cutLo.z || vWP.z > cutHi.z)) discard;   // box-only view: the shells end at the box
   bool onFacet = facetOn > 0.5 && distance(vWP.xz, cen.xz) < facetR;
   if(onFacet && abs(vWP.x - footCen.x) < footHalf.x && abs(vWP.z - footCen.y) < footHalf.y) discard;
   if(clipOn > 0.5 && length((vWP - clipC) * clipInvS) > clipR - 6.0) discard;   // the thylakoid cap ends at the inner envelope
@@ -5164,6 +5179,8 @@ void main(void){
   let etcSel = -1;                       // index into etcGroups of the selected cofactor (−1 = none)
   let updateCofInfo = null;              // set later → populates the selected-cofactor info panel (3D image, single-unit mass, PubChem link)
   const gCut = new Float32Array([0, 1, 0]);   // membrane cross-cut: [cutZ, cutSign, strength] (bound as memCut[])
+  let gViewBox = 0;   // 1 while the camera is inside the light-reaction box: lipids, shells, free molecules, proteins, DNA outside the box are not drawn (viewBox uniform + CPU culls)
+  const inViewBox = (x, y, z, r) => !gViewBox || (x + r >= gPsuLo.x && x - r <= gPsuHi.x && y + r >= gPsuLo.y && y - r <= gPsuHi.y && z + r >= gPsuLo.z && z - r <= gPsuHi.z);
   const gCutLo = new BABYLON.Vector3(-1e9, -1e9, -1e9), gCutHi = new BABYLON.Vector3(1e9, 1e9, 1e9);   // the cut's box (cell mode: the light-reaction box, so the rest of the cell keeps its membranes)
   const MEM_FADE_S = 1.0;      // seconds the membrane takes to fade fully out / back in
   let memCutOn = false;        // latched threshold state (hysteresis) driving that fade
@@ -5659,7 +5676,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); bindCof(eff); bindPLight(eff); });
   const vdwMatStatic = new BABYLON.ShaderMaterial('vdwLODs', scene, 'imp', {
     attributes:['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
-    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','memCut','cutLo','cutHi','selModel','tileOff','memDrift','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
+    uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','memCut','cutLo','cutHi','viewBox','selModel','tileOff','memDrift','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
     samplers:['cofDepth'],
     defines:['#define IMPRAD','#define MEMFADE','#define COFHIDE','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT'] });   // LIPTPL: one instance per lipid, atoms baked per vertex   // MEMFADE = cross-cut fade, LIPWRAP = the sheet repeats around the camera
   vdwMatStatic.setFloat('radius',1.0); vdwMatStatic.setFloat('isShell',0); vdwMatStatic.setFloat('shellMin',0); vdwMatStatic.setFloat('bubbleR',1e9);
@@ -5669,7 +5686,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
     eff.setFloat('memDrift', gMemDrift);
     eff.setFloat('isShell', gShell); eff.setFloat('shellMin', gShellMin); eff.setFloat('revealFade', gRevealFade); eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 1 → membrane vdW goes 50% transparent where revealed
-    eff.setFloat('uT',gWaveT); eff.setFloat('boil', gBoil); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd);
+    eff.setFloat('uT',gWaveT); eff.setFloat('boil', gBoil); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox); eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd);
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); bindCof(eff); bindPLight(eff); });
 
   /* FAR twins of the two vdW materials. Same shader, same instance buffers — but compiled with CHEAP, and
@@ -5703,12 +5720,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); bindPLight(eff); });
   const vdwStaticFarMat = mkFar('vdwLODsfar',
     ['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
-    ['memCut','cutLo','cutHi','tileOff','memDrift','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
+    ['memCut','cutLo','cutHi','viewBox','tileOff','memDrift','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
     ['#define IMPRAD','#define MEMFADE','#define CHEAP','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT']);
   vdwStaticFarMat.onBindObservable.add(mesh=>{ const eff=vdwStaticFarMat.getEffect(); if(!eff)return;
     eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
     eff.setFloat('memDrift', gMemDrift); bindPLight(eff);
-    eff.setFloat('uT',gWaveT); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi);
+    eff.setFloat('uT',gWaveT); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo);
     eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread);
     eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); });
@@ -6800,7 +6817,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const NEAR_R = Math.max(60, S*3);   // "close to the camera" → nuclei + electrons switch on inside this
     const mkLipMat = (nm, shader, attrs, extra) => {
       const mat = new BABYLON.ShaderMaterial(nm, scene, shader, { attributes:attrs,
-        uniforms:['view','projection','bubbleR','fogColor','fogStart','fogEnd','uT','nElec','selCenter','focusId','coneCos','drawElec','elecR','memCut','cutLo','cutHi','selModel','memDrift'].concat(extra||[]),
+        uniforms:['view','projection','bubbleR','fogColor','fogStart','fogEnd','uT','nElec','selCenter','focusId','coneCos','drawElec','elecR','memCut','cutLo','cutHi','viewBox','selModel','memDrift'].concat(extra||[]),
         // LIPBAKE, not LIPWRAP: these draw the shared templates, and the per-frame gather already places
         // each instance on the wrapped copy, so the shader has no wrapping left to do.
         defines:['#define ELECGATE','#define MEMFADE','#define LIPBAKE'] });   // ELECGATE isolates elecR, MEMFADE = the cross-cut fade
@@ -6809,7 +6826,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       mat.onBindObservable.add(()=>{ const eff=mat.getEffect(); if(!eff) return;
         eff.setFloat('memDrift', gMemDrift);
         eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 2 → membrane orbitals only inside the close forward cone
-        eff.setFloat('uT', gWaveT); eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi);
+        eff.setFloat('uT', gWaveT); eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);
         eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd); });
       return realAlpha(mat);
     };
@@ -7240,7 +7257,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const _e0 = [0,0,0];
       for(const M of MEMS){
         const mat = new BABYLON.ShaderMaterial('cellShellMat'+M.id, scene, 'cellshell', {
-          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','laattaK','texGain','texContrast','texMean','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi'] });
+          attributes:['position','surf'], samplers:['grainTex'], uniforms:['world','view','projection','slabCol','texOn','laattaK','texGain','texContrast','texMean','focalD','depthK','depthLo','startOff','spread','camPos','holeR','grainPitch','slabDark','halfH','blendW','cen','invS','invS2','camSide','facetOn','facetY','facetR','footCen','footHalf','poreOn','poreCos','poreDP','poreNP','poreLim','poreAng','poreInner','baseShade','clipOn','clipC','clipInvS','clipR','shapeP','memCut','cutLo','cutHi','viewBox'] });
         mat.setFloat('poreAng', NE_PORE_R/M.R); mat.setFloat('poreInner', M.inner ? 1 : 0); mat.setFloat('baseShade', M.baseShade);
         mat.setFloat('clipOn', M.clipTo ? 1 : 0);
         if(M.clipTo){ const K = M.clipTo; mat.setVector3('clipC', K.C); mat.setVector3('clipInvS', new BABYLON.Vector3(1/K.s[0], 1/K.s[1], 1/K.s[2])); mat.setFloat('clipR', K.R); }
@@ -7256,7 +7273,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread);
           const hole = (gMembrane && gMemSpanX > 0 && !M.nolat) ? Math.max(0, deriveLod().memR + gMemCellR - gMemBlend) : 0;   // no lipids under the cell wall, so no hole
           eff.setFloat('holeR', hole); eff.setVector3('camPos', cp); eff.setFloat('slabDark', gSlabDark); eff.setFloat('blendW', gMemBlend);
-          eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi);
+          eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);
           let side;   // which face of this bilayer the camera is on: +1 outside, -1 inside
           if(M.facet && Math.hypot(cp.x-bilayerCen.x, cp.z-bilayerCen.z) < facetR) side = cp.y < bilayerCen.y ? 1 : -1;
           else { const ex = (cp.x - M.C.x)*M.invS[0], ey = (cp.y - M.C.y)*M.invS[1], ez = (cp.z - M.C.z)*M.invS[2]; side = SOLU_CELL.pnorm(M, ex,ey,ez) > M.R ? 1 : -1; }
@@ -7558,7 +7575,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const _zeroOff = new BABYLON.Vector3(0,0,0), _ident9 = new Float32Array([1,0,0, 0,1,0, 0,0,1]);
     const nucMatL = new BABYLON.ShaderMaterial('lipNucMat', scene, 'imp', {
       attributes:['position','instanceColor','world0','world1','world2','world3'],
-      uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','tileOff','tileRot','memDrift','memCut','cutLo','cutHi'],
+      uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','tileOff','tileRot','memDrift','memCut','cutLo','cutHi','viewBox'],
       defines:['#define LIPTILE','#define MEMFADE'] });   // LIPTILE isolates tileOff; MEMFADE = cross-cut fade so lipid nuclei vanish WITH their lipid
     nucMatL.setFloat('radius',NUCLEON_R); nucMatL.setFloat('isShell',0); nucMatL.setFloat('bubbleR',1e9);
     nucMatL.setFloat('protonOutline',0); nucMatL.setFloat('coneCos',-1.0); nucMatL.backFaceCulling=false;
@@ -7567,7 +7584,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 2 → membrane nuclei only inside the close cone
       eff.setFloat('uT',gWaveT); eff.setColor3('fogColor',scene.fogColor);
       eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd);
-      eff.setVector3('selCenter', selCenter); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi);
+      eff.setVector3('selCenter', selCenter); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);
       eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || _zeroOff);
       eff.setMatrix3x3('tileRot', (mesh && mesh.metadata && mesh.metadata.rot) || _ident9);   // a cell-membrane tile stands on its local normal
       eff.setFloat('memDrift', gMemDrift); });
@@ -7863,7 +7880,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const wMat=(rad, solid, glow, bias, outline, haze)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':''),scene,'imp',{
         attributes:['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
         uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK','depthBias',
-                  'cellWrap','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi'],
+                  'cellWrap','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
                       : ['#define WATERBOX']).concat(glow ? ['#define PGLOW'] : ['#define PLIGHT']).concat(SOLU_CELL ? ['#define CELLCLIP', '#define DEPTHSHADE'] : []).concat(haze ? ['#define HAZE'] : []) });   // DEPTHSHADE: in cell mode the free molecules and the haze darken with distance like everything else   // CELLCLIP: cell mode wraps the medium around the camera and keeps it to the cytosol - HAZE: the sparse far fill
@@ -7874,7 +7891,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       realAlpha(m); if(!glow && !solid) glassable(m);   // glass-capable (bubbleR = gCrisp below) → two passes
       // AFTER realAlpha, which sets the blend mode to COMBINE - the corona has to be additive to read as light
       if(glow){ m.alphaMode = BABYLON.Constants.ALPHA_ADD; m.disableDepthWrite = true; }
-      m.onBindObservable.add(()=>{const eff=m.getEffect();if(!eff)return; eff.setFloat('uT',gWaveT); eff.setFloat('planeDim', gPlaneDim ? 1 : 0); eff.setFloat('planeZ', gTasoZ); eff.setVector3('psuLo', gPsuLo || bLo); eff.setVector3('psuHi', gPsuHi || bHi);
+      m.onBindObservable.add(()=>{const eff=m.getEffect();if(!eff)return; eff.setFloat('uT',gWaveT); eff.setFloat('planeDim', gPlaneDim ? 1 : 0); eff.setFloat('planeZ', gTasoZ); eff.setVector3('psuLo', gPsuLo || bLo); eff.setVector3('psuHi', gPsuHi || bHi); eff.setFloat('viewBox', gViewBox);
         eff.setFloat('bubbleR', solid ? 0 : gCrisp);   // glass only where the orbitals are actually drawn
         if(!glow) bindPLight(eff);
         eff.setVector3('boxLo',bLo); eff.setVector3('boxHi',bHi); eff.setFloat('memY', MEMBRANE_Y); eff.setFloat('memHalf', SOLU ? 0 : gMemHalfT);   // cell mode: the thylakoid is a curved cap, not this plane - the cap's band is cut in CELLCLIP instead
@@ -8080,11 +8097,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const wCoreN = wOrbCore.m.length/16, wBondN = wOrbBond.m.length/16;
     const wOrbMat = (nm, shader, attrs, extra, defs) => {
       const m = new BABYLON.ShaderMaterial(nm, scene, shader, { attributes:attrs.concat(['seed']),   // SEEDATTR: every free orbital pool carries a per-slot seed buffer
-        uniforms:['view','projection','bubbleR','fogColor','fogStart','fogEnd','uT','nElec','selCenter','focusId','coneCos','drawElec','planeDim','planeZ','psuLo','psuHi'].concat(extra||[]),
+        uniforms:['view','projection','bubbleR','fogColor','fogStart','fogEnd','uT','nElec','selCenter','focusId','coneCos','drawElec','planeDim','planeZ','psuLo','psuHi','viewBox'].concat(extra||[]),
         defines: ['#define SEEDATTR'].concat(defs||[]) });
       m.setFloat('bubbleR',1e9); m.setFloat('nElec',2); m.setFloat('coneCos',-1.0); m.setFloat('drawElec',1);
       m.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); m.setFloat('focusId',-1); m.backFaceCulling=true;
-      m.onBindObservable.add(()=>{ const eff=m.getEffect(); if(!eff) return; eff.setFloat('uT',gWaveT); eff.setFloat('planeDim', gPlaneDim ? 1 : 0); eff.setFloat('planeZ', gTasoZ); eff.setVector3('psuLo', gPsuLo || bLo); eff.setVector3('psuHi', gPsuHi || bHi);
+      m.onBindObservable.add(()=>{ const eff=m.getEffect(); if(!eff) return; eff.setFloat('uT',gWaveT); eff.setFloat('planeDim', gPlaneDim ? 1 : 0); eff.setFloat('planeZ', gTasoZ); eff.setVector3('psuLo', gPsuLo || bLo); eff.setVector3('psuHi', gPsuHi || bHi); eff.setFloat('viewBox', gViewBox);
         eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); });
       return realAlpha(m);
     };
@@ -9039,7 +9056,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     if(gCut[2] < 0.001) gCut[2] = 0; else if(gCut[2] > 0.999) gCut[2] = 1;
     gCut[0] = SOLU ? gTasoZ : bilayerCen.z;                          // cut plane: the particle plane in the cell (owner 12.9.2026: see down onto the plane), the membrane centre on the sheet
     gCut[1] = (cp.z - gCut[0]) >= 0 ? 1 : -1;                        // which side is toward the camera
-    if(SOLU && gPsuLo){ gCutLo.copyFrom(gPsuLo); gCutHi.copyFrom(gPsuHi); } else { gCutLo.set(-1e9, -1e9, -1e9); gCutHi.set(1e9, 1e9, 1e9); }   // only inside the light-reaction box
+    if(SOLU && gPsuLo){ gCutLo.copyFrom(gPsuLo); gCutHi.copyFrom(gPsuHi); } else { gCutLo.set(-1e9, -1e9, -1e9); gCutHi.set(1e9, 1e9, 1e9); }
+    gViewBox = (SOLU && gPsuLo && cp.x >= gPsuLo.x && cp.x <= gPsuHi.x && cp.y >= gPsuLo.y && cp.y <= gPsuHi.y && cp.z >= gPsuLo.z && cp.z <= gPsuHi.z) ? 1 : 0;   // inside the light-reaction box NOTHING outside it is drawn (owner 13.9.2026)   // only inside the light-reaction box
     /* MEGACHEAP PROTEINS. Decided once per model, not per cell, so a complex is never half hull and
        half atoms. Once it is too small on screen its atoms stop drawing entirely and its hull is filled in
        the model's own colour instead - the third tier for proteins, matching the slab for the membrane.
@@ -9053,7 +9071,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const c = h.slab.position;   // the transform observer above has already placed it this frame
       const dx = c.x-cp.x, dy = c.y-cp.y, dz = c.z-cp.z;
       const d = Math.sqrt(dx*dx+dy*dy+dz*dz) || 1e-6;
-      const want = gSlabLod && (d - h.maxR) > _memR;   // the hull slab is a slab tier too: off with 'laatta-LoD'
+      const want = gSlabLod && (d - h.maxR) > _memR && inViewBox(c.x, c.y, c.z, h.maxR);   // the hull slab is a slab tier too: off with 'laatta-LoD' - and not outside the box while the camera is in it
       gProtSlab[h.mi] = want;
       if(h.slab.isEnabled() !== want){ h.slab.setEnabled(want);
         if(want){ const o=h.mi*3;   // the model's own colour, dimmed like packed atoms against a flat fill
@@ -9137,7 +9155,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         } else { wcx=cell.cx; wcy=cell.cy; wcz=cell.cz; }   // membrane cells don't follow the PSII gizmo
       }
       const vx=wcx-cp.x, vy=wcy-cp.y, vz=wcz-cp.z, d2=vx*vx+vy*vy+vz*vz;
-      let vis = true;                                    // in the view frustum?
+      let vis = inViewBox(wcx, wcy, wcz, cM);            // in the view frustum? (and inside the light-reaction box while the camera is in it)
       if(d2 > cM*cM){
         for(let p=0;p<6;p++){ const pl=fplanes[p];
           if(pl.normal.x*wcx + pl.normal.y*wcy + pl.normal.z*wcz + pl.d < -cM){ vis=false; break; }
@@ -9800,7 +9818,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
       if(!any) return;
       { let hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5) + MZ;
-        if(typeof POSE !== 'undefined') hz2 = Math.max(hz2, Math.abs(POSE.pos.z - gTasoZ));   // the box reaches the camera where the Kalvostoon flight lands (owner 12.9.2026), so the cut and the cull cover everything between the camera and the plane
+        if(typeof POSE !== 'undefined'){ hz2 = Math.max(hz2, Math.abs(POSE.pos.z - gTasoZ) + 200);   // the box reaches the camera where the Kalvostoon flight lands, with 200 to spare (owner 13.9.2026: 'make the box reach the spot where the camera lands') - so the cut, the cull and the box-only view all hold there
+          lx = Math.min(lx, POSE.pos.x - 200 - M); hx = Math.max(hx, POSE.pos.x + 200 - M); ly = Math.min(ly, POSE.pos.y - 200 - MY); hy = Math.max(hy, POSE.pos.y + 200 - MY); }
         lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
@@ -13179,7 +13198,7 @@ void main(void){
         const cp = cam.position, memR = deriveLod().memR, nearR = gCrisp + 60;
         for(const ch of chunks){ let cx=0, cy=0, cz=0, n=0; for(let i=ch.bp0;i<ch.bp1;i++){ cx+=bpPos[i*3]; cy+=bpPos[i*3+1]; cz+=bpPos[i*3+2]; n++; } cx/=n; cy/=n; cz/=n;
           const d = Math.hypot(cx-cp.x, cy-cp.y, cz-cp.z) - (ch.bp1-ch.bp0)*RISE*0.5;   // to the chunk's near end
-          const tier = d < nearR ? 0 : (d < memR ? 1 : 2);
+          const tier = gViewBox ? 3 : (d < nearR ? 0 : (d < memR ? 1 : 2));   // 3 = nothing (the camera is inside the light-reaction box, the DNA is not)
           if(tier === ch.tier) continue; ch.tier = tier;
           ch.shells.setEnabled(tier <= 1); ch.nucs.setEnabled(tier === 0); ch.cores.setEnabled(tier === 0); ch.bonds.setEnabled(tier === 0); ch.blobs.setEnabled(tier === 2); }
       }, -1, true);
