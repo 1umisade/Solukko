@@ -98,6 +98,22 @@ ensimmäinen lause alkaa yleensä hakusanalla: "X on…" tai "X tarkoittaa, ett�
 
 ---
 
+## 4c. "Kutsutaan myös:" on oma rivinsä
+
+Synonyymit annetaan vastauksen viimeisenä lauseena muodossa `Kutsutaan myös: nimi, toinen nimi.` — pelkkänä
+tekstinä, ei HTML:ää. Sivusto muotoilee sen automaattisesti (omistaja 13.9.2026): lause tulee **omalle rivilleen**,
+edelle jää **yksi tyhjä rivi** ja nimet ovat **kursiivilla**:
+
+```
+Tuotteen valmistamista teollisessa mittakaavassa, kuten penisilliiniä satojen kuutioiden fermentoreissa.
+
+Kutsutaan myös: *suurtuotanto*.
+```
+
+Edeltävän lauseen on päätyttävä pisteeseen, ja "Kutsutaan myös" -lauseen jälkeen ei saa tulla enää muuta tekstiä.
+
+---
+
 ## 5. Kattavuus
 
 - **Määrittelykortti jokaisesta termistä** — myös helpoimmista.

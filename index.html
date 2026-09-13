@@ -676,6 +676,7 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .embed-2d, .embed-3d-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: none; background: transparent; display: block; }
 .embed-2d { object-fit: contain; padding: 6%; box-sizing: border-box; }
 .card-embed-3d[data-dim="2d"] .embed-3d-frame, .card-embed-3d[data-dim="3d"] .embed-2d { visibility: hidden; pointer-events: none; }   /* the other view stays loaded underneath (the model keeps building while the formula shows) */
+.kutsutaan-myos { display: block; margin-top: 1.5em; margin-top: 1lh; }   /* oma rivi, yksi tyhjä rivi väliin (omistaja 13.9.2026) */
 .dim-paren { color: rgba(26,22,18,0.5); }   /* dim by colour, not opacity: an opacity span faded the word-link bubbles inside it, which looked like cut-off bubbles (owner 10.9.2026) */
 body.dark-mode .dim-paren { color: rgba(234,223,206,0.55); }
 
@@ -7193,8 +7194,19 @@ function _wrapTextNode(textNode){
 }
 
 // Dim text inside parentheses to 50% opacity
+// "Kutsutaan myös: x, y." omalle rivilleen, tyhjä rivi väliin ja nimet kursiivilla (omistaja 13.9.2026). Korttitekstissä lause on
+// pelkkää tekstiä vastauksen lopussa (kurssit/CLAUDE.md §4c); muotoilu tehdään tässä, joten se koskee kaikkia kortteja ja popupeja.
+function muotoileKutsutaanMyos(element){
+  if(!element||element.querySelector('.kutsutaan-myos')) return;
+  const h=element.innerHTML;
+  const m=/((?:\s|&nbsp;|<br\s*\/?>)*)Kutsutaan myös:\s*([\s\S]*?)\.?((?:\s|<br\s*\/?>)*)$/i.exec(h);
+  if(!m) return;
+  const nimet=m[2].split(/,\s*/).map(n=>n.trim()).filter(Boolean).map(n=>'<i>'+n+'</i>').join(', ');
+  element.innerHTML=h.slice(0,m.index)+'<span class="kutsutaan-myos">Kutsutaan myös: '+nimet+'.</span>';
+}
 function dimParentheses(element){
   if(!element) return;
+  muotoileKutsutaanMyos(element);   // ennen sanalinkkejä: teksti on vielä jakamatonta
   const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT,{
     acceptNode(node){ let p=node.parentElement; while(p&&p!==element){ if(p.classList&&(p.classList.contains('word-link')||p.classList.contains('dim-paren')||p.classList.contains('cloze-blank'))) return NodeFilter.FILTER_REJECT; p=p.parentElement; } return /\([^()]*\)/.test(node.textContent)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }
   });
