@@ -3866,6 +3866,7 @@ function collectCourses(){
   const courses=new Map();
   paths.forEach(d=>{
     if(!d.startsWith('SOLUKKO::')) return;
+    if(/^SOLUKKO::Arkisanat(::|$)/.test(d) && !devMode) return;   // arkisanat (yleiskielen sanat, joilla on määritelmäkortti vain sanalinkkejä varten): pakka näkyy vain devissä (omistaja 13.9.2026)
     const segs=d.slice('SOLUKKO::'.length).split('::');
     if(/LUKUVUOSI/i.test(segs[0])){                         // hierarchy: year :: semester :: [period ::] course :: …
       let ci=2, period='';                                  // course index; the "N. Periodi" level is optional (SYKSY has it, KEVÄT may not)

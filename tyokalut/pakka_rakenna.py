@@ -17,8 +17,8 @@ SRC = os.path.join(REPO, 'SOLUKKO.apkg'); KUVAT = os.path.join(SC, 'kuvat')
 SEP = chr(31); MID = 1727391050
 
 
-def K(q, s, l, tt, links='', kuva=None):
-    return {'q': q, 's': s, 'l': l, 'tt': str(tt), 'ls': links, 'kuva': kuva}
+def K(q, s, l, tt, links='', kuva=None, arki=False):
+    return {'q': q, 's': s, 'l': l, 'tt': str(tt), 'ls': links, 'kuva': kuva, 'arki': arki}
 
 
 def _g(M, k): return M[k] if isinstance(M, dict) else getattr(M, k)
@@ -75,6 +75,17 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
         num = str(max([int(k) for k in mediamap] + [-1]) + 1)
         shutil.copyfile(os.path.join(KUVAT, fn), os.path.join(work, num)); mediamap[num] = fn
     kaikki_nid = {}
+    # Arkisanat (omistaja 13.9.2026): k['arki'] -> kortti menee piilotettuun SOLUKKO::Arkisanat-pakkaan ja saa tagin 'arkisana',
+    # guid ja numero pysyvat luennon mukaisina, joten Ankissa riittaa 'tag:arkisana' -> Change Deck. Sivusto nayttaa pakan vain devissa.
+    ARKI = 'SOLUKKO::Arkisanat'; arki_did = [None]
+    def arki_deck():
+        if arki_did[0] is None:
+            t = next((d for d in decks.values() if d['name'] == ARKI), None)
+            if t: arki_did[0] = int(t['id'])
+            else:
+                arki_did[0] = max(int(k) for k in decks) + 1; t = dict(sisar); t.update({'id': arki_did[0], 'name': ARKI, 'mod': now, 'usn': -1}); decks[str(arki_did[0])] = t
+                cur.execute("update col set decks=?", (json.dumps(decks),)); print('uusi pakka:', ARKI)
+        return arki_did[0]
     for li, M in enumerate(luennot):
         LEHTI, NRO, KORTIT = _g(M, 'LEHTI'), str(_g(M, 'NRO')), _g(M, 'KORTIT')
         ALKU = (M.get('ALKU', 0) if isinstance(M, dict) else getattr(M, 'ALKU', 0))   # numeroinnin alku: lisays olemassa olevaan pakkaan jatkaa sen numeroita (esim. 300 -> 1.301...)
@@ -106,10 +117,14 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
                 nid = row[0]
                 if row[1] != SEP.join(fields):
                     cur.execute("update notes set flds=?, sfld=?, csum=?, mod=?, usn=-1 where id=?", (SEP.join(fields), sfld, csum, now, nid)); paivitetyt += 1
+                kdid = arki_deck() if k.get('arki') else did; ktag = ' arkisana ' if k.get('arki') else ''
+                if cur.execute("select did from cards where nid=?", (nid,)).fetchone()[0] != kdid or cur.execute("select tags from notes where id=?", (nid,)).fetchone()[0] != ktag:
+                    cur.execute("update cards set did=?, mod=?, usn=-1 where nid=?", (kdid, now, nid)); cur.execute("update notes set tags=?, mod=?, usn=-1 where id=?", (ktag, now, nid)); paivitetyt += 1
             else:
                 nid = seuraava[0]; seuraava[0] += 2
-                cur.execute("insert into notes values (?,?,?,?,?,?,?,?,?,?,?)", (nid, guid, MID, now, -1, '', SEP.join(fields), sfld, csum, 0, ''))
-                cur.execute("insert into cards values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (nid + 1, nid, did, 0, now, -1, 0, 0, ALKU + i + 1, 0, 0, 0, 0, 0, 0, 0, 0, ''))
+                kdid = arki_deck() if k.get('arki') else did; ktag = ' arkisana ' if k.get('arki') else ''
+                cur.execute("insert into notes values (?,?,?,?,?,?,?,?,?,?,?)", (nid, guid, MID, now, -1, ktag, SEP.join(fields), sfld, csum, 0, ''))
+                cur.execute("insert into cards values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (nid + 1, nid, kdid, 0, now, -1, 0, 0, ALKU + i + 1, 0, 0, 0, 0, 0, 0, 0, 0, ''))
                 uudet += 1
             nids.append(nid)
         # muiden korttien linkkisanat tunnetaan nyt myos taman luennon osalta (seuraavat luennot eivat saa toistaa niita)

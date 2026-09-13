@@ -39,6 +39,13 @@ if __name__ == '__main__':
         if q in POISTA_KORTIT or (q == 'Esittely' and pakka in POISTA_ESITTELY_PAKAT):
             cur.execute("delete from cards where nid=?", (nid,)); cur.execute("delete from notes where id=?", (nid,)); muutetut.append(nid)
             print('  poistettu kortti', q, '(poista se myos Ankista kasin)')
+    # Arkisanat: tagin 'arkisana' kortit kuuluvat SOLUKKO::Arkisanat-pakkaan (omistaja 13.9.2026). Ankin tuonti ei siirra kortteja,
+    # joten omistajan vienti voi tuoda ne takaisin luentopakkoihin - siirretaan takaisin joka ajolla.
+    arki = next((d for d in decks.values() if d['name'] == 'SOLUKKO::Arkisanat'), None)
+    if arki:
+        siirto = cur.execute("select c.id from cards c join notes n on n.id=c.nid where n.tags like '% arkisana %' and c.did<>?", (int(arki['id']),)).fetchall()
+        for (cid,) in siirto: cur.execute("update cards set did=?, mod=?, usn=-1 where id=?", (int(arki['id']), now, cid)); muutetut.append(cid)
+        if siirto: print('  siirretty Arkisanat-pakkaan:', len(siirto), 'korttia (tee sama Ankissa: tag:arkisana -> Change Deck)')
     for nid, mid, flds in cur.execute("select id, mid, flds from notes").fetchall():
         f = flds.split(SEP); q = re.sub('<[^>]*>', '', f[0]).replace('&nbsp;', ' ').strip()
         names = [x['name'].lower() for x in models[str(mid)]['flds']]

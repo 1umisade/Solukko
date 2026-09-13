@@ -47,5 +47,6 @@ _KORTIT = {}
 for _a in JARJESTYS:
     _KORTIT[_a] = [(lemma, tt, suppea, kys or 'Mitä %s tarkoittaa?' % lemma, _linkkisanat(lemma)) for lemma, tt, suppea, kys in _rivit(_a)]
 
-def kortit(avain):
-    return [K(kys, suppea, '', tt, ls) for lemma, tt, suppea, kys, ls in _KORTIT.get(avain, [])]
+ARKI = set(w.strip() for w in io.open(os.path.join(SC, 'sanasto_massa', 'arkisanat.txt'), encoding='utf-8') if w.strip() and not w.startswith('#'))
+def kortit(avain):   # arkisanat saavat arki-lipun: rakentaja vie ne SOLUKKO::Arkisanat-pakkaan (sama guid ja numero)
+    return [K(kys, suppea, '', tt, ls, arki=(lemma in ARKI)) for lemma, tt, suppea, kys, ls in _KORTIT.get(avain, [])]
