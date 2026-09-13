@@ -1,0 +1,92 @@
+# Solu- ja biomolekyylit, Luento 4a - massakierros
+aloituskohta	2	Kohta, josta replikaatio tai transkriptio alkaa: replikaation aloituskohta, transkription aloituskohta +1.	Mikä on aloituskohta?
+altistaa	1	Saattaa alttiiksi: säteily altistaa DNA:n vaurioille.
+antikodoni	3	Siirtäjä-RNA:n kolmen emäksen jakso, joka pariutuu lähetti-RNA:n kodonin kanssa.	Mikä on antikodoni?
+apuproteiini	1	Pääproteiinia avustava proteiini, kuten sigmatekijä RNA-polymeraasille.
+asikloviiri	2	Herpesviruslääke, nukleosidianalogi, jonka viruksen kinaasi aktivoi ja joka pysäyttää virus-DNA:n synteesin.	Mikä on asikloviiri?
+atg	1	Aloituskodoni DNA:ssa (RNA:ssa AUG), joka koodaa metioniinia ja aloittaa translaation.	Mikä on ATG?
+avustaa	1	Auttaa: apuproteiinit avustavat polymeraasia.
+cap-proteiini	2	Bakteerin kataboliittiaktivaattoriproteiini, joka cAMP:n kanssa tehostaa lac-operonin transkriptiota glukoosin puuttuessa.	Mikä on CAP-proteiini?
+ctp	1	Sytidiinitrifosfaatti, RNA-synteesin C-nukleotidi.	Mikä on CTP?
+denukleotidi	1	Deoksiribonukleotidi lyhennettynä.
+deoksi	1	Etuliite, joka tarkoittaa hapen puuttumista: deoksiriboosista puuttuu 2'-hydroksyyli.	Mitä deoksi- tarkoittaa?
+dna-kopio	1	Replikaatiossa syntynyt DNA:n jäljennös.
+dna-vaurio	2	DNA:n rakenteen vaurio, kuten katkos, emäsmuutos tai tymiinidimeeri, jonka korjausentsyymit korjaavat.	Mikä on DNA-vaurio?
+dna-virus	2	Virus, jonka genomi on DNA:ta, kuten adenovirus ja herpesvirus.	Mikä on DNA-virus?
+dtmp	1	Deoksitymidiinimonofosfaatti, DNA:n T-nukleotidi.	Mikä on dTMP?
+elinaika	1	Aika olemassaolosta hajoamiseen: lähetti-RNA:n elinaika minuutteja, DNA:n solun ikä.
+fosfodiesteriketju	1	Nukleotidien fosfodiesterisidoksin liittynyt runko. Kutsutaan myös: sokeri-fosfaattirunko.
+gc-rikas	1	Paljon guaniinia ja sytosiinia sisältävä DNA-jakso, joka on vakaampi kolmen vetysidoksen vuoksi.	Mitä GC-rikas tarkoittaa?
+geeniyhdistelmä	1	Geenien muunnosten yhdistelmä yksilössä, rekombinaation tuote.
+guaniininukleotidi	1	Guaniinia emäksenään sisältävä nukleotidi, GMP, GDP tai GTP.
+hiusneula	2	RNA:n rakenne, jossa juoste taittuu ja pariutuu itsensä kanssa. Kutsutaan myös: hiusneularakenne.	Mikä on hiusneula?
+huippupalkinto	1	Alan arvostetuin tunnustus, kuten Nobelin palkinto.
+huppu	2	Eukaryootin lähetti-RNA:n 5'-päähän lisätty metyyliguanosiini, joka suojaa ja ohjaa ribosomille. Kutsutaan myös: 5'-cap.	Mikä on huppu?
+jono	1	Peräkkäisten yksiköiden sarja, kuten emäsjono eli sekvenssi.
+kaksirenkainen	1	Kahdesta renkaasta koostuva: puriinit adeniini ja guaniini.
+kantaa	1	Kuljettaa mukanaan: lähetti-RNA kantaa ohjeen, siirtäjä-RNA aminohapon.
+katkos	1	Juosteen katkeama: DNA:n yksijuoste- tai kaksoisjuostekatkos.
+kohtisuora	1	90 asteen kulmassa: B-DNA:n emäsparit ovat kohtisuorassa kierteen akseliin.
+kolmikko	1	Kolmen ryhmä: kodoni on emäskolmikko. Kutsutaan myös: tripletti.
+kompakti	1	Tiivis, vähän tilaa vievä: kompakti kaksoiskierre.
+korjauslukukyky	2	DNA-polymeraasin kyky tarkistaa liitetty nukleotidi ja poistaa väärä. Kutsutaan myös: oikoluku.	Mikä on korjauslukukyky?
+kuusirengas	1	Kuuden atomin rengas: pyrimidiinit ja puriinin toinen rengas.
+laci-repressori	1	LacI-geenin tuottama lac-operonin repressori.
+liittämisnopeus	1	Nukleotidien liittämisen nopeus polymeraasilla, nukleotidia sekunnissa.
+luettavuus	1	Geenin saatavuus transkriptiolle: avoin kromatiini on luettavaa.
+lyhetä	1	Tulla lyhyemmäksi: telomeerit lyhenevät jokaisessa jakautumisessa.
+monokistroninen	2	Lähetti-RNA, joka koodaa yhden geenin. Eukaryoottien mRNA:t ovat monokistronisia.	Mitä monokistroninen tarkoittaa?
+normaalisolu	1	Terve, muuntumaton solu erotuksena syöpäsolusta.
+nusa-proteiini	2	Bakteerin transkriptiotekijä, joka sitoutuu RNA-polymeraasiin ja edistää terminaatiota.	Mikä on NusA-proteiini?
+oikoluku	2	Polymeraasin virheen tarkistus ja väärän nukleotidin poisto 3'→5'-eksonukleaasilla.	Mitä oikoluku on?
+ovalbumiinigeeni	1	Kananmunan valkuaisen pääproteiinin geeni, klassinen esimerkki introneista.
+paljastaa	1	Tuoda näkyviin: röntgenkuva paljasti kaksoiskierteen.
+pareittain	1	Pareina: emäkset pareittain, kromosomit pareittain.
+peräkkäin	1	Toinen toisensa jälkeen: nukleotidit peräkkäin.
+pidentää	1	Tehdä pidemmäksi: polymeraasi pidentää ketjua 3'-päästä.
+pituusyksikkö	1	Pituuden mitta, kuten nanometri tai emäspari DNA:lle.
+polykistroninen	2	Lähetti-RNA, joka koodaa useaa geeniä, kuten bakteerin operonin mRNA.	Mitä polykistroninen tarkoittaa?
+primaarirakenne	2	Polymeerin yksiköiden järjestys: proteiinin aminohappojärjestys, DNA:n emäsjärjestys.	Mikä on primaarirakenne?
+puolustusentsyymi	1	Solua suojaava entsyymi, kuten restriktioentsyymi bakteerilla tai lysotsyymi.
+pysähtyä	1	Lakata etenemästä: polymeraasi pysähtyy terminaattoriin.
+päättää	1	Lopettaa: terminaattori päättää transkription.
+rasitus	1	Mekaaninen jännitys: kierteen rasitus replikaatiohaarukan edellä.
+rengasrakenteinen	1	Rengasmainen: plasmidi on rengasrakenteinen DNA.
+repressoida	2	Estää geenin luenta: repressori repressoi operonin.	Mitä repressoiminen tarkoittaa?
+rinnastaa	1	Asettaa rinnakkain vertailua varten: sekvenssien rinnastus.
+rna-geeni	2	Geeni, jonka lopputuote on RNA eikä proteiini: rRNA-, tRNA- ja säätely-RNA-geenit.	Mikä on RNA-geeni?
+rna-genomi	1	Viruksen RNA:sta koostuva perimä, kuten influenssa- ja koronaviruksella.
+rna-kopio	1	Transkriptiossa DNA:sta tehty RNA.
+rna-synteesi	1	RNA:n valmistus, transkriptio.
+semikonservatiivinen	3	Replikaatiotapa, jossa kumpikin tytär-DNA sisältää yhden vanhan ja yhden uuden juosteen.	Mitä semikonservatiivinen tarkoittaa?
+sense-juoste	2	Koodaava juoste, jonka emäsjärjestys on sama kuin lähetti-RNA:n. Kutsutaan myös: koodaava juoste.	Mikä on sense-juoste?
+signalointi	2	Viestintä molekyyleillä solujen välillä ja sisällä. Kutsutaan myös: signalointi, viestinvälitys.	Mitä signalointi on?
+silmukoida	1	Poistaa intronit ja liittää eksonit: esi-mRNA silmukoidaan.
+sokerifosfaattirunko	2	DNA:n ja RNA:n selkäranka, jossa sokeri ja fosfaatti vuorottelevat fosfodiesterisidoksin.	Mikä on sokeri-fosfaattirunko?
+stabiilisuus	1	Vakaus: DNA:n stabiilisuus on RNA:ta suurempi. Kutsutaan myös: stabiilius.
+sula	1	Nestemäinen: DNA sulaa eli juosteet erkanevat kuumennettaessa.
+sytidiini	1	Sytosiinin nukleosidi, sytosiini + riboosi.	Mikä on sytidiini?
+säätely-rna	2	RNA, joka säätelee geenien ilmentymistä, kuten mikro-RNA ja pitkät ei-koodaavat RNA:t.	Mikä on säätely-RNA?
+säätelymolekyyli	1	Toimintaa säätelevä molekyyli, kuten repressori, cAMP tai hormoni.
+taivuttaa	1	Kaartaa: proteiini taivuttaa DNA:ta sitoutuessaan.
+tallentua	1	Jäädä säilöön: perimä tallentuu DNA:han.
+tehostaja	2	DNA-jakso, johon sitoutuneet tekijät lisäävät transkriptiota kaukaakin. Kutsutaan myös: enhanceri.	Mikä on tehostaja?
+tilantarve	1	Vaadittu tila: emäsparin tilantarve määrää kierteen mitat.
+tukkia	1	Estää kulku: repressori tukkii promoottorin.
+tunnistuskohta	2	DNA:n jakso, johon proteiini sitoutuu spesifisesti, kuten restriktioentsyymin kohta.	Mikä on tunnistuskohta?
+tunnuskirjain	1	Emästä tai aminohappoa merkitsevä kirjain: A, T, G, C.
+typpiheterorengas	1	Typpeä sisältävä rengas, nukleoemästen rakenne.
+typpipitoinen	1	Typpeä sisältävä: emäkset ovat typpipitoisia.
+uag	1	Lopetuskodoni (amber), joka päättää translaation. Muut ovat UAA ja UGA.	Mikä on UAG?
+udp-glukoosi	2	Glukoosin aktivoitu muoto glykogeenin ja muiden sokeripolymeerien synteesissä.	Mikä on UDP-glukoosi?
+uridiini	1	Urasiilin nukleosidi, urasiili + riboosi.	Mikä on uridiini?
+utp	1	Uridiinitrifosfaatti, RNA-synteesin U-nukleotidi.	Mikä on UTP?
+vaihto	1	Korvaaminen toisella: emäksen vaihto on pistemutaatio.
+vastinkromosomi	2	Kromosomiparin toinen jäsen, sama geenisisältö eri vanhemmalta. Kutsutaan myös: homologinen kromosomi.	Mikä on vastinkromosomi?
+vedetön	1	Ilman vettä: kuivissa oloissa DNA ottaa A-muodon.
+vektori	3	DNA-molekyyli, kuten plasmidi tai virus, jolla vieras geeni viedään soluun.	Mikä on vektori geenitekniikassa?
+vienti	1	Kuljetus ulos: lähetti-RNA:n vienti tumasta.
+vihje	1	Johtolanka: Chargaffin säännöt olivat vihje emäspariutumisesta.
+yksirenkainen	1	Yhdestä renkaasta koostuva: pyrimidiinit sytosiini, tymiini ja urasiili.
+yleiskäyttöinen	1	Moneen tarkoitukseen sopiva: RNA on yleiskäyttöinen molekyyli.
+ylivoimainen	1	Selvästi parempi: DNA:n vakaus on RNA:han nähden ylivoimainen.

@@ -1,0 +1,143 @@
+# Solu- ja biomolekyylit, Luento 3 - massakierros
+absorboiva	1	Valoa tai ainetta itseensä imevä: valoa absorboiva pigmentti.
+adaptoriproteiini	2	Proteiini, joka liittää kaksi muuta proteiinia yhteen, kuten rakkulan kuoren ja rahdin.	Mikä on adaptoriproteiini?
+aktiiniproteiini	1	Aktiini, tukirangan säikeiden rakenneproteiini.
+akvaporiini	2	Kalvon vesikanava, joka päästää vettä läpi nopeasti mutta ei ioneja.	Mikä on akvaporiini?
+ameeba	2	Valejalkojen avulla liikkuva ja syövä yksisoluinen eukaryootti, endosytoosin esimerkki.	Mikä on ameeba?
+antosyaani	2	Kasvien vakuoliin varastoitu punainen tai sininen väriaine, kukkien ja marjojen väri.	Mikä on antosyaani?
+asetyylikoliini	2	Hermovälittäjäaine hermo-lihasliitoksessa ja autonomisessa hermostossa. Kutsutaan myös: asetyylikoli.	Mikä on asetyylikoliini?
+aukko	1	Reikä rakenteessa: tumahuokosen aukko, ilmarako.
+dopamiini	2	Aivojen hermovälittäjäaine, joka liittyy palkitsemiseen ja liikkeen säätelyyn. Puute aiheuttaa Parkinsonin taudin.	Mikä on dopamiini?
+erilleen	1	Toisistaan pois: solun osat erotellaan erilleen sentrifugoimalla.
+erite	1	Solusta tai rauhasesta ulos vapautettu aine, kuten entsyymi tai hormoni.
+erityistehtävä	1	Organellille tai solulle ominainen tehtävä.
+erotella	1	Jakaa osiin: organellit erotellaan fraktioihin.
+fagolysosomi	2	Fagosomin ja lysosomin sulautuma, jossa nielty mikrobi hajotetaan.	Mikä on fagolysosomi?
+fagosomi	2	Fagosytoosissa syntynyt kalvorakkula, jossa on nielty hiukkanen.	Mikä on fagosomi?
+hajotustuote	1	Hajotuksessa syntynyt pienempi molekyyli.
+halkaista	1	Jakaa kahtia: solu halkaistaan kuroutumalla.
+hedelmäkärpänen	2	Drosophila melanogaster, genetiikan malliorganismi lyhyen sukupolven ja jättikromosomien vuoksi.	Mikä on hedelmäkärpänen?
+hedelmöitys	2	Siittiön ja munasolun yhtyminen tsygootiksi.	Mitä hedelmöitys on?
+heijastaa	1	Palauttaa valo pinnasta: lehti heijastaa vihreää.
+helminauha	1	Helmistä koostuva nauha: nukleosomit DNA:ssa muistuttavat helminauhaa.
+hiilensidonta	2	Hiilidioksidin liittäminen orgaaniseen molekyyliin fotosynteesin pimeäreaktioissa.	Mitä hiilensidonta on?
+homogenoida	2	Rikkoa solut tasaiseksi seokseksi ennen fraktiointia.	Mitä homogenointi tarkoittaa?
+houkutella	1	Vetää puoleensa: kukka houkuttelee pölyttäjiä värillä.
+huokonen	2	Kalvon tai seinämän pieni aukko, kuten tumahuokonen tai ilmarako.	Mikä on huokonen?
+ihmissolu	1	Ihmisen solu, eukaryoottisolu.
+ilmakehä	1	Maapalloa ympäröivä kaasukehä, jonka happi on fotosynteesin tuotetta.
+immuunisolu	2	Immuunijärjestelmän solu: valkosolut, kuten makrofagit ja lymfosyytit.	Mikä on immuunisolu?
+ionigradientti	2	Ionin pitoisuusero kalvon yli, joka varastoi energiaa ja ajaa kuljetusta.	Mikä on ionigradientti?
+jyvänen	1	Pieni rakeinen rakenne, kuten tumajyvänen tai tärkkelysjyvänen.
+kahtia	1	Kahteen osaan: solu jakautuu kahtia.
+kaliumkanava	2	Kaliumionit läpäisevä kanavaproteiini, joka luo kalvon lepopotentiaalin.	Mikä on kaliumkanava?
+kalsiumsignaali	2	Solunsisäisen kalsiumpitoisuuden nousu viestinä, joka laukaisee supistuksen tai erityksen.	Mikä on kalsiumsignaali?
+kalvoton	1	Ilman kalvoa: tumajyvänen ja ribosomi ovat kalvottomia rakenteita.
+kasaantua	1	Kertyä yhteen: proteiinit kasaantuvat väärin laskostuessaan.
+kenttä	1	Voimakenttä: sähkökenttä, magneettikenttä.
+kestävyys	1	Kyky kestää rasitusta: välikokoisten filamenttien kestävyys.
+kierrättää	1	Käyttää uudelleen: solu kierrättää reseptorit endosytoosin jälkeen.
+kietoutua	1	Kiertyä ympärille: DNA kietoutuu histonien ympärille.
+kisko	1	Rata, jota pitkin kuljetetaan: mikrotubulukset ovat solun kiskoja.
+koira	1	Kesytetty eläin, jonka kromosomiluku on 78.
+kokonaisreaktio	1	Reaktiosarjan yhteenlaskettu nettoyhtälö, kuten fotosynteesin tai soluhengityksen.
+konjugoitua	1	Liittyä yhteen: bakteerit konjugoituvat, kaksoissidokset konjugoituvat.
+kristat	1	Mitokondrion sisäkalvon poimut. Kutsutaan myös: cristat.	Mitä kristat ovat?
+kuihtua	1	Näivettyä vedenpuutteessa: kasvi kuihtuu, kun vakuolit tyhjenevät.
+kuitutyyppi	1	Tukirangan säietyyppi: aktiini, välikokoiset filamentit, mikrotubulukset.
+kukka	1	Kasvin lisääntymiselin, jonka värit ovat vakuolin pigmenttejä.
+kuljettajaproteiini	2	Kalvoproteiini, joka siirtää aineen kalvon läpi muotoaan muuttamalla. Kutsutaan myös: kuljettaja, transportteri.	Mikä on kuljettajaproteiini?
+kuljetusrata	1	Reitti, jota pitkin rahti kulkee solussa, mikrotubulus.
+kuroa	1	Puristaa kokoon: solukalvo kuroutuu rakkulaksi.
+köysimäinen	1	Köyden tapaan kierretty, kuten välikokoiset filamentit.
+laminit	1	Tuman sisäpintaa tukevat välikokoiset filamentit. Kutsutaan myös: lamiini.	Mitä laminit ovat?
+laskeutua	1	Painua pohjalle: raskaat hiukkaset laskeutuvat sentrifugoinnissa.
+laskostus	1	Laskostuminen, proteiinin taipuminen muotoonsa.
+laukaista	1	Käynnistää: kalsium laukaisee supistuksen.
+lihassupistus	2	Lihassolun lyheneminen, kun myosiini vetää aktiinisäikeitä ATP:n energialla.	Mikä on lihassupistus?
+liikuttaa	1	Saada liikkeelle: moottoriproteiinit liikuttavat rakkuloita.
+litistyä	1	Painua litteäksi: kalvosto litistyy cisternoiksi.
+litteä	1	Ohut ja tasainen: litteä kalvopussi.
+liukua	1	Siirtyä pintaa pitkin: aktiini- ja myosiinisäikeet liukuvat lomittain.
+lomittain	1	Toistensa väliin asettuen: säikeet liukuvat lomittain.
+magnetosomi	2	Magnetiittikiteen sisältävä kalvorakkula, jolla magnetotaktinen bakteeri suunnistaa.	Mikä on magnetosomi?
+mekanismi	1	Toimintatapa vaiheittain: reaktiomekanismi, kuljetusmekanismi.
+melaniini	2	Ihon, hiusten ja silmien ruskea pigmentti, joka suojaa UV-säteilyltä.	Mikä on melaniini?
+miinuspää	2	Mikrotubuluksen hitaasti kasvava pää, joka on kiinni sentrosomissa. Kutsutaan myös: miinus-pää.	Mikä on miinuspää?
+monitumainen	1	Useita tumia sisältävä, kuten lihassolu.
+munasolu	2	Naaraan sukusolu, suuri ja ravintorikas. Hedelmöityksessä yhtyy siittiöön.	Mikä on munasolu?
+muotoutua	1	Saada muoto: solu muotoutuu tukirangan avulla.
+määräpää	1	Kohde, johon kuljetus päättyy.
+niellä	1	Ottaa sisään: makrofagi nielee bakteerin fagosytoosilla.
+nmr	2	Ydinmagneettinen resonanssi, menetelmä molekyylin rakenteen määritykseen liuoksessa magneettikentässä.	Mikä on NMR?
+nälkä	1	Ravinnon puute, jossa solu hajottaa varastojaan ja omia osiaan (autofagia).
+ontelo	1	Rakenteen sisäinen tila: kalvo-ontelo, tylakoidin ontelo.
+ontto	1	Sisältä tyhjä: mikrotubulus on ontto putki.
+organisoitua	1	Järjestäytyä: tukiranka organisoituu sentrosomista.
+osoite	1	Kohdetta ilmaiseva merkki: proteiinin osoitesekvenssi ohjaa organelliin.
+paikko	1	Paikka, sijainti.
+paino	1	Massaan kohdistuva vetovoima. Painon mukaan organellit erottuvat sentrifugissa.
+painua	1	Vajota: raskaat organellit painuvat pohjalle.
+pakkaus	1	Tiivistetty muoto: DNA:n pakkaus kromatiiniksi, proteiinien pakkaus rakkuloihin.
+paksuus	1	Mitta läpi rakenteen: kalvon paksuus 5 nm, säikeen paksuus 7–25 nm.
+peptidimerkki	1	Osoitteena toimiva lyhyt aminohappojakso, kuten signaalipeptidi. Kutsutaan myös: osoitepeptidi.
+perifeerinen	2	Reunalla oleva: perifeerinen kalvoproteiini on kiinni kalvon pinnassa, ei sen läpi.	Mitä perifeerinen tarkoittaa?
+pituus	1	Mitta päästä päähän: säikeen pituus, ketjun pituus.
+plus-pää	2	Mikrotubuluksen nopeasti kasvava pää, joka osoittaa solun reunaan. Kutsutaan myös: pluspää.	Mikä on plus-pää?
+poimu	1	Taittunut laskos, kuten mitokondrion sisäkalvon poimut.
+poimuttua	1	Muodostaa poimuja: sisäkalvo poimuttuu pinta-alan lisäämiseksi.
+porfyriinirakenne	2	Neljän pyrrolirenkaan muodostama rengas, joka sitoo metalli-ionin: hemin ja klorofyllin runko.	Mikä on porfyriinirakenne?
+portti	1	Kulkuaukko, jota säädellään: tumahuokonen, ionikanavan portti.
+pumppuproteiini	2	Kalvoproteiini, joka siirtää ainetta gradienttia vastaan ATP:n energialla. Kutsutaan myös: pumppu.	Mikä on pumppuproteiini?
+puolittua	1	Jakautua kahteen yhtä suureen osaan: kromosomiluku puolittuu meioosissa.
+päädomeeni	1	Proteiinin pään domeeni, kuten myosiinin moottoripää.
+päästää	1	Sallia läpi: kanava päästää ionit.
+pölyttäjä	1	Siitepölyä kuljettava eläin, kuten mehiläinen, jota kukan väri ja tuoksu houkuttelevat.
+rahti	1	Kuljetettava sisältö: rakkulan rahti, moottoriproteiinin rahti.
+reaktiokeskus	2	Fotosysteemin klorofyllipari, jossa valon energia muuttuu elektronin siirroksi.	Mikä on reaktiokeskus?
+reaktiosarja	1	Peräkkäisten reaktioiden ketju, kuten sitruunahappokierto.
+risti	1	Ristikkäinen rakenne: kromosomit ristiin, ristiinkytkentä.
+roska	1	Solun jäte, jonka lysosomi hajottaa tai joka eritetään.
+sekundaarinen	1	Toissijainen tai toisen vaiheen: sekundaarinen lysosomi, sekundaarinen aktiivinen kuljetus.
+siimallinen	1	Siimalla varustettu: siimallinen bakteeri tai siittiö.
+siittiö	2	Koiraan sukusolu, pieni ja siimallinen, kuljettaa perimän munasoluun.	Mikä on siittiö?
+siivota	1	Poistaa jätteet: lysosomi siivoaa vanhat organellit.
+simpanssi	1	Ihmisen lähin sukulaislaji, 48 kromosomia.
+sisin	1	Sisimpänä oleva: kalvon sisin kerros, tuman sisin osa.
+sisäkkäinen	1	Toistensa sisällä: sisäkkäiset kalvot, sisäkkäiset rakkulat.
+sivutuote	1	Reaktion pääasiallisen tuotteen ohella syntyvä aine, kuten happi fotosynteesissä.
+sokerointi	2	Sokeriketjun liittäminen proteiiniin kalvostossa ja Golgissa. Kutsutaan myös: glykosylaatio.	Mitä sokerointi on?
+solumurska	1	Homogenoinnissa syntynyt solujen hajotusseos. Kutsutaan myös: homogenaatti.
+supistua	1	Lyhentyä: lihas supistuu, kuroutumisrengas supistuu.
+supistus	1	Lyhentyminen: lihassupistus.
+suunnata	1	Ohjata tiettyyn suuntaan: proteiini suunnataan organelliin.
+synapsirako	2	Hermosolujen välinen kapea rako, jonka yli välittäjäaine kulkee.	Mikä on synapsirako?
+takaisinotto	2	Välittäjäaineen kuljetus takaisin hermopäätteeseen synapsista. Kutsutaan myös: reuptake.	Mitä takaisinotto on?
+tasapaksu	1	Kauttaaltaan yhtä paksu, kuten mikrotubulus.
+tasoittua	1	Muuttua tasaiseksi: pitoisuusero tasoittuu diffuusiolla.
+toimeton	1	Ilman toimintaa: inaktiivinen entsyymi.
+tsygootti	2	Hedelmöitynyt munasolu, diploidi ensimmäinen solu, josta yksilö kehittyy.	Mikä on tsygootti?
+tunnistusproteiini	1	Proteiini, joka tunnistaa osoitteen tai signaalin, kuten reseptori.
+tunnistussignaali	1	Molekyylin merkki, jonka tunnistusproteiini lukee, kuten osoitesekvenssi.
+tyhjetä	1	Menettää sisältönsä: vakuoli tyhjenee kuivuudessa.
+tylakoidikalvo	1	Tylakoidin kalvo, jossa fotosysteemit ja ATP-syntaasi ovat.
+tyyppi	1	Laji tai luokka: solutyyppi, kuitutyyppi.
+ulkonäkö	1	Ulkoinen olemus: kukan ulkonäkö, solun ulkonäkö mikroskoopissa.
+ultraviolettivalo	2	Näkyvää valoa lyhytaaltoisempi säteily, joka vaurioittaa DNA:ta. Melaniini suojaa siltä. Kutsutaan myös: UV-valo.	Mikä on ultraviolettivalo?
+vaeltaa	1	Liikkua paikasta toiseen: solut vaeltavat kudoksessa.
+vaiheittain	1	Vaihe kerrallaan: reaktio etenee vaiheittain.
+valikoida	1	Valita tietyt: Golgi valikoi proteiinit oikeaan osoitteeseen.
+valikoivuus	1	Kyky valita: kalvon valikoivuus päästää vain tietyt aineet läpi. Kutsutaan myös: selektiivisyys.
+valmistua	1	Tulla valmiiksi: proteiini valmistuu ribosomilla.
+varastoiva	1	Varastoon kerryttävä: varastoiva solu, kuten rasvasolu.
+vastine	1	Vastaava rakenne toisessa: eläimen vastine kasvin rakenteelle.
+verkkomainen	1	Verkon kaltainen: verkkomainen kalvosto.
+viherhiukkanen	3	Kasvisolun organelli, jossa fotosynteesi tapahtuu. Kaksoiskalvo, tylakoidit ja oma DNA. Kutsutaan myös: kloroplasti.	Mikä on viherhiukkanen?
+virittää	1	Nostaa korkeampaan energiatilaan: valo virittää klorofyllin.
+viritysenergia	2	Energia, joka siirtää elektronin tai molekyylin viritettyyn tilaan, esimerkiksi fotonin energia.	Mikä on viritysenergia?
+vuotaa	1	Päästä hallitsemattomasti läpi: kalvo vuotaa, jos se vaurioituu.
+välittäjäainerakkula	2	Hermopäätteen rakkula, jossa välittäjäaine odottaa vapautumista. Kutsutaan myös: synaptinen rakkula.	Mikä on välittäjäainerakkula?
+värekarva	2	Solun pinnan lyhyt liikkuva uloke, joka koostuu mikrotubuluksista. Kutsutaan myös: silia.	Mikä on värekarva?
+yhteisnimi	1	Yhteinen nimitys ryhmälle, kuten organelli soluelimille.
+yhteys	1	Liitos tai suhde: solujen väliset yhteydet, kalvojen yhteys.
+ympyrä	1	Pyöreä muoto: rengasmainen rakenne.

@@ -602,3 +602,10 @@ L1 += sanasto3.SOLU_L1
 L2 += sanasto3.SOLU_L2
 L3 += sanasto3.SOLU_L3
 L4a += sanasto3.SOLU_L4a
+
+# massakierros (omistaja 13.9.2026): sanasto_massa/<avain>.txt
+import sanasto_massa
+L1 += sanasto_massa.kortit("solu_L1")
+L2 += sanasto_massa.kortit("solu_L2")
+L3 += sanasto_massa.kortit("solu_L3")
+L4a += sanasto_massa.kortit("solu_L4a")

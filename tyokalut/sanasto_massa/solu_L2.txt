@@ -1,0 +1,208 @@
+# Solu- ja biomolekyylit, Luento 2 - Vesi - massakierros
+aikaväli	1	Kahden hetken välinen aika: vetysidoksen elinikä on pikosekuntien aikaväli.
+aktivoida	2	Saattaa toimivaksi: happo aktivoi pepsinogeenin pepsiiniksi, fosforylaatio aktivoi entsyymin.	Mitä aktivoiminen tarkoittaa?
+aktivoitua	1	Tulla toimivaksi: reseptori aktivoituu ligandista.
+alapuoli	1	Alla oleva puoli: renkaan alapuoli, tason alapuoli.
+asema	1	Paikka rakenteessa: substituentin asema renkaassa, atomin asema.
+aspartaatti	2	Aspartaatin eli asparagiinihapon anioni, hapan aminohappo. Lyhenne Asp, D.	Mikä on aspartaatti?
+asteikko	1	Mittausasteikko: pH-asteikko 0–14, lämpötila-asteikko.
+astia	1	Säiliö: reaktioastia, koeputki, mittapullo.
+bikarbonaattijärjestelmä	2	Veren tärkein puskuri: hiilihappo ja bikarbonaatti, jonka pH:ta keuhkot ja munuaiset säätävät. Kutsutaan myös: bikarbonaattipuskuri.	Mikä on bikarbonaattijärjestelmä?
+ehdoton	1	Välttämätön ilman poikkeusta: vesi on elämän ehdoton edellytys.
+ekologinen	1	Eliöiden ja ympäristön suhteisiin liittyvä: veden ekologinen merkitys, ekologinen lokero.
+ekvivalentti	2	Yhtä suuri määrä reaktion kannalta: yksi ekvivalentti emästä neutraloi yhden ekvivalentin happoa.	Mitä ekvivalentti tarkoittaa?
+elinkelpoinen	1	Kykenevä elämään: elinkelpoinen solu tai alkio.
+elintärkeä	1	Elämälle välttämätön: vesi, happi ja ravinto.
+emäskonsentraatio	2	Emäksen pitoisuus liuoksessa, Henderson–Hasselbalchin yhtälön osoittaja.	Mikä on emäskonsentraatio?
+epäedullinen	1	Energian kannalta haitallinen: epäedullinen reaktio ei etene itsestään.
+epäsäännöllinen	1	Ilman toistuvaa järjestystä: nesteen epäsäännöllinen rakenne, jään säännöllinen.
+epätasainen	1	Ei tasaisesti jakautunut: epätasainen varausjakauma tekee molekyylistä poolisen.
+epätavallinen	1	Tavallisesta poikkeava: veden epätavalliset ominaisuudet.
+erikoistapaus	1	Yleisen säännön erityinen tapaus: hapon dissosiaatio on tasapainon erikoistapaus.
+eristävyys	1	Kyky estää lämmön tai sähkön kulku: jää eristää järven.
+eristää	1	Erottaa ympäristöstä: jääkansi eristää veden, kalvo solun.
+estää	1	Tehdä mahdottomaksi: inhibiittori estää entsyymin, puskuri pH:n muutoksen.
+etenevä	1	Eteenpäin kulkeva: etenevä reaktio, etenevä aalto.
+fosfatidyylikoliini	2	Yleisin kalvofosfolipidi, jonka pääryhmä on koliini. Kutsutaan myös: lesitiini.	Mikä on fosfatidyylikoliini?
+fotosysteemi	2	Tylakoidikalvon pigmentti-proteiinikompleksi, joka sitoo valon energian fotosynteesissä.	Mikä on fotosysteemi?
+fysikaaliskemiallinen	1	Fysiikan ja kemian yhteinen ominaisuus, kuten kiehumispiste tai liukoisuus. Kutsutaan myös: fysikokemiallinen.
+gibbs-energia	2	Vapaaenergia G, jonka muutos ΔG kertoo reaktion spontaaniuden vakiopaineessa ja -lämpötilassa.	Mikä on Gibbs-energia?
+haapa	1	Puu, jonka lehdet lepattavat. Kasvi, jonka soluista vesi haihtuu ilmarakojen kautta.
+haaste	1	Vaikea tehtävä: solun haaste on pysyä vakaana vaihtelevassa ympäristössä.
+haava	1	Kudosvaurio, jossa veri hyytyy ja iho korjautuu.
+haima	2	Rauhanen, joka erittää suoleen ruoansulatusentsyymejä ja bikarbonaattia sekä vereen insuliinia.	Mikä on haima?
+hakasulje	1	Merkki [ ], joka tarkoittaa pitoisuutta: [H<sup>+</sup>] on vetyionipitoisuus.	Mitä hakasulkeet tarkoittavat kemiassa?
+haljeta	1	Hajota kahtia: vesimolekyyli halkeaa protoniksi ja hydroksidiksi.
+happamoitua	1	Muuttua happamammaksi: veri happamoituu hiilidioksidista.
+happipää	1	Molekyylin happea sisältävä pää, vetysidoksen vastaanottaja.
+heiketä	1	Tulla heikommaksi: vetysidos heikkenee lämmössä.
+heikkous	1	Vähäinen voima: vetysidoksen heikkous tekee siitä nopeasti purkautuvan.
+hemiproteiini	2	Proteiini, jossa on hemi-ryhmä: hemoglobiini, myoglobiini, sytokromit.	Mikä on hemiproteiini?
+hermopääte	1	Hermosolun viejähaarakkeen pää, josta välittäjäaine vapautuu.
+herkkä	1	Pienestä muutoksesta reagoiva: entsyymi on herkkä pH:lle.
+hetkellinen	1	Lyhytaikainen: hetkellinen vetysidos, hetkellinen dipoli.
+hidastua	1	Tulla hitaammaksi: reaktio hidastuu kylmässä.
+hukka	1	Menetetty osuus: energiahukka lämpönä.
+huuhtelu	1	Pesu nesteellä: nenähuuhtelu suolaliuoksella.
+hydratoituminen	2	Vesimolekyylien kerääntyminen ionin tai poolisen ryhmän ympärille. Kutsutaan myös: hydraatio.	Mitä hydratoituminen on?
+hyppiä	1	Siirtyä nopeasti paikasta toiseen: protoni hyppii vesimolekyyliltä toiselle.
+häiriintyä	1	Poiketa normaalista: happo-emästasapaino häiriintyy.
+häkkivesi	2	Hydrofobisen molekyylin ympärille järjestyvä jäykkä vesikerros, joka laskee entropiaa ja ajaa hydrofobisen vuorovaikutuksen.	Mikä on häkkivesi?
+höyrystymislämpö	2	Energia, joka tarvitaan nesteen höyrystämiseen. Vedellä suuri vetysidosten vuoksi, siksi hiki jäähdyttää.	Mikä on höyrystymislämpö?
+ikä	1	Kulunut aika syntymästä: solun ikä, maapallon ikä.
+imidatsolirengas	2	Histidiinin viisijäseninen typpirengas, jonka pK<sub>a</sub> noin 6 tekee siitä hyvän protonin välittäjän. Kutsutaan myös: imidatsoli.	Mikä on imidatsolirengas?
+inaktivoitua	1	Menettää toimintakyky: entsyymi inaktivoituu väärässä pH:ssa.
+ioninen	2	Ioneihin perustuva: ioninen sidos, ioninen vuorovaikutus, ioninen yhdiste.	Mitä ioninen tarkoittaa?
+jompikumpi	1	Toinen kahdesta.
+jyrkästi	1	Voimakkaasti: pH muuttuu jyrkästi ekvivalenttikohdassa.
+järvi	1	Makean veden allas. Jää kelluu ja suojaa järven elämää talvella.
+jääkide	2	Jään säännöllinen rakenne, jossa jokainen vesimolekyyli on neljässä vetysidoksessa. Harvempi kuin vesi.	Mikä on jääkide?
+jäätyä	1	Muuttua kiinteäksi: vesi jäätyy 0 °C:ssa ja laajenee.
+kahvi	1	Juoma, jonka happamuus on pH 5. Esimerkki arkisesta happamasta liuoksesta.
+kaksiketjuinen	1	Kahdesta ketjusta koostuva, kuten DNA tai kaksiketjuinen fosfolipidi.
+kanamuna	1	Kananmuna, jonka valkuaisen proteiinit denaturoituvat kuumennettaessa.
+kanavoida	1	Ohjata tiettyä reittiä: ionit kanavoidaan kalvon läpi.
+kapea	1	Vähän leveä: elämän kapea pH-alue.
+kapsidi	2	Viruksen proteiinikuori, joka suojaa genomia. Kutsutaan myös: kuori.	Mikä on kapsidi?
+kasvatusalusta	2	Ravinne-elatusaine, jolla mikrobeja tai soluja kasvatetaan: liemi tai agar. Kutsutaan myös: alusta.	Mikä on kasvatusalusta?
+katkoa	1	Katkaista useasta kohdasta: proteaasi katkoo proteiinia.
+kellua	1	Pysyä pinnalla: jää kelluu, koska se on vettä harvempaa.
+kerroin	1	Luku, jolla kerrotaan: reaktioyhtälön kertoimet.
+kerääntyä	1	Kokoontua yhteen: ionit kerääntyvät varatun pinnan ympärille.
+keskikohta	1	Keskellä oleva kohta: titrauksen keskikohta, jossa pH on pK<sub>a</sub>.
+keveys	1	Pieni tiheys: jään keveys veteen nähden.
+kevyt	1	Pienimassainen tai vähätiheyksinen: vety on kevyin alkuaine, jää kevyempää kuin vesi.
+kiehua	1	Höyrystyä koko nesteestä kiehumispisteessä: vesi kiehuu 100 °C:ssa.
+kokonainen	1	Ehjä, täysi: kokonainen molekyyli, kokonainen kierros.
+kokonaiskonsentraatio	1	Aineen kaikkien muotojen yhteispitoisuus, esimerkiksi hapon ja sen anionin summa.
+kolajuoma	1	Fosforihapolla hapotettu virvoitusjuoma, pH noin 2,5.
+kolmiprotoninen	2	Happo, joka voi luovuttaa kolme protonia, kuten fosforihappo. Jokaisella on oma pK<sub>a</sub>.	Mitä kolmiprotoninen tarkoittaa?
+korvata	1	Panna tilalle: emäs korvaa hapon, vety korvautuu.
+kotitalous	1	Koti arkisine kemikaaleineen: etikka, ruokasooda, lipeä.
+kovalenttisesti	1	Kovalenttisella sidoksella: kovalenttisesti sitoutunut.
+kuiva	1	Ilman vettä: kuivassa proteiinit eivät toimi.
+kumoutua	1	Mitätöityä: varaus kumoutuu vastakkaisella varauksella.
+kutistua	1	Pienentyä: solu kutistuu väkevässä liuoksessa.
+kylmä	1	Alhainen lämpötila: kylmä hidastaa reaktioita ja vahvistaa vetysidoksia.
+kymmenkertainen	1	Kymmenen kertaa suurempi: yksi pH-yksikkö on kymmenkertainen ero pitoisuudessa.
+kymmenlogaritmi	1	Logaritmi kantaluvulla 10: pH on vetyionipitoisuuden negatiivinen kymmenlogaritmi.
+kytkeytyä	1	Liittyä toiseen: happo-emäsreaktiot kytkeytyvät toisiinsa.
+kyynelneste	1	Silmän pinnan neste, isotoninen ja lysotsyymiä sisältävä.
+käänteisreaktio	2	Reaktio päinvastaiseen suuntaan. Tasapainossa etenevä ja käänteinen reaktio ovat yhtä nopeat.	Mikä on käänteisreaktio?
+laimentaa	1	Vähentää pitoisuutta lisäämällä liuotinta.
+laskos	1	Taittunut rakenne: beetalaskos, proteiinin laskos.
+lasku	1	Arvon pieneneminen tai laskutoimitus: pH:n lasku, pitoisuuden lasku.
+lauseke	1	Matemaattinen kaava: tasapainovakion lauseke, pH:n lauseke.
+levitä	1	Kulkeutua laajemmalle: aine leviää diffuusiolla.
+liukoinen	2	Liuottimeen liukeneva: suola on vesiliukoinen, rasva ei.	Mitä liukoinen tarkoittaa?
+liuotuskyky	1	Liuottimen kyky liuottaa aineita. Vesi on erinomainen liuotin poolisuutensa vuoksi.
+logaritmi	2	Potenssin eksponentti: log 100 = 2. pH-asteikko on logaritminen.	Mikä on logaritmi?
+loiva	1	Vähän muuttuva: titrauskäyrän loiva osa puskurialueella.
+lukuisa	1	Monilukuinen: lukuisat vetysidokset.
+luovuttaja-atomi	2	Vetysidoksen atomi, johon vety on kovalenttisesti sidottu, tavallisesti happi tai typpi.	Mikä on luovuttaja-atomi?
+luusto	1	Kehon luiden kokonaisuus, kalsiumin ja fosfaatin varasto.
+lämpökapasiteetti	2	Lämpömäärä, joka nostaa aineen lämpötilaa yhden asteen. Vedellä suuri, mikä tasaa lämpötiloja.	Mikä on lämpökapasiteetti?
+läpäistä	1	Kulkea läpi: pienet poolittomat molekyylit läpäisevät kalvon.
+matala	1	Alhainen: matala pH, matala pitoisuus.
+mikromooli	1	Miljoonasosamooli, µmol.
+millimooli	1	Tuhannesosamooli, mmol.
+minimoida	1	Tehdä pienimmäksi: hydrofobiset ryhmät minimoivat kosketuksen veteen.
+moolimäärä	1	Aineen määrä mooleina, ainemäärä.
+munuainen	2	Elin, joka suodattaa veren, poistaa kuona-aineet virtsaan ja säätää nestetasapainoa ja pH:ta.	Mikä on munuainen?
+naapuriatomi	1	Vieressä oleva atomi, johon atomi on sitoutunut tai vuorovaikuttaa.
+nenähuuhtelu	1	Nenän huuhtelu isotonisella suolaliuoksella, joka ei ärsytä limakalvoa.
+nestepatsas	1	Pystysuora nestemäärä, jonka paine kasvaa syvyyden mukana.
+normaali	1	Tavallinen tai kohtisuora: normaali pH, normaali olotila.
+näennäinen	1	Miltä näyttää, ei todellinen: näennäinen pK<sub>a</sub> ympäristön vaikutuksesta.
+onkalo	1	Sisäinen tila: proteiinin onkalo, jossa substraatti sitoutuu.
+optimi	1	Paras arvo: entsyymin pH-optimi ja lämpötilaoptimi.
+osamäärä	1	Jakolaskun tulos: tasapainovakio on tuotteiden ja lähtöaineiden pitoisuuksien osamäärä.
+osapuoli	1	Reaktioon osallistuva aine.
+osittainen	1	Vajaa, ei täysi: osittainen dissosiaatio, osittaisvaraus.
+osmolariteetti	2	Liuoksen hiukkasten kokonaispitoisuus (osmol/ℓ), joka määrää osmoottisen paineen.	Mikä on osmolariteetti?
+painoprosentti	1	Aineen massan osuus liuoksen massasta prosentteina. Kutsutaan myös: massaprosentti.
+pakottaa	1	Saada tapahtumaan väkisin: energia pakottaa reaktion epäedulliseen suuntaan.
+pepsinogeeni	2	Pepsiinin esiaste, jonka mahahappo aktivoi. Kutsutaan myös: tsymogeeni.	Mikä on pepsinogeeni?
+peptidiketju	1	Aminohappojen ketju peptidisidoksin, polypeptidi.
+peptidiryhmä	1	Peptidisidoksen tasomainen atomiryhmä C(=O)–NH.
+pienetä	1	Tulla pienemmäksi.
+piilolinssi	1	Silmän pinnalle asetettava linssi, jonka neste on isotonista.
+pikosekunti	1	Sekunnin biljoonasosa, 10<sup>−12</sup> s. Vetysidoksen elinikä vedessä.
+pilkkoutua	1	Hajota osiin: proteiini pilkkoutuu peptideiksi.
+pinta-ala	1	Pinnan suuruus: solun pinta-ala rajoittaa aineiden vaihtoa.
+poistaa	1	Ottaa pois: munuaiset poistavat kuona-aineet.
+positiivinen	2	Plusmerkkinen: positiivinen varaus, positiivinen ΔG.
+puhdas	1	Ilman muita aineita: puhdas vesi on pH 7 ja johtaa huonosti sähköä.
+punaviini	1	Viini, jonka pH on noin 3,5. Esimerkki happamasta juomasta.
+puskurialue	2	pH-alue noin pK<sub>a</sub> ± 1, jolla puskuri tasaa pH:ta tehokkaasti.	Mikä on puskurialue?
+raskas	1	Suurimassainen: raskas isotooppi, raskas vety on deuterium.
+rasvahappoketju	1	Rasvahapon hiilivetyketju, lipidin hydrofobinen osa.
+rasvamolekyyli	1	Rasvan molekyyli, triglyseridi.
+reaktioastia	1	Astia, jossa reaktio tehdään.
+resonanssimuoto	2	Yksi delokalisoituneen rakenteen sidoskaavoista. Karboksylaatin kaksi resonanssimuotoa jakavat varauksen.	Mikä on resonanssimuoto?
+reuna	1	Rakenteen ulkolaita: kalvon reuna, renkaan reuna.
+rypäs	1	Tiivis ryhmä: vesimolekyylien rypäs, hydrofobinen rypäs. Kutsutaan myös: klusteri.
+ruokasoodaliuos	1	Natriumbikarbonaatin vesiliuos, lievästi emäksinen (pH noin 8).
+samanmerkkinen	1	Saman etumerkin omaava: samanmerkkiset varaukset hylkivät toisiaan.
+sekoittua	1	Yhdistyä tasaisesti: poolinen aine sekoittuu veteen, öljy ei.
+sisäosa	1	Sisällä oleva osa: kalvon hydrofobinen sisäosa.
+sitruunamehu	1	Sitruunahappoa sisältävä mehu, pH noin 2.
+solvataatio	2	Liuotinmolekyylien järjestyminen liuenneen hiukkasen ympärille. Vedessä hydratoituminen.	Mitä solvataatio on?
+suhde	1	Kahden määrän osamäärä: emäksen ja hapon suhde määrää pH:n.
+sulamislämpö	2	Energia, joka tarvitaan kiinteän aineen sulattamiseen. Jäällä suuri vetysidosten vuoksi.	Mikä on sulamislämpö?
+suolapitoisuus	1	Suolan määrä liuoksessa: veren 0,9 %, meriveden 3,5 %.
+suonensisäinen	1	Verisuoneen annettava: suonensisäinen liuos on isotoninen. Kutsutaan myös: intravenoosinen.
+suuruus	1	Määrän tai voiman suuruus: varauksen suuruus, vuorovaikutuksen suuruus.
+syke	1	Sydämen lyöntitiheys, jota hengityskeskus ja hormonit säätävät.
+syrjäytyä	1	Joutua pois: vesi syrjäytyy hydrofobisten ryhmien väliltä.
+sähkövirta	1	Varausten liike: ionit kuljettavat sähkövirtaa liuoksessa.
+taipua	1	Kääntyä kaarelle: vesimolekyyli on taipunut, ketju taipuu.
+talvi	1	Kylmä vuodenaika, jolloin järvi jäätyy pinnasta ja pohja pysyy sulana.
+tasapainoreaktio	2	Reaktio, joka etenee molempiin suuntiin ja asettuu tasapainoon, kuten hapon dissosiaatio.	Mikä on tasapainoreaktio?
+tasata	1	Tehdä tasaiseksi: puskuri tasaa pH:n, vesi tasaa lämpötilan.
+tasku	1	Proteiinin pinnan syvennys, johon ligandi sitoutuu. Kutsutaan myös: sitoutumistasku.	Mikä on tasku proteiinissa?
+tehollinen	1	Todellinen vaikutus: tehollinen pitoisuus, tehollinen ydinvaraus.
+tiheys	2	Massa tilavuutta kohti. Vesi 1 g/mℓ, jää harvempaa, siksi se kelluu.	Mikä on tiheys?
+tiukka	1	Voimakas ja tarkka: tiukka sitoutuminen, tiukka säätely.
+toimintaympäristö	1	Olosuhteet, joissa molekyyli toimii: solun vesipohjainen toimintaympäristö.
+torjua	1	Estää haitta: puskuri torjuu pH:n muutoksen, immuunijärjestelmä patogeenit.
+trypsinogeeni	2	Trypsiinin esiaste, jonka suolen enteropeptidaasi aktivoi.	Mikä on trypsinogeeni?
+tulkinta	1	Merkityksen selitys: mittaustuloksen tulkinta.
+tuoteaine	1	Reaktiossa syntyvä aine, tuote.
+turvota	1	Laajeta vettä imemällä: solu turpoaa laimeassa liuoksessa.
+tuulettaa	1	Poistaa hiilidioksidia hengittämällä: keuhkot tuulettavat verta.
+typpiatomi	1	Typen atomi, vetysidosten luovuttaja ja vastaanottaja, emäsryhmien keskus.
+tärisyttää	1	Saada värähtelemään: lämpö tärisyttää molekyylejä.
+uhka	1	Vaara: happamoituminen on uhka soluille.
+ulottua	1	Yltää: vetysidosverkosto ulottuu koko nesteen läpi.
+vaarallinen	1	Haitallinen: vahva happo on vaarallinen kudoksille.
+vaha	1	Rasvahappojen ja pitkien alkoholien esterit, vettä hylkivä pinnoite lehdillä ja höyhenillä.	Mikä on vaha?
+vahvasti	1	Voimakkaasti: vahva happo dissosioituu vahvasti, täysin.
+vahvuus	1	Hapon tai sidoksen voimakkuus: hapon vahvuus näkyy pK<sub>a</sub>:sta.
+vaihtua	1	Korvautua toisella: protoni vaihtuu, vesimolekyylit vaihtuvat.
+vaimentaa	1	Heikentää: puskuri vaimentaa pH:n muutoksen.
+valkaisuaine	1	Hapettava puhdistusaine, kuten hypokloriitti tai vetyperoksidi.
+valkuainen	2	Munanvalkuainen, lähes pelkkää proteiinia (albumiinia) vedessä. Kutsutaan myös: valkuaisaine on proteiini.	Mikä on valkuainen?
+valmistus	1	Tekeminen: liuoksen valmistus, proteiinin valmistus.
+varauspainopiste	2	Molekyylin positiivisten tai negatiivisten varausten keskipiste. Jos ne eivät osu yhteen, molekyyli on dipoli.	Mikä on varauspainopiste?
+vastaanottaja-atomi	2	Vetysidoksen atomi, jonka vapaa elektronipari sitoo vedyn: happi tai typpi.	Mikä on vastaanottaja-atomi?
+vastapää	1	Molekyylin toinen pää: dipolin vastapää.
+vastavaikuttaja	1	Vastakkaiseen suuntaan vaikuttava tekijä, kuten käänteisreaktio tai antagonisti.
+vastustaa	1	Toimia vastaan: puskuri vastustaa pH:n muutosta.
+vaurioittaa	1	Vahingoittaa: happo vaurioittaa kudosta.
+venyä	1	Pidentyä voiman vaikutuksesta: sidos venyy värähtelyssä.
+verihiutale	2	Veren pieni solunkappale, joka käynnistää hyytymisen. Kutsutaan myös: trombosyytti.	Mikä on verihiutale?
+verrannollinen	1	Suhteessa muuttuva: pH on kääntäen verrannollinen vetyionipitoisuuden logaritmiin.
+vesijohtovesi	1	Hanavesi, joka sisältää liuenneita ioneja ja on noin pH 7–8.
+vesiketju	1	Vetysidoksin liittyneiden vesimolekyylien jono, jota pitkin protoni hyppii.
+vesipohjainen	1	Veteen perustuva: solu on vesipohjainen järjestelmä.
+vetyionipitoisuus	2	Protonien pitoisuus [H<sup>+</sup>] liuoksessa, jonka negatiivinen logaritmi on pH. Kutsutaan myös: vetyionikonsentraatio.	Mikä on vetyionipitoisuus?
+vetypää	1	Molekyylin vetyä sisältävä pää, vetysidoksen luovuttaja.
+viereinen	1	Vieressä oleva: viereinen atomi, viereinen solu.
+väkevä	2	Paljon ainetta sisältävä liuos: väkevä happo, väkevä suolaliuos. Vastakohta: laimea.	Mitä väkevä tarkoittaa?
+värähdellä	1	Liikkua edestakaisin: sidokset värähtelevät, molekyylit värähtelevät lämmössä.
+yhteensopiva	1	Toistensa kanssa sopiva: vetysidoksen geometria yhteensopiva.
+yhteisvoima	1	Monen heikon vuorovaikutuksen summa, joka pitää rakenteen koossa.
+yksiketjuinen	1	Yhdestä ketjusta koostuva, kuten RNA tai yksiketjuinen lipidi.
+yläpuoli	1	Yllä oleva puoli: renkaan tason yläpuoli.
+ärtyä	1	Reagoida ärsykkeeseen: limakalvo ärtyy hapon vaikutuksesta.

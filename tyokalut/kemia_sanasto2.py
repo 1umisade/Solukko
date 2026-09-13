@@ -328,3 +328,11 @@ L21 += sanasto3.KEMIA_L21
 L22 += sanasto3.KEMIA_L22
 L31 += sanasto3.KEMIA_L31
 L32 += sanasto3.KEMIA_L32
+
+# massakierros (omistaja 13.9.2026): sanasto_massa/<avain>.txt
+import sanasto_massa
+L1 += sanasto_massa.kortit("kemia_1")
+L21 += sanasto_massa.kortit("kemia_21")
+L22 += sanasto_massa.kortit("kemia_22")
+L31 += sanasto_massa.kortit("kemia_31")
+L32 += sanasto_massa.kortit("kemia_32")

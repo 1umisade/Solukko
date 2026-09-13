@@ -821,3 +821,9 @@ import sanasto3
 L1 += sanasto3.BIOTEK_L1
 L2 += sanasto3.BIOTEK_L2
 L3 += sanasto3.BIOTEK_L3
+
+# massakierros (omistaja 13.9.2026): sanasto_massa/<avain>.txt
+import sanasto_massa
+L1 += sanasto_massa.kortit("biotek_L1")
+L2 += sanasto_massa.kortit("biotek_L2")
+L3 += sanasto_massa.kortit("biotek_L3")

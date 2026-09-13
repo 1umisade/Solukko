@@ -1,0 +1,686 @@
+# Solu- ja biomolekyylit, Luento 1 - massakierros (lemma <TAB> tt <TAB> suppea [<TAB> kysymys])
+aakkosto	1	Merkkien joukko, josta viestit kootaan: DNA:n aakkosto on neljä emästä, proteiinin kaksikymmentä aminohappoa.
+adrenaliini	2	Lisämunuaisen stressihormoni, joka nostaa sykettä ja vapauttaa glukoosia. Tyrosiinista tehty pieni viestimolekyyli.
+aikaansaada	1	Saada aikaan, aiheuttaa: entsyymi saa aikaan reaktion, mutaatio muutoksen.
+aistia	1	Havaita ympäristöä: solu aistii signaaleja reseptoreillaan, eliö aistimillaan.
+aivo	2	Hermoston keskus, joka käsittelee tietoa. Hermosolujen ja tukisolujen muodostama elin.	Mitä aivot ovat?
+aktivaatioenergia	3	Energiakynnys, joka reaktion on ylitettävä käynnistyäkseen. Katalyytti alentaa sitä eikä muuta tasapainoa.	Mikä on aktivaatioenergia?
+alaniini	2	Pieni pooliton aminohappo, jonka sivuketju on metyyliryhmä. Lyhenne Ala, A.	Mikä on alaniini?
+aldehydisokeri	2	Sokeri, jonka karbonyyliryhmä on ketjun päässä aldehydinä, kuten glukoosi. Kutsutaan myös: aldoosi.	Mikä on aldehydisokeri?
+aldolaasi	2	Glykolyysin entsyymi, joka halkaisee fruktoosi-1,6-bisfosfaatin kahdeksi kolmihiiliseksi sokeriksi.	Mikä on aldolaasi?
+aldoosi	2	Sokeri, jonka karbonyyli on aldehydinä ketjun päässä, kuten glukoosi ja glyseraldehydi. Vastakohta: ketoosi.	Mikä on aldoosi?
+alentaa	1	Laskea arvoa: katalyytti alentaa aktivaatioenergiaa, happo alentaa pH:ta.
+alfa	1	Kreikan aakkosten ensimmäinen kirjain α. Nimeää ensimmäisen vaihtoehdon: alfakierre, alfahiili, alfa-glykosidisidos.	Mitä alfa tarkoittaa nimissä?
+alfahiili	2	Karboksyyliryhmän viereinen hiili, johon aminohapon aminoryhmä ja sivuketju kiinnittyvät.	Mikä on alfahiili?
+alfasidos	2	Glykosidisidos, jossa sokerin anomeerinen hydroksyyli osoittaa renkaan tason alle, kuten tärkkelyksessä. Kutsutaan myös: alfa-glykosidisidos.	Mikä on alfasidos?
+alkaani	2	Hiilivety, jossa on vain yksinkertaisia sidoksia, kuten metaani ja etaani. Kaava C<sub>n</sub>H<sub>2n+2</sub>.	Mikä on alkaani?
+alkeellinen	1	Yksinkertainen ja varhainen, kuten alkeellinen solu tai aineenvaihdunta elämän alussa.
+alku	1	Ensimmäinen vaihe tai lähtökohta: elämän alku, reaktion alku, polymeerin alkupää.
+alkueläin	2	Yksisoluinen eukaryootti, joka liikkuu ja syö, kuten ameba tai tohvelieläin. Kutsutaan myös: protisti.	Mikä on alkueläin?
+alkuperä	1	Se, mistä jokin on peräisin: elämän alkuperä, mitokondrion bakteerialkuperä.
+alkuperäinen	1	Ensimmäinen, muuttamaton muoto, josta myöhemmät versiot polveutuvat.
+alkupää	1	Ketjun ensimmäinen pää: DNA:n 5'-pää, proteiinin N-pää.
+alkyyliketju	2	Hiilivetyketju –(CH<sub>2</sub>)<sub>n</sub>–CH<sub>3</sub> substituenttina, kuten rasvahapon häntä. Kutsutaan myös: alkyyliryhmä.	Mikä on alkyyliketju?
+all-trans-retinaali	2	Retinaalin suora muoto, joka syntyy valon isomeroidessa 11-cis-retinaalin ja käynnistää näköaistimuksen.	Mikä on all-trans-retinaali?
+altis	1	Herkkä jollekin vaikutukselle: proteiini on altis denaturaatiolle, DNA mutaatioille.
+alue	1	Rajattu osa rakenteesta, kuten proteiinin sitoutumisalue tai geenin säätelyalue.
+alumiini	1	Alkuaine Al, maankuoren yleisin metalli. Ei osallistu elämän kemiaan.	Mikä on alumiini?
+amidivety	2	Amidin typpeen sitoutunut vety, joka peptidisidoksessa toimii vetysidoksen luovuttajana alfakierteessä ja beetalaskoksessa.	Mikä on amidivety?
+amiini	2	Typpiyhdiste, jossa typpeen on liittynyt hiiliryhmiä, R–NH<sub>2</sub>. Emäksinen, protonoituu ammoniumioniksi.	Mikä on amiini?
+anomeerinen	2	Sokerin renkaan sulkeutumisessa syntyvä uusi kiraalikeskus (anomeerinen hiili) ja sen kaksi muotoa alfa ja beeta.	Mitä anomeerinen tarkoittaa?
+apu	1	Auttava tekijä: apuproteiini, apuaine, koentsyymi entsyymin apuna.
+arginiini	2	Emäksinen aminohappo, jonka sivuketjussa on positiivinen guanidiniumryhmä. Lyhenne Arg, R.	Mikä on arginiini?
+arvo	1	Suureen mitattu tai laskettu lukema, kuten pH-arvo tai pK<sub>a</sub>-arvo.
+asento	1	Rakenteen tai atomin sijainti suhteessa muihin: cis- ja trans-asento, aksiaalinen ja ekvatoriaalinen asento.
+asetaldehydi	2	Etanolin hapettumistuote CH<sub>3</sub>CHO, krapulan aiheuttaja. Hapettuu edelleen etikkahapoksi.	Mikä on asetaldehydi?
+asetamidi	2	Etikkahapon amidi CH<sub>3</sub>CONH<sub>2</sub>, yksinkertaisin amidi ja peptidisidoksen malli.	Mikä on asetamidi?
+asetylointi	2	Asetyyliryhmän –COCH<sub>3</sub> liittäminen molekyyliin, esimerkiksi histonin lysiiniin, mikä löysentää kromatiinia.	Mitä asetylointi on?
+asetyylifosfaatti	2	Energiarikas fosfaattiyhdiste, jonka fosfaattisidos vapauttaa hydrolyysissä enemmän energiaa kuin ATP:n.	Mikä on asetyylifosfaatti?
+asetyylikoentsyymi	2	Asetyyli-CoA: koentsyymi A:n kantama kahden hiilen asetyyliryhmä, sitruunahappokierron polttoaine.	Mikä on asetyylikoentsyymi A?
+askel	1	Yksi vaihe reaktiosarjassa tai kehityksessä: glykolyysin kymmenen askelta.
+asparagiini	2	Poolinen aminohappo, jonka sivuketjussa on amidiryhmä. Lyhenne Asn, N. Sokeroinnin kiinnityskohta.	Mikä on asparagiini?
+aspartaami	2	Makeutusaine, aspartaatin ja fenyylialaniinin metyyliesteröity dipeptidi. 200 kertaa sokeria makeampi.	Mikä on aspartaami?
+aste	1	Mitta-asteikon yksikkö tai vaihe: lämpötila asteina, hapetusaste, kehitysaste.
+asyyliryhmä	2	Karboksyylihaposta hydroksyylin poistamalla saatava ryhmä R–C=O, kuten asetyyli tai rasvahapon asyyli.	Mikä on asyyliryhmä?
+atomiluku	1	Alkuaineen protonien määrä, sama kuin järjestysluku.	Mikä on atomiluku?
+atomiryhmä	1	Toisiinsa sitoutuneiden atomien joukko, joka toimii molekyylissä yksikkönä, kuten funktionaalinen ryhmä.
+atp-syntaasi	3	Kalvon entsyymikoneisto, joka valmistaa ATP:tä protonivirran pyörittämänä mitokondriossa ja viherhiukkasessa.	Mikä on ATP-syntaasi?
+avautua	1	Muuttua avoimeksi: kaksoiskierre avautuu replikaatiossa, sokerirengas avautuu ketjuksi.
+avoin	1	Ei suljettu: avoin ketjumuoto, avoin systeemi, joka vaihtaa energiaa ympäristönsä kanssa.
+beetaketju	2	Hemoglobiinin toinen alayksikkötyyppi, kaksi beetaketjua ja kaksi alfaketjua muodostavat tetrameerin.	Mikä on beetaketju?
+beetalaskos	3	Proteiinin sekundaarirakenne, jossa rinnakkaiset ketjut liittyvät vetysidoksin laskostuneeksi levyksi.	Mikä on beetalaskos?
+beetasidos	2	Glykosidisidos, jossa anomeerinen hydroksyyli osoittaa renkaan tason yläpuolelle, kuten selluloosassa. Kutsutaan myös: beeta-glykosidisidos.	Mikä on beetasidos?
+bentseeni	2	Kuuden hiilen aromaattinen rengas C<sub>6</sub>H<sub>6</sub>, elektronit delokalisoituneet. Fenyylialaniinin ja tyrosiinin rengas.	Mikä on bentseeni?
+bisfosfoglyseraatti	2	Glykolyysin välituote 1,3-bisfosfoglyseraatti, jonka energiarikas fosfaatti siirretään ADP:lle ATP:ksi.	Mikä on bisfosfoglyseraatti?
+cis	2	Samalla puolella: cis-isomeerissä substituentit ovat kaksoissidoksen samalla puolella, trans-isomeerissä vastakkaisilla.	Mitä cis tarkoittaa?
+cis-trans-isomeeri	2	Kaksoissidoksen tai renkaan ympärillä erilaiset isomeerit, joissa ryhmät ovat samalla (cis) tai eri (trans) puolella.	Mikä on cis-trans-isomeeri?
+delokalisaatio	2	Elektronien jakautuminen usealle atomille yhden sidoksen sijasta, kuten bentseenissä ja peptidisidoksessa.	Mitä delokalisaatio on?
+dihappo	1	Happo, jossa on kaksi happoryhmää, kuten fumaarihappo ja omenahappo. Kutsutaan myös: dikarboksyylihappo.	Mikä on dihappo?
+edellytys	1	Ehto, jonka on täytyttävä: vesi on elämän edellytys.
+edeltää	1	Tulla ennen: RNA-maailma edelsi DNA:ta, prokaryootit eukaryootteja.
+eetterihappi	2	Kahden hiilen väliin sitoutunut happi C–O–C, kuten sokerin renkaassa tai glykosidisidoksessa.	Mikä on eetterihappi?
+eetterisidos	2	Sidos C–O–C, jossa happi yhdistää kaksi hiiltä. Arkeonien kalvolipideissä eetterisidos korvaa esterisidoksen.	Mikä on eetterisidos?
+ehjä	1	Vaurioitumaton, kokonainen: ehjä solukalvo, ehjä DNA-juoste.
+ei-kiraalinen	2	Molekyyli, joka on peilikuvansa kanssa identtinen, kuten glysiini. Kutsutaan myös: akiraalinen.	Mitä ei-kiraalinen tarkoittaa?
+ei-spontaani	2	Reaktio, joka ei etene itsestään, koska sen vapaaenergian muutos on positiivinen. Vaatii kytkennän energiaa vapauttavaan reaktioon.	Mitä ei-spontaani tarkoittaa?
+elin	1	Kudoksista koostuva rakenne, jolla on tehtävä, kuten sydän tai maksa. Soluelin on solun sisäinen vastine.
+elinkaari	1	Yksilön vaiheet syntymästä kuolemaan. Solun elinkaari on solusykli.
+eliöluokittelu	1	Eliöiden jako ryhmiin sukulaisuuden mukaan: kolme domeenia, kunnat, lahkot, suvut, lajit. Kutsutaan myös: taksonomia.
+eliöryhmä	1	Yhteisen esivanhemman jälkeläisten joukko luokittelussa, kuten bakteerit tai selkärankaiset.
+eläinsolu	2	Eläimen eukaryoottisolu: ei soluseinää eikä viherhiukkasia, tuma, mitokondriot ja joustava kalvo.	Mikä on eläinsolu?
+entalpia	2	Systeemin lämpösisältö H. Sen muutos ΔH kertoo, vapautuuko reaktiossa lämpöä (negatiivinen) vai sitoutuuko sitä.	Mikä on entalpia?
+entsymaattinen	2	Entsyymin katalysoima: entsymaattinen reaktio on nopea, spesifinen ja säädeltävissä.
+epäsuora	1	Välillinen, ei suoraan: epäsuora vaikutus tai mittaus.
+epätäydellinen	1	Vaillinainen: epätäydellinen palaminen tai laskostuminen.
+epävakaa	1	Helposti hajoava tai muuttuva, kuten energiarikas välituote tai lähetti-RNA.
+erikoistua	1	Kehittyä tiettyyn tehtävään: solu erikoistuu lihas- tai hermosoluksi.
+erilainen	1	Poikkeava toisesta. Erilaistuminen on solun muuttumista erikoistuneeksi.
+erillinen	1	Muista irrallaan oleva, oma yksikkönsä, kuten erillinen domeeni proteiinissa.
+eristyä	1	Joutua erilleen ympäristöstä: solukalvo eristää sisällön, hydrofobiset ryhmät eristyvät vedestä.
+erityinen	1	Tiettyä tarkoitusta varten oleva, ominainen: erityinen rakenne, spesifinen.
+ero	1	Kahden asian välinen poikkeavuus, kuten pitoisuusero kalvon yli tai energiaero.
+erota	1	Poiketa toisesta tai irrota: isomeerit eroavat rakenteeltaan, faasit eroavat toisistaan.
+erottaa	1	Tehdä ero tai irrottaa: tunnistaa isomeerit toisistaan tai eristää aine seoksesta.
+esieukaryoottisolu	2	Hypoteettinen solu, josta eukaryootti kehittyi: asgard-arkeonin kaltainen isäntä, joka otti sisäänsä mitokondrion esi-isän.	Mikä on esieukaryoottisolu?
+esiintyä	1	Olla olemassa tai tavattavissa: aminohapot esiintyvät luonnossa L-muotoina.
+esteröitynyt	2	Esterisidoksella liittynyt: rasvahapot ovat esteröityneet glyseroliin triglyseridissä.
+esto	2	Toiminnan estäminen: entsyymin esto inhibiittorilla, takaisinkytkentäesto.	Mitä esto tarkoittaa?
+etyyliasetaatti	2	Etikkahapon ja etanolin esteri, hedelmäinen liuotin. Esimerkki esterisidoksesta.	Mikä on etyyliasetaatti?
+fenyylialaniini	2	Aromaattinen, hydrofobinen aminohappo, jossa on bentseenirengas. Lyhenne Phe, F. Tyrosiinin esiaste.	Mikä on fenyylialaniini?
+fimbria	2	Bakteerin pinnan lyhyt karvamainen proteiinirakenne, jolla se tarttuu pintoihin ja soluihin.	Mikä on fimbria?
+fosfoenolipyruvaatti	2	Glykolyysin viimeinen välituote, jonka energiarikas enolifosfaatti siirretään ADP:lle. Lyhenne PEP.	Mikä on fosfoenolipyruvaatti?
+fosfori	2	Alkuaine P, elämälle välttämätön: fosfaattina nukleotideissa, fosfolipideissä ja ATP:ssä.	Mikä on fosfori?
+fosforylointi	3	Fosfaattiryhmän liittäminen molekyyliin, tavallisesti ATP:stä kinaasin avulla. Säätelee proteiinien toimintaa.	Mitä fosforylointi on?
+fotoautotrofi	2	Eliö, joka saa energiansa valosta ja hiilensä hiilidioksidista: kasvit, levät ja syanobakteerit.	Mikä on fotoautotrofi?
+fotolitoautotrofi	2	Fotoautotrofi, joka ottaa elektroninsa epäorgaanisesta lähteestä, kuten vedestä. Kasvit ovat fotolitoautotrofeja.	Mikä on fotolitoautotrofi?
+galaktoosi	2	Kuuden hiilen aldoosi, glukoosin epimeeri, laktoosin toinen puolikas.	Mikä on galaktoosi?
+geometria	2	Atomien avaruudellinen järjestys molekyylissä: tetraedri, tasomainen tai lineaarinen.	Mitä geometria tarkoittaa molekyylistä?
+glutamiini	2	Poolinen aminohappo, glutamaatin amidi. Lyhenne Gln, Q. Typen kuljettaja veressä.	Mikä on glutamiini?
+glykaani	2	Sokeriketju, joka on liitetty proteiiniin tai lipidiin. Kutsutaan myös: sokeriosa.	Mikä on glykaani?
+glykolyysi	3	Glukoosin pilkkominen kahdeksi pyruvaatiksi solulimassa, tuottaa 2 ATP ja 2 NADH. Aineenvaihdunnan vanhin reitti.	Mikä on glykolyysi?
+glyseroli	2	Kolmen hiilen kolmiarvoinen alkoholi, rasvojen ja fosfolipidien runko.	Mikä on glyseroli?
+gram-negatiivinen	2	Bakteeri, jolla on ohut soluseinä ja ulkokalvo eikä pidätä gramväriä, kuten E. coli.	Mikä on gram-negatiivinen bakteeri?
+haara	1	Ketjusta erkaneva sivuketju, kuten glykogeenin haarat tai haaraketjuinen aminohappo.
+haitallinen	1	Vahingoittava: haitallinen mutaatio tai aineenvaihduntatuote.
+hapan	2	Happamuus: liuos, jonka pH on alle 7, tai aminohappo, jonka sivuketju on karboksyylihappo.
+hapellinen	2	Happea sisältävä ympäristö, aerobinen. Hapellisissa oloissa soluhengitys tuottaa eniten energiaa.
+hapetusaste	2	Atomin muodollinen varaus yhdisteessä. Hiilen hapetusaste nousee metaanista hiilidioksidiin. Kutsutaan myös: hapetusluku.	Mikä on hapetusaste?
+happimolekyyli	2	Kaksiatominen O<sub>2</sub>, ilman happi, soluhengityksen lopullinen elektronin vastaanottaja.	Mikä on happimolekyyli?
+happoemäskatalyytti	2	Katalyytti, joka luovuttaa tai ottaa protonin reaktion välivaiheessa. Entsyymien aktiivisen kohdan yleinen mekanismi. Kutsutaan myös: happo-emäskatalyysi.	Mikä on happo-emäskatalyytti?
+happoryhmä	2	Protonin luovuttava ryhmä, tavallisesti karboksyyliryhmä –COOH tai fosfaatti.	Mikä on happoryhmä?
+harvinainen	1	Vähän esiintyvä, kuten harvinainen aminohappo tai mutaatio.
+heksokinaasi	2	Glykolyysin ensimmäinen entsyymi, joka fosforyloi glukoosin ATP:llä ja lukitsee sen soluun.	Mikä on heksokinaasi?
+hemiketaali	2	Ketonin ja alkoholin liitos, joka syntyy ketosokerin, kuten fruktoosin, renkaan sulkeutuessa.	Mikä on hemiketaali?
+hermo	2	Hermosolujen viejähaarakkeiden kimppu, joka välittää impulsseja aivoista kehoon ja takaisin.	Mikä on hermo?
+hermosto	2	Hermosolujen muodostama järjestelmä: aivot, selkäydin ja hermot.	Mikä on hermosto?
+hetero	1	Erilainen, toista lajia: heterotrofi käyttää muiden tekemää orgaanista ainetta, heteroatomi on muu kuin hiili.	Mitä hetero- tarkoittaa etuliitteenä?
+hidastaa	1	Tehdä hitaammaksi: inhibiittori hidastaa entsyymiä, kylmä hidastaa reaktiota.
+hierarkiataso	1	Rakenteellisen järjestyksen porras: atomi, molekyyli, organelli, solu, kudos, elin, eliö.
+hiiliatomi	2	Yksi hiilen atomi, neljä sidosta: elämän molekyylien runko. Kutsutaan myös: hiili.	Mikä on hiiliatomi?
+hiilihiilisidos	2	Kahden hiilen välinen kovalenttinen sidos, luja ja stabiili, hiiliketjujen ja renkaiden perusta.	Mikä on hiili–hiili-sidos?
+hiilikaksoissidos	2	C=C, jäykkä ja tasomainen, mahdollistaa cis–trans-isomerian. Tyydyttymättömien rasvahappojen tunnusmerkki.	Mikä on hiili–hiili-kaksoissidos?
+hiiliryhmä	1	Hiilipohjainen substituentti molekyylissä, kuten metyyli- tai alkyyliryhmä.
+hiiliyhdiste	2	Hiiltä sisältävä yhdiste, orgaaninen aine. Elämä on hiiliyhdisteiden kemiaa.	Mikä on hiiliyhdiste?
+hiki	1	Ihon rauhasten erittämä suolainen neste, joka jäähdyttää haihtuessaan. Veden suuren höyrystymislämmön sovellus.
+hius	1	Keratiinista rakentuva karva. Keratiinin rikkisillat määräävät kiharuuden.
+hiussuoni	2	Ohuin verisuoni, jonka seinämän läpi happi ja ravinteet siirtyvät kudokseen. Kutsutaan myös: kapillaari.	Mikä on hiussuoni?
+hivenalkuaine	2	Elimistön pienenä määränä tarvitsema alkuaine, kuten rauta, sinkki, kupari, jodi ja seleeni.	Mikä on hivenalkuaine?
+huone	1	Huoneenlämpö on noin 20–25 °C, tavallinen viittaus lämpötilaan, jossa reaktio tai säilytys tapahtuu.	Mitä huoneenlämpö tarkoittaa?
+huuhtoutua	1	Kulkeutua pois veden mukana, kuten ravinteet maasta.
+hydroksidikarboksyylihappo	2	Karboksyylihappo, jossa on lisäksi hydroksyyliryhmä, kuten maitohappo, omenahappo ja sitruunahappo. Kutsutaan myös: hydroksihappo.	Mikä on hydroksikarboksyylihappo?
+hylkiävoima	2	Samanmerkkisten varausten tai elektronipilvien välinen työntö, joka estää atomeja tunkeutumasta toisiinsa.	Mikä on hylkivä voima?
+hyödyllinen	1	Hyötyä tuottava: hyödyllinen mutaatio parantaa kelpoisuutta.
+hyödyntää	1	Käyttää hyväksi: solu hyödyntää valon energiaa, ihminen mikrobeja.
+hyökkäys	1	Aktiivinen kohdistuminen: nukleofiilinen hyökkäys reaktiossa, immuunijärjestelmän hyökkäys patogeeniin.
+häiriö	1	Normaalin toiminnan poikkeama: aineenvaihduntahäiriö, laskostumishäiriö.
+häntä	1	Molekyylin pitkä hydrofobinen osa, kuten fosfolipidin rasvahappohännät, tai poly(A)-häntä.
+identtinen	1	Täysin samanlainen: identtiset kopiot DNA:sta, identtiset kaksoset.
+ihmisapina	1	Ihmisen lähin sukulaisryhmä: simpanssi, gorilla ja oranki. Perimä 98 % sama kuin ihmisellä.
+ihosolu	1	Ihon epiteelin solu, keratiinia tuottava keratinosyytti.
+ilmetä	1	Tulla näkyviin: geeni ilmenee proteiinina, ominaisuus ilmenee yksilössä.
+imeyttää	1	Ottaa aine sisään pinnan läpi: suoli imeyttää ravinteet vereen.
+impulssi	2	Hermosolun kalvolla etenevä sähköinen sysäys. Kutsutaan myös: hermoimpulssi, aktiopotentiaali.	Mikä on impulssi?
+imukudos	2	Immuunijärjestelmän kudos, jossa imusolut kypsyvät ja kohtaavat antigeenin: imusolmukkeet, perna, kateenkorva. Kutsutaan myös: lymfaattinen kudos.	Mikä on imukudos?
+ionivirta	2	Ionien liike kalvon kanavien läpi, joka synnyttää hermosolun sähköisen signaalin.	Mikä on ionivirta?
+irrota	1	Erota kiinnityksestään: protoni irtoaa haposta, tuote irtoaa entsyymistä.
+irrottaa	1	Saada irtoamaan: entsyymi irrottaa fosfaatin, katkaisee sidoksen.
+itsesäätely	2	Järjestelmän kyky pitää tilansa vakaana takaisinkytkennällä, kuten solun pH:n tai eliön lämpötilan säätö. Kutsutaan myös: homeostaasi.	Mitä itsesäätely on?
+jodi	1	Alkuaine I, halogeeni, kilpirauhashormonin osa ja siksi hivenalkuaine.	Mikä on jodi?
+johdannainen	2	Yhdiste, joka on tehty toisesta pienellä muutoksella, kuten sokerijohdannainen tai aminohappojohdannainen. Kutsutaan myös: derivaatta.	Mikä on johdannainen?
+joustavuus	1	Kyky taipua ja palautua: yksinkertaiset sidokset antavat molekyylille joustavuutta.
+jäljitellä	1	Matkia: synteettinen biologia jäljittelee luonnon rakenteita, solumalli jäljittelee solua.
+jälkeläinen	1	Lisääntymisessä syntynyt uusi yksilö tai tytärsolu.
+järjestys	1	Rakenneosien keskinäinen asema: aminohappojärjestys, emäsjärjestys, järjestyneisyys.
+järjestäytyä	1	Asettua järjestykseen itsestään: lipidit järjestäytyvät kaksoiskerrokseksi.
+jättimäinen	1	Hyvin suuri: jättimäinen molekyyli kuten titiini, jättimäinen solu kuten munasolu.
+jäykkä	1	Taipumaton: kaksoissidos ja peptidisidos ovat jäykkiä, rengas jäykistää molekyylin.
+kahdentua	2	Kopioitua kahdeksi: DNA kahdentuu replikaatiossa ennen solunjakautumista.	Mitä kahdentuminen tarkoittaa?
+kaksinauhaisuus	2	DNA:n rakenne kahtena toisiaan täydentävänä juosteena, mikä mahdollistaa kopioinnin ja korjauksen.	Mitä kaksinauhaisuus tarkoittaa?
+kaksiosainen	1	Kahdesta osasta koostuva: kaksiosainen ribosomi, kaksiosainen lajinimi.
+kaksisiimainen	1	Kahdella siimalla varustettu, kuten Chlamydomonas-levä.
+kaksisuuntainen	1	Kumpaankin suuntaan toimiva: kaksisuuntainen reaktio tai kuljetus.
+kaksoiskovera	1	Molemmilta puolilta painunut muoto, kuten punasolu, joka lisää pinta-alaa hapen vaihtoon.
+kalium	2	Alkuaine K, solun sisäinen pääkationi K<sup>+</sup>. Kalvon lepopotentiaali syntyy sen gradientista.	Mikä on kalium?
+kalsiumfosfaatti	2	Luun ja hampaan kova mineraali, kalsiumin ja fosfaatin suola. Kutsutaan myös: hydroksiapatiitti.	Mikä on kalsiumfosfaatti?
+kalvolipidi	2	Solukalvon lipidi: fosfolipidit, glykolipidit ja kolesteroli, jotka muodostavat kaksoiskerroksen.	Mikä on kalvolipidi?
+kambrikausi	2	Geologinen kausi 540 miljoonaa vuotta sitten, jolloin monisoluiset eläinryhmät ilmestyivät nopeasti fossiiliaineistoon. Kutsutaan myös: kambrin räjähdys.	Mikä on kambrikausi?
+kanavaproteiini	2	Kalvoproteiini, jonka läpi kulkeva huokonen päästää tietyt ionit tai molekyylit kalvon läpi.	Mikä on kanavaproteiini?
+kapseli	2	Bakteerin uloin limainen sokerikerros, joka suojaa kuivumiselta ja immuunipuolustukselta.	Mikä on kapseli bakteerilla?
+karboksylaattimuoto	2	Karboksyylihapon deprotonoitunut muoto –COO<sup>−</sup>, jossa aminohapot ovat solun pH:ssa.	Mikä on karboksylaattimuoto?
+karboksyylihappo	3	Yhdiste, jossa on karboksyyliryhmä –COOH: heikko happo, kuten etikkahappo ja rasvahapot.	Mikä on karboksyylihappo?
+karbonyylihappi	2	Karbonyyliryhmän C=O kaksoissidoksinen happi, vetysidoksen vastaanottaja peptidisidoksessa.	Mikä on karbonyylihappi?
+karbonyylihiili	2	Karbonyyliryhmän C=O hiili, osittain positiivinen ja siksi nukleofiilin hyökkäyskohde.	Mikä on karbonyylihiili?
+karbonyyliyhdiste	2	Yhdiste, jossa on C=O-ryhmä: aldehydi, ketoni, karboksyylihappo, esteri tai amidi.	Mikä on karbonyyliyhdiste?
+karsiutua	1	Jäädä pois valinnassa: haitalliset mutaatiot karsiutuvat luonnonvalinnassa.
+kasvi	2	Fotosynteesiä tekevä monisoluinen eukaryootti, jolla on soluseinä ja viherhiukkaset.	Mikä on kasvi?
+kasvisolu	2	Kasvin solu: selluloosaseinä, viherhiukkaset ja suuri vakuoli eläinsolun rakenteiden lisäksi.	Mikä on kasvisolu?
+katkaista	1	Rikkoa sidos: entsyymi katkaisee peptidisidoksen, vesikatkaisu katkaisee esterin.
+katkaisu	1	Sidoksen rikkominen, esimerkiksi vesikatkaisu tai DNA:n katkaisu restriktioentsyymillä.
+kehittyä	1	Muuttua vähitellen monimutkaisemmaksi: eliöt kehittyvät evoluutiossa, alkio yksilöksi.
+kehitysaskel	1	Evoluution tai tekniikan merkittävä edistysvaihe, kuten fotosynteesin synty.
+keltuainen	1	Munan ravintovarasto, yksi jättimäinen solu.
+kemo	1	Kemiaan viittaava etuliite: kemotrofi saa energiansa kemiallisista reaktioista.	Mitä kemo- tarkoittaa etuliitteenä?
+kerroksellinen	1	Kerroksista koostuva, kuten stromatoliitti tai kalvon kaksoiskerros.
+kerros	1	Tasainen rakenteen osa toisen päällä: lipidikerros, solukerros, sedimenttikerros.
+kerryttää	1	Koota vähitellen: solu kerryttää varastoja, mutaatiot kerryttävät vaihtelua.
+kertyä	1	Lisääntyä varastoon: rasva kertyy rasvasoluihin, virheet kertyvät vanhetessa.
+keskiarvo	1	Lukujen summa jaettuna niiden määrällä: alkuaineen atomimassa on isotooppien painotettu keskiarvo.
+keskinäinen	1	Toisiinsa kohdistuva: molekyylien keskinäinen vuorovaikutus.
+kestää	1	Sietää rikkoutumatta: kovalenttinen sidos kestää lämpöä, itiö kestää kuivuutta.
+ketju	1	Peräkkäin liittyneiden yksiköiden jono: hiiliketju, polypeptidiketju, reaktioketju.
+ketjumainen	1	Ketjun muotoinen, lineaarinen, ei rengasmainen.
+ketoaine	2	Rasvojen hajotuksesta maksassa syntyvä pieni polttoaine, kuten asetoasetaatti, jota aivot käyttävät paastossa. Kutsutaan myös: ketoni.	Mikä on ketoaine?
+ketomuoto	2	Tautomeerin muoto, jossa on C=O-ryhmä, vastakohtana enolimuodolle C=C–OH. Nukleoemäkset ovat tavallisesti ketomuodossa.	Mikä on ketomuoto?
+ketonisokeri	2	Sokeri, jonka karbonyyli on ketjun keskellä ketonina, kuten fruktoosi. Kutsutaan myös: ketoosi.	Mikä on ketonisokeri?
+keuhko	1	Hengityselin, jossa happi siirtyy ilmasta vereen ja hiilidioksidi poistuu.
+kiekko	1	Litteä pyöreä muoto, kuten punasolu tai tylakoidi.
+kierros	1	Yksi täysi kierto: kaksoiskierteen kierros on 10 emäsparia, sitruunahappokierron kierros.
+kierteinen	1	Ruuvimaisesti kiertyvä: kierteinen alfakierre, DNA:n kaksoiskierre. Kutsutaan myös: heliksi.
+kiertokulma	2	Kulma, jonka kaksi sidosta muodostavat yksinkertaisen sidoksen ympäri kierrettäessä. Proteiinin phi- ja psi-kulmat.	Mikä on kiertokulma?
+kiertosuunta	1	Kierteen suunta, oikea- tai vasenkätinen. Alfakierre ja B-DNA ovat oikeakätisiä.
+kiertyä	1	Pyöriä sidoksen ympäri tai kietoutua kierteeksi: ketju kiertyy alfakierteeksi.
+kietoa	1	Kääriä ympärille: DNA kietoutuu histonien ympärille.
+kiinnittyä	1	Tarttua kiinni: substraatti kiinnittyy aktiiviseen kohtaan, solu alustaan.
+kimmoisa	1	Muotonsa palauttava, kuten rusto tai elastiini.
+kimppu	1	Yhteen sidottu joukko säikeitä, kuten kollageenikuitujen kimppu.
+kitiini	2	Sienten soluseinän ja hyönteisten kuoren polysakkaridi, N-asetyyliglukosamiinin ketju.	Mikä on kitiini?
+kitkerä	1	Karvas maku, jonka aistii monista emäksistä ja myrkyistä. Suojaa myrkytyksiltä.
+kivettyä	1	Muuttua kiveksi: eliön jäänne kivettyy fossiiliksi.
+kloori	2	Alkuaine Cl, halogeeni. Kloridi-ionina solun ulkoinen pääanioni.	Mikä on kloori?
+kohde	1	Se, johon vaikutus suunnataan: entsyymin kohde on substraatti, lääkkeen kohde proteiini.
+kohdesolu	2	Solu, johon hormoni tai viesti vaikuttaa, koska sillä on sopiva reseptori.	Mikä on kohdesolu?
+kohdistua	1	Suuntautua tiettyyn kohteeseen: valinta kohdistuu ominaisuuksiin, hyökkäys karbonyylihiileen.
+kokeellinen	1	Kokeisiin perustuva: kokeellinen tiede testaa hypoteeseja mittauksin.
+kokoero	1	Koon eroavuus: bakteerin ja eukaryoottisolun kokoero on kymmenkertainen.
+kokonaisuus	1	Osista muodostuva yhtenäinen rakenne: solu on toimiva kokonaisuus.
+kolmihiilinen	1	Kolme hiiltä sisältävä, kuten glyseraldehydi tai pyruvaatti.
+kolmoiskierre	2	Kolmen polypeptidiketjun kiertymä kollageenissa, joka antaa sille vetolujuuden.	Mikä on kolmoiskierre?
+komplementti	2	Veren proteiinijärjestelmä, joka tunnistaa mikrobeja, puhkaisee niitä ja merkitsee ne syötäväksi. Kutsutaan myös: komplementtijärjestelmä.	Mikä on komplementti?
+koodaus	2	Tiedon esittäminen merkeillä: DNA koodaa proteiinin emäsjärjestyksellä, kodoni aminohapon.	Mitä koodaus tarkoittaa?
+koota	1	Rakentaa osista: ribosomi kokoaa proteiinin, solu kokoaa makromolekyylit.
+kopio	1	Alkuperäisen jäljennös: DNA-kopio, geenin kopiot kromosomissa.
+kopioida	1	Tehdä jäljennös: DNA kopioidaan replikaatiossa, RNA:ksi transkriptiossa.
+kopiointi	2	Jäljennöksen tekeminen: DNA:n kopiointi on replikaatiota. Kutsutaan myös: kopioituminen.	Mitä kopiointi tarkoittaa?
+kopiointikoneisto	2	Replikaatioon osallistuvat proteiinit: helikaasi, primaasi, DNA-polymeraasit ja ligaasi. Kutsutaan myös: replikaatiokoneisto.	Mikä on kopiointikoneisto?
+korjata	1	Palauttaa toimivaksi: solu korjaa DNA-vauriot korjausentsyymeillä.
+korkeus	1	Pystymitta tai taso: energiakynnyksen korkeus.
+korkki	1	Korkkitammen kuoren kuollut solukko, jonka soluista Hooke keksi solun nimen.
+korostaa	1	Painottaa, tuoda esiin.
+korva	1	Kuuloelin. Korvalehden rusto on kimmoisaa tukikudosta.
+kosketus	1	Fyysinen yhteys: molekyylien kosketus mahdollistaa reaktion, solujen kosketus viestinnän.
+kotihiiri	2	Mus musculus, nisäkkäiden tärkein malliorganismi lääketieteellisessä tutkimuksessa.	Mikä on kotihiiri?
+kova	1	Vaikeasti muotoutuva: kova luu, kova soluseinä, kova vesi.
+krapula	1	Alkoholin jälkitila, jonka aiheuttaa etanolin hapettumistuote asetaldehydi.
+kulku	1	Eteneminen: reaktion kulku, elektronien kulku, evoluution kulku.
+kulma	1	Kahden sidoksen välinen kulma: vesimolekyylissä 104,5°, tetraedrissä 109,5°. Kutsutaan myös: sidoskulma.	Mikä on sidoskulma?
+kulua	1	Käytettyä loppuun: reaktiossa lähtöaine kuluu, katalyytti ei.
+kuluttaa	1	Käyttää: solu kuluttaa ATP:tä, hengitys kuluttaa happea.
+kuolla	1	Menettää elintoiminnot: solu kuolee apoptoosissa tai nekroosissa.
+kupla	1	Kaasun täyttämä pallo nesteessä, kuten ilmakupla fermentorissa.
+kuusihiilinen	1	Kuusi hiiltä sisältävä, kuten glukoosi. Kutsutaan myös: heksoosi.
+kuusijäseninen	1	Kuudesta atomista muodostuva rengas, kuten pyranoosi tai bentseeni.
+kuusikulmio	1	Kuusikulmainen muoto: bentseenirenkaan ja pyranoosin kuvaus tasossa.
+kuvaaja	1	Suureen riippuvuuden piirros, kuten titrauskäyrä tai kasvukäyrä. Kutsutaan myös: käyrä.
+kyky	1	Mahdollisuus tehdä jotakin: entsyymin kyky katalysoida, solun kyky jakautua.
+kynsilakanpoistoaine	1	Asetoni, pieni ketoni. Esimerkki ketonista arkielämässä.
+kysteiini	2	Rikkiä sisältävä aminohappo, jonka tioliryhmät muodostavat rikkisiltoja. Lyhenne Cys, C.	Mikä on kysteiini?
+kytkentä	2	Kahden reaktion yhdistäminen niin, että energiaa vapauttava ajaa energiaa vaativaa. Kutsutaan myös: energiakytkentä.	Mitä kytkentä tarkoittaa?
+kytkös	1	Yhteys tai riippuvuus asioiden välillä.
+kärki	1	Terävä pää: sukkularihman kärki, siittiön kärki.
+käynnistää	1	Saada alkamaan: signaali käynnistää reaktion, promoottori transkription.
+käyrä	1	Kuvaajan viiva, joka esittää riippuvuutta, kuten sigmoidinen sitoutumiskäyrä.
+käyttäytyä	1	Toimia tietyllä tavalla: molekyyli käyttäytyy vedessä ominaisuuksiensa mukaan.
+käyttökelpoinen	1	Sopiva käyttöön: solulle käyttökelpoinen energia on ATP.
+käytäntö	1	Käyttö todellisuudessa, vastakohtana teorialle.
+kääntyä	1	Muuttaa suuntaa: reaktio kääntyy, sivuketju kääntyy sisäänpäin.
+laaja	1	Suuri alaltaan tai määrältään.
+laajeta	1	Kasvaa kooltaan: vesi laajenee jäätyessään.
+laboratoriomittaus	1	Laboratoriossa tehty määritys, kuten pH:n tai pitoisuuden mittaus.
+laimea	1	Vähän ainetta sisältävä liuos, vastakohta väkevä.
+lajinimi	2	Eliön kaksiosainen tieteellinen nimi, suku ja laji, kuten Escherichia coli.	Mikä on lajinimi?
+laskennallinen	1	Tietokoneella laskettu: laskennallinen mallinnus, laskennallinen biologia.
+leivinhiiva	2	Saccharomyces cerevisiae, leivän ja oluen hiiva, eukaryoottien malliorganismi.	Mikä on leivinhiiva?
+lektiini	2	Sokeria sitova proteiini, jolla solut tunnistavat toisiaan ja mikrobit tarttuvat soluihin.	Mikä on lektiini?
+lepotila	1	Toiminnan vähimmäistila: bakteerin itiö, kasvin siemen, hermosolun lepopotentiaali.
+leväsolu	1	Levän solu, fotosynteettinen eukaryootti- tai syanobakteerisolu.
+liika	1	Ylimäärä: liika happi tuottaa vapaita radikaaleja.
+liikeenergia	2	Liikkeeseen sitoutunut energia. Lämpö on molekyylien liike-energiaa. Kutsutaan myös: kineettinen energia.	Mikä on liike-energia?
+liitos	1	Kohta, jossa kaksi osaa yhtyy: sidos, liitoskohta.
+liittyä	1	Yhtyä toiseen: monomeerit liittyvät polymeeriksi, substraatti entsyymiin.
+limittäinen	1	Osittain päällekkäinen, kuten limittäiset lukukehykset tai orbitaalit.
+lisätä	1	Tuoda lisää: liuokseen lisätään happoa, ketjuun nukleotidi.
+lopputulos	1	Prosessin päätepiste: reaktion lopputuote, evoluution lopputulos.
+luja	1	Vahva ja kestävä: kovalenttinen sidos on luja, kollageeni luja kuitu.
+lujuus	1	Kyky vastustaa voimaa: kollageenin vetolujuus, sidoksen lujuus.
+lukita	1	Kiinnittää muuttumattomaksi: fosforylaatio lukitsee glukoosin soluun, rikkisilta rakenteen.
+luokka	1	Luokittelun ryhmä: aminohappojen luokat sivuketjun mukaan, eliöiden luokat.
+luonteinen	1	Luonteeltaan tietynlainen: poolinen luonteinen ryhmä.
+luonto	1	Elollinen ja eloton ympäristö. Luonnossa esiintyvä on luonnollinen.
+luopua	1	Antaa pois: pelkistin luopuu elektroneista, happo protonista.
+lyhytikäinen	1	Nopeasti hajoava: lähetti-RNA on lyhytikäinen, radikaalit lyhytikäisiä.
+lähtökohta	1	Alkutilanne, josta lähdetään: lähtöaine, lähtötaso.
+lämpö	2	Hiukkasten satunnaisen liikkeen energia, joka siirtyy kuumasta kylmään. Reaktiot vapauttavat tai sitovat lämpöä.	Mitä lämpö on?
+lämpöenergia	2	Aineen molekyylien liikkeeseen sitoutunut energia, joka mitataan lämpötilana.	Mikä on lämpöenergia?
+maailmankaikkeus	1	Kaikki olemassa oleva, universumi. Syntyi 13,8 miljardia vuotta sitten.
+maapallo	1	Kotiplaneettamme, 4,5 miljardia vuotta vanha. Elämä syntyi siellä noin 4 miljardia vuotta sitten. Kutsutaan myös: Maa.	Mikä on maapallo?
+magnesium	2	Alkuaine Mg, kationi Mg<sup>2+</sup>, joka sitoo ATP:n fosfaatteja ja on klorofyllin keskusatomi.	Mikä on magnesium?
+magnetiitti	2	Rautaoksidi Fe<sub>3</sub>O<sub>4</sub>, magneettinen mineraali, jota jotkin bakteerit valmistavat suunnistaakseen.	Mikä on magnetiitti?
+maitosokeri	2	Laktoosi, maidon disakkaridi glukoosista ja galaktoosista.	Mikä on maitosokeri?
+makea	1	Sokerin maku. Makeuden aistii kielen makureseptori.
+maksimi	1	Suurin arvo: reaktionopeuden maksimi V<sub>max</sub>, absorption maksimi.
+maku	1	Aistimus, jonka kielen reseptorit tuottavat liuenneista aineista: makea, suolainen, hapan, karvas, umami.
+makureseptori	2	Kielen makusilmujen reseptoriproteiini, joka tunnistaa maun molekyylin, kuten sokerin tai glutamaatin.	Mikä on makureseptori?
+malliorganismi	3	Tutkimukseen valittu laji, jonka tulokset yleistetään muihin: E. coli, hiiva, banaanikärpänen, hiiri, lituruoho.	Mikä on malliorganismi?
+menestyä	1	Selviytyä ja lisääntyä: parhaiten sopeutuneet menestyvät.
+menettää	1	Kadottaa: proteiini menettää rakenteensa denaturaatiossa, atomi elektronin hapettuessa.
+meri	1	Suolainen valtameri, jossa elämä syntyi ja jossa suurin osa siitä yhä elää.
+meripohja	1	Meren pohja. Kuumat lähteet meren pohjassa ovat elämän synnyn ehdokaspaikkoja.
+merkintä	1	Sovittu merkitsemistapa: alkuainemerkintä, aminohapon lyhenne, hapetusluvun merkintä.
+metaanitioli	2	CH<sub>3</sub>SH, yksinkertaisin tioli, rikkivastine metanolille. Metioniinin ja kysteiinin ryhmien malli.	Mikä on metaanitioli?
+metyyliamiini	2	CH<sub>3</sub>NH<sub>2</sub>, yksinkertaisin amiini, aminoryhmän malli. Protonoituu metyyliammoniumioniksi.	Mikä on metyyliamiini?
+metyyliammonium	2	Metyyliamiinin protonoitunut muoto CH<sub>3</sub>NH<sub>3</sub><sup>+</sup>, aminoryhmän tila solun pH:ssa. Kutsutaan myös: metyyliammoniumioni.	Mikä on metyyliammoniumioni?
+metyyliasetaatti	2	Etikkahapon metyyliesteri CH<sub>3</sub>COOCH<sub>3</sub>, esteriryhmän malliyhdiste.	Mikä on metyyliasetaatti?
+metyyliesteri	2	Esteri, jonka alkoholiosa on metanoli, kuten aspartaamin metyyliesteri.	Mikä on metyyliesteri?
+metyylifosfaatti	2	Fosforihapon metyyliesteri, fosfaattiesterin malli. Nukleotidien ja fosfolipidien sidostyyppi.	Mikä on metyylifosfaatti?
+metyyliguanidinium	2	Arginiinin sivuketjun ryhmä, jonka positiivinen varaus jakautuu kolmelle typelle. Kutsutaan myös: guanidiniumioni.	Mikä on metyyliguanidiniumioni?
+metyyliimidatsoli	2	Histidiinin sivuketjun rengas, jonka pK<sub>a</sub> on lähellä 7 ja joka toimii happo-emäskatalyyttinä. Kutsutaan myös: imidatsoli.	Mikä on metyyli-imidatsoli?
+metyylitioasetaatti	2	Tioesterin malliyhdiste CH<sub>3</sub>COSCH<sub>3</sub>. Asetyyli-CoA:n energiarikas sidos on tioesteri.	Mikä on metyylitioasetaatti?
+miessukupuolihormoni	1	Testosteroni, kiveksen tuottama steroidihormoni. Kutsutaan myös: androgeeni.	Mikä on miessukupuolihormoni?
+miljardi	1	Tuhat miljoonaa, 10<sup>9</sup>. Elämän ikä on noin 4 miljardia vuotta.
+miljoona	1	Tuhat tuhatta, 10<sup>6</sup>. Solussa on miljoonia proteiinimolekyylejä.
+minimi	1	Pienin arvo: energiaminimi on stabiilein tila.
+mitta	1	Suuruuden ilmaisin: entropia on epäjärjestyksen mitta, pH happamuuden mitta.
+molybdeeni	2	Alkuaine Mo, hivenalkuaine, nitrogenaasin ja monien hapetusentsyymien kofaktori.	Mikä on molybdeeni?
+monimuotoisuus	2	Elämän muotojen kirjo lajien, perimän ja ekosysteemien tasolla. Kutsutaan myös: biodiversiteetti.	Mikä on monimuotoisuus?
+monimutkainen	1	Monista osista ja suhteista koostuva, kuten monimutkainen molekyyli tai säätelyverkko.
+monimutkaisuus	1	Rakenteen tai toiminnan monitahoisuus. Kutsutaan myös: kompleksisuus.
+monistaa	2	Tehdä monta kopiota: PCR monistaa DNA-jakson, virus monistuu solussa.	Mitä monistaa tarkoittaa?
+muistisääntö	1	Apukeino asian muistamiseen, kuten aminohappojen kirjainlyhenteet tai OIL RIG hapettumiselle.
+muodostaa	1	Rakentaa tai synnyttää: atomit muodostavat molekyylin, solut kudoksen.
+muodostua	1	Syntyä osista: sidos muodostuu, kaksoiskerros muodostuu itsestään.
+muoto	1	Ulkoinen hahmo tai olomuoto: proteiinin muoto määrää tehtävän, sokerin rengasmuoto.
+muotomuutos	1	Rakenteen muodon muuttuminen, kuten proteiinin konformaatiomuutos sitoutumisessa.
+mutatoitua	2	Saada mutaatio: geeni mutatoituu, kun sen emäsjärjestys muuttuu.	Mitä mutatoituminen tarkoittaa?
+muunnos	1	Muutettu versio: aminohapon muunnos, geenin muunnos eli variantti.
+muuntua	1	Muuttua toiseksi: glukoosi muuntuu pyruvaatiksi, energia muodosta toiseen.
+muutos	1	Tilan vaihtuminen toiseksi: vapaaenergian muutos ΔG, mutaatio on perimän muutos.
+myötäpäivään	1	Kellon viisarin suuntaan. Kiertosuunta määrää kätisyyden.
+määritellä	1	Ilmaista täsmällisesti, mitä käsite tarkoittaa.
+määrittää	1	Selvittää mittaamalla tai määrätä: rakenne määrittää toiminnan.
+määrä	1	Lukumäärä tai paljous: ainemäärä, solumäärä, pitoisuus on määrä tilavuudessa.
+määräytyä	1	Tulla määrätyksi jonkin perusteella: proteiinin muoto määräytyy aminohappojärjestyksestä.
+n-metyylietaani-imiini	2	Imiinin malliyhdiste, jossa hiili ja typpi ovat kaksoissidoksessa C=N. Retinaali sitoutuu opsiiniin imiininä.	Mikä on N-metyylietaani-imiini?
+naissukupuolihormoni	1	Estrogeeni ja progesteroni, munasarjan steroidihormonit.	Mikä on naissukupuolihormoni?
+natrium	2	Alkuaine Na, solun ulkoinen pääkationi Na<sup>+</sup>. Natrium-kaliumpumppu pitää sen ulkona.	Mikä on natrium?
+nauha	1	Pitkä kapea rakenne: DNA-nauha eli juoste, beetalaskoksen nauha.
+negatiivi	1	Käänteinen vastine, kuten vastinjuoste on juosteen negatiivi.
+nelihiilinen	1	Neljä hiiltä sisältävä, kuten oksaloasetaatti tai sukkinaatti.
+nenä	1	Hajuaistin elin. Hajureseptorit tunnistavat haihtuvia molekyylejä.
+nestemäinen	1	Nesteen olomuodossa: vesi on nestemäistä 0–100 °C, kalvo on nestemäinen mosaiikki.
+nimitys	1	Nimi, jolla asiaa kutsutaan.
+nisäkäs	2	Selkärankainen, joka imettää poikasiaan ja on tasalämpöinen. Ihminen ja hiiri ovat nisäkkäitä.	Mikä on nisäkäs?
+nivelpinta	1	Nivelen luiden liukupinta, jota rusto verhoaa.
+nopeuttaa	1	Tehdä nopeammaksi: katalyytti nopeuttaa reaktiota.
+nopeutua	1	Muuttua nopeammaksi: reaktio nopeutuu lämmössä.
+noudattaa	1	Toimia säännön mukaan: kaasut noudattavat kaasulakeja, emäkset pariutumissääntöjä.
+nousu	1	Arvon kasvu: pH:n nousu, lämpötilan nousu.
+nuoli	1	Kaavion merkki, joka osoittaa reaktion tai elektronien siirron suunnan.
+nykykäsitys	1	Tämänhetkinen tieteellinen näkemys, joka voi tarkentua.
+näköaisti	2	Valon aistiminen silmän verkkokalvolla, jossa retinaalin isomeroituminen laukaisee hermoimpulssin.	Mikä on näköaisti?
+ohjelma	1	Ohjeiden sarja: geneettinen ohjelma ohjaa kehitystä, tietokoneohjelma laskentaa.
+ohut	1	Pieni paksuudeltaan: solukalvo on 5 nm ohut.
+oikeapuoleinen	1	Oikealla puolella oleva, kuten Fischer-projektiossa D-muodon hydroksyyli.
+oktaanimolekyyli	1	Kahdeksan hiilen alkaani C<sub>8</sub>H<sub>18</sub>, bensiinin ainesosa. Esimerkki hydrofobisesta hiilivedystä.	Mikä on oktaani?
+olento	1	Elävä yksilö, eliö.
+omena	1	Hedelmä, jonka happamuus tulee omenahaposta.
+ominainen	1	Tunnusomainen, jollekin kuuluva: entsyymille ominainen substraatti.
+oranssi	1	Väri karotenoideissa, kuten beetakaroteenissa, joka absorboi sinistä valoa.
+organo	1	Orgaaniseen aineeseen viittaava: organotrofi saa elektroninsa orgaanisista yhdisteistä.	Mitä organo- tarkoittaa etuliitteenä?
+osallistua	1	Olla mukana: happi osallistuu soluhengitykseen, vesi reaktioihin.
+osasto	1	Rajattu osa solusta, kuten organelli. Kutsutaan myös: kompartmentti.
+pakata	1	Tiivistää pieneen tilaan: DNA pakataan kromatiiniksi, proteiini rakkulaan.
+pakkautua	1	Tiivistyä: emäkset pakkautuvat pinoon, kromosomit tiivistyvät mitoosissa.
+paksu	1	Suuri paksuudeltaan: soluseinä on paksu, kalvo ohut.
+palauttaa	1	Saattaa takaisin: proteiini palauttaa muotonsa, homeostaasi palauttaa tasapainon.
+palautua	1	Palata entiseen tilaan: denaturoitunut proteiini voi palautua laskostuneeksi.
+pallo	1	Pyöreä kolmiulotteinen muoto: globulaarinen proteiini on pallomainen, kokki on pallobakteeri.
+pari	1	Kaksi yhteenkuuluvaa: emäspari, elektronipari, ionipari.
+pariton	1	Ilman paria oleva: pariton elektroni tekee radikaalin.
+pariutua	1	Liittyä pariksi: emäkset pariutuvat A–T ja G–C.
+peilikuvamuoto	2	Kiraalisen molekyylin toinen enantiomeeri, joka on toisen peilikuva. L- ja D-muodot.	Mikä on peilikuvamuoto?
+peittää	1	Verhota: kalvo peittää solun, kapseli bakteerin.
+pelkkä	1	Yksinään, ilman muuta: pelkkä hiilivety ilman funktionaalisia ryhmiä.
+perhe	1	Sukua olevien ryhmä: proteiiniperhe on samasta esi-isägeenistä polveutuvien proteiinien joukko.	Mikä on proteiiniperhe?
+periytyä	2	Siirtyä vanhemmilta jälkeläisille: ominaisuudet periytyvät geeneissä.	Mitä periytyminen tarkoittaa?
+perusedellytys	1	Välttämätön ehto, kuten vesi ja energia elämälle.
+perusmuoto	1	Yksinkertaisin tai tavallisin muoto, josta muunnokset johdetaan.
+perusperiaate	1	Kaiken pohjana oleva sääntö: elämän perusperiaatteet, kuten solurakenne ja perimä.
+perusrakenne	1	Rakenteen ydin, jonka päälle muunnelmat rakentuvat: aminohapon perusrakenne.
+perusta	1	Pohja, jolle jokin rakentuu: kemia on biologian perusta.
+perustoiminta	1	Elämän välttämätön toiminto: aineenvaihdunta, kasvu, lisääntyminen.
+perustua	1	Pohjautua johonkin: näköaisti perustuu retinaalin isomeroitumiseen.
+peräkkäinen	1	Toinen toisensa jälkeen: peräkkäiset nukleotidit, peräkkäiset reaktiot.
+peräsuoli	1	Suoliston loppuosa.
+pidättää	1	Estää pääsemästä: kalvo pidättää ionit, geeli pidättää proteiinit.
+pienikokoinen	1	Kooltaan pieni: bakteerit ovat pienikokoisia soluja.
+pii	1	Alkuaine Si, maankuoren toiseksi yleisin. Hiilen sukulainen, mutta ei sovi elämän rungoksi.	Mikä on pii?
+piirtää	1	Kuvata rakenne kaavana: rakennekaava, Fischer-projektio.
+pikkulokero	1	Solun sisäinen pieni osasto, organelli tai rakkula.
+pilkkoa	2	Katkaista pienemmiksi osiksi: entsyymit pilkkovat ravinnon, proteaasi proteiinin.	Mitä pilkkominen tarkoittaa?
+pintaominaisuus	1	Molekyylin pinnan piirre, kuten varaus tai hydrofobisuus, joka määrää sitoutumisen.
+pitkäaikainen	1	Kauan kestävä: pitkäaikainen varasto, pitkäaikainen muutos.
+pitää	1	Säilyttää tilassa: puskuri pitää pH:n vakiona, sidokset pitävät rakenteen koossa.
+pohja	1	Alin osa tai perusta: reaktion pohja, meren pohja.
+poiketa	1	Erota tavallisesta: mutantti poikkeaa villityypistä.
+poikkeuksellinen	1	Tavallisesta poikkeava: veden poikkeukselliset ominaisuudet.
+poikkeus	1	Sääntöä noudattamaton tapaus: glysiini on kiraalisuuden poikkeus.
+polveutua	1	Olla peräisin esivanhemmasta: kaikki solut polveutuvat LUCAsta.
+poolinen	2	Sähköisesti epätasainen molekyyli tai sidos, jossa varaus on jakautunut. Kutsutaan myös: polaarinen.	Mitä poolinen tarkoittaa?
+poolisuus	2	Sidoksen tai molekyylin varauksen epätasainen jakautuminen, joka tekee siitä vesiliukoisen. Kutsutaan myös: polaarisuus.	Mitä poolisuus on?
+populaatio	2	Saman lajin yksilöiden joukko tietyllä alueella. Evoluutio tapahtuu populaatiossa.	Mikä on populaatio?
+potentiaalienergia	2	Asemaan tai rakenteeseen varastoitunut energia, kuten kemiallisiin sidoksiin tai pitoisuuseroon sitoutunut.	Mikä on potentiaalienergia?
+primaarinen	1	Ensisijainen tai ensimmäinen: primaarirakenne, primaarinen alkoholi.
+prioni	2	Väärin laskostunut proteiini, joka pakottaa normaalit proteiinit samaan muotoon ja aiheuttaa hullun lehmän taudin.	Mikä on prioni?
+propaani	1	Kolmen hiilen alkaani C<sub>3</sub>H<sub>8</sub>, nestekaasun osa.	Mikä on propaani?
+prosentti	1	Sadasosa, %. Massaprosentti kertoo osuuden massasta.
+proteoglykaani	2	Proteiini, johon on liitetty pitkiä sulfatoituja sokeriketjuja. Ruston ja soluväliaineen vettä sitova aine.	Mikä on proteoglykaani?
+puhdistaa	1	Erottaa muista aineista: proteiini puhdistetaan kromatografialla.
+puoli	1	Toinen kahdesta osasta tai sivusta: kalvon sisäpuoli, renkaan yläpuoli.
+puoliasetaali	2	Aldehydin ja alkoholin liitos, joka syntyy aldoosin renkaan sulkeutuessa. Kutsutaan myös: hemiasetaali.	Mikä on puoliasetaali?
+puolustus	1	Suojautuminen uhalta: immuunipuolustus, bakteerin restriktioentsyymit.
+puolustusjärjestelmä	2	Eliön koneisto taudinaiheuttajia vastaan, kuten immuunijärjestelmä. Kutsutaan myös: puolustusmekanismi.	Mikä on puolustusjärjestelmä?
+purkaa	1	Hajottaa osiin: solu purkaa polymeerit, rakenne purkautuu.
+pussi	1	Kalvon rajaama umpinainen tila, kuten rakkula tai kalvopussi.
+puutteellinen	1	Vajaa: puutteellinen ravinto, puutteellinen tieto.
+puuttua	1	Olla poissa: deoksiriboosista puuttuu hydroksyyli.
+pyridoksaalifosfaatti	2	B<sub>6</sub>-vitamiinin aktiivinen muoto, aminohappoentsyymien koentsyymi. Lyhenne PLP.	Mikä on pyridoksaalifosfaatti?
+pyriitti	2	Rautasulfidi FeS<sub>2</sub>, rikkikiisu. Mineraalipintojen on ehdotettu katalysoineen elämän ensimmäisiä reaktioita.	Mikä on pyriitti?
+pyörittää	1	Saada pyörimään: protonivirta pyörittää ATP-syntaasia.
+pyöriä	1	Kiertää akselinsa ympäri: yksöissidoksen ympäri ryhmät pyörivät vapaasti.
+pyöriäliike	1	Kiertyminen akselin ympäri, kuten ATP-syntaasin roottorin pyöriminen. Kutsutaan myös: pyörimisliike.	Mitä pyörimisliike tarkoittaa?
+pää	1	Ketjun tai molekyylin loppu: fosfolipidin poolinen pää, DNA:n 3'-pää.
+pääalkuaine	1	Elämän runsaimmat alkuaineet: hiili, vety, happi, typpi, fosfori ja rikki.	Mitkä ovat elämän pääalkuaineet?
+päähaara	1	Ketjun runko-osa, josta sivuhaarat erkanevat.
+päällekkäin	1	Toistensa päällä: emäkset pinoutuvat päällekkäin.
+päätehtävä	1	Tärkein tehtävä: DNA:n päätehtävä on tiedon säilytys.
+päätemetyyli	1	Hiiliketjun päässä oleva metyyliryhmä –CH<sub>3</sub>, esimerkiksi rasvahapon omega-pää.	Mikä on päätemetyyli?
+päättyä	1	Loppua: translaatio päättyy lopetuskodoniin.
+päätyä	1	Joutua lopulta johonkin: pyruvaatti päätyy mitokondrioon.
+raja	1	Reunaviiva tai kynnys: solun raja on kalvo, määritysraja.
+rajata	1	Erottaa rajalla: kalvo rajaa solun ympäristöstä.
+rajaton	1	Ilman rajaa: lähes rajaton määrä erilaisia proteiineja.
+rajoittaa	1	Asettaa raja: pinta-ala rajoittaa solun kokoa.
+rakenneaine	1	Rakenteen rakentamiseen käytetty aine, kuten kollageeni tai selluloosa.
+rakennepolymeeri	2	Polymeeri, jonka tehtävä on antaa rakenne ja lujuutta, kuten selluloosa, kitiini ja kollageeni.	Mikä on rakennepolymeeri?
+rakennepolysakkaridi	2	Tukea antava sokeripolymeeri: selluloosa kasveilla, kitiini sienillä ja hyönteisillä.	Mikä on rakennepolysakkaridi?
+rakenneproteiini	2	Muotoa ja tukea antava proteiini, kuten kollageeni, keratiini ja aktiini.	Mikä on rakenneproteiini?
+rakennusaine	1	Aine, josta rakenteet kootaan: aminohapot ovat proteiinien rakennusaineita.
+rakennuspalikka	1	Perusyksikkö, josta suurempi kootaan, kuten monomeeri.
+rakenteellinen	1	Rakenteeseen liittyvä: rakenteellinen proteiini, rakenteellinen ero isomeerien välillä.
+rakentua	1	Muodostua osista: proteiini rakentuu aminohapoista.
+rasvahappo	3	Pitkä hiilivetyketju, jonka päässä on karboksyyliryhmä. Rasvojen ja fosfolipidien osa, tyydyttynyt tai tyydyttymätön.	Mikä on rasvahappo?
+rasvahappohäntä	2	Fosfolipidin kaksi hydrofobista hiilivetyketjua, jotka muodostavat kalvon sisuksen.	Mikä on rasvahappohäntä?
+rauhanen	2	Erittävä elin: umpirauhanen erittää hormonit vereen, avorauhanen pinnalle.	Mikä on rauhanen?
+ravintomolekyyli	1	Ravinnoksi kelpaava molekyyli: sokerit, rasvat, proteiinit.
+ravitsemustyyppi	2	Eliön tapa hankkia energiaa ja hiiltä: autotrofi tai heterotrofi, fototrofi tai kemotrofi.	Mikä on ravitsemustyyppi?
+reagoida	1	Osallistua kemialliseen reaktioon: happo reagoi emäksen kanssa.
+reaktiivinen	2	Herkästi reagoiva: radikaalit ja karbonyylit ovat reaktiivisia, alkaanit eivät.	Mitä reaktiivinen tarkoittaa?
+reaktioolosuhde	1	Reaktion ympäristö: lämpötila, pH, pitoisuudet ja liuotin. Kutsutaan myös: reaktio-olosuhteet.	Mitä reaktio-olosuhteet ovat?
+redox-reaktio	3	Hapetus-pelkistysreaktio, jossa elektronit siirtyvät luovuttajalta vastaanottajalle. Soluhengitys on redox-reaktioiden ketju.	Mikä on redox-reaktio?
+rengasmuoto	2	Sokerin rengasrakenne, joka syntyy karbonyylin ja hydroksyylin liitoksesta vedessä. Glukoosista 99 % on rengasmuodossa.	Mikä on rengasmuoto?
+rengasrakenne	1	Suljetun renkaan muotoinen molekyylin osa, kuten bentseeni tai pyranoosi.
+repiä	1	Rikkoa voimalla: detergentti repii kalvon.
+resonanssi	2	Rakenteen kuvaus usean sidoskaavan yhdistelmänä, kun elektronit ovat delokalisoituneet, kuten karboksylaatissa ja peptidisidoksessa.	Mitä resonanssi tarkoittaa?
+riippua	1	Olla riippuvainen: reaktionopeus riippuu lämpötilasta.
+riistää	1	Ottaa pois: hapetin riistää elektronit.
+rikettsia	2	Solunsisäinen loisbakteeri, alfaproteobakteeri, mitokondrion lähimpiä nykyisiä sukulaisia.	Mikä on rikettsia?
+rikkivastine	1	Yhdiste, jossa rikki korvaa hapen: tioli on alkoholin, tioesteri esterin rikkivastine.
+rinta	1	Rintarauhanen, maidon erittäjä. Rintasyöpä on sen kasvain.
+risteyskohta	1	Kohta, jossa kaksi reittiä tai juostetta kohtaavat, kuten aineenvaihduntareittien risteys.
+rotameria	2	Isomeria, joka syntyy kiertymisestä yksinkertaisen sidoksen ympäri. Rotameerit vaihtuvat toisikseen vapaasti.	Mitä rotameria on?
+runko	1	Kantava keskiosa: hiilirunko, sokeri-fosfaattirunko, polypeptidirunko.
+runkoalkuaine	1	Alkuaine, josta molekyylin runko koostuu: elämässä hiili.	Mikä on runkoalkuaine?
+runsas	1	Paljon esiintyvä: vesi on solun runsain molekyyli.
+runsausalkuaine	1	Suurina määrinä tarvittava alkuaine: C, H, O, N, P, S, Na, K, Ca, Mg ja Cl.	Mikä on runsausalkuaine?
+ruoansulatus	2	Ravinnon pilkkominen entsyymeillä imeytyviksi molekyyleiksi ruoansulatuskanavassa.	Mitä ruoansulatus on?
+ruoansulatuskanava	2	Suusta peräsuoleen kulkeva putki: ruokatorvi, mahalaukku, ohutsuoli ja paksusuoli.	Mikä on ruoansulatuskanava?
+ruokosokeri	2	Sakkaroosi, glukoosin ja fruktoosin disakkaridi, tavallinen sokeri.	Mikä on ruokosokeri?
+ruuvi	1	Kierteinen muoto, kuten alfakierre tai DNA:n kaksoiskierre.
+räjähdys	1	Äkillinen nopea tapahtuma: kambrin räjähdys on eläinryhmien nopea ilmestyminen.
+saavuttaa	1	Päästä johonkin: reaktio saavuttaa tasapainon.
+sakkaraasi	2	Sakkaroosin glukoosiksi ja fruktoosiksi pilkkova suolen entsyymi. Kutsutaan myös: invertaasi.	Mikä on sakkaraasi?
+samanaikainen	1	Yhtä aikaa tapahtuva: samanaikaiset reaktiot.
+samanarvoinen	1	Yhtä suuri energialtaan tai asemaltaan, kuten degeneroituneet orbitaalit tai resonanssirakenteet.
+samankaltainen	1	Muistuttava mutta ei sama: samankaltaiset proteiinit ovat homologisia.
+sarja	1	Peräkkäisten jäsenten jono: reaktiosarja, homologinen sarja.
+sarvi	1	Keratiinista rakentuva kova uloke, samaa proteiinia kuin hiukset ja kynnet.
+sata	1	Luku 100. Satakertainen on sata kertaa suurempi.
+sekoitus	1	Aineiden yhdistäminen tasaiseksi seokseksi.
+sekundaarirakenne	3	Proteiinin paikallinen laskos, alfakierre tai beetalaskos, jota rungon vetysidokset pitävät koossa.	Mikä on sekundaarirakenne?
+seleeni	2	Alkuaine Se, hivenalkuaine, selenokysteiinin osa antioksidanttientsyymeissä.	Mikä on seleeni?
+selittyä	1	Saada selitys: veden ominaisuudet selittyvät vetysidoksilla.
+selkäranka	1	Selkärankaisten luinen tukiranka, joka suojaa selkäydintä.
+selkärankainen	2	Eläin, jolla on selkäranka: kalat, sammakot, matelijat, linnut ja nisäkkäät.	Mikä on selkärankainen?
+selviytyä	1	Pysyä hengissä: parhaiten sopeutuneet selviytyvät.
+seos	1	Useasta aineesta koostuva kokonaisuus, jonka osat eivät ole sitoutuneet: liuos, suspensio, metalliseos.	Mikä on seos?
+seriini	2	Poolinen aminohappo, jonka sivuketjussa on hydroksyyli. Lyhenne Ser, S. Fosforylaation ja sokeroinnin kohta.	Mikä on seriini?
+seuraus	1	Se, mikä johtuu jostakin: mutaation seuraus.
+sidekudos	2	Kudoksia tukeva ja yhdistävä kudos, jossa soluväliainetta on paljon: jänteet, rusto, luu, rasva.	Mikä on sidekudos?
+sidoselektroni	2	Kahden atomin jakama elektronipari kovalenttisessa sidoksessa.	Mikä on sidoselektroni?
+sidosenergia	2	Energia, joka tarvitaan sidoksen katkaisemiseen. Kovalenttisella sidoksella satoja kJ/mol, vetysidoksella noin 20.	Mikä on sidosenergia?
+sienikunta	2	Eliökunta, johon kuuluvat hiivat, homeet ja sienet: eukaryootteja, joilla on kitiiniseinä ja jotka syövät hajottamalla.	Mikä on sienikunta?
+siirtymätila	3	Reaktion energiahuippu, jossa vanhat sidokset ovat katkeamassa ja uudet syntymässä. Entsyymi vakauttaa sen.	Mikä on siirtymätila?
+siirtyä	1	Muuttaa paikkaa: elektronit siirtyvät, protoni siirtyy.
+siirto	1	Siirtäminen paikasta toiseen: fosfaatin siirto, elektronin siirto, geenin siirto.
+sinkki	2	Alkuaine Zn, hivenalkuaine, satojen entsyymien ja sinkkisormi-proteiinien kofaktori.	Mikä on sinkki?
+sisus	1	Sisäosa: kalvon hydrofobinen sisus, proteiinin ydin.
+sisäelin	1	Kehon sisällä oleva elin, kuten maksa, munuainen tai haima.
+sisäkalvosto	2	Eukaryoottisolun sisäiset kalvorakenteet: kalvosto, Golgi, lysosomit ja rakkulat. Kutsutaan myös: endomembraanijärjestelmä.	Mikä on sisäkalvosto?
+sisältää	1	Pitää sisällään: solu sisältää tuman, molekyyli atomeja.
+sisäpinta	1	Rakenteen sisäpuolen pinta, kuten kalvon sisäpinta tai suolen sisäpinta.
+sisäpuoli	1	Rajan sisällä oleva osa, kuten solun sisäpuoli.
+sitkeä	1	Vetoa kestävä, ei murtuva: kollageeni ja kitiini ovat sitkeitä.
+sokerifosfaatti	2	Sokeri, johon on liitetty fosfaatti, kuten glukoosi-6-fosfaatti. Aineenvaihdunnan välituotteet ovat sokerifosfaatteja.	Mikä on sokerifosfaatti?
+sokeriyksikkö	1	Polysakkaridin yksi monosakkaridi, kuten glukoosiyksikkö tärkkelyksessä.
+soluhengitys	3	Ravinnon hapetus hapella hiilidioksidiksi ja vedeksi mitokondriossa, tuottaa ATP:n. Kutsutaan myös: aerobinen hengitys.	Mitä soluhengitys on?
+solukerros	1	Vierekkäisten solujen muodostama kerros, kuten epiteeli.
+solumainen	1	Solua muistuttava: solumainen rakenne, protosolu.
+solurakenne	1	Solun osien järjestys: prokaryootin ja eukaryootin solurakenne.
+solurykelmä	1	Toisiinsa tarttuneiden solujen ryhmä, kuten monisoluisuuden alku tai organoidi.
+solutukiranka	2	Solun proteiinisäikeiden verkko, joka antaa muodon ja liikuttaa. Kutsutaan myös: sytoskeleton.	Mikä on solutukiranka?
+soluväli	1	Solujen välinen tila, jossa on soluväliainetta ja kudosnestettä.
+sopeutua	2	Muuttua ympäristöön sopivaksi: laji sopeutuu evoluutiossa, solu säätelyllä.	Mitä sopeutuminen tarkoittaa?
+sormi	1	Käden ulokkeet. Sinkkisormi on DNA:ta sitova proteiinirakenne.
+spiraali	1	Kierteinen muoto, heliksi.
+stabiili	2	Vakaa, ei helposti hajoava tai muuttuva: stabiili sidos, stabiili proteiini.	Mitä stabiili tarkoittaa?
+substituentti	2	Molekyylin runkoon liittynyt ryhmä tai atomi, joka korvaa vedyn.	Mikä on substituentti?
+suhteellinen	1	Toiseen verrattu: suhteellinen atomimassa, suhteellinen osuus.
+sukkulamato	2	Caenorhabditis elegans, pieni läpinäkyvä mato, jonka kaikki 959 solua tunnetaan. Kehitysbiologian malliorganismi.	Mikä on sukkulamato?
+suku	1	Lajien ryhmä luokittelussa, lajinimen ensimmäinen osa, kuten Escherichia.	Mikä on suku eliöiden luokittelussa?
+sukulainen	1	Yhteisestä esivanhemmasta polveutuva: mitokondrion sukulaiset ovat alfaproteobakteereja.
+sukulinja	1	Peräkkäisten sukupolvien jono, joka polveutuu yhteisestä kantamuodosta. Kutsutaan myös: linja.
+sukupuu	2	Eliöiden sukulaisuutta kuvaava haarautuva kaavio. Kutsutaan myös: fylogeneettinen puu.	Mikä on sukupuu?
+sulkeutua	1	Muuttua suljetuksi: sokerin rengas sulkeutuu, kanava sulkeutuu.
+suoja	1	Vahingolta varjeleva rakenne: soluseinä, kapseli, kuori.
+suojarakenne	1	Suojaava rakenne, kuten bakteerin kapseli tai viruksen kuori.
+suojata	1	Varjella vahingolta: kalvo suojaa solua, antioksidantti radikaaleilta.
+suoraketjuinen	1	Haarautumaton: suoraketjuinen hiilivety tai rasvahappo.
+suosia	1	Antaa etua: luonnonvalinta suosii sopeutuneita.
+suurikokoinen	1	Kooltaan suuri: eukaryoottisolu on suurikokoinen bakteeriin verrattuna.
+symbiontti	2	Toisen eliön kanssa läheisessä yhteiselossa elävä eliö, kuten mitokondrion esi-isä isäntäsolussa.	Mikä on symbiontti?
+symbioosi	2	Kahden lajin läheinen yhteiselo, josta molemmat hyötyvät. Eukaryootti syntyi symbioosista.	Mikä on symbioosi?
+synnynnäinen	1	Syntymästä asti oleva, perinnöllinen.
+synnyttää	1	Saada aikaan: reaktio synnyttää tuotteen, mutaatio vaihtelua.
+syödä	1	Ottaa ravintoa: heterotrofi syö orgaanista ainetta, makrofagi mikrobeja.
+sähköisesti	1	Sähkövarauksen kannalta: sähköisesti neutraali molekyyli.
+säännöllinen	1	Toistuva samalla tavalla: säännöllinen rakenne, kiteen säännöllinen hila.
+säätely	3	Toiminnan ohjaus tarpeen mukaan: geenien, entsyymien ja aineenvaihdunnan säätely.	Mitä säätely tarkoittaa?
+säätelymekanismi	2	Tapa, jolla säätely toteutuu: takaisinkytkentä, fosforylaatio, repressori.	Mikä on säätelymekanismi?
+taipuisa	1	Helposti taipuva, joustava: yksinkertaiset sidokset tekevät ketjusta taipuisan.
+taipumus	1	Luontainen suuntaus: hydrofobisten ryhmien taipumus hakeutua yhteen.
+tallentaa	1	Säilöä tieto: DNA tallentaa perimän.
+tallennusmuoto	1	Muoto, jossa tieto tai energia säilytetään: DNA tiedon, glykogeeni energian tallennusmuoto.
+tapahtumasarja	1	Peräkkäisten tapahtumien ketju, kuten signaalikaskadi.
+tasainen	1	Vaihtelematon, sileä: tasainen jakauma, tasainen pinta.
+tasomainen	1	Yhdessä tasossa oleva: peptidisidos ja bentseenirengas ovat tasomaisia.
+tavallinen	1	Yleinen, ei poikkeava: tavallinen sokeri on sakkaroosi.
+tehokas	1	Paljon tulosta vähällä: entsyymi on tehokas katalyytti.
+tehostaa	1	Lisätä tehoa: tehostaja lisää transkriptiota.
+tekijä	1	Vaikuttava asia tai proteiini: kasvutekijä, transkriptiotekijä, ympäristötekijä.
+tetraedri	2	Nelitahokas. Hiilen neljä sidosta osoittavat tetraedrin kärkiin 109,5 asteen kulmissa.	Mikä on tetraedri?
+tetraedrinen	2	Tetraedrin muotoinen: sp<sup>3</sup>-hiilen sidosgeometria, veden hapen elektroniparit.
+tieto	1	Informaatio: DNA sisältää perinnöllisen tiedon.
+tietokone	1	Laskentalaite, jolla rakenteita mallinnetaan ja sekvenssejä analysoidaan.
+tiivis	1	Tiheä, ilman välejä: tiivis pakkaus, tiivis kudos.
+tiivistyä	1	Muuttua tiiviimmäksi: kromosomit tiivistyvät mitoosissa.
+toiminnallinen	1	Toimintaan liittyvä: funktionaalinen ryhmä on molekyylin toiminnallinen osa.
+toiminto	1	Yksittäinen tehtävä: solun perustoiminnot.
+tolueeni	1	Metyylibentseeni, aromaattinen liuotin. Esimerkki aromaattisesta hiilivedystä.	Mikä on tolueeni?
+toteuttaa	1	Panna täytäntöön: proteiinit toteuttavat geenien ohjeet.
+trans	2	Vastakkaisilla puolilla: trans-isomeerissä substituentit ovat kaksoissidoksen eri puolilla. Vastakohta: cis.	Mitä trans tarkoittaa?
+trans-isomeeri	2	Kaksoissidoksen isomeeri, jossa ryhmät ovat vastakkaisilla puolilla, kuten transrasvahappo.	Mikä on trans-isomeeri?
+triljoona	1	10<sup>18</sup>, miljoona biljoonaa. Ihmisessä on kymmeniä biljoonia (10<sup>13</sup>) soluja, ei triljoonia.	Mikä on triljoona?
+tuhka	1	Palamisen epäorgaaninen jäännös, kivennäisaineet.
+tuhota	1	Hävittää: makrofagi tuhoaa bakteerin, kuumuus tuhoaa entsyymin.
+tukea	1	Kannatella tai vahvistaa: tukiranka tukee solua, havainnot tukevat teoriaa.
+tukikudos	2	Elimistön kannatteleva kudos: luu, rusto ja sidekudos.	Mikä on tukikudos?
+tumattomuus	1	Tuman puuttuminen: prokaryootit ovat tumattomia, samoin punasolu.
+tunnistus	2	Kohteen erottaminen muista sitoutumalla: vasta-aine tunnistaa antigeenin, entsyymi substraatin.	Mitä tunnistus tarkoittaa?
+tunnistusjärjestelmä	1	Koneisto, joka erottaa oman vieraasta, kuten immuunijärjestelmä tai bakteerin restriktiojärjestelmä.
+tunnusmerkki	1	Tunnistava piirre: elämän tunnusmerkit ovat aineenvaihdunta, lisääntyminen, säätely ja evoluutio.
+tuoksu	1	Haihtuvien molekyylien aiheuttama hajuaistimus, kuten esterien hedelmäinen tuoksu.
+tuottaa	1	Valmistaa: solu tuottaa proteiineja, fotosynteesi happea.
+tutkia	1	Selvittää järjestelmällisesti: tiede tutkii luontoa kokein.
+typpikaksoissidos	2	C=N-sidos imiinissä. Retinaali sitoutuu opsiiniin imiinisidoksella.	Mikä on typpikaksoissidos?
+typpivastine	1	Yhdiste, jossa typpi korvaa hapen: amiini on alkoholin, imiini karbonyylin typpivastine.
+tyrosiini	2	Aromaattinen aminohappo, jossa on fenoliryhmä. Lyhenne Tyr, Y. Fosforylaation kohta ja hormonien esiaste.	Mikä on tyrosiini?
+tyypillinen	1	Lajille tai luokalle ominainen: tyypillinen eukaryoottisolu.
+työjako	1	Tehtävien jakaminen osien kesken: solujen työjako kudoksissa, organellien solussa.
+työkalu	1	Väline tehtävän tekemiseen: entsyymit ovat solun työkaluja, PCR tutkijan.
+työkopio	2	Geenistä tehty lähetti-RNA, jota ribosomi lukee. Alkuperäinen DNA säilyy tumassa.	Mikä on työkopio?
+tärinä	1	Nopea edestakainen liike, kuten sidosten värähtely lämmössä.
+tärkeysjärjestys	1	Järjestys merkityksen mukaan, kuten CIP-säännöissä substituenttien prioriteetti.
+täydellinen	1	Kokonainen, virheetön: täydellinen palaminen, täydellinen kopio.
+täydentää	1	Tehdä kokonaiseksi: vastinjuoste täydentää juosteen.
+ulkoelektroni	2	Atomin uloimman kuoren elektroni, joka osallistuu sidoksiin. Kutsutaan myös: valenssielektroni.	Mikä on ulkoelektroni?
+ulkoinen	1	Ulkopuolelta tuleva tai ulkopuolella oleva: ulkoinen signaali, ulkoinen kalvo.
+ulkopinta	1	Rakenteen ulkopuolen pinta: solun ulkopinta, proteiinin pinta.
+ulkopuoli	1	Rajan ulkopuolella oleva: solun ulkopuoli.
+uloke	1	Pinnasta työntyvä osa, kuten siima, karva tai valejalka.
+ulottuvuus	1	Suunta avaruudessa: kolme ulottuvuutta, kolmiulotteinen rakenne.
+umpirauhanen	2	Hormoneja suoraan vereen erittävä rauhanen: haima, kilpirauhanen, lisämunuainen. Kutsutaan myös: endokriininen rauhanen.	Mikä on umpirauhanen?
+universumi	1	Maailmankaikkeus, kaikki olemassa oleva.
+urea	2	Virtsa-aine (NH<sub>2</sub>)<sub>2</sub>CO, typen erityksen muoto. Wöhler valmisti sen 1828 epäorgaanisesta aineesta.	Mikä on urea?
+uuni	1	Kuumennuslaite. Kuuma lähde on merenpohjan luonnollinen uuni.
+vaakasidos	1	Fischer-projektiossa vaakasuora sidos, joka osoittaa katsojaa kohti.
+vaatia	1	Edellyttää: reaktio vaatii energiaa, elämä vettä.
+vahinko	1	Vaurio: säteily aiheuttaa vahinkoa DNA:lle.
+vaihdella	1	Muuttua tapauksesta toiseen: pitoisuus vaihtelee.
+vaihtelu	2	Yksilöiden väliset erot, joita mutaatiot ja rekombinaatio tuottavat. Evoluution raaka-aine.	Mitä vaihtelu tarkoittaa?
+vakaa	1	Muuttumaton, tasapainoinen: vakaa rakenne, vakaa tila.
+vakauttaa	1	Tehdä vakaaksi: vetysidokset vakauttavat kierteen, entsyymi siirtymätilan.
+vakiopaine	1	Muuttumaton paine, jossa entalpian muutos vastaa lämpöä.
+valikoitua	1	Tulla valituksi luonnonvalinnassa.
+valinta	2	Kelpoisimpien yksilöiden suosiminen lisääntymisessä: luonnonvalinta tai jalostuksen valinta.	Mitä valinta tarkoittaa evoluutiossa?
+vallita	1	Olla hallitseva: tasapaino vallitsee, olosuhteet vallitsevat.
+valmis	1	Lopulliseen muotoonsa saatettu: valmis proteiini.
+valmistaa	1	Tuottaa: ribosomi valmistaa proteiineja.
+valokvantti	2	Valon pienin energiapaketti, fotoni, jonka energia on E = hf.	Mikä on valokvantti?
+valtava	1	Hyvin suuri: proteiinien valtava määrä mahdollisia sekvenssejä.
+vapaaenergiaero	2	Tuotteiden ja lähtöaineiden vapaaenergioiden erotus ΔG, joka määrää reaktion suunnan.	Mikä on vapaaenergiaero?
+vapaasti	1	Ilman estettä: ryhmät pyörivät vapaasti yksöissidoksen ympäri.
+varasto	1	Säilytyspaikka: energiavarasto, ravintovarasto.
+varastohiilihydraatti	2	Energiavarastoksi tehty polysakkaridi: tärkkelys kasveilla, glykogeeni eläimillä.	Mikä on varastohiilihydraatti?
+varastomuoto	1	Muoto, jossa aine säilytetään: glukoosin varastomuoto on glykogeeni.
+varastoravinto	1	Myöhempää käyttöä varten talletettu ravinto, kuten rasva tai tärkkelys.
+varata	1	Ottaa käyttöön tai antaa sähkövaraus: varattu hiukkanen.
+varautua	1	Saada sähkövaraus: aminoryhmä varautuu positiivisesti.
+varmistaa	1	Tehdä varmaksi: oikoluku varmistaa kopion oikeellisuuden.
+vasenpuoleinen	1	Vasemmalla puolella oleva, kuten L-muodon hydroksyyli Fischer-projektiossa.
+vastaanottaa	1	Ottaa vastaan: emäs vastaanottaa protonin, happi elektronit.
+vastaavuus	1	Yhteensopivuus: kodonin ja aminohapon vastaavuus.
+vastaavuussääntö	1	Sääntö vastaavuudesta, kuten emästen pariutumissääntö tai geneettinen koodi.
+vastakkainen	1	Päinvastainen: vastakkaiset varaukset vetävät toisiaan.
+vastakohta	1	Päinvastainen asia: hydrofobisen vastakohta on hydrofiilinen.
+vastapäivä	1	Kellon viisareita vastaan. Kiertosuunta S-konfiguraatiossa. Kutsutaan myös: vastapäivään.	Mitä vastapäivään tarkoittaa?
+vastaväri	1	Väriympyrän vastakkainen väri: aine näyttää absorboimansa värin vastaväriltä.
+vaurioitua	1	Vahingoittua: DNA vaurioituu säteilystä.
+verhota	1	Peittää: kalvo verhoaa solun, myeliini hermosäikeen.
+verenkierto	2	Veren kulku sydämestä valtimoita pitkin kudoksiin ja laskimoita pitkin takaisin.	Mikä on verenkierto?
+veriryhmä	2	Punasolujen pinnan sokeriantigeenien mukainen luokka: A, B, AB ja O.	Mikä on veriryhmä?
+veriryhmäantigeeni	2	Punasolun pinnan sokerirakenne, joka määrää veriryhmän ja jonka vieraat muodot vasta-aineet tunnistavat.	Mikä on veriryhmäantigeeni?
+verisuoneton	1	Ilman verisuonia: rusto on verisuoneton kudos.
+verkko	1	Toisiinsa liittyneiden osien rakenne: säieverkko, aineenvaihduntaverkko.
+verkkokalvo	2	Silmän takaosan valoa aistiva solukerros, jossa retinaali sijaitsee.	Mikä on verkkokalvo?
+verkosto	1	Laaja yhteyksien verkko, kuten säätelyverkosto tai vetysidosverkosto.
+verrata	1	Asettaa rinnakkain erojen näkemiseksi: sekvenssejä verrataan rinnastamalla.
+vesieliö	1	Vedessä elävä eliö.
+veto	1	Vetävä voima: sähköinen veto vastakkaisten varausten välillä.
+vetolujuus	1	Kyky kestää venytystä: kollageenin vetolujuus vastaa terästä painoon nähden.
+vety	3	Alkuaine H, kevyin ja yleisin. Elämän molekyyleissä hiilen kumppanina ja vetysidoksissa.	Mikä on vety?
+vetää	1	Kohdistaa vetovoima: ydin vetää elektroneja, vastakkaiset varaukset toisiaan.
+vieras	1	Ulkopuolinen, ei oma: vieras DNA, vieras antigeeni.
+vierekkäinen	1	Toistensa vieressä oleva: vierekkäiset nukleotidit.
+viesti	1	Välitetty tieto: hormoni on kemiallinen viesti, lähetti-RNA geenin viesti.
+viestiaine	2	Viestiä kuljettava molekyyli, kuten hormoni tai hermovälittäjäaine. Kutsutaan myös: välittäjäaine.	Mikä on viestiaine?
+viestiä	1	Välittää tietoa: solut viestivät molekyyleillä.
+viilentää	1	Jäähdyttää: hiki viilentää haihtuessaan.
+viisihiilinen	1	Viisi hiiltä sisältävä, kuten riboosi. Kutsutaan myös: pentoosi.
+viisijäseninen	1	Viidestä atomista muodostuva rengas, kuten furanoosi tai imidatsoli.
+viisirengas	1	Viiden atomin rengas, esimerkiksi riboosin furanoosimuoto.
+vinyylialkoholi	2	Enolin malliyhdiste CH<sub>2</sub>=CHOH, joka isomeroituu asetaldehydiksi. Keto-enolitautomerian esimerkki.	Mikä on vinyylialkoholi?
+violetti	1	Väri, jonka aallonpituus on lyhin näkyvässä valossa. Gram-positiiviset värjäytyvät violeteiksi.
+virhe	1	Poikkeama oikeasta: kopiointivirhe on mutaatio.
+virheellinen	1	Väärä: virheellinen laskostuminen tuottaa prionin.
+virheetön	1	Ilman virheitä: virheetön kopio.
+virhekorjaus	2	Kopiointivirheiden poisto: polymeraasin oikoluku ja DNA:n korjausentsyymit.	Mitä virhekorjaus on?
+virrata	1	Liikkua virtana: elektronit virtaavat ketjussa, protonit kalvon läpi.
+virta	1	Hiukkasten jatkuva liike: elektronivirta, ionivirta, protonivirta.
+virtaus	1	Nesteen tai kaasun liike: veren virtaus, solulimavirtaus.
+voimakas	1	Suuri voimaltaan: voimakas sidos, voimakas happo.
+vuorotella	1	Vaihtua vuorotellen: sokeri ja fosfaatti vuorottelevat DNA:n rungossa.
+vuosi	1	Ajan yksikkö, 365 päivää. Elämän ikä 4 miljardia vuotta.
+vähentää	1	Tehdä vähemmäksi: inhibiittori vähentää entsyymin toimintaa.
+vähäenergisempi	1	Pienemmän energian tila, johon reaktio pyrkii.
+vähäinen	1	Pieni määrältään: vähäinen pitoisuus.
+väliaikainen	1	Tilapäinen: väliaikainen sidos entsyymin ja substraatin välillä.
+välimuoto	1	Kahden muodon välinen tila, kuten siirtymätila tai välituote.
+välittyä	1	Siirtyä välittäjän kautta: viesti välittyy hormonilla.
+välittäjä	1	Viestin tai aineen siirtäjä: hermovälittäjäaine, elektronin välittäjä.
+värjätä	1	Antaa väri: solut värjätään mikroskopiaa varten, gramvärjäys erottaa bakteerit.
+wöhler	2	Friedrich Wöhler, joka syntetisoi urean epäorgaanisesta ammoniumsyanaatista 1828 ja kumosi elinvoimaopin.	Kuka oli Wöhler?
+ydinsisältö	1	Asian tärkein osa, kurssin keskeisin aines.
+yhdistää	1	Liittää yhteen: sidos yhdistää atomit, ligaasi DNA-päät.
+yhteistyö	1	Yhdessä toimiminen: entsyymit toimivat yhteistyössä reaktioteissä.
+yhteisö	1	Yhdessä elävien eliöiden joukko, kuten mikrobiyhteisö.
+yhtenäinen	1	Katkeamaton, sama kauttaaltaan: yhtenäinen kalvo, yhtenäinen teoria.
+yksikkö	1	Mittayksikkö tai rakenteen perusosa: mol, sokeriyksikkö, toistoyksikkö.
+yksilö	1	Yksi eliö: evoluutio muuttaa populaatiota, ei yksilöä.
+yksittäinen	1	Yksi erillinen: yksittäinen solu, yksittäinen mutaatio.
+yleinen	1	Laajalti esiintyvä: hiili on elämän yleisin runkoalkuaine.
+yleistys	1	Yksittäistapauksista johdettu yleinen sääntö.
+ylittää	1	Mennä yli: reaktion on ylitettävä aktivaatioenergia.
+ylläpitää	1	Pitää yllä: solu ylläpitää pitoisuuseroja energialla.
+ympäristö	2	Eliön tai molekyylin ympärillä oleva: solun ympäristö, vesiympäristö, elinympäristö.	Mitä ympäristö tarkoittaa?
+ympäröidä	1	Olla ympärillä: kalvo ympäröi solun, vesi ionin.
+äkillinen	1	Nopea ja yllättävä: äkillinen muutos, äkillinen tauti.
