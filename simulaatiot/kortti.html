@@ -794,7 +794,7 @@ float outsideBox(vec3 p){ return 1.0 - step(cutLo.x, p.x) * step(p.x, cutHi.x) *
 varying float vGid;        // this cofactor atom's group index
 uniform float hlGroup;     // the group to highlight (hover / flash), -1 = none
 uniform float hlBright;    // its brightness multiplier (1.0 = normal, 1.25 = hover, pulses on select)
-uniform sampler2D slotTex; // VALOREAKTIOT 2: per group, the slot state as brightness (0.5 = as is, 0.22 = an empty electron carrier, 0.8 = excited) - the 2D 'modulate'
+uniform sampler2D slotTex; // the light reactions: per group, the slot state as brightness (0.5 = as is, 0.22 = an empty electron carrier, 0.8 = excited) - the 2D 'modulate'
 uniform float slotN;       // its width (0 = off)
 #endif
 uniform float selModel;    // index of the SELECTED complex (−1 = none) → its atoms get a sage rim
