@@ -6007,7 +6007,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(const g of etcGroups){ g.cx/=g.n; g.cy/=g.n; g.cz/=g.n; let r2=0;
         for(const i of g.atoms){ const dx=gx[i]-g.cx, dy=gy[i]-g.cy, dz=gz[i]-g.cz, d=dx*dx+dy*dy+dz*dz; if(d>r2) r2=d; }
         g.r = Math.sqrt(r2) + 2.0;
-        for(const i of g.atoms) if(EL_LIST[etcEl[i]] === 'Mg'){ g.mg = [gx[i], gy[i], gz[i]]; break; } }   // a chlorophyll's Mg (13.9.2026: the excitation glows from it - valo/Kalvosto.js)
+        for(const i of g.atoms) if(EL_LIST[etcEl[i]] === 'MG'){ g.mg = [gx[i], gy[i], gz[i]]; g.mgSlot = inLhc(gx[i], gy[i], gz[i]); break; } }   // mgSlot: the LHC piece's transform slot when the chlorophyll rides a drifting antenna piece (-1 = the model's own)   // a chlorophyll's Mg (13.9.2026: the excitation glows from it - valo/Kalvosto.js)
       etcGroupPos = { gx, gy, gz };
       for(let i=0;i<NA;i++) gCofOfAtom.set(etcEl[i]*16777216 + etcIdx[i], gid[i]);
       // ── Reactive-site / collision spheres ── one per cofactor group, at its LIVE world centre (follows a
