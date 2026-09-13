@@ -3517,8 +3517,15 @@ async function run(){
          arrangement (the exponential map of its sheet position, see the placement block). The sphere runs on
          beyond the complexes and is cut where it leaves the inner envelope, so it reads as a bulge of the inner
          membrane. Its lattice leaves a hole under every membrane complex (foot). Untinted, like the sheet was. */
-      const THY_R = 2400, thy = add('tylakoidi', new BABYLON.Vector3(760, -THY_R, 0), THY_R, null, { ax:'x', clipTo: inn, foot:true });   // tinted like every other chloroplast membrane (owner 12.9.2026: all of them green - the sheet's lipids ride on this host and take its tint too)
-      thy.pole = new BABYLON.Vector3(760, 0, 0);
+      /* 13.9.2026 (owner: 'straighten the box, it looks tilted relative to the membrane proteins' - 'move the pole to the unit centre'): the pole
+         is no longer ATP synthase's x (760) but the middle of the membrane complexes' x range (PSII -560 .. ATP synthase 760 -> 100), so
+         the unit sits symmetrically on the sphere: the two ends tilt about 16 degrees each way instead of 0 and 31. ATP synthase
+         therefore no longer has the identity transform - its rotor slot composes with its model transform like every other, and the
+         free protons' channel is taken through the model transform (axX/axZ), so both still work; the flat lipid wall the free
+         protons see stays at the sheet plane y = 0. */
+      const POLE_X = (() => { const mb = MODELS.filter(c => Math.abs(c.y) <= 100); let lo = Infinity, hi = -Infinity; for(const c of mb){ lo = Math.min(lo, c.x); hi = Math.max(hi, c.x); } return isFinite(lo) ? (lo + hi)/2 : 760; })();
+      const THY_R = 2400, thy = add('tylakoidi', new BABYLON.Vector3(POLE_X, -THY_R, 0), THY_R, null, { ax:'x', clipTo: inn, foot:true });   // tinted like every other chloroplast membrane (owner 12.9.2026: all of them green - the sheet's lipids ride on this host and take its tint too)
+      thy.pole = new BABYLON.Vector3(POLE_X, 0, 0);
       CHL.push(o); DISCS.push([thy, thy, thy]); LAYOUT_THY = thy; }
     chloro(5000, -1800, -1800, 'z'); chloro(-1500, -800, -5400, 'x');
     /* a mitochondrion: outer and inner envelope, three flat cristae across the long axis */
