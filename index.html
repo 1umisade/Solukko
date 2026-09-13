@@ -1011,6 +1011,8 @@ body.dark-mode .grid-shuffle-btn { background: #3a312b; border-color: #6d5f52; }
 #grid-tools #darkmode-wrap { flex: 0 0 auto; }
 .grid-tool-btn { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #6b6055; background: #fffef9; border: 1px solid #d4cec4; border-radius: 999px; padding: 0.5rem 0.9rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.1s ease, background 0.15s ease; }
 .grid-tool-btn:hover { background: #f5f0e8; }
+select.grid-tool-btn { appearance: none; -webkit-appearance: none; padding-right: 1.6rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236b6055' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.8rem center; }   /* järjestysvalikko: nuoli oikeassa reunassa, muuten kuin nappi */
+body.dark-mode select.grid-tool-btn { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23cbb89b' stroke-width='1.5'/%3E%3C/svg%3E"); }
 .grid-tool-btn:active { transform: scale(0.96); }
 body.dark-mode .grid-tool-btn { background: #3a312b; color: #cbb89b; border-color: #6d5f52; }
 .overview-card { transition: transform 0.16s ease, box-shadow 0.16s ease; }   /* no will-change: it would put all ~130 cards on their own GPU layers and make the whole page sluggish */
@@ -2830,7 +2832,11 @@ body.dark-mode .cal-ev { color:#241f1b; }
 
   <div class="grid-tools" id="grid-tools">   <!-- under the grid by default; startDeck lifts it above the cards for the dev "Kaikki kortit" deck -->
     <button class="grid-tool-btn" onclick="resetDeckProgress()" title="Merkitse kaikki kortit uusiksi">↺ Nollaa edistyminen</button>
-    <button id="shuffle-toggle-btn" class="grid-tool-btn" onclick="toggleShuffleOrder()" title="Sekoita korttien järjestys">🔀 Sekoita</button>
+    <select id="order-select" class="grid-tool-btn" onchange="setReviewOrder(this.value)" title="Korttien järjestys">   <!-- omistaja 13.9.2026: Järjestä-nappi pudotusvalikoksi -->
+      <option value="tarina">↕ Tarinallinen</option>
+      <option value="tentti">★ Tenttitodennäköisyys</option>
+      <option value="satunnainen">🔀 Satunnainen</option>
+    </select>
   </div>
   </div>
   <div id="card-col">
@@ -4126,7 +4132,7 @@ async function startDeck(deckName, animate=true){   // animate=false (reload/dee
   _deckIntro = infos.find(c=>getField(c,['Front','front','Kysymys','kysymys','Question','question']).replace(/<[^>]*>/g,'').trim().toLowerCase()==='esittely') || null;   // the card whose Front/Kysymys is "Esittely" becomes the deck cover
   reviewCards = _deckIntro ? infos.filter(c=>c!==_deckIntro) : infos;   // the intro card is a cover, not a study card
   queue = reviewCards.slice();
-  shuffleMode=false; _reviewCardsOriginal=null; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
+  shuffleMode=false; orderMode='tarina'; _reviewCardsOriginal=null; document.getElementById('shuffle-btn')?.classList.remove('active'); updateShuffleToggleBtn();
   deckGroups=buildDeckGroups(reviewCards,deckName);
   buildWordLinks();
   currentOverviewIndex=0;
@@ -4426,7 +4432,7 @@ function _syncReviewOrder(cur){
   if(currentCard && !inFullscreen()){ _previewIndex=-1; _doPreview(currentOverviewIndex); }   // re-render the shown card with fresh links
 }
 function shuffleReviewOrder(){   // shuffle the REAL review order (reviewCards) so the grid, navigation (Seuraava/Edellinen) and grading all follow the shuffle
-  shuffleMode=true;
+  shuffleMode=true; orderMode='satunnainen';
   document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.add('active'));
   if(!_reviewCardsOriginal) _reviewCardsOriginal=reviewCards.slice();            // remember the default order once
   const cur=currentCard;
@@ -4436,17 +4442,30 @@ function shuffleReviewOrder(){   // shuffle the REAL review order (reviewCards) 
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
   renderCardOverview();
 }
-function toggleShuffleOrder(){   // one button toggles: Sekoita (shuffle) ⇄ Järjestä (restore the original order)
-  if(shuffleMode) restoreDefaultOrder(); else shuffleReviewOrder();
+let orderMode='tarina';   // 'tarina' = pakan oma järjestys (luentojen tarina), 'tentti' = tähdet laskevasti, 'satunnainen' = sekoitettu (shuffleMode)
+function setReviewOrder(mode){   // pudotusvalikko (omistaja 13.9.2026): tarinallinen / tenttitodennäköisyys / satunnainen
+  orderMode=mode;
+  if(mode==='satunnainen') shuffleReviewOrder();
+  else if(mode==='tentti') sortByExamProbability();
+  else restoreDefaultOrder();
   updateShuffleToggleBtn();
 }
-function updateShuffleToggleBtn(){
-  const btn=document.getElementById('shuffle-toggle-btn'); if(!btn) return;
-  btn.textContent = shuffleMode ? '↕ Järjestä' : '🔀 Sekoita';
-  btn.title = shuffleMode ? 'Palauta alkuperäinen järjestys' : 'Sekoita korttien järjestys';
+function sortByExamProbability(){   // 3★ ensin, samoilla tähdillä pakan oma järjestys säilyy; yksi pino kuten sekoitettunakin
+  shuffleMode=false;
+  document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.remove('active'));
+  if(!_reviewCardsOriginal) _reviewCardsOriginal=reviewCards.slice();
+  const cur=currentCard, alku=new Map(_reviewCardsOriginal.map((c,i)=>[c,i]));
+  reviewCards.sort((a,b)=>(cardStarCount(b)-cardStarCount(a)) || ((alku.get(a)??1e9)-(alku.get(b)??1e9)));
+  _syncReviewOrder(cur);
+  deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.slice()}];
+  const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';
+  renderCardOverview();
+}
+function updateShuffleToggleBtn(){   // valikko näyttää voimassa olevan järjestyksen
+  const sel=document.getElementById('order-select'); if(sel) sel.value=orderMode;
 }
 function restoreDefaultOrder(){   // back to the deck's original order, lectures split out again
-  shuffleMode=false;
+  shuffleMode=false; orderMode='tarina';
   document.querySelectorAll('.peek-shuffle-btn').forEach(b=>b.classList.remove('active'));
   if(_reviewCardsOriginal){ reviewCards.length=0; _reviewCardsOriginal.forEach(c=>reviewCards.push(c)); }   // restore the default order in place
   _syncReviewOrder(currentCard);
@@ -5963,7 +5982,7 @@ function _injectUserCards(cur){   // make reviewCards end with exactly the curre
   for(let i=reviewCards.length-1;i>=0;i--) if(reviewCards[i]&&reviewCards[i]._userCard) reviewCards.splice(i,1);
   _userCards.forEach(c=>reviewCards.push(c));
   if(_reviewCardsOriginal){ for(let i=_reviewCardsOriginal.length-1;i>=0;i--) if(_reviewCardsOriginal[i]._userCard) _reviewCardsOriginal.splice(i,1); _userCards.forEach(c=>_reviewCardsOriginal.push(c)); }
-  if(shuffleMode) deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.slice()}];   // shuffled: one pile (sections are merged)
+  if(shuffleMode||orderMode==='tentti') deckGroups=[{name:'Pääpakka', link:null, cards:reviewCards.slice()}];   // shuffled or by stars: one pile (sections are merged)
   else deckGroups=buildDeckGroups(reviewCards, currentDeck);                               // regroup by subdeck so each user card sits in its own lecture section
   const _mp=document.getElementById('mona-top-peek'); const _wasFlew=!!(_mp&&_mp.classList.contains('flew-in'));   // the cover rebuild would drop Mona's flew-in
   const grid=document.getElementById('card-overview-grid'); if(grid) grid.dataset.deckName='';   // force a full re-render
