@@ -664,7 +664,7 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb { background: #a97f4e; border
 body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; }
 .card-content { font-size: 1.2rem; line-height: 1.75; color: #1a1612; text-align: center; font-weight: 700; letter-spacing: 0.04em; }   /* plain single-paragraph text (questions, short answers) is centred, bold, slightly spaced */
 /* multi-line / list content: centre the block on the longest line, keep the rows left-aligned from there */
-.card-content:has(br), .card-content:has(li), .card-content:has(ul), .card-content:has(ol), .card-content:has(> * ~ *) { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; text-align: left; }
+.card-content:has(br), .card-content:has(li), .card-content:has(ul), .card-content:has(ol), .card-content:has(> :not(span, i, b, em, strong, sub, sup, a) ~ :not(span, i, b, em, strong, sub, sup, a)) { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; text-align: left; }   /* monilohkoinen sisältö vasemmalle; sanalinkkien spanit ja muut rivinsisäiset eivät ole lohkoja - kysymys, jossa on kaksi linkkiä, pysyy keskitettynä (omistaja 13.9.2026) */
 .card-content:has(iframe) { width: 100%; }   /* 3D-embed cards keep full width (an iframe has no intrinsic width) */
 .flashcard.front-basic { display: flex; flex-direction: column; align-items: center; justify-content: center; }   /* basic card front: big, centered question */
 .flashcard.answer-shown { display: flex; flex-direction: column; justify-content: safe center; }   /* back side: centre the content on the Y axis too (safe = still scrolls from the top when it overflows) */
