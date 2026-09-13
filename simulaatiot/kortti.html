@@ -956,8 +956,8 @@ void main(void){
     float shimF = 0.5 + 0.5*sin(uT*2.3 + vWCen.x*0.14 + vWCen.y*0.10 + vWCen.z*0.12);
     colF += vec3(0.10, 0.24, 0.55) * fresF * (0.34 + 0.5*shimF);
   }
-#ifdef MACRON
-  colF = mix(colF, vColor * outlineK, rimF);   // the protein atoms' very dark rim (dev slider)
+#if defined(MACRON) || defined(WATERBOX)
+  colF = mix(colF, vColor * outlineK, rimF);   // the protein atoms' very dark rim (dev slider) - and the free molecules' (owner 14.9.2026: 'the molecules dont have those crisp black outlines on vdW as the proteins')
 #else
   colF = mix(colF, vColor * 0.40, rimF);
 #endif
@@ -1118,7 +1118,11 @@ void main(void){
     col = mix(col, (cofClear > 0.5) ? vec3(cofOutCol) : vColor * 0.40, rim);   // a see-through atom's outline uses the dev colour, otherwise the atom's own 40% shade
   #endif
  #else
+  #ifdef WATERBOX
+    col = mix(col, vColor * outlineK, rim);                // a free molecule's atoms get the protein atoms' ink rim (owner 14.9.2026)
+  #else
     col = mix(col, vColor * 0.40, rim);                    // rim → a FIXED 40% shade of the atom's own UNLIT colour → same darkness whichever way the sphere faces the light (was col *= mix(1.0,0.40,rim), whose 40%-of-LIT-colour went near-black on shadowed edges → the inconsistent thick-black outlines)
+  #endif
  #endif
 #endif
   }
