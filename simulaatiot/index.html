@@ -4978,10 +4978,10 @@ void main(void){
   /* 'Kalvostoon' (owner, 2026-09-09): a slow flight from wherever the camera is into the thylakoid scene - the sheet's
      old default view, now inside the host chloroplast - over FLY_S seconds, eased, target and position together.
      Any control (a press, a wheel notch, a key) breaks it off. */
-  /* The destination is the owner's exact dev-readout view (12.9.2026, second readout): sij. 19, 166, -1003 ·
-     katse 0.054, -0.191, 0.980 · ylä -0.312, 0.929, 0.198 · et. 426. The readout's katse/ylä lines ARE the rotation:
+  /* The destination is the owner's exact dev-readout view (13.9.2026, after the pole moved to the unit's centre): sij. 118, 180, -1004 ·
+     katse -0.041, -0.145, 0.989 · ylä -0.027, 0.989, 0.144 · et. 426. The readout's katse/ylä lines ARE the rotation:
      target = sij. + katse·et., cam.upVector = ylä (the screen-up is a valid up vector - β comes out 90°, the roll stays). */
-  const POSE = (() => { const pos = new BABYLON.Vector3(19, 166, -1003), fw = new BABYLON.Vector3(0.054, -0.191, 0.980).normalize(), up = new BABYLON.Vector3(-0.312, 0.929, 0.198), r = 426;
+  const POSE = (() => { const pos = new BABYLON.Vector3(118, 180, -1004), fw = new BABYLON.Vector3(-0.041, -0.145, 0.989).normalize(), up = new BABYLON.Vector3(-0.027, 0.989, 0.144), r = 426;
     up.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(up, fw))).normalize();   // exactly perpendicular to the view axis (the readout is rounded to three decimals)
     return { pos, tgt: pos.add(fw.scale(r)), up }; })();
   { const FLY_S = 14, TGT = POSE.tgt, POS = POSE.pos, UP = POSE.up;
