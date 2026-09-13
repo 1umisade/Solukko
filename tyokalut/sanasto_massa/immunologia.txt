@@ -1,0 +1,79 @@
+# Immunologia - teoria - massakierros
+adapterimolekyyli	1	Signaalireitin proteiini, joka yhdistää reseptorin seuraavaan proteiiniin.
+adaptiivinen	2	Hankittu, oppiva: adaptiivinen immuniteetti muodostaa antigeenikohtaisia vasta-aineita ja T-soluja sekä muistin.	Mitä adaptiivinen immuniteetti on?
+aktivaatio	1	Solun tai proteiinin käynnistyminen toimintaan.
+akuutti	1	Äkillinen ja lyhytkestoinen: akuutti tulehdus, akuutin vaiheen proteiinit.
+akuutin vaiheen proteiini	2	Maksan tulehduksessa erittämä proteiini, kuten CRP, joka nousee veressä tunneissa.	Mikä on akuutin vaiheen proteiini?
+albumiini	2	Plasman runsain proteiini, joka ylläpitää osmoottista painetta ja kuljettaa aineita.	Mikä on albumiini?
+altistus	1	Joutuminen antigeenin tai patogeenin kanssa kosketuksiin.
+annos	1	Annettu määrä: rokoteannos, lääkeannos.
+auttaja-t-solu	2	CD4-positiivinen T-solu, joka aktivoi B-soluja ja makrofageja sytokiineilla.	Mikä on auttaja-T-solu?
+bcr	2	B-solureseptori, solun pintaan kiinnittynyt vasta-aine, joka tunnistaa antigeenin.	Mikä on BCR?
+b-proteiini	1	B-solun reseptorin proteiiniosa.
+creutzfeldt-jakobin tauti	2	Prionin aiheuttama ihmisen aivotauti, hullun lehmän taudin ihmismuoto.	Mikä on Creutzfeldt-Jakobin tauti?
+defensiini	2	Pieni antimikrobinen peptidi, joka puhkaisee mikrobin kalvon. Synnynnäisen immuniteetin ase.	Mikä on defensiini?
+dendriittisolu	2	Antigeenia esittelevä solu, joka kuljettaa antigeenin imusolmukkeeseen ja aktivoi T-solut.	Mikä on dendriittisolu?
+efektori-t-solu	1	Aktivoitunut T-solu, joka toteuttaa vasteen: tappaa tai erittää sytokiineja.
+efektorimolekyyli	1	Vasteen toteuttava molekyyli, kuten perforiini, vasta-aine tai sytokiini.
+efektorivaste	1	Immuunivasteen toteutusvaihe.
+elinsiirto	2	Elimen siirto luovuttajalta potilaalle. Hylkiminen estetään sopivalla MHC:llä ja lääkkeillä.	Mikä on elinsiirto?
+eosinofiili	2	Valkosolu, joka torjuu loisia ja osallistuu allergiaan.	Mikä on eosinofiili?
+fagosytoida	1	Niellä hiukkanen soluun: makrofagi fagosytoi bakteerin.
+fas-reitti	2	Solukuoleman reitti: tappaja-T-solun FasL sitoutuu kohdesolun Fas-reseptoriin ja laukaisee apoptoosin.	Mikä on Fas-reitti?
+globuliini	1	Plasman proteiiniryhmä, johon vasta-aineet (immunoglobuliinit) kuuluvat.
+glukaani	1	Glukoosipolymeeri sienten soluseinässä, jonka PRR-reseptorit tunnistavat.
+grantsyymi	2	Tappaja-T-solun proteaasi, joka pääsee kohdesoluun perforiinin reiästä ja laukaisee apoptoosin.	Mikä on grantsyymi?
+immuuni	1	Vastustuskykyinen: rokotettu on immuuni taudille.
+imueste	1	Este mikrobien pääsylle: iho ja limakalvot.
+kalvoreseptori	1	Solukalvon reseptori.
+kateenkorva	2	Rintakehän imukudoselin, jossa T-solut kypsyvät. Kutsutaan myös: tyymus.	Mikä on kateenkorva?
+kipu	1	Tulehduksen merkki, jonka välittäjäaineet aiheuttavat hermopäätteissä.
+kolerabakteeri	1	Vibrio cholerae, koleran aiheuttaja.
+kolerarokote	1	Suun kautta otettava rokote koleraa vastaan.
+komplementtiproteiini	1	Komplementtijärjestelmän proteiini, C1–C9.
+kudossiirto	1	Kudoksen siirto, kuten ihonsiirto.
+kudosvaurio	1	Kudoksen vahingoittuminen, tulehduksen laukaisija.
+kuru	2	Prionitauti, joka levisi Papua-Uuden-Guinean fore-kansassa rituaalisen kannibalismin kautta.	Mikä on kuru?
+kypsyä	1	Kehittyä toimintakykyiseksi: T-solut kypsyvät kateenkorvassa.
+laskostumisvirhe	1	Proteiinin virheellinen laskostuminen, prionitautien syy.
+laumaimmuniteetti	2	Väestön suoja, kun riittävän moni on immuuni eikä tartunta leviä. Suojaa rokottamattomiakin.	Mikä on laumaimmuniteetti?
+liikakasvu	1	Solujen hallitsematon lisääntyminen, kasvain.
+loiseläin	1	Toisen eliön kustannuksella elävä eläin, kuten mato tai punkki.
+lymfa	2	Kudosnesteestä kertyvä imuneste, joka kulkee imusuonia pitkin imusolmukkeisiin. Kutsutaan myös: imuneste.	Mikä on lymfa?
+mhc-molekyyli	2	Solun pinnan proteiini, joka esittelee peptidejä T-soluille. MHC I kaikissa soluissa, MHC II antigeenia esittelevissä.	Mikä on MHC-molekyyli?
+monosyytti	2	Veren valkosolu, joka kudoksessa kypsyy makrofagiksi.	Mikä on monosyytti?
+muisti-b-solu	1	Pitkäikäinen B-solu, joka käynnistää nopean vasteen uudessa altistuksessa.
+muisti-t-solu	1	Pitkäikäinen T-solu, joka muistaa antigeenin.
+neoplasia	2	Kasvain, solujen hallitsematon uudismuodostus. Kutsutaan myös: neoplasma.	Mikä on neoplasia?
+normaalifloora	2	Elimistön pintojen luonnollinen mikrobisto, joka suojaa taudinaiheuttajilta.	Mikä on normaalifloora?
+opsonisaatio	2	Mikrobin merkitseminen vasta-aineella tai komplementilla, jotta fagosyytti nielee sen helpommin.	Mikä on opsonisaatio?
+pamp	2	Mikrobeille yhteinen rakenne, kuten LPS tai flagelliini, jonka synnynnäinen immuniteetti tunnistaa. Kutsutaan myös: PAMP-rakenne.	Mikä on PAMP?
+patologi	1	Tautien kudosmuutoksia tutkiva lääkäri.
+perforiini	2	Tappaja-T-solun ja NK-solun proteiini, joka puhkaisee reiän kohdesolun kalvoon.	Mikä on perforiini?
+pitkäikäinen	1	Kauan elävä: muistisolut ovat pitkäikäisiä.
+primäärivaste	2	Ensimmäinen immuunivaste antigeeniin: hidas, IgM-painotteinen. Kutsutaan myös: primaarivaste.	Mikä on primäärivaste?
+prr	2	Hahmontunnistusreseptori, joka tunnistaa PAMP-rakenteet, kuten Toll-reseptorit. Lyhenne sanoista pattern recognition receptor.	Mikä on PRR?
+punoitus	1	Tulehduksen merkki, verenkierron lisääntyminen.
+puolustuslinja	1	Puolustuksen kerros: esteet, synnynnäinen immuniteetti, adaptiivinen immuniteetti.
+puolustusreaktio	1	Immuunivaste.
+pääluokka	1	Vasta-aineiden isotyyppi.
+regulatoorinen t-solu	2	T-solu, joka hillitsee immuunivastetta ja estää autoimmuniteettia. Kutsutaan myös: säätelijä-T-solu.	Mikä on regulatoorinen T-solu?
+rutto	2	Yersinia pestis -bakteerin tauti, joka tappoi kolmanneksen Euroopasta 1300-luvulla.	Mikä on rutto?
+räätälöidä	1	Sovittaa yksilöllisesti: vasta-aine räätälöidään antigeeniin.
+sekundäärivaste	2	Toinen kohtaaminen antigeenin kanssa: nopea, voimakas, IgG-painotteinen muistisolujen ansiosta.	Mikä on sekundäärivaste?
+siirre	1	Siirretty elin tai kudos.
+solupinta	1	Solun ulkopinta reseptoreineen.
+stimuloida	1	Aktivoida: sytokiini stimuloi solua.
+sytotoksinen	2	Soluja tappava: sytotoksinen T-solu tappaa infektoituneet solut.	Mitä sytotoksinen tarkoittaa?
+tappaja-t-solu	2	CD8-positiivinen T-solu, joka tappaa virusinfektoituneet ja syöpäsolut. Kutsutaan myös: sytotoksinen T-solu.	Mikä on tappaja-T-solu?
+tcr	2	T-solureseptori, joka tunnistaa MHC-molekyylin esittelemän peptidin.	Mikä on TCR?
+thukydides	1	Antiikin historioitsija, joka kuvasi Ateenan ruton ja havaitsi sairastaneiden immuniteetin.
+toimintakyvytön	1	Kyvytön toimimaan: toimintakyvytön immuunijärjestelmä.
+tulehdusvaste	2	Kudoksen reaktio vaurioon tai infektioon: punoitus, kuumotus, turvotus, kipu.	Mikä on tulehdusvaste?
+turvotus	1	Tulehduksen merkki, nesteen kertyminen kudokseen.
+vakava	1	Vaarallinen: vakava infektio.
+varaustihentymä	1	Kohta, johon varaus on keskittynyt.
+verikoe	1	Verinäytteen laboratoriotutkimus.
+verensiirto	1	Veren siirto luovuttajalta potilaalle, veriryhmien on sovittava.
+vierasaine	1	Elimistöön kuulumaton aine, antigeeni.
+vierasperäinen	1	Ulkopuolelta tullut, ei oma.

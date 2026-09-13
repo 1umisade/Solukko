@@ -1,0 +1,23 @@
+# Kasvibiokemia - teoria 1 - massakierros
+antenni	2	Fotosysteemin pigmenttiproteiinit, jotka keräävät valon ja siirtävät viritysenergian reaktiokeskukseen. Kutsutaan myös: valonkeruuantenni.	Mikä on antenni fotosynteesissä?
+feofytiini	2	Klorofylli ilman magnesiumia, fotosysteemi II:n ensimmäinen elektronin vastaanottaja.	Mikä on feofytiini?
+granatylakoidi	2	Pinoutuneet tylakoidit viherhiukkasessa, joissa fotosysteemi II sijaitsee. Kutsutaan myös: grana.	Mikä on granatylakoidi?
+happikehä	1	Fotosysteemi II:n hapenkehityskompleksi, joka hajottaa veden.
+klusteri	1	Atomiryhmä, kuten mangaaniklusteri vedenhajotuksessa.
+korjauskierto	2	Fotosysteemi II:n D1-proteiinin jatkuva vaihto valovaurion jälkeen.	Mikä on korjauskierto?
+meioosi	2	Vähennysjakautuminen, jossa kromosomiluku puolittuu sukusoluiksi tai itiöiksi.	Mikä on meioosi?
+mitoosi	2	Tavallinen solunjakautuminen, jossa tytärsolut saavat saman kromosomiston.	Mikä on mitoosi?
+monoploidi	1	Yhden kromosomiston omaava, haploidi.
+oec	1	Hapenkehityskompleksi, joka hapettaa veden fotosysteemi II:ssa. Lyhenne sanoista oxygen-evolving complex.	Mikä on OEC?
+plastokinoni	2	Tylakoidikalvon liikkuva elektroninkuljettaja fotosysteemi II:n ja sytokromi b6f:n välillä. Pelkistyneenä plastokinoli.	Mikä on plastokinoni?
+psba	1	Fotosysteemi II:n D1-proteiinin geeni, jonka tuote sitoo reaktiokeskuksen.
+psbo	1	Hapenkehityskompleksia vakauttava proteiini PsbO (myös PsbP ja PsbQ).
+reaktiokeskusklorofylli	1	Fotosysteemin erityinen klorofyllipari (P680, P700), joka luovuttaa elektronin.
+sisäantenniproteiini	1	Reaktiokeskuksen lähin antenniproteiini (CP43, CP47).
+sporofyytti	2	Kasvin diploidi, itiöitä tuottava sukupolvi.	Mikä on sporofyytti?
+gametofyytti	2	Kasvin haploidi, sukusoluja tuottava sukupolvi.	Mikä on gametofyytti?
+sukupolvenvuorottelu	2	Kasvien elinkierto, jossa haploidi ja diploidi sukupolvi vuorottelevat.	Mikä on sukupolvenvuorottelu?
+itiö	1	Kasvin tai sienen haploidi lisääntymissolu, josta uusi yksilö kasvaa ilman hedelmöitystä.
+suojaproteiini	1	Fotosysteemiä valovauriolta suojaava proteiini.
+valovaurio	2	Liian voimakkaan valon aiheuttama fotosysteemi II:n vaurio, jota korjauskierto paikkaa. Kutsutaan myös: fotoinhibitio.	Mikä on valovaurio?
+z-kaavio	2	Fotosynteesin valoreaktioiden elektroninsiirtoketju piirrettynä energian mukaan Z-kirjaimen muotoon.	Mikä on Z-kaavio?

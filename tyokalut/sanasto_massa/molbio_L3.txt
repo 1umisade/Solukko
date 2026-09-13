@@ -1,0 +1,218 @@
+# Molekyylibiologia - teoria, Luento 3 - massakierros
+aauaaa-jakso	2	Polyadenylaatiosignaali lähetti-RNA:n 3'-päässä, jonka jälkeen esi-mRNA katkaistaan ja poly(A)-häntä lisätään.	Mikä on AAUAAA-jakso?
+adapteri	1	Lyhyt kaksijuosteinen DNA, joka liitetään fragmentin päihin sekvensointia tai kloonausta varten.
+adenosiinihäntä	1	Poly(A)-häntä, adenosiinien ketju mRNA:n 3'-päässä.
+affiniteettijakso	1	Proteiiniin liitetty jakso, jolla se puhdistetaan, kuten histidiinihäntä.
+agaroosi	2	Merilevästä saatava polysakkaridi, josta DNA-elektroforeesin geeli valetaan.	Mikä on agaroosi?
+agrobakteeri	2	Agrobacterium tumefaciens, maabakteeri, joka siirtää Ti-plasmidin T-DNA:n kasvisoluun. Kasvien geeninsiirron työkalu.	Mikä on agrobakteeri?
+akryyli	1	Polyakryyliamidi, geeli proteiinien ja pienten DNA-fragmenttien elektroforeesiin.
+aktivointi	1	Käynnistäminen: geenin aktivointi, entsyymin aktivointi.
+allopolyploidi	2	Eliö, jonka useat kromosomistot ovat peräisin eri lajeista, kuten vehnä.	Mikä on allopolyploidi?
+aluespesifinen	2	Tiettyyn DNA-jaksoon kohdistuva: aluespesifinen rekombinaatio Cre-loxP-järjestelmässä.	Mitä aluespesifinen tarkoittaa?
+aluketekniikka	1	Alukkeiden suunnitteluun ja käyttöön perustuvat menetelmät, kuten PCR.
+analysointi	1	Tulosten tai näytteen tutkiminen.
+anhydridisidos	2	Kahden happoryhmän välinen sidos, kuten ATP:n fosfaattien välillä. Energiarikas.	Mikä on anhydridisidos?
+annotointi	2	Genomin sekvenssin merkitseminen: geenien, eksonien ja säätelyalueiden tunnistus ja nimeäminen.	Mitä annotointi on?
+argonautti	2	RNA-interferenssin proteiini, joka ohjaa pienen RNA:n kohteeseensa ja katkaisee tai hiljentää sen. Kutsutaan myös: Argonaute.	Mikä on argonautti?
+asetylaatio	2	Asetyyliryhmän liittäminen, kuten histonin lysiiniin, mikä avaa kromatiinin.	Mitä asetylaatio on?
+asetyyli-coa	2	Asetyylikoentsyymi A, kahden hiilen asetyyliryhmä koentsyymiin liitettynä. Sitruunahappokierron polttoaine.	Mikä on asetyyli-CoA?
+autopolyploidi	2	Eliö, jonka kromosomistot ovat moninkertaistuneet omasta lajista.	Mikä on autopolyploidi?
+avidiini	2	Kananmunan proteiini, joka sitoo biotiinia erittäin lujasti. Käytetään biotiinileimattujen molekyylien pyydystämiseen.	Mikä on avidiini?
+biotiini	2	B-vitamiini, jota käytetään leimana: biotinyloitu molekyyli sidotaan avidiinilla tai streptavidiinilla.	Mikä on biotiini?
+biotiinileima	1	Biotiinilla merkitty koetin tai nukleotidi.
+blotting	2	Molekyylien siirto geelistä kalvolle koettimella tunnistettavaksi: Southern (DNA), northern (RNA), western (proteiini).	Mitä blotting on?
+cas-entsyymi	2	CRISPR-järjestelmän nukleaasi, kuten Cas9, joka katkaisee ohjaus-RNA:n osoittaman DNA:n.	Mikä on Cas-entsyymi?
+cpg-saareke	2	Genomin alue, jossa CG-emäsparit ovat tiheässä, usein promoottorissa. Metylaatio hiljentää sen.	Mikä on CpG-saareke?
+cos-alue	2	Lambda-faagin genomin kohesiiviset päät, joista pakkaus faagihiukkaseen alkaa.	Mikä on cos-alue?
+cosmidi	2	Plasmidi, jossa on lambdan cos-jakso, joten se pakataan faagipartikkeliin ja voi kantaa 40 kb inserttiä.	Mikä on kosmidi?
+ctab	1	Detergentti, jolla kasvien DNA eristetään polysakkarideista.
+deasetylaatio	1	Asetyyliryhmän poisto, esimerkiksi histonista, mikä tiivistää kromatiinin.
+dehydrosyntaasi	1	Entsyymi, joka liittää molekyylit vettä poistamalla.
+dekarboksylaatio	2	Hiilidioksidin poisto karboksyyliryhmästä, kuten pyruvaatista asetyyli-CoA:ksi.	Mitä dekarboksylaatio on?
+deleetio	2	Mutaatio, jossa DNA-jakso puuttuu. Kutsutaan myös: del-mutaatio, häviämä.	Mikä on deleetio?
+denaturointi	1	Rakenteen purku: DNA:n denaturointi kuumalla erottaa juosteet.
+dicer-entsyymi	2	RNaasi, joka pilkkoo kaksijuosteisen RNA:n pieniksi häiritseviksi RNA:iksi (siRNA, miRNA).	Mikä on Dicer-entsyymi?
+dna-lyaasi	1	DNA:ta katkaiseva lyaasi, korjausentsyymi.
+dna-polymeraasi	1	DNA:ta syntetisoiva entsyymi. Kutsutaan myös: DNA-pol.
+dnaa-proteiini	2	Bakteerin replikaation aloittaja, joka sitoutuu origoon ja avaa juosteet.	Mikä on DnaA-proteiini?
+dna-rihma	1	DNA-juoste tai -säie.
+dna-transposoni	2	Transposoni, joka siirtyy DNA:na leikkaa-liimaa-mekanismilla transposaasin avulla.	Mikä on DNA-transposoni?
+dodekaani	1	Kahdentoista hiilen alkaani C<sub>12</sub>H<sub>26</sub>.
+eksonukleaasi	2	Entsyymi, joka pilkkoo nukleotideja ketjun päästä. Oikoluku on 3'→5'-eksonukleaasiaktiivisuutta.	Mikä on eksonukleaasi?
+eksponentiaalinen	2	Kiihtyvästi kasvava: PCR monistaa eksponentiaalisesti, 2<sup>n</sup> kopiota n kierroksessa.	Mitä eksponentiaalinen tarkoittaa?
+eksportiini	2	Tumakuljetusreseptori, joka vie lastin tumasta solulimaan Ran-GTP:n kanssa.	Mikä on eksportiini?
+emäsmuutos	1	Yhden emäksen vaihtuminen toiseksi, pistemutaatio.
+endosymbiontti	1	Isäntäsolun sisällä elävä symbiontti, kuten mitokondrion esi-isä.
+erkaantua	1	Erota toisistaan: juosteet erkaantuvat kuumennettaessa.
+esivaihe	1	Valmisteleva vaihe ennen päävaihetta.
+etaanidioli	1	Etyleeniglykoli, kaksiarvoinen alkoholi, pakkasneste.
+etyleeni	2	Kaasumainen kasvihormoni C<sub>2</sub>H<sub>4</sub>, joka kypsyttää hedelmät.	Mikä on etyleeni?
+eukromatiini	2	Löyhä, aktiivisesti luettava kromatiini. Vastakohta: heterokromatiini.	Mikä on eukromatiini?
+fenoli	2	Bentseenirengas hydroksyylillä. Fenoliuutto erottaa DNA:n proteiineista.	Mikä on fenoli?
+formaldehydi	2	Metanaali HCHO, joka ristisitoo proteiinit DNA:han ja denaturoi RNA:n geelissä.	Mikä on formaldehydi?
+fosforylaasi	1	Entsyymi, joka katkaisee sidoksen fosfaatilla, kuten glykogeenifosforylaasi.
+galaktosidaasi	2	Laktoosin pilkkova entsyymi, lac-operonin lacZ-geenin tuote ja sinivalkoseulonnan reportteri. Kutsutaan myös: β-galaktosidaasi.	Mikä on galaktosidaasi?
+gc-pitoisuus	1	Guaniinin ja sytosiinin osuus DNA:sta, joka nostaa sulamislämpötilaa.
+gdp	1	Guanosiinidifosfaatti, GTP:n hydrolyysituote.
+geenimäärä	1	Geenien lukumäärä genomissa: ihmisellä noin 20 000.
+gradienttisentrifugointi	2	Sentrifugointi tiheysgradientissa (sakkaroosi tai CsCl), jossa hiukkaset asettuvat tiheyden mukaan.	Mikä on gradienttisentrifugointi?
+guaniininvaihtaja	2	Proteiini, joka vaihtaa G-proteiinin GDP:n GTP:ksi ja aktivoi sen, kuten RanGEF. Kutsutaan myös: GEF.	Mikä on guaniininvaihtaja?
+haavakohta	1	Kasvin vauriokohta, josta agrobakteeri tunkeutuu.
+happomuoto	1	Protonoitunut muoto: hapon happomuoto ja emäsmuoto.
+helikaasi	3	Entsyymi, joka avaa kaksoiskierteen ATP:n energialla replikaatiossa ja transkriptiossa.	Mikä on helikaasi?
+heterokromatiini	2	Tiivis, hiljennetty kromatiini, kuten sentromeerit ja inaktiivinen X-kromosomi.	Mikä on heterokromatiini?
+holliday-liitos	2	Neljän DNA-juosteen risteys homologisessa rekombinaatiossa, joka ratkaistaan katkaisemalla. Kutsutaan myös: Hollidayn liitos.	Mikä on Holliday-liitos?
+holoentsyymi	2	Täydellinen entsyymikompleksi kaikkine alayksiköineen, kuten RNA-polymeraasi sigmatekijän kanssa.	Mikä on holoentsyymi?
+homologinen	2	Yhteisestä alkuperästä peräisin ja samankaltainen: homologiset kromosomit, homologinen rekombinaatio.	Mitä homologinen tarkoittaa?
+hs-peroksidaasi	2	Piparjuuren peroksidaasi, entsyymileima, joka tuottaa värin tai valon substraatista. Kutsutaan myös: HRP.	Mikä on HS-peroksidaasi?
+hybridisaatio	3	Toisiaan täydentävien nukleiinihappojuosteiden pariutuminen, koettimen sitoutuminen kohteeseen.	Mikä on hybridisaatio?
+hydrogenointi	1	Vedyn liittäminen kaksoissidokseen, esimerkiksi rasvojen kovettaminen.
+hydrolaasi	1	Entsyymi, joka katkaisee sidoksen vedellä (vesikatkaisu).
+höyrysterilointi	1	Sterilointi kuumalla paineistetulla höyryllä autoklaavissa.
+ilmentymisplasmidi	2	Plasmidi, jossa insertti on promoottorin takana ja tuottaa proteiinia isännässä. Kutsutaan myös: ekspressiovektori, ilmentämisvektori.	Mikä on ilmentymisplasmidi?
+importiini	2	Tumakuljetusreseptori, joka tunnistaa tumakuljetussignaalin ja vie lastin tumaan.	Mikä on importiini?
+insertio	2	Mutaatio tai kloonaus, jossa DNA-jakso liitetään sisään. Kutsutaan myös: lisäys.	Mikä on insertio?
+insertti	2	Vektoriin liitetty vieras DNA-jakso.	Mikä on insertti?
+integraasi	2	Entsyymi, joka liittää viruksen tai transposonin DNA:n isännän genomiin.	Mikä on integraasi?
+interkalaatio	2	Tasomaisen molekyylin, kuten etidiumbromidin, tunkeutuminen emäsparien väliin.	Mitä interkalaatio on?
+inversio	2	Mutaatio, jossa DNA-jakso on kääntynyt päinvastaiseen suuntaan.	Mikä on inversio?
+irtautua	1	Erota kiinnityksestä: polymeraasi irtautuu DNA:sta.
+jakotaso	1	Solunjakautumisen taso, jonka mukaan tytärsolut erkanevat.
+johtoketju	2	Replikaatiossa jatkuvasti 5'→3' syntetisoituva juoste. Kutsutaan myös: johtava juoste.	Mikä on johtoketju?
+juosteenvaihtoproteiini	2	Rekombinaation proteiini (RecA, Rad51), joka ohjaa yksijuosteisen DNA:n pariutumaan homologisen jakson kanssa.	Mikä on juosteenvaihtoproteiini?
+kaksoisjuoste	1	Kaksi pariutunutta juostetta, DNA:n kaksoisketju.
+kaotrooppinen	2	Vetysidoksia rikkova aine, kuten guanidiini, joka denaturoi proteiinit ja sitoo DNA:n silikaan.	Mitä kaotrooppinen tarkoittaa?
+kaperoni	2	Proteiini, joka auttaa toisia laskostumaan oikein ja estää kasautumisen, kuten Hsp70.	Mikä on kaperoni?
+kasetti	1	Valmis DNA-jakso, kuten valintageeni promoottoreineen, joka liitetään vektoriin.
+kemiluminesoiva	1	Kemiallisessa reaktiossa valoa tuottava, kuten luminoli-substraatti.
+kemiosmoosi	2	ATP:n tuotto protonigradientin ajamana ATP-syntaasilla. Kutsutaan myös: kemiosmoottinen teoria.	Mikä on kemiosmoosi?
+keskusklorofylli	1	Fotosysteemin reaktiokeskuksen klorofyllipari.
+kitti	1	Valmis reagenssipakkaus määritykseen tai eristykseen.
+klenow	2	DNA-polymeraasi I:n fragmentti, jolta puuttuu 5'→3'-eksonukleaasi. Täyttää tarrapäät.	Mikä on Klenow-fragmentti?
+koentsyymi-a	1	Koentsyymi A, joka kantaa asyyliryhmiä tioesterinä.
+koetin	1	Leimattu nukleiinihappo, joka hybridisoituu kohteeseen.
+kohdespesifinen	1	Tiettyyn kohteeseen kohdistuva.
+kohesiini	2	Proteiinirengas, joka pitää sisarkromatidit yhdessä jakautumiseen asti.	Mikä on kohesiini?
+komplementaatio	2	Mutantin puutteen korjaaminen tuomalla toimiva geeni, kloonauksen seulontatapa.	Mitä komplementaatio on?
+konjugaatio	2	Bakteerien geenien siirto suoran soluyhteyden kautta plasmidilla.	Mitä konjugaatio on?
+koodiketju	1	Koodaava juoste.
+kuljetussignaalijakso	1	Proteiinin osoitesekvenssi, kuten tumakuljetussignaali.
+kuumakestoinen	1	Lämpöä kestävä, termostabiili.
+lacz	2	β-galaktosidaasin geeni, sinivalkoseulonnan reportteri: insertti katkaisee sen ja pesäke jää valkoiseksi.	Mikä on lacZ?
+lataaja	1	Proteiini, joka lataa toisen DNA:lle, kuten helikaasin lataaja.
+lb-alusta	1	Luria–Bertani-elatusaine, bakteerien yleinen kasvatusalusta.
+leikkauskohta	1	Restriktioentsyymin katkaisukohta.
+lopetusnukleotidi	1	Dideoksinukleotidi, joka päättää ketjun sekvensoinnissa.
+ltr	2	Retroviruksen ja retrotransposonin päiden pitkät toistojaksot, joissa promoottori sijaitsee.	Mikä on LTR?
+lukukehys	2	Kodonien luentatapa kolmen ryhmissä. Avoin lukukehys (ORF) koodaa proteiinin.	Mikä on lukukehys?
+luminoli	1	Kemiluminesenssin substraatti, joka hehkuu peroksidaasin katalysoimana.
+lyaasi	1	Entsyymi, joka katkaisee sidoksen ilman vettä tai hapetusta.
+lysogeeni	2	Bakteeri, joka kantaa profaagia genomissaan. Lysogeeninen sykli on faagin lepotila.	Mikä on lysogeeni?
+lyyttinen	2	Faagin sykli, jossa virus monistuu ja hajottaa isäntäsolun.	Mitä lyyttinen tarkoittaa?
+mcs	2	Vektorin monikatkaisualue, jossa on useita ainutkertaisia restriktiokohtia inserttiä varten. Kutsutaan myös: polylinkkeri.	Mikä on MCS?
+metanaali	1	Formaldehydi HCHO.
+metylointi	1	Metyyliryhmän liittäminen, metylaatio.
+mikrosatelliitti	2	Lyhyen jakson (2–6 emästä) toistoalue, jonka pituus vaihtelee yksilöittäin. DNA-tunnistuksen merkki.	Mikä on mikrosatelliitti?
+monikatkaisualue	1	Vektorin polylinkkeri, MCS.
+moninkertaistua	1	Kasvaa monikertaiseksi: kromosomisto moninkertaistuu polyploidiassa.
+monistusplasmidi	1	Plasmidi, jota käytetään DNA:n monistamiseen bakteerissa.
+mufa	1	Kertatyydyttymätön rasvahappo, jossa yksi kaksoissidos.
+muottiketju	1	Mallijuoste, templaatti.
+muuntelu	1	Vaihtelu perimässä, muuntelun lähde on mutaatio.
+nhej	2	Kaksoisjuostekatkoksen korjaus liittämällä päät suoraan ilman homologiaa. Virhealtis. Kutsutaan myös: ei-homologinen päidenliitos.	Mikä on NHEJ?
+nick-tekniikka	2	Leimaus, jossa DNA:han tehdään yksijuosteisia katkoksia ja polymeraasi korvaa nukleotidit leimatuilla. Kutsutaan myös: nick translation.	Mikä on nick-tekniikka?
+nls	2	Tumakuljetussignaali, emäksinen aminohappojakso, joka ohjaa proteiinin tumaan. Lyhenne sanoista nuclear localization signal.	Mikä on NLS?
+nylonkalvo	1	Blottauksen kalvo, johon DNA tai RNA siirretään.
+oksidatiivinen	1	Hapettava: oksidatiivinen fosforylaatio, oksidatiivinen stressi.
+operonirakenne	1	Geenien järjestys operonissa: promoottori, operaattori, rakennegeenit.
+opiini	2	Agrobakteerin kasvisolua tuottamaan pakottama ravintoyhdiste.	Mikä on opiini?
+orf	2	Avoin lukukehys: aloituskodonista lopetuskodoniin ulottuva jakso, joka voi koodata proteiinin.	Mikä on ORF?
+ori	2	Replikaation aloituskohta plasmidissa tai kromosomissa. Kutsutaan myös: origo.	Mikä on ori?
+palindromi	2	DNA-jakso, joka on sama molemmissa juosteissa 5'→3' luettuna, kuten GAATTC. Restriktiokohdat ovat palindromeja.	Mikä on palindromi?
+paperilevy	1	Suodatinpaperi, jolle pesäkkeet nostetaan.
+peptidisyntetaasi	1	Ei-ribosomaalinen entsyymi, joka kokoaa peptidejä ilman ribosomia.
+peruskromosomisto	1	Yksi täydellinen kromosomisarja, haploidi luku n.
+pintamateriaali	1	Pinnan aine, johon molekyyli sitoutuu, kuten silika tai nylon.
+piwi-proteiini	1	Argonautin sukulainen, joka hiljentää transposoneja sukusoluissa piRNA:n avulla.
+plastidi	2	Kasvisolun organelliperhe: viherhiukkaset, kromoplastit ja amyloplastit.	Mikä on plastidi?
+plektoneeminen	1	Kierteen päälle kiertynyt superkierre, kuten plasmidilla.
+polya-polymeraasi	1	Entsyymi, joka lisää poly(A)-hännän mRNA:han.
+polyploidi	2	Eliö, jolla on enemmän kuin kaksi kromosomistoa, kuten tetraploidi.	Mikä on polyploidi?
+presekvenssi	1	Mitokondrioon ohjaava N-pään signaalijakso.
+promoottori	1	Transkription aloituskohta, johon RNA-polymeraasi sitoutuu.
+proteasomi	2	Solun proteiinisilppuri, joka hajottaa ubikitiinilla merkityt proteiinit.	Mikä on proteasomi?
+pseudogeeni	2	Toimintakykynsä menettänyt geenin kopio genomissa.	Mikä on pseudogeeni?
+punalevä	1	Levä, josta agar ja agaroosi saadaan.
+pyrofosfataasi	1	Entsyymi, joka pilkkoo pyrofosfaatin ja tekee polymeroinnista peruuttamattoman.
+päätäyttötekniikka	1	Tarrapäiden täyttäminen polymeraasilla leimatuilla nukleotideilla.
+qpcr	2	Kvantitatiivinen PCR, jossa monistusta seurataan fluoresenssilla reaaliajassa ja lähtömäärä lasketaan.	Mikä on qPCR?
+ran	2	Pieni GTPaasi, jonka GTP/GDP-tila ohjaa tumakuljetuksen suunnan.	Mikä on Ran?
+rangap	1	Ranin GTPaasia aktivoiva proteiini solulimassa.
+ravintoalusta	1	Kasvatusalusta, elatusaine.
+rekombinanttiplasmidi	1	Plasmidi, johon vieras DNA on liitetty.
+reportteri	2	Geeni, jonka tuote on helppo havaita (GFP, lacZ, lusiferaasi) ja joka paljastaa säätelyalueen toiminnan. Kutsutaan myös: reportterigeeni.	Mikä on reportteri?
+repressoriproteiini	1	Transkriptiota estävä säätelyproteiini.
+resistenssi	2	Vastustuskyky antibiootille, jonka geeni toimii valintamarkkerina.	Mikä on resistenssi?
+resistenssigeeni	1	Antibioottiresistenssin antava geeni vektorissa.
+revetä	1	Katketa: DNA repeää voimasta.
+ribonukleaasi	1	RNA:ta pilkkova entsyymi, RNaasi.
+ribonukleoproteiini	1	RNA:n ja proteiinin kompleksi, kuten ribosomi tai splisosomi.
+rikkietanoli	1	Merkaptoetanoli.
+risc-kompleksi	2	RNA-interferenssin hiljennyskompleksi, jossa argonautti ja pieni RNA tunnistavat kohde-mRNA:n.	Mikä on RISC-kompleksi?
+ristisitoutua	1	Sitoutua kovalenttisesti toisiinsa: formaldehydi ristisitoo proteiinit DNA:han.
+rna-aluke	1	Primaasin tekemä lyhyt RNA, josta DNA-polymeraasi aloittaa.
+rna-polymeraasi	1	RNA:ta syntetisoiva entsyymi.
+sefaroosi	1	Ristisidottu agaroosi, kromatografian geelimateriaali.
+seinämä	1	Rakenteen reuna: soluseinä.
+sekundäärinen	1	Toissijainen, toinen: sekundäärinen rakenne.
+sentromeeri	2	Kromosomin kuroumakohta, johon sukkularihmat kiinnittyvät jakautumisessa.	Mikä on sentromeeri?
+seriinirekombinaasi	1	Rekombinaasi, jonka aktiivinen aminohappo on seriini.
+sirna	2	Pieni häiritsevä RNA, 21 nukleotidia, joka ohjaa RISCin katkaisemaan kohde-mRNA:n.	Mikä on siRNA?
+southern	2	Southern-blottaus: DNA siirretään geelistä kalvolle ja tunnistetaan koettimella.	Mikä on Southern-blottaus?
+splisosomi	2	Tuman RNA-proteiinikompleksi, joka poistaa intronit esi-mRNA:sta.	Mikä on splisosomi?
+srp-partikkeli	2	Signaalintunnistuspartikkeli, joka ohjaa ribosomin kalvostoon signaalipeptidin perusteella.	Mikä on SRP-partikkeli?
+stationäärinen	1	Tasannevaiheen: stationäärinen kasvuvaihe.
+subkloonaus	1	Insertin siirto vektorista toiseen.
+sukkulaplasmidi	2	Plasmidi, joka replikoituu kahdessa isännässä, kuten E. colissa ja hiivassa.	Mikä on sukkulaplasmidi?
+sukroosi	1	Sakkaroosi, ruokosokeri. Sukroosigradientti sentrifugoinnissa.
+surfaktantti	1	Pinta-aktiivinen aine, detergentti.
+sytokiniini	2	Kasvihormoni, joka edistää solunjakautumista. Agrobakteeri saa kasvisolun tuottamaan sitä.	Mikä on sytokiniini?
+sähköshokki	1	Sähköpulssi elektroporaatiossa.
+säteilyaktiivinen	1	Radioaktiivinen.
+t-dna	2	Ti-plasmidin jakso, jonka agrobakteeri siirtää kasvin genomiin. Kasvigeenitekniikan kuljetin.	Mikä on T-DNA?
+tata-jakso	2	Eukaryootin promoottorin TATA-laatikko noin 25 emästä ennen aloituskohtaa.	Mikä on TATA-jakso?
+telomeeri	2	Kromosomin pään toistojakso, joka suojaa päitä ja lyhenee jakautumisissa.	Mikä on telomeeri?
+telomeraasi	2	Entsyymi, joka pidentää telomeerejä oman RNA-mallinsa avulla. Aktiivinen kantasoluissa ja syövässä.	Mikä on telomeraasi?
+tetraploidi	1	Neljä kromosomistoa omaava.
+ti-plasmidi	2	Agrobakteerin kasvainta aiheuttava plasmidi, jonka T-DNA siirtyy kasviin.	Mikä on Ti-plasmidi?
+transferaasi	1	Entsyymi, joka siirtää ryhmän molekyylistä toiseen.
+transitiolämpötila	1	Lämpötila, jossa rakenne muuttuu, kuten DNA:n sulamislämpötila tai kalvon faasimuutos.
+transitpeptidi	1	Viherhiukkaseen ohjaava N-pään signaalijakso.
+translokaattoriproteiini	1	Kalvon proteiinikanava, jonka läpi polypeptidi siirtyy organelliin.
+transposaasi	2	Entsyymi, joka leikkaa transposonin irti ja liittää sen uuteen paikkaan.	Mikä on transposaasi?
+tumagenomi	1	Tuman kromosomien DNA, erotuksena mitokondrion ja plastidin genomeista.
+tumakuljetus	2	Proteiinien ja RNA:n siirto tumahuokosten läpi importiinien ja eksportiinien avulla.	Mitä tumakuljetus on?
+tumakuljetusreseptori	1	Importiini tai eksportiini.
+tumakuljetussignaali	1	NLS, tumaan ohjaava aminohappojakso.
+tunnistin	1	Tunnistava molekyyli tai anturi.
+tuplajuoste	1	Kaksoisjuoste.
+tymiininukleosidi	1	Tymidiini, tymiini + deoksiriboosi.
+tyrosiinirekombinaasi	1	Rekombinaasi, jonka aktiivinen aminohappo on tyrosiini, kuten Cre.
+tytärkromosomi	1	Replikaatiossa syntynyt kromosomin kopio.
+ubikitiini	2	Pieni proteiini, joka liitetään hajotettavaan proteiiniin merkiksi proteasomille.	Mikä on ubikitiini?
+ubikitinaatio	1	Ubikitiinin liittäminen proteiiniin.
+utr	2	Lähetti-RNA:n koodaamaton pää: 5'-UTR ennen aloituskodonia, 3'-UTR lopetuskodonin jälkeen.	Mikä on UTR?
+valintageeni	1	Valintamarkkeri.
+vastinketju	1	Vastinjuoste.
+vastinkodoni	1	Antikodoni.
+vedynsiirtäjä	1	Elektroneja ja protoneja siirtävä koentsyymi, kuten NADH.
+viiveketju	2	Replikaatiossa paloittain Okazakin fragmentteina syntetisoituva juoste. Kutsutaan myös: jälkijuoste.	Mikä on viiveketju?
+vir-alue	1	Ti-plasmidin virulenssigeenit, jotka siirtävät T-DNA:n.
+viruskonsentraatio	1	Viruspartikkelien pitoisuus, tiitteri.
+virustiitteri	1	Infektiokykyisten virusten määrä tilavuudessa.
+vähennysjako	1	Meioosi, kromosomiluvun puolittava jakautuminen.
+xist-rna	2	Pitkä ei-koodaava RNA, joka hiljentää toisen X-kromosomin naaraan soluissa.	Mikä on Xist-RNA?
+x-kromosomi	1	Sukupuolikromosomi, naaraalla kaksi, koiraalla yksi.
+yac-vektori	2	Hiivan keinotekoinen kromosomi, joka kantaa satoja kiloemäspareja.	Mikä on YAC-vektori?
+yksijuosteinen	1	Yhdestä juosteesta koostuva.
+ylipitkä	1	Tavallista pidempi: ylipitkä telomeeri.

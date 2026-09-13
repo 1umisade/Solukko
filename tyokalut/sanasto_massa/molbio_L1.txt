@@ -1,0 +1,20 @@
+# Molekyylibiologia - teoria, Luento 1 - massakierros
+cesiumkloridi	2	Raskas suola CsCl, jonka tiheysgradientissa DNA erotellaan ultrasentrifugoimalla.	Mikä on cesiumkloridi?
+cesiumkloridisentrifugointi	2	DNA:n puhdistus tiheysgradientissa: DNA asettuu CsCl-liuoksessa omalle tiheystasolleen. Kutsutaan myös: tiheysgradienttisentrifugointi.	Mikä on cesiumkloridisentrifugointi?
+digestio	2	DNA:n pilkkominen restriktioentsyymillä. Kutsutaan myös: restriktiodigestio.	Mikä on digestio?
+eristys	1	Aineen erottaminen puhtaaksi: DNA:n eristys, proteiinin eristys.
+esiintyvyys	1	Yleisyys, kuinka usein jotakin tavataan.
+etidiumbromidi	2	DNA:n väliin tunkeutuva väriaine, joka fluoresoi UV-valossa ja paljastaa DNA:n geelissä.	Mikä on etidiumbromidi?
+formamidi	2	Metaanihapon amidi HCONH<sub>2</sub>, joka alentaa DNA:n sulamislämpötilaa ja denaturoi sen. Kutsutaan myös: metaaniamidi.	Mikä on formamidi?
+laktamaasi	2	Bakteerin entsyymi, joka pilkkoo penisilliinin beetalaktaamirenkaan ja antaa resistenssin. Kutsutaan myös: beetalaktamaasi.	Mikä on laktamaasi?
+lambda-faagi	2	E. colin bakteriofagi λ, jonka 48 kb:n genomi on kloonausvektorien ja geenisäätelyn klassinen malli.	Mikä on lambda-faagi?
+lenkki	1	Silmukka: DNA:n lenkki, RNA:n hiusneulalenkki.
+leusiini	2	Haaraketjuinen hydrofobinen aminohappo. Lyhenne Leu, L. Leusiinigeeni on hiivan valintamarkkeri.	Mikä on leusiini?
+merkaptoetanoli	2	Tioli, joka pelkistää rikkisillat ja suojaa proteiineja hapettumiselta. Kutsutaan myös: β-merkaptoetanoli.	Mikä on merkaptoetanoli?
+mikrobipesäke	1	Yhdestä solusta kasvanut näkyvä mikrobirykelmä maljalla. Kutsutaan myös: pesäke.
+pesäke-pcr	2	PCR suoraan bakteeripesäkkeestä ilman DNA:n eristystä, kloonien seulontaan. Kutsutaan myös: colony-PCR.	Mikä on pesäke-PCR?
+retrotransposoni	2	Liikkuva DNA-jakso, joka kopioituu RNA:n ja käänteiskopioinnin kautta uuteen paikkaan genomissa.	Mikä on retrotransposoni?
+sentrifugi	2	Laite, joka erottaa hiukkaset pyörittämällä näytettä suurella nopeudella. Kutsutaan myös: linko.	Mikä on sentrifugi?
+superkierteinen	2	Kiertynyt kaksoiskierteen päälle: rengasmainen plasmidi on superkierteinen ja kulkee geelissä nopeasti.	Mitä superkierteinen tarkoittaa?
+uuttaa	2	Erottaa aine liuottimella: DNA uutetaan fenolilla proteiineista.	Mitä uuttaminen tarkoittaa?
+valintamarkkeri	2	Geeni, jolla muokatut solut valitaan, kuten antibioottiresistenssi tai ravinteen synteesigeeni. Kutsutaan myös: valintageeni.	Mikä on valintamarkkeri?
