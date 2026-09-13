@@ -5588,7 +5588,7 @@ function _applyAnswerMode(anim){   // swap the answer text + the middle button i
   const _nappi=()=>{                                  // both directions behind a button, like the word-link tooltip
     const b=document.createElement('button');
     b.type='button'; b.className='answer-expand';
-    b.textContent=(_answerMode==='suppea')?'Laajenna':'Pienennä';
+    b.textContent=(_answerMode==='suppea')?'Laajenna':'Supista';
     b.addEventListener('click',e=>{ e.stopPropagation(); toggleAnswerMode(); });   // don't let the card's own click handler shake it
     return b;
   };
@@ -5629,7 +5629,7 @@ function _applyAnswerMode(anim){   // swap the answer text + the middle button i
   const tkb=document.querySelector('#tarkista-btn .tk-back'); if(tkb) tkb.src='tyhja.png';
   // Mona's bubble: on the Suppea side she points to the Laaja answer (and its length); on the Laaja side just its length
   { const _w=_wordCountOfHtml(currentCard._laajaHtml);
-    const _cnt=_w?(' Laajemman vastauksen pituus '+_sanamaara(_w)+' sanaa.'):'';
+    const _cnt=_w?(' Laajan vastauksen pituus '+_sanamaara(_w)+' sanaa.'):'';
     _scopeText=(_answerMode==='suppea')
       ? _cnt.trim()                                     // the button says what to do; Mona just gives the length   // "uudestaan" only if they got here with the space bar
       : 'Jos valitset <b>"En tiennyt"</b>, kysyn sitä 5 min kuluttua uudestaan.';   // the long answer is on screen, so no word count — just what grading does
@@ -7284,7 +7284,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
   function lapsiTip(L){ if(!lapset[L]){ const d=document.createElement('div'); d.className='wl-lapsi'; d.style.zIndex=String(100000+L); d.style.display='none'; tip.parentElement.appendChild(d); lapset[L]=d;
       d.addEventListener('click', e=>{ const b=e.target.closest('.wl-expand'); if(!b||!(d._laaja&&d._suppea)) return; e.stopPropagation();
         const body=d.querySelector('.wl-body'); if(!body) return; const laajenee=(b.textContent.trim()==='Laajenna');
-        body.innerHTML=laajenee?d._laaja:d._suppea; dimParentheses(body); linkitaTip(d, d._card); b.textContent=laajenee?'Pienennä':'Laajenna'; d._lukittu=true; placeTip(d._target,true,d); });
+        body.innerHTML=laajenee?d._laaja:d._suppea; dimParentheses(body); linkitaTip(d, d._card); b.textContent=laajenee?'Supista':'Laajenna'; d._lukittu=true; placeTip(d._target,true,d); });
       d.addEventListener('scroll',()=>{}); }
     return lapset[L]; }
   function tasoOf(el){ if(!el) return -1; if(tip.contains(el)) return 0; for(let i=0;i<lapset.length;i++) if(lapset[i]&&lapset[i].contains(el)) return i+1; return -1; }   // -1 = the card, 0 = the main popup, k = lapset[k-1]
@@ -7375,7 +7375,7 @@ function flashWordLinkBubbles(){   // when a card/answer loads (or the card is s
     const laajenee=(b.textContent.trim()==='Laajenna');
     const vanhaK=body.getBoundingClientRect().height;
     body.style.height=''; body.innerHTML=laajenee?_tipLaaja:_tipSuppea; dimParentheses(tip); linkitaTip(tip, _tipTarget&&_wlCards[parseInt(_tipTarget.dataset.cardIndex)]);
-    b.textContent=laajenee?'Pienennä':'Laajenna';
+    b.textContent=laajenee?'Supista':'Laajenna';
     const uusiK=body.getBoundingClientRect().height;
     _tipLukittu=true;
     if(_tipTarget) placeTip(_tipTarget,true);            // clamp against the FINAL height, before the box starts moving

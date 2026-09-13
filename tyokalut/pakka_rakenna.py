@@ -75,8 +75,8 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
         num = str(max([int(k) for k in mediamap] + [-1]) + 1)
         shutil.copyfile(os.path.join(KUVAT, fn), os.path.join(work, num)); mediamap[num] = fn
     kaikki_nid = {}
-    # Arkisanat (omistaja 13.9.2026): k['arki'] -> kortti menee piilotettuun SOLUKKO::Arkisanat-pakkaan ja saa tagin 'arkisana',
-    # guid ja numero pysyvat luennon mukaisina, joten Ankissa riittaa 'tag:arkisana' -> Change Deck. Sivusto nayttaa pakan vain devissa.
+    # Arkisanat (omistaja 13.9.2026): k['arki'] -> kortti menee piilotettuun SOLUKKO::Arkisanat-pakkaan (ei tagia, omistaja 13.9.2026),
+    # guid ja numero pysyvat luennon mukaisina. Sivusto nayttaa pakan vain devissa.
     ARKI = 'SOLUKKO::Arkisanat'; arki_did = [None]
     def arki_deck():
         if arki_did[0] is None:
@@ -117,12 +117,12 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
                 nid = row[0]
                 if row[1] != SEP.join(fields):
                     cur.execute("update notes set flds=?, sfld=?, csum=?, mod=?, usn=-1 where id=?", (SEP.join(fields), sfld, csum, now, nid)); paivitetyt += 1
-                kdid = arki_deck() if k.get('arki') else did; ktag = ' arkisana ' if k.get('arki') else ''
+                kdid = arki_deck() if k.get('arki') else did; ktag = ''
                 if cur.execute("select did from cards where nid=?", (nid,)).fetchone()[0] != kdid or cur.execute("select tags from notes where id=?", (nid,)).fetchone()[0] != ktag:
                     cur.execute("update cards set did=?, mod=?, usn=-1 where nid=?", (kdid, now, nid)); cur.execute("update notes set tags=?, mod=?, usn=-1 where id=?", (ktag, now, nid)); paivitetyt += 1
             else:
                 nid = seuraava[0]; seuraava[0] += 2
-                kdid = arki_deck() if k.get('arki') else did; ktag = ' arkisana ' if k.get('arki') else ''
+                kdid = arki_deck() if k.get('arki') else did; ktag = ''
                 cur.execute("insert into notes values (?,?,?,?,?,?,?,?,?,?,?)", (nid, guid, MID, now, -1, ktag, SEP.join(fields), sfld, csum, 0, ''))
                 cur.execute("insert into cards values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (nid + 1, nid, kdid, 0, now, -1, 0, 0, ALKU + i + 1, 0, 0, 0, 0, 0, 0, 0, 0, ''))
                 uudet += 1
