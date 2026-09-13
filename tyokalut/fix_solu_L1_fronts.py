@@ -52,7 +52,7 @@ Q={  # bare term -> natural Finnish question
 "korkeaenerginen yhdiste":"Mikä on korkeaenerginen yhdiste?","ATP":"Mikä on ATP?","ADP":"Mikä on ADP?","NADH":"Mikä on NADH?",
 "katabolia":"Mitä katabolia tarkoittaa?","anabolia":"Mitä anabolia tarkoittaa?","metabolia":"Mitä metabolia tarkoittaa?",
 "reaktiotie":"Mikä on reaktiotie?","laktaatti":"Mikä on laktaatti?","pyruvaatti":"Mikä on pyruvaatti?",
-"laktaattidehydrogenaasi":"Mikä on laktaattidehydrogenaasi?","hapetusluku":"Mitä hapetusluku tarkoittaa?",
+"laktaattidehydrogenaasi":"Mikä on laktaattidehydrogenaasi?","elektronoitumisaste":"Mitä elektronoitumisaste tarkoittaa?",
 "komplementaarisuus":"Mitä komplementaarisuus tarkoittaa?","mutaatio":"Mikä on mutaatio?",
 "duplikaatio":"Mitä duplikaatio tarkoittaa?","luonnonvalinta":"Mitä luonnonvalinta tarkoittaa?",
 "evoluutio":"Mitä on evoluutio?","erilaistuminen":"Mitä erilaistuminen tarkoittaa?",

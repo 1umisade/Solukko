@@ -21,7 +21,9 @@ POISTA_KORTIT = ['(3.107) Mikä on kromosomi?',
                  '(2.034) Mikä on lähetti-RNA-rokote?',
                  '(32.034) Mikä on valenssielektroni?',
                  '(1.997) Mikä on ulkoelektroni?',
-                 '(1.514) Mikä on gram-negatiivinen bakteeri?', '(1.705) Mikä on malliorganismi?']   # massakierroksen kaksoiskortit omistajan korteille   # ulkoelektroni on pintaelektroni-kortin linkkisana   # nimetty pintaelektroniksi (omistaja 13.9.2026)   # biotek L2:n kaksoiskortti omistajan L1-kortille, nimetty uudelleen nukleiinihapporokotteeksi 12.9.2026
+                 '(1.514) Mikä on gram-negatiivinen bakteeri?', '(1.705) Mikä on malliorganismi?',
+                 '(1.518) Mikä on hapetusaste?', '(22.128) Mikä on roomalainen numero hapetusluvun merkintänä?',
+                 '(22.012) Miten nimetään metallin yhdiste, kun metallilla on useita hapetuslukuja?']   # elektronoitumisaste (omistaja 13.9.2026): 1.518 on omistajan 1.188-kortin kaksoiskappale, 22.128 nimetty uudelleen   # massakierroksen kaksoiskortit omistajan korteille   # ulkoelektroni on pintaelektroni-kortin linkkisana   # nimetty pintaelektroniksi (omistaja 13.9.2026)   # biotek L2:n kaksoiskortti omistajan L1-kortille, nimetty uudelleen nukleiinihapporokotteeksi 12.9.2026
 # luentopakan oma Esittely (vain kurssipakalla saa olla, kurssit/CLAUDE.md §6): tuli takaisin vanhasta Vesikatkaisu-korjaus.apkg:sta
 POISTA_ESITTELY_PAKAT = ['Luento 2 - Vesi']
 

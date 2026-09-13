@@ -40,7 +40,7 @@ asetyylikoentsyymi	2	Asetyyli-CoA: koentsyymi A:n kantama kahden hiilen asetyyli
 askel	1	Yksi vaihe reaktiosarjassa tai kehityksessä: glykolyysin kymmenen askelta.
 asparagiini	2	Poolinen aminohappo, jonka sivuketjussa on amidiryhmä. Lyhenne Asn, N. Sokeroinnin kiinnityskohta.	Mikä on asparagiini?
 aspartaami	2	Makeutusaine, aspartaatin ja fenyylialaniinin metyyliesteröity dipeptidi. 200 kertaa sokeria makeampi.	Mikä on aspartaami?
-aste	1	Mitta-asteikon yksikkö tai vaihe: lämpötila asteina, hapetusaste, kehitysaste.
+aste	1	Mitta-asteikon yksikkö tai vaihe: lämpötila asteina, elektronoitumisaste, kehitysaste.
 asyyliryhmä	2	Karboksyylihaposta hydroksyylin poistamalla saatava ryhmä R–C=O, kuten asetyyli tai rasvahapon asyyli.	Mikä on asyyliryhmä?
 atomiluku	1	Alkuaineen protonien määrä, sama kuin järjestysluku.	Mikä on atomiluku?
 atomiryhmä	1	Toisiinsa sitoutuneiden atomien joukko, joka toimii molekyylissä yksikkönä, kuten funktionaalinen ryhmä.
@@ -103,7 +103,7 @@ haara	1	Ketjusta erkaneva sivuketju, kuten glykogeenin haarat tai haaraketjuinen
 haitallinen	1	Vahingoittava: haitallinen mutaatio tai aineenvaihduntatuote.
 hapan	2	Happamuus: liuos, jonka pH on alle 7, tai aminohappo, jonka sivuketju on karboksyylihappo.
 hapellinen	2	Happea sisältävä ympäristö, aerobinen. Hapellisissa oloissa soluhengitys tuottaa eniten energiaa.
-hapetusaste	2	Atomin muodollinen varaus yhdisteessä. Hiilen hapetusaste nousee metaanista hiilidioksidiin. Kutsutaan myös: hapetusluku.	Mikä on hapetusaste?
+-	poistettu 13.9.2026: elektronoitumisaste määritellään omistajan kortissa (1.188), vanha nimi on sen linkkisana
 happimolekyyli	2	Kaksiatominen O<sub>2</sub>, ilman happi, soluhengityksen lopullinen elektronin vastaanottaja.	Mikä on happimolekyyli?
 happoemäskatalyytti	2	Katalyytti, joka luovuttaa tai ottaa protonin reaktion välivaiheessa. Entsyymien aktiivisen kohdan yleinen mekanismi. Kutsutaan myös: happo-emäskatalyysi.	Mikä on happo-emäskatalyytti?
 happoryhmä	2	Protonin luovuttava ryhmä, tavallisesti karboksyyliryhmä –COOH tai fosfaatti.	Mikä on happoryhmä?
@@ -293,7 +293,7 @@ menestyä	1	Selviytyä ja lisääntyä: parhaiten sopeutuneet menestyvät.
 menettää	1	Kadottaa: proteiini menettää rakenteensa denaturaatiossa, atomi elektronin hapettuessa.
 meri	1	Suolainen valtameri, jossa elämä syntyi ja jossa suurin osa siitä yhä elää.
 meripohja	1	Meren pohja. Kuumat lähteet meren pohjassa ovat elämän synnyn ehdokaspaikkoja.
-merkintä	1	Sovittu merkitsemistapa: alkuainemerkintä, aminohapon lyhenne, hapetusluvun merkintä.
+merkintä	1	Sovittu merkitsemistapa: alkuainemerkintä, aminohapon lyhenne, elektronoitumisasteen merkintä.
 metaanitioli	2	CH<sub>3</sub>SH, yksinkertaisin tioli, rikkivastine metanolille. Metioniinin ja kysteiinin ryhmien malli.	Mikä on metaanitioli?
 metyyliamiini	2	CH<sub>3</sub>NH<sub>2</sub>, yksinkertaisin amiini, aminoryhmän malli. Protonoituu metyyliammoniumioniksi.	Mikä on metyyliamiini?
 metyyliammonium	2	Metyyliamiinin protonoitunut muoto CH<sub>3</sub>NH<sub>3</sub><sup>+</sup>, aminoryhmän tila solun pH:ssa. Kutsutaan myös: metyyliammoniumioni.	Mikä on metyyliammoniumioni?

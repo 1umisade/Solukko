@@ -130,7 +130,7 @@ solu	Mikä on reaktiotie?	2
 solu	Mikä on laktaatti?	1
 solu	Mikä on pyruvaatti?	2
 solu	Mikä on laktaattidehydrogenaasi?	1
-solu	Mitä hapetusluku tarkoittaa?	2
+solu	Mitä elektronoitumisaste tarkoittaa?	2
 solu	Mitä komplementaarisuus tarkoittaa?	3
 solu	Mikä on mutaatio?	3
 solu	Mitä duplikaatio tarkoittaa?	2
@@ -214,7 +214,7 @@ solu	Mitkä ovat solun rakenteen hierarkiatasot monomeereista alkaen?	3
 solu	Miten ATP saa aikaan reaktion, joka ei muuten tapahtuisi itsestään?	2
 solu	Millainen on ATP:n rakenne, ja millä kahdella tavalla se voi hajota?	2
 solu	Miten katalyytti nopeuttaa reaktiota muuttamatta sen lopputulosta?	3
-solu	Missä järjestyksessä hiiliyhdiste hapettuu, ja miten hiilen hapetusluku muuttuu?	2
+solu	Missä järjestyksessä hiiliyhdiste hapettuu, ja miten hiilen elektronoitumisaste muuttuu?	2
 solu	Mistä kataboliset reaktiotiet alkavat ja mihin anaboliset päätyvät?	2
 solu	Mistä juosteista DNA:n kahdentumisessa syntyneet kaksoiskierteet koostuvat?	2
 solu	Miksi geenin kahdentuminen on usein edellytys uuden toiminnon syntymiselle?	2

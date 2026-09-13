@@ -182,9 +182,9 @@ TAHDET: 3
 ---
 TIEDOSTO: solu_s113_593596.png
 KURSSI: solu
-KYSYMYS: Missä järjestyksessä hiiliyhdiste hapettuu, ja miten hiilen hapetusluku muuttuu?
-SUPPEA: Alkaani, alkoholi, aldehydi, karboksyylihappo ja hiilidioksidi; hapetusluku kasvaa -3:sta +4:ään.
-LAAJA: Kuvassa sama hiili on esitetty viidessä eri hapetusasteessa punaisella korostettuna. Ylimpänä on alkaani, jossa hiileen on sitoutunut pelkkiä vetyjä. Siitä edetään alkoholiin, aldehydiin ja karboksyylihappoon, kun hiileen tulee yhä enemmän happea ja yhä vähemmän vetyä. Lopuksi hiili on täysin hapettunut hiilidioksidiksi. Jokaisessa askeleessa hiili luovuttaa elektroneja, joten sarjan alkupäässä on eniten energiaa otettavana talteen.
+KYSYMYS: Missä järjestyksessä hiiliyhdiste hapettuu, ja miten hiilen elektronoitumisaste muuttuu?
+SUPPEA: Alkaani, alkoholi, aldehydi, karboksyylihappo ja hiilidioksidi; elektronoitumisaste kasvaa -3:sta +4:ään.
+LAAJA: Kuvassa sama hiili on esitetty viidessä eri elektronoitumisasteessa punaisella korostettuna. Ylimpänä on alkaani, jossa hiileen on sitoutunut pelkkiä vetyjä. Siitä edetään alkoholiin, aldehydiin ja karboksyylihappoon, kun hiileen tulee yhä enemmän happea ja yhä vähemmän vetyä. Lopuksi hiili on täysin hapettunut hiilidioksidiksi. Jokaisessa askeleessa hiili luovuttaa elektroneja, joten sarjan alkupäässä on eniten energiaa otettavana talteen.
 TAHDET: 2
 ---
 TIEDOSTO: solu_s115_b69e44.png

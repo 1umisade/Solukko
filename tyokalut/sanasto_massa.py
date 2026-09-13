@@ -6,7 +6,7 @@ Lahde: SOLUKKO.apkg:n korttitekstit lemmatisoitiin (uralicNLP, fin), ja sanat jo
 pakoittain ensiesiintymisen mukaan. Maaritelmat ovat tekstitiedostoissa sanasto_massa/<avain>.txt, rivi per sana:
     lemma <TAB> tt <TAB> suppea [<TAB> kysymys]
 Kysymys oletuksena "Mitä <lemma> tarkoittaa?". Linkkisanat = korteissa esiintyneet taivutusmuodot (sanasto_muodot.json)
-+ biotek_taivutus.L:n muodot, joista suodatetaan pois muualla jo katetut. Tyhjat rivit ja #-rivit ohitetaan."""
++ biotek_taivutus.L:n muodot, joista suodatetaan pois muualla jo katetut. Tyhjat rivit ja #-rivit ohitetaan; rivi '-<TAB>syy' varaa numeron ilman korttia."""
 import os, io, json
 from biotek_taivutus import taiv
 from pakka_rakenna import K
@@ -40,13 +40,14 @@ def _rivit(avain):
         rivi = rivi.rstrip('\n')
         if not rivi.strip() or rivi.startswith('#'): continue
         osat = rivi.split('\t')
+        if osat[0].strip() == '-': out.append(None); continue   # poistettu rivi: numero varataan, korttia ei tehda (kuten None KORTIT-listassa)
         out.append((osat[0].strip(), int(osat[1]), osat[2].strip(), osat[3].strip() if len(osat) > 3 and osat[3].strip() else ''))
     return out
 
 _KORTIT = {}
 for _a in JARJESTYS:
-    _KORTIT[_a] = [(lemma, tt, suppea, kys or 'Mitä %s tarkoittaa?' % lemma, _linkkisanat(lemma)) for lemma, tt, suppea, kys in _rivit(_a)]
+    _KORTIT[_a] = [r and (r[0], r[1], r[2], r[3] or 'Mitä %s tarkoittaa?' % r[0], _linkkisanat(r[0])) for r in _rivit(_a)]
 
 ARKI = set(w.strip() for w in io.open(os.path.join(SC, 'sanasto_massa', 'arkisanat.txt'), encoding='utf-8') if w.strip() and not w.startswith('#'))
 def kortit(avain):   # arkisanat saavat arki-lipun: rakentaja vie ne SOLUKKO::Arkisanat-pakkaan (sama guid ja numero)
-    return [K(kys, suppea, '', tt, ls, arki=(lemma in ARKI)) for lemma, tt, suppea, kys, ls in _KORTIT.get(avain, [])]
+    return [r and K(r[3], r[2], '', r[1], r[4], arki=(r[0] in ARKI)) for r in _KORTIT.get(avain, [])]
