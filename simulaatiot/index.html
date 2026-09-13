@@ -163,6 +163,14 @@ html.nopills #toplist, html.nopills #scorebox, html.nopills #timerbox{display:no
 #memcut-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--brown)}
 #memcut-btn.on{background:var(--sage);color:var(--sageink);box-shadow:0 0 0 3px var(--sage2),0 4px 0 var(--brown)}
 #memcut-icon{font-size:15px;line-height:1}
+#xsec-btn{position:absolute;left:16px;top:348px;z-index:12;touch-action:manipulation;
+  font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
+  color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;
+  box-shadow:0 4px 0 var(--brown);padding:8px 16px;display:inline-flex;align-items:center;gap:7px;
+  line-height:1;user-select:none;-webkit-user-select:none;transition:transform .1s ease,box-shadow .1s ease}
+#xsec-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--brown)}
+#xsec-btn.on{background:var(--sage);color:var(--sageink);box-shadow:0 0 0 3px var(--sage2),0 4px 0 var(--brown)}
+#xsec-icon{font-size:15px;line-height:1}
 #memonly-btn{position:absolute;left:16px;top:396px;z-index:12;touch-action:manipulation;
   font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;
@@ -339,6 +347,7 @@ html.kortti body > *:not(#c){display:none !important} html.kortti #c{position:fi
 <button id="dev-btn" title="Dev-tila: mallien siirto/kierto-työkalu + sijaintimerkinnät"><span id="dev-icon">🛠️</span><span id="dev-label">Dev</span></button>
 <button id="lantern-btn" title="Lyhty: pimennä kaikki paitsi valoreaktioiden elektronit - veden halkaisusta kantajien kautta FNR:ään"><span id="lantern-icon">🏮</span><span id="lantern-label">Lyhty</span></button>
 <button id="memcut-btn" title="Piilota kameran ja hiukkastason välinen kalvon puolisko yhteyttämiskalvoston laatikossa (näe tasolle)"><span id="memcut-icon">◧</span><span id="memcut-label">Puolikas</span></button>
+<button id="xsec-btn" title="Poikkileikkaus: koko solu soluelimineen halkaistaan keskeltä, aloitusnäkymän puoleinen puolisko jätetään piirtämättä"><span id="xsec-icon">◫</span><span id="xsec-label">Poikkileikkaus</span></button>
 <button id="pad-btn" title="Näytä tai piilota ohjainkuva"><span id="pad-icon">🎮</span><span id="pad-label">Ohjain</span></button>
 <button id="slab-btn" title="Kaukotason laatta: pois = kalvot piirretään lipideinä niin kauas kuin puskurit riittävät (kaksinkertainen matka), kaukokuoret piilotetaan"><span id="slab-icon">▦</span><span id="slab-label">Laatta</span></button>
 <button id="outline-btn" title="Piilota mustat ja vihreät ääriviivat"><span id="outline-icon">✒️</span><span id="outline-label">Reunat</span></button>
@@ -1143,6 +1152,11 @@ BABYLON.Effect.ShadersStore['impFragmentShader'] = `
 #extension GL_EXT_frag_depth : enable
 #extension GL_OES_standard_derivatives : enable
 precision highp float;
+uniform float isoLo;       // the isolated model's extra transform slots (the LHC pieces), isoLo..isoHi (-1..-2 = none)
+uniform float isoHi;
+uniform float selLo;       // the same for the selected model's tint
+uniform float selHi;
+uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - an atom on its positive side is not drawn (0,0,0,-1 = off)
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform mat4 projection;
 uniform float uT;
@@ -1274,8 +1288,9 @@ varying vec3 vWB1;
 varying vec3 vWB2;
 uniform float boil;      // line-boil amount (0 = off) → warps the silhouette, object-locked
 void main(void){
+  if(dot(cutPlane.xyz, vWCen) + cutPlane.w > 0.0) discard;      // POIKKILEIKKAUS: the removed half of the cell
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
   if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
 #endif
@@ -1351,7 +1366,7 @@ void main(void){
   colF *= mix(1.0, depthLo, dtF * depthK);
 #endif
 #ifdef MODELMOVE
-  if(selModel >= 0.0 && abs(vMid - selModel) < 0.5) colF = mix(colF, selCol, 0.35);   // keep selection readable
+  if(selModel >= 0.0 && (abs(vMid - selModel) < 0.5 || (vMid >= selLo && vMid <= selHi))) colF = mix(colF, selCol, 0.35);   // keep selection readable
 #endif
   float fogF = clamp((fogEnd - vCenterV.z) / (fogEnd - fogStart), 0.0, 1.0);
 #ifdef PLIGHT
@@ -1510,7 +1525,7 @@ void main(void){
   // Selected complex → repaint each of its atoms' rims sage. Every atom is outlined, so the shape
   // the eye picks up is the OUTER contour of the whole protein (interior rims are hidden behind the
   // atoms in front of them) — an outline, not the filled silhouette a highlight layer would give.
-  if(selModel >= 0.0 && abs(vMid - selModel) < 0.5)
+  if(selModel >= 0.0 && (abs(vMid - selModel) < 0.5 || (vMid >= selLo && vMid <= selHi)))
     col = mix(col, selCol, smoothstep(0.55, 1.0, r2) * 0.95);
 #ifdef OUTLINEONLY
   if(rim < 0.30) discard;                 // keep ONLY the outline ring — the fill is dropped
@@ -1882,6 +1897,11 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['bondFragmentShader'] = `
 precision highp float;
+uniform float isoLo;       // the isolated model's extra transform slots (the LHC pieces), isoLo..isoHi (-1..-2 = none)
+uniform float isoHi;
+uniform float selLo;       // the same for the selected model's tint
+uniform float selHi;
+uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform float opacity;
@@ -2002,8 +2022,9 @@ void electrons(inout vec3 c, float ne, float bri){
   c += vec3(0.72, 0.86, 1.0) * core * 0.5 * bri;   // small soft highlight at the very centre
 }
 void main(void){
+  if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
   if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
 #endif
@@ -2022,7 +2043,7 @@ void main(void){
   // two shapes — the crevice between them stays visible (and the painterly pass inks it).
   float fres = 1.0 - max(dot(N, normalize(-vViewPos)), 0.0);
   c *= 1.0 - 0.55 * pow(fres, 2.5);   // gentle silhouette darkening (restored — no thick rim)
-  if(selModel >= 0.0 && abs(vMid - selModel) < 0.5)
+  if(selModel >= 0.0 && (abs(vMid - selModel) < 0.5 || (vMid >= selLo && vMid <= selHi)))
     c = mix(c, selCol, smoothstep(0.45, 0.95, fres) * 0.95);   // sage rim on the selected complex's lobes
   float efac = (focusId >= 0.0 && vSel > 0.5 && abs(vOid - focusId) > 0.5) ? 0.05 : 1.0;   // isolate an orbital → others' electrons dim to  5%
   if(efac < 0.5) alpha *= 0.3;   // and the others' lobes go 70 percent transparent (owner, 2026-09-10)
@@ -2260,6 +2281,11 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['orbFragmentShader'] = `
 precision highp float;
+uniform float isoLo;       // the isolated model's extra transform slots (the LHC pieces), isoLo..isoHi (-1..-2 = none)
+uniform float isoHi;
+uniform float selLo;       // the same for the selected model's tint
+uniform float selHi;
+uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform vec3 fogColor;
@@ -2384,8 +2410,9 @@ void electrons(inout vec3 c, float ne, float bri){
   c += vec3(0.72, 0.86, 1.0) * core * 0.5 * bri;   // small soft highlight at the very centre
 }
 void main(void){
+  if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
   if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
 #endif
@@ -2410,7 +2437,7 @@ void main(void){
   // two shapes — the crevice between them stays visible (and the painterly pass inks it).
   float fres = 1.0 - max(dot(N, normalize(-vViewPos)), 0.0);
   c *= 1.0 - 0.55 * pow(fres, 2.5);   // gentle silhouette darkening (restored — no thick rim)
-  if(selModel >= 0.0 && abs(vMid - selModel) < 0.5)
+  if(selModel >= 0.0 && (abs(vMid - selModel) < 0.5 || (vMid >= selLo && vMid <= selHi)))
     c = mix(c, selCol, smoothstep(0.45, 0.95, fres) * 0.95);   // sage rim on the selected complex's lobes
   float ne = (vCol.r > 0.82 && vCol.g > 0.82 && vCol.b > 0.82) ? 1.0 : nElec;   // hydrogen 1s holds a single electron
   float efac = (focusId >= 0.0 && vSel > 0.5 && abs(vOid - focusId) > 0.5) ? 0.05 : 1.0;   // isolate an orbital → the others' electrons dim to  5%
@@ -3620,7 +3647,28 @@ async function run(){
      and must follow the main speed slider, while the boil and the electrons have their own sliders in the
      dock. Registered here before the effect compiles (same trick as boilHzAdj), advanced once per frame. */
   const gShaderMats = [];
-  scene.onNewMaterialAddedObservable.add(m => { if(m instanceof BABYLON.ShaderMaterial){ m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', -1); gShaderMats.push(m); } });
+  /* extra transform slots that belong to a model (the ATP synthase rotor has one, the photosystems' LHC pieces four each): the
+     shaders' isolate test and selection tint take them as the model's own, by slot range (see the gShaderMats loop) */
+  const gPieceRange = {}, NO_RANGE = [-1, -2], pieceRange = mi => (mi >= 0 && gPieceRange[mi]) || NO_RANGE;
+  /* POIKKILEIKKAUS (owner 13.9.2026: 'the cross-section mode will indeed cut the whole cell in half including its organelles'): a fixed
+     plane through the cell's centre, normal to the start view's axis - everything on the camera's side of it (z < CEN.z, the side the
+     start view looks from) is not drawn: the shaders discard by the plane (cutPlane, world space - cutPlaneV in view space for the
+     lobe shaders), the cell LoD and the hull slabs skip what lies wholly beyond it. On by default in cell mode, the button toggles it. */
+  let gXsec = !!SOLU_CELL;
+  const XSEC_OFF = new BABYLON.Vector4(0, 0, 0, -1), gXsecPlane = new BABYLON.Vector4(0, 0, -1, SOLU_CELL ? SOLU_CELL.CEN.z : 0);   // n.p + w > 0 is removed
+  const xsecOut = (x, y, z, r) => gXsec && gXsecPlane.x*x + gXsecPlane.y*y + gXsecPlane.z*z + gXsecPlane.w > r;   // a sphere wholly on the removed side
+  const _xsV = new BABYLON.Vector4(0, 0, 0, 0), _xsN = new BABYLON.Vector3(), _xsP = new BABYLON.Vector3();
+  const xsecViewPlane = () => { const V = cam.getViewMatrix(); BABYLON.Vector3.TransformNormalToRef(new BABYLON.Vector3(gXsecPlane.x, gXsecPlane.y, gXsecPlane.z), V, _xsN);
+    _xsP.set(gXsecPlane.x, gXsecPlane.y, gXsecPlane.z).scaleInPlace(-gXsecPlane.w); BABYLON.Vector3.TransformCoordinatesToRef(_xsP, V, _xsP);   // a point on the plane (n unit) -> view space
+    _xsV.set(_xsN.x, _xsN.y, _xsN.z, -BABYLON.Vector3.Dot(_xsN, _xsP)); return _xsV; };
+  /* 13.9.2026: the observable fires from the Material base constructor, BEFORE ShaderMaterial's own fields (_options, _floats ...) exist -
+     whatever was set there was thrown away when they were initialised - and Babylon caches a compiled effect by shader name + defines
+     alone, so a uniform first named after the first compile of that key never binds on ANY material sharing it (the cell shells'
+     cutPlane). So the shared uniforms are put on the material right before it compiles: its readiness check is wrapped. */
+  const shareUniforms = m => { if(m.__shared) return; m.__shared = true; m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', -1);
+    m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); gShaderMats.push(m); };
+  for(const fn of ['isReady', 'isReadyForSubMesh']){ const orig = BABYLON.ShaderMaterial.prototype[fn]; if(!orig) continue;
+    BABYLON.ShaderMaterial.prototype[fn] = function(){ shareUniforms(this); return orig.apply(this, arguments); }; }
   scene.skipPointerMovePicking = true;   // perf: we never auto-pick on pointer-move (all picking is done manually in our own handlers)
   scene.clearColor = new BABYLON.Color4(0.055,0.135,0.082,1);   // static dark green (matches the bg quad)
   scene.fogMode  = BABYLON.Scene.FOGMODE_NONE;                 // NO distance darkening — every atom keeps its true colour at any depth
@@ -3774,10 +3822,12 @@ void main(void){ vec4 wp = world * vec4(position, 1.0); vWP = wp.xyz; vN = norma
   vec4 vp = view * wp; vV = vp.xyz; gl_Position = projection * vp; }`;
 BABYLON.Effect.ShadersStore['hullPixelShader'] = `
 precision highp float;
+uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
 uniform vec3 hcol; uniform vec3 keyDir; uniform vec3 keyCol; uniform float keyFloor; uniform vec3 camPos;
 uniform float focalD; uniform float depthK; uniform float depthLo; uniform float startOff; uniform float spread;
 varying vec3 vN; varying vec3 vWP; varying vec3 vV;
 void main(void){
+  if(dot(cutPlane.xyz, vWP) + cutPlane.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   vec3 n = normalize(vN); if(!gl_FrontFacing) n = -n;
   float d = pow(max(dot(n, keyDir), 0.0), 1.1);
   vec3 k = (dot(keyDir, keyDir) < 0.5) ? vec3(1.0) : vec3(keyFloor) + (1.0 - keyFloor) * d * keyCol;   // the atoms' key light, on the hull's normal
@@ -3803,6 +3853,7 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['slabPixelShader'] = `
 precision highp float;
+uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
 uniform vec3 slabCol;
 uniform float focalD;
 uniform float depthK;
@@ -3837,6 +3888,7 @@ vec3 laatta(vec2 pq){
   return (texMean + (c - texMean) * texContrast) * texGain;
 }
 void main(void){
+  if(dot(cutPlane.xyz, vWP) + cutPlane.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   /* inside holeR of the camera every lipid is drawn at full density, so the slab steps aside there -
      a glass shell over a slab of its own colour was invisible, and the two never belong in one place */
   float dCam = distance(vWP, camPos);
@@ -3896,6 +3948,7 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['cellshellPixelShader'] = `
 precision highp float;
+uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
 precision highp int;
 uniform vec3 slabCol;
 uniform float focalD;
@@ -3993,6 +4046,7 @@ uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the 
 uniform float viewBox;   // 1 = only what is inside the box is drawn
 uniform float boxKeep;   // 1 on the thylakoid the unit sits on: its shell is not clipped to the box (the membrane stays whole outside the box)
 void main(void){
+  if(dot(cutPlane.xyz, vWP) + cutPlane.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   float dCam = distance(vWP, camPos);
   if(holeR > 0.0 && dCam < holeR) discard;
   if(memCut.z * step(0.0, (vWP.z - memCut.x)*memCut.y) * (step(cutLo.x, vWP.x) * step(vWP.x, cutHi.x) * step(cutLo.y, vWP.y) * step(vWP.y, cutHi.y) * step(cutLo.z, vWP.z) * step(vWP.z, cutHi.z)) > 0.5) discard;
@@ -5404,6 +5458,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   { const cb = document.getElementById('memcut-btn');
     if(cb){ cb.addEventListener('click', () => { gMemCut = !gMemCut; cb.classList.toggle('on', gMemCut); });
       cb.classList.toggle('on', gMemCut); } }
+  { const xb = document.getElementById('xsec-btn');
+    if(xb){ if(!SOLU_CELL) xb.style.display = 'none'; xb.addEventListener('click', () => { gXsec = !gXsec; xb.classList.toggle('on', gXsec); });
+      xb.classList.toggle('on', gXsec); } }
   const CONE_COS = 11.0;      // reveal tube radius (Å): only atoms within this ⊥ distance of the view axis show orbitals
   // Graphics mode 2 cone half-angle, as tan(angle) off the view axis. Sized from the LIVE viewport:
   // 0.78 × the wider half-FOV → a big reveal that still never fills the frame (the long axis' edges
@@ -5739,12 +5796,45 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       gAtpAxisX = n ? sx/n : mInfo[ai].cx; gAtpAxisZ = n ? sz/n : mInfo[ai].cz;
       gModelCol[ROTOR_SLOT*3]=gModelCol[ai*3]; gModelCol[ROTOR_SLOT*3+1]=gModelCol[ai*3+1]; gModelCol[ROTOR_SLOT*3+2]=gModelCol[ai*3+2];
       gMemBound[ROTOR_SLOT] = true; } }
+  /* ── the photosystems' light-harvesting antennae ── the same device as the rotor: the peripheral LHCs of PSII (3jcu, the C2S2M2
+     supercomplex - LHCII trimers, CP24/26/29 along both long sides of the core dimer) and of PSI (9e0j, the LHCI belt) get their own
+     transform slots, four per photosystem, and drift a little in place - a slow sway of a couple of units and a degree or so about
+     the membrane normal - so the antennae read as loose parts docked on the core, not one cast block. No chain data in the mol2, so
+     the split is geometric: in the membrane plane the atoms' principal axis is the long axis (u), and everything farther from it
+     than LHC_CORE times the half-width is antenna, cut into four pieces by side (v) and half (u). UNCERTAIN (13.9.2026): the
+     half-width fraction is a guess - PSI's belt lies on one side only, so its core may lose a rim on the other. Check with Mallit
+     colouring off, the pieces keep their parent's colour. */
+  const LHC_CORE = 0.5, gLhc = [];   // per photosystem: { mi, cx, cz, ux, uz, vCore, slot0, cen:[[x,z]x4] }
+  let LHC_SLOT0 = -1;
+  for(const code of ['3jcu', '9e0j']){ const mi = mols.findIndex(m => m.cfg && m.cfg.match === code); if(mi < 0) continue;
+    const need = (LHC_SLOT0 < 0 ? mols.length + 2 : LHC_SLOT0 + gLhc.length*4) + 4; if(need > MAX_MODELS) break;   // mols.length is the rotor's slot, +1 the DNA links'
+    if(LHC_SLOT0 < 0) LHC_SLOT0 = mols.length + 2;
+    const m = mols[mi], n = m.na; let sx = 0, sz = 0; for(let k=0;k<n;k++){ sx += m.x[k]; sz += m.z[k]; } const cx = sx/n + m.ox, cz = sz/n + m.oz;
+    let sxx = 0, sxz = 0, szz = 0; for(let k=0;k<n;k++){ const dx = m.x[k] + m.ox - cx, dz = m.z[k] + m.oz - cz; sxx += dx*dx; sxz += dx*dz; szz += dz*dz; }
+    const th = 0.5*Math.atan2(2*sxz, sxx - szz), ux = Math.cos(th), uz = Math.sin(th);   // the principal (long) axis in the membrane plane
+    let vMax = 0; for(let k=0;k<n;k++){ const dx = m.x[k] + m.ox - cx, dz = m.z[k] + m.oz - cz; const v = Math.abs(-uz*dx + ux*dz); if(v > vMax) vMax = v; }
+    const L = { mi, cx, cz, ux, uz, vCore: LHC_CORE*vMax, slot0: LHC_SLOT0 + gLhc.length*4, cen: [[0,0,0],[0,0,0],[0,0,0],[0,0,0]] };
+    for(let k=0;k<n;k++){ const pc = lhcPiece(L, m.x[k] + m.ox, m.z[k] + m.oz); if(pc < 0) continue; const c = L.cen[pc]; c[0] += m.x[k] + m.ox; c[1] += m.z[k] + m.oz; c[2]++; }
+    for(const c of L.cen){ if(c[2]){ c[0] /= c[2]; c[1] /= c[2]; } else { c[0] = cx; c[1] = cz; } }
+    for(let q=0;q<4;q++){ const sl = L.slot0 + q; gModelCol[sl*3]=gModelCol[mi*3]; gModelCol[sl*3+1]=gModelCol[mi*3+1]; gModelCol[sl*3+2]=gModelCol[mi*3+2]; gMemBound[sl] = true; }
+    gPieceRange[mi] = [L.slot0, L.slot0 + 3]; gLhc.push(L); }
+  function lhcPiece(L, x, z){ const dx = x - L.cx, dz = z - L.cz, u = L.ux*dx + L.uz*dz, v = -L.uz*dx + L.ux*dz; return Math.abs(v) > L.vCore ? (v > 0 ? 2 : 0) + (u > 0 ? 1 : 0) : -1; }
+  const inLhc = (x,y,z) => { for(const L of gLhc){ const mi = mInfo[L.mi]; if(x<mi.x0 || x>mi.x1 || y<mi.y0 || y>mi.y1 || z<mi.z0 || z>mi.z1) continue;
+      if(modelOf(x,y,z) !== L.mi) continue; const pc = lhcPiece(L, x, z); if(pc >= 0) return L.slot0 + pc; } return -1; };
+  { const _lm = new BABYLON.Matrix(), _la = new BABYLON.Matrix();
+    scene.onBeforeRenderObservable.add(() => {   // each piece's transform: the parent's, with its own small sway in front of it (on the shake clock, so a pause holds it)
+      for(const L of gLhc){ BABYLON.Matrix.FromArrayToRef(gModelXform, L.mi*16, _la);
+        for(let q=0;q<4;q++){ const sl = L.slot0 + q, ph = sl*1.7, c = L.cen[q], t = gWaveT;
+          const dx = 2.0*Math.sin(t*0.6 + ph), dz = 2.0*Math.sin(t*0.47 + ph*1.3), ang = 0.02*Math.sin(t*0.38 + ph*0.7);   // a couple of units, about a degree, a period of 10-15 s at speed 1
+          BABYLON.Matrix.Translation(-c[0], 0, -c[1]).multiplyToRef(BABYLON.Matrix.RotationY(ang), _lm);
+          _lm.multiplyToRef(BABYLON.Matrix.Translation(c[0] + dx, 0, c[1] + dz), _lm);
+          _lm.multiplyToRef(_la, _lm); _lm.copyToArray(gModelXform, sl*16); } } }); }
   const inRotor = (x,y,z) => { if(ROTOR_SLOT < 0) return false; const mi = mInfo[gAtpMid];
     if(x<mi.x0 || x>mi.x1 || y<mi.y0 || y>mi.y1 || z<mi.z0 || z>mi.z1) return false;
     const r2 = (x-gAtpAxisX)*(x-gAtpAxisX) + (z-gAtpAxisZ)*(z-gAtpAxisZ);
     return (y < MEMBRANE_Y + 30 && r2 < 34*34) || (y < gRotorHeadMid && r2 < 13*13); };
   const mdlBuf = mm => { const n=mm.length/16, a=new Float32Array(n);
-    for(let i=0;i<n;i++){ const x=mm[i*16+12], y=mm[i*16+13], z=mm[i*16+14]; a[i] = inRotor(x,y,z) ? ROTOR_SLOT : modelOf(x,y,z); } return a; };
+    for(let i=0;i<n;i++){ const x=mm[i*16+12], y=mm[i*16+13], z=mm[i*16+14]; if(inRotor(x,y,z)){ a[i] = ROTOR_SLOT; continue; } const l = inLhc(x,y,z); a[i] = l >= 0 ? l : modelOf(x,y,z); } return a; };
   { const _rm = new BABYLON.Matrix(), _ra = new BABYLON.Matrix(); let _ppShown = -1;
     scene.onBeforeRenderObservable.add(() => {   // the rotor's transform: the model's, with the eased turn about the axis in front of it
       if(ROTOR_SLOT < 0) return;
@@ -7834,12 +7924,17 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // and the speed scale (CAM_DEF_R), so only the view moved, not how the camera handles.
   const CAM_DEF_TGT = new BABYLON.Vector3(82.7, 68.3, 197.6), CAM_DEF_POS = new BABYLON.Vector3(41, 30, 820);
   const CAM_DEF_R = 1183.85;   // the old default distance - the reference scale for the limits and speeds below
-  if(SOLU_CELL){ const d = CAM_DEF_POS.subtract(CAM_DEF_TGT).normalize();   // cell mode (owner): I and the start view = the whole cell from outside, looking the same way as the sheet's default
-    CAM_DEF_TGT.copyFrom(SOLU_CELL.CEN); CAM_DEF_POS.copyFrom(SOLU_CELL.CEN.add(d.scale(SOLU_CELL.R*3.2))); }
+  /* cell mode (owner 13.9.2026: 'aloita kamera tasta sijainnista' + 'poikkileikkaus ... toiselta puolelta'): I and the start view are the
+     owner's dev readout - sij. 3495, 2728, -24967 - katse 0.031, -0.097, 0.995 - yla 0.000, 0.995, 0.097 - et. 24877: the whole cell from
+     the -z side, the cut face of the poikkileikkaus toward the camera. As in POSE: target = sij. + katse*et., the up vector = yla. */
+  const CAM_DEF_UP = new BABYLON.Vector3(0, 0, 1);
+  if(SOLU_CELL){ const pos = new BABYLON.Vector3(3495, 2728, -24967), fw = new BABYLON.Vector3(0.031, -0.097, 0.995).normalize(), up = new BABYLON.Vector3(0.000, 0.995, 0.097);
+    up.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(up, fw))).normalize();
+    CAM_DEF_POS.copyFrom(pos); CAM_DEF_TGT.copyFrom(pos.add(fw.scale(24877))); CAM_DEF_UP.copyFrom(up); }
   let CAM_DEF_ALPHA = 0, CAM_DEF_BETA = 0;   // filled in from the derived angles right after the first resetView() (used by viewPerp)
   const resetView = () => { scene.stopAnimation(cam);   // I → restore the default starting view
     if(gFocusRadiusObs){ scene.onBeforeRenderObservable.remove(gFocusRadiusObs); gFocusRadiusObs = null; }
-    cam.upVector.set(0, 0, 1); cam.setMatUp();   // undo any WASD arcball roll → the default view is level again (setMatUp: keep the camera's up matrices in step)
+    cam.upVector.copyFrom(CAM_DEF_UP); cam.setMatUp();   // undo any WASD arcball roll → the default view is level again (setMatUp: keep the camera's up matrices in step)
     cam.setTarget(CAM_DEF_TGT.clone()); cam.setPosition(CAM_DEF_POS.clone());
     cam.inertialAlphaOffset = cam.inertialBetaOffset = cam.inertialRadiusOffset = 0; cam.inertialPanningX = cam.inertialPanningY = 0; gZoomVel = 0; };
   resetView();
@@ -9110,7 +9205,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     engine.setColorWrite(true); engine.setStencilBuffer(false);
     gWaveT += Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // advance the thermal-shake clock
     { const dtR = Math.min(engine.getDeltaTime(), 50) * 0.001; if(!gPaused){ gBoilT += dtR * gBoilSpeed; gElecT += dtR * gElecSpeed; }   // own clocks (space still pauses them)
-      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT); m.setFloat('isoModel', gIsoModel); } }
+      const isoR = pieceRange(gIsoModel), selR = pieceRange(gSelModel), cutW = gXsec ? gXsecPlane : XSEC_OFF, cutV = gXsec ? xsecViewPlane() : XSEC_OFF;
+      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT); m.setFloat('isoModel', gIsoModel); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
     const u = cam.getDirection(BABYLON.Axis.Y);   // view up
     const r = cam.getDirection(BABYLON.Axis.X);   // view right
@@ -9224,7 +9320,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const c = h.slab.position;   // the transform observer above has already placed it this frame
       const dx = c.x-cp.x, dy = c.y-cp.y, dz = c.z-cp.z;
       const d = Math.sqrt(dx*dx+dy*dy+dz*dz) || 1e-6;
-      const want = gSlabLod && gIsoModel < 0 && (d - h.maxR) > _memR && inViewBox(c.x, c.y, c.z, h.maxR) && !inPsuBox(c.x, c.y, c.z) && !gHiddenModel[h.mi];   // the hull slab is a slab tier too: off with 'laatta-LoD' - not outside the box while the camera is in it, never for a complex INSIDE the box
+      const want = gSlabLod && gIsoModel < 0 && !xsecOut(c.x, c.y, c.z, h.maxR) && (d - h.maxR) > _memR && inViewBox(c.x, c.y, c.z, h.maxR) && !inPsuBox(c.x, c.y, c.z) && !gHiddenModel[h.mi];   // the hull slab is a slab tier too: off with 'laatta-LoD' - not outside the box while the camera is in it, never for a complex INSIDE the box
       gProtSlab[h.mi] = want;
       if(h.slab.isEnabled() !== want){ h.slab.setEnabled(want);
         if(want){ const o=h.mi*3;   // the model's own colour, dimmed like packed atoms against a flat fill
@@ -9308,7 +9404,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         } else { wcx=cell.cx; wcy=cell.cy; wcz=cell.cz; }   // membrane cells don't follow the PSII gizmo
       }
       const vx=wcx-cp.x, vy=wcy-cp.y, vz=wcz-cp.z, d2=vx*vx+vy*vy+vz*vz;
-      let vis = !gHiddenModel[cell.mi] && (gIsoModel < 0 || cell.mi === gIsoModel) && inViewBox(wcx, wcy, wcz, cM);            // in the view frustum? (and inside the light-reaction box while the camera is in it, and not a hidden display molecule)
+      let vis = !gHiddenModel[cell.mi] && (gIsoModel < 0 || cell.mi === gIsoModel) && !xsecOut(wcx, wcy, wcz, cM) && inViewBox(wcx, wcy, wcz, cM);            // in the view frustum? (and inside the light-reaction box while the camera is in it, and not a hidden display molecule)
       if(d2 > cM*cM){
         for(let p=0;p<6;p++){ const pl=fplanes[p];
           if(pl.normal.x*wcx + pl.normal.y*wcy + pl.normal.z*wcz + pl.d < -cM){ vis=false; break; }
@@ -11858,7 +11954,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn',
-                     'memcut-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
+                     'memcut-btn','xsec-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
       const b = document.getElementById(id); if(!b) continue;
       b.style.position = 'static'; b.style.left = 'auto'; b.style.top = 'auto'; menu.appendChild(b);   // static → they stack in the menu
     }

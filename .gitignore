@@ -21,3 +21,6 @@ __pycache__/
 
 # ChimeraX-sessiot (.cxs): isoja, sivusto ei tarvitse - siirtyvat OneDriven mukana
 /simulaatiot/chimerax/
+
+# LuK-tutkielma: ei kuulu julkiseen repoon (omistaja 13.9.2026)
+/LuK Tutkielma/
