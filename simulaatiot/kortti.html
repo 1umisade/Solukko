@@ -748,6 +748,7 @@ BABYLON.Effect.ShadersStore['impFragmentShader'] = `
 #extension GL_EXT_frag_depth : enable
 #extension GL_OES_standard_derivatives : enable
 precision highp float;
+uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform mat4 projection;
 uniform float uT;
 uniform float boilHzAdj;        // shared clock → the moving electric-blue shimmer
@@ -878,6 +879,11 @@ varying vec3 vWB1;
 varying vec3 vWB2;
 uniform float boil;      // line-boil amount (0 = off) → warps the silhouette, object-locked
 void main(void){
+#ifdef MODELMOVE
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+#else
+  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+#endif
 #ifdef MEMFADE
   if(viewBox > 0.5 && outsideBox(vMemW) > 0.5) discard;   // box-only view: a lipid outside the light-reaction box is not drawn
 #endif
@@ -1481,6 +1487,7 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['bondFragmentShader'] = `
 precision highp float;
+uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform float opacity;
 uniform vec3 fogColor;
@@ -1600,6 +1607,11 @@ void electrons(inout vec3 c, float ne, float bri){
   c += vec3(0.72, 0.86, 1.0) * core * 0.5 * bri;   // small soft highlight at the very centre
 }
 void main(void){
+#ifdef MODELMOVE
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+#else
+  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+#endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
@@ -1853,6 +1865,7 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['orbFragmentShader'] = `
 precision highp float;
+uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform vec3 fogColor;
 uniform float fogStart;
@@ -1976,6 +1989,11 @@ void electrons(inout vec3 c, float ne, float bri){
   c += vec3(0.72, 0.86, 1.0) * core * 0.5 * bri;   // small soft highlight at the very centre
 }
 void main(void){
+#ifdef MODELMOVE
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+#else
+  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+#endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE

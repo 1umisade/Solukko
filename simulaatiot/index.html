@@ -1143,6 +1143,7 @@ BABYLON.Effect.ShadersStore['impFragmentShader'] = `
 #extension GL_EXT_frag_depth : enable
 #extension GL_OES_standard_derivatives : enable
 precision highp float;
+uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform mat4 projection;
 uniform float uT;
 uniform float boilHzAdj;        // shared clock → the moving electric-blue shimmer
@@ -1273,6 +1274,11 @@ varying vec3 vWB1;
 varying vec3 vWB2;
 uniform float boil;      // line-boil amount (0 = off) → warps the silhouette, object-locked
 void main(void){
+#ifdef MODELMOVE
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+#else
+  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+#endif
 #ifdef MEMFADE
   if(viewBox > 0.5 && outsideBox(vMemW) > 0.5) discard;   // box-only view: a lipid outside the light-reaction box is not drawn
 #endif
@@ -1876,6 +1882,7 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['bondFragmentShader'] = `
 precision highp float;
+uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform float opacity;
 uniform vec3 fogColor;
@@ -1995,6 +2002,11 @@ void electrons(inout vec3 c, float ne, float bri){
   c += vec3(0.72, 0.86, 1.0) * core * 0.5 * bri;   // small soft highlight at the very centre
 }
 void main(void){
+#ifdef MODELMOVE
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+#else
+  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+#endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
@@ -2248,6 +2260,7 @@ void main(void){
 }`;
 BABYLON.Effect.ShadersStore['orbFragmentShader'] = `
 precision highp float;
+uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform vec3 fogColor;
 uniform float fogStart;
@@ -2371,6 +2384,11 @@ void electrons(inout vec3 c, float ne, float bri){
   c += vec3(0.72, 0.86, 1.0) * core * 0.5 * bri;   // small soft highlight at the very centre
 }
 void main(void){
+#ifdef MODELMOVE
+  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5) discard;   // ISOLATE (double-tap F): only the selected model is drawn
+#else
+  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+#endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
 #ifdef MEMFADE
@@ -3602,7 +3620,7 @@ async function run(){
      and must follow the main speed slider, while the boil and the electrons have their own sliders in the
      dock. Registered here before the effect compiles (same trick as boilHzAdj), advanced once per frame. */
   const gShaderMats = [];
-  scene.onNewMaterialAddedObservable.add(m => { if(m instanceof BABYLON.ShaderMaterial){ m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); gShaderMats.push(m); } });
+  scene.onNewMaterialAddedObservable.add(m => { if(m instanceof BABYLON.ShaderMaterial){ m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', -1); gShaderMats.push(m); } });
   scene.skipPointerMovePicking = true;   // perf: we never auto-pick on pointer-move (all picking is done manually in our own handlers)
   scene.clearColor = new BABYLON.Color4(0.055,0.135,0.082,1);   // static dark green (matches the bg quad)
   scene.fogMode  = BABYLON.Scene.FOGMODE_NONE;                 // NO distance darkening — every atom keeps its true colour at any depth
@@ -4014,7 +4032,8 @@ void main(void){
 }`;
   const bgMat = new BABYLON.ShaderMaterial('bgMat', scene, 'bg', { attributes:['position'], uniforms:['cBg','focusAmt','focusDark'] });
   bgMat.backFaceCulling = false;
-  bgMat.onBindObservable.add(()=>{ const eff=bgMat.getEffect(); if(!eff) return; syncBgRaw(); eff.setColor3('cBg', gBgRaw); eff.setFloat('focusAmt', gFocusDimAmt); eff.setFloat('focusDark', gFocusDark); });
+  const ISO_BG = new BABYLON.Color3(1, 1, 1);
+  bgMat.onBindObservable.add(()=>{ const eff=bgMat.getEffect(); if(!eff) return; syncBgRaw(); eff.setColor3('cBg', gIsoModel >= 0 ? ISO_BG : gBgRaw); eff.setFloat('focusAmt', gFocusDimAmt); eff.setFloat('focusDark', gFocusDark); });
   const bgQuad = BABYLON.MeshBuilder.CreatePlane('bgQuad', {size:2}, scene);
   bgQuad.material = bgMat; bgQuad.isPickable = false; bgQuad.alwaysSelectAsActiveMesh = true;
   bgQuad.renderingGroupId = 0; bgQuad.infiniteDistance = true;   // stays behind everything
@@ -4048,6 +4067,7 @@ void main(void){
      drag and its inertia have ended, put back at the old distance along the NEW view direction, so the radius
      that the zoom, the shading plane and the readouts use is only 20 for the duration of the turn. The shading
      plane keeps the old distance even then (gFocalD). The thylakoid mode keeps its orbit. */
+  let gIsoModel = -1, gIsoHidden = [], gIsoTheme = null;   // ISOLATE (owner 13.9.2026: double-tap F): the one model still drawn, the meshes hidden for it, the theme to restore
   const LOOK_R = 20; let gLookPivot = null, gFHold = false, gFHoldR = 0;   // gFHold: F is held - the pivot sits on the selection and the look-around stays out of the way, gFHoldR = the selection's radius (the zoom stops there)
   const gFocalD = () => gLookPivot ? gLookPivot.r : cam.radius;
   /* THE DEPTH CUE (owner, 2026-09-09: 'everything needs a depth cue'). On the sheet the darkening is measured from the
@@ -9090,7 +9110,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     engine.setColorWrite(true); engine.setStencilBuffer(false);
     gWaveT += Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // advance the thermal-shake clock
     { const dtR = Math.min(engine.getDeltaTime(), 50) * 0.001; if(!gPaused){ gBoilT += dtR * gBoilSpeed; gElecT += dtR * gElecSpeed; }   // own clocks (space still pauses them)
-      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT); } }
+      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT); m.setFloat('isoModel', gIsoModel); } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
     const u = cam.getDirection(BABYLON.Axis.Y);   // view up
     const r = cam.getDirection(BABYLON.Axis.X);   // view right
@@ -9204,7 +9224,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const c = h.slab.position;   // the transform observer above has already placed it this frame
       const dx = c.x-cp.x, dy = c.y-cp.y, dz = c.z-cp.z;
       const d = Math.sqrt(dx*dx+dy*dy+dz*dz) || 1e-6;
-      const want = gSlabLod && (d - h.maxR) > _memR && inViewBox(c.x, c.y, c.z, h.maxR) && !inPsuBox(c.x, c.y, c.z) && !gHiddenModel[h.mi];   // the hull slab is a slab tier too: off with 'laatta-LoD' - not outside the box while the camera is in it, never for a complex INSIDE the box
+      const want = gSlabLod && gIsoModel < 0 && (d - h.maxR) > _memR && inViewBox(c.x, c.y, c.z, h.maxR) && !inPsuBox(c.x, c.y, c.z) && !gHiddenModel[h.mi];   // the hull slab is a slab tier too: off with 'laatta-LoD' - not outside the box while the camera is in it, never for a complex INSIDE the box
       gProtSlab[h.mi] = want;
       if(h.slab.isEnabled() !== want){ h.slab.setEnabled(want);
         if(want){ const o=h.mi*3;   // the model's own colour, dimmed like packed atoms against a flat fill
@@ -9288,7 +9308,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         } else { wcx=cell.cx; wcy=cell.cy; wcz=cell.cz; }   // membrane cells don't follow the PSII gizmo
       }
       const vx=wcx-cp.x, vy=wcy-cp.y, vz=wcz-cp.z, d2=vx*vx+vy*vy+vz*vz;
-      let vis = !gHiddenModel[cell.mi] && inViewBox(wcx, wcy, wcz, cM);            // in the view frustum? (and inside the light-reaction box while the camera is in it, and not a hidden display molecule)
+      let vis = !gHiddenModel[cell.mi] && (gIsoModel < 0 || cell.mi === gIsoModel) && inViewBox(wcx, wcy, wcz, cM);            // in the view frustum? (and inside the light-reaction box while the camera is in it, and not a hidden display molecule)
       if(d2 > cM*cM){
         for(let p=0;p<6;p++){ const pl=fplanes[p];
           if(pl.normal.x*wcx + pl.normal.y*wcy + pl.normal.z*wcz + pl.d < -cM){ vis=false; break; }
@@ -9307,7 +9327,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       /* MEGACHEAP is the slab tier's protein half (1/16 of the atoms past memR) - with 'laatta-LoD' off it
          is off for proteins too. Left on, complexes dropped to a sixteenth at 600 units in one step: the
          'thin and dark, then snapping back' as you crossed 600. Thinning is now only protFrac (by size). */
-      const mega = (gSlabLod && d2 > (cell.macro ? MEGA2 : MEMR2) + cR*cR) || offSlab;
+      const mega = ((gSlabLod && d2 > (cell.macro ? MEGA2 : MEMR2) + cR*cR) || offSlab) && !(gIsoModel >= 0 && cell.mi === gIsoModel);   // ISOLATE: the isolated model has no slab to stand in for it, so it never thins to the slab tier
       const wantSph = vis && !!cell.sphere && (!gCullOnly || d2 < closeR*closeR) && !(mega && !cell.macro);
       const nucR = gCrisp + cR + 8;                         // nuclei wherever the orbitals show (they used to stop at half the crisp radius)
       const wantNuc = vis && gGfxMode === 1 && d2 < nucR*nucR;   // nuclei: mode 1, genuinely up close only
@@ -12605,7 +12625,23 @@ void main(void){
       if(selAtom && selAtom.world){ gFHoldR = 6; return selAtom.world.clone(); }
       if(etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel]; gFHoldR = g.r * 2.5; return new BABYLON.Vector3(g.cx, g.cy, g.cz); }
       return null; };
+    /* ISOLATE (owner 13.9.2026: 'if I double tap the F button, the focus should make the bg white and hide ALL the other particles besides
+       the one selected'): the selection's model alone, on white. Every shader drops the other models' instances (isoModel), the cell LoD and
+       the slabs skip them, and every mesh that is not a model at all (membrane slab, hull slabs, organelle shells, photon beams, electron
+       sprites, glows, labels - anything with a StandardMaterial or one of those shaders) is hidden until the next double tap. */
+    const selModelOf = () => { if(gSel.size) return [...gSel][0];
+      if(selAtom && selAtom.center) return modelOf(selAtom.center.x, selAtom.center.y, selAtom.center.z);
+      if(etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel]; return modelOf(g.cx, g.cy, g.cz); } return -1; };
+    const ISO_SHADERS = new Set(['hull', 'slab', 'cellshell', 'beam', 'bigelec', 'ecorona']);
+    const isoOff = () => { if(gIsoModel < 0) return; gIsoModel = -1; for(const m of gIsoHidden) m.isVisible = true; gIsoHidden = []; if(gIsoTheme){ scene.clearColor = gIsoTheme; gIsoTheme = null; } };
+    const isoOn = mi => { if(mi < 0) return; if(gIsoModel >= 0) isoOff(); gIsoModel = mi; gIsoTheme = scene.clearColor; scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
+      for(const m of scene.meshes){ if(m === bgQuad || !m.isVisible) continue; let mat = m.material; if(mat && mat.subMaterials) mat = mat.subMaterials[0]; if(!mat) continue;
+        const shader = mat instanceof BABYLON.ShaderMaterial ? String(mat.shaderPath) : null;
+        if(mat instanceof BABYLON.StandardMaterial || m instanceof BABYLON.LinesMesh || (shader && ISO_SHADERS.has(shader))){ m.isVisible = false; gIsoHidden.push(m); } } };
+    window.gIsoToggle = () => { if(gIsoModel >= 0) isoOff(); else isoOn(selModelOf()); }; window.__isoOn = isoOn; window.__isoOff = isoOff;   // (dev)
+    let gFLastTap = 0;
     window.addEventListener('keydown', e => { if(e.repeat || (e.key !== 'f' && e.key !== 'F') || (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) return;
+      const now = performance.now(); if(now - gFLastTap < 400){ gFLastTap = 0; window.gIsoToggle(); return; } gFLastTap = now;   // a double tap: isolate the selection (or leave the isolation)
       const c = selCentreOf(); if(!c) return;
       gFHold = true; gLookPivot = null; scene.stopAnimation(cam); cam.setTarget(c); });
     window.addEventListener('keyup', e => { if(e.key === 'f' || e.key === 'F') gFHold = false; }); }
@@ -12656,7 +12692,7 @@ void main(void){
     gSelVigAmt += ((anySel ? 1 : 0) - gSelVigAmt) * 0.09;
     // Written only when it actually moves. Assigning style.opacity every frame invalidates the layer
     // even when the value is identical.
-    const vigWant = 1;   // the vignette is always on at full (it used to rise only with O held or a selection)
+    const vigWant = gIsoModel >= 0 ? 0 : 1;   // the vignette is always on at full (it used to rise only with O held or a selection) - except while isolating (double-tap F): the background stays plain white
     if(Math.abs(vigWant - _vigShown) > 0.002){ _vigShown = vigWant;
       fVig.style.opacity = vigWant.toFixed(3);
       fVig.style.display = vigWant < 0.004 ? 'none' : 'block'; }
