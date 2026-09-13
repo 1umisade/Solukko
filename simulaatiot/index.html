@@ -1146,6 +1146,8 @@ float outsideBox(vec3 p){ return 1.0 - step(cutLo.x, p.x) * step(p.x, cutHi.x) *
 varying float vGid;        // this cofactor atom's group index
 uniform float hlGroup;     // the group to highlight (hover / flash), -1 = none
 uniform float hlBright;    // its brightness multiplier (1.0 = normal, 1.25 = hover, pulses on select)
+uniform sampler2D slotTex; // VALOREAKTIOT 2: per group, the slot state as brightness (0.5 = as is, 0.22 = an empty electron carrier, 0.8 = excited) - the 2D 'modulate'
+uniform float slotN;       // its width (0 = off)
 #endif
 uniform float selModel;    // index of the SELECTED complex (−1 = none) → its atoms get a sage rim
 uniform vec3 selCol;       // that rim's colour (sage)
@@ -1402,6 +1404,7 @@ void main(void){
 #ifdef ETCHL
   bool hl = abs(vGid - hlGroup) < 0.5;                        // hovered / flashing cofactor group
   if(hl) col *= hlBright;                                     // → brighter FILL (the dark outline is applied AFTER, so it stays dark)
+  if(slotN > 0.5) col *= 2.0 * texture2D(slotTex, vec2((vGid + 0.5) / slotN, 0.5)).r;   // the slot state (an empty carrier is dim, an excited pigment bright)
 #endif
   // Ink outline band. Normally starts at 0.86 (width 0.14). For atoms REVEALING orbitals (glass shells)
   // start it at 0.965 (width 0.035 ≈ 4× thinner) so the thin rim doesn't obscure the orbitals inside.
@@ -4507,8 +4510,7 @@ void main(void){
   let gValoProtons = null;     // the proton simulation's handle: grab / place / release / nearestFree
   let gValoFree = null;        // the analytic free molecules' handle: pos / nearest / setWorld (through the molTex displacement)
   let gMolHold = null;         // per free-molecule flag: 1 = the light reactions hold it (the collision solver leaves it alone)
-  let gValoDockHold = null;    // sh -> true while a docked shuttle must wait (empty PQ at PSII, loaded PC at a reduced P700 ...)
-  let gValoRetarget = null;    // sh -> picks which PSII unit's QB pocket a plastoquinone heads for
+  let gValoShuttle = null;     // { target(sh), arrive(sh), docked(sh) } - the agent model's handle on the shuttle mover (VALOREAKTIOT 2)
   let gZoomSpeed = 0.5;    // multiplier on the zoom speed (I/O - in and out along the view)
   let gZoomMax = 63;       // the wheel's MAXIMUM: world units per full notch - the ramp is a percentage of this, never of a distance
   let gRotSpeed  = 2.705;  // max yaw/pitch rate in rad/s (WASD) — 2.705 ≈ 155 deg/s
@@ -5784,10 +5786,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // ON TOP of the whole scene. Follows the per-model gizmo + PSII transform like the normal spheres.
   if(etcM.length){
     const etcMat = new BABYLON.ShaderMaterial('etcTop', scene, 'imp', {
-      attributes:['position','instanceColor','instR','modelId','groupId','world0','world1','world2','world3'],
-      uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','hlGroup','hlBright','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark'],
+      attributes:['position','instanceColor','instR','modelId','groupId','world0','world1','world2','world3'], samplers:['slotTex'],
+      uniforms:['slotN','view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','hlGroup','hlBright','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark'],
       defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define ETCHL','#define DEPTHSHADE','#define ETCTHIN'] });
     etcMat.setFloat('radius',1.0); etcMat.setFloat('selModel', -1); etcMat.setFloat('isShell',0); etcMat.setFloat('shellMin',0); etcMat.setFloat('bubbleR',1e9);
+    etcMat.setFloat('slotN', 0); etcMat.setTexture('slotTex', new BABYLON.RawTexture(new Uint8Array([128]), 1, 1, BABYLON.Constants.TEXTUREFORMAT_R, scene, false, false, BABYLON.Texture.NEAREST_SAMPLINGMODE, BABYLON.Constants.TEXTURETYPE_UNSIGNED_BYTE));   // VALOREAKTIOT 2 fills it: per cofactor group, 0.5 = as is, less = an empty carrier, more = excited
     etcMat.setFloat('protonOutline',0); etcMat.setFloat('depthBias',0); etcMat.setFloat('coneCos',-1.0);
     etcMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); etcMat.backFaceCulling=false; realAlpha(etcMat); glassable(etcMat);
     etcMat.depthFunction = BABYLON.Engine.ALWAYS;   // cofactors ALWAYS draw (never occluded by the protein in front) → visible at every angle, not just when the reveal tunnel happens to clear
@@ -9932,19 +9935,21 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       gDevPsuBox.scaling.set(gPsuHi.x-gPsuLo.x, gPsuHi.y-gPsuLo.y, gPsuHi.z-gPsuLo.z); };
     fit(); let lastFit = performance.now();
     scene.onBeforeRenderObservable.add(() => { const t = performance.now(); if(t - lastFit > 1000){ lastFit = t; fit(); } }); }
-  { const _q=new BABYLON.Quaternion(), _dq=new BABYLON.Quaternion();
+  { const _q=new BABYLON.Quaternion(), _dq=new BABYLON.Quaternion(), _dp=[0,0,0];
     scene.onBeforeRenderObservable.add(() => {
       if(!gBouncers.length || !gBoxLo || gizmoDragging) return;
       const dt = Math.min(engine.getDeltaTime(), 50)*0.001*gSpeed*gProtSpeed; if(dt <= 0) return;
       const lo=gPsuLo||gBoxLo, hi=gPsuHi||gBoxHi, hT=gMemHalfT;   // the loose proteins keep to the PSU box
       for(const b of gBouncers){ const mi=b.mi, c=mInfo[mi], R=b.R; const vx0=b.vx, vy0=b.vy, vz0=b.vz;   // remembered: a velocity change below means a collision
+        if(b.dockedAt){ b.dockedAt.world(_dp); gModelOff[mi*3]=_dp[0]-c.cx; gModelOff[mi*3+1]=_dp[1]-c.cy; gModelOff[mi*3+2]=gTasoZ-c.cz; rebuildModelXform(mi); continue; }   // VALOREAKTIOT 2: docked = held at the slot point (outside the host's hull by construction)
         let x=c.cx+gModelOff[mi*3]+b.vx*dt, y=c.cy+gModelOff[mi*3+1]+b.vy*dt, z=c.cz+gModelOff[mi*3+2]+b.vz*dt;
         if(x<lo.x+R){ x=lo.x+R; b.vx=Math.abs(b.vx); } else if(x>hi.x-R){ x=hi.x-R; b.vx=-Math.abs(b.vx); }
         if(y<lo.y+R){ y=lo.y+R; b.vy=Math.abs(b.vy); } else if(y>hi.y-R){ y=hi.y-R; b.vy=-Math.abs(b.vy); }
         if(z<lo.z+R){ z=lo.z+R; b.vz=Math.abs(b.vz); } else if(z>hi.z-R){ z=hi.z-R; b.vz=-Math.abs(b.vz); }
-        if(hT > 0){ const top=MEMBRANE_Y+hT+R, bot=MEMBRANE_Y-hT-R;   // the lipid layer is a wall
+        if(hT > 0 && !(b.mol && b.mol.hard)){ const top=MEMBRANE_Y+hT+R, bot=MEMBRANE_Y-hT-R;   // the lipid layer is a wall - except for a carrier PULLED to a dock (VALOREAKTIOT 2: the 2D in-transit layer; PSI's stromal face lies under the layer in this sheet)
           if(y < top && y > bot){ if(y >= MEMBRANE_Y){ y=top; b.vy=Math.abs(b.vy); } else { y=bot; b.vy=-Math.abs(b.vy); } } }
-        for(let sI=0;sI<gHulls.length;sI++){ const h=gHulls[sI]; if(h.mi===mi) continue;   // membrane proteins and the other bouncers alike
+        const _hostMi = (b.mol && b.mol.hard && b.mol.hard.host) ? b.mol.hard.host.mi : -1;   // VALOREAKTIOT 2: pulled to a dock, it may enter its host's shell (the dock can sit inside it: a ferredoxin sits on FB)
+        for(let sI=0;sI<gHulls.length;sI++){ const h=gHulls[sI]; if(h.mi===mi || h.mi===_hostMi) continue;   // membrane proteins and the other bouncers alike
           const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2];
           const dx=x-ox, dy=y-oy, dz=z-oz, d=Math.hypot(dx,dy,dz), minD=R+h.maxR; if(d >= minD || d < 1e-6) continue;
           const nx=dx/d, ny=dy/d, nz=dz/d; x=ox+nx*minD; y=oy+ny*minD; z=oz+nz*minD;
@@ -10005,51 +10010,59 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const siteW = (mi, site, off, out) => { const m = gModelXform, o = mi*16, x = site[0], y = site[1], z = site[2];   // a baked site through its host's transform
       out[0] = m[o]*x + m[o+4]*y + m[o+8]*z + m[o+12] + off[0]; out[1] = m[o+1]*x + m[o+5]*y + m[o+9]*z + m[o+13] + off[1]; out[2] = m[o+2]*x + m[o+6]*y + m[o+10]*z + m[o+14] + off[2]; };
     const _a = [0,0,0], _b = [0,0,0], _q = new BABYLON.Quaternion(), _dq = new BABYLON.Quaternion(), _axv = new BABYLON.Vector3(0.3,1,0.2).normalize();
-    for(const sh of gShuttles){ siteW(sh.hostA, sh.A, sh.offA, _a); siteW(sh.hostB, sh.B, sh.offB, _b);   // start somewhere along the way
-      const t = sh.t; sh.cur = [_a[0]+(_b[0]-_a[0])*t, _a[1]+(_b[1]-_a[1])*t, _a[2]+(_b[2]-_a[2])*t]; sh.t = 0; }
+    for(const sh of gShuttles){ siteW(sh.hostA, sh.A, sh.offA, _a); siteW(sh.hostB, sh.B, sh.offB, _b);   // start somewhere along the old A-B way
+      const t = sh.t; sh.cur = [_a[0]+(_b[0]-_a[0])*t, _a[1]+(_b[1]-_a[1])*t, _a[2]+(_b[2]-_a[2])*t]; sh.t = 0; sh.phase = 'to'; }
+    /* VALOREAKTIOT 2 (13.9.2026): the carrier no longer shuttles A <-> B on a timer - it is a MoleculeBody2D agent with a soft / hard target
+       (a slot Mol: PSII's QB pocket, b6f's Qo / Qi, NDH-1's quinone site, b6f's or PSI's plastocyanin dock), asked from gValoShuttle each
+       frame. Reaching the slot = binding (gValoShuttle.arrive); while docked the pose is pinned to the slot; released, the agent gives a new
+       target. The wander, the shell slide and the box walls are as before. A quinone sits IN its pocket; a protein hangs under the host's
+       shell below the slot point (contact(), cached on the slot). */
+    const _tw = [0,0,0];
+    const dockPoint = (sh, slot, out) => { slot.world(out); if(sh.pq) return out;
+      if(!slot.dockOff){ const host = slot.host ? slot.host.mi : -1; slot.dockOff = host >= 0 ? contact(host, slot.p || [0,0,0], sh.R) : [0, -(sh.R + 4), 0]; }
+      out[0] += slot.dockOff[0]; out[1] += slot.dockOff[1]; out[2] += slot.dockOff[2]; return out; };
     scene.onBeforeRenderObservable.add(() => {
       if(!gShuttles.length || gizmoDragging) return;
       const dt = Math.min(engine.getDeltaTime(), 50)*0.001*gSpeed; if(dt <= 0) return;
       for(const sh of gShuttles){ const c = mInfo[sh.mi];
-        siteW(sh.hostA, sh.A, sh.offA, _a); siteW(sh.hostB, sh.B, sh.offB, _b);
-        const from = sh.phase === 'toB' || sh.phase === 'dockA' ? _a : _b, to = sh.phase === 'toB' || sh.phase === 'dockA' ? _b : _a;
-        if(sh.phase === 'dockA' || sh.phase === 'dockB'){ sh.t += dt; const at = sh.phase === 'dockA' ? _a : _b; sh.cur[0]=at[0]; sh.cur[1]=at[1]; sh.cur[2]=at[2];
-          if(sh.t >= sh.dock && !(gValoDockHold && gValoDockHold(sh))){ sh.t = 0; siteOcc[(sh.pq ? 'pq' : 'pc') + (sh.phase === 'dockA' ? 'A' + (sh.unitKey||'') : 'B')] = -1; sh.phase = sh.phase === 'dockA' ? 'toB' : 'toA';
-            if(gValoRetarget) gValoRetarget(sh); } }   // leaving frees the site - and a plastoquinone picks the PSII pocket it heads for next
-        else { const key = (sh.pq ? 'pq' : 'pc') + (sh.phase === 'toB' ? 'B' : 'A' + (sh.unitKey||'')), occ = siteOcc[key] ?? -1, blocked = occ !== -1 && occ !== sh.mi, holdR = 2.3*sh.R + 6, step = sh.speed*dt;
-          let dx = to[0]-sh.cur[0], dy = to[1]-sh.cur[1], dz = to[2]-sh.cur[2], d = Math.hypot(dx,dy,dz); const dSite = d;
+        const V = gValoShuttle, T = V ? V.target(sh) : null;
+        if(T && V.docked(sh)){ dockPoint(sh, T, _tw); sh.cur[0]=_tw[0]; sh.cur[1]=_tw[1]; sh.cur[2]=_tw[2]; sh.phase = 'dock'; }
+        else { sh.phase = 'to'; const haveT = !!T; if(haveT) dockPoint(sh, T, _tw);
+          const blocked = haveT && T.occupied && T.holder !== sh.mol, holdR = 2.3*sh.R + 6, step = sh.speed*dt;
+          let dx = haveT ? _tw[0]-sh.cur[0] : 0, dy = haveT ? _tw[1]-sh.cur[1] : 0, dz = haveT ? _tw[2]-sh.cur[2] : 0, d = Math.hypot(dx,dy,dz) || 1e-3; const dSite = haveT ? d : Infinity;
           /* One carrier per site. While the site is taken the arriving shuttle aims at a point holdR out
              from it along its own bearing, so it hangs about outside the docked one - still wandering -
              and moves in the moment the site frees. */
-          if(blocked && dSite < holdR*1.1){ const k = holdR/Math.max(dSite, 1e-3); const tx = to[0]-dx*k, ty = to[1]-dy*k, tz = to[2]-dz*k; dx = tx-sh.cur[0]; dy = ty-sh.cur[1]; dz = tz-sh.cur[2]; d = Math.hypot(dx,dy,dz) || 1e-3; }
-          if(!blocked && dSite <= Math.max(step, 3)){ sh.cur[0]=to[0]; sh.cur[1]=to[1]; sh.cur[2]=to[2]; sh.phase = sh.phase === 'toB' ? 'dockB' : 'dockA'; sh.t = 0; siteOcc[key] = sh.mi; }
+          if(blocked && dSite < holdR*1.1){ const k = holdR/Math.max(dSite, 1e-3); const tx = _tw[0]-dx*k, ty = _tw[1]-dy*k, tz = _tw[2]-dz*k; dx = tx-sh.cur[0]; dy = ty-sh.cur[1]; dz = tz-sh.cur[2]; d = Math.hypot(dx,dy,dz) || 1e-3; }
+          if(haveT && !blocked && dSite <= Math.max(step, 3) && V.arrive(sh)){ sh.cur[0]=_tw[0]; sh.cur[1]=_tw[1]; sh.cur[2]=_tw[2]; sh.phase = 'dock'; }
           else {
             /* A wandering approach, not a bee-line: the heading is kicked about at random every frame and
                pulled toward the site - gently from afar, hard once close - so the molecule diffuses its
                way to the pocket. A quinone keeps to the membrane plane (its heading has no vertical part
                and its height eases onto the pocket's), a plastocyanin keeps below the lipid layer. Both
-               bounce off the box and are pushed out of every complex except the two they shuttle between. */
-            const pull = 3.0 + 120/Math.max(d, 15), wob = 1.6, rs = Math.sqrt(dt);   // still a wander, but with a real drift: the light reactions wait on these deliveries, and with pull 0.5 / wob 2.6 a plastoquinone took minutes to find b6f (owner 12.9.2026)
-            let hx = sh.h[0] + (dx/d)*pull*dt + (Math.random()-0.5)*wob*rs, hy = sh.h[1] + (dy/d)*pull*dt + (Math.random()-0.5)*wob*rs, hz = sh.h[2] + (dz/d)*pull*dt + (Math.random()-0.5)*wob*rs;
+               bounce off the box and are pushed out of every complex except the one they head for. */
+            const pull = haveT ? 3.0 + 120/Math.max(d, 15) : 0, wob = 1.6, rs = Math.sqrt(dt);
+            let hx = sh.h[0] + (haveT ? (dx/d)*pull*dt : 0) + (Math.random()-0.5)*wob*rs, hy = sh.h[1] + (haveT ? (dy/d)*pull*dt : 0) + (Math.random()-0.5)*wob*rs, hz = sh.h[2] + (haveT ? (dz/d)*pull*dt : 0) + (Math.random()-0.5)*wob*rs;
             if(sh.pq) hy = 0;
             const hl = Math.hypot(hx,hy,hz)||1; hx/=hl; hy/=hl; hz/=hl;
             let x = sh.cur[0]+hx*step, y = sh.cur[1]+hy*step, z = sh.cur[2]+hz*step;
-            if(sh.pq) y = to[1] + (sh.cur[1]-to[1])*Math.max(0, 1-dt*0.6);
-            else { const cap = MEMBRANE_Y - gMemHalfT - sh.R; if(y > cap && dSite > 40){ y = cap; hy = -Math.abs(hy); } /* under the lipid layer on the way, free to rise into the pocket once there: PSI's docking point sits above the cap and the plastocyanin hovered 14 units short of it forever (owner 12.9.2026) */ if(gBoxLo && y < gBoxLo.y + sh.R){ y = gBoxLo.y + sh.R; hy = Math.abs(hy); } }
+            if(sh.pq){ const ty = haveT ? _tw[1] : MEMBRANE_Y; y = ty + (sh.cur[1]-ty)*Math.max(0, 1-dt*0.6); }
+            else { const cap = MEMBRANE_Y - gMemHalfT - sh.R; if(y > cap && dSite > 40){ y = cap; hy = -Math.abs(hy); } if(gBoxLo && y < gBoxLo.y + sh.R){ y = gBoxLo.y + sh.R; hy = Math.abs(hy); } }
             let onShell = false;   // set below when a complex's shell pushes this frame - then the plane easing waits, so the carrier can slide round the shell
-            if(dSite > 60 && !sh.onShell){ z = gTasoZ + (z - gTasoZ)*Math.max(0, 1 - dt*2); }   // on the particle plane on the way, off it only into the pocket (a site can sit 30 units off the plane). The heading keeps its z part: a plastoquinone's heading has no y, and with z zeroed too it was one-dimensional - normalised back to +-1 every frame, so the pull toward b6f could never turn it round and a PQH2 that left the pocket the wrong way ran to the box wall and back (13.9.2026)
+            if(dSite > 60 && !sh.onShell){ z = gTasoZ + (z - gTasoZ)*Math.max(0, 1 - dt*2); }   // on the particle plane on the way, off it only into the pocket (a site can sit 30 units off the plane). The heading keeps its z part (13.9.2026: with hy = 0 and hz = 0 a quinone's heading was one-dimensional and could never turn round)
             if(gBoxLo){ if(x < gBoxLo.x+sh.R){ x = gBoxLo.x+sh.R; hx = Math.abs(hx); } else if(x > gBoxHi.x-sh.R){ x = gBoxHi.x-sh.R; hx = -Math.abs(hx); }
               if(z < gBoxLo.z+sh.R){ z = gBoxLo.z+sh.R; hz = Math.abs(hz); } else if(z > gBoxHi.z-sh.R){ z = gBoxHi.z-sh.R; hz = -Math.abs(hz); } }
-            for(let sI=0;sI<gHulls.length;sI++){ const hh=gHulls[sI]; if(!gMemBound[hh.mi] || mols[hh.mi].shuttle || hh.mi === sh.hostA || hh.mi === sh.hostB || sameKind(hh.mi, sh.hostB) || sameKind(hh.mi, sh.hostA)) continue;   // the row copies sit ON the originals once the RTS floor flattens z, so a copy's shell must not wall off the host's pocket (owner 12.9.2026)
+            const hostMi = (haveT && T.host) ? T.host.mi : -1;
+            for(let sI=0;sI<gHulls.length;sI++){ const hh=gHulls[sI]; if(!gMemBound[hh.mi] || mols[hh.mi].shuttle || hh.mi === hostMi || sameKind(hh.mi, hostMi)) continue;   // the row copies sit ON the originals once the RTS floor flattens z, so a copy's shell must not wall off the host's pocket (owner 12.9.2026)
               const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2]; const ex=x-ox, ey=y-oy, ez=z-oz, dd=Math.hypot(ex,ey,ez), minD=sh.R+hh.maxR; if(dd >= minD || dd < 1e-6) continue;
               const nx=ex/dd, ny=ey/dd, nz=ez/dd; x=ox+nx*minD; if(!sh.pq) y=oy+ny*minD; z=oz+nz*minD;
               onShell = true;
               /* SLIDE round the shell, do not bounce off it: the heading loses its inward part and keeps the rest, so the pull toward the
                  site (added again next frame) walks the carrier round the obstacle. A mirror bounce plus the pull was a standoff - four
-                 plastocyanins sat on NDH-1's shell between b6f and PSI for good, under the lipid cap with the site straight through the
-                 shell (13.9.2026). Sideways is preferred: the tangent toward the site, or a random one if the site is dead ahead. */
+                 plastocyanins sat on NDH-1's shell between b6f and PSI for good (13.9.2026). Sideways is preferred: the tangent toward
+                 the site, or a random one if the site is dead ahead. */
               const hn=hx*nx+hy*ny+hz*nz; if(hn < 0){ hx-=hn*nx; hy-=hn*ny; hz-=hn*nz; if(sh.pq) hy = 0;
-                if(hx*hx+hy*hy+hz*hz < 0.04){ let tx=(to[0]-x), ty=sh.pq ? 0 : (to[1]-y), tz=(to[2]-z); const tn=tx*nx+ty*ny+tz*nz; tx-=tn*nx; ty-=tn*ny; tz-=tn*nz; let tl=Math.hypot(tx,ty,tz);
+                if(hx*hx+hy*hy+hz*hz < 0.04){ let tx=(_tw[0]-x), ty=sh.pq ? 0 : (_tw[1]-y), tz=(_tw[2]-z); if(!haveT){ tx=Math.random()-0.5; ty=sh.pq ? 0 : Math.random()-0.5; tz=Math.random()-0.5; } const tn=tx*nx+ty*ny+tz*nz; tx-=tn*nx; ty-=tn*ny; tz-=tn*nz; let tl=Math.hypot(tx,ty,tz);
                   if(tl < 1e-3){ tx=Math.random()-0.5; ty=sh.pq ? 0 : Math.random()-0.5; tz=Math.random()-0.5; const t2=tx*nx+ty*ny+tz*nz; tx-=t2*nx; ty-=t2*ny; tz-=t2*nz; tl=Math.hypot(tx,ty,tz)||1; }
                   hx=tx/tl; hy=ty/tl; hz=tz/tl; } } }
             sh.onShell = onShell;
@@ -10137,33 +10150,28 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       return best; };
     window.__photons = () => ({ chlorophylls: N_CH, photons: N_PH, glowing: glows.size, gSpeed, chlSample: [0, (N_CH/2)|0, N_CH-1].map(k => [chW[k*3]|0, chW[k*3+1]|0, chW[k*3+2]|0]), photonSample: [0,1].map(i => [px[i*3]|0, px[i*3+1]|0, px[i*3+2]|0]), shuttles: gShuttles.map(s => ({mi:s.mi, pq:s.pq, phase:s.phase, at:s.cur.map(v=>v|0)})) });
   }
-  /* ── VALOREAKTIOT (owner 12.9.2026) ─────────────────────────────────────────────────────────────────────
-     The light reactions run as a machine on the sheet's REAL cofactors. Roles are read off the structures by geometry
-     (the residue tables cannot tell P680 from an antenna chlorophyll):
-       PSII, per reaction centre = per Mn4CaO5 cluster: OEC -> Tyr Z (the tyrosine markTyrZ found next to it) -> P680 (the
-         two chlorophylls nearest Tyr Z) -> ChlD1 (the chlorophyll nearest PheoD1) -> PheoD1 (the pheophytin nearest Tyr Z)
-         -> QA (the quinone nearest PheoD1) -> non-heme Fe (the one-atom Fe group) -> QB (the quinone on the far side of
-         the Fe, or the mirror point if the pocket is empty). Every other chlorophyll is antenna of the nearest centre.
-       b6f, per monomer (the hemes split by their principal axis in the membrane plane), hemes by height: f (lumenal)
-         < bL < bH < cn (stromal), the Rieske cluster nearest heme f, Qo next to bL, Qi beyond cn.
-       PSI: A1 = the phylloquinones, FX the Fe4S4 nearest them, FA the next, FB the last, and along the axis FX -> A1
-         the chlorophylls on it: the two furthest out are P700, the ones by A1 are A0.
-     Then, each frame: a photon absorbed by any chlorophyll becomes an EXCITON that hops chlorophyll to chlorophyll,
-     mostly downhill toward the centre, and dies as heat if the centre is closed. At an open P680 it separates charge:
-     an electron (the bigelec sprite) hops P680 -> PheoD1 -> QA -> QB, P680+ is refilled from Tyr Z, Tyr Z from the OEC,
-     whose S-state counts to 4 and then splits two of the free WATER molecules (pulled into the cluster) into an O2
-     (a free O2 molecule released at the lumenal face) and four protons (free protons put into the lumen). QB with two
-     electrons takes two free protons from the stroma and becomes PQH2, which the docked plastoquinone shuttle carries
-     to cyt b6f: two protons out into the lumen at Qo, one electron Rieske -> heme f -> plastocyanin (the docked PC
-     shuttle) -> P700+, the other bL -> bH -> cn -> Qi, where two electrons plus two stromal protons run the Q cycle
-     back through Qo. P700's electron runs A0 -> A1 -> FX -> FA -> FB -> ferredoxin -> FNR, two of them plus a proton make
-     NADPH from a free NADP+. Protons are the same 20000 simulated ones (held while bound, parked out of sight while they
-     ride inside PQH2), so the lumen really does fill from the stroma and ATP synthase runs them back. */
+  /* ── VALOREAKTIOT 2 (owner 13.9.2026: 'copy the code logic and style from MoleculeBody2D - replace') ────────────────────
+     A port of ProjectMPB's MoleculeBody2D.gd (Godot, 2D) and its per-molecule scripts onto the real structures. The 2D
+     model is an AGENT system: every molecule - complexes, cofactors, electrons, carriers, water, protons - is a Mol with
+     bind SLOTS. A free body roams; a slot that can take it PULLS it (hard target); when it touches the slot it BINDS
+     (glides in, is consumed, the slot lights up); a slot RELEASES its content as a fresh body when the rules say so; an
+     electron slot releases only to an ACCEPTOR slot whose owner is the next link (place_in_the_chain + 1). Excitation is a
+     separate energy that hops pigment to pigment by the same ordering, dies as heat after 5 s, and a reaction centre that
+     is excited AND holds an electron ejects it. The rulebook (possible_interactions), the guards (binding / releasing /
+     exiting / transferring / shaking), the energy bookkeeping (photon 0.292 aJ, x0.9 per bind, 0 on heat) and the
+     per-molecule hooks (BINDING/RELEASING/EXCITING_special_conditions/actions, check_soft_target) are the 2D ones.
+       Mapping onto the 3D sheet: a complex is a model, its cofactors (found by the same geometry role-finder as before:
+     P680, ChlD1, PheoD1, QA, Fe, the QB pocket, Rieske, hemes f/bL/bH/cn, Qo/Qi, Cu, P700, A0, FX/FA/FB, FAD ...) are Mols
+     living in the model's frame, each with an electron slot; the plastoquinone / plastocyanin models are the 2D
+     plastoquinone_B / plastocyanin bodies (the shuttle mover carries them to their soft target and docks = binds); the
+     two ferredoxins and VDE are steered bouncers; water / O2 / NADP+ / ATP / ADP / Pi are the analytic free molecules;
+     protons the simulated ones; electrons the bigelec sprites. Two additions the 2D code did not need: LANES (a
+     place_in_the_chain is matched within a lane - 'p0' one PSII centre, 'b1.lo' the b-heme arm of a b6f monomer - because
+     four b6f monomers and two PSII centres share one sheet) and antenna PLACES by distance band to the reaction centre (the
+     2D antenna had six ordered pigments, PSI has 260). Everything runs as per-frame state machines (no promises), so the
+     speed slider and pause govern it. */
   { const G = etcGroups, M = mols;
     const labelOf = mi => (M[mi] && M[mi].cfg && M[mi].cfg.label) || '';
-    /* which model a cofactor group belongs to: the smallest bounding box that holds its centre - but never a shuttle clone or a
-       display molecule (chlorophyll / plastoquinone / NADPH) when a real complex holds it too: a plastoquinone shuttle parked in
-       PSII's QB pocket has a tiny box that swallows the reaction-centre chlorophylls, and modelOf would then pin them to the shuttle */
     const grpModel = g => { let best = -1, bv = Infinity, bestAny = -1, bvAny = Infinity;
       for(let mi=0; mi<M.length; mi++){ const c = mInfo[mi]; if(!c || g.cx < c.x0 || g.cx > c.x1 || g.cy < c.y0 || g.cy > c.y1 || g.cz < c.z0 || g.cz > c.z1) continue;
         if(c.vol < bvAny){ bvAny = c.vol; bestAny = mi; } const m = M[mi]; if(m.shuttle || /^(chlorophyll|plastoquinone|nadph)$/i.test((m.cfg && m.cfg.match) || '')) continue; if(c.vol < bv){ bv = c.vol; best = mi; } }
@@ -10174,267 +10182,597 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const ofType = (mi, t) => { const out = []; for(let gi=0; gi<G.length; gi++) if(G[gi].n && G[gi].type === t && grpMi[gi] === mi) out.push(gi); return out; };
     const nearest = (list, p, excl) => { let b=-1, bd=Infinity; for(const gi of list){ if(excl && excl.has(gi)) continue; const d=d3(cen(gi), p); if(d < bd){ bd=d; b=gi; } } return b; };
     const wpt = (mi, p, out) => { const m=gModelXform, o=mi*16, x=p[0], y=p[1], z=p[2]; out[0]=m[o]*x+m[o+4]*y+m[o+8]*z+m[o+12]; out[1]=m[o+1]*x+m[o+5]*y+m[o+9]*z+m[o+13]; out[2]=m[o+2]*x+m[o+6]*y+m[o+10]*z+m[o+14]; return out; };
-    const S = (mi, p) => ({ mi, p });                       // a site: a baked point in a model's frame (follows the model)
-    const SG = gi => S(grpMi[gi], cen(gi));                 // a cofactor group as a site
-    const SW = (site, out) => wpt(site.mi, site.p, out);    // its world position now
-    const cenSite = mi => S(mi, [mInfo[mi].cx, mInfo[mi].cy, mInfo[mi].cz]);
-    const stats = { o2:0, nadph:0, hplus:0, fotonit:0, lampo:0 };
+    const _a = [0,0,0], _b = [0,0,0], _c = [0,0,0];
+    const hullR = mi => { const h = gHulls.find(q => q.mi === mi); return h ? h.maxR : 30; };
+    const stats = { o2:0, nadph:0, atp:0, glukoosi:0, hplus:0, fotonit:0, lampo:0, vaurio:0 };
 
-    /* ── roles ── */
+    /* ── the speed table (globals.gd): one slider, three size classes ── */
+    const SPEED = { large: 8, mid: 30, small: 90 };   // world units per second at 1x - large complexes, carriers, electrons/protons (2D: 0.25 / 1 / 2 of the slider)
+    const HOP = 0.3;              // s, one excitation hop (2D: 0.8 s over six pigments - the 3D antenna is eight bands deep, see BAND)
+    const HEAT_S = 5.0;           // s, excitation not passed on dies as heat (2D)
+    const RC_HOLD = 1.0;          // s, a reaction centre stays excited before it ejects the electron (P680.gd / P700.gd)
+    const PHOTON_E = 0.292;       // aJ (photon.gd)
+    const BIND_LOSS = 0.9;        // energy kept per electron bind (try_BINDING)
+    const NEAR_COF = 45;          // "Nearby_area" of a cofactor: how far an electron slot looks for its acceptor (A0 -> FX is 39 in 9E0J, no A1 between)
+    const NEAR_DOCK = 90;         // "Nearby_area" of a docking slot: how far it pulls a carrier / free molecule
+    const TOUCH = 1.5;            // "Touch_area": an electron this close to its slot binds
+    const BAND = 12;              // (first cut: distance bands - replaced by hop depth, see orderAntenna)
+    const NB_R = 24;              // two pigments this close are neighbours (the exciton graph, as before)
+
+    /* ── possible_interactions (verbatim from MoleculeBody2D.gd) ── */
+    const INTER = {
+      OEC:['electron','H2O'], P680:['electron'], P700:['electron'], pheophytin:['electron'], plastoquinone_A:['electron'],
+      plastoquinone_B:['electron','proton'], photosystem_II:['plastoquinone_B','VDE'], cytochrome_b6f:['plastoquinone_B','plastocyanin'],
+      heme:['electron'], plastocyanin:['electron'], iron_sulfur_cluster_inside_cytochrome_b6f:['electron'], photosystem_I:['plastocyanin'],
+      chlorophyll_A_PSI:['electron'], phylloquinone:['electron'], iron_sulfur_cluster_inside_photosystem_I:['electron'],
+      photosystem_I_dock:['plastocyanin','ferredoxin'],   // (3D: the ferredoxin DOCKS on PSI's stromal face; the 2D one hovered by FB)
+      RuBisCO:['CO2','NADP','ATP'], ferredoxin:['electron'], FNR:['ferredoxin','NADP','electron'], NADP:['electron','proton'],
+      'ATP-synthase':['ADP','phosphate','proton'], tyrosine:['electron','O2'], 'Fe3+':['electron'], 'NDH-1':['ferredoxin','plastoquinone_B'],
+      chlorophyll_A:['electron'] };   // (chlorophyll_A: ChlD1 relays the electron P680 -> PheoD1 in the structure; the 2D scene had no accessory chlorophyll)
+
+    /* ── Mol: the node contract of MoleculeBody2D ──
+       name = molecule_name (also a tag), place = place_in_the_chain, lane = which chain it counts in, slots = BindSites (each a Mol
+       with isSlot, occupied, energy, pulled), host = the Mol the slot belongs to (body_that_I_am_bound_to), mi/p = the baked point in a
+       model's frame (follows the model), body = how a FREE agent moves ('elec' sprite / 'sh' shuttle / 'bnc' bouncer / 'free' analytic
+       molecule / 'o' oxygen sprite), hard/soft = targets (slots), flags = the re-entrancy guards, hooks = the per-molecule overrides. */
+    let molSeq = 0; const ALL = [];
+    class Mol { constructor(o){ this.id = molSeq++; this.name = o.name; this.tags = new Set([o.name, ...(o.tags||[])]); this.place = o.place ?? null; this.lane = o.lane || null;
+        this.mi = o.mi ?? -1; this.p = o.p || null; this.host = o.host || null; this.isSlot = !!o.isSlot; this.occupied = false; this.holder = null;   // holder: the Mol docked IN this slot (a carrier keeps its own sub-slots)
+        this.energy = 0; this.pulled = new Set(); this.hard = null; this.soft = null; this.flags = {}; this.slots = []; this.body = o.body || null; this.speed = o.speed || 0;
+        this.excited = false; this.damaged = false; this.heatT = 0; this.transfer = null; this.timers = []; this.gi = o.gi ?? -1; this.near = o.near || NEAR_COF; this.x = 0; this.y = 0; this.z = 0; this.dir = [0,1,0];
+        this.hooks = Object.assign({ bindCond: () => true, bindAct: () => {}, relCond: () => true, relAct: () => {}, excCond: () => true, excAct: () => {}, softTarget: () => {}, touchLocal: () => {} }, o.hooks || {});
+        this.alive = true; ALL.push(this); }
+      tag(t){ this.tags.add(t); } has(t){ return this.tags.has(t); }
+      slot(name, o){ const s = new Mol(Object.assign({ name, isSlot:true, host:this, mi:this.mi, place:o && o.place != null ? o.place : this.place, lane:this.lane }, o || {})); s.host = this; this.slots.push(s); return s; }
+      slotNamed(n){ return this.slots.find(s => s.name === n) || null; }
+      slotsNamed(n){ return this.slots.filter(s => s.name === n || s.name.startsWith(n + '_')); }
+      /* world position: a free body's own, a slot's / cofactor's through its model (a docked carrier's sub-slots ride the carrier) */
+      world(out){ if(this.body && !this.isSlot){ out[0]=this.x; out[1]=this.y; out[2]=this.z; return out; }
+        if(this.isSlot && this.host && this.host.body){ this.host.world(out); if(this.p){ out[0]+=this.p[0]; out[1]+=this.p[1]; out[2]+=this.p[2]; } return out; }
+        if(this.p && this.mi >= 0) return wpt(this.mi, this.p, out); if(this.host) return this.host.world(out); out[0]=this.x; out[1]=this.y; out[2]=this.z; return out; }
+      after(t, fn){ this.timers.push({ t, fn }); }
+      filled(n){ const s = this.slotNamed(n); return !!(s && s.occupied); }
+      allFilled(prefix){ const ss = prefix ? this.slotsNamed(prefix) : this.slots; return ss.length > 0 && ss.every(s => s.occupied); }
+      noneFilled(prefix){ const ss = prefix ? this.slotsNamed(prefix) : this.slots; return ss.every(s => !s.occupied); }
+      chainPlace(){ return this.isSlot ? this.host.chainPlace() : (this.dockedAt ? this.dockedAt.place : this.place); }   // a docked carrier counts as the slot it sits in (2D: its state was copied into the slot)
+      chainLane(){ return this.isSlot ? this.host.chainLane() : (this.dockedAt ? this.dockedAt.lane : this.lane); }
+      owner(){ return this.isSlot ? this.host : this; } }
+    const byTag = t => ALL.filter(m => m.alive && m.has(t));
+    const laneOk = (giver, taker) => { const a = giver.chainLane(), b = taker.chainLane(); return !a || !b || b === a || b.startsWith(a + '.'); };   // a lane matches itself and its sub-arms ('b0' -> 'b0.hi', 'b0.lo')
+
+    /* ── the roles, read off the structures (unchanged geometry from the first machine) ── only the models of THIS sheet: the cell
+       carries a second copy of the complexes in another thylakoid thousands of units away, and a quinone sent there fell out of the box */
+    const psii0 = M.findIndex(m => m.cfg && /photosystem ii/i.test(m.cfg.label || ''));
+    const onSheet = mi => { if(psii0 < 0) return true; const a = mInfo[psii0], b = mInfo[mi]; if(!a || !b) return false; return Math.hypot(a.cx + gModelOff[psii0*3] - b.cx - gModelOff[mi*3], a.cy + gModelOff[psii0*3+1] - b.cy - gModelOff[mi*3+1], a.cz + gModelOff[psii0*3+2] - b.cz - gModelOff[mi*3+2]) < 2500; };
     const units = [];   // PSII reaction centres
-    for(let mi=0; mi<M.length; mi++){ if(!/photosystem ii/i.test(labelOf(mi))) continue;
+    for(let mi=0; mi<M.length; mi++){ if(!/photosystem ii/i.test(labelOf(mi)) || !onSheet(mi)) continue;
       const oecG = ofType(mi, 1); if(!oecG.length) continue;
       const used = new Set(), mine = [];
       for(const g0 of oecG){ if(used.has(g0)) continue; const cl = [g0]; used.add(g0);
         for(const g of oecG){ if(!used.has(g) && d3(cen(g), cen(g0)) < 10){ cl.push(g); used.add(g); } }
         const c = [0,0,0]; for(const g of cl){ c[0] += G[g].cx/cl.length; c[1] += G[g].cy/cl.length; c[2] += G[g].cz/cl.length; }
-        mine.push({ kind:'PSII', mi, oec: cl, oecC: c }); }
-      const tyrs = ofType(mi, 9), pheos = ofType(mi, 2), quins = ofType(mi, 3), chls = ofType(mi, 7), fes = ofType(mi, 5).filter(g => G[g].n <= 2);
+        mine.push({ mi, oec: cl, oecC: c }); }
+      const tyrs = ofType(mi, 9), pheos = ofType(mi, 2), quins = ofType(mi, 3), chls = ofType(mi, 7), cars = ofType(mi, 8), fes = ofType(mi, 5).filter(g => G[g].n <= 2);
       for(const u of mine){
         u.tyrZ = nearest(tyrs, u.oecC); const tz = u.tyrZ >= 0 ? cen(u.tyrZ) : u.oecC;
         u.pheo = nearest(pheos, tz); const ph = u.pheo >= 0 ? cen(u.pheo) : tz;
         u.qa = nearest(quins, ph); const qa = u.qa >= 0 ? cen(u.qa) : ph;
-        u.fe = nearest(fes, qa); if(u.fe >= 0 && d3(cen(u.fe), qa) > 12) u.fe = -1;   // the non-heme iron sits 7 A from QA - anything further is some other Fe
+        u.fe = nearest(fes, qa); if(u.fe >= 0 && d3(cen(u.fe), qa) > 12) u.fe = -1;
         const ex = new Set(); u.p680 = []; for(let k=0;k<2;k++){ const g = nearest(chls, tz, ex); if(g >= 0){ ex.add(g); u.p680.push(g); } }
-        /* QB: the quinone across the non-heme Fe from QA, else the C2 image of QA about the reaction centre's axis (through the
-           centroid of the two pheophytins and the P680 pair, along the membrane normal) - same height as QA, on the D1 side */
         { const pts = [u.pheo, nearest(pheos, ph, new Set([u.pheo])), ...u.p680].filter(g => g >= 0).map(cen); const Mc = [0,0,0]; for(const c of pts){ Mc[0] += c[0]/pts.length; Mc[1] += c[1]/pts.length; Mc[2] += c[2]/pts.length; }
           const c2 = [2*Mc[0]-qa[0], qa[1], 2*Mc[2]-qa[2]];
           let mir = c2; if(u.fe >= 0){ const fe = cen(u.fe), m2 = [2*fe[0]-qa[0], 2*fe[1]-qa[1], 2*fe[2]-qa[2]]; if(Math.abs(m2[1]-qa[1]) < 6) mir = m2; }
           const qb = nearest(quins, mir, new Set([u.qa])); u.qb = (qb >= 0 && d3(cen(qb), mir) < 10) ? qb : -1; u.qbSite = u.qb >= 0 ? cen(u.qb) : mir; }
         u.chlD1 = nearest(chls, ph, ex); if(u.chlD1 >= 0) ex.add(u.chlD1);
-        u.rc = new Set([...u.p680, u.chlD1].filter(g => g >= 0)); u.ant = [];
-        Object.assign(u, { p680ox:false, tyrOx:false, s:0, pheoE:null, qaE:null, qbE:[], qbH:0, pqh2:false, busyOEC:false, tyrBusy:false, oecBusy:false, qbBusy:false, qbHBusy:false, served:false, pqh2T:0 }); }
+        u.rc = new Set([...u.p680, u.chlD1].filter(g => g >= 0)); u.ant = []; u.cars = []; }
       for(const g of chls){ if(mine.some(u => u.rc.has(g))) continue; let b=null, bd=Infinity;
         for(const u of mine){ const t = u.chlD1 >= 0 ? u.chlD1 : (u.p680[0] ?? -1); if(t < 0) continue; const d = d3(cen(g), cen(t)); if(d < bd){ bd=d; b=u; } } if(b) b.ant.push(g); }
+      for(const g of cars){ let b=null, bd=Infinity; for(const u of mine){ const t = u.chlD1 >= 0 ? u.chlD1 : (u.p680[0] ?? -1); if(t < 0) continue; const d = d3(cen(g), cen(t)); if(d < bd){ bd=d; b=u; } } if(b) b.cars.push(g); }
       for(const u of mine) if(u.p680.length) units.push(u); }
     const b6fs = [];
-    for(let mi=0; mi<M.length; mi++){ if(!/b6f/i.test(labelOf(mi))) continue;
+    for(let mi=0; mi<M.length; mi++){ if(!/b6f/i.test(labelOf(mi)) || !onSheet(mi)) continue;
       const hemes = ofType(mi, 4), fes = ofType(mi, 5), quins = ofType(mi, 3); if(hemes.length < 2) continue;
       let cx=0, cz=0; for(const g of hemes){ cx += G[g].cx/hemes.length; cz += G[g].cz/hemes.length; }
       let sxx=0, sxz=0, szz=0; for(const g of hemes){ const dx=G[g].cx-cx, dz=G[g].cz-cz; sxx+=dx*dx; sxz+=dx*dz; szz+=dz*dz; }
       const ang = 0.5*Math.atan2(2*sxz, sxx-szz), ax = Math.cos(ang), az = Math.sin(ang);
       const side = g => ((G[g].cx-cx)*ax + (G[g].cz-cz)*az) >= 0 ? 1 : 0;
       for(const sd of [0, 1]){ const hs = hemes.filter(g => side(g) === sd).sort((a, b) => G[a].cy - G[b].cy); if(hs.length < 2) continue;
-        const u = { kind:'b6f', mi, f: hs[0], bL: hs[1], bH: hs[Math.min(2, hs.length-1)], cn: hs[hs.length-1], fE:null, qi:[], qiH:0, qiBusy:false, cycleBusy:false };
+        const u = { mi, f: hs[0], bL: hs[1], bH: hs[Math.min(2, hs.length-1)], cn: hs[hs.length-1] };
         u.rieske = nearest(fes, cen(u.f)); const qs = quins.filter(g => side(g) === sd);
         { const q = nearest(qs, cen(u.bL)); if(q >= 0 && d3(cen(q), cen(u.bL)) < 22) u.qoSite = cen(q); else { const a = cen(u.bL), b = u.rieske >= 0 ? cen(u.rieske) : cen(u.f); u.qoSite = [(a[0]+b[0])/2, (a[1]+b[1])/2, (a[2]+b[2])/2]; } }
         { const q = nearest(qs, cen(u.cn)); if(q >= 0 && d3(cen(q), cen(u.cn)) < 22 && d3(cen(q), u.qoSite) > 8) u.qiSite = cen(q); else { const a = cen(u.bH), b = cen(u.cn); u.qiSite = [b[0]+(b[0]-a[0])*0.6, b[1]+(b[1]-a[1])*0.6, b[2]+(b[2]-a[2])*0.6]; } }
         b6fs.push(u); } }
     const psis = [];
-    for(let mi=0; mi<M.length; mi++){ if(!/photosystem i$/i.test(labelOf(mi))) continue;
-      const quins = ofType(mi, 3), fes = ofType(mi, 5).filter(g => G[g].n >= 4), chls = ofType(mi, 7); if(!chls.length) continue;
-      const u = { kind:'PSI', mi, p700ox:false, busy:false, fbE:null, ant:[] };
+    for(let mi=0; mi<M.length; mi++){ if(!/photosystem i$/i.test(labelOf(mi)) || !onSheet(mi)) continue;
+      const quins = ofType(mi, 3), fes = ofType(mi, 5).filter(g => G[g].n >= 4), chls = ofType(mi, 7), cars = ofType(mi, 8); if(!chls.length) continue;
+      const u = { mi, ant:[], cars };
       let qm = null; if(quins.length){ qm = [0,0,0]; for(const g of quins){ qm[0] += G[g].cx/quins.length; qm[1] += G[g].cy/quins.length; qm[2] += G[g].cz/quins.length; } }
       u.fx = qm ? nearest(fes, qm) : (fes.length ? fes.reduce((a, b) => G[a].cy < G[b].cy ? a : b) : -1);
       const exf = new Set([u.fx]); u.fa = u.fx >= 0 ? nearest(fes, cen(u.fx), exf) : -1; if(u.fa >= 0) exf.add(u.fa); u.fb = u.fa >= 0 ? nearest(fes, cen(u.fa), exf) : -1;
       let chlY = 0; for(const g of chls) chlY += G[g].cy/chls.length;
-      const A = u.fx >= 0 ? cen(u.fx) : [mInfo[mi].cx, mInfo[mi].y1, mInfo[mi].cz], dirY = u.fx >= 0 ? Math.sign(chlY - A[1]) || -1 : -1;   // the antenna lies on the membrane side of FX: that is the way to P700
-      const B = qm || (u.fx >= 0 ? [A[0], A[1] + 45*dirY, A[2]] : [mInfo[mi].cx, mInfo[mi].y0, mInfo[mi].cz]);   // no phylloquinone in this structure (9E0J carries none): the axis is the membrane normal from FX toward the antenna
-      u.orient = { fxY: +A[1].toFixed(1), chlY: +chlY.toFixed(1), y0: +mInfo[mi].y0.toFixed(1), y1: +mInfo[mi].y1.toFixed(1), dirY };
+      const A = u.fx >= 0 ? cen(u.fx) : [mInfo[mi].cx, mInfo[mi].y1, mInfo[mi].cz], dirY = u.fx >= 0 ? Math.sign(chlY - A[1]) || -1 : -1;
+      const B = qm || (u.fx >= 0 ? [A[0], A[1] + 45*dirY, A[2]] : [mInfo[mi].cx, mInfo[mi].y0, mInfo[mi].cz]);
       const ab = [B[0]-A[0], B[1]-A[1], B[2]-A[2]], L2 = ab[0]*ab[0]+ab[1]*ab[1]+ab[2]*ab[2] || 1;
       const par = chls.map(g => { const c = cen(g), t = ((c[0]-A[0])*ab[0]+(c[1]-A[1])*ab[1]+(c[2]-A[2])*ab[2])/L2; const px=A[0]+ab[0]*t, py=A[1]+ab[1]*t, pz=A[2]+ab[2]*t; return { g, t, r: Math.hypot(c[0]-px, c[1]-py, c[2]-pz) }; }).filter(o => o.r < 10 && o.t > (qm ? 0.8 : 0.25)).sort((a, b) => b.t - a.t);
       u.p700 = par.slice(0, 2).map(o => o.g); const rest = par.slice(2).sort((a, b) => a.t - b.t); u.a0 = rest.length ? rest[0].g : -1;
-      u.dbg = chls.map(g => { const c = cen(g), t = ((c[0]-A[0])*ab[0]+(c[1]-A[1])*ab[1]+(c[2]-A[2])*ab[2])/L2; const px=A[0]+ab[0]*t, py=A[1]+ab[1]*t, pz=A[2]+ab[2]*t; return [g, +t.toFixed(2), +Math.hypot(c[0]-px, c[1]-py, c[2]-pz).toFixed(1)]; }).sort((a, b) => a[2] - b[2]).slice(0, 10);   // dev: the ten chlorophylls nearest the axis (group, t, r)
       if(!u.p700.length) u.p700 = [nearest(chls, B)];
       u.a1 = (u.a0 >= 0 && quins.length) ? nearest(quins, cen(u.a0)) : (quins.length ? quins[0] : -1);
       u.rc = new Set([...u.p700, u.a0].filter(g => g >= 0)); for(const g of chls) if(!u.rc.has(g)) u.ant.push(g);
+      u.fdDir = [A[0]-B[0], A[1]-B[1], A[2]-B[2]];   // the axis out through FB: a ferredoxin docks along it, just outside the hull (see fdSlot)
       psis.push(u); }
-    const fds = [], fnrs = [];
-    for(let mi=0; mi<M.length; mi++){ const l = labelOf(mi); if(/ferredoxin/i.test(l)){ const f = ofType(mi, 5); fds.push({ mi, site: f.length ? SG(f[0]) : cenSite(mi), e:null, busy:false, holdT:0 }); }
-      else if(/^FNR/i.test(l)){ const n = ofType(mi, 10); fnrs.push({ mi, site: n.length ? SG(n[0]) : cenSite(mi), e:[], busy:false }); } }
-    const cuSite = sh => { const cu = ofType(sh.mi, 6); return cu.length ? SG(cu[0]) : cenSite(sh.mi); };
-    // exciton graph: chlorophylls within 17 A are neighbours, the target is the centre's first chlorophyll
-    for(const u of [...units, ...psis]){ const list = [...u.ant, ...u.rc]; u.nb = new Map();
-      for(const a of list){ const arr = []; for(const b of list){ if(a === b) continue; const d = d3(cen(a), cen(b)); if(d < 24) arr.push({ g:b, d }); } u.nb.set(a, arr); }
-      u.rcTarget = u.kind === 'PSII' ? (u.chlD1 >= 0 ? u.chlD1 : u.p680[0]) : u.p700[0]; u.chlSet = new Set(list); }
-    const unitOfChl = new Map(); for(const u of [...units, ...psis]) for(const g of u.chlSet) unitOfChl.set(g, u);
-    // the shuttles: which PSII pocket a plastoquinone serves, which b6f monomer and PSI each carrier docks at
-    for(const u of units) u.served = gShuttles.some(sh => sh.pq && sh.hostA === u.mi);
-    { let rr = 0; for(const sh of gShuttles){ sh.cargoE = null; sh.cargoH = null; sh.loading = false; sh.waitT = 0;
-        if(sh.pq){ const cands = units.filter(u => u.mi === sh.hostA); if(cands.length){ const u = cands[rr++ % cands.length]; sh.unit = u; sh.unitKey = String(units.indexOf(u)); sh.A = u.qbSite; }
-          let b=null, bd=Infinity; for(const u of b6fs){ if(u.mi !== sh.hostB) continue; const d = d3(u.qoSite, sh.B); if(d < bd){ bd=d; b=u; } } sh.b6f = b; }
-        else { let b=null, bd=Infinity; for(const u of b6fs){ if(u.mi !== sh.hostA) continue; const d = d3(cen(u.f), sh.A); if(d < bd){ bd=d; b=u; } } sh.b6f = b; sh.psi = psis.find(u => u.mi === sh.hostB) || psis[0] || null; } } }
+    /* The antenna's place_in_the_chain: the 2D scene had six pigments numbered by hand toward the centre; here each pigment's place is
+       (centre's place - 1 - its hop depth) over the neighbour graph (pigments within NB_R), so every pigment has a place+1 neighbour in
+       reach - its BFS parent - and excitation funnels to the centre exactly as the 2D rule intends. A pigment no path reaches keeps
+       place -99 (its excitation dies as heat). */
+    const orderAntenna = (rc, list) => { const pos = new Map(); const w = [0,0,0]; for(const m of [rc, ...list]){ m.world(w); pos.set(m, [w[0], w[1], w[2]]); }
+      for(const m of list) m.place = -99; const q = [rc]; const depth = new Map([[rc, 0]]);
+      while(q.length){ const a = q.shift(), pa = pos.get(a), da = depth.get(a); for(const b of list){ if(depth.has(b)) continue; const pb = pos.get(b); if(Math.hypot(pa[0]-pb[0], pa[1]-pb[1], pa[2]-pb[2]) > NB_R) continue; depth.set(b, da + 1); b.place = rc.place - (da + 1); q.push(b); } } };
+    const fnrMis = [], fdMis = [], ndhMis = [], atpMis = [], rubMis = [], vdeMis = [];
+    for(let mi=0; mi<M.length; mi++){ const l = labelOf(mi); if(!M[mi].cfg || M[mi].shuttle || !onSheet(mi)) continue;
+      if(/ferredoxin/i.test(l)) fdMis.push(mi); else if(/^FNR/i.test(l)) fnrMis.push(mi); else if(/NDH-1/i.test(l)) ndhMis.push(mi); else if(/ATP synthase/i.test(l)) atpMis.push(mi); else if(/RuBisCO/i.test(l)) rubMis.push(mi); else if(/violaxanthin de-epoxidase/i.test(l)) vdeMis.push(mi); }
     if(!units.length && !psis.length){ console.warn('valoreaktiot: ei reaktiokeskuksia (PSII/PSI puuttuu)'); }
     else {
-    console.log('valoreaktiot: PSII-keskuksia ' + units.length + ' (palveltuja ' + units.filter(u => u.served).length + '), b6f-monomeereja ' + b6fs.length + ', PSI ' + psis.length + ', Fd ' + fds.length + ', FNR ' + fnrs.length);
+    console.log('valoreaktiot 2: PSII ' + units.length + ', b6f ' + b6fs.length + ', PSI ' + psis.length + ', Fd ' + fdMis.length + ', FNR ' + fnrMis.length + ', NDH-1 ' + ndhMis.length + ', ATP-syntaasi ' + atpMis.length + ', RuBisCO ' + rubMis.length + ', VDE ' + vdeMis.length);
 
-    /* ── the sprites: electrons (the bigelec glint + corona, on top of everything), exciton and heat glows ── */
+    /* ── building the Mols ── a cofactor Mol at a group's centre, in its model's frame, with one electron slot */
+    const cofMols = new Map();   // group index -> Mol
+    const cof = (gi, name, place, lane, tags, slotNames) => { if(gi < 0) return null; const m = new Mol({ name, place, lane, mi: grpMi[gi], p: cen(gi), gi, tags }); for(const s of (slotNames || ['electron'])) m.slot(s); cofMols.set(gi, m); return m; };
+    const pt = (mi, p, name, place, lane, tags, slotNames) => { const m = new Mol({ name, place, lane, mi, p, tags }); for(const s of (slotNames || ['electron'])) m.slot(s); return m; };
+    const rcOf = new Map();   // chlorophyll / carotenoid group -> its photosystem record
+    const antenna = [];       // every pigment Mol (excitation runs over these)
+
+    /* PSII: OEC 2 -> Tyr Z 3 -> P680 4 -> ChlD1 5 -> PheoD1 6 -> QA 7 -> Fe 8 -> the QB pocket 9 (lane p<k>) - the 2D numbers with the
+       accessory chlorophyll and the non-heme iron as their own stops. Antenna: places 3, 2, 1, 0 ... by distance band to ChlD1. */
+    units.forEach((u, k) => { const L = 'p' + k, mi = u.mi;
+      u.psii = new Mol({ name:'photosystem_II', place:-1, lane:L, mi, p:[mInfo[mi].cx, mInfo[mi].cy, mInfo[mi].cz], hooks:{
+        bindCond: (body, slot) => { if(body.has('plastoquinone_B')) return body.noneFilled();   // Photosystem_II.gd: an EMPTY plastoquinone docks
+          return true; },
+        relCond: (slot) => { if(slot.name === 'plastoquinone_B') return !!(slot.holder && slot.holder.allFilled());   // it leaves FULL (2 e-, 2 H+)
+          if(slot.name === 'VDE') return slot.vdeT >= 7.0; return true; } } });
+      u.oecM = pt(mi, u.oecC, 'OEC', 2, L, [], ['electron', 'H2O']); u.oecM.water = 0;   // water state: 0 empty, 1 H2O, 2 OH (OEC.gd try_to_remove_electron_from_water)
+      const h2o = u.oecM.slotNamed('H2O'); h2o.near = 400; h2o.side = -1; h2o.free = 'w';   // the free water keeps clear of the thylakoid band: the nearest is ~300 away
+      u.oecM.hooks.relCond = slot => slot.name !== 'H2O';   // OEC.gd: water is never released as water
+      u.oecM.hooks.bindAct = () => removeElectronFromWater(u.oecM); u.oecM.hooks.relAct = () => removeElectronFromWater(u.oecM);
+      u.tyrM = cof(u.tyrZ, 'tyrosine', 3, L, [], ['electron', 'O2']); if(u.tyrM){ u.tyrM.original = 3; u.tyrM.near = 40; const o2 = u.tyrM.slotNamed('O2'); o2.near = 60;
+        u.tyrM.hooks.bindCond = body => body.has('O2') ? body.excited : true;   // tyrosine.gd: only EXCITED oxygen binds (photodamage)
+        u.tyrM.hooks.bindAct = slot => { if(slot.name !== 'O2') return; slot.excited = true; u.tyrM.damaged = true; u.tyrM.place = 0; stats.vaurio++;   // damaged: out of the chain for 5 s
+          u.tyrM.after(5.0, () => { slot.excited = false; u.tyrM.damaged = false; u.tyrM.place = u.tyrM.original; }); };
+        u.tyrM.hooks.relCond = slot => slot.name === 'O2' ? !slot.excited && !u.tyrM.damaged : !u.tyrM.damaged; }
+      u.p680M = cof(u.p680[0], 'P680', 4, L, ['P680', 'reaction_centre']); u.p680M.ps = u; u.p680M.rcHold = 0;
+      u.p680M.hooks.relCond = slot => { if(slot.name !== 'electron') return true; if(!u.p680M.excited){ u.p680M.rcHold = 0; return false; } u.p680M.rcHold += dtNow; return u.p680M.rcHold >= RC_HOLD; };   // P680.gd: excited, and stays so for 1 s
+      u.p680M.hooks.relAct = body => { if(body.has('electron')){ body.excited = true; body.energy = u.p680M.energy; handFollow(u.p680M, body); } u.p680M.rcHold = 0; };
+      if(u.p680[1] >= 0){ const m2 = cof(u.p680[1], 'chlorophyll_A', 3, L, ['P680pair']); m2.slots = []; antenna.push(m2); rcOf.set(u.p680[1], u); m2.ps = u; m2.rcTwin = u.p680M; }
+      u.chlD1M = cof(u.chlD1, 'chlorophyll_A', 5, L, ['ChlD1']); if(u.chlD1M) u.chlD1M.relay = true;
+      u.pheoM = cof(u.pheo, 'pheophytin', 6, L); u.qaM = cof(u.qa, 'plastoquinone_A', 7, L);
+      u.feM = cof(u.fe, 'Fe3+', 8, L); const qbPlace = u.feM ? 9 : 8;
+      u.qbSlot = u.psii.slot('plastoquinone_B', { p: u.qbSite, place: qbPlace, near: NEAR_DOCK }); u.qbSlot.dockOff = [0,0,0]; u.qbSlot.side = 0;
+      { const c = mInfo[mi], sx = u.oecC[0] >= c.cx ? 1 : -1; u.vdeSlot = u.psii.slot('VDE', { p: [c.cx + sx*(hullR(mi) + 26), u.oecC[1], c.cz], place: -1, near: 320 }); u.vdeSlot.side = -1; u.vdeSlot.vdeT = 0; }   // beside the complex at the OEC's height (no room under it: PSII stands on the box floor)
+      u.o2Point = [u.oecC[0], u.oecC[1] - 45, u.oecC[2]];   // "target_4": where oxygen atoms and protons head after the OEC (lumen)
+      const rcC = u.chlD1 >= 0 ? cen(u.chlD1) : cen(u.p680[0]);
+      for(const g of u.ant){ const band = Math.floor(d3(cen(g), rcC) / BAND); const m = cof(g, 'chlorophyll_A', 3 - band, L); m.slots = []; m.ps = u; antenna.push(m); rcOf.set(g, u); }
+      u.cars.forEach((g, i) => { const band = Math.floor(d3(cen(g), rcC) / BAND); const m = cof(g, 'xanthophyll', 3 - band, L, ['violaxanthin']); m.slots = []; m.ps = u; antenna.push(m); rcOf.set(g, u); });
+      antenna.push(u.p680M); rcOf.set(u.p680[0], u); u.p680M.slotNamed('electron').occupied = true;   // the centre starts reduced (it must hold an electron to be excited, 2D 6G)
+      orderAntenna(u.p680M, antenna.filter(m => m.ps === u && m !== u.p680M));
+    });
+    /* b6f, per monomer: the Qo pocket 1 (lane b<k>) -> Rieske 2 -> heme f 3 -> the plastocyanin dock 4 (arm b<k>.hi); heme bL 2 -> bH 3 -> cn 4 -> the
+       Qi pocket 5 (arm b<k>.lo). A plastoquinol docked at Qo hands one electron to each arm (the first taker fills, the second goes the other way). */
+    b6fs.forEach((u, k) => { const L = 'b' + k, mi = u.mi;
+      u.b6f = new Mol({ name:'cytochrome_b6f', lane:L, mi, p:[mInfo[mi].cx, mInfo[mi].cy, mInfo[mi].cz], hooks:{
+        bindCond: (body, slot) => { if(body.has('plastoquinone_B')) return slot.name === 'plastoquinone_B_LUMENAL' ? body.allFilled() : body.noneFilled();   // cytochrome_b6f.gd: Qo takes a FULL quinol, Qi an EMPTY quinone
+          if(body.has('plastocyanin')) return !body.filled('electron'); return true; },
+        relCond: slot => { if(slot.name === 'plastocyanin') return !!(slot.holder && slot.holder.filled('electron'));
+          if(slot.name === 'plastoquinone_B_LUMENAL') return !!(slot.holder && slot.holder.noneFilled());
+          if(slot.name === 'plastoquinone_B_STROMAL') return !!(slot.holder && slot.holder.allFilled()); return true; } } });
+      u.qoSlot = u.b6f.slot('plastoquinone_B_LUMENAL', { p: u.qoSite, place: 1, near: NEAR_DOCK }); u.qoSlot.side = 0;
+      u.rieskeM = cof(u.rieske, 'iron_sulfur_cluster_inside_cytochrome_b6f', 2, L + '.hi'); u.fM = cof(u.f, 'heme', 3, L + '.hi');
+      u.pcSlot = u.b6f.slot('plastocyanin', { p: cen(u.f), place: 4, lane: L + '.hi', near: NEAR_DOCK }); u.pcSlot.side = -1;
+      u.bLM = cof(u.bL, 'heme', 2, L + '.lo'); u.bHM = cof(u.bH, 'heme', 3, L + '.lo'); u.cnM = cof(u.cn, 'heme', 4, L + '.lo');
+      u.qiSlot = u.b6f.slot('plastoquinone_B_STROMAL', { p: u.qiSite, place: 5, lane: L + '.lo', near: NEAR_DOCK }); u.qiSlot.side = 0;
+      u.lumenPoint = [u.qoSite[0], u.qoSite[1] - 40, u.qoSite[2]];   // "target_3": protons leave the quinol into the lumen here
+    });
+    /* PSI: the plastocyanin dock 13 -> P700 14 -> A0 15 -> (A1 16, none in 9E0J) -> FX 17 -> FA 18 -> FB 19 -> the ferredoxin dock 20 (lane psi<k>) */
+    psis.forEach((u, k) => { const L = 'psi' + k, mi = u.mi;
+      u.psi = new Mol({ name:'photosystem_I', tags:['photosystem_I_dock'], lane:L, mi, p:[mInfo[mi].cx, mInfo[mi].cy, mInfo[mi].cz], hooks:{
+        bindCond: (body, slot) => { if(body.has('plastocyanin')) return body.filled('electron'); if(body.has('ferredoxin')) return !body.filled('electron'); return true; },   // photosystem_I.gd
+        relCond: slot => { if(slot.name === 'plastocyanin') return !!(slot.holder && !slot.holder.filled('electron') && u.p700M.filled('electron'));
+          if(slot.name === 'ferredoxin') return !!(slot.holder && slot.holder.filled('electron')); return true; } } });
+      const c = mInfo[mi];
+      u.pcSlot = u.psi.slot('plastocyanin', { p: [c.cx, c.y0, c.cz], place: 13, near: NEAR_DOCK }); u.pcSlot.side = -1;
+      u.p700M = cof(u.p700[0], 'P700', 14, L, ['P700', 'reaction_centre']); u.p700M.ps = u; u.p700M.rcHold = 0;
+      u.p700M.hooks.relCond = slot => { if(slot.name !== 'electron') return true; if(!u.p700M.excited){ u.p700M.rcHold = 0; return false; } u.p700M.rcHold += dtNow; return u.p700M.rcHold >= RC_HOLD; };
+      u.p700M.hooks.relAct = body => { if(body.has('electron')){ body.excited = true; body.energy = u.p700M.energy; handFollow(u.p700M, body); } u.p700M.rcHold = 0; };
+      if(u.p700[1] >= 0){ const m2 = cof(u.p700[1], 'chlorophyll_A', 13, L, ['P700pair']); m2.slots = []; antenna.push(m2); rcOf.set(u.p700[1], u); m2.ps = u; m2.rcTwin = u.p700M; }
+      u.a0M = cof(u.a0, 'chlorophyll_A_PSI', 15, L); u.a1M = cof(u.a1, 'phylloquinone', 16, L);
+      const fxP = u.a1M ? 17 : 16; u.fxM = cof(u.fx, 'iron_sulfur_cluster_inside_photosystem_I', fxP, L); u.faM = cof(u.fa, 'iron_sulfur_cluster_inside_photosystem_I', fxP+1, L); u.fbM = cof(u.fb, 'iron_sulfur_cluster_inside_photosystem_I', fxP+2, L);
+      { const d = u.fdDir, l = Math.hypot(d[0], d[1], d[2]) || 1, fb = u.fb >= 0 ? cen(u.fb) : [c.cx, c.cy, c.cz]; u.fdSite = [fb[0] + d[0]/l*26, fb[1] + d[1]/l*26, fb[2] + d[2]/l*26]; }   // 26 past FB along the axis - inside the hull, as the 2D ferredoxin sat on FB; a pulled bouncer ignores its host's shell
+      u.fdSlot = u.psi.slot('ferredoxin', { p: u.fdSite, place: fxP+3, near: 320 }); u.fdSlot.side = 1;   // (PSI stands upside down in this sheet: its stromal face is below the lipid layer - a pulled ferredoxin crosses it, like a 2D body on the in-transit layer)
+      const rcC = cen(u.p700[0]);
+      for(const g of u.ant){ const band = Math.floor(d3(cen(g), rcC) / BAND); const m = cof(g, 'chlorophyll_A', 13 - band, L); m.slots = []; m.ps = u; antenna.push(m); rcOf.set(g, u); }
+      u.cars.forEach((g, i) => { const band = Math.floor(d3(cen(g), rcC) / BAND); const m = cof(g, 'xanthophyll', 13 - band, L, ['violaxanthin']); m.slots = []; m.ps = u; antenna.push(m); rcOf.set(g, u); });
+      antenna.push(u.p700M); rcOf.set(u.p700[0], u); u.p700M.slotNamed('electron').occupied = true;
+      orderAntenna(u.p700M, antenna.filter(m => m.ps === u && m !== u.p700M));
+    });
+    /* FNR: the ferredoxin dock 20 -> FAD 21 -> the NADP+ dock 22 (lane fnr<k>); NADP+ takes two electrons and a proton and leaves as NADPH */
+    const fnrs = fnrMis.map((mi, k) => { const L = 'fnr' + k, c = mInfo[mi], fad = ofType(mi, 10);
+      const fnr = new Mol({ name:'FNR', place:21, lane:L, mi, p:[c.cx, c.cy, c.cz], hooks:{
+        bindCond: (body, slot) => { if(body.has('NADP')) return !body.filled('electron') || !body.filled('electron_2');   // FNR.gd
+          if(body.has('ferredoxin')) return body.filled('electron'); return true; },
+        relCond: slot => { if(slot.name === 'ferredoxin') return !!(slot.holder && !slot.holder.filled('electron'));
+          if(slot.name === 'NADP') return !!(slot.holder && slot.holder.filled('electron') && slot.holder.filled('electron_2') && slot.holder.filled('proton')); return true; },
+        relAct: body => { if(body.has('NADP')){ stats.nadph++; flashAt(body.world(_c)); } } } });
+      const fadC = fad.length ? cen(fad[0]) : [c.cx, c.cy, c.cz];
+      fnr.fadM = fad.length ? cof(fad[0], 'FNR_FAD', 21, L, ['heme']) : pt(mi, fadC, 'FNR_FAD', 21, L, ['heme']);
+      fnr.fdSlot = fnr.slot('ferredoxin', { p: [c.cx, c.cy + hullR(mi) + 16 + 2, c.cz], place: 20, near: 320 }); fnr.fdSlot.side = 1;
+      fnr.nadpSlot = fnr.slot('NADP', { p: [fadC[0] + 12, fadC[1] + 6, fadC[2]], place: 22, near: 80 }); fnr.nadpSlot.side = 1; fnr.nadpSlot.free = 'nadp';
+      return fnr; });
+    /* NDH-1 (cyclic flow): the ferredoxin dock 1 -> its Fe-S clusters 2.. -> the plastoquinone dock last (lane ndh<k>) */
+    const ndhs = ndhMis.map((mi, k) => { const L = 'ndh' + k, c = mInfo[mi], fes = ofType(mi, 5), quins = ofType(mi, 3);
+      const ndh = new Mol({ name:'NDH-1', lane:L, mi, p:[c.cx, c.cy, c.cz], hooks:{
+        bindCond: (body, slot) => { if(body.has('ferredoxin')) return body.filled('electron'); if(body.has('plastoquinone_B')) return body.noneFilled(); return true; },   // NDH-1.gd
+        relCond: slot => { if(slot.name === 'ferredoxin') return !!(slot.holder && !slot.holder.filled('electron')); if(slot.name === 'plastoquinone_B') return !!(slot.holder && slot.holder.allFilled()); return true; } } });
+      const top = [c.cx, c.y1, c.cz]; const chain = fes.slice().sort((a, b) => d3(cen(a), top) - d3(cen(b), top)).slice(0, 6); ndh.fes = chain.map((g, i) => cof(g, 'iron_sulfur_cluster_inside_photosystem_I', 2 + i, L, ['ndh_fes']));
+      { const f0 = chain.length ? cen(chain[0]) : top; ndh.fdSlot = ndh.slot('ferredoxin', { p: [f0[0], f0[1] + 26, f0[2]], place: 1, near: 320 }); ndh.fdSlot.side = 1; }   // (the pull must reach past the shell, R 130, that holds an unpulled bouncer off) ndh.fes = chain.map((g, i) => cof(g, 'iron_sulfur_cluster_inside_photosystem_I', 2 + i, L, ['ndh_fes']));
+      let q = quins.length ? cen(quins[0]) : null; if(chain.length){ const l = cen(chain[chain.length-1]); if(!q || d3(q, l) > 50){ const f = cen(chain[0]), d = [l[0]-f[0], l[1]-f[1], l[2]-f[2]], n = Math.hypot(d[0], d[1], d[2]) || 1; q = [l[0] + d[0]/n*22, l[1] + d[1]/n*22, l[2] + d[2]/n*22]; } }   // the quinone site: the model's own if it sits by the last cluster, else 22 past it along the chain
+      if(!q) q = [c.cx, c.cy, c.cz];
+      ndh.pqSlot = ndh.slot('plastoquinone_B', { p: q, place: 2 + chain.length, near: NEAR_DOCK }); ndh.pqSlot.side = 0;
+      return ndh; });
+    /* ATP synthase (ATP-synthase.gd): ADP + Pi bound on the stromal head, four protons through the channel -> an ATP leaves */
+    const atps = atpMis.map((mi, k) => { const c = mInfo[mi];
+      const atp = new Mol({ name:'ATP-synthase', mi, p:[c.cx, c.cy, c.cz], hooks:{
+        relCond: slot => (slot.name === 'ADP' || slot.name === 'phosphate') ? (atp.filled('ADP') && atp.filled('phosphate') && atp.protons >= 4) : true,
+        relAct: body => { if(body.has('ADP') || body.has('phosphate')){ makeATP(atp); } } } });
+      atp.protons = 0; atp.passes0 = 0;
+      atp.slot('ADP', { p: [c.cx - 8, c.y1 - 10, c.cz], near: 80 }).free = 'adp'; atp.slotNamed('ADP').side = 1;
+      atp.slot('phosphate', { p: [c.cx + 8, c.y1 - 10, c.cz], near: 80 }).free = 'pi'; atp.slotNamed('phosphate').side = 1;
+      return atp; });
+    /* RuBisCO (RuBisCo.gd): CO2, NADPH and ATP slots; all full -> a sugar (no glucose model in the sheet yet: counted, the substrates return to the pool) */
+    const rubs = rubMis.map((mi, k) => { const c = mInfo[mi];
+      const rub = new Mol({ name:'RuBisCO', mi, p:[c.cx, c.cy, c.cz], hooks:{
+        bindCond: (body, slot) => body.has('NADP') ? body.filled('electron') : true,   // only NADPH counts
+        relCond: () => rub.allFilled(), relAct: () => { stats.glukoosi++; flashAt(rub.world(_c)); for(const s of rub.slots){ if(s.occupied && s.freeI != null){ parkedF.push({ key:s.free, i:s.freeI, t:0 }); s.freeI = null; } s.occupied = false; } } } });   // RuBisCo.gd: all slots dark again, the sugar counted (no glucose model in the sheet yet)
+      const R = mInfo[mi].vol > 0 ? Math.cbrt(mInfo[mi].vol)*0.5 : 40;
+      for(let i=0;i<3;i++){ const a = i/3*6.283; const s = rub.slot('CO2_' + (i+1), { p:[c.cx + Math.cos(a)*R, c.cy + 6, c.cz + Math.sin(a)*R], near: 90 }); s.free = 'co2'; s.side = 1; }
+      for(let i=0;i<2;i++){ const a = (i+0.5)/2*6.283; const s = rub.slot('NADP_' + (i+1), { p:[c.cx + Math.cos(a)*R*0.8, c.cy + 14, c.cz + Math.sin(a)*R*0.8], near: 90 }); s.free = 'nadp'; s.side = 1; s.needs = 'NADPH'; }
+      for(let i=0;i<3;i++){ const a = (i+0.5)/3*6.283; const s = rub.slot('ATP_' + (i+1), { p:[c.cx + Math.cos(a)*R, c.cy - 8, c.cz + Math.sin(a)*R], near: 90 }); s.free = 'atp'; s.side = 1; }
+      return rub; });
+
+    /* ── the carriers: plastoquinone_B and plastocyanin are the shuttle models, ferredoxin and VDE the steered bouncers ── */
+    const carriers = [];
+    for(const sh of gShuttles){ const m = sh.pq
+        ? new Mol({ name:'plastoquinone_B', mi: sh.mi, body:{ kind:'sh', sh }, speed: SPEED.mid, hooks:{
+            bindCond: (body, slot) => { if(body.has('proton')) return m.filled('electron') && m.filled('electron_2'); return true; },   // Plastoquinone_B.gd: protons only after both electrons
+            bindAct: () => {},
+            relCond: slot => { if(!m.dockedAt || m.dockedAt.name !== 'plastoquinone_B_LUMENAL') return false;   // only at Qo does a quinol give anything up
+              if(slot.name.startsWith('proton')) return !m.filled('electron') && !m.filled('electron_2'); return true; },   // protons after the electrons
+            relAct: () => {},
+            softTarget: () => pqSoftTarget(m) } })
+        : new Mol({ name:'plastocyanin', mi: sh.mi, body:{ kind:'sh', sh }, speed: SPEED.mid, hooks:{ softTarget: () => pcSoftTarget(m) } });
+      m.near = 60; if(sh.pq){ m.slot('electron', { p:[0,0,0] }); m.slot('electron_2', { p:[0,0,0] }); const p1 = m.slot('proton', { p:[0,0,0] }); p1.near = 250; p1.side = 1; const p2 = m.slot('proton_2', { p:[0,0,0] }); p2.near = 250; p2.side = 1; }
+      else { const cu = ofType(sh.mi, 6); const c = mInfo[sh.mi]; m.slot('electron', { p: cu.length ? [G[cu[0]].cx - c.cx, G[cu[0]].cy - c.cy, G[cu[0]].cz - c.cz] : [0,0,0] }); }
+      sh.mol = m; sh.tgt = null; sh.docked = null; carriers.push(m); }
+    let fdToNdh = false;   // ferredoxin.gd: static var ferredoxin_goes_to_ndh - alternates FNR / NDH-1
+    for(const mi of fdMis){ const b = gBouncers.find(q => q.mi === mi); if(!b) continue; const fes = ofType(mi, 5); const c = mInfo[mi];
+      const m = new Mol({ name:'ferredoxin', place:20, mi, body:{ kind:'bnc', b }, speed: SPEED.mid, hooks:{ softTarget: () => fdSoftTarget(m) } });
+      m.near = 60; m.slot('electron', { p: fes.length ? [G[fes[0]].cx - c.cx, G[fes[0]].cy - c.cy, G[fes[0]].cz - c.cz] : [0,0,0] }); b.mol = m; b.side = 1; carriers.push(m); }
+    for(const mi of vdeMis){ const b = gBouncers.find(q => q.mi === mi); if(!b) continue;
+      const m = new Mol({ name:'VDE', mi, body:{ kind:'bnc', b }, speed: SPEED.mid, hooks:{ softTarget: () => { const u = units[(Math.random()*units.length)|0]; m.soft = u ? u.vdeSlot : null; },
+        touchLocal: body => { if(body.has('violaxanthin')){ body.tags.delete('violaxanthin'); body.tag('zeaxanthin'); } } } });   // VDE.gd: violaxanthin -> zeaxanthin on contact
+      b.mol = m; b.side = -1; carriers.push(m); }
+    /* FNR.gd / RuBisCo.gd: their soft target is a fixed node - they drift home. They stay ordinary Mols (slots through the model's transform);
+       only their bouncers are steered, gently, toward where they started */
+    const homers = [];
+    for(const mi of [...fnrMis, ...rubMis]){ const b = gBouncers.find(q => q.mi === mi); if(b){ b.mol = (fnrs[fnrMis.indexOf(mi)] || rubs[rubMis.indexOf(mi)]); b.side = 1; b.home = [mInfo[mi].cx + gModelOff[mi*3], mInfo[mi].cy + gModelOff[mi*3+1], gTasoZ]; homers.push(b); } }
+
+    /* ── soft targets (check_soft_target of the carriers) ── */
+    const countHeading = (tag, slot) => byTag(tag).filter(o => o.soft === slot).length;
+    const pqSoftTarget = m => { const full = m.allFilled();
+      if(full){ const empties = b6fs.filter(u => !u.qoSlot.holder); const u = (empties.length ? empties : b6fs)[(Math.random()*Math.max(1, (empties.length ? empties : b6fs).length))|0]; m.soft = u ? u.qoSlot : null; return; }
+      /* an empty quinone (Plastoquinone_B.gd): the nearest of PSII / NDH-1 owns it; it heads for whichever side - the reducing pockets
+         (PSII's QB or NDH-1's site) or b6f's Qi pockets - fewer empty quinones are already heading for, and there for the nearest free slot */
+      m.world(_a); const toQi = byTag('plastoquinone_B').filter(o => o !== m && o.soft && o.soft.name === 'plastoquinone_B_STROMAL').length;
+      const toRed = byTag('plastoquinone_B').filter(o => o !== m && o.soft && (o.soft.name === 'plastoquinone_B')).length;
+      const pick = list => { let best = null, bd = Infinity; for(const sl of list){ if(sl.holder) continue; sl.world(_b); const d = d3(_a, _b) + (sl.pulled.size ? 200 : 0); if(d < bd){ bd = d; best = sl; } } return best || list[0] || null; };
+      const red = [...units.map(u => u.qbSlot), ...ndhs.map(n => n.pqSlot)], qi = b6fs.map(u => u.qiSlot);
+      m.soft = (toQi > toRed) ? pick(red) : pick(qi); if(!m.soft) m.soft = pick(red); };
+    const pcSoftTarget = m => { if(m.filled('electron')){ const u = psis[(Math.random()*psis.length)|0]; m.soft = u ? u.pcSlot : null; return; }
+      let best = null, fewest = Infinity; for(const u of b6fs){ const n = countHeading('plastocyanin', u.pcSlot); if(n < fewest){ fewest = n; best = u.pcSlot; } } m.soft = best; };   // plastocyanin.gd: the least-crowded cytochrome slot
+    const fdSoftTarget = m => { if(!m.filled('electron')){ const u = psis[(Math.random()*psis.length)|0]; m.soft = u ? u.fdSlot : null; return; }
+      if(fdToNdh && ndhs.length){ m.soft = ndhs[(Math.random()*ndhs.length)|0].fdSlot; } else { m.soft = fnrs.length ? fnrs[(Math.random()*fnrs.length)|0].fdSlot : null; }
+      fdToNdh = !fdToNdh; };
+    for(const m of carriers) m.hooks.softTarget();   // _ready_call_deferred: every carrier picks its first destination
+
+    /* ── the sprites: free electrons (bigelec glint + corona), oxygen atoms, exciton / heat / flash glows ── */
     const eng = scene.getEngine();
     const eMat = new BABYLON.ShaderMaterial('valoElecMat', scene, 'bigelec', { attributes:['position','normal'], uniforms:['world','view','projection','uT'] });
-    eMat.alphaMode = BABYLON.Constants.ALPHA_ADD; eMat.needAlphaBlending = () => true; eMat.disableDepthWrite = true; eMat.backFaceCulling = true; eMat.depthFunction = BABYLON.Engine.ALWAYS;   // on top of the protein it sits inside (the material's own depth function is what the bind applies, like etcMat)
+    eMat.alphaMode = BABYLON.Constants.ALPHA_ADD; eMat.needAlphaBlending = () => true; eMat.disableDepthWrite = true; eMat.backFaceCulling = true; eMat.depthFunction = BABYLON.Engine.ALWAYS;
     eMat.onBindObservable.add(() => { const eff = eMat.getEffect(); if(eff) eff.setFloat('uT', gWaveT); });
     const cMat = new BABYLON.ShaderMaterial('valoCoronaMat', scene, 'ecorona', { attributes:['position'], uniforms:['worldViewProjection','uT'] });
     cMat.alphaMode = BABYLON.Constants.ALPHA_ADD; cMat.needAlphaBlending = () => true; cMat.disableDepthWrite = true; cMat.backFaceCulling = false; cMat.depthFunction = BABYLON.Engine.ALWAYS;
     cMat.onBindObservable.add(() => { const eff = cMat.getEffect(); if(eff) eff.setFloat('uT', gWaveT); });
     const onTop = m => { m.onBeforeRenderObservable.add(() => eng.setDepthFunction(BABYLON.Constants.ALWAYS)); m.onAfterRenderObservable.add(() => eng.setDepthFunction(BABYLON.Constants.LEQUAL)); };
-    const E_N = 64, elecs = []; window.gValoElecs = elecs;   // enough for a full chain in flight: ten plastocyanins and ten PQH2 can hold 30 between them, b6f and the PSII pockets a dozen more (48 ran dry under a photon barrage, 13.9.2026). Published for the lantern (each live electron is a spotlight)
+    const E_N = 64, sprites = [];
     for(let k=0;k<E_N;k++){ const mesh = BABYLON.MeshBuilder.CreateSphere('valoE'+k, { segments:12, diameter:4.6 }, scene); mesh.material = eMat; mesh.isPickable = false; mesh.alwaysSelectAsActiveMesh = true; mesh.renderingGroupId = 3; onTop(mesh);
       const corona = BABYLON.MeshBuilder.CreatePlane('valoEc'+k, { size:22 }, scene); corona.material = cMat; corona.isPickable = false; corona.alwaysSelectAsActiveMesh = true; corona.renderingGroupId = 3; corona.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL; onTop(corona);
-      mesh.setEnabled(false); corona.setEnabled(false); elecs.push({ mesh, corona, on:false, site:null, mov:null, ph: Math.random()*6.283, x:0, y:0, z:0 }); }
-    const eSpawn = site => { const e = elecs.find(e => !e.on); if(!e) return null; e.on = true; e.site = site; e.mov = null; e.mesh.setEnabled(true); e.corona.setEnabled(true); return e; };
-    const eMove = (e, site, dur, cb) => { e.mov = { from: e.site || S(0, [e.x, e.y, e.z]), to: site, t:0, dur, cb }; if(!e.site) e.mov.from = { mi:-1, p:[e.x, e.y, e.z] }; e.site = null; };
-    const eKill = e => { e.on = false; e.site = null; e.mov = null; e.mesh.setEnabled(false); e.corona.setEnabled(false); };
+      mesh.setEnabled(false); corona.setEnabled(false); sprites.push({ mesh, corona, mol:null }); }
+    const O_N = 12, oSprites = [];
+    { const oMat = new BABYLON.StandardMaterial('valoOMat', scene); oMat.emissiveColor = new BABYLON.Color3(0.95, 0.25, 0.2); oMat.diffuseColor = new BABYLON.Color3(0.6, 0.1, 0.1); oMat.specularColor = BABYLON.Color3.Black();
+      for(let k=0;k<O_N;k++){ const mesh = BABYLON.MeshBuilder.CreateSphere('valoO'+k, { segments:10, diameter:3.0 }, scene); mesh.material = oMat; mesh.isPickable = false; mesh.alwaysSelectAsActiveMesh = true; mesh.renderingGroupId = 1; mesh.setEnabled(false); oSprites.push({ mesh, mol:null }); } }
     const mkGlow = (name, col, alpha, cap) => { const m = BABYLON.MeshBuilder.CreateSphere(name, { diameter:1, segments:10 }, scene);
-      const mat = new BABYLON.StandardMaterial(name+'Mat', scene); mat.emissiveColor = new BABYLON.Color3(col[0], col[1], col[2]); mat.disableLighting = true; mat.alpha = alpha; mat.alphaMode = BABYLON.Constants.ALPHA_ADD; mat.disableDepthWrite = true; mat.depthFunction = BABYLON.Engine.ALWAYS;   // the glow lives inside the protein: drawn over it
+      const mat = new BABYLON.StandardMaterial(name+'Mat', scene); mat.emissiveColor = new BABYLON.Color3(col[0], col[1], col[2]); mat.disableLighting = true; mat.alpha = alpha; mat.alphaMode = BABYLON.Constants.ALPHA_ADD; mat.disableDepthWrite = true; mat.depthFunction = BABYLON.Engine.ALWAYS;
       m.material = mat; m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.renderingGroupId = 3;
       const buf = new Float32Array(cap*16); m.thinInstanceSetBuffer('matrix', buf, 16, false); m.thinInstanceCount = 0; m.setEnabled(false); return { m, buf, cap }; };
-    const eks = mkGlow('valoEks', [0.55, 1.0, 0.30], 0.28, 48), heat = mkGlow('valoHeat', [1.0, 0.42, 0.18], 0.4, 24), flashG = mkGlow('valoFlash', [1.0, 1.0, 0.90], 0.35, 16);   // faint additive glows: the toon pass inks any saturated disc into a white blob
+    const eks = mkGlow('valoEks', [0.55, 1.0, 0.30], 0.28, 64), heat = mkGlow('valoHeat', [1.0, 0.42, 0.18], 0.4, 24), flashG = mkGlow('valoFlash', [1.0, 1.0, 0.90], 0.35, 16), ringG = mkGlow('valoRing', [0.5, 0.8, 1.0], 0.25, 16);
     const putGlow = (g, n, r, x, y, z) => { const B = g.buf, m = n*16; B[m]=r; B[m+1]=0; B[m+2]=0; B[m+3]=0; B[m+4]=0; B[m+5]=r; B[m+6]=0; B[m+7]=0; B[m+8]=0; B[m+9]=0; B[m+10]=r; B[m+11]=0; B[m+12]=x; B[m+13]=y; B[m+14]=z; B[m+15]=1; };
     const showGlow = (g, n) => { if(n) g.m.thinInstancePartialBufferUpdate('matrix', g.buf.subarray(0, n*16), 0); g.m.thinInstanceCount = n; g.m.setEnabled(n > 0); };
-    const heats = [], flashes = [];   // {x,y,z,t}
+    const heats = [], flashes = [], rings = [];
     const heatAt = p => { heats.push({ x:p[0], y:p[1], z:p[2], t:0 }); if(heats.length > heat.cap) heats.shift(); stats.lampo++; };
     const flashAt = p => { flashes.push({ x:p[0], y:p[1], z:p[2], t:0 }); if(flashes.length > flashG.cap) flashes.shift(); };
+    const ringAt = p => { rings.push({ x:p[0], y:p[1], z:p[2], t:0 }); if(rings.length > ringG.cap) rings.shift(); };   // shock_wave_animation: a ring on every electron bind
 
-    /* ── timers, held free molecules, held protons ── */
-    const timers = []; const after = (dur, fn) => timers.push({ t: dur, fn });
-    const heldF = [], parkedF = [], released = [];   // analytic molecules: on their way somewhere, parked out of sight, drifting back to the pool
-    const heldP = [], parked = [];                  // protons: on their way to a pocket, parked (inside PQH2 / consumed)
+    /* ── the cofactor overlay shows a slot's state (the 2D modulate): an empty electron carrier is dim, a filled one full colour, an excited pigment bright ── */
+    const SLOT_W = Math.max(1, G.length), slotData = new Uint8Array(SLOT_W); slotData.fill(128);
+    const slotTex = new BABYLON.RawTexture(slotData, SLOT_W, 1, BABYLON.Constants.TEXTUREFORMAT_R, scene, false, false, BABYLON.Texture.NEAREST_SAMPLINGMODE, BABYLON.Constants.TEXTURETYPE_UNSIGNED_BYTE);
+    let slotDirty = true;
+    const setSlotK = (gi, v) => { if(gi < 0 || gi >= SLOT_W) return; const b = Math.max(0, Math.min(255, Math.round(v*128))); if(slotData[gi] !== b){ slotData[gi] = b; slotDirty = true; } };
+    if(typeof etcOverlay !== 'undefined' && etcOverlay){ const A = glassA(etcOverlay); A.setTexture('slotTex', slotTex); A.setFloat('slotN', SLOT_W); }
+
+    /* ── the camera follow ('followed' group): the tag rides photon -> pigment -> centre -> electron -> carrier ... and the camera keeps it in view ── */
+    let followed = null, followOn = false;
+    const handFollow = (from, to) => { if(followed === from && to){ followed = to; } };
+    window.gValoFollow = on => { followOn = !!on; if(!followOn) followed = null; else followed = followed || null; };   // the gear button arms it: the next electron P680 ejects is followed
+    let followArm = false; window.gValoFollowArm = () => { followArm = true; followOn = true; };
+
+    /* ── timers, held free molecules, held protons (the same plumbing as before) ── */
+    const heldF = [], parkedF = [], released = [];
+    const heldP = [], parked = [];
     const PARK = () => [gBoxLo.x - 150, gBoxLo.y - 400, gBoxLo.z - 150];
-    const _a = [0,0,0], _b = [0,0,0], _c = [0,0,0];
-    const pullFree = (key, from, toSite, dur, then, life) => { const F = gValoFree; if(!F) return false; gMolHold[F.base[key] + from.i] = 1; const p = F.shown(key, from.i, [0,0,0]);
-      heldF.push({ key, i: from.i, from: p, to: toSite, t:0, dur, then, life: life || 15 }); return true; };
+    const pullFree = (key, i, toSlot, dur, then, life) => { const F = gValoFree; if(!F) return false; gMolHold[F.base[key] + i] = 1; const p = F.shown(key, i, [0,0,0]);
+      heldF.push({ key, i, from: p, to: toSlot, t:0, dur, then, life: life || 15 }); return true; };
     const releaseFree = (key, i, x, y, z, v, life) => { released.push({ key, i, x, y, z, vx:v[0], vy:v[1], vz:v[2], t:0, life }); };
-    const grabProtons = (n, site, side, dur, then) => { const P = gValoProtons; if(!P) return 0; SW(site, _a); let got = 0;
-      for(let k=0;k<n;k++){ let i = P.nearestFree(_a[0], _a[1], _a[2], side, 500); if(i < 0) i = P.anyFree(side); if(i < 0) break; P.grab(i); const o = i*3;
-        heldP.push({ i, from:[P.pos[o], P.pos[o+1], P.pos[o+2]], to: site, t:0, dur, then }); got++; } return got; };
-    const spitProtons = (n, p, dy, spread) => { const P = gValoProtons; if(!P) return; for(let k=0;k<n;k++){ let i = parked.length ? parked.pop() : P.anyFree(-dy > 0 ? 1 : -1); if(i < 0) return;
-        const a = Math.random()*6.283; P.release(i, p[0]+Math.cos(a)*spread, p[1]+dy, p[2]+Math.sin(a)*spread, Math.cos(a)*9, dy*(2.4 + Math.random()*1.2), Math.sin(a)*9); stats.hplus += dy < 0 ? 1 : 0; } };
+    const spitProton = (p, dy, spread) => { const P = gValoProtons; if(!P) return; let i = parked.length ? parked.pop() : P.anyFree(-dy > 0 ? 1 : -1); if(i < 0) return;
+      const a = Math.random()*6.283; P.release(i, p[0]+Math.cos(a)*spread, p[1]+dy, p[2]+Math.sin(a)*spread, Math.cos(a)*9, dy*(2.4 + Math.random()*1.2), Math.sin(a)*9); if(dy < 0) stats.hplus++; };
 
-    /* ── PSII ── */
-    const chargeSepII = u => { if(u.p680ox || u.pheoE || u.qaE || u.pheo < 0 || u.qa < 0) return false;
-      const e = eSpawn(SG(u.p680[0])); if(!e) return false; u.p680ox = true; u.pheoE = e; flashAt(SW(SG(u.p680[0]), _c));
-      const toPheo = () => eMove(e, SG(u.pheo), 0.3, () => { u.pheoE = null; u.qaE = e; eMove(e, SG(u.qa), 0.35, null); });
-      if(u.chlD1 >= 0) eMove(e, SG(u.chlD1), 0.2, toPheo); else toPheo(); return true; };   // P680 -> ChlD1 -> PheoD1 -> QA: the accessory chlorophyll is a real stop on the way (owner 13.9.2026: 'hop between those exact molecules')
-    const splitWater = u => { u.busyOEC = true; const oec = S(u.mi, u.oecC); SW(oec, _a); const F = gValoFree;
-      if(F){ const skip = new Set(); for(let k=0;k<2;k++){ const i = F.nearest('w', _a[0], _a[1]-6, _a[2], -1, skip); if(i < 0) break; skip.add(i); pullFree('w', { i }, oec, 1.3, 'park'); } }
-      after(1.6, () => { SW(oec, _a); flashAt(_a);
-        if(F){ const j = F.nearest('o2', _a[0], _a[1]-8, _a[2], -1); if(j >= 0){ gMolHold[F.base.o2 + j] = 1; const a = Math.random()*6.283; releaseFree('o2', j, _a[0]+Math.cos(a)*3, _a[1]-7, _a[2]+Math.sin(a)*3, [Math.cos(a)*7, -9, Math.sin(a)*7], 25); } }
-        spitProtons(4, _a, -6, 3); stats.o2++; u.s = 0; u.busyOEC = false; }); };
-    const tickPSII = (u, dt) => {
-      if(u.qaE && !u.qaE.mov && u.qbE.length < 2 && !u.qbBusy){ const e = u.qaE; u.qaE = null; u.qbBusy = true; eMove(e, S(u.mi, u.qbSite), 0.5, () => { u.qbE.push(e); u.qbBusy = false; }); }
-      if(u.qbE.length === 2 && u.qbH === 0 && !u.qbHBusy && !u.pqh2){ u.qbHBusy = true; const got = grabProtons(2, S(u.mi, u.qbSite), 1, 0.9, 'park'); after(got ? 1.0 : 0.2, () => { u.qbH = 2; u.pqh2 = true; u.pqh2T = 0; u.qbHBusy = false; }); }
-      if(u.pqh2){ u.pqh2T += dt; if(!u.served && u.pqh2T > 2.5){ for(const e of u.qbE) eKill(e); u.qbE = []; u.qbH = 0; u.pqh2 = false; } }   // no carrier serves this centre: PQH2 leaves into the pool
-      if(u.p680ox && !u.tyrOx && !u.tyrBusy && u.tyrZ >= 0){ u.tyrBusy = true; after(0.25, () => { const e = eSpawn(SG(u.tyrZ)); if(!e){ u.tyrBusy = false; return; }
-        eMove(e, SG(u.p680[0]), 0.3, () => { eKill(e); u.p680ox = false; u.tyrOx = true; u.tyrBusy = false; }); }); }
-      if(u.tyrOx && !u.oecBusy && !u.busyOEC){ u.oecBusy = true; after(0.3, () => { const e = eSpawn(S(u.mi, u.oecC)); if(!e){ u.oecBusy = false; return; }
-        eMove(e, SG(u.tyrZ), 0.3, () => { eKill(e); u.tyrOx = false; u.oecBusy = false; u.s++; if(u.s >= 4) splitWater(u); }); }); } };
+    /* ── free bodies: an electron / oxygen Mol on a sprite ── */
+    const bodies = [];   // every free Mol that moves on its own (electrons, oxygen atoms) - carriers are in `carriers`
+    const spawnElectron = (at, opts) => { const s = sprites.find(s => !s.mol); if(!s) return null;
+      const m = new Mol({ name:'electron', body:{ kind:'elec', s }, speed: SPEED.small }); m.x = at[0]; m.y = at[1]; m.z = at[2]; m.energy = opts && opts.energy || 0; m.flags.exiting = true;
+      s.mol = m; s.mesh.setEnabled(true); s.corona.setEnabled(true); bodies.push(m); return m; };
+    const spawnO = at => { const s = oSprites.find(s => !s.mol); if(!s) return null;
+      const m = new Mol({ name:'O', body:{ kind:'o', s }, speed: SPEED.mid }); m.x = at[0]; m.y = at[1]; m.z = at[2]; m.flags.exiting = true; m.dir = [Math.random()-0.5, -1, (Math.random()-0.5)*0.3];
+      s.mol = m; s.mesh.setEnabled(true); bodies.push(m); return m; };
+    const killBody = m => { m.alive = false; if(m.body && m.body.kind === 'free' && !m.consumed){ const F = gValoFree; if(F){ gMolHold[F.base[m.body.key] + m.body.i] = 0; F.setOff(m.body.key, m.body.i, 0, 0, 0); } }
+      if(m.body && m.body.s){ m.body.s.mol = null; m.body.s.mesh.setEnabled(false); if(m.body.s.corona) m.body.s.corona.setEnabled(false); }
+      const i = bodies.indexOf(m); if(i >= 0) bodies.splice(i, 1); const j = ALL.indexOf(m); if(j >= 0) ALL.splice(j, 1); if(followed === m) followed = null; for(const s of ALL) if(s.pulled) s.pulled.delete(m); };
 
-    /* ── b6f: the Qo oxidation (two protons out, one electron to the Rieske/f arm, one down the b hemes to Qi) and the Q cycle ── */
-    const oxidiseQo = (u, e1, e2, fromShuttle) => { SW(S(u.mi, u.qoSite), _a); spitProtons(2, _a, -5, 3);
-      if(u.rieske >= 0) eMove(e1, SG(u.rieske), 0.4, () => { const toF = () => { if(!u.fE){ u.fE = e1; eMove(e1, SG(u.f), 0.45, null); } else after(0.3, toF); }; toF(); });
-      else { const toF = () => { if(!u.fE){ u.fE = e1; eMove(e1, SG(u.f), 0.6, null); } else after(0.3, toF); }; toF(); }
-      eMove(e2, SG(u.bL), 0.4, () => eMove(e2, SG(u.bH), 0.4, () => eMove(e2, SG(u.cn), 0.3, () => eMove(e2, S(u.mi, u.qiSite), 0.35, () => { u.qi.push(e2); })))); };
-    const tickB6f = (u, dt) => {
-      if(u.qi.length >= 2 && u.qiH === 0 && !u.qiBusy){ u.qiBusy = true; const got = grabProtons(2, S(u.mi, u.qiSite), 1, 0.9, 'park'); after(got ? 1.0 : 0.2, () => { u.qiH = 2; u.qiBusy = false; }); }
-      if(u.qi.length >= 2 && u.qiH === 2 && !u.cycleBusy){ u.cycleBusy = true; const e1 = u.qi.shift(), e2 = u.qi.shift(); u.qiH = 0; let n = 0;
-        const go = () => { if(++n < 2) return; after(0.2, () => { oxidiseQo(u, e1, e2, false); u.cycleBusy = false; }); };
-        after(0.8, () => { eMove(e1, S(u.mi, u.qoSite), 0.7, go); eMove(e2, S(u.mi, u.qoSite), 0.7, go); }); } };
+    /* ══ PULL (when_body_enters_nearby_area -> try_PULLING / PULLING_conditions) ══ a slot that can take a nearby free body sets its hard target */
+    const slotTakes = (slot, body) => { const base = slot.name.replace(/_LUMENAL2?$|_STROMAL2?$/, '').replace(/_\d+$/, '').replace(/_2$/, ''); return body.has(base); };
+    const bindCond = (owner, body, slot) => { if(slot.occupied || slot.flags.binding || body.flags.binding || body.flags.exiting) return false; if(!slotTakes(slot, body)) return false;
+      const li = owner.has('photosystem_I_dock') ? INTER.photosystem_I_dock : INTER[owner.name]; if(li && !li.some(t => body.has(t))) return false; if(owner.isSlot) return false;
+      return owner.hooks.bindCond(body, slot) === true; };
+    const tryPulling = (slot, body) => { const owner = slot.owner(); if(body.hard) return false;
+      if(slot.pulled.size && ![...slot.pulled].every(b => !b.alive || b === body)) return false;   // one body per slot
+      if(!bindCond(owner, body, slot)) return false;
+      body.hard = slot; slot.pulled.add(body); owner.hooks.pullAct && owner.hooks.pullAct(body); return true; };
 
-    /* ── PSI, ferredoxin, FNR ── */
-    const chargeSepI = u => { if(u.p700ox || u.busy || u.fbE) return false; const e = eSpawn(SG(u.p700[0])); if(!e) return false; u.p700ox = true; u.busy = true; flashAt(SW(SG(u.p700[0]), _c));
-      const steps = [u.a0, u.a1, u.fx, u.fa, u.fb].filter(g => g >= 0); let k = 0;
-      const next = () => { if(k >= steps.length){ u.fbE = e; u.busy = false; return; } eMove(e, SG(steps[k++]), 0.3, next); }; next(); return true; };
-    const tickPSI = (u, dt) => {
-      if(u.fbE && !u.fbE.mov){ const fd = fds.find(f => !f.e && !f.busy); if(fd){ const e = u.fbE; u.fbE = null; fd.busy = true; SW(fd.site, _a); SW(SG(u.fb), _b); const dur = 0.3 + d3(_a, _b)/150;
-        eMove(e, fd.site, dur, () => { fd.e = e; fd.busy = false; fd.holdT = 0; }); } } };
-    const tickFd = (fd, dt) => { if(!fd.e || fd.e.mov || fd.busy) return; fd.holdT += dt; if(fd.holdT < 1.0) return;
-      const fn = fnrs.find(f => f.e.length < 2 && !f.busy); if(!fn) return; const e = fd.e; fd.e = null; fd.busy = true; SW(fn.site, _a); SW(fd.site, _b); const dur = 0.3 + d3(_a, _b)/150;
-      eMove(e, fn.site, dur, () => { fn.e.push(e); fd.busy = false; }); };
-    const tickFNR = (fn, dt) => { if(fn.e.length < 2 || fn.busy || fn.e.some(e => e.mov)) return; fn.busy = true; const F = gValoFree; SW(fn.site, _a);
-      let pulled = false; if(F && F.count('nadp')){ const i = F.nearest('nadp', _a[0], _a[1], _a[2], 1); if(i >= 0) pulled = pullFree('nadp', { i }, fn.site, 1.0, 'release', 15); }
-      grabProtons(1, fn.site, 1, 0.9, 'park');
-      after(pulled ? 1.2 : 0.6, () => { SW(fn.site, _a); flashAt(_a); for(const e of fn.e) eKill(e); fn.e = []; stats.nadph++; fn.busy = false; }); };
+    /* ══ BIND (when_body_enters_BindSite -> try_BINDING) ══ the body glides in, is consumed, the slot lights up */
+    const consume = (body, slot) => { const owner = slot.owner();
+      slot.occupied = true; slot.holder = null; slot.energy = body.has('electron') ? body.energy * BIND_LOSS : body.energy; if(body.has('electron')){ ringAt(slot.world(_c)); }
+      if(body.body && body.body.kind === 'free'){ slot.freeI = body.body.i; slot.free = body.body.key; slot.excited = body.excited; }
+      if(followed === body) followed = slot;
+      for(const o of slot.pulled) if(o !== body && o.alive && o.hard === slot) o.hard = null; slot.pulled.clear();   // the slot is full: free the others that were pulling to it
+      slot.flags.binding = false; slot.host.hooks.softTarget(); owner.hooks.bindAct(slot, body); };
+    const dock = (carrier, slot) => {   // a carrier binding = docking: it stays a Mol with its own slots, parked in the host's slot
+      const owner = slot.owner(); slot.occupied = true; slot.holder = carrier; carrier.dockedAt = slot; carrier.hard = null; carrier.soft = null;
+      for(const o of slot.pulled) if(o !== carrier && o.alive && o.hard === slot) o.hard = null; slot.pulled.clear(); slot.flags.binding = false; carrier.flags.binding = false;
+      if(slot.name === 'VDE') slot.vdeT = 0;
+      owner.hooks.bindAct(slot, carrier); carrier.hooks.bindAct(slot, carrier); };
+    const undock = (carrier, slot) => { slot.occupied = false; slot.holder = null; carrier.dockedAt = null; carrier.flags.exiting = true; carrier.exitT = 0;
+      if(carrier.body && carrier.body.kind === 'bnc'){ const b = carrier.body.b; b.dockedAt = null; const sp = carrier.speed || SPEED.mid; b.vx = (Math.random()-0.5)*sp; b.vy = (b.side || 1)*sp*0.7; b.vz = 0; }
+      carrier.hooks.softTarget(); };
 
-    /* ── the shuttles' cargo ── */
-    const tickShuttle = (sh, dt) => {
-      if(sh.pq){
-        // an empty plastoquinone heads for (or waits at) a pocket that has nothing for it while another centre holds PQH2: go there instead
-        if((sh.phase === 'toA' || (sh.phase === 'dockA' && !sh.cargoE && !sh.loading)) && sh.unit && !sh.unit.pqh2){
-          const busyU = new Set(gShuttles.filter(o => o !== sh && o.pq && (o.phase === 'toA' || o.phase === 'dockA')).map(o => o.unit));
-          const ready = units.find(u => u.mi === sh.hostA && u.pqh2 && !busyU.has(u));
-          if(ready){ if(sh.phase === 'dockA'){ sh.waitT = 1e9; sh.t = sh.dock; } else { sh.unit = ready; sh.unitKey = String(units.indexOf(ready)); sh.A = ready.qbSite; } } }
-        if(sh.phase === 'dockA' && sh.unit && !sh.cargoE && !sh.loading && sh.unit.pqh2){ const u = sh.unit; sh.loading = true; const es = u.qbE; u.qbE = []; u.qbH = 0; u.pqh2 = false;
-          const hIds = []; for(let k=0;k<2;k++){ const i = parked.length ? parked.pop() : -1; if(i >= 0) hIds.push(i); } sh.cargoH = hIds; sh.cargoE = es; let n = 0; const site = cenSite(sh.mi);
-          for(const e of es) eMove(e, site, 0.45, () => { if(++n === es.length){ sh.loading = false; sh.t = sh.dock; } }); if(!es.length){ sh.loading = false; sh.t = sh.dock; } }
-        if(sh.phase === 'dockB' && sh.b6f && sh.cargoE && !sh.loading){ const u = sh.b6f, es = sh.cargoE; sh.cargoE = null; sh.loading = true; for(const i of (sh.cargoH || [])) parked.push(i); sh.cargoH = null;
-          if(es.length >= 2) oxidiseQo(u, es[0], es[1], true); else for(const e of es) eKill(e); after(0.5, () => { sh.loading = false; sh.t = sh.dock; }); } }
-      else {
-        if(sh.phase === 'dockA' && sh.b6f && !sh.cargoE && !sh.loading && sh.b6f.fE && !sh.b6f.fE.mov){ const u = sh.b6f, e = u.fE; u.fE = null; sh.cargoE = e; sh.loading = true; eMove(e, cuSite(sh), 0.45, () => { sh.loading = false; sh.t = sh.dock; }); }
-        if(sh.phase === 'dockB' && sh.psi && sh.cargoE && !sh.loading && sh.psi.p700ox){ const u = sh.psi, e = sh.cargoE; sh.cargoE = null; sh.loading = true; eMove(e, SG(u.p700[0]), 0.5, () => { eKill(e); u.p700ox = false; sh.loading = false; sh.t = sh.dock; }); } } };
-    let dtNow = 0;
-    gValoDockHold = sh => { sh.waitT += dtNow; if(sh.loading) return true;
-      if(sh.pq) return sh.phase === 'dockA' ? (!sh.cargoE && sh.waitT < 40) : !!sh.cargoE;
-      return sh.phase === 'dockA' ? (!sh.cargoE && sh.waitT < 40) : (!!sh.cargoE && sh.waitT < 60); };
-    gValoRetarget = sh => { sh.waitT = 0; if(!sh.pq) return;
-      if(sh.phase === 'toB' && !sh.cargoE) sh.phase = 'toA';   // gave up waiting empty: try another PSII pocket rather than carry nothing to b6f
-      if(sh.phase !== 'toA') return; const cands = units.filter(u => u.mi === sh.hostA); if(!cands.length) return;
-      const busyU = new Set(gShuttles.filter(o => o !== sh && o.pq && (o.phase === 'toA' || o.phase === 'dockA')).map(o => o.unit));
-      let u = cands.find(u => u.pqh2 && !busyU.has(u)) || cands.find(u => !busyU.has(u)) || cands[(sh.rr = ((sh.rr|0) + 1)) % cands.length];
-      sh.unit = u; sh.unitKey = String(units.indexOf(u)); sh.A = u.qbSite; };
+    /* ══ RELEASE (try_RELEASING / RELEASING_conditions) ══ */
+    const electronAcceptor = (giver) => {   // 3B..3H: an EMPTY electron slot whose owner is the next link, in reach, not already targeted; plastocyanin never to plastocyanin
+      const p = giver.chainPlace(); if(p == null) return null; giver.world(_a); const cands = [];
+      for(const m of ALL){ if(!m.alive || !m.isSlot || m.name !== 'electron' && m.name !== 'electron_2') continue; if(m.occupied || m.flags.binding) continue;
+        if([...m.pulled].some(b => b.alive)) continue; const o = m.owner(); if(o === giver || (o.dockedAt && o.dockedAt.owner() === giver && false)) continue;
+        if(o.chainPlace() !== p + 1) continue; if(!laneOk(giver, o)) continue; if(o.damaged) continue;
+        if(giver.has('plastocyanin') && o.has('plastocyanin')) continue;
+        m.world(_b); if(d3(_a, _b) > Math.max(giver.near || NEAR_COF, o.near || 0) + ((o.body || giver.body) ? 30 : 0)) continue; cands.push(m); }
+      return cands.length ? cands[(Math.random()*cands.length)|0] : null; };
+    const tryReleasing = owner => { if(owner.isSlot) return;
+      for(const slot of owner.slots){ if(!slot.occupied || slot.flags.releasing || slot.flags.binding) continue; slot.flags.releasing = true;
+        let ok = owner.hooks.relCond(slot); let acceptor = null;
+        if(ok && (slot.name === 'electron' || slot.name === 'electron_2')){ acceptor = electronAcceptor(owner); ok = !!acceptor; }
+        slot.flags.releasing = false; if(!ok) continue;
+        if(slot.holder){ const c = slot.holder; undock(c, slot); owner.hooks.relAct(c); c.hooks.relAct && c.hooks.relAct(c); owner.excited = false; continue; }   // a docked carrier leaves
+        // a new body from the slot
+        slot.world(_c); let body = null;
+        if(slot.name.startsWith('electron')){ body = spawnElectron(_c, { energy: slot.energy }); if(!body) continue; body.hard = acceptor; acceptor.pulled.add(body); if(followed === slot) followed = body; }
+        else if(slot.name.startsWith('proton')){ spitProton(_c, owner.has('plastoquinone_B') ? -6 : 6, 3); body = { has: t => t === 'proton', flags:{} }; }
+        else if(slot.freeI != null){ const k = slot.free, i = slot.freeI; slot.freeI = null; releaseFree(k, i, _c[0], _c[1], _c[2], [(Math.random()-0.5)*8, slot.side < 0 ? -6 : 6, (Math.random()-0.5)*8], 15); body = { has: t => t === slot.name.replace(/_\d+$/, '') || (t === 'NADP' && k === 'nadp'), flags:{}, world: o => { o[0]=_c[0]; o[1]=_c[1]; o[2]=_c[2]; return o; } }; }
+        else if(slot.name === 'O2'){ body = { has: t => t === 'O2', flags:{} }; }
+        else body = { has: () => false, flags:{} };
+        slot.occupied = false; slot.excited = false; slot.energy = 0; owner.excited = owner.has('reaction_centre') ? false : owner.excited;
+        owner.hooks.relAct(body); owner.hooks.softTarget(); } };
 
-    /* ── excitons ── */
-    const excitons = []; const HOP = 0.13;
-    gValoExcite = (gi, x, y, z) => { const u = unitOfChl.get(gi); if(!u) return false; stats.fotonit++; if(excitons.length >= 40){ heatAt([x, y, z]); return true; } excitons.push({ u, at: gi, t:0, hops:0, life:0 }); return true; };
-    const tickExcitons = dt => { let n = 0;
-      for(let q = excitons.length-1; q >= 0; q--){ const ex = excitons[q], u = ex.u; ex.t += dt; ex.life += dt;
-        if(ex.t >= HOP){ ex.t = 0; ex.hops++;
-          if(u.kind === 'PSII'){ if(u.p680.includes(ex.at)){ if(chargeSepII(u)){ excitons.splice(q, 1); continue; } } else if(ex.at === u.chlD1){ ex.at = u.p680[0]; } }
-          else if(u.p700.includes(ex.at)){ if(chargeSepI(u)){ excitons.splice(q, 1); continue; } }
-          if(ex.life > 6.0 || ex.hops > 90){ heatAt(SW(SG(ex.at), _c)); excitons.splice(q, 1); continue; }
-          if(!(u.kind === 'PSII' && ex.at === u.p680[0] && ex.hops % 2)){   // a hop, mostly downhill toward the centre (an exciton at P680 lingers a beat before it wanders off)
-            const nb = u.nb.get(ex.at); if(!nb || !nb.length){ heatAt(SW(SG(ex.at), _c)); excitons.splice(q, 1); continue; }
-            const tgt = cen(u.rcTarget); let best = null, bs = -Infinity; for(const o of nb){ const sc = -d3(cen(o.g), tgt)/5 + Math.random()*1.2; if(sc > bs){ bs = sc; best = o; } } ex.at = best.g; } }
-        if(n < eks.cap){ SW(SG(ex.at), _c); putGlow(eks, n++, 2.6 + 0.8*Math.sin(gWaveT*9 + q), _c[0], _c[1], _c[2]); } }
+    /* ══ EXCITATION (try_EXCITING / try_EXCITATION_TRANSFERRING / turning_excitation_to_heat) ══ */
+    const tryExciting = (m, energy, from) => { if(m.damaged || m.transfer || m.flags.shaking) return false; if(!m.hooks.excCond()) return false;
+      if(m.has('reaction_centre') && !m.filled('electron')) return false;   // 6G: a centre must hold its electron
+      m.excited = true; m.energy = energy; m.heatT = 0; if(from && followed === from) followed = m;
+      if(m.has('zeaxanthin')){ m.flags.shaking = 0.001; }   // zeaxanthin turns it straight to heat (heat_shake)
+      m.hooks.excAct(); return true; };
+    const excitationAcceptor = m => { if(m.has('electron') || m.has('O2')) return null; m.world(_a); const p = m.chainPlace(); const cands = [], zea = [];
+      for(const o of antenna){ if(o === m || !o.alive || o.excited || o.damaged || o.transfer || o.flags.shaking) continue; if(o.ps !== m.ps) continue;
+        const ok = o.place === p + 1 || o.has('zeaxanthin'); if(!ok || o.has('violaxanthin')) continue;
+        if(o.has('reaction_centre') && !o.filled('electron')) continue;
+        o.world(_b); if(d3(_a, _b) > 24) continue; (o.has('zeaxanthin') ? zea : cands).push(o); }
+      if(zea.length) return zea[(Math.random()*zea.length)|0]; if(cands.length) return cands[(Math.random()*cands.length)|0];
+      if(m.has('P680') || m.has('P680pair')){ const F = gValoFree; if(F && F.count('o2') && Math.random() < 0.02){ const i = F.nearest('o2', _a[0], _a[1], _a[2], 0); if(i >= 0){ F.pos('o2', i, _b); if(d3(_a, _b) < 24) return spawnO2Body(i, _b); } } }   // singlet oxygen: an O2 by an excited centre takes the energy
+      return null; };
+    const spawnO2Body = (i, at) => { const F = gValoFree; gMolHold[F.base.o2 + i] = 1; const m = new Mol({ name:'O2', body:{ kind:'free', key:'o2', i }, speed: SPEED.mid }); m.x = at[0]; m.y = at[1]; m.z = at[2]; m.dir = [Math.random()-0.5, -0.5, 0];
+      m.hooks.softTarget = () => { const ts = units.map(u => u.tyrM && u.tyrM.slotNamed('O2')).filter(Boolean); m.soft = m.excited && ts.length ? ts[(Math.random()*ts.length)|0] : null; }; bodies.push(m); return m; };
+    const tickExcitation = dt => { let n = 0;
+      for(const m of antenna){ if(!m.alive) continue;
+        if(m.flags.shaking){ m.flags.shaking += dt; if(m.flags.shaking > 0.6){ m.flags.shaking = 0; m.excited = false; m.energy = 0; heatAt(m.world(_c)); } continue; }
+        if(m.has('zeaxanthin') && Math.random() < dt/60){ m.tags.delete('zeaxanthin'); m.tag('violaxanthin'); }   // zeaxanthin epoxidase: back to violaxanthin in a minute or so
+        if(!m.excited) continue;
+        if(m.transfer){ const T = m.transfer; T.t += dt; if(T.t >= HOP){ m.transfer = null; const to = T.to; if(to.alive && tryExciting(to, m.energy, m)){ m.excited = false; m.energy = 0; if(to.has('reaction_centre')) tryReleasing(to); to.hooks.softTarget(); } } }
+        else { m.heatT += dt; if(m.heatT >= HEAT_S){ m.flags.shaking = 0.001; continue; }   // use it or lose it
+          if(!(m.has('reaction_centre'))){ const to = excitationAcceptor(m); if(to) m.transfer = { to, t:0 }; } }
+        if(n < eks.cap){ m.world(_c); putGlow(eks, n++, 2.6 + 0.8*Math.sin(gWaveT*9 + m.id), _c[0], _c[1], _c[2]); } }
       showGlow(eks, n); };
+    // a photon absorbed by chlorophyll group gi (the photon block calls this)
+    gValoExcite = (gi, x, y, z) => { const m = cofMols.get(gi); if(!m || !antenna.includes(m)) return false; stats.fotonit++;
+      if(tryExciting(m, PHOTON_E, null)){ if(followArm && !followed){ followed = m; followArm = false; } return true; } heatAt([x, y, z]); return true; };
+
+    /* ── the OEC (OEC.gd try_to_remove_electron_from_water): bound water -> OH (electron + proton out) -> O (electron + proton out, the O leaves) ── */
+    const removeElectronFromWater = oec => { const h2o = oec.slotNamed('H2O'), e = oec.slotNamed('electron'); if(!h2o.occupied || e.occupied || h2o.flags.binding) return;
+      h2o.world(_a); const u = units.find(q => q.oecM === oec);
+      if(oec.water === 1){ oec.water = 2; }
+      else { oec.water = 0; if(h2o.freeI != null){ const i = h2o.freeI; h2o.freeI = null; parkedF.push({ key:'w', i, t:0 }); } h2o.occupied = false;
+        const o = spawnO(_a); if(o && u) o.soft = { p: u.o2Point, mi: u.mi }; }
+      const el = spawnElectron(_a, { energy: 0 }); if(el){ el.hard = e; e.pulled.add(el); }
+      spitProton(_a, -6, 3); };
+    // O + O -> O2 (when_body_enters_touch_area): two oxygen atoms that touch merge into a free O2 molecule
+    const combineO = (a, b) => { a.flags.combining = b.flags.combining = true; const p = [(a.x+b.x)/2, (a.y+b.y)/2, (a.z+b.z)/2]; const F = gValoFree;
+      if(F && F.count('o2')){ const j = F.nearest('o2', p[0], p[1], p[2], 0); if(j >= 0){ gMolHold[F.base.o2 + j] = 1; releaseFree('o2', j, p[0], p[1], p[2], [(Math.random()-0.5)*8, -8, (Math.random()-0.5)*8], 25); } }
+      flashAt(p); stats.o2++; killBody(a); killBody(b); };
+    const makeATP = atp => { const F = gValoFree; for(const n of ['ADP', 'phosphate']){ const s = atp.slotNamed(n); if(s.freeI != null){ parkedF.push({ key: s.free, i: s.freeI, t:0 }); s.freeI = null; } s.occupied = false; }
+      atp.protons = 0; atp.world(_a); if(F && F.count('atp')){ const j = F.nearest('atp', _a[0], _a[1], _a[2], 0); if(j >= 0){ gMolHold[F.base.atp + j] = 1; releaseFree('atp', j, _a[0], _a[1] + 20, _a[2], [(Math.random()-0.5)*8, 8, (Math.random()-0.5)*8], 20); } }
+      stats.atp++; flashAt(_a); };
+
+    /* ── the mover: free bodies steer like _physics_process (hard 0.5, soft 0.025 per tick, bounce off shells / walls), bind on touch ── */
+    const tgtWorld = (t, out) => { if(t.world) return t.world(out); if(t.p && t.mi >= 0) return wpt(t.mi, t.p, out); out[0]=t.point[0]; out[1]=t.point[1]; out[2]=t.point[2]; return out; };
+    const steer = (m, tgt, k, dt) => { tgtWorld(tgt, _b);
+      const dx=_b[0]-m.x, dy=_b[1]-m.y, dz=_b[2]-m.z, d=Math.hypot(dx,dy,dz)||1e-3; const f = 1 - Math.pow(1-k, dt*60);
+      m.dir[0] += (dx/d - m.dir[0])*f; m.dir[1] += (dy/d - m.dir[1])*f; m.dir[2] += (dz/d - m.dir[2])*f; const l = Math.hypot(m.dir[0], m.dir[1], m.dir[2])||1; m.dir[0]/=l; m.dir[1]/=l; m.dir[2]/=l; return d; };
+    const tickBodies = dt => {
+      for(let q = bodies.length-1; q >= 0; q--){ const m = bodies[q]; if(!m || !m.alive) continue;   // (two oxygen atoms merging remove two entries at once)
+        if(m.exitT != null){ m.exitT += dt; if(m.exitT > 0.6){ m.flags.exiting = false; m.exitT = null; } } else if(m.flags.exiting){ m.exitT = 0; }
+        if(m.flags.binding && m.hard){ const slot = m.hard; slot.world(_b); const f = 1 - Math.pow(0.5, dt*60); m.x += (_b[0]-m.x)*f; m.y += (_b[1]-m.y)*f; m.z += (_b[2]-m.z)*f;
+          if(m.body.kind === 'free'){ const F = gValoFree; if(F) F.setWorld(m.body.key, m.body.i, m.x, m.y, m.z); }
+          if(Math.hypot(_b[0]-m.x, _b[1]-m.y, _b[2]-m.z) < 1.0){ consume(m, slot); m.consumed = true; killBody(m); } continue; }
+        let d = Infinity; if(m.hard){ if(!m.hard.alive || (m.hard.occupied && !m.hard.flags.binding)){ m.hard = null; } else d = steer(m, m.hard, 0.5, dt); }
+        if(!m.hard && m.soft) steer(m, m.soft, 0.025, dt);
+        const sp = m.speed * (m.has('electron') ? 1 : 1); m.x += m.dir[0]*sp*dt; m.y += m.dir[1]*sp*dt; m.z += m.dir[2]*sp*dt;
+        if(m.hard && d < TOUCH + sp*dt){ const slot = m.hard; if(bindCond(slot.owner(), m, slot) || slot.pulled.has(m)){ if(!slot.occupied){ slot.flags.binding = true; m.flags.binding = true; continue; } } m.hard = null; }
+        if(!m.hard && m.has('electron')){ m.lifeT = (m.lifeT || 0) + dt; if(m.lifeT > 4){ heatAt([m.x, m.y, m.z]); killBody(m); continue; } }   // electron.gd: an electron with no target is gone
+        if(m.body.kind === 'free'){ const F = gValoFree; if(F) F.setWorld(m.body.key, m.body.i, m.x, m.y, m.z); }
+        if(m.has('O') || m.has('O2')){   // oxygen atoms / a singlet oxygen: bounce in the box (below the lipid layer), the atoms merge on contact
+          const lo = gPsuLo || gBoxLo, hi = gPsuHi || gBoxHi; if(lo){ if(m.x < lo.x){ m.x = lo.x; m.dir[0] = Math.abs(m.dir[0]); } if(m.x > hi.x){ m.x = hi.x; m.dir[0] = -Math.abs(m.dir[0]); } if(m.y < lo.y){ m.y = lo.y; m.dir[1] = Math.abs(m.dir[1]); } if(m.y > MEMBRANE_Y - gMemHalfT - 2){ m.y = MEMBRANE_Y - gMemHalfT - 2; m.dir[1] = -Math.abs(m.dir[1]); } m.z = gTasoZ; m.dir[2] = 0; }
+          m.dir[0] += (Math.random()-0.5)*0.3*Math.sqrt(dt); m.dir[1] += (Math.random()-0.5)*0.3*Math.sqrt(dt); const l = Math.hypot(m.dir[0], m.dir[1])||1; m.dir[0]/=l; m.dir[1]/=l;
+          if(m.has('O') && !m.flags.combining) for(const o of bodies){ if(o === m || !o.has('O') || o.flags.combining || !o.alive) continue; if(Math.hypot(o.x-m.x, o.y-m.y, o.z-m.z) < 4){ combineO(m, o); break; } } if(!m.alive) continue; }
+        if(m.body.s){ m.body.s.mesh.position.set(m.x, m.y, m.z); if(m.body.s.corona){ m.body.s.corona.position.set(m.x, m.y, m.z); const g = 0.5 + Math.min(1.5, m.energy*3.0/PHOTON_E); m.body.s.corona.scaling.set(g, g, g); } } } };
+
+    /* ── the pulls: every open slot looks around its Nearby_area for a body it can take (electrons / oxygen from `bodies`, carriers, free molecules, protons) ── */
+    const P = () => gValoProtons;
+    const tickPulls = dt => {
+      for(const owner of ALL){ if(!owner.alive || owner.isSlot || !owner.slots.length) continue; if(owner.dockedAt == null && owner.body && owner.body.kind === 'sh' && owner.has('plastoquinone_B')){ /* a quinone takes electrons / protons only in a pocket */ if(!owner.dockedAt) continue; }
+        for(const slot of owner.slots){ if(slot.occupied || slot.flags.binding) continue; if([...slot.pulled].some(b => b.alive)) continue; slot.world(_a);
+          const nm = slot.name;
+          if(nm.startsWith('electron')){ if(owner.has('plastoquinone_B') || owner.has('plastocyanin') || owner.has('ferredoxin')){ if(!owner.dockedAt) continue; }
+            for(const b of bodies){ if(!b.alive || !b.has('electron') || b.hard) continue; if(Math.hypot(b.x-_a[0], b.y-_a[1], b.z-_a[2]) > slot.near) continue; tryPulling(slot, b); break; } }
+          else if(nm.startsWith('proton')){ if(!bindCond(owner, PROTON, slot)) continue; const pr = P(); if(!pr) continue;
+            let i = pr.nearestFree(_a[0], _a[1], _a[2], slot.side || 0, slot.near || 60); if(i < 0) i = pr.anyFree(slot.side || 0); if(i < 0) continue; pr.grab(i); slot.flags.binding = true;   // (none in reach: any free one of that side, as the first machine did - the free protons keep clear of the complexes)
+            heldP.push({ i, from:[pr.pos[i*3], pr.pos[i*3+1], pr.pos[i*3+2]], to: slot, t:0, dur: 0.9 }); }
+          else if(slot.free){ const F = gValoFree; if(!F || !F.count(slot.free)) continue; slot.scanT = (slot.scanT || 0) + dt; if(slot.scanT < 0.5) continue; slot.scanT = 0; if(slot.needs === 'NADPH'){ /* only a reduced NADP: the FNR has just made one - it comes from the pool tagged by nadphReady */ if(!nadphReady.length) continue; }
+            const i = slot.needs === 'NADPH' ? nadphReady.pop() : F.nearest(slot.free, _a[0], _a[1], _a[2], slot.side || 0); if(i < 0) continue; F.pos(slot.free, i, _b); if(slot.needs !== 'NADPH' && d3(_a, _b) > Math.max(slot.near, 400)) continue;   // (the free pools keep clear of the complexes: the reach is at least 400)
+            const fake = { has: t => t === nm.replace(/_\d+$/, '') || (t === 'NADP' && slot.free === 'nadp'), flags:{}, filled: () => slot.needs === 'NADPH', alive:true, excited:false }; if(!bindCond(owner, fake, slot)) continue;
+            slot.flags.binding = true; pullFree(slot.free, i, slot, 0.3 + d3(_a, _b)/120, 'slot'); }
+          else if(nm === 'O2'){ for(const b of bodies){ if(!b.alive || !b.has('O2') || b.hard) continue; if(Math.hypot(b.x-_a[0], b.y-_a[1], b.z-_a[2]) > slot.near) continue; tryPulling(slot, b); break; } }
+          else { // a docking slot: a carrier heading here that is within reach is pulled in (the shuttle mover / bouncer steer do the travel)
+            for(const c of carriers){ if(!c.alive || c.dockedAt || c.hard || c.flags.exiting) continue; if(!slotTakes(slot, c)) continue; c.world(_b); if(d3(_a, _b) > slot.near) continue; tryPulling(slot, c); break; } } } } };
+    const PROTON = { has: t => t === 'proton', flags:{}, alive:true };
+    const nadphReady = [];   // free NADP+ instances that left FNR reduced (the pool has one species: this list says which are NADPH)
+
+    /* ── carriers: the shuttle mover and the steered bouncers ask where to go; docking is binding ── */
+    const carrierTarget = c => c.hard || c.soft;
+    gValoShuttle = {   // read by the shuttle mover (below the old dock/travel logic, rewritten): the target slot's world point, and what to do on arrival / while docked
+      target: sh => { const c = sh.mol; if(!c) return null; if(c.dockedAt) return c.dockedAt; const t = carrierTarget(c); return t && t.world ? t : null; },
+      arrive: sh => { const c = sh.mol, slot = c.hard || c.soft; if(!slot || !slot.world || slot.occupied){ c.lastFail = 'arrive: ' + (!slot ? 'no slot' : !slot.world ? 'a point' : 'occupied by ' + (slot.holder ? slot.holder.name : '?')); c.hard = null; c.hooks.softTarget(); return false; }
+        if(!bindCond(slot.owner(), c, slot) && !slot.pulled.has(c)){ c.lastFail = 'arrive: bindCond ' + slot.owner().name + '/' + slot.name; c.hard = null; c.hooks.softTarget(); return false; } dock(c, slot); return true; },
+      docked: sh => !!(sh.mol && sh.mol.dockedAt), exiting: sh => !!(sh.mol && sh.mol.flags.exiting) };
+    const tickCarriers = dt => {
+      for(const b of homers){ const ci = mInfo[b.mi], x = ci.cx + gModelOff[b.mi*3], y = ci.cy + gModelOff[b.mi*3+1]; const dx = b.home[0]-x, dy = b.home[1]-y, d = Math.hypot(dx, dy) || 1e-3, sp = SPEED.large; const f = 1 - Math.pow(0.94, dt*60);
+        const vx = b.vx + (dx/d*sp - b.vx)*f, vy = b.vy + (dy/d*sp - b.vy)*f, l = Math.hypot(vx, vy) || 1; b.vx = vx/l*sp; b.vy = vy/l*sp; }
+      for(const c of carriers){ if(!c.alive) continue;
+        if(!c.dockedAt && !c.hard){ c.retT = (c.retT || 0) + dt; if(c.retT > 3 && (!c.soft || c.soft.holder || c.soft.occupied)){ c.retT = 0; c.hooks.softTarget(); } }   // check_soft_target again while the slot it heads for is taken (2D re-runs it on every nearby event)
+        if(c.flags.exiting){ c.exitT = (c.exitT || 0) + dt; if(c.exitT > 1.5){ c.flags.exiting = false; c.exitT = 0; } }
+        if(c.dockedAt){ const slot = c.dockedAt; if(slot.name === 'VDE'){ slot.vdeT += dt; const u = units.find(q => q.vdeSlot === slot); if(u) for(const m of antenna) if(m.ps === u && m.has('violaxanthin') && Math.random() < dt*0.5){ m.tags.delete('violaxanthin'); m.tag('zeaxanthin'); } } continue; }
+        if(c.body.kind === 'bnc'){ const b = c.body.b, mi = c.mi, ci = mInfo[mi]; c.x = ci.cx + gModelOff[mi*3]; c.y = ci.cy + gModelOff[mi*3+1]; c.z = ci.cz + gModelOff[mi*3+2];
+          const t = carrierTarget(c); if(t){ tgtWorld(t, _b);
+            const dx=_b[0]-c.x, dy=_b[1]-c.y, d=Math.hypot(dx,dy)||1e-3, sp = c.speed || Math.hypot(b.vx, b.vy); const k = c.hard ? 0.5 : 0.06, f = 1 - Math.pow(1-k, dt*60);
+            let vx = b.vx + (dx/d*sp - b.vx)*f, vy = b.vy + (dy/d*sp - b.vy)*f; const l = Math.hypot(vx, vy)||1; b.vx = vx/l*sp; b.vy = vy/l*sp;
+            if(t.world && d < b.R + 18 && !c.flags.exiting){ if(gValoShuttle.arrive({ mol:c })){ b.vx = b.vy = 0; b.dockedAt = t; } } }
+          if(c.dockedAt && b.dockedAt){ /* hold in contact with the host */ } }
+        else if(c.body.kind === 'sh'){ const sh = c.body.sh; c.x = sh.cur[0]; c.y = sh.cur[1]; c.z = sh.cur[2]; } } };
 
     /* ── per frame ── */
-    let valoRow = null;   // the dev panel is built after this block: look it up lazily
-    let dev = 0;
+    let valoRow = null, dev = 0, dtNow = 0; const prof = { exc:0, pull:0, rel:0, all:0 };
+    const tickTimers = (m, dt) => { for(let q = m.timers.length-1; q >= 0; q--){ const t = m.timers[q]; t.t -= dt; if(t.t <= 0){ m.timers.splice(q, 1); t.fn(); } } };
     scene.onBeforeRenderObservable.add(() => {
       { const ov = document.getElementById('overlay'); if(ov && !ov.classList.contains('gone')) return; }
       const dt = Math.min(engine.getDeltaTime(), 50)*0.001*gSpeed; dtNow = dt; if(dt <= 0) return;
-      for(let q = timers.length-1; q >= 0; q--){ const t = timers[q]; t.t -= dt; if(t.t <= 0){ timers.splice(q, 1); t.fn(); } }
-      tickExcitons(dt);
-      for(const u of units) tickPSII(u, dt); for(const u of b6fs) tickB6f(u, dt); for(const u of psis) tickPSI(u, dt);
-      for(const f of fds) tickFd(f, dt); for(const f of fnrs) tickFNR(f, dt); for(const sh of gShuttles) tickShuttle(sh, dt);
-      // electrons: along their hop (an eased arc) or riding their site's live position with a little orbit
-      for(const e of elecs){ if(!e.on) continue;
-        if(e.mov){ const m = e.mov; m.t += dt; const k = Math.min(1, m.t/m.dur), s = k*k*(3-2*k); if(m.from.mi >= 0) SW(m.from, _a); else { _a[0]=m.from.p[0]; _a[1]=m.from.p[1]; _a[2]=m.from.p[2]; } SW(m.to, _b);
-          const lift = Math.sin(Math.PI*k)*Math.min(6, d3(_a, _b)*0.25); e.x = _a[0]+(_b[0]-_a[0])*s; e.y = _a[1]+(_b[1]-_a[1])*s + lift; e.z = _a[2]+(_b[2]-_a[2])*s;
-          if(k >= 1){ e.site = m.to; e.mov = null; if(m.cb) m.cb(); } }
-        else if(e.site){ SW(e.site, _a); const w = gWaveT*3 + e.ph; e.x = _a[0] + Math.cos(w)*1.3; e.y = _a[1] + Math.sin(w*0.7)*1.0; e.z = _a[2] + Math.sin(w)*1.3; }
-        e.mesh.position.set(e.x, e.y, e.z); e.corona.position.set(e.x, e.y, e.z); }
-      // held protons: eased onto their pocket, then parked out of sight
-      const P = gValoProtons;
-      if(P) for(let q = heldP.length-1; q >= 0; q--){ const h = heldP[q]; h.t += dt; const k = Math.min(1, h.t/h.dur), s = k*k*(3-2*k); SW(h.to, _b);
-        P.place(h.i, h.from[0]+(_b[0]-h.from[0])*s, h.from[1]+(_b[1]-h.from[1])*s, h.from[2]+(_b[2]-h.from[2])*s);
-        if(k >= 1){ heldP.splice(q, 1); const pk = PARK(); P.place(h.i, pk[0] + Math.random()*40, pk[1], pk[2] + Math.random()*40); parked.push(h.i); } }
-      // held analytic molecules: water into the OEC, NADP+ onto FNR, then parked or released to drift back into the pool
+      const _t0 = performance.now();
+      for(const m of ALL) if(m.timers.length) tickTimers(m, dt);
+      tickExcitation(dt); prof.exc = performance.now() - _t0; tickPulls(dt); prof.pull = performance.now() - _t0 - prof.exc; tickBodies(dt); tickCarriers(dt); const _t1 = performance.now();
+      for(const m of ALL){ if(!m.alive || m.isSlot || !m.slots.length) continue; if(m.has('plastoquinone_B') || m.has('plastocyanin') || m.has('ferredoxin')){ if(m.dockedAt) tryReleasing(m); } else tryReleasing(m); }
+      prof.rel = performance.now() - _t1;
+      // ATP synthase: the proton channel's passes (the GPU protons) count toward the next ATP
+      for(const a of atps){ const passes = typeof gProtonPasses !== 'undefined' ? gProtonPasses : 0; if(a.passes0 === 0) a.passes0 = passes; if(passes - a.passes0 >= 1){ a.protons += passes - a.passes0; a.passes0 = passes; } }
+      // held protons: eased onto their slot, then parked out of sight (they ride inside the quinol / NADPH)
+      const Pr = gValoProtons;
+      if(Pr) for(let q = heldP.length-1; q >= 0; q--){ const h = heldP[q]; h.t += dt; const k = Math.min(1, h.t/h.dur), s = k*k*(3-2*k); h.to.world(_b);
+        Pr.place(h.i, h.from[0]+(_b[0]-h.from[0])*s, h.from[1]+(_b[1]-h.from[1])*s, h.from[2]+(_b[2]-h.from[2])*s);
+        if(k >= 1){ heldP.splice(q, 1); const pk = PARK(); Pr.place(h.i, pk[0] + Math.random()*40, pk[1], pk[2] + Math.random()*40); parked.push(h.i); h.to.flags.binding = false; if(h.to.alive){ h.to.occupied = true; h.to.holder = null; h.to.owner().hooks.bindAct(h.to, PROTON); h.to.host.hooks.softTarget(); } } }
+      // held analytic molecules: water into the OEC, NADP+ onto FNR, ADP/Pi onto ATP synthase, substrates onto RuBisCO
       const F = gValoFree;
-      if(F){ for(let q = heldF.length-1; q >= 0; q--){ const h = heldF[q]; h.t += dt; const k = Math.min(1, h.t/h.dur), s = k*k*(3-2*k); SW(h.to, _b);
+      if(F){ for(let q = heldF.length-1; q >= 0; q--){ const h = heldF[q]; h.t += dt; const k = Math.min(1, h.t/h.dur), s = k*k*(3-2*k); h.to.world(_b);
           const x = h.from[0]+(_b[0]-h.from[0])*s, y = h.from[1]+(_b[1]-h.from[1])*s, z = h.from[2]+(_b[2]-h.from[2])*s; F.setWorld(h.key, h.i, x, y, z);
-          if(k >= 1){ heldF.splice(q, 1); if(h.then === 'park') parkedF.push({ key:h.key, i:h.i, t:0 }); else releaseFree(h.key, h.i, x, y, z, [(Math.random()-0.5)*8, 6, (Math.random()-0.5)*8], h.life); } }
+          if(k >= 1){ heldF.splice(q, 1); if(h.then === 'slot'){ const slot = h.to; slot.flags.binding = false; if(slot.alive){ slot.occupied = true; slot.freeI = h.i; slot.holder = null; if(slot.name === 'H2O'){ slot.owner().water = 1; } if(slot.name === 'NADP' && !slot.owner().has('RuBisCO')){ /* an NADP+ docked at FNR: it is a Mol with electron / electron_2 / proton slots while it sits there */ const nm = new Mol({ name:'NADP', mi: slot.mi, p: slot.p, host: null }); nm.slot('electron'); nm.slot('electron_2'); const pr = nm.slot('proton'); pr.near = 250; pr.side = 1; nm.hooks.bindCond = (body, s2) => body.has('proton') ? (nm.filled('electron') || nm.filled('electron_2')) : true; nm.dockedAt = slot; slot.holder = nm; nm.freeI = h.i; nm.p = slot.p; nm.mi = slot.mi; }
+                slot.owner().hooks.bindAct(slot, { has: t => t === slot.name.replace(/_\d+$/, '') || (t === 'NADP' && h.key === 'nadp'), filled: () => true, flags:{} }); slot.host.hooks.softTarget(); } else { gMolHold[F.base[h.key] + h.i] = 0; } }
+            else if(h.then === 'park') parkedF.push({ key:h.key, i:h.i, t:0 }); else releaseFree(h.key, h.i, x, y, z, [(Math.random()-0.5)*8, 6, (Math.random()-0.5)*8], h.life); } }
+        // a molecule sitting in a slot rides the slot
+        for(const m of ALL){ if(!m.alive || !m.isSlot || m.freeI == null || !m.occupied) continue; m.world(_b); F.setWorld(m.free, m.freeI, _b[0], _b[1], _b[2]); }
+        for(const m of ALL){ if(!m.alive || !m.has('NADP') || m.freeI == null || !m.dockedAt) continue; m.world(_b); F.setWorld('nadp', m.freeI, _b[0], _b[1], _b[2]); }
         for(let q = parkedF.length-1; q >= 0; q--){ const pf = parkedF[q]; pf.t += dt; const pk = PARK(); F.setWorld(pf.key, pf.i, pk[0], pk[1], pk[2]);
-          if(pf.t > 25){ parkedF.splice(q, 1); gMolHold[F.base[pf.key] + pf.i] = 0; F.setOff(pf.key, pf.i, 0, 0, 0); } }   // back into the pool (it reappears on its own path, somewhere else)
+          if(pf.t > 25){ parkedF.splice(q, 1); gMolHold[F.base[pf.key] + pf.i] = 0; F.setOff(pf.key, pf.i, 0, 0, 0); } }
         for(let q = released.length-1; q >= 0; q--){ const r = released[q]; r.t += dt; const k = Math.min(1, r.t/r.life), k2 = k*k; const dmp = Math.max(0, 1 - dt*0.5); r.vx *= dmp; r.vy *= dmp; r.vz *= dmp; r.x += r.vx*dt; r.y += r.vy*dt; r.z += r.vz*dt;
           F.pos(r.key, r.i, _a); F.setWorld(r.key, r.i, r.x*(1-k2) + _a[0]*k2, r.y*(1-k2) + _a[1]*k2, r.z*(1-k2) + _a[2]*k2);
           if(k >= 1){ released.splice(q, 1); gMolHold[F.base[r.key] + r.i] = 0; F.setOff(r.key, r.i, 0, 0, 0); } } }
-      // heat and flashes
+      // the NADP+ docked at FNR: full (2 e-, 1 H+) -> FNR releases it as NADPH (its 'NADP' slot's relCond), the Mol is dropped, the instance goes back to the pool marked reduced
+      for(const fnr of fnrs){ const s = fnr.nadpSlot; if(s.holder && !s.occupied){ /* released this frame by tryReleasing -> undock */ } }
+      for(const m of ALL.slice()){ if(!m.alive || !m.has('NADP') || m.isSlot) continue; if(!m.dockedAt && m.freeI != null){ nadphReady.push(m.freeI); m.world(_c); releaseFree('nadp', m.freeI, _c[0], _c[1], _c[2], [(Math.random()-0.5)*8, 8, (Math.random()-0.5)*8], 30); m.freeI = null; m.alive = false; const j = ALL.indexOf(m); if(j >= 0) ALL.splice(j, 1); } }
+      // the slot texture: electron carriers dim when empty, pigments bright when excited
+      for(const [gi, m] of cofMols){ if(!m.alive) continue; let k = 1.0;
+        if(m.slots.length && m.slotNamed('electron')) k = m.filled('electron') ? 1.0 : 0.45; if(m.excited) k = 1.6; if(m.damaged) k = 0.3; setSlotK(gi, k); }
+      if(slotDirty){ slotTex.update(slotData); slotDirty = false; }
+      // heat, flashes, rings
       let hn = 0; for(let q = heats.length-1; q >= 0; q--){ const H = heats[q]; H.t += dt; if(H.t > 0.5){ heats.splice(q, 1); continue; } if(hn < heat.cap) putGlow(heat, hn++, 3 + 14*(H.t/0.5), H.x, H.y, H.z); } showGlow(heat, hn);
       let fn = 0; for(let q = flashes.length-1; q >= 0; q--){ const Fl = flashes[q]; Fl.t += dt; if(Fl.t > 0.35){ flashes.splice(q, 1); continue; } if(fn < flashG.cap) putGlow(flashG, fn++, 3 + 16*(Fl.t/0.35), Fl.x, Fl.y, Fl.z); } showGlow(flashG, fn);
-      if((++dev & 7) === 0 && (valoRow || (valoRow = document.getElementById('dev-valo-row')))) valoRow.textContent = 'valoreaktiot: O2 ' + stats.o2 + ' · NADPH ' + stats.nadph + ' · H+ lumeniin ' + stats.hplus + ' · fotoneja ' + stats.fotonit + ' · lampona ' + stats.lampo + ' · S-tilat ' + units.map(u => u.s).join('') + ' · P700+ ' + psis.map(u => u.p700ox ? 1 : 0).join('');
+      let rn = 0; for(let q = rings.length-1; q >= 0; q--){ const R = rings[q]; R.t += dt; if(R.t > 1.0){ rings.splice(q, 1); continue; } if(rn < ringG.cap) putGlow(ringG, rn++, 2 + 12*R.t, R.x, R.y, R.z); } showGlow(ringG, rn);
+      // the camera follow
+      if(followOn && followed && followed.alive !== false){ followed.world(_c); const t = cam.target; const f = 1 - Math.pow(0.1, dt*3); t.x += (_c[0]-t.x)*f; t.y += (_c[1]-t.y)*f; t.z += (_c[2]-t.z)*f; }
+      // the lantern: every free electron and every filled electron slot is a spotlight
+      { const L = gValoElecsList; L.length = 0; for(const b of bodies) if(b.alive && b.has('electron')) L.push({ on:true, x:b.x, y:b.y, z:b.z });
+        for(const m of ALL){ if(!m.alive || !m.isSlot || !m.occupied || !m.name.startsWith('electron')) continue; m.world(_c); L.push({ on:true, x:_c[0], y:_c[1], z:_c[2] }); if(L.length >= 64) break; } }
+      prof.all = performance.now() - _t0;
+      if((++dev & 7) === 0 && (valoRow || (valoRow = document.getElementById('dev-valo-row')))) valoRow.textContent = 'valoreaktiot: O2 ' + stats.o2 + ' · NADPH ' + stats.nadph + ' · ATP ' + stats.atp + ' · sokeri ' + stats.glukoosi + ' · H+ lumeniin ' + stats.hplus + ' · fotoneja ' + stats.fotonit + ' · lampona ' + stats.lampo + ' · vaurioita ' + stats.vaurio + ' · e- vapaana ' + bodies.filter(b => b.has('electron')).length + (followed ? ' · seurataan ' + followed.name : '');
     }, -1, false);
-    window.__valo = () => ({ units: units.map(u => ({ mi:u.mi, served:u.served, s:u.s, p680ox:u.p680ox, tyrOx:u.tyrOx, qb:u.qbE.length, qbH:u.qbH, pqh2:u.pqh2, ant:u.ant.length, roles:{ oec:u.oec, tyrZ:u.tyrZ, p680:u.p680, chlD1:u.chlD1, pheo:u.pheo, qa:u.qa, fe:u.fe, qb:u.qb }, p680W: SW(SG(u.p680[0]), [0,0,0]).map(v => +v.toFixed(1)), oecW: SW(S(u.mi, u.oecC), [0,0,0]).map(v => +v.toFixed(1)), qbW: SW(S(u.mi, u.qbSite), [0,0,0]).map(v => +v.toFixed(1)) })),
-      psiDbg: psis.map(u => ({ dbg: u.dbg, orient: u.orient, p700W: SW(SG(u.p700[0]), [0,0,0]).map(v => +v.toFixed(1)) })),
-      elPos: elecs.filter(e => e.on).map(e => [+e.x.toFixed(1), +e.y.toFixed(1), +e.z.toFixed(1), e.mov ? 'mov' : 'sit']),
-      kick: (k, n) => { const u = (k >= units.length ? psis[k - units.length] : units[k]); if(!u) return 0; let c = 0; for(let i=0;i<(n||1);i++){ const g = u.ant[(Math.random()*u.ant.length)|0]; if(gValoExcite(g, 0, 0, 0)) c++; } return c; },   // dev: photons absorbed by unit k's antenna
-      sep: k => (k >= units.length ? chargeSepI(psis[k - units.length]) : chargeSepII(units[k])),   // dev: force a charge separation
-      b6f: b6fs.map(u => ({ mi:u.mi, f:u.f, bL:u.bL, bH:u.bH, cn:u.cn, rieske:u.rieske, fE:!!u.fE, qi:u.qi.length, qiH:u.qiH })),
-      psi: psis.map(u => ({ mi:u.mi, p700:u.p700, a0:u.a0, a1:u.a1, fx:u.fx, fa:u.fa, fb:u.fb, p700ox:u.p700ox, busy:u.busy, fbE:!!u.fbE, ant:u.ant.length })),
-      fd: fds.map(f => ({ mi:f.mi, e:!!f.e, w: SW(f.site, [0,0,0]).map(v => +v.toFixed(0)) })), fnr: fnrs.map(f => ({ mi:f.mi, e:f.e.length })), shuttles: gShuttles.map(sh => { const B = wpt(sh.hostB, sh.B, [0,0,0]); const hits = []; for(let sI=0;sI<gHulls.length;sI++){ const hh=gHulls[sI]; if(hh.mi === sh.mi) continue; const dd=Math.hypot(sh.cur[0]-gShellCen[sI*3], sh.cur[1]-gShellCen[sI*3+1], sh.cur[2]-gShellCen[sI*3+2]); if(dd < sh.R+hh.maxR+2) hits.push([hh.mi, labelOf(hh.mi), +hh.maxR.toFixed(0), +dd.toFixed(0)]); }   // dev: the shells this carrier is touching (a carrier stuck on one shows here)
-      return { hits, mi:sh.mi, pq:sh.pq, phase:sh.phase, cargo: sh.cargoE ? (sh.cargoE.length ?? 1) : 0, unitKey: sh.unitKey, waitT: +sh.waitT.toFixed(1), R: +sh.R.toFixed(0), cur: sh.cur.map(v => +v.toFixed(0)), tgt: [B[0]+sh.offB[0], B[1]+sh.offB[1], B[2]+sh.offB[2]].map(v => +v.toFixed(0)), cap: +(MEMBRANE_Y - gMemHalfT - sh.R).toFixed(0), dB: +Math.hypot(sh.cur[0]-B[0]-sh.offB[0], sh.cur[1]-B[1]-sh.offB[1], sh.cur[2]-B[2]-sh.offB[2]).toFixed(0), h: sh.h.map(v => +v.toFixed(2)) }; }),
-      excitons: excitons.length, electrons: elecs.filter(e => e.on).length, heldP: heldP.length, parked: parked.length, heldF: heldF.length, released: released.length, stats });
+    const gValoElecsList = []; window.gValoElecs = gValoElecsList;
+    window.__valoInt = { ALL, antenna, units, b6fs, psis, fnrs, ndhs, atps, rubs, carriers, bodies, cofMols, tryExciting, tryReleasing, electronAcceptor, excitationAcceptor, bindCond, slotTakes, tryPulling, SPEED, stats };   // dev: the live objects
+    window.__valo = () => ({ stats, prof, mols: ALL.length, bodies: bodies.map(b => [b.name, +b.x.toFixed(0), +b.y.toFixed(0), +b.z.toFixed(0), b.hard ? b.hard.owner().name : (b.soft ? 'soft' : '-')]),
+      units: units.map(u => ({ mi:u.mi, p680: u.p680M.filled('electron'), p680ex: u.p680M.excited, tyr: u.tyrM && u.tyrM.filled('electron'), oec: u.oecM.filled('electron'), water: u.oecM.water, chlD1: u.chlD1M && u.chlD1M.filled('electron'), pheo: u.pheoM && u.pheoM.filled('electron'), qa: u.qaM && u.qaM.filled('electron'), fe: u.feM && u.feM.filled('electron'), qb: u.qbSlot.holder ? u.qbSlot.holder.slots.map(s => s.occupied ? 1 : 0).join('') : '-', vde: !!u.vdeSlot.holder })),
+      b6f: b6fs.map(u => ({ mi:u.mi, qo: u.qoSlot.holder ? u.qoSlot.holder.slots.map(s => s.occupied ? 1 : 0).join('') : '-', rieske: u.rieskeM && u.rieskeM.filled('electron'), f: u.fM.filled('electron'), bL: u.bLM.filled('electron'), bH: u.bHM.filled('electron'), cn: u.cnM.filled('electron'), qi: u.qiSlot.holder ? u.qiSlot.holder.slots.map(s => s.occupied ? 1 : 0).join('') : '-', pc: u.pcSlot.holder ? (u.pcSlot.holder.filled('electron') ? 'PC1' : 'PC0') : '-' })),
+      psi: psis.map(u => ({ mi:u.mi, pc: u.pcSlot.holder ? (u.pcSlot.holder.filled('electron') ? 'PC1' : 'PC0') : '-', p700: u.p700M.filled('electron'), p700ex: u.p700M.excited, a0: u.a0M && u.a0M.filled('electron'), fx: u.fxM && u.fxM.filled('electron'), fa: u.faM && u.faM.filled('electron'), fb: u.fbM && u.fbM.filled('electron'), fd: u.fdSlot.holder ? (u.fdSlot.holder.filled('electron') ? 'Fd1' : 'Fd0') : '-' })),
+      fnr: fnrs.map(f => ({ mi:f.mi, fd: f.fdSlot.holder ? (f.fdSlot.holder.filled('electron') ? 'Fd1' : 'Fd0') : '-', fad: f.fadM.filled('electron'), nadp: f.nadpSlot.holder ? f.nadpSlot.holder.slots.map(s => s.occupied ? 1 : 0).join('') : (f.nadpSlot.occupied ? 'in' : '-') })),
+      ndh: ndhs.map(n => ({ mi:n.mi, fd: n.fdSlot.holder ? 'Fd' : '-', fes: n.fes.map(m => m.filled('electron') ? 1 : 0).join(''), pq: n.pqSlot.holder ? n.pqSlot.holder.slots.map(s => s.occupied ? 1 : 0).join('') : '-' })),
+      atp: atps.map(a => ({ adp: a.filled('ADP'), pi: a.filled('phosphate'), protons: a.protons })), rub: rubs.map(r => r.slots.map(s => s.name + (s.occupied ? '*' : '')).join(' ')),
+      carriers: carriers.map(c => ({ name:c.name, mi:c.mi, at: [c.x|0, c.y|0, c.z|0], docked: c.dockedAt ? c.dockedAt.owner().name + '/' + c.dockedAt.name : null, hard: c.hard ? c.hard.owner().name + '/' + c.hard.name : null, soft: c.soft ? (c.soft.owner ? c.soft.owner().name + '/' + c.soft.name : 'point') : null, slots: c.slots.map(s => s.occupied ? 1 : 0).join(''), exiting: !!c.flags.exiting })),
+      excited: antenna.filter(m => m.excited).length, antenna: antenna.length, heldP: heldP.length, parked: parked.length, heldF: heldF.length, released: released.length, followed: followed ? followed.name : null,
+      kick: (k, n) => { const u = (k >= units.length ? psis[k - units.length] : units[k]); if(!u) return 0; let c = 0; for(let i=0;i<(n||1);i++){ const g = u.ant[(Math.random()*u.ant.length)|0]; if(gValoExcite(g, 0, 0, 0)) c++; } return c; },
+      sep: k => { const u = (k >= units.length ? psis[k - units.length] : units[k]); if(!u) return false; const rc = u.p680M || u.p700M; return tryExciting(rc, PHOTON_E, null); },
+      follow: on => window.gValoFollow(on) });
     } }
   /* ── RTS floor ── flatten every model onto ONE plane (perpendicular to the membrane, at the models'
      level) and lay a 90%-transparent white sheet there, so the scene reads as a flat RTS battlefield. */
@@ -12072,11 +12410,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       document.documentElement.classList.add('nopills');
       pb.addEventListener('click', () => { const on = document.documentElement.classList.toggle('nopills'); pb.classList.toggle('on', !on); });
       document.body.appendChild(pb); }
+    { const fb = document.createElement('button'); fb.id = 'follow-btn'; fb.textContent = '🎯 Seuraa e⁻'; fb.title = 'Seuraa: kamera seuraa seuraavaa fotonia klorofyllistä P680:n elektroniin ja kantajien kautta NADPH:hon (2D-version "followed")';
+      let on = false; fb.addEventListener('click', () => { on = !on; fb.classList.toggle('on', on); if(on){ if(window.gValoFollowArm) window.gValoFollowArm(); } else if(window.gValoFollow) window.gValoFollow(false); });
+      document.body.appendChild(fb); }
     { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 100 hiukkasta joka lajia, muut jätetään piirtämättä';   // in the gear menu for everyone (owner 12.9.2026)
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn',
-                     'memcut-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
+                     'memcut-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
       const b = document.getElementById(id); if(!b) continue;
       b.style.position = 'static'; b.style.left = 'auto'; b.style.top = 'auto'; menu.appendChild(b);   // static → they stack in the menu
     }

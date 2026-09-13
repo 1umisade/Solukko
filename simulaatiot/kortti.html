@@ -794,6 +794,8 @@ float outsideBox(vec3 p){ return 1.0 - step(cutLo.x, p.x) * step(p.x, cutHi.x) *
 varying float vGid;        // this cofactor atom's group index
 uniform float hlGroup;     // the group to highlight (hover / flash), -1 = none
 uniform float hlBright;    // its brightness multiplier (1.0 = normal, 1.25 = hover, pulses on select)
+uniform sampler2D slotTex; // VALOREAKTIOT 2: per group, the slot state as brightness (0.5 = as is, 0.22 = an empty electron carrier, 0.8 = excited) - the 2D 'modulate'
+uniform float slotN;       // its width (0 = off)
 #endif
 uniform float selModel;    // index of the SELECTED complex (−1 = none) → its atoms get a sage rim
 uniform vec3 selCol;       // that rim's colour (sage)
@@ -1050,6 +1052,7 @@ void main(void){
 #ifdef ETCHL
   bool hl = abs(vGid - hlGroup) < 0.5;                        // hovered / flashing cofactor group
   if(hl) col *= hlBright;                                     // → brighter FILL (the dark outline is applied AFTER, so it stays dark)
+  if(slotN > 0.5) col *= 2.0 * texture2D(slotTex, vec2((vGid + 0.5) / slotN, 0.5)).r;   // the slot state (an empty carrier is dim, an excited pigment bright)
 #endif
   // Ink outline band. Normally starts at 0.86 (width 0.14). For atoms REVEALING orbitals (glass shells)
   // start it at 0.965 (width 0.035 ≈ 4× thinner) so the thin rim doesn't obscure the orbitals inside.
