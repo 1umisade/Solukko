@@ -6008,7 +6008,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
 
       for(const g of etcGroups){ g.cx/=g.n; g.cy/=g.n; g.cz/=g.n; let r2=0;
         for(const i of g.atoms){ const dx=gx[i]-g.cx, dy=gy[i]-g.cy, dz=gz[i]-g.cz, d=dx*dx+dy*dy+dz*dz; if(d>r2) r2=d; }
-        g.r = Math.sqrt(r2) + 2.0; }
+        g.r = Math.sqrt(r2) + 2.0;
+        for(const i of g.atoms) if(EL_LIST[etcEl[i]] === 'Mg'){ g.mg = [gx[i], gy[i], gz[i]]; break; } }   // a chlorophyll's Mg (13.9.2026: the excitation glows from it - valo/Kalvosto.js)
       etcGroupPos = { gx, gy, gz };
       for(let i=0;i<NA;i++) gCofOfAtom.set(etcEl[i]*16777216 + etcIdx[i], gid[i]);
       // ── Reactive-site / collision spheres ── one per cofactor group, at its LIVE world centre (follows a
@@ -12645,7 +12646,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(isFinite(best)) dist = Math.max(1, Math.sqrt(best)); }
     const pxPerWorld = engine.getRenderHeight() / (2*dist*Math.tan(cam.fov/2));
     const cofw = (4.0*NUCLEON_R) * pxPerWorld * (gCofLineW/2.2);   // cofactor outline = 2 proton-diameters, scales with zoom like the proton outline
-    eff.setFloat('cofW', gOutlines ? Math.max(0.6, Math.min(6.0, cofw)) : 0.0);   // width 0 → the edge detector samples one texel → no line
+    eff.setFloat('cofW', (gOutlines && gEtc) ? Math.max(0.6, Math.min(6.0, cofw)) : 0.0);   // width 0 → the edge detector samples one texel → no line. gEtc too (13.9.2026): with ETC mode off the mask is no longer rendered, and the pass - kept attached by a selection's green ring - inked the STALE mask as static outlines
     if(cofMaskRT) eff.setTexture('cofMask', cofMaskRT);
   };
   let _rtW = 0, _rtH = 0;   // last framebuffer size the offscreen masks were fitted to
@@ -12707,7 +12708,7 @@ varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform vec2 elecUV;
 #define LN_MAX 64
-uniform vec3 elecUVs[LN_MAX];   // the lights on screen: xy, z = 0 an electron (blue), 1 a proton (orange), 2 an excited chlorophyll (green) (owner 13.9.2026)
+uniform vec4 elecUVs[LN_MAX];   // the lights on screen: xy, z = 0 an electron (blue), 1 a proton (orange), 2 an excited chlorophyll (green), w = the pool's radius as a fraction of the screen height - a WORLD size projected, so it scales with the zoom (owner 13.9.2026)
 uniform float nElecs;
 uniform float lanternOn;
 uniform float aspect;
@@ -12729,7 +12730,7 @@ void main(void){
   float litE = 0.0, litP = 0.0, litG = 0.0;
   { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.05; litE = pool(d, R, 0.0); }   // (the old single electron - off-screen unless something sets it)
   for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
-    vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].z > 1.5 ? 0.028 : 0.037;   // a third of the old pools (0.11) - a pigment's smaller still
+    vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].w;   // the pool's radius, projected from a world size
     float l = pool(d, R, float(i)*1.7);
     if(elecUVs[i].z > 1.5) litG = max(litG, l); else if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
   vec3 cE = vec3(0.25, 0.55, 1.00), cP = vec3(1.00, 0.55, 0.12), cG = vec3(0.40, 1.00, 0.45);
@@ -12744,7 +12745,7 @@ void main(void){
   gl_FragColor = vec4(min(c, vec3(1.0)), 1.0);
 }`;
   const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect','lanternDark','uT'], null, 1.0, cam);
-  const _lnUV = new Float32Array(64*3);
+  const _lnUV = new Float32Array(64*4);
   { const _lvp = new BABYLON.Viewport(0, 0, 1, 1);
     lanternPP.onApply = eff => {
       const w = engine.getRenderWidth(), h = engine.getRenderHeight();
@@ -12755,8 +12756,13 @@ void main(void){
       let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
       if(window.gValoElecs){ const tm = scene.getTransformMatrix();
         for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; if(!gLantern && e.p !== 2) continue; /* outside the lantern only the excited pigments (kind 2) are lights */ const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
-          if(q.z < 0.0 || q.z > 1.0) continue; _lnUV[n*3] = q.x / w; _lnUV[n*3+1] = 1.0 - q.y / h; _lnUV[n*3+2] = e.p || 0; n++; } }
-      eff.setArray3('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark); eff.setFloat('uT', performance.now()*0.001);
+          if(q.z < 0.0 || q.z > 1.0) continue;
+          /* the pool's size is a WORLD size (owner 13.9.2026: 'the glow should scale with the simulation'): about 7 units round an electron or a proton,
+             5 round a pigment's Mg, projected at the light's distance - a fraction of the screen height. Too small to see from the whole cell, so it is not drawn */
+          const dist = Math.max(1, Math.hypot(e.x - cam.position.x, e.y - cam.position.y, e.z - cam.position.z)), R = ((e.p === 2 ? 5 : 7) / (2*dist*Math.tan(cam.fov/2)));
+          if(R < 0.0015) continue;
+          _lnUV[n*4] = q.x / w; _lnUV[n*4+1] = 1.0 - q.y / h; _lnUV[n*4+2] = e.p || 0; _lnUV[n*4+3] = Math.min(0.12, R); n++; } }
+      eff.setArray4('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark); eff.setFloat('uT', performance.now()*0.001);
       eff.setFloat('lanternOn', gLantern ? 1.0 : 0.0);
       eff.setFloat('aspect', w / h);
     };

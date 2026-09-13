@@ -91,7 +91,7 @@
     /* ── building the scene: a body in a model's frame, a slot's position, a target point ── */
     const cofMols = new Map();   // etc group index -> body (the overlay paints these)
     const body = (name, mi, p, opts) => { const b = new MB(name, Object.assign({ frame: { mi, p } }, opts || {})); if(opts && opts.gi != null) cofMols.set(opts.gi, b); return b; };
-    const cof = (gi, name, opts) => gi < 0 ? null : body(name, grpMi[gi], cen(gi), Object.assign({ gi }, opts || {}));
+    const cof = (gi, name, opts) => { if(gi < 0) return null; const b = body(name, grpMi[gi], cen(gi), Object.assign({ gi }, opts || {})); b.gi = gi; return b; };
     const placeSlot = (parent, slotName, mi, p, lane) => { const s = parent.get_node('BindSites/' + slotName); if(!s) return null; s.frame = { mi, p }; if(lane !== undefined) setLane(s, lane); return s; };
     const setLane = (b, lane) => { b.lane = lane; if(b.BindSites) for(const s of b.BindSites) setLane(s, lane); };
     const point = (parent, name, mi, p) => { const pt = new Point([0,0,0], name); Object.defineProperty(pt, 'global_position', { get: () => wpt(mi, p, [0,0,0]) }); parent.namedChildren.set(name, pt); return pt; };
@@ -376,7 +376,7 @@
       // the lantern: every free electron and every filled electron slot is a spotlight
       { const L = lantern; L.length = 0; for(const b of V.get_nodes_in_group('electron')){ if(!b.alive) continue; if(b.parent_is_BindSites ? b.modulate !== 'white' : !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2] }); if(L.length >= 64) break; }
         for(const b of V.get_nodes_in_group('proton')){ if(!b.alive || !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:1 }); if(L.length >= 64) break; }
-        for(const m of antenna){ if(!m.alive || !m.ExcitedSprite || !m.ExcitedSprite.visible) continue; const p = m.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:2 }); if(L.length >= 64) break; } }   // an excited pigment: a green light that hops pigment to pigment to P680 (owner 13.9.2026: 'make the chlorophylls glow like the lanterns with green')   // ...and every free proton, an orange pool (owner 13.9.2026)
+        for(const m of antenna){ if(!m.alive || !m.ExcitedSprite || !m.ExcitedSprite.visible) continue; const g = m.gi != null ? G[m.gi] : null; const p = (g && g.mg) ? wpt(grpMi[m.gi], g.mg, [0,0,0]) : m.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:2 }); if(L.length >= 64) break; } }   // the glow sits on the chlorophyll's Mg (owner 13.9.2026)   // an excited pigment: a green light that hops pigment to pigment to P680 (owner 13.9.2026: 'make the chlorophylls glow like the lanterns with green')   // ...and every free proton, an orange pool (owner 13.9.2026)
       prof.all = performance.now() - t0;
       if((++dev & 7) === 0 && (valoRow || (valoRow = document.getElementById('dev-valo-row')))) valoRow.textContent = 'valoreaktiot: O2 ' + stats.o2 + ' · e- FNR:ään ' + stats.fnrE + ' · NADPH ' + stats.nadph + ' · ATP ' + stats.atp + ' · sokeri ' + stats.glukoosi + ' · H+ lumeniin ' + stats.hplus + ' · fotoneja ' + stats.fotonit + ' · lämpönä ' + stats.lampo + ' · vaurioita ' + stats.vaurio + ' · kappaleita ' + V.all.length + ' · ' + prof.all.toFixed(1) + ' ms';
     }, -1, false);
