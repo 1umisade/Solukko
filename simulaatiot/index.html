@@ -8090,7 +8090,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gSpawnPlaneZ = gcz;
     gSpawnBounds = {x0:gcx-iw, x1:gcx+iw, y0:gcy-ih, y1:gcy+ih};
 
-    const NW=Math.round(20000*FILL), NP=SOLU ? 100 : Math.round(20000*Math.min(2,FILL)) /* cell mode (owner 13.9.2026): exactly 100 protons, 50 in the stroma and 50 in the lumen, inside the box - placed by the light reactions (valo/Kalvosto.js) once the box is known */, NCO2=Math.round(20000*FILL), NO2=Math.round(5000*FILL), NNADP=Math.round(500*FILL), NATP=1000, NADP2=1000, NPI=1000, rnd=x=>{ const v=Math.sin(x*127.1)*43758.5453; return v-Math.floor(v); };   // free-floating water filling the container box
+    const NW=Math.round(20000*FILL), NP=SOLU ? 500 : Math.round(20000*Math.min(2,FILL)) /* cell mode (owner 13.9.2026): 100 protons, 50 in the stroma and 50 in the lumen, inside the box, plus a reserve of 400 hidden ones the OEC makes NEW protons from (two per water) - placed by the light reactions (valo/Kalvosto.js) once the box is known */, NCO2=Math.round(20000*FILL), NO2=Math.round(5000*FILL), NNADP=Math.round(500*FILL), NATP=1000, NADP2=1000, NPI=1000, rnd=x=>{ const v=Math.sin(x*127.1)*43758.5453; return v-Math.floor(v); };   // free-floating water filling the container box
     const wc=new Float32Array(NW*3), wv=new Float32Array(NW*3), wh1=new Float32Array(NW*3), wh2=new Float32Array(NW*3);
     for(let i=0;i<NW;i++){
       // Seed each axis from its OWN stream (i*3+n, not i+n) — with i+n consecutive molecules share draws
@@ -8691,6 +8691,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
          lies outside the light-reaction box is drawn at the wrapped copy nearest the camera, i.e. somewhere else (the 'popping in and out') */
       home: (i, x, y, z) => { const o=i*3; pOrg[o]=x; pOrg[o+1]=y; pOrg[o+2]=z; FREE_P.c[o]=x; FREE_P.c[o+1]=y; FREE_P.c[o+2]=z; gValoProtons.place(i, x, y, z); },
       homeFlush: () => { const og = new Float32Array(pOrg); for(const nm of ['pH','pN','pG','pHF','pNF','pGF']){ const m=scene.getMeshByName(nm); if(m) m.thinInstanceSetBuffer('wOrig', og, 3, true); } },
+      reserve: 100,   // the first 100 live in the box, the rest are the OEC's reserve (hidden until made)
       memY: memSurfY, box: () => gPsuLo ? [Math.max(bLo.x, gPsuLo.x), Math.max(bLo.y, gPsuLo.y), Math.max(bLo.z, gPsuLo.z), Math.min(bHi.x, gPsuHi.x), Math.min(bHi.y, gPsuHi.y), Math.min(bHi.z, gPsuHi.z)] : [bLo.x, bLo.y, bLo.z, bHi.x, bHi.y, bHi.z] };
     let gCollideOn = true;
     let gSimActive = 0;   // how many molecules were simulated this frame (shown in the dev readout)

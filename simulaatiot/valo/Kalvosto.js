@@ -203,7 +203,7 @@
       for(let k=0;k<12;k++){ const mesh = BABYLON.MeshBuilder.CreateSphere('valoO'+k, { segments:10, diameter:3.0 }, scene); mesh.material = oMat; mesh.isPickable = false; mesh.alwaysSelectAsActiveMesh = true; mesh.renderingGroupId = 1; mesh.setEnabled(false); oSprites.push({ mesh, body: null }); } }
     const FREE_KEY = { H2O:'w', O2:'o2', NADP:'nadp', ADP:'adp', ATP:'atp', phosphate:'pi', CO2:'co2' };
     const PARK = () => { const lo = get.gBoxLo(); return [lo.x - 150, lo.y - 400, lo.z - 150]; };
-    const parkedP = []; let protonsHomed = false;   // (parkedP: no longer used for protons - a bound proton rides its slot in plain sight, 13.9.2026)
+    const parkedP = [], reserveP = []; let protonsHomed = false;   // (parkedP: no longer used for protons - a bound proton rides its slot in plain sight, 13.9.2026)
     V.env.instantiate = (name, opts) => { const at = opts.position || [0,0,0], slot = opts.from_slot;
       if(name === 'electron'){ const s = sprites.find(s => !s.body); if(!s) return null; const b = new MB('electron', { position: at }); b.kin = { kind:'sprite', s }; s.body = b; s.mesh.setEnabled(true); s.corona.setEnabled(true); return b; }
       if(name === 'O'){ const s = oSprites.find(s => !s.body); if(!s) return null; const b = new MB('O', { position: at }); b.kin = { kind:'sprite', s }; s.body = b; s.mesh.setEnabled(true); b.direction = V.normalize([Math.random()-0.5, -1, 0]); return b; }
@@ -212,7 +212,8 @@
         /* 13.9.2026 (owner: 'the protons seem to be popping in and out of existence'): a proton is never conjured up at a point - one released from a
            slot is the one that rode there (it stays where the slot is), one the OEC makes from water is the nearest free lumen proton, taken
            brought to the OEC from wherever it is (every water split makes its proton) */
-        if(i < 0){ i = P.nearestFree(at[0], at[1], at[2], -1, 1e9); if(i < 0) i = P.anyFree(0); if(i < 0) return null; }   // (owner 13.9.2026: 'always make the proton, dont care about the 100') - the nearest free lumen proton, wherever it is, appears at the OEC
+        if(i < 0){ i = reserveP.length ? reserveP.pop() : -1;   // a NEW proton from the hidden reserve (owner 13.9.2026: 'just make a new proton each time, 2 per water molecule')
+          if(i >= 0){ P.home(i, at[0], at[1], at[2]); P.homeFlush(); } else { i = P.nearestFree(at[0], at[1], at[2], -1, 1e9); if(i < 0) i = P.anyFree(0); if(i < 0) return null; } }   // (the reserve of 400 spent: the nearest free one)
         P.grab(i); P.place(i, from[0], from[1], from[2]);
         const b = new MB('proton', { position: from }); b.kin = { kind:'proton', i }; b.born = V.time; return b; }
       if(FREE_KEY[name]){ const F = get.gValoFree(); if(!F) return null; const key = FREE_KEY[name]; let i = slot && slot._instance != null ? slot._instance : -1; if(slot) slot._instance = null;
@@ -332,7 +333,9 @@
       tickSpawners(dt);
       { const P = get.gValoProtons(); if(P){
         if(!protonsHomed && get.gPsuLo()){ protonsHomed = true; const bx = P.box(), hT = get.gMemHalfT();   // 100 protons, 50 in the stroma and 50 in the lumen, inside the box (owner 13.9.2026)
-          for(let i=0;i<P.n;i++){ const side = i < P.n/2 ? 1 : -1; let x, y, z; for(let k=0;k<40;k++){ x = bx[0] + Math.random()*(bx[3]-bx[0]); z = bx[2] + Math.random()*(bx[5]-bx[2]); const my = P.memY(x, z);
+          const N0 = Math.min(P.n, P.reserve || P.n);
+          for(let i=N0;i<P.n;i++){ const o = i*3; P.grab(i); P.place(i, P.pos[o], -30000, P.pos[o+2]); reserveP.push(i); }   // the reserve: held and far under the cell, unseen, until the OEC makes one
+          for(let i=0;i<N0;i++){ const side = i < N0/2 ? 1 : -1; let x, y, z; for(let k=0;k<40;k++){ x = bx[0] + Math.random()*(bx[3]-bx[0]); z = bx[2] + Math.random()*(bx[5]-bx[2]); const my = P.memY(x, z);
               y = side > 0 ? my + hT + 6 + Math.random()*Math.max(10, bx[4] - my - hT - 12) : bx[1] + Math.random()*Math.max(10, my - hT - 6 - bx[1]); if(y > bx[1] && y < bx[4]) break; }
             P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283, ph = Math.acos(2*Math.random()-1); P.release(i, x, y, z, sp*Math.sin(ph)*Math.cos(th), sp*Math.cos(ph), sp*Math.sin(ph)*Math.sin(th)); }
           P.homeFlush(); }
