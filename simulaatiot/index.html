@@ -9911,7 +9911,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
       if(!any) return;
       { let hz2 = Math.max(gTasoZ - lz, hz - gTasoZ, 5) + MZ;
-        // (the box no longer reaches the Kalvostoon camera spot - owner 13.9.2026: as small as the proteins allow)
+        if(typeof POSE !== 'undefined'){ hz2 = Math.max(hz2, Math.abs(POSE.pos.z - gTasoZ) + MZ);   // ...but the box must still hold the camera where the Kalvostoon flight lands (owner 13.9.2026): the depth reaches it, x and y stay as tight as the proteins allow (the spot lies inside them)
+          lx = Math.min(lx, POSE.pos.x - MZ - M); hx = Math.max(hx, POSE.pos.x + MZ - M); ly = Math.min(ly, POSE.pos.y - MZ - MY); hy = Math.max(hy, POSE.pos.y + MZ - MY); }
         lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
