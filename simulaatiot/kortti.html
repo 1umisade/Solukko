@@ -359,7 +359,7 @@ attribute float instR;   // per-instance radius multiplier (vdW LOD spheres — 
 #ifdef MACRON
 attribute vec4 macroN;   // xyz = the MOLECULE's surface normal at this atom (its baked frame), w = how buried the atom is (0 = on the surface, 1 = deep) - see macroField()
 #endif
-#ifdef MACRON
+#if defined(MACRON) || defined(WATERBOX)
 varying vec4 vMacroN;    // world-space macro normal + buriedness → the key light shades the molecule's SHAPE, not each little sphere (owner 12.9.2026: 'no lighting on the DNA surface, everything looks flat')
 #endif
 #endif
@@ -582,6 +582,7 @@ void main(void){
     float th = dot(sk, wCen);
     float c = cos(th), sn = sin(th); vec3 v = W[3].xyz;
     W[3].xyz = v * c + cross(ax, v) * sn + ax * dot(ax, v) * (1.0 - c); }
+  { float lo = length(W[3].xyz); vMacroN = vec4(lo > 0.3 ? W[3].xyz / lo : vec3(0.0), 0.0); }   // a free molecule's macro normal: this atom's offset from the molecule's centre, turned with the spin (the centre atom keeps its sphere normal) - so water, O2, NADP+ are shaded as bodies like the proteins (owner 13.9.2026: 'depth lighting should affect all')
 #ifndef HAZE
   wCen += molDisp();          // collision deviation, zero for anything the CPU is not simulating
 #ifdef NSHELL
@@ -807,7 +808,8 @@ uniform vec3 keyCol;       // dev slider 'valon lampo': the key's colour (warm a
 uniform float specAmt;     // dev slider 'kiilto': a specular highlight from the key
 uniform float rimAmt;      // dev slider 'reunahohde': the electric-blue grazing sheen
 uniform float selfShade;   // dev slider 'pallon oma varjo': each sphere's rim darkening
-#ifdef MACRON
+uniform float outlineK;    // dev slider 'proteiinin atomireuna': the protein atoms' ink rim as a fraction of the atom's colour (0.08 = very dark, the old value was 0.40)
+#if defined(MACRON) || defined(WATERBOX)
 varying vec4 vMacroN;
 #endif
 float keyLight(vec3 nW){ if(dot(keyDir, keyDir) < 0.5) return 1.0;
@@ -818,7 +820,7 @@ float keyLight(vec3 nW){ if(dot(keyDir, keyDir) < 0.5) return 1.0;
    axis; a lipid: its own axis) and the key light is taken on a blend of that and the sphere normal - the sphere keeps its
    roundness, the molecule gets its shading. w = buriedness darkens crevices and grooves a little (a poor man's AO). */
 vec3 keyNormal(vec3 nW){
-#ifdef MACRON
+#if defined(MACRON) || defined(WATERBOX)
   vec3 m = vMacroN.xyz; float lM = length(m);   // (the membrane lipids keep their own sphere normals: a flat sheet has no shape to bring out, and its brightness is what the slab picture is calibrated against)
   if(lM > 0.5) return normalize(nW * (1.0 - macroMix) + m * (macroMix / lM));
 #endif
@@ -901,12 +903,23 @@ void main(void){
   float rimKF = smoothstep(2.0, 30.0, pxRF);
   float rimStartF = 1.0 - 0.14 * mix(0.35, 1.0, rimKF);
   float rimF = smoothstep(rimStartF, 1.0, r2) * mix(0.3, 1.0, rimKF);
+#ifdef MACRON
+  /* protein atoms (owner 13.9.2026: 'add the very dark outlines to the vdW spheres on proteins'): the ink band is never thinner
+     than a pixel (rimStart in r-squared = 1 - 2b/pxR for a band of b pixels), capped at a third of the radius on tiny discs, and
+     it keeps at least 65 percent of its strength however small the atom is - the hairline fade-out was what made them vanish */
+  rimStartF = max(0.6, min(rimStartF, 1.0 - 2.2 / max(pxRF, 1.0)));
+  rimF = smoothstep(rimStartF, 1.0, r2) * mix(0.65, 1.0, rimKF);
+#endif
   if(protonOutline < 0.5){   // and the same faint cool sheen on the grazing edge, so the two tiers carry the same light
     float fresF = pow(1.0 - zcF, 2.3);
     float shimF = 0.5 + 0.5*sin(uT*2.3 + vWCen.x*0.14 + vWCen.y*0.10 + vWCen.z*0.12);
     colF += vec3(0.10, 0.24, 0.55) * fresF * (0.34 + 0.5*shimF);
   }
+#ifdef MACRON
+  colF = mix(colF, vColor * outlineK, rimF);   // the protein atoms' very dark rim (dev slider)
+#else
   colF = mix(colF, vColor * 0.40, rimF);
+#endif
 #ifdef DEPTHSHADE
   float dtF = clamp((length(vCenterV) - focalD - startOff) / max(spread, 1.0), 0.0, 1.0);   // camera distance past the pivot
   colF *= mix(1.0, depthLo, dtF * depthK);
@@ -1030,7 +1043,14 @@ void main(void){
   float pxR = 2.0 / max(fwidth(vUV.x) + fwidth(vUV.y), 1e-5);
   float rimK = smoothstep(2.0, 30.0, pxR);
   rimStart = 1.0 - (1.0 - rimStart) * mix(0.35, 1.0, rimK);
-  float rim = smoothstep(rimStart - min(aa, 0.008), 1.0, r2) * mix(0.3, 1.0, rimK);   // thin ink band like the orbital lobes, tiny aa only so revealed shells do not get a fat outline
+#ifdef MACRON
+  if(isShell < 0.5 || reveal < 0.5) rimStart = max(0.6, min(rimStart, 1.0 - 2.2 / max(pxR, 1.0)));   // protein atoms: at least a pixel of ink (see the far path) - not on a revealed glass shell, whose rim stays thin so the orbitals show
+#endif
+#ifdef MACRON
+  float rim = smoothstep(rimStart - min(aa, 0.008), 1.0, r2) * mix((isShell < 0.5 || reveal < 0.5) ? 0.65 : 0.3, 1.0, rimK);
+#else
+  float rim = smoothstep(rimStart - min(aa, 0.008), 1.0, r2) * mix(0.3, 1.0, rimK);
+#endif   // thin ink band like the orbital lobes, tiny aa only so revealed shells do not get a fat outline
   // Subtle electric-blue shimmer: a faint cool sheen that rides the sphere's grazing edge and drifts in time.
   if(protonOutline < 0.5){
     float fres = pow(1.0 - zc, 2.3);
@@ -1049,7 +1069,11 @@ void main(void){
     col = mix(col, vec3(0.03), rim);                       // cofactors → a BLACK outline that traces the molecule shape (each atom outlined, interior rims occluded by the atoms in front → the eye reads the outer contour)
 #else
  #ifdef COFHIDE
+  #ifdef MACRON
+    col = mix(col, (cofClear > 0.5) ? vec3(cofOutCol) : vColor * outlineK, rim);   // a see-through atom's outline uses the dev colour, otherwise the protein atom's very dark rim (owner 13.9.2026: the 40 percent shade vanished under the new lighting)
+  #else
     col = mix(col, (cofClear > 0.5) ? vec3(cofOutCol) : vColor * 0.40, rim);   // a see-through atom's outline uses the dev colour, otherwise the atom's own 40% shade
+  #endif
  #else
     col = mix(col, vColor * 0.40, rim);                    // rim → a FIXED 40% shade of the atom's own UNLIT colour → same darkness whichever way the sphere faces the light (was col *= mix(1.0,0.40,rim), whose 40%-of-LIT-colour went near-black on shadowed edges → the inconsistent thick-black outlines)
  #endif
