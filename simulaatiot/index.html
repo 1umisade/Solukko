@@ -337,7 +337,7 @@ html.kortti body > *:not(#c){display:none !important} html.kortti #c{position:fi
 <button id="color-btn" title="Väritys: alkuaineittain ↔ malleittain"><span id="color-icon">🎨</span><span id="color-label">Mallit</span></button>
 <button id="etc-btn" title="Korosta elektroninsiirtoketjun kofaktorit (klorofyllit, karotenoidit, kinonit, hemit, feofytiini, Tyr Z, OEC, Fe-S) päälle"><span id="etc-icon">⚡</span><span id="etc-label">ETC-ketju</span></button>
 <button id="dev-btn" title="Dev-tila: mallien siirto/kierto-työkalu + sijaintimerkinnät"><span id="dev-icon">🛠️</span><span id="dev-label">Dev</span></button>
-<button id="lantern-btn" title="Lyhty: pimennä kaikki paitsi kiihdytetty elektroni (valaisee lähiatomit)"><span id="lantern-icon">🏮</span><span id="lantern-label">Lyhty</span></button>
+<button id="lantern-btn" title="Lyhty: pimennä kaikki paitsi valoreaktioiden elektronit - veden halkaisusta kantajien kautta FNR:ään"><span id="lantern-icon">🏮</span><span id="lantern-label">Lyhty</span></button>
 <button id="memcut-btn" title="Piilota kameran ja hiukkastason välinen kalvon puolisko yhteyttämiskalvoston laatikossa (näe tasolle)"><span id="memcut-icon">◧</span><span id="memcut-label">Puolikas</span></button>
 <button id="pad-btn" title="Näytä tai piilota ohjainkuva"><span id="pad-icon">🎮</span><span id="pad-label">Ohjain</span></button>
 <button id="slab-btn" title="Kaukotason laatta: pois = kalvot piirretään lipideinä niin kauas kuin puskurit riittävät (kaksinkertainen matka), kaukokuoret piilotetaan"><span id="slab-icon">▦</span><span id="slab-label">Laatta</span></button>
@@ -5331,6 +5331,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // offset into the stroma / lumen (|y| large — see the MODELS table).
   let gMemOnly = false;
   const gMemBound = mols.map(m => Math.abs((m.cfg && m.cfg.y) || 0) < 120);
+  /* The three stationary display molecules - the lone chlorophyll, plastoquinone and NADPH beside the sheet - are HIDDEN (owner
+     13.9.2026). They stay loaded because the free NADP+ / ATP / ADP builders and the plastoquinone shuttles copy their atoms;
+     everything that draws, picks, hulls or boxes a model skips these indices. */
+  const gHiddenModel = mols.map(m => !!(m.cfg && !m.shuttle && /^(chlorophyll|plastoquinone|nadph)$/.test(m.cfg.match || '')));
   // (the Vain kalvo button is gone - owner 12.9.2026; gMemOnly stays false)
   { const cb = document.getElementById('memcut-btn');
     if(cb){ cb.addEventListener('click', () => { gMemCut = !gMemCut; cb.classList.toggle('on', gMemCut); });
@@ -5650,7 +5654,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(cf && cf[a]){ const mc=ETC_COL[cf[a]]||molCol(rs[a]); c.sphC.push(mc[0],mc[1],mc[2],1); }   // one colour per cofactor TYPE - every bound quinone blue, every chlorophyll green
       else c.sphC.push(ec[0],ec[1],ec[2],0);
       c.sphR.push(vr);
-      if(cf && cf[a]){ const cc=ETC_COL[cf[a]]||ec; pushN(etcM, sb, a*16, 16); etcC.push(cc[0],cc[1],cc[2],0); etcR.push(vr*1.15); etcT.push(cf[a]); etcS.push(rs[a]); etcEl.push(e); etcIdx.push(a); }   // cofactor → overlay, coloured by type, slightly enlarged to pop (etcEl/etcIdx = element + its orbBuf index for the info panel)
+      if(cf && cf[a] && !gHiddenModel[modelOf(sb[a*16+12],sb[a*16+13],sb[a*16+14])]){ const cc=ETC_COL[cf[a]]||ec; pushN(etcM, sb, a*16, 16); etcC.push(cc[0],cc[1],cc[2],0); etcR.push(vr*1.15); etcT.push(cf[a]); etcS.push(rs[a]); etcEl.push(e); etcIdx.push(a); }   // cofactor → overlay, coloured by type, slightly enlarged to pop (etcEl/etcIdx = element + its orbBuf index for the info panel)
     }
     await yield_();
   }
@@ -9154,7 +9158,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const c = h.slab.position;   // the transform observer above has already placed it this frame
       const dx = c.x-cp.x, dy = c.y-cp.y, dz = c.z-cp.z;
       const d = Math.sqrt(dx*dx+dy*dy+dz*dz) || 1e-6;
-      const want = gSlabLod && (d - h.maxR) > _memR && inViewBox(c.x, c.y, c.z, h.maxR) && !inPsuBox(c.x, c.y, c.z);   // the hull slab is a slab tier too: off with 'laatta-LoD' - not outside the box while the camera is in it, never for a complex INSIDE the box
+      const want = gSlabLod && (d - h.maxR) > _memR && inViewBox(c.x, c.y, c.z, h.maxR) && !inPsuBox(c.x, c.y, c.z) && !gHiddenModel[h.mi];   // the hull slab is a slab tier too: off with 'laatta-LoD' - not outside the box while the camera is in it, never for a complex INSIDE the box
       gProtSlab[h.mi] = want;
       if(h.slab.isEnabled() !== want){ h.slab.setEnabled(want);
         if(want){ const o=h.mi*3;   // the model's own colour, dimmed like packed atoms against a flat fill
@@ -9238,7 +9242,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         } else { wcx=cell.cx; wcy=cell.cy; wcz=cell.cz; }   // membrane cells don't follow the PSII gizmo
       }
       const vx=wcx-cp.x, vy=wcy-cp.y, vz=wcz-cp.z, d2=vx*vx+vy*vy+vz*vz;
-      let vis = inViewBox(wcx, wcy, wcz, cM);            // in the view frustum? (and inside the light-reaction box while the camera is in it)
+      let vis = !gHiddenModel[cell.mi] && inViewBox(wcx, wcy, wcz, cM);            // in the view frustum? (and inside the light-reaction box while the camera is in it, and not a hidden display molecule)
       if(d2 > cM*cM){
         for(let p=0;p<6;p++){ const pl=fplanes[p];
           if(pl.normal.x*wcx + pl.normal.y*wcy + pl.normal.z*wcz + pl.d < -cM){ vis=false; break; }
@@ -9612,7 +9616,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const pqnM = mols.find(m => m.cfg && m.cfg.match === 'plastoquinone');
     let mgK = -1;
     if(chlM){ for(let k=0;k<chlM.na;k++){ if(info(chlM.el[k]).z === 12){ mgK = k; break; } } }   // z=12 → magnesium (el[] holds numeric element codes)
-    if(chlM && mgK >= 0){
+    if(chlM && mgK >= 0 && !gHiddenModel[mols.indexOf(chlM)]){   // (never, now that the display chlorophyll is hidden - the lantern follows the light-reaction electrons instead)
       const chlI = mols.indexOf(chlM);
       const mgRest = new BABYLON.Vector3(chlM.x[mgK]+chlM.ox, chlM.y[mgK]+chlM.oy, chlM.z[mgK]+chlM.oz);
       const eng = scene.getEngine();
@@ -9910,7 +9914,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const px=c.cx+gModelOff[mi*3], py=c.cy+gModelOff[mi*3+1], pz=c.cz+gModelOff[mi*3+2];
       lxL=Math.min(lxL, px-h.maxR); hxL=Math.max(hxL, px+h.maxR); lyL=Math.min(lyL, py-h.maxR); hyL=Math.max(hyL, py+h.maxR); lzL=Math.min(lzL, pz-h.maxR); hzL=Math.max(hzL, pz+h.maxR); }
     const fit = () => { if(!gBoxLo) return; let lx=lxL, ly=lyL, lz=lzL, hx=hxL, hy=hyL, hz=hzL, any=isFinite(lx);
-      for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || !m.cfg || m.shuttle || m.cfg.dna || gOrganelleModels.has(mi) || loose.has(mi)) continue; const c=mInfo[mi]; if(!c) continue; any=true;
+      for(const h of gHulls){ const mi=h.mi, m=mols[mi]; if(!m || !m.cfg || m.shuttle || m.cfg.dna || gOrganelleModels.has(mi) || loose.has(mi) || gHiddenModel[mi]) continue; const c=mInfo[mi]; if(!c) continue; any=true;
         BABYLON.Matrix.FromArrayToRef(gModelXform, mi*16, _fm); BABYLON.Vector3.TransformCoordinatesToRef(_fc.set(c.cx, c.cy, c.cz), _fm, _fp);   // the complex's centroid where it stands NOW - through its full transform, exactly as its hull is placed (a rotated model's centroid is not c + offset)
         const px=_fp.x, py=_fp.y, pz=_fp.z;
         lx=Math.min(lx, px-h.maxR); hx=Math.max(hx, px+h.maxR); ly=Math.min(ly, py-h.maxR); hy=Math.max(hy, py+h.maxR); lz=Math.min(lz, pz-h.maxR); hz=Math.max(hz, pz+h.maxR); }
@@ -10254,7 +10258,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     cMat.alphaMode = BABYLON.Constants.ALPHA_ADD; cMat.needAlphaBlending = () => true; cMat.disableDepthWrite = true; cMat.backFaceCulling = false; cMat.depthFunction = BABYLON.Engine.ALWAYS;
     cMat.onBindObservable.add(() => { const eff = cMat.getEffect(); if(eff) eff.setFloat('uT', gWaveT); });
     const onTop = m => { m.onBeforeRenderObservable.add(() => eng.setDepthFunction(BABYLON.Constants.ALWAYS)); m.onAfterRenderObservable.add(() => eng.setDepthFunction(BABYLON.Constants.LEQUAL)); };
-    const E_N = 48, elecs = [];   // enough for a full chain in flight: ten plastocyanins and five PQH2 can hold 20 between them
+    const E_N = 48, elecs = []; window.gValoElecs = elecs;   // enough for a full chain in flight: ten plastocyanins and five PQH2 can hold 20 between them. Published for the lantern (each live electron is a spotlight)
     for(let k=0;k<E_N;k++){ const mesh = BABYLON.MeshBuilder.CreateSphere('valoE'+k, { segments:12, diameter:4.6 }, scene); mesh.material = eMat; mesh.isPickable = false; mesh.alwaysSelectAsActiveMesh = true; mesh.renderingGroupId = 3; onTop(mesh);
       const corona = BABYLON.MeshBuilder.CreatePlane('valoEc'+k, { size:22 }, scene); corona.material = cMat; corona.isPickable = false; corona.alwaysSelectAsActiveMesh = true; corona.renderingGroupId = 3; corona.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL; onTop(corona);
       mesh.setEnabled(false); corona.setEnabled(false); elecs.push({ mesh, corona, on:false, site:null, mov:null, ph: Math.random()*6.283, x:0, y:0, z:0 }); }
@@ -10476,7 +10480,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const pickModelAtCursor = () => {   // accurate: nearest model whose CURRENT bounding box the cursor ray enters
     const ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), cam);
     const o=ray.origin, d=ray.direction; let best=-1, bt=Infinity;
-    for(const mi of mInfo){ if(mi.isChl || camInsideModel(mi.mi)) continue;   // not the complex you are inside
+    for(const mi of mInfo){ if(mi.isChl || gHiddenModel[mi.mi] || camInsideModel(mi.mi)) continue;   // not the complex you are inside, never a hidden display molecule
       /* the ray in the model's BAKED frame (the inverse of its transform), against its baked box - a box moved
          by the offset alone ignored the rotation, so a tumbling or organelle-placed complex missed the click */
       BABYLON.Matrix.FromArrayToRef(gModelXform, mi.mi*16, _pmM); _pmM.invertToRef(_pmI);
@@ -11087,6 +11091,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(let a=0;a<cnt;a++){
         const bx = sb[a*16+12], by = sb[a*16+13], bz = sb[a*16+14];
         const mi = modelOf(bx, by, bz), lo = mLo[mi] || dfl.lo, ld = mLd[mi] || dfl.ld, lc = mCam[mi] || dfl.lc;   // this atom's model-local ray
+        if(gHiddenModel[mi]) continue;
         const cxp = bx-lc.x, cyp = by-lc.y, czp = bz-lc.z;
         if(cxp*cxp + cyp*cyp + czp*czp > bub2) continue;         // atom outside the reveal bubble → its orbitals aren't drawn
         const px = bx-lo.x, py = by-lo.y, pz = bz-lo.z;
@@ -11152,7 +11157,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     let bestT = Infinity, bE = -1, bA = -1;
     for(let e=0;e<nEl;e++){ const r = info(e).vr*FILL_SCALE, r2 = r*r, sb = sphBuf[e], cnt = atomCount[e];
       for(let a=0;a<cnt;a++){ const bx = sb[a*16+12], by = sb[a*16+13], bz = sb[a*16+14];
-        const mi = modelOf(bx, by, bz), lo = mLo[mi] || mLo[0], ld = mLd[mi] || mLd[0];
+        const mi = modelOf(bx, by, bz), lo = mLo[mi] || mLo[0], ld = mLd[mi] || mLd[0]; if(gHiddenModel[mi]) continue;
         const px = bx-lo.x, py = by-lo.y, pz = bz-lo.z, tca = px*ld.x + py*ld.y + pz*ld.z; if(tca <= 0) continue;
         const d2 = px*px + py*py + pz*pz - tca*tca; if(d2 > r2) continue;
         const t = tca - Math.sqrt(r2 - d2); if(t > 0 && t < bestT){ bestT = t; bE = e; bA = a; } } }
@@ -12751,23 +12756,26 @@ precision highp float;
 varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform vec2 elecUV;
+#define LN_MAX 48
+uniform vec2 elecUVs[LN_MAX];   // the light-reaction electrons on screen (owner 13.9.2026: 'in lantern mode I should see the electrons from photolysis travel the carriers to FNR')
+uniform float nElecs;
 uniform float lanternOn;
 uniform float aspect;
 void main(void){
   vec3 c = texture2D(textureSampler, vUV).rgb;
   if(lanternOn > 0.5){
-    vec2 d = vUV - elecUV;
-    d.x *= aspect;
-    float dist = length(d);
-    float R = 0.16;
-    float lit = (R*R) / (R*R + dist*dist);
-    lit = pow(lit, 1.4);
+    float lit = 0.0;
+    { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.16; lit = pow((R*R) / (R*R + dot(d, d)), 1.4); }   // (the old single electron - off-screen unless something sets it)
+    for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
+      vec2 d = vUV - elecUVs[i]; d.x *= aspect; float R = 0.11;   // a tighter pool of light around each electron, so a chain of them reads as a chain
+      lit = max(lit, pow((R*R) / (R*R + dot(d, d)), 1.4)); }
     float dark = 0.05 + 0.95*lit;
     c = c*dark + vec3(0.06, 0.26, 0.60) * lit * 0.30;
   }
   gl_FragColor = vec4(c, 1.0);
 }`;
-  const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','lanternOn','aspect'], null, 1.0, cam);
+  const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect'], null, 1.0, cam);
+  const _lnUV = new Float32Array(48*2);
   { const _lvp = new BABYLON.Viewport(0, 0, 1, 1);
     lanternPP.onApply = eff => {
       const w = engine.getRenderWidth(), h = engine.getRenderHeight();
@@ -12775,6 +12783,11 @@ void main(void){
       const p = BABYLON.Vector3.Project(gLanternPos, BABYLON.Matrix.Identity(), scene.getTransformMatrix(), _lvp);
       const onScreen = (p.z >= 0.0 && p.z <= 1.0);   // electron behind the camera → push the spotlight off-screen (all dark)
       eff.setFloat2('elecUV', onScreen ? p.x / w : -10.0, onScreen ? 1.0 - p.y / h : -10.0);
+      let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
+      if(gLantern && window.gValoElecs){ const tm = scene.getTransformMatrix();
+        for(const e of window.gValoElecs){ if(!e.on || n >= 48) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
+          if(q.z < 0.0 || q.z > 1.0) continue; _lnUV[n*2] = q.x / w; _lnUV[n*2+1] = 1.0 - q.y / h; n++; } }
+      eff.setArray2('elecUVs', _lnUV); eff.setFloat('nElecs', n);
       eff.setFloat('lanternOn', gLantern ? 1.0 : 0.0);
       eff.setFloat('aspect', w / h);
     };
