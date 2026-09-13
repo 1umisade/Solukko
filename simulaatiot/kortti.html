@@ -998,7 +998,7 @@ void main(void){
 #ifdef COFHIDE
     if(cofClear > 0.5) aSplit *= min(cofAlpha, cofOutAlpha);   // a see-through atom is translucent whatever its rim says
 #endif
-    if(glassPass < 0.5){ if(aSplit < 0.985) discard; } else if(aSplit >= 0.985) discard; }
+    if(glassPass < 0.5){ if(aSplit < 0.985) discard; } else if(glassPass < 1.5){ if(aSplit >= 0.985) discard; } }   // 2 = the double draw is switched off: one blended pass keeps everything (the old way, holes and all)
 #endif
   if(depthBias > 0.0 && distance(vWCen, selCenter) < 0.35) discard;   // selected atom → its spinning highlight nucleus draws instead
   // Bias the nucleus toward the camera so it beats its OWN orbitals (but not atoms clearly in front).

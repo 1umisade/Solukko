@@ -1349,7 +1349,7 @@ void main(void){
 #ifdef COFHIDE
     if(cofClear > 0.5) aSplit *= min(cofAlpha, cofOutAlpha);   // a see-through atom is translucent whatever its rim says
 #endif
-    if(glassPass < 0.5){ if(aSplit < 0.985) discard; } else if(aSplit >= 0.985) discard; }
+    if(glassPass < 0.5){ if(aSplit < 0.985) discard; } else if(glassPass < 1.5){ if(aSplit >= 0.985) discard; } }   // 2 = the double draw is switched off: one blended pass keeps everything (the old way, holes and all)
 #endif
   if(depthBias > 0.0 && distance(vWCen, selCenter) < 0.35) discard;   // selected atom → its spinning highlight nucleus draws instead
   // Bias the nucleus toward the camera so it beats its OWN orbitals (but not atoms clearly in front).
@@ -5450,6 +5450,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      material at construction (the uniform and the define must be in the options before the first compile);
      glassSplit() converts a mesh once its material is set; soloMM() is the far twins' [far, null] pair, so a
      cell can swap tiers without rebuilding its sub-meshes (a null sub-material is simply not drawn). */
+  /* The dev switch 'kaksoispiirto (lasi)' (owner 13.9.2026): OFF drops the second pass - A goes back to one blended pass with
+     depth write (realAlpha) that keeps every fragment (glassPass 2), B is unhooked from the MultiMaterial. Half the draw calls
+     near a complex, and the see-through holes behind glass shells come back. ON restores the two passes. */
+  const gGlassPairs = []; let gGlass2 = true;
+  const setGlass2 = on => { gGlass2 = !!on;
+    for(const g of gGlassPairs){ if(gGlass2){ g.A.alpha = 1; g.A.forceDepthWrite = true; g.A.setFloat('glassPass', 0); g.MM.subMaterials[1] = g.B; }
+      else { realAlpha(g.A); g.A.setFloat('glassPass', 2); g.MM.subMaterials[1] = null; } } };
   const glassable = mat => { mat._options.uniforms.push('glassPass'); mat._options.defines.push('#define GLASS2'); mat.setFloat('glassPass', 0); return mat; };
   const isGlassable = mat => !!(mat && mat._options && mat._options.uniforms.includes('glassPass'));
   const glassMM = A => { if(A._glassMM) return A._glassMM;
@@ -5460,7 +5467,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        reach B too, or B's bind would re-apply its clone-time copy: forward every setter, glassPass excepted */
     for(const fn of ['setFloat','setFloats','setInt','setFloat3','setVector2','setVector3','setVector4','setColor3','setColor4','setMatrix','setMatrices','setArray2','setArray3','setArray4','setTexture'])
       if(typeof A[fn] === 'function'){ const orig = A[fn]; A[fn] = function(name, ...rest){ orig.call(A, name, ...rest); if(name !== 'glassPass') B[fn](name, ...rest); return A; }; }
-    const MM = new BABYLON.MultiMaterial(A.name + '_2p', scene); MM.subMaterials.push(A, B); A._glassMM = MM; return MM; };
+    const MM = new BABYLON.MultiMaterial(A.name + '_2p', scene); MM.subMaterials.push(A, B); A._glassMM = MM; gGlassPairs.push({ A, B, MM }); if(!gGlass2) setGlass2(false); return MM; };
   const glassA = mesh => (mesh.material && mesh.material.subMaterials) ? mesh.material.subMaterials[0] : mesh.material;   // the material behind a two-pass mesh (its setters reach both passes)
   const soloMM = A => { if(A._soloMM) return A._soloMM; const MM = new BABYLON.MultiMaterial(A.name + '_1p', scene); MM.subMaterials.push(A, null); A._soloMM = MM; return MM; };
   const glassSplit = mesh => { const A = mesh.material; if(!isGlassable(A)) return mesh;
@@ -10692,6 +10699,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const syncSl = () => { slBtn.textContent = gSlabLod ? 'laatta-LoD: ON' : 'laatta-LoD: OFF'; slBtn.style.cssText = cullStyle(gSlabLod); };
   slBtn.onclick = () => setSlabLod(!gSlabLod);
   syncSl(); gSlabSync.push(syncSl); slRow.appendChild(slBtn);
+  { const b = document.createElement('button'); const sync = () => { b.textContent = 'kaksoispiirto (lasi): ' + (gGlass2 ? 'ON' : 'OFF'); b.style.cssText = cullStyle(gGlass2); };
+    b.onclick = () => { setGlass2(!gGlass2); sync(); }; sync(); slRow.appendChild(b); }
   // Right-tap move order on/off (see gRightMove) - off by default, the right button only pans.
   const rmRow = document.createElement('div'); const rmBtn = document.createElement('button');
   const syncRm = () => { rmBtn.textContent = gRightMove ? 'oikea napautus siirtää valinnan: ON' : 'oikea napautus siirtää valinnan: OFF'; rmBtn.style.cssText = cullStyle(gRightMove); };
