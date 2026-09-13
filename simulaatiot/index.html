@@ -789,6 +789,8 @@ uniform float memHalf;
    (ellipsoids: centre, base radius, the inverse scales - the margin is the bilayer's thickness measured along
    the local normal). The haze (HAZE) is a sparse species in a box the size of the cell, clipped the same way. */
 uniform vec3 cellWrap;
+uniform float wrapScale;   // 1 = the near set. > 1 = the FAR set (13.9.2026): the same molecules spread over a box wrapScale times as wide, a sparse field that reaches wrapScale times as far, without touching the physics box
+uniform float fadeNear;    // the far set starts here (where the near set has faded out) - 0 for the near set
 uniform vec3 cellCam;
 uniform vec3 cellCen;
 uniform float cellR;
@@ -912,12 +914,16 @@ void main(void){
                    bnc(wOrig.z + wVel.z*uT, boxLo.z, boxHi.z));
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
-  { vec3 k = cellWrap.x > 0.0 ? floor((cellCam - wCen) / cellWrap + 0.5) : vec3(0.0);
-    wCen += k * cellWrap;
-    bool copy = dot(k, k) > 0.5;
+  { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
+    if(wrapScale > 1.0){ vec3 mid = 0.5 * (boxLo + boxHi); wCen = mid + (wCen - mid) * wrapScale; }   // the far set: the box stretched about its centre
+    vec3 k = wrapP.x > 0.0 ? floor((cellCam - wCen) / wrapP + 0.5) : vec3(0.0);
+    wCen += k * wrapP;
+    bool copy = dot(k, k) > 0.5 || wrapScale > 1.0;
     if(copy || cellClipAll > 0.5) cellDrop = !cytosol(wCen);
     if(!cellDrop && inThyBand(wCen)) cellDrop = true;
-    if(copy && cellFade > 0.0) cellShrink = 1.0 - smoothstep(cellFade - 70.0, cellFade, distance(wCen, cellCam)); }
+    float dCam = distance(wCen, cellCam);
+    if(copy && cellFade > 0.0) cellShrink = 1.0 - smoothstep(cellFade - 70.0, cellFade, dCam);
+    if(fadeNear > 0.0){ if(dCam < fadeNear) cellDrop = true; else cellShrink *= smoothstep(fadeNear, fadeNear + 70.0, dCam); } }   // the far set takes over where the near set fades
 #endif
   /* SPIN. Every free molecule tumbles about its own random axis. The angle is a signed mix of the
      molecule's ANALYTIC bounced coordinates (before the displacement and the shells, so the CPU can
@@ -936,10 +942,12 @@ void main(void){
     W[3].xyz = v * c + cross(ax, v) * sn + ax * dot(ax, v) * (1.0 - c); }
   { float lo = length(W[3].xyz); vMacroN = vec4(lo > 0.3 ? W[3].xyz / lo : vec3(0.0), 0.0); }   // a free molecule's macro normal: this atom's offset from the molecule's centre, turned with the spin (the centre atom keeps its sphere normal) - so water, O2, NADP+ are shaded as bodies like the proteins (owner 13.9.2026: 'depth lighting should affect all')
 #ifndef HAZE
+  if(wrapScale <= 1.0){   // (the far set is not simulated - no displacement, no shells)
   wCen += molDisp();          // collision deviation, zero for anything the CPU is not simulating
 #ifdef NSHELL
   wCen = repelShells(wCen);   // the protein shells still win: they are applied last
 #endif
+  }
 #endif
   { float inB = step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z);
     tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * inB, viewBox * (1.0 - inB)); }   // the plane switch culls off-plane molecules INSIDE the box, the box-only view culls everything OUTSIDE it   // judged on the FINAL centre (after the CPU displacement and the shell repel - the protons live entirely in that displacement): off the plane and inside the PSU box -> culled
@@ -5288,7 +5296,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     if(pb) pb.addEventListener('click', () => { gFreeOn = !gFreeOn;
         pb.classList.toggle('on', !gFreeOn);   // highlighted while they are HIDDEN, like the Kalvo button
         const lab=document.getElementById('particles-label'); if(lab) lab.textContent = gFreeOn ? 'Hiukkaset' : 'Hiukkaset pois';
-        for(const m of gFreeMeshes) m.setEnabled(gFreeOn); }); }
+        for(const m of gFreeMeshes) m.setEnabled(gFreeOn); if(window.gFarMeshes) for(const f of window.gFarMeshes) f.setEnabled(gFreeOn && gFreeFade > gFreeFadeMax + 1); }); }
   /* The membrane's SLAB tier (megahalpa: past memR the lipids switch off and the flat slab stands in,
      with the sheet wrapping around the camera) is switched OFF by default since 2026-09-06 - the owner
      wants the real lipids at every distance for now. The dev button 'laatta-LoD' turns it back on.
@@ -7385,18 +7393,21 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       gCellDrop = (x,y,z) => { const L = gBoxLo, H = gBoxHi; if(!L) return false;
         if(inThyBand(x,y,z)) return true;   // never inside the thylakoid's bilayer
         if(x >= L.x && x <= H.x && y >= L.y && y <= H.y && z >= L.z && z <= H.z) return false;   // the base box: the physics lives here, it is always shown
-        if(Math.hypot(x-cam.position.x, y-cam.position.y, z-cam.position.z) > gFreeFade) return true;   // a copy past the fade is gone
+        if(Math.hypot(x-cam.position.x, y-cam.position.y, z-cam.position.z) > Math.min(gFreeFade, gFreeFadeMax)) return true;   // a copy past the near fade is gone (the far set is not picked)
         return !cytosol(x,y,z); };
       gCellWrap = true;
       const orgA = new Float32Array(32*4), orgB = new Float32Array(32*4), _wrap = new BABYLON.Vector3(), _zero = new BABYLON.Vector3(0,0,0);
       SOLU_CELL.ORG.forEach((M, i) => { if(i >= 32) return; orgA[i*4]=M.C.x; orgA[i*4+1]=M.C.y; orgA[i*4+2]=M.C.z; orgA[i*4+3]=M.R; orgB[i*4]=M.invS[0]; orgB[i*4+1]=M.invS[1]; orgB[i*4+2]=M.invS[2]; orgB[i*4+3]=M.hazeOk ? 1 : 0; });
       const CELL_FADE = gBoxLo ? Math.min(gBoxHi.x-gBoxLo.x, gBoxHi.y-gBoxLo.y, gBoxHi.z-gBoxLo.z)*0.5 - 6 : 370;   // half the box's thinnest side: the copies fade out before their edge shows
+      const FAR_SCALE = 8;   // the far set's box is eight times the physics box (owner 13.9.2026: reach 5000 'but do not grow the box'): 8 x 722 = 5776 of reach, density 1/512 - dots by then anyway
       gFreeFadeMax = CELL_FADE; gFreeFade = CELL_FADE; if(window.__ffSync) window.__ffSync();   // the slider's ceiling and its default (the dev panel is built before this block runs - it re-reads through __ffSync)
       const _thyA = THY ? new BABYLON.Vector4(THY.C.x, THY.C.y, THY.C.z, THY.R) : new BABYLON.Vector4(0,0,0,0);
       const _thyB = HIN ? new BABYLON.Vector4(HIN.C.x, HIN.C.y, HIN.C.z, HIN.R) : new BABYLON.Vector4(0,0,0,1);
       const _thyS = HIN ? new BABYLON.Vector3(1/HIN.s[0], 1/HIN.s[1], 1/HIN.s[2]) : new BABYLON.Vector3(1,1,1);
-      gCellBind = (eff, haze) => { if(gBoxLo && !haze) _wrap.set(gBoxHi.x-gBoxLo.x, gBoxHi.y-gBoxLo.y, gBoxHi.z-gBoxLo.z); else _wrap.set(0,0,0);
-        eff.setVector4('thyA', _thyA); eff.setVector4('thyB', _thyB); eff.setVector3('thyInvS', _thyS); eff.setFloat('cellFade', haze ? 0 : gFreeFade); eff.setFloat('cellP', MEMS[0].p || 0);
+      gCellBind = (eff, haze, far) => { if(gBoxLo && !haze) _wrap.set(gBoxHi.x-gBoxLo.x, gBoxHi.y-gBoxLo.y, gBoxHi.z-gBoxLo.z); else _wrap.set(0,0,0);
+        const nearFade = Math.min(gFreeFade, gFreeFadeMax);   // the near set can only reach half the box - the far set (wrapScale FAR_SCALE) carries on to the slider's value
+        eff.setVector4('thyA', _thyA); eff.setVector4('thyB', _thyB); eff.setVector3('thyInvS', _thyS); eff.setFloat('cellFade', haze ? 0 : (far ? gFreeFade : nearFade)); eff.setFloat('cellP', MEMS[0].p || 0);
+        eff.setFloat('wrapScale', far ? FAR_SCALE : 1); eff.setFloat('fadeNear', far ? nearFade : 0);
         eff.setVector3('cellWrap', _wrap); eff.setVector3('cellCam', cam.position); eff.setVector3('cellCen', CEN); eff.setFloat('cellR', SOLU_CELL.R);
         eff.setFloat('cellFacetY', bilayerCen.y); eff.setFloat('cellMemT', mT); eff.setFloat('cellClipAll', haze ? 1 : 0);
         eff.setArray4('orgA', orgA); eff.setArray4('orgB', orgB); eff.setFloat('nOrg', Math.min(32, SOLU_CELL.ORG.length)); };
@@ -7899,7 +7910,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const wMat=(rad, solid, glow, bias, outline, haze)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':''),scene,'imp',{
         attributes:['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
         uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK','depthBias',
-                  'cellWrap','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
+                  'cellWrap','wrapScale','fadeNear','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
                       : ['#define WATERBOX']).concat(glow ? ['#define PGLOW'] : ['#define PLIGHT']).concat(SOLU_CELL ? ['#define CELLCLIP', '#define DEPTHSHADE'] : []).concat(haze ? ['#define HAZE'] : []) });   // DEPTHSHADE: in cell mode the free molecules and the haze darken with distance like everything else   // CELLCLIP: cell mode wraps the medium around the camera and keeps it to the cytosol - HAZE: the sparse far fill
@@ -7914,13 +7925,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         eff.setFloat('bubbleR', solid ? 0 : gCrisp);   // glass only where the orbitals are actually drawn
         if(!glow) bindPLight(eff);
         eff.setVector3('boxLo',bLo); eff.setVector3('boxHi',bHi); eff.setFloat('memY', MEMBRANE_Y); eff.setFloat('memHalf', SOLU ? 0 : gMemHalfT);   // cell mode: the thylakoid is a curved cap, not this plane - the cap's band is cut in CELLCLIP instead
-        if(gCellBind) gCellBind(eff, !!haze);   // cell mode: the wrap period, the cytosol and the organelles
+        if(gCellBind) gCellBind(eff, !!haze, !!m._far);   // cell mode: the wrap period, the cytosol and the organelles (m._far: this is a far-set material)
         if(SOLU_CELL){ eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); }
         eff.setFloat('molTexDim', MOLTEX_DIM); eff.setTexture('molTex', gMolTex);
         if(NSH){ eff.setTexture('shellTex', gShellTex); eff.setArray3('shellCen', gShellCen);
                  eff.setMatrix3x3('shellRot', gShellRot); eff.setFloatArray('shellR2', gShellR2); }
         eff.setColor3('fogColor',scene.fogColor);eff.setFloat('fogStart',scene.fogStart);eff.setFloat('fogEnd',scene.fogEnd);}); return m; };
     // `off` gives each atom its rigid offset from the molecule centre (0 for O, the two O–H vectors for H)
+    /* The FAR set (13.9.2026): a clone of the species mesh - the clone shares the geometry, and the thin-instance buffers live on
+       the geometry, so it costs no memory - with its own opaque material flagged _far: wrapScale FAR_SCALE spreads the same
+       molecules over a box eight times as wide and the shader drops everything nearer than the near set's fade. Only enabled
+       while the reach slider is past the box limit (see the slider), so the extra draws cost nothing until asked for. */
+    const gFarMeshes = []; window.gFarMeshes = gFarMeshes;
+    const mkFar = (base, rad, bias, outline) => { const f = base.clone(base.name + 'F'); f.material = wMat(rad, true, false, bias, outline); f.material._far = true;
+      f.isPickable = false; f.alwaysSelectAsActiveMesh = true; f.renderingGroupId = 1; f.thinInstanceCount = base.thinInstanceCount; f.setEnabled(false); gFarMeshes.push(f); return f; };
     const mkImp=(nm,rad,col,cnt,off)=>{ const mesh=BABYLON.MeshBuilder.CreatePlane(nm,{size:2},scene); mesh.material=wMat(rad,false); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
       // Group 1, like every other vdW shell in the scene: the ORBITALS live in group 0 and are drawn
       // first, then the glass shell blends over them. Left in group 0 the sphere and the lobes sort
@@ -7940,7 +7958,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       mesh.thinInstanceSetBuffer('wOrig',og,3,true);
       mesh.thinInstanceSetBuffer('wVel',vl,3,true);
       mesh.thinInstanceSetBuffer('molId',mid,1,true);
-      mesh.thinInstanceCount=cnt; gFreeMeshes.push(mesh); return mesh; };
+      mesh.thinInstanceCount=cnt; gFreeMeshes.push(mesh); mkFar(mesh, rad, 0, false); return mesh; };
     // Free water reads BLUE as a body of water, rather than by element — so it is instantly separable
     // from the red/white oxygens dotted through the proteins. The orbitals inside still use the real
     // element colours, so once you are close enough to see them the chemistry is still honest.
@@ -7996,7 +8014,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         mesh.thinInstanceSetBuffer('wOrig',og,3,true);
         mesh.thinInstanceSetBuffer('wVel',vl,3,true);
         mesh.thinInstanceSetBuffer('molId',mid,1,true);
-        mesh.thinInstanceCount=n; gFreeMeshes.push(mesh);
+        mesh.thinInstanceCount=n; gFreeMeshes.push(mesh); if(!a.glow) mkFar(mesh, a.r, a.bias, a.outline);
       }
       return {c, v, ax, fu, fv, n};   // the orbital builder below rides these same bodies
     };
@@ -10637,10 +10655,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Free molecules' reach (owner 13.9.2026): how far from the camera a free molecule is still drawn. The ceiling is half the wrap
   // box's thinnest side - beyond it there is no copy to draw (see CELL_FADE) - so the slider only ever brings them closer.
   const ffRow = document.createElement('div'); ffRow.innerHTML = 'vapaiden molekyylien kantama: <b id="dev-ff-val">0</b>';
-  const ffSld = document.createElement('input'); ffSld.type='range'; ffSld.min='60'; ffSld.max=String(Math.max(60, Math.round(gFreeFadeMax))); ffSld.step='10'; ffSld.style.cssText='width:100%;cursor:pointer;';
+  const ffSld = document.createElement('input'); ffSld.type='range'; ffSld.min='60'; ffSld.max='5000'; ffSld.step='10'; ffSld.style.cssText='width:100%;cursor:pointer;';
   const ffValEl = ffRow.querySelector('#dev-ff-val');
-  ffSld.oninput = () => { gFreeFade = +ffSld.value; ffValEl.textContent = String(Math.round(gFreeFade)) + ' / ' + Math.round(gFreeFadeMax); };
-  window.__ffSync = () => { ffSld.max = String(Math.max(60, Math.round(gFreeFadeMax))); ffSld.value = String(Math.round(gFreeFade)); ffValEl.textContent = String(Math.round(gFreeFade)) + ' / ' + Math.round(gFreeFadeMax); };
+  const ffApply = () => { const far = gFreeFade > gFreeFadeMax + 1; if(window.gFarMeshes) for(const f of window.gFarMeshes) f.setEnabled(far && gFreeOn);   // the far set only past the box limit
+    ffValEl.textContent = String(Math.round(gFreeFade)) + (far ? ' (kaukojoukko)' : ' / ' + Math.round(gFreeFadeMax)); };
+  ffSld.oninput = () => { gFreeFade = +ffSld.value; ffApply(); };
+  window.__ffSync = () => { ffSld.value = String(Math.round(gFreeFade)); ffApply(); };
   window.__ffSync();
   mgSld.value = String(Math.round(gMega)); mgValEl.textContent = String(Math.round(gMega));
   // The width of the band where lipids thin out over the slab at the 2→3 boundary.
