@@ -4849,11 +4849,7 @@ void main(void){
             else { gSel.clear(); gSelMol.clear(); gSel.add(rtsDownModel); focusOnModel(rtsDownModel); }   // a fresh pick centres the camera on it
             updateSelectionUI();
           } else {   // click on empty → deselect EVERYTHING (move order is on RIGHT-click)
-            gSel.clear(); gSelMol.clear(); updateSelectionUI();
-            // ...including the atom and cofactor selections. Clearing only the RTS set left a selected
-            // atom outlined with its info card open, so a single click looked like it had done nothing.
-            if(selAtom) clearAtomSel();
-            if(etcSel >= 0) showEtcSel(-1);
+            window.gDeselectAll();   // ...including the atom and cofactor selections (clearing only the RTS set left a selected atom outlined with its info card open)
           } }
         return;
       }
@@ -5028,10 +5024,11 @@ void main(void){
   setLbl(`Rakennetaan ${mols.length} mallia…`); setBar(0.38); await yield_();
   const LP = {N:1, O:2, S:2, P:1, CL:3};          // lone pairs per element (non-bonding orbitals)
   const lonePairs = e => LP[EL_LIST[e]] || 0;
+  const sphCellIdx = [];   // per element, per atom: its index inside its cell's sphere buffer (see pass A)
   const sphBuf = [], cylBuf = [], wBuf = [], knobBuf = [], cylAtBuf = [], cylOidBuf = [], cenBuf = [], lpBuf = [], lpCenBuf = [], lpOidBuf = [], colBuf = [], cofBuf = [], resBuf = [],
         sphIdx = new Uint32Array(nEl), cylIdx = new Uint32Array(nEl), lpIdx = new Uint32Array(nEl);
   for(let e=0;e<nEl;e++){
-    sphBuf[e] = new Float32Array(atomCount[e]*16);
+    sphBuf[e] = new Float32Array(atomCount[e]*16); sphCellIdx[e] = new Int32Array(atomCount[e]);
     cylBuf[e] = new Float32Array(halfCount[e]*16);             // bonding half-lobes (one per bond half)
     wBuf[e]   = new Float32Array(halfCount[e]);                // per-lobe width (electronegativity)
     knobBuf[e] = new Uint8Array(halfCount[e]);                 // 1 = small back-knob → skipped by the selection outline
@@ -5792,6 +5789,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const sb=sphBuf[e], ec=info(e).c, vr=info(e).vr*FILL_SCALE, cf=cofBuf[e], rs=resBuf[e];
     for(let a=0;a<atomCount[e];a++){
       const c=getCell(cellIx(sb[a*16+12],sb[a*16+13],sb[a*16+14]));
+      sphCellIdx[e][a] = c.sphM.length/16;   // its slot in the cell's instance buffer: drawn only while below the cell's live thinInstanceCount (the pick checks this, 14.9.2026)
       pushN(c.sphM, sb, a*16, 16);
       // A cofactor / bound molecule gets ONE colour of its own, keyed on its residue instance, so every
       // atom of that molecule matches and the neighbouring one differs. Alpha 1 marks it as carrying its
@@ -11038,6 +11036,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const bx = sb[a*16+12], by = sb[a*16+13], bz = sb[a*16+14];
         const mi = modelOf(bx, by, bz), lo = mLo[mi] || dfl.lo, ld = mLd[mi] || dfl.ld, lc = mCam[mi] || dfl.lc;   // this atom's model-local ray
         if(gHiddenModel[mi]) continue;
+        { const ce = macroCellByKey.get(cellIx(bx, by, bz)); if(ce && (!ce.sphOn || sphCellIdx[e][a] >= ce.sphCount)) continue; }   // not drawn right now (its cell is off, or the distance thinning dropped it) - nothing invisible is hoverable (owner 14.9.2026)
         const cxp = bx-lc.x, cyp = by-lc.y, czp = bz-lc.z;
         if(cxp*cxp + cyp*cyp + czp*czp > bub2) continue;         // atom outside the reveal bubble → its orbitals aren't drawn
         const px = bx-lo.x, py = by-lo.y, pz = bz-lo.z;
@@ -11963,6 +11962,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       + 'display:none;flex-direction:column;align-items:stretch;gap:8px;padding:11px 12px;overflow:auto;'
       + 'font-family:"Courier New",monospace;color:var(--ink);background:var(--paper);border:2.5px solid var(--brown);border-radius:14px;box-shadow:0 3px 0 var(--brown);pointer-events:auto;';
     document.body.appendChild(gInfoRight);
+    { const xb = document.createElement('button'); xb.id = 'info-close'; xb.textContent = '✕'; xb.title = 'Sulje';   // owner 14.9.2026: 'make an X button in the top right of info cards to close them'
+      xb.style.cssText = 'position:sticky;top:0;align-self:flex-end;margin:-4px -4px -30px 0;width:26px;height:26px;border-radius:999px;border:2px solid var(--brown);background:var(--paper);color:var(--ink);font:bold 13px "Courier New",monospace;cursor:pointer;line-height:1;padding:0;z-index:2;box-shadow:0 2px 0 var(--brown);';
+      xb.addEventListener('click', e => { e.stopPropagation(); if(window.gDeselectAll) window.gDeselectAll(); });
+      gInfoRight.appendChild(xb); }
     // dock the existing panels into the modules, stripping their own frames so the module IS the frame
     const dock = (el, host, resets) => { if(!el) return; Object.assign(el.style, resets); host.appendChild(el); };
     dock(document.getElementById('rts-minimap'), left,      { position:'static', left:'', bottom:'', zIndex:'', boxShadow:'none', background:'transparent', border:'none', padding:'0', width:'auto', height:'100%' });
@@ -12591,6 +12594,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     }
     if(gFlashGroup < 0){ gHlGroup = gHoverGroup; gHlBright = gHoverGroup >= 0 ? 1.25 : 1.0; }
   });
+  window.gDeselectAll = () => { gSel.clear(); gSelMol.clear(); updateSelectionUI(); if(selAtom) clearAtomSel(); if(etcSel >= 0) showEtcSel(-1); };   // everything deselected (a click on empty, Escape, the info card's X)
   scene.onPointerObservable.add(p => {
     if(p.type === BABYLON.PointerEventTypes.POINTERDOUBLETAP){ if(!p.event.button) onDouble(); return; }   // primary button / touch only: Babylon fires this for the middle button too, so two quick middle-drags swung the camera to the default framing (viewPerp) mid-look (owner 11.9.2026)        // touch double-tap
     if(p.type === BABYLON.PointerEventTypes.POINTERMOVE){                                   // hover highlight
@@ -12652,8 +12656,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(dx*fw.x + dy*fw.y + dz*fw.z <= 0) continue; const d = dx*dx + dy*dy + dz*dz; if(d < best) best = d; }
       if(isFinite(best)) dist = Math.max(1, Math.sqrt(best)); }
     const pxPerWorld = engine.getRenderHeight() / (2*dist*Math.tan(cam.fov/2));
-    const cofw = (4.0*NUCLEON_R) * pxPerWorld * (gCofLineW/2.2);   // cofactor outline = 2 proton-diameters, scales with zoom like the proton outline
-    eff.setFloat('cofW', (gOutlines && gEtc) ? Math.max(0.6, Math.min(6.0, cofw)) : 0.0);   // width 0 → the edge detector samples one texel → no line. gEtc too (13.9.2026): with ETC mode off the mask is no longer rendered, and the pass - kept attached by a selection's green ring - inked the STALE mask as static outlines
+    const cofw = (4.0*NUCLEON_R/3) * pxPerWorld * (gCofLineW/2.2);   // cofactor outline: a third of the old 2 proton-diameters (owner 14.9.2026: '3x thinner'), scales with zoom like the proton outline
+    eff.setFloat('cofW', (gOutlines && gEtc) ? Math.max(0.5, Math.min(2.0, cofw)) : 0.0);   // width 0 → the edge detector samples one texel → no line. gEtc too (13.9.2026): with ETC mode off the mask is no longer rendered, and the pass - kept attached by a selection's green ring - inked the STALE mask as static outlines
     if(cofMaskRT) eff.setTexture('cofMask', cofMaskRT);
   };
   let _rtW = 0, _rtH = 0;   // last framebuffer size the offscreen masks were fitted to
@@ -12747,7 +12751,7 @@ void main(void){
     float dark = (1.0 - lanternDark) + lanternDark*min(1.0, lit*1.5);
     c = c*dark * mix(vec3(1.0), lc * 2.2, min(1.0, lit)) + lc * lit * 0.9;   // STRONG: the surface takes the colour, and the pool blazes over it
   } else {
-    c = c * mix(vec3(1.0), lc * 1.6, min(1.0, litG)) + cG * litG * 0.7;   // outside the lantern only the pigments glow: the excitation as a green light that hops pigment to pigment
+    c = c * mix(vec3(1.0), lc * 1.5, min(1.0, lit)) + lc * lit * 0.7;   // outside the lantern the same electric glows, no darkening: blue electrons, orange protons, green excited chlorophylls (owner 14.9.2026)
   }
   gl_FragColor = vec4(min(c, vec3(1.0)), 1.0);
 }`;
@@ -12762,7 +12766,7 @@ void main(void){
       eff.setFloat2('elecUV', onScreen ? p.x / w : -10.0, onScreen ? 1.0 - p.y / h : -10.0);
       let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
       if(window.gValoElecs){ const tm = scene.getTransformMatrix();
-        for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; if(!gLantern && e.p !== 2) continue; /* outside the lantern only the excited pigments (kind 2) are lights */ const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
+        for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
           if(q.z < 0.0 || q.z > 1.0) continue;
           /* the pool's size is a WORLD size (owner 13.9.2026: 'the glow should scale with the simulation'): about 7 units round an electron or a proton,
              5 round a pigment's Mg, projected at the light's distance - a fraction of the screen height. Too small to see from the whole cell, so it is not drawn */
