@@ -1272,7 +1272,7 @@ vec3 protonLight(vec3 p){ vec3 acc = vec3(0.0);
      'atoms turn red as I get close' that had nothing to do with what was behind them. */
   for(int i=0; i<PL_N; i++){ if(float(i) >= pLightN) break;
     float w = max(0.0, 1.0 - distance(p, pLight[i]) / pLightR);
-    acc += vec3(1.0, 0.24, 0.12) * (w*w); }
+    acc += vec3(1.0, 0.50, 0.08) * (w*w); }   // ORANGE (owner 13.9.2026: 'the proton light distinctly orange' - the electrons' lantern light is blue)
   return acc * 0.9; }
 #endif
 varying vec2 vUV;
@@ -4156,9 +4156,15 @@ void main(void){
     fx /= fl; fy /= fl;
     let rx = r.x, ry = r.y; const rl = Math.hypot(rx, ry) || 1; rx /= rl; ry /= rl;
     cam.target.x += (rx*ex + fx*ey) * sp; cam.target.y += (ry*ex + fy*ey) * sp; };
+  /* In the cell the grab-pan slides the pivot in the SCREEN plane - screen-right and screen-up of the moment, so the picture
+     follows the cursor whichever way the camera points (owner 13.9.2026: 'the panning with the right click goes in a nonsensical
+     direction sometimes' - the floor pan mapped screen-up to the camera's horizontal forward, which is meaningless with the
+     free look of the cell). The membrane viewer keeps the RTS floor pan. */
+  const panScreen = (ex, ey) => { const r = cam.getDirection(BABYLON.Axis.X), u = cam.getDirection(BABYLON.Axis.Y);
+    cam.target.x += r.x*ex + u.x*ey; cam.target.y += r.y*ex + u.y*ey; cam.target.z += r.z*ex + u.z*ey; };
   const panBy = (dxPx, dyPx) => { const wpp = worldPerPixelAt(panDepth);
     orbitLocked = false; gCamFollow = false;   // panning breaks the lock so the follow stops (you deliberately moved away)
-    panFloor(-dxPx * wpp, dyPx * wpp, 1); };
+    if(SOLU) panScreen(-dxPx * wpp, dyPx * wpp); else panFloor(-dxPx * wpp, dyPx * wpp, 1); };
   // Zoom that flies THROUGH the model without flipping: once the radius hits a small
   // floor, the pivot dollies forward along the view instead of the radius going negative.
   const _zSel = new BABYLON.Vector3();
@@ -4183,6 +4189,7 @@ void main(void){
      of a passing proton went red - the owner does not want that tint). The dev slider 'protonivalon
      kantama' brings it back. The protons' own corona is separate and unaffected. */
   const gPL = new Float32Array(PL_N*3); let gPLN = 0, gPLR = 0.0;
+  let gLanternDark = 0.95;   // Lyhty: how dark the unlit parts go (dev slider 'lyhdyn pimeys')
   // The soft key light: a WORLD direction pointing at the light, from above the membrane (+Y) with a lean
   // toward the default view. gKeyPos is where the dev-mode sun gizmo sits.
   const gKeyDir = new BABYLON.Vector3(0.18, 1.0, 0.42).normalize();
@@ -9305,7 +9312,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     if(gCut[2] < 0.001) gCut[2] = 0; else if(gCut[2] > 0.999) gCut[2] = 1;
     gCut[0] = SOLU ? gTasoZ : bilayerCen.z;                          // cut plane: the particle plane in the cell (owner 12.9.2026: see down onto the plane), the membrane centre on the sheet
     gCut[1] = (cp.z - gCut[0]) >= 0 ? 1 : -1;                        // which side is toward the camera
-    if(SOLU && gPsuLo){ gCutLo.copyFrom(gPsuLo); gCutHi.copyFrom(gPsuHi); } else { gCutLo.set(-1e9, -1e9, -1e9); gCutHi.set(1e9, 1e9, 1e9); }
+    if(SOLU && gPsuLo){ gCutLo.copyFrom(gPsuLo); gCutHi.copyFrom(gPsuHi);
+      if(gBoxLo){ gCutLo.maximizeInPlace(gBoxLo); gCutHi.minimizeInPlace(gBoxHi); } }   // ...and only inside the box you can SEE (owner 13.9.2026: 'the membrane half is cut off noticeably away from the box'): the unit box reaches out to the Kalvostoon landing in depth, the drawn box does not
+    else { gCutLo.set(-1e9, -1e9, -1e9); gCutHi.set(1e9, 1e9, 1e9); }
     gViewBox = (SOLU && gPsuLo && cp.x >= gPsuLo.x && cp.x <= gPsuHi.x && cp.y >= gPsuLo.y && cp.y <= gPsuHi.y && cp.z >= gPsuLo.z && cp.z <= gPsuHi.z) ? 1 : 0;   // inside the light-reaction box NOTHING outside it is drawn (owner 13.9.2026)   // only inside the light-reaction box
     /* MEGACHEAP PROTEINS. Decided once per model, not per cell, so a complex is never half hull and
        half atoms. Once it is too small on screen its atoms stop drawing entirely and its hull is filled in
@@ -10632,6 +10641,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const plSld = document.createElement('input'); plSld.type='range'; plSld.min='0'; plSld.max='30'; plSld.value='0'; plSld.style.cssText='width:100%;cursor:pointer;';
   const plValEl = plRow.querySelector('#dev-pl-val');
   plSld.oninput = () => { gPLR = +plSld.value; plValEl.textContent = String(gPLR); };
+  // Lantern: how dark the unlit parts go (owner 13.9.2026: 'a slider to set the darkness of the non-illuminated parts in the lantern mode')
+  const ldRow = document.createElement('div'); ldRow.innerHTML = 'lyhdyn pimeys: <b id="dev-ld-val">95</b> %';
+  const ldSld = document.createElement('input'); ldSld.type='range'; ldSld.min='0'; ldSld.max='100'; ldSld.value=String(Math.round(gLanternDark*100)); ldSld.style.cssText='width:100%;cursor:pointer;';
+  const ldValEl = ldRow.querySelector('#dev-ld-val'); ldValEl.textContent = String(Math.round(gLanternDark*100));
+  ldSld.oninput = () => { gLanternDark = +ldSld.value/100; ldValEl.textContent = String(+ldSld.value); };
   blSld.value = String(Math.round(gMemBlend)); blValEl.textContent = String(Math.round(gMemBlend));
   // Speed of the loose proteins drifting in the box, and how many protons have gone through ATP synthase
   const psRow = document.createElement('div');
@@ -10685,7 +10699,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   devPanel.appendChild(backRow); devPanel.appendChild(qRow); devPanel.appendChild(qSld);   // render-resolution slider - it was built but had fallen out of the panel
   devPanel.appendChild(czRow); devPanel.appendChild(czSld);
   devPanel.appendChild(mgRow); devPanel.appendChild(mgSld); devPanel.appendChild(ffRow); devPanel.appendChild(ffSld);
-  devPanel.appendChild(blRow); devPanel.appendChild(blSld); devPanel.appendChild(sdRow); devPanel.appendChild(sdSld); devPanel.appendChild(plRow); devPanel.appendChild(plSld); devPanel.appendChild(bRow); devPanel.appendChild(bSld); devPanel.appendChild(bhRow); devPanel.appendChild(bhSld);
+  devPanel.appendChild(blRow); devPanel.appendChild(blSld); devPanel.appendChild(sdRow); devPanel.appendChild(sdSld); devPanel.appendChild(plRow); devPanel.appendChild(plSld); devPanel.appendChild(ldRow); devPanel.appendChild(ldSld); devPanel.appendChild(bRow); devPanel.appendChild(bSld); devPanel.appendChild(bhRow); devPanel.appendChild(bhSld);
   // Membrane slab tier on/off (see gSlabLod).
   const slRow = document.createElement('div'); const slBtn = document.createElement('button');
   const syncSl = () => { slBtn.textContent = gSlabLod ? 'laatta-LoD: ON' : 'laatta-LoD: OFF'; slBtn.style.cssText = cullStyle(gSlabLod); };
@@ -12577,12 +12591,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Silhouette pass — runs FIRST, on the RAW scene (background is the exact flat colour). Inks a black
   // outline where the frame meets the background (the whole assembly) AND around each cofactor molecule
   // (from the coverage mask). fxaa + the painterly grade then blend it into the comic look.
+  const _cofW = new BABYLON.Vector3();
   const cofsil = new BABYLON.PostProcess('cofsil', 'cofsil', ['texel','cofW'], ['cofMask'], 1.0, cam);
   cofsil.onApply = eff => {
     eff.setFloat2('texel', 1/engine.getRenderWidth(), 1/engine.getRenderHeight());
     // silhouette thickness tracks zoom → always ~5 proton-diameters on screen (thinner zoomed out, thicker in).
     // gCofLineW/2.2 keeps the dev slider as a multiplier (1.0 at its default). Clamped so it never vanishes or blooms.
-    const dist = Math.max(1, Math.abs(cam.radius));
+    /* The width follows the distance to the nearest cofactor in front of the camera, not cam.radius - exactly the green ring's rule
+       (owner 13.9.2026: 'the dark outline of the ETCs is sometimes way too thick'): the look-around pivot leaves the radius at 20
+       while the cofactors are hundreds of units away, and the line then sat on its cap round every one of them. */
+    let dist = Math.max(1, Math.abs(cam.radius));
+    if(typeof etcGroups !== 'undefined' && etcGroups.length && gReactSites){ const cp = cam.position, fw = cam.getDirection(BABYLON.Axis.Z); let best = Infinity;
+      for(let gi = 0; gi < etcGroups.length; gi++){ gReactSites.siteWorld(gi, _cofW); const dx = _cofW.x - cp.x, dy = _cofW.y - cp.y, dz = _cofW.z - cp.z;
+        if(dx*fw.x + dy*fw.y + dz*fw.z <= 0) continue; const d = dx*dx + dy*dy + dz*dz; if(d < best) best = d; }
+      if(isFinite(best)) dist = Math.max(1, Math.sqrt(best)); }
     const pxPerWorld = engine.getRenderHeight() / (2*dist*Math.tan(cam.fov/2));
     const cofw = (4.0*NUCLEON_R) * pxPerWorld * (gCofLineW/2.2);   // cofactor outline = 2 proton-diameters, scales with zoom like the proton outline
     eff.setFloat('cofW', gOutlines ? Math.max(0.6, Math.min(6.0, cofw)) : 0.0);   // width 0 → the edge detector samples one texel → no line
@@ -12647,25 +12669,29 @@ varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform vec2 elecUV;
 #define LN_MAX 64
-uniform vec2 elecUVs[LN_MAX];   // the light-reaction electrons on screen (owner 13.9.2026: 'in lantern mode I should see the electrons from photolysis travel the carriers to FNR')
+uniform vec3 elecUVs[LN_MAX];   // the light-reaction electrons AND protons on screen (xy, z = 0 electron / 1 proton) (owner 13.9.2026: 'in lantern mode I should see the electrons from photolysis travel the carriers to FNR' - 'the electron light distinctly blue and the proton light distinctly orange')
 uniform float nElecs;
 uniform float lanternOn;
 uniform float aspect;
+uniform float lanternDark;   // how dark the unlit parts go (0 = untouched, 1 = black) - the dev slider
 void main(void){
   vec3 c = texture2D(textureSampler, vUV).rgb;
   if(lanternOn > 0.5){
-    float lit = 0.0;
-    { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.16; lit = pow((R*R) / (R*R + dot(d, d)), 1.4); }   // (the old single electron - off-screen unless something sets it)
+    float litE = 0.0, litP = 0.0;
+    { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.16; litE = pow((R*R) / (R*R + dot(d, d)), 1.4); }   // (the old single electron - off-screen unless something sets it)
     for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
-      vec2 d = vUV - elecUVs[i]; d.x *= aspect; float R = 0.11;   // a tighter pool of light around each electron, so a chain of them reads as a chain
-      lit = max(lit, pow((R*R) / (R*R + dot(d, d)), 1.4)); }
-    float dark = 0.05 + 0.95*lit;
-    c = c*dark + vec3(0.06, 0.26, 0.60) * lit * 0.30;
+      vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = 0.11;   // a tighter pool of light around each particle, so a chain of them reads as a chain
+      float l = pow((R*R) / (R*R + dot(d, d)), 1.4);
+      if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
+    float lit = max(litE, litP);
+    float dark = (1.0 - lanternDark) + lanternDark*lit;
+    vec3 lc = (vec3(0.18, 0.40, 1.00) * litE + vec3(1.00, 0.55, 0.15) * litP) / max(litE + litP, 1e-4);   // the light's colour: blue round an electron, orange round a proton
+    c = c*dark * mix(vec3(1.0), lc * 1.6, lit) + lc * lit * 0.22;   // the pool is LIT IN THAT COLOUR (the surface takes the hue), plus a little glow
   }
   gl_FragColor = vec4(c, 1.0);
 }`;
-  const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect'], null, 1.0, cam);
-  const _lnUV = new Float32Array(64*2);
+  const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect','lanternDark'], null, 1.0, cam);
+  const _lnUV = new Float32Array(64*3);
   { const _lvp = new BABYLON.Viewport(0, 0, 1, 1);
     lanternPP.onApply = eff => {
       const w = engine.getRenderWidth(), h = engine.getRenderHeight();
@@ -12676,8 +12702,8 @@ void main(void){
       let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
       if(gLantern && window.gValoElecs){ const tm = scene.getTransformMatrix();
         for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
-          if(q.z < 0.0 || q.z > 1.0) continue; _lnUV[n*2] = q.x / w; _lnUV[n*2+1] = 1.0 - q.y / h; n++; } }
-      eff.setArray2('elecUVs', _lnUV); eff.setFloat('nElecs', n);
+          if(q.z < 0.0 || q.z > 1.0) continue; _lnUV[n*3] = q.x / w; _lnUV[n*3+1] = 1.0 - q.y / h; _lnUV[n*3+2] = e.p ? 1 : 0; n++; } }
+      eff.setArray3('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark);
       eff.setFloat('lanternOn', gLantern ? 1.0 : 0.0);
       eff.setFloat('aspect', w / h);
     };
@@ -12740,7 +12766,10 @@ void main(void){
       const now = performance.now(); if(now - gFLastTap < 400){ gFLastTap = 0; window.gIsoToggle(); return; } gFLastTap = now;   // a double tap: isolate the selection (or leave the isolation)
       const c = selCentreOf(); if(!c) return;
       gFHold = true; gLookPivot = null; scene.stopAnimation(cam); cam.setTarget(c); });
-    window.addEventListener('keyup', e => { if(e.key === 'f' || e.key === 'F') gFHold = false; }); }
+    window.addEventListener('keyup', e => { if(e.key === 'f' || e.key === 'F') gFHold = false; });
+    /* F HELD FOLLOWS (owner 13.9.2026: 'if I hold down F it should follow the selection'): while the key is down the target rides on the
+       selection's centre every frame - alpha, beta and radius untouched, so the camera keeps its offset and glides after a moving carrier. */
+    scene.onBeforeRenderObservable.add(() => { if(!gFHold) return; const c = selCentreOf(); if(c) cam.target.copyFrom(c); }); }
   window.addEventListener('keydown', e => {
     if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // don't hijack typing in dev inputs
     const k = e.key;

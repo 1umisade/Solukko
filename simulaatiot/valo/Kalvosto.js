@@ -357,7 +357,8 @@
       // camera.gd: follow whatever valid body is in the 'followed' group
       if(followOn){ const fb = V.get_nodes_in_group('followed')[0]; if(fb){ const p = fb.global_position, t = cam.target, f = 1 - Math.pow(0.1, dt*3); t.x += (p[0]-t.x)*f; t.y += (p[1]-t.y)*f; t.z += (p[2]-t.z)*f; } }
       // the lantern: every free electron and every filled electron slot is a spotlight
-      { const L = lantern; L.length = 0; for(const b of V.get_nodes_in_group('electron')){ if(!b.alive) continue; if(b.parent_is_BindSites ? b.modulate !== 'white' : !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2] }); if(L.length >= 64) break; } }
+      { const L = lantern; L.length = 0; for(const b of V.get_nodes_in_group('electron')){ if(!b.alive) continue; if(b.parent_is_BindSites ? b.modulate !== 'white' : !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2] }); if(L.length >= 64) break; }
+        for(const b of V.get_nodes_in_group('proton')){ if(!b.alive || !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:1 }); if(L.length >= 64) break; } }   // ...and every free proton, an orange pool (owner 13.9.2026)
       prof.all = performance.now() - t0;
       if((++dev & 7) === 0 && (valoRow || (valoRow = document.getElementById('dev-valo-row')))) valoRow.textContent = 'valoreaktiot: O2 ' + stats.o2 + ' · e- FNR:ään ' + stats.fnrE + ' · NADPH ' + stats.nadph + ' · ATP ' + stats.atp + ' · sokeri ' + stats.glukoosi + ' · H+ lumeniin ' + stats.hplus + ' · fotoneja ' + stats.fotonit + ' · lämpönä ' + stats.lampo + ' · vaurioita ' + stats.vaurio + ' · kappaleita ' + V.all.length + ' · ' + prof.all.toFixed(1) + ' ms';
     }, -1, false);
