@@ -106,8 +106,8 @@
       u.tyrM = cof(u.tyrZ, 'tyrosine', { lane: L }); if(u.tyrM) u.psii.namedChildren.set('tyrosine', u.tyrM);
       u.p680M = cof(u.p680[0], 'P680', { lane: L }); u.p680M.psId = L; u.p680M.rcBody = u.p680M; u.psii.namedChildren.set('P680', u.p680M); antenna.push(u.p680M);
       if(u.p680[1] >= 0){ const m2 = cof(u.p680[1], 'chlorophyll_A', { lane: L }); m2.add_to_group('P680pair'); antenna.push(m2); }
-      u.chlD1M = cof(u.chlD1, 'chlorophyll_A', { lane: L, BindSites: ['electron'], place: 5, nearby: 45 }); if(u.chlD1M){ u.chlD1M.ExcitedSprites = []; u.chlD1M.ExcitedSprite = null; }   // ChlD1: the accessory chlorophyll relays P680 -> PheoD1; not a pigment of the antenna here
-      u.pheoM = cof(u.pheo, 'pheophytin', { lane: L, place: 6 }); u.qaM = cof(u.qa, 'plastoquinone_A', { lane: L, place: 7 }); u.feM = cof(u.fe, 'Fe3+', { lane: L, place: 8 });
+      u.chlD1M = null; if(u.chlD1 >= 0){ const m = cof(u.chlD1, 'chlorophyll_A', { lane: L }); antenna.push(m); }   // ChlD1: an antenna pigment beside the centre (13.9.2026: no longer a stop between P680 and pheophytin)
+      u.pheoM = cof(u.pheo, 'pheophytin', { lane: L, place: 5 }); u.qaM = cof(u.qa, 'plastoquinone_A', { lane: L, place: 6 }); u.feM = cof(u.fe, 'Fe3+', { lane: L, place: 7 });
       for(const g of u.ant){ const m = cof(g, 'chlorophyll_A', { lane: L }); antenna.push(m); }
       for(const g of u.cars){ const m = cof(g, 'xanthophyll', { lane: L }); antenna.push(m); }
       for(const m of antenna) if(m.lane === L){ m.psId = L; m.rcBody = u.p680M; }
@@ -375,7 +375,8 @@
       if(followOn){ const fb = V.get_nodes_in_group('followed')[0]; if(fb){ const p = fb.global_position, t = cam.target, f = 1 - Math.pow(0.1, dt*3); t.x += (p[0]-t.x)*f; t.y += (p[1]-t.y)*f; t.z += (p[2]-t.z)*f; } }
       // the lantern: every free electron and every filled electron slot is a spotlight
       { const L = lantern; L.length = 0; for(const b of V.get_nodes_in_group('electron')){ if(!b.alive) continue; if(b.parent_is_BindSites ? b.modulate !== 'white' : !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2] }); if(L.length >= 64) break; }
-        for(const b of V.get_nodes_in_group('proton')){ if(!b.alive || !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:1 }); if(L.length >= 64) break; } }   // ...and every free proton, an orange pool (owner 13.9.2026)
+        for(const b of V.get_nodes_in_group('proton')){ if(!b.alive || !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:1 }); if(L.length >= 64) break; }
+        for(const m of antenna){ if(!m.alive || !m.ExcitedSprite || !m.ExcitedSprite.visible) continue; const p = m.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:2 }); if(L.length >= 64) break; } }   // an excited pigment: a green light that hops pigment to pigment to P680 (owner 13.9.2026: 'make the chlorophylls glow like the lanterns with green')   // ...and every free proton, an orange pool (owner 13.9.2026)
       prof.all = performance.now() - t0;
       if((++dev & 7) === 0 && (valoRow || (valoRow = document.getElementById('dev-valo-row')))) valoRow.textContent = 'valoreaktiot: O2 ' + stats.o2 + ' · e- FNR:ään ' + stats.fnrE + ' · NADPH ' + stats.nadph + ' · ATP ' + stats.atp + ' · sokeri ' + stats.glukoosi + ' · H+ lumeniin ' + stats.hplus + ' · fotoneja ' + stats.fotonit + ' · lämpönä ' + stats.lampo + ' · vaurioita ' + stats.vaurio + ' · kappaleita ' + V.all.length + ' · ' + prof.all.toFixed(1) + ' ms';
     }, -1, false);

@@ -529,8 +529,8 @@ const yield_ = () => new Promise(r => setTimeout(r, 0));
    models already here. The viewer and the editor both take the parsed molecules (only one mode runs per page,
    so the viewer may mutate them). Anything not on the list still goes through the same functions on demand. */
 const PRE_FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_synthase.mol2','NDH-1.mol2',
-  'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2','PGR5.mol2',
-  'PGRL1.mol2','PPH1.mol2','STN7.mol2','Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];
+  'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2',
+  'Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];   // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - are out, owner 13.9.2026)
 const gPreText = new Map(), gPreParsed = new Map();
 const preText = fn => { let p = gPreText.get(fn); if(!p){ p = fetch('./' + fn).then(r => r.ok ? r.text() : null).catch(() => null); gPreText.set(fn, p); } return p; };
 const preParsed = fn => { let p = gPreParsed.get(fn); if(!p){ p = preText(fn).then(t => t === null ? null : parseMol2(t)); gPreParsed.set(fn, p); } return p; };
@@ -3355,18 +3355,15 @@ async function run(){
     {match:'1a70',   x:230,  y:250,  z:20,   label:'Ferredoxin'},
     {match:'1gjr',   x:400,  y:290,  z:80,   label:'FNR'},
     {match:'1rcx',   x:600,  y:380,  z:-80,  label:'RuBisCO'},
-    {match:'q9sl05', x:-40,  y:220,  z:90,   label:'PGR5'},
-    {match:'q8h112', x:30,   y:185,  z:-90,  label:'PGRL1'},
-    {match:'q9s713', x:-360, y:230,  z:90,   label:'STN7'},
-    {match:'4yzg',   x:-470, y:220,  z:-80,  label:'PPH1'},
+    // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - are out: owner 13.9.2026 'remove all the non ETC proteins')
     {match:'q9fgc7', x:-640, y:230,  z:0,    label:'Zeaxanthin epoxidase'},
     {match:'chlorophyll', x:-560, y:150, z:130, label:'Chlorophyll'},   // one CLA plucked from PSII → its own file
     {match:'plastoquinone', x:-495, y:150, z:135, label:'Plastoquinone'},   // one PL9 plucked from cytb6f → its own file, beside the lone chlorophyll
     {match:'nadph', x:-425, y:150, z:135, label:'NADPH'},   // one NADP+ plucked from FNR → its own file, beside the chlorophyll + quinone (coloured pink)
   ];
   const FILES = ['PSII.mol2','photosystem_I.mol2','cytochrome_b6f.mol2','ATP_synthase.mol2','NDH-1.mol2',
-    'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2','PGR5.mol2',
-    'PGRL1.mol2','PPH1.mol2','STN7.mol2','Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];
+    'ferredoxin.mol2','FNR.mol2','RuBisCO.mol2','plastocyanin.mol2',
+   'Violaxanthin_de-epoxidase.mol2','Zeaxanthin_epoxidase.mol2','chlorophyll.mol2','quinone.mol2','nadph.mol2'];
   setLbl('Haetaan tylakoidimalleja…');
   const mols = [];
   for(let i=0;i<FILES.length;i++){ const fn=FILES[i];
@@ -3424,7 +3421,7 @@ async function run(){
        with them the second row put the heap at 3.3 GB steady and the owner's browser died 'Out of
        Memory' during the build (2026-09-06). The lighter ten are, which still doubles the membrane's
        b6f and ATP synthase and every loose protein at a fraction of the cost. */
-    { const DUP = ['Cytochrome b6f','ATP synthase','Violaxanthin de-epoxidase','Ferredoxin','FNR','PGR5','PGRL1','STN7','PPH1','Zeaxanthin epoxidase'];
+    { const DUP = ['Cytochrome b6f','ATP synthase','Violaxanthin de-epoxidase','Ferredoxin','FNR','Zeaxanthin epoxidase'];
       /* MEMORY. Every atom instance carries CPU-side buffers (matrices, colours, orbital lobes, nucleons),
          so a full extra set of complexes costs on the order of a gigabyte of JS heap. Two extra rows put
          the heap at 4.6 GB against Chrome's 4 GB limit and the renderer died. DUP_ROWS is therefore what
@@ -10300,29 +10297,33 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const halo = mkGlowSphere('chlHalo', [0.62,1.0,0.36], 0.32, HALO_MAX), flash = mkGlowSphere('chlFlash', [0.9,1.0,0.8], 0.5, FLASH_MAX);
     const glows = new Map();   // chlorophyll k -> time left
     const flashes = [];        // {x,y,z,t}
-    const spawn = i => { const lo = gBoxLo, hi = gBoxHi; if(!lo) return; const o = i*3;
-      const face = Math.random(); let x, y, z, dx, dy, dz;
-      if(face < 0.6){ x = lo.x + Math.random()*(hi.x-lo.x); y = hi.y; z = lo.z + Math.random()*(hi.z-lo.z); dx = (Math.random()-0.5)*0.8; dy = -1; dz = (Math.random()-0.5)*0.8; }   // mostly from above
-      else if(face < 0.8){ x = lo.x; y = lo.y + Math.random()*(hi.y-lo.y); z = lo.z + Math.random()*(hi.z-lo.z); dx = 1; dy = (Math.random()-0.5)*0.6; dz = (Math.random()-0.5)*0.8; }
-      else { x = hi.x; y = lo.y + Math.random()*(hi.y-lo.y); z = lo.z + Math.random()*(hi.z-lo.z); dx = -1; dy = (Math.random()-0.5)*0.6; dz = (Math.random()-0.5)*0.8; }
-      const l = Math.hypot(dx,dy,dz); px[o]=x; px[o+1]=y; px[o+2]=z; pd[o]=dx/l; pd[o+1]=dy/l; pd[o+2]=dz/l; alive[i] = 1; phase[i] = Math.random()*6.283; };
-    let seeded = false;
+    /* 13.9.2026 (owner: 'make photons arrive only from the top of the box vertically'): every photon starts on the box's top face and falls
+       straight down. Four in five are dropped over a chlorophyll that stands inside the box (photon.gd aims at a pigment - a beam 7
+       units wide over a 1600 x 2000 face would otherwise hardly ever meet one), the rest anywhere on the face. */
+    const spawn = i => { const lo = gPsuLo || gBoxLo, hi = gPsuHi || gBoxHi; if(!lo) return; const o = i*3;
+      let x = lo.x + Math.random()*(hi.x-lo.x), z = lo.z + Math.random()*(hi.z-lo.z);
+      if(Math.random() < 0.8 && N_CH){ for(let tries = 0; tries < 8; tries++){ const k = (Math.random()*N_CH)|0, cx = chW[k*3], cy = chW[k*3+1], cz = chW[k*3+2];
+          if(cx > lo.x && cx < hi.x && cy > lo.y && cy < hi.y && cz > lo.z && cz < hi.z){ x = cx + (Math.random()-0.5)*6; z = cz + (Math.random()-0.5)*6; break; } } }
+      px[o]=x; px[o+1]=hi.y; px[o+2]=z; pd[o]=0; pd[o+1]=-1; pd[o+2]=0; alive[i] = 1; phase[i] = Math.random()*6.283; };
+    let seeded = false, phBudget = 0; const PH_RATE = 4;
     scene.onBeforeRenderObservable.add(() => {
       if(!gBoxLo) return;
       if(!gPhotonsOn){ if(beamMesh.isEnabled()){ beamMesh.setEnabled(false); halo.m.setEnabled(false); flash.m.setEnabled(false); } return; }   // switched off (dev panel)
       const dt = Math.min(engine.getDeltaTime(), 50)*0.001*gSpeed;
-      if(!seeded){ seeded = true; for(let i=0;i<N_PH;i++){ spawn(i); const o=i*3, t=Math.random()*1.5; px[o]+=pd[o]*PH_SPEED*t; px[o+1]+=pd[o+1]*PH_SPEED*t; px[o+2]+=pd[o+2]*PH_SPEED*t; } }
+      if(!seeded){ seeded = true; }   // (the beams used to be seeded all at once - now they come at PH_RATE a second)
       // chlorophyll centres through their models' transforms (cheap: a few hundred)
       for(let k=0;k<N_CH;k++){ const m = gModelXform, o = chMi[k]*16, x=chB[k*3], y=chB[k*3+1], z=chB[k*3+2];
         chW[k*3] = m[o]*x + m[o+4]*y + m[o+8]*z + m[o+12]; chW[k*3+1] = m[o+1]*x + m[o+5]*y + m[o+9]*z + m[o+13]; chW[k*3+2] = m[o+2]*x + m[o+6]*y + m[o+10]*z + m[o+14]; }
-      const lo = gBoxLo, hi = gBoxHi, step = PH_SPEED*dt; let n = 0;
-      for(let i=0;i<N_PH;i++){ const o=i*3; if(!alive[i]) spawn(i);
+      const lo = gPsuLo || gBoxLo, hi = gPsuHi || gBoxHi, step = PH_SPEED*dt; let n = 0;
+      /* the light: PH_RATE photons a second at speed 1 (13.9.2026: aimed at the pigments, every photon used to hit - 240 a second, every pigment excited) */
+      phBudget = Math.min(phBudget + dt*PH_RATE, 3);
+      for(let i=0;i<N_PH;i++){ const o=i*3; if(!alive[i]){ if(phBudget < 1) continue; phBudget -= 1; spawn(i); }
         const x0=px[o], y0=px[o+1], z0=px[o+2], dx=pd[o], dy=pd[o+1], dz=pd[o+2];
         // absorbed if the step passes within HIT_R of a chlorophyll centre
         let hit = -1;
         if(step > 0) for(let k=0;k<N_CH;k++){ const cx=chW[k*3]-x0, cy=chW[k*3+1]-y0, cz=chW[k*3+2]-z0; const t = cx*dx+cy*dy+cz*dz; if(t < -HIT_R || t > step + HIT_R) continue;
           const tc = Math.max(0, Math.min(step, t)), ex = cx-dx*tc, ey = cy-dy*tc, ez = cz-dz*tc; if(ex*ex+ey*ey+ez*ez < HIT_R*HIT_R){ hit = k; break; } }
-        if(hit >= 0){ if(!(gValoExcite && gValoExcite(chl[hit].gi, x0, y0, z0))) glows.set(hit, GLOW_S); alive[i] = 0; flashes.push({ x:x0, y:y0, z:z0, t:0 }); if(flashes.length > FLASH_MAX) flashes.shift(); continue; }
+        if(hit >= 0){ if(!(gValoExcite && gValoExcite(chl[hit].gi, x0, y0, z0))) glows.set(hit, GLOW_S); /* (the halo spheres only when the light reactions are not running) */ alive[i] = 0; flashes.push({ x:x0, y:y0, z:z0, t:0 }); if(flashes.length > FLASH_MAX) flashes.shift(); continue; }
         const x=x0+dx*step, y=y0+dy*step, z=z0+dz*step;
         if(x < lo.x-2 || x > hi.x+2 || y < lo.y-2 || y > hi.y+2 || z < lo.z-2 || z > hi.z+2){ alive[i] = 0; continue; }
         px[o]=x; px[o+1]=y; px[o+2]=z;
@@ -12706,28 +12707,43 @@ varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform vec2 elecUV;
 #define LN_MAX 64
-uniform vec3 elecUVs[LN_MAX];   // the light-reaction electrons AND protons on screen (xy, z = 0 electron / 1 proton) (owner 13.9.2026: 'in lantern mode I should see the electrons from photolysis travel the carriers to FNR' - 'the electron light distinctly blue and the proton light distinctly orange')
+uniform vec3 elecUVs[LN_MAX];   // the lights on screen: xy, z = 0 an electron (blue), 1 a proton (orange), 2 an excited chlorophyll (green) (owner 13.9.2026)
 uniform float nElecs;
 uniform float lanternOn;
 uniform float aspect;
 uniform float lanternDark;   // how dark the unlit parts go (0 = untouched, 1 = black) - the dev slider
+uniform float uT;            // seconds, for the crackle
+/* an ELECTRIC pool (owner 13.9.2026: 'glow radii only a third but much more electric and strong'): a tight core, and round it jagged
+   rays that whirl and flicker - two ray patterns counter-rotating, a fast shimmer on top */
+float pool(vec2 d, float R, float ph){
+  float r2 = dot(d, d), r = sqrt(r2);
+  float core = pow((R*R) / (R*R + r2), 1.6);
+  float ang = atan(d.y, d.x);
+  float rays = 0.55 + 0.45 * sin(ang*13.0 + uT*11.0 + ph) * sin(ang*7.0 - uT*17.0 + ph*2.1);
+  float arcs = 0.7 + 0.3 * sin(r/R*9.0 - uT*23.0 + ph);
+  float flick = 0.8 + 0.2 * sin(uT*41.0 + ph*3.0) * sin(uT*29.0 + ph);
+  return core * (0.6 + 0.9*rays*arcs) * flick;
+}
 void main(void){
   vec3 c = texture2D(textureSampler, vUV).rgb;
+  float litE = 0.0, litP = 0.0, litG = 0.0;
+  { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.05; litE = pool(d, R, 0.0); }   // (the old single electron - off-screen unless something sets it)
+  for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
+    vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].z > 1.5 ? 0.028 : 0.037;   // a third of the old pools (0.11) - a pigment's smaller still
+    float l = pool(d, R, float(i)*1.7);
+    if(elecUVs[i].z > 1.5) litG = max(litG, l); else if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
+  vec3 cE = vec3(0.25, 0.55, 1.00), cP = vec3(1.00, 0.55, 0.12), cG = vec3(0.40, 1.00, 0.45);
+  float lit = max(litE, max(litP, litG));
+  vec3 lc = (cE*litE + cP*litP + cG*litG) / max(litE + litP + litG, 1e-4);   // the light's colour where pools overlap
   if(lanternOn > 0.5){
-    float litE = 0.0, litP = 0.0;
-    { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.16; litE = pow((R*R) / (R*R + dot(d, d)), 1.4); }   // (the old single electron - off-screen unless something sets it)
-    for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
-      vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = 0.11;   // a tighter pool of light around each particle, so a chain of them reads as a chain
-      float l = pow((R*R) / (R*R + dot(d, d)), 1.4);
-      if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
-    float lit = max(litE, litP);
-    float dark = (1.0 - lanternDark) + lanternDark*lit;
-    vec3 lc = (vec3(0.18, 0.40, 1.00) * litE + vec3(1.00, 0.55, 0.15) * litP) / max(litE + litP, 1e-4);   // the light's colour: blue round an electron, orange round a proton
-    c = c*dark * mix(vec3(1.0), lc * 1.6, lit) + lc * lit * 0.22;   // the pool is LIT IN THAT COLOUR (the surface takes the hue), plus a little glow
+    float dark = (1.0 - lanternDark) + lanternDark*min(1.0, lit*1.5);
+    c = c*dark * mix(vec3(1.0), lc * 2.2, min(1.0, lit)) + lc * lit * 0.9;   // STRONG: the surface takes the colour, and the pool blazes over it
+  } else {
+    c = c * mix(vec3(1.0), lc * 1.6, min(1.0, litG)) + cG * litG * 0.7;   // outside the lantern only the pigments glow: the excitation as a green light that hops pigment to pigment
   }
-  gl_FragColor = vec4(c, 1.0);
+  gl_FragColor = vec4(min(c, vec3(1.0)), 1.0);
 }`;
-  const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect','lanternDark'], null, 1.0, cam);
+  const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect','lanternDark','uT'], null, 1.0, cam);
   const _lnUV = new Float32Array(64*3);
   { const _lvp = new BABYLON.Viewport(0, 0, 1, 1);
     lanternPP.onApply = eff => {
@@ -12737,10 +12753,10 @@ void main(void){
       const onScreen = (p.z >= 0.0 && p.z <= 1.0);   // electron behind the camera → push the spotlight off-screen (all dark)
       eff.setFloat2('elecUV', onScreen ? p.x / w : -10.0, onScreen ? 1.0 - p.y / h : -10.0);
       let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
-      if(gLantern && window.gValoElecs){ const tm = scene.getTransformMatrix();
-        for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
-          if(q.z < 0.0 || q.z > 1.0) continue; _lnUV[n*3] = q.x / w; _lnUV[n*3+1] = 1.0 - q.y / h; _lnUV[n*3+2] = e.p ? 1 : 0; n++; } }
-      eff.setArray3('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark);
+      if(window.gValoElecs){ const tm = scene.getTransformMatrix();
+        for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; if(!gLantern && e.p !== 2) continue; /* outside the lantern only the excited pigments (kind 2) are lights */ const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
+          if(q.z < 0.0 || q.z > 1.0) continue; _lnUV[n*3] = q.x / w; _lnUV[n*3+1] = 1.0 - q.y / h; _lnUV[n*3+2] = e.p || 0; n++; } }
+      eff.setArray3('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark); eff.setFloat('uT', performance.now()*0.001);
       eff.setFloat('lanternOn', gLantern ? 1.0 : 0.0);
       eff.setFloat('aspect', w / h);
     };
