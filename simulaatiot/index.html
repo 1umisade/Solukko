@@ -10406,6 +10406,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
       { const cx=(lx+hx)/2, hw=(hx-lx)/2; lx=cx-2*hw; hx=cx+2*hw; }   // twice as long along the line of complexes (x), both ways (owner 13.9.2026)
+      { const cy=(ly+hy)/2, hh=(hy-ly)/2; ly=cy-2*hh; hy=cy+2*hh; }   // and twice as tall (y), both ways (owner 14.9.2026: 'make box 2x taller')
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);
       if(gValoFree && !gLumenLifted){ gLumenLifted = true;   // the plane's lumen water was laid down to the FREE box's floor, 300 under the unit box's: the part below the unit box is drawn as a wrapped copy elsewhere - lift it into the box (owner 14.9.2026: '500 H2O in the plane in the lumen')
         const c = gValoFree.orig('w'), n = gValoFree.count('w'); if(c){ const bot = gPsuLo.y + 12; let moved = 0;
