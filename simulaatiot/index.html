@@ -5534,6 +5534,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Membrane half-cut → fade out the CAMERA-SIDE leaflet so it stops occluding the complexes. This used to be
   // permanently on (wantCut hardcoded true); now it is button-controlled and OFF by default, so the full
   // bilayer shows until you choose to cut the near half. gCut[2] eases in/out over MEM_FADE_S when toggled.
+  let gTopDown = false;  // view is (nearly) along the membrane normal: Puolikas shows both halves (owner 14.9.2026)
   let gMemCut = true;    // Puolikas ON by default (owner 12.9.2026): the camera-side half of the membrane inside the light-reaction box is cut away, the button restores it
   // "Membrane only" perf mode: hide the peripheral (soluble) proteins, keep the ones EMBEDDED in the membrane.
   // A model is membrane-integral when its scene Y sits near the bilayer plane (|y| small); peripheral ones are
@@ -9462,7 +9463,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // conditions below form a single on/off threshold (with hysteresis so it can't chatter on the
     // boundary), and gCut[2] then eases to that target over MEM_FADE_S seconds. At rest it is always
     // exactly 0 or 1, so lipids are either fully solid or completely gone.
-    const wantCut = gMemCut;   // camera-side leaflet is cut only when the "Puolikas" button is on (no longer automatic)
+    // Looking straight down (or up) at the membrane both halves are shown even with Puolikas on (owner 14.9.2026): the cut
+    // only helps when you look at the sheet from an angle. Hysteresis so a slow tilt cannot make it chatter on the boundary.
+    { const fy = Math.abs(cam.getDirection(BABYLON.Axis.Z).y); gTopDown = fy > (gTopDown ? 0.86 : 0.92); }   // the sheet's normal is Y (bilayerCen.y); the cut plane itself is z = const
+    const wantCut = gMemCut && !gTopDown;   // camera-side leaflet is cut only when the "Puolikas" button is on (no longer automatic) and the view is not top-down
     memCutOn = wantCut;
     const step = Math.min(engine.getDeltaTime(), 50) / (MEM_FADE_S * 1000);
     gCut[2] += Math.max(-step, Math.min(step, (wantCut ? 1 : 0) - gCut[2]));   // 1 s linear fade to full-on / full-off
