@@ -629,7 +629,11 @@ void main(void){
   }
 #endif
   { float inB = step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z);
-    tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * inB, viewBox * (1.0 - inB)); }   // the plane switch culls off-plane molecules INSIDE the box, the box-only view culls everything OUTSIDE it   // judged on the FINAL centre (after the CPU displacement and the shell repel - the protons live entirely in that displacement): off the plane and inside the PSU box -> culled
+    tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * inB, viewBox * (1.0 - inB));
+#ifdef CELLCLIP
+    if(placed) tasoDim = viewBox * (1.0 - inB);   // a PLACED molecule (a simulated proton, one held in a slot) is never plane-culled: a proton pushed off the plane by a protein's shell, funnelled into ATP synthase's channel or riding a pocket 28 units off it vanished (owner 14.9.2026: 'protons popping in and out - is the plane too narrow')
+#endif
+  }   // the plane switch culls off-plane molecules INSIDE the box, the box-only view culls everything OUTSIDE it   // judged on the FINAL centre (after the CPU displacement and the shell repel - the protons live entirely in that displacement): off the plane and inside the PSU box -> culled
   base = wCen + W[3].xyz;
 #endif
 #ifdef LIPTILE
