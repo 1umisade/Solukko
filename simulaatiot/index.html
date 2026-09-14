@@ -863,7 +863,8 @@ uniform float cellClipAll;
 uniform vec4 orgA[32];
 uniform vec4 orgB[32];
 uniform float nOrg;
-uniform vec4 thyA;       // the thylakoid cap: centre, radius - no molecule inside its bilayer (inside the host envelope only)
+uniform vec4 thyA;
+float capY(vec2 xz){ vec2 dq = xz - thyA.xz; float rr = thyA.w*thyA.w - dot(dq, dq); return thyA.y + (rr > 0.0 ? sqrt(rr) : 0.0); }   // the thylakoid cap's surface height under a point       // the thylakoid cap: centre, radius - no molecule inside its bilayer (inside the host envelope only)
 uniform vec4 thyB;       // the host's inner envelope: centre, base radius
 uniform vec3 thyInvS;
 uniform float cellFade;  // a copy fades out over the last 70 units before this distance from the camera (the box edge is never seen)
@@ -976,8 +977,9 @@ void main(void){
                    bnc(yO + wVel.y*uT, yLo, yHi),
                    bnc(wOrig.z + wVel.z*uT, boxLo.z, boxHi.z));
 #ifdef CELLCLIP
-  if(sideOnly > 0.5 && thyA.w > 0.0){ vec2 dq = wCen.xz - thyA.xz; float rr = thyA.w*thyA.w - dot(dq, dq); float surf = thyA.y + (rr > 0.0 ? sqrt(rr) : 0.0) + sideClear;
-    if(wCen.y < surf) wCen.y = min(yHi, 2.0*surf - wCen.y); }   // stroma only: mirrored about the cap's surface (a fold, so the path stays continuous)
+  if(sideOnly > 0.5 && thyA.w > 0.0){ float sgn = sideOnly > 1.5 ? (wOrig.y < capY(wOrig.xz) ? -1.0 : 1.0) : 1.0;   // 1 = stroma only, 2 = the side the molecule STARTED on (water, owner 14.9.2026)
+    float surf = capY(wCen.xz) + sgn*sideClear;
+    if(sgn > 0.0){ if(wCen.y < surf) wCen.y = min(yHi, 2.0*surf - wCen.y); } else { if(wCen.y > surf) wCen.y = max(yLo, 2.0*surf - wCen.y); } }   // mirrored about the cap's surface (a fold, so the path stays continuous)
 #endif
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
@@ -8128,6 +8130,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gTasoZ = (z0 + z1) / 2;
     const tasoita = (c, v, cnt) => { const k = Math.min(TASO_N, cnt); for(let i=0;i<k;i++){ c[i*3+2] = gTasoZ; v[i*3+2] = 0; } };
     tasoita(wc, wv, NW);
+    /* the plane's water goes into the LUMEN (owner 14.9.2026: 'put 500 H2O in the plane in the lumen'): under the thylakoid cap's surface at its x,
+       clear of the bilayer band, down to the box floor - the OEC takes its water from there. (The rest of the water stays on whichever
+       side of the cap it landed - sideOnly 2 keeps every water molecule on its starting side.) */
+    if(SOLU_CELL && SOLU_CELL.THY){ for(let i=0;i<Math.min(TASO_N, NW);i++){ const x = SOLU_CELL.THY.pole.x + (rnd(i*7+3) - 0.5)*2400, top = memSurfY(x, gTasoZ) - gMemHalfT - 16, bot = y0 + 12;   // within 1200 of the pole: farther out the cap has dropped below the box floor and there is no lumen left
+        wc[i*3] = x; if(top > bot) wc[i*3+1] = bot + rnd(i*7+5)*(top - bot); } }
     // Global molecule-id space, shared by the molId attribute and the collision texture.
     const MOLBASE = { w:0, p:NW, co2:NW+NP, o2:NW+NP+NCO2, nadp:NW+NP+NCO2+NO2 };   // molecule id ranges, laid end to end from the counts (the id texture below is sized to fit)
     MOLBASE.atp = MOLBASE.nadp + NNADP; MOLBASE.adp = MOLBASE.atp + NATP; MOLBASE.pi = MOLBASE.adp + NADP2;
@@ -8445,9 +8452,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     /* the STROMAL FOLD (14.9.2026): a stromal species' path is mirrored above the thylakoid cap in the shader (sideOnly) - every CPU mirror of the
        analytic path applies the same fold, or the orbitals, the spin, the collisions and the pick would sit where the molecule is NOT drawn
        (owner: 'why cant I see the orbitals of the particles that fly near the camera, only the transparent vdW') */
-    const sideFold = (side, x, y, z) => { if(side > 0 && SOLU_CELL && SOLU_CELL.THY){ const surf = memSurfY(x, z) + gMemHalfT + 10; if(y < surf) return Math.min(bHi.y, 2*surf - y); } return y; };
+    const sideFold = (side, c, i, x, y, z) => { if(!side || !SOLU_CELL || !SOLU_CELL.THY) return y;
+      const sg = side === 2 ? (c[i*3+1] < memSurfY(c[i*3], c[i*3+2]) ? -1 : 1) : 1;   // 2 = the side the molecule started on (water)
+      const surf = memSurfY(x, z) + sg*(gMemHalfT + 10);
+      if(sg > 0){ if(y < surf) return Math.min(bHi.y, 2*surf - y); } else { if(y > surf) return Math.max(bLo.y, 2*surf - y); } return y; };
     const sideOfC = c => { for(const z of gSpecies) if(z.c === c) return z.side || 0; return 0; };   // which species owns this origin array (a handful of species, called per molecule near the camera)
-    const anaC = (c,v,i,T,out) => { out[0]=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[2]=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); out[1]=sideFold(sideOfC(c), out[0], bncY(c[i*3+1],v[i*3+1],T), out[2]); };
+    const anaC = (c,v,i,T,out) => { out[0]=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[2]=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); out[1]=sideFold(sideOfC(c), c, i, out[0], bncY(c[i*3+1],v[i*3+1],T), out[2]); };
     const spinAt = (molId, c,v,i,T) => { anaC(c,v,i,T,_a3); spinS(molId, _a3[0],_a3[1],_a3[2], _S9); return _S9; };   // S for molecule i of a species at time T
     const gatherT = () => gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // the clock the per-frame gathers place at
     const wPick=new Int32Array(WCAP), wPickD=new Float32Array(WCAP), wPos=new Float32Array(WCAP*3);
@@ -8476,9 +8486,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(let i=0;i<NW;i++){
         const px=bnc(wc[i*3]  +wv[i*3]  *T, bLo.x, bHi.x);
         const dx=px-cp.x; if(dx*dx>R2) continue;                       // cheap axis reject before the rest
-        const py=bncY(wc[i*3+1], wv[i*3+1], T);
-        const dy=py-cp.y; if(dx*dx+dy*dy>R2) continue;
         const pz=bnc(wc[i*3+2]+wv[i*3+2]*T, bLo.z, bHi.z);
+        const py=sideFold(2, wc, i, px, bncY(wc[i*3+1], wv[i*3+1], T), pz);
+        const dy=py-cp.y; if(dx*dx+dy*dy>R2) continue;
         const dz=pz-cp.z; const d2=dx*dx+dy*dy+dz*dz; if(d2>R2) continue;
         if(gCellDrop && gCellDrop(px,py,pz)) continue;   // cell mode: a copy outside the cytosol is not drawn
         /* The shader adds the collision displacement and then repels off the protein shells, so this
@@ -8588,7 +8598,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     /* Species register themselves here: where their molecules start in the texture, and the arrays that
        hold their analytic start point and velocity. */
     const gSpecies = [
-      { c: wc,          v: wv,          base: MOLBASE.w,   n: NW },
+      { c: wc,          v: wv,          base: MOLBASE.w,   n: NW, side: 2 },   // water keeps the side of the cap it started on
       { c: FREE_P.c,    v: FREE_P.v,    base: MOLBASE.p,   n: FREE_P.n },
       { c: FREE_CO2.c,  v: FREE_CO2.v,  base: MOLBASE.co2, n: FREE_CO2.n },
       { c: FREE_O2.c,   v: FREE_O2.v,   base: MOLBASE.o2,  n: FREE_O2.n }];
@@ -8597,6 +8607,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     /* STROMAL species (owner 14.9.2026): NADP+, ATP, ADP, Pi and CO2 never go under the thylakoid cap - the shader folds their paths back above it (sideOnly), the CPU mirror below does the same */
     { const co2sp = gSpecies.find(q => q.base === MOLBASE.co2); if(co2sp){ co2sp.side = 1; co2sp.meshes = FREE_CO2.meshes; }
       for(const F of [FREE_NADP, FREE_ATP, FREE_ADP, FREE_PI, FREE_CO2]) if(F) F.side = 1;   // the placers read the species object
+      for(const nm of ['wO','wH','wOF','wHF']){ const m = scene.getMeshByName(nm); if(!m || !m.material) continue; const mat = m.material; if(mat.subMaterials){ for(const sm of mat.subMaterials) if(sm) sm.setFloat('sideOnly', 2); } else mat.setFloat('sideOnly', 2); }
       for(const sp of gSpecies){ if(!sp.side || !sp.meshes) continue; for(const m of sp.meshes){ const mat = m.material; if(!mat) continue; if(mat.subMaterials){ for(const sm of mat.subMaterials) if(sm) sm.setFloat('sideOnly', 1); } else mat.setFloat('sideOnly', 1); } } }
     const gDVel = new Float32Array(MOL_N*3);   // velocity DELTA from collisions (added to the analytic one)
     /* The light reactions' handle on the analytic molecules: a molecule is moved by writing target minus analytic point into its
@@ -8605,7 +8616,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gValoFree = { hold: gMolHold, disp: gMolDisp, base: MOLBASE, count: key => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); return sp ? sp.n : 0; },
       pos: (key, i, out) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); const T = gWaveT, c = sp.c, v = sp.v;
         out[0] = bnc(c[i*3] + v[i*3]*T, bLo.x, bHi.x); out[1] = bncY(c[i*3+1], v[i*3+1], T); out[2] = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z);
-        if(sp.side > 0 && SOLU_CELL && SOLU_CELL.THY){ const surf = memSurfY(out[0], out[2]) + gMemHalfT + 10; if(out[1] < surf) out[1] = Math.min(bHi.y, 2*surf - out[1]); }   // the stromal fold, exactly as the shader
+        out[1] = sideFold(sp.side, c, i, out[0], out[1], out[2]);   // the side fold, exactly as the shader
         return out; },
       shown: (key, i, out) => { gValoFree.pos(key, i, out); const o = (MOLBASE[key]+i)*4; out[0] += gMolDisp[o]; out[1] += gMolDisp[o+1]; out[2] += gMolDisp[o+2]; return out; },
       nearest: (key, x, y, z, side, skip) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return -1; const t=[0,0,0]; let b=-1, bd=Infinity;
@@ -8793,7 +8804,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
               const px = bnc(c[i*3]   + v[i*3]  *T, bLo.x, bHi.x);
               const dx = px - cp.x; if(dx*dx > R2) continue;
               const pz = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z);
-              const py = sideFold(sp.side, px, bncY(c[i*3+1], v[i*3+1], T), pz);
+              const py = sideFold(sp.side, c, i, px, bncY(c[i*3+1], v[i*3+1], T), pz);
               const dy = py - cp.y; if(dx*dx + dy*dy > R2) continue;
               const dz = pz - cp.z; if(dx*dx + dy*dy + dz*dz > R2) continue;
               if(gCellDrop && gCellDrop(px,py,pz)) continue;
@@ -8807,7 +8818,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const sp = gSpecies[spk[k]], i = mi_[k], id = idx[k], c = sp.c, v = sp.v;
           const px = bnc(c[i*3]   + v[i*3]  *T, bLo.x, bHi.x);
           const pz = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z);
-          const py = sideFold(sp.side, px, bncY(c[i*3+1], v[i*3+1], T), pz);
+          const py = sideFold(sp.side, c, i, px, bncY(c[i*3+1], v[i*3+1], T), pz);
           ax_[k] = px; ay_[k] = py; az_[k] = pz;
           bx_[k] = v[i*3]; by_[k] = v[i*3+1]; bz_[k] = v[i*3+2];
           sx[k] = px + gMolDisp[id*4];               // analytic path plus whatever deviation it carries
@@ -8937,7 +8948,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const d2=px*px+py*py+pz*pz-tca*tca; if(d2>r*r) return;
         const t=tca-Math.sqrt(r*r-d2); if(t>0 && t<bestT){ bestT=t; best={ax,ay,az,e}; src=s; } };
       const centre = (c,v,i,base) => {
-        _p[0]=bnc(c[i*3]  +v[i*3]  *T, bLo.x, bHi.x); _p[2]=bnc(c[i*3+2]+v[i*3+2]*T, bLo.z, bHi.z); _p[1]=sideFold(sideOfC(c), _p[0], bncY(c[i*3+1], v[i*3+1], T), _p[2]);
+        _p[0]=bnc(c[i*3]  +v[i*3]  *T, bLo.x, bHi.x); _p[2]=bnc(c[i*3+2]+v[i*3+2]*T, bLo.z, bHi.z); _p[1]=sideFold(sideOfC(c), c, i, _p[0], bncY(c[i*3+1], v[i*3+1], T), _p[2]);
         if(gCellDrop && gCellDrop(_p[0],_p[1],_p[2])){ _p[0]=_p[1]=_p[2]=1e9; return _p; }   // cell mode: not drawn, so never hit
         const md=(base+i)*4; _p[0]+=gMolDisp[md]; _p[1]+=gMolDisp[md+1]; _p[2]+=gMolDisp[md+2];
         repelShells(_p);
@@ -8945,7 +8956,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         return _p; };
       const near = (c,v,i) => { const px=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x)-cp.x; if(px*px>R2) return false;
         const pz=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z)-cp.z;
-        const py=sideFold(sideOfC(c), px+cp.x, bncY(c[i*3+1], v[i*3+1], T), pz+cp.z)-cp.y; if(px*px+py*py>R2) return false;
+        const py=sideFold(sideOfC(c), c, i, px+cp.x, bncY(c[i*3+1], v[i*3+1], T), pz+cp.z)-cp.y; if(px*px+py*py>R2) return false;
         if(px*px+py*py+pz*pz>R2) return false;
         return !(gCellDrop && gCellDrop(px+cp.x, py+cp.y, pz+cp.z)); };
       const hRad = info(codeH).vr*FILL_SCALE, oRad = info(codeO).vr*FILL_SCALE, cRad = info(codeC).vr*FILL_SCALE;
@@ -9205,7 +9216,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const px=bnc(F.c[i*3]  +F.v[i*3]  *T, bLo.x, bHi.x);
           const dx=px-cp.x; if(dx*dx>R2) continue;
           const pz=bnc(F.c[i*3+2]+F.v[i*3+2]*T, bLo.z, bHi.z);
-          const py=sideFold(F.side, px, bncY(F.c[i*3+1], F.v[i*3+1], T), pz);
+          const py=sideFold(F.side, F.c, i, px, bncY(F.c[i*3+1], F.v[i*3+1], T), pz);
           const dy=py-cp.y; if(dx*dx+dy*dy>R2) continue;
           const dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue;
           if(gCellDrop && gCellDrop(px,py,pz)) continue;

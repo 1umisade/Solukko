@@ -455,7 +455,8 @@ uniform float cellClipAll;
 uniform vec4 orgA[32];
 uniform vec4 orgB[32];
 uniform float nOrg;
-uniform vec4 thyA;       // the thylakoid cap: centre, radius - no molecule inside its bilayer (inside the host envelope only)
+uniform vec4 thyA;
+float capY(vec2 xz){ vec2 dq = xz - thyA.xz; float rr = thyA.w*thyA.w - dot(dq, dq); return thyA.y + (rr > 0.0 ? sqrt(rr) : 0.0); }   // the thylakoid cap's surface height under a point       // the thylakoid cap: centre, radius - no molecule inside its bilayer (inside the host envelope only)
 uniform vec4 thyB;       // the host's inner envelope: centre, base radius
 uniform vec3 thyInvS;
 uniform float cellFade;  // a copy fades out over the last 70 units before this distance from the camera (the box edge is never seen)
@@ -568,8 +569,9 @@ void main(void){
                    bnc(yO + wVel.y*uT, yLo, yHi),
                    bnc(wOrig.z + wVel.z*uT, boxLo.z, boxHi.z));
 #ifdef CELLCLIP
-  if(sideOnly > 0.5 && thyA.w > 0.0){ vec2 dq = wCen.xz - thyA.xz; float rr = thyA.w*thyA.w - dot(dq, dq); float surf = thyA.y + (rr > 0.0 ? sqrt(rr) : 0.0) + sideClear;
-    if(wCen.y < surf) wCen.y = min(yHi, 2.0*surf - wCen.y); }   // stroma only: mirrored about the cap's surface (a fold, so the path stays continuous)
+  if(sideOnly > 0.5 && thyA.w > 0.0){ float sgn = sideOnly > 1.5 ? (wOrig.y < capY(wOrig.xz) ? -1.0 : 1.0) : 1.0;   // 1 = stroma only, 2 = the side the molecule STARTED on (water, owner 14.9.2026)
+    float surf = capY(wCen.xz) + sgn*sideClear;
+    if(sgn > 0.0){ if(wCen.y < surf) wCen.y = min(yHi, 2.0*surf - wCen.y); } else { if(wCen.y > surf) wCen.y = max(yLo, 2.0*surf - wCen.y); } }   // mirrored about the cap's surface (a fold, so the path stays continuous)
 #endif
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
