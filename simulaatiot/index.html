@@ -830,6 +830,9 @@ varying vec2 vUV;
 varying vec3 vCenterV;
 varying vec3 vColor;
 varying vec3 vWCen;      // instance world centre → identify the selected atom's nucleons
+varying float vIsoKeep;  // ISOLATE a cofactor: 1 = one of the isolated group's atoms (or no isolation), 0 = discard
+uniform vec3 isoAt[96];  // the isolated cofactor group's atom centres (world)
+uniform float isoN;      // how many of them (0 = no cofactor isolation)
 varying vec3 vHb;        // the boil-hash point: the atom centre for a static atom, a FIXED key for a moving one (the fragment lump phase reads it)
 varying float vFlag;     // instance alpha → 1 for protons, 0 for neutrons
 varying float vRad;      // per-instance radius (= uniform radius unless IMPRAD scales it)
@@ -1129,6 +1132,8 @@ void main(void){
   base = (modelXform[int(modelId + 0.5)] * vec4(base, 1.0)).xyz;
 #endif
   vWCen = base;
+  vIsoKeep = 1.0;
+  if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(base, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
 #ifdef MACROMOVE
   wc = (macroXform * vec4(wc - macroCenter, 1.0)).xyz;
 #endif
@@ -1192,7 +1197,7 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - an atom on its positive side is not drawn (0,0,0,-1 = off)
-uniform vec4 isoSph;       // ISOLATE a cofactor (double-tap F on a selected cofactor): only atoms inside this world sphere (xyz centre, w radius, 0 = off) are drawn
+varying float vIsoKeep;    // ISOLATE a cofactor: 0 = not one of the group's atoms
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform mat4 projection;
 uniform float uT;
@@ -1328,7 +1333,7 @@ varying vec3 vWB2;
 uniform float boil;      // line-boil amount (0 = off) → warps the silhouette, object-locked
 void main(void){
   if(dot(cutPlane.xyz, vWCen) + cutPlane.w > 0.0) discard;      // POIKKILEIKKAUS: the removed half of the cell
-  if(isoSph.w > 0.0 && distance(vWCen, isoSph.xyz) > isoSph.w) discard;   // ISOLATE a cofactor: the protein around it goes too
+  if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: the protein around it goes too
 #ifdef MODELMOVE
   if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
@@ -1809,6 +1814,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying vec3 vBcol;
 varying float vCang;
 #ifdef MEMFADE
@@ -1936,6 +1944,8 @@ void main(void){
   vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
+  vIsoKeep = 1.0;
+  if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
   vBcol = bcol;   // bonding lobes ALWAYS keep their element colour
   float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled — per-model pastel applies to the vdW spheres only
   vOid = oid;
@@ -1951,7 +1961,6 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform vec4 isoSphV;      // ISOLATE a cofactor: only fragments inside this view-space sphere (xyz centre, w radius, 0 = off) are drawn
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform float opacity;
@@ -1981,6 +1990,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying vec3 vBcol;
 uniform float selModel;   // index of the SELECTED complex (-1 = none)
 uniform vec3 selCol;      // sage rim colour
@@ -2073,7 +2085,7 @@ void electrons(inout vec3 c, float ne, float bri){
 }
 void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
-  if(isoSphV.w > 0.0 && distance(vViewPos, isoSphV.xyz) > isoSphV.w) discard;   // ISOLATE a cofactor: only its own orbitals
+  if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
   if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
@@ -2210,6 +2222,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
@@ -2323,6 +2338,8 @@ void main(void){
   vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
+  vIsoKeep = 1.0;
+  if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
   float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled
   vOid = oid;
   vec3 ocv = (view * vec4(ocenW, 1.0)).xyz; vCang = (ocv.z > 0.0) ? length(ocv.xy)/ocv.z : 1e9;   // ⊥ distance from the view axis (reveal tube)
@@ -2337,7 +2354,6 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform vec4 isoSphV;      // ISOLATE a cofactor: only fragments inside this view-space sphere (xyz centre, w radius, 0 = off) are drawn
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform vec3 fogColor;
@@ -2366,6 +2382,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
@@ -2463,7 +2482,7 @@ void electrons(inout vec3 c, float ne, float bri){
 }
 void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
-  if(isoSphV.w > 0.0 && distance(vViewPos, isoSphV.xyz) > isoSphV.w) discard;   // ISOLATE a cofactor: only its own orbitals
+  if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
   if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
@@ -3733,7 +3752,7 @@ async function run(){
      alone, so a uniform first named after the first compile of that key never binds on ANY material sharing it (the cell shells'
      cutPlane). So the shared uniforms are put on the material right before it compiles: its readiness check is wrapped. */
   const shareUniforms = m => { if(m.__shared) return; m.__shared = true; m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', -1);
-    m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); m.setVector4('isoSph', XSEC_OFF); m.setVector4('isoSphV', XSEC_OFF); gShaderMats.push(m); };
+    m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); m.setArray3('isoAt', gIsoAt); m.setFloat('isoN', 0); gShaderMats.push(m); };
   for(const fn of ['isReady', 'isReadyForSubMesh']){ const orig = BABYLON.ShaderMaterial.prototype[fn]; if(!orig) continue;
     BABYLON.ShaderMaterial.prototype[fn] = function(){ shareUniforms(this); return orig.apply(this, arguments); }; }
   scene.skipPointerMovePicking = true;   // perf: we never auto-pick on pointer-move (all picking is done manually in our own handlers)
@@ -4188,7 +4207,7 @@ void main(void){
      drag and its inertia have ended, put back at the old distance along the NEW view direction, so the radius
      that the zoom, the shading plane and the readouts use is only 20 for the duration of the turn. The shading
      plane keeps the old distance even then (gFocalD). The thylakoid mode keeps its orbit. */
-  let gIsoModel = -1, gIsoHidden = [], gIsoTheme = null; const gIsoSph = new BABYLON.Vector4(0, 0, 0, 0), gIsoSphV = new BABYLON.Vector4(0, 0, 0, 0), _isoC = new BABYLON.Vector3(), _isoV = new BABYLON.Vector3();   // (the sphere: an isolated COFACTOR alone, its protein gone - owner 14.9.2026)   // ISOLATE (owner 13.9.2026: double-tap F): the one model still drawn, the meshes hidden for it, the theme to restore
+  let gIsoModel = -1, gIsoHidden = [], gIsoTheme = null, gIsoN = 0; const gIsoAt = new Array(96*3).fill(0);   // (an isolated COFACTOR alone, its protein gone: the group's atom centres, the shaders keep only atoms on them - owner 14.9.2026)   // ISOLATE (owner 13.9.2026: double-tap F): the one model still drawn, the meshes hidden for it, the theme to restore
   const LOOK_R = 20; let gLookPivot = null, gFHold = false, gFHoldR = 0;   // gFHold: F is held - the pivot sits on the selection and the look-around stays out of the way, gFHoldR = the selection's radius (the zoom stops there)
   const gFocalD = () => gLookPivot ? gLookPivot.r : cam.radius;
   /* THE DEPTH CUE (owner, 2026-09-09: 'everything needs a depth cue'). On the sheet the darkening is measured from the
@@ -9388,8 +9407,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gWaveT += Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // advance the thermal-shake clock
     { const dtR = Math.min(engine.getDeltaTime(), 50) * 0.001; if(!gPaused){ gBoilT += dtR * gBoilSpeed; gElecT += dtR * gElecSpeed; }   // own clocks (space still pauses them)
       const isoR = pieceRange(gIsoModel), selR = pieceRange(gSelModel), cutW = gXsec ? gXsecPlane : XSEC_OFF, cutV = gXsec ? xsecViewPlane() : XSEC_OFF;
-      if(gIsoSph.w > 0){ BABYLON.Vector3.TransformCoordinatesToRef(_isoC.set(gIsoSph.x, gIsoSph.y, gIsoSph.z), scene.getViewMatrix(), _isoV); gIsoSphV.set(_isoV.x, _isoV.y, _isoV.z, gIsoSph.w); } else gIsoSphV.w = 0;   // the isolated cofactor's sphere in view space (orbitals, bonds)
-      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT); m.setFloat('isoModel', gIsoModel); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setVector4('isoSph', gIsoSph); m.setVector4('isoSphV', gIsoSphV); } }
+      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT); m.setFloat('isoModel', gIsoModel); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
     const u = cam.getDirection(BABYLON.Axis.Y);   // view up
     const r = cam.getDirection(BABYLON.Axis.X);   // view right
@@ -10336,7 +10354,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     let pqA = null, pqB = null, pcA = null, pcB = null;
     if(psiiMi >= 0 && b6fMi >= 0){
       const qs = groupsOf(psiiMi, 3); if(qs.length){ const c = mInfo[psiiMi]; qs.sort((a,b) => Math.hypot(b.cx-c.cx, b.cz-c.cz) - Math.hypot(a.cx-c.cx, a.cz-c.cz)); pqA = grpC(qs[0]); }
-      const qb = groupsOf(b6fMi, 3); if(qb.length){ qb.sort((a,b) => a.cy - b.cy); pqB = grpC(qb[0]); } }
+      const qb = groupsOf(b6fMi, 3); if(qb.length){ qb.sort((a,b) => a.cy - b.cy); pqB = grpC(qb[0]); } else { const c = mInfo[b6fMi]; pqB = [c.cx, c.cy, c.cz]; } }   // (b6f has no bound quinones since 14.9.2026 - dropCofTypes - so its centre stands in; the live pockets come from the level, this is only the fallback dock)
     if(b6fMi >= 0 && psiMi >= 0){
       const hs = groupsOf(b6fMi, 4); if(hs.length){ hs.sort((a,b) => a.cy - b.cy); pcA = grpC(hs[0]); }
       const c = mInfo[psiMi]; pcB = [c.cx, c.y0, c.cz]; }
@@ -10380,7 +10398,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const V = gValoShuttle, pin = V ? V.pinned(sh) : null, T = (!pin && V) ? V.target(sh) : null;
         if(pin){ sh.cur[0]=pin[0]; sh.cur[1]=pin[1]; sh.cur[2]=pin[2]; sh.phase = 'dock'; }
         else { sh.phase = 'to'; const haveT = !!T; if(haveT){ _tw[0]=T[0]; _tw[1]=T[1]; _tw[2]=T[2]; }
-          const step = sh.speed*dt;
+          const step = (sh.pq && !T ? 40 : sh.speed)*dt;   // a quinone with nowhere to go idles at the old pace: at 200 the wander's z kicks outran the plane easing and it drifted 90 units off the plane (14.9.2026)
           let dx = haveT ? _tw[0]-sh.cur[0] : 0, dy = haveT ? _tw[1]-sh.cur[1] : 0, dz = haveT ? _tw[2]-sh.cur[2] : 0, d = Math.hypot(dx,dy,dz) || 1e-3; const dSite = haveT ? d : Infinity;
           {
             /* A wandering approach, not a bee-line: the heading is kicked about at random every frame and
@@ -10388,7 +10406,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
                way to the pocket. A quinone keeps to the membrane plane (its heading has no vertical part
                and its height eases onto the pocket's), a plastocyanin keeps below the lipid layer. Both
                bounce off the box and are pushed out of every complex except the one they head for. */
-            const pull = haveT ? 3.0 + 120/Math.max(d, 15) : 0, wob = 1.6, rs = Math.sqrt(dt);
+            const pull = haveT ? (sh.pq ? 9.0 + 360/Math.max(d, 15) : 3.0 + 120/Math.max(d, 15)) : 0, wob = sh.pq ? 0.8 : 1.6, rs = Math.sqrt(dt);   // a quinone goes for its pocket (owner 14.9.2026: 'why pqb dont move, make them fast'): 5x the speed alone only jittered - the heading is pulled 3x harder and kicked half as much
             let hx = sh.h[0] + (haveT ? (dx/d)*pull*dt : 0) + (Math.random()-0.5)*wob*rs, hy = sh.h[1] + (haveT ? (dy/d)*pull*dt : 0) + (Math.random()-0.5)*wob*rs, hz = sh.h[2] + (haveT ? (dz/d)*pull*dt : 0) + (Math.random()-0.5)*wob*rs;
             if(sh.pq) hy = 0;
             const hl = Math.hypot(hx,hy,hz)||1; hx/=hl; hy/=hl; hz/=hl;
@@ -13010,11 +13028,12 @@ void main(void){
       if(selAtom && selAtom.center) return modelOf(selAtom.center.x, selAtom.center.y, selAtom.center.z);
       if(etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel]; return modelOf(g.cx, g.cy, g.cz); } return -1; };
     const ISO_SHADERS = new Set(['hull', 'slab', 'cellshell', 'beam', 'bigelec', 'ecorona']);
-    const isoOff = () => { if(gIsoModel < 0) return; gIsoModel = -1; gIsoSph.w = 0; for(const m of gIsoHidden) m.isVisible = true; gIsoHidden = []; if(gIsoTheme){ scene.clearColor = gIsoTheme; gIsoTheme = null; } };
+    const isoOff = () => { if(gIsoModel < 0) return; gIsoModel = -1; gIsoN = 0; for(const m of gIsoHidden) m.isVisible = true; gIsoHidden = []; if(gIsoTheme){ scene.clearColor = gIsoTheme; gIsoTheme = null; } };
     const isoOn = mi => { if(mi < 0) return; if(gIsoModel >= 0) isoOff(); gIsoModel = mi; gIsoTheme = scene.clearColor; scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
-      gIsoSph.w = 0;   // a selected COFACTOR inside a complex (no complex selected): only the atoms within the group's sphere are drawn, the protein around it goes (owner 14.9.2026: 'double F doesnt hide the protein if the selected cofactor is part of the protein')
-      if(!gSel.size && !(selAtom && selAtom.center) && etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel], W = new BABYLON.Matrix(); BABYLON.Matrix.FromArrayToRef(gModelXform, mi*16, W);
-        const c = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(g.cx, g.cy, g.cz), W); gIsoSph.set(c.x, c.y, c.z, g.r + 1.5); }
+      gIsoN = 0;   // a selected COFACTOR inside a complex (no complex selected): only the group's own atoms are drawn, the protein around it goes (owner 14.9.2026: 'double F doesnt hide the protein if the selected cofactor is part of the protein')
+      if(!gSel.size && !(selAtom && selAtom.center) && etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel], W = new BABYLON.Matrix(), v = new BABYLON.Vector3(); BABYLON.Matrix.FromArrayToRef(gModelXform, mi*16, W);
+        const n = Math.min(96, g.atoms.length); for(let k=0;k<n;k++){ const a = g.atoms[k]; BABYLON.Vector3.TransformCoordinatesToRef(v.set(etcM[a*16+12], etcM[a*16+13], etcM[a*16+14]), W, v); gIsoAt[k*3] = v.x; gIsoAt[k*3+1] = v.y; gIsoAt[k*3+2] = v.z; }
+        gIsoN = n; for(const m of gShaderMats) m.setArray3('isoAt', gIsoAt); }
       for(const m of scene.meshes){ if(m === bgQuad || !m.isVisible) continue; let mat = m.material; if(mat && mat.subMaterials) mat = mat.subMaterials[0]; if(!mat) continue;
         const shader = mat instanceof BABYLON.ShaderMaterial ? String(mat.shaderPath) : null;
         if(mat instanceof BABYLON.StandardMaterial || m instanceof BABYLON.LinesMesh || (shader && ISO_SHADERS.has(shader))){ m.isVisible = false; gIsoHidden.push(m); } } };

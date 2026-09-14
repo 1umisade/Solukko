@@ -413,6 +413,9 @@ varying vec2 vUV;
 varying vec3 vCenterV;
 varying vec3 vColor;
 varying vec3 vWCen;      // instance world centre → identify the selected atom's nucleons
+varying float vIsoKeep;  // ISOLATE a cofactor: 1 = one of the isolated group's atoms (or no isolation), 0 = discard
+uniform vec3 isoAt[96];  // the isolated cofactor group's atom centres (world)
+uniform float isoN;      // how many of them (0 = no cofactor isolation)
 varying vec3 vHb;        // the boil-hash point: the atom centre for a static atom, a FIXED key for a moving one (the fragment lump phase reads it)
 varying float vFlag;     // instance alpha → 1 for protons, 0 for neutrons
 varying float vRad;      // per-instance radius (= uniform radius unless IMPRAD scales it)
@@ -712,6 +715,8 @@ void main(void){
   base = (modelXform[int(modelId + 0.5)] * vec4(base, 1.0)).xyz;
 #endif
   vWCen = base;
+  vIsoKeep = 1.0;
+  if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(base, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
 #ifdef MACROMOVE
   wc = (macroXform * vec4(wc - macroCenter, 1.0)).xyz;
 #endif
@@ -775,7 +780,7 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - an atom on its positive side is not drawn (0,0,0,-1 = off)
-uniform vec4 isoSph;       // ISOLATE a cofactor (double-tap F on a selected cofactor): only atoms inside this world sphere (xyz centre, w radius, 0 = off) are drawn
+varying float vIsoKeep;    // ISOLATE a cofactor: 0 = not one of the group's atoms
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform mat4 projection;
 uniform float uT;
@@ -911,7 +916,7 @@ varying vec3 vWB2;
 uniform float boil;      // line-boil amount (0 = off) → warps the silhouette, object-locked
 void main(void){
   if(dot(cutPlane.xyz, vWCen) + cutPlane.w > 0.0) discard;      // POIKKILEIKKAUS: the removed half of the cell
-  if(isoSph.w > 0.0 && distance(vWCen, isoSph.xyz) > isoSph.w) discard;   // ISOLATE a cofactor: the protein around it goes too
+  if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: the protein around it goes too
 #ifdef MODELMOVE
   if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
@@ -1392,6 +1397,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying vec3 vBcol;
 varying float vCang;
 #ifdef MEMFADE
@@ -1519,6 +1527,8 @@ void main(void){
   vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
+  vIsoKeep = 1.0;
+  if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
   vBcol = bcol;   // bonding lobes ALWAYS keep their element colour
   float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled — per-model pastel applies to the vdW spheres only
   vOid = oid;
@@ -1534,7 +1544,6 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform vec4 isoSphV;      // ISOLATE a cofactor: only fragments inside this view-space sphere (xyz centre, w radius, 0 = off) are drawn
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform float opacity;
@@ -1564,6 +1573,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying vec3 vBcol;
 uniform float selModel;   // index of the SELECTED complex (-1 = none)
 uniform vec3 selCol;      // sage rim colour
@@ -1656,7 +1668,7 @@ void electrons(inout vec3 c, float ne, float bri){
 }
 void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
-  if(isoSphV.w > 0.0 && distance(vViewPos, isoSphV.xyz) > isoSphV.w) discard;   // ISOLATE a cofactor: only its own orbitals
+  if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
   if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
@@ -1793,6 +1805,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
@@ -1906,6 +1921,8 @@ void main(void){
   vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
+  vIsoKeep = 1.0;
+  if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
   float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled
   vOid = oid;
   vec3 ocv = (view * vec4(ocenW, 1.0)).xyz; vCang = (ocv.z > 0.0) ? length(ocv.xy)/ocv.z : 1e9;   // ⊥ distance from the view axis (reveal tube)
@@ -1920,7 +1937,6 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform vec4 isoSphV;      // ISOLATE a cofactor: only fragments inside this view-space sphere (xyz centre, w radius, 0 = off) are drawn
 uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform vec3 fogColor;
@@ -1949,6 +1965,9 @@ varying vec3 vAx0;
 varying vec3 vAx1;
 varying vec3 vAx2;
 varying float vSel;
+varying float vIsoKeep;
+uniform vec3 isoAt[96];
+uniform float isoN;
 varying float vOid;
 varying float vCang;
 #ifdef MEMFADE
@@ -2046,7 +2065,7 @@ void electrons(inout vec3 c, float ne, float bri){
 }
 void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
-  if(isoSphV.w > 0.0 && distance(vViewPos, isoSphV.xyz) > isoSphV.w) discard;   // ISOLATE a cofactor: only its own orbitals
+  if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
   if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
