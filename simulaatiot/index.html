@@ -823,7 +823,7 @@ uniform mat4 macroXform; uniform vec3 macroCenter;
 #ifdef MODELMOVE
 attribute float modelId;         // which loaded model this instance belongs to (index into modelOff)
 uniform mat4 modelXform[80];     // per-model transform (rotate around centre + translate) for repositioning
-uniform vec3 modelCol[48];       // per-model pastel colour
+uniform vec3 modelCol[80];       // per-model pastel colour
 uniform float colorMode;         // 1 = colour by model (pastel), 0 = by element
 #endif
 varying vec2 vUV;
@@ -1034,6 +1034,9 @@ void main(void){
     vec3 ax = normalize(vec3(h1, h2, h3) - 0.5 + vec3(0.001, 0.0, 0.0));
     vec3 sk = (vec3(h4, h5, h6) - 0.5) * 0.16;   // rad per world unit, per axis - with speeds of 30-70 units per second that is a few radians per second
     float th = dot(sk, wCen);
+#ifdef CELLCLIP
+    if(placed) th = dot(sk, wCen + mdisp.xyz);   // PLACED (owner 14.9.2026: 'reduce the shaking and rotation of bound particles like ADP and P'): the spin is read off the DRAWN position - still while it sits in its slot (the CPU's spinAt does the same)
+#endif
     float c = cos(th), sn = sin(th); vec3 v = W[3].xyz;
     W[3].xyz = v * c + cross(ax, v) * sn + ax * dot(ax, v) * (1.0 - c); }
   { float lo = length(W[3].xyz); vMacroN = vec4(lo > 0.3 ? W[3].xyz / lo : vec3(0.0), 0.0); }   // a free molecule's macro normal: this atom's offset from the molecule's centre, turned with the spin (the centre atom keeps its sphere normal) - so water, O2, NADP+ are shaded as bodies like the proteins (owner 13.9.2026: 'depth lighting should affect all')
@@ -1261,7 +1264,7 @@ uniform float focusAmt;    // O: 0 = off, 1 = full grayscale of everything OUTSI
 uniform float focusMode;   // 0 = grayscale all, 1 = keep colour near focusCenterV, 2 = keep colour where focusSet[model]=1
 uniform vec3 focusCenterV; // point-selection centre (view space)
 uniform float focusR;      // point-selection radius
-uniform float focusSet[48];// per-model keep-colour flags (mode 2)
+uniform float focusSet[80];// per-model keep-colour flags (mode 2)
 uniform float focusGroup;  // cofactor group to keep coloured (mode 3, ETCHL overlay only)
 uniform float focusDark;   // darken the grayscale (non-selection) environment: 0 = plain grey, 1 = to black
 #ifdef PLIGHT
@@ -1809,7 +1812,7 @@ uniform mat4 macroXform; uniform vec3 macroCenter;
 #endif
 #ifdef MODELMOVE
 attribute float modelId; uniform mat4 modelXform[80];
-uniform vec3 modelCol[48]; uniform float colorMode;
+uniform vec3 modelCol[80]; uniform float colorMode;
 #endif
 varying float vMid;      // this instance's model index (-1 = untagged) -> sage selection rim
 varying vec3 vViewPos;
@@ -2007,7 +2010,7 @@ uniform float focusAmt;   // O: grayscale everything OUTSIDE the selection (its 
 uniform float focusMode;  // 0 = grayscale all, 1 = keep near focusCenterV, 2 = keep where focusSet[model]=1
 uniform vec3 focusCenterV;
 uniform float focusR;
-uniform float focusSet[48];
+uniform float focusSet[80];
 uniform float focusDark;  // darken the grayscale (non-selection) environment
 varying float vMid;       // this instance's model index
 // Electron glow: a small breathing point of light that slowly orbits its camera-facing spot,
@@ -2217,7 +2220,7 @@ uniform mat4 macroXform; uniform vec3 macroCenter;  // whole-macromolecule drag 
 #endif
 #ifdef MODELMOVE
 attribute float modelId; uniform mat4 modelXform[80];
-uniform vec3 modelCol[48]; uniform float colorMode;
+uniform vec3 modelCol[80]; uniform float colorMode;
 #endif
 varying float vMid;      // this instance's model index (-1 = untagged) -> sage selection rim
 varying vec3 vViewPos;
@@ -2404,7 +2407,7 @@ uniform float focusAmt;   // O: grayscale everything OUTSIDE the selection (its 
 uniform float focusMode;  // 0 = grayscale all, 1 = keep near focusCenterV, 2 = keep where focusSet[model]=1
 uniform vec3 focusCenterV;
 uniform float focusR;
-uniform float focusSet[48];
+uniform float focusSet[80];
 uniform float focusDark;  // darken the grayscale (non-selection) environment
 varying float vMid;       // this instance's model index
 // Electron glow: a small breathing point of light that slowly orbits its camera-facing spot,
@@ -3486,7 +3489,8 @@ async function run(){
       for(const key of Object.keys(src)) if(!(key in m)) m[key] = src[key];   // any other per-atom tables (residues, cofactor flags) are shared read-only
       m.cfg = Object.assign({}, src.cfg, cfg); m.cfg._used = true; m.name = cfg.label; m.shuttle = kind; m.shuttleK = k; mols.push(m); };
     const pq = mols.find(m => m.cfg && m.cfg.match === 'plastoquinone'), pc = mols.find(m => m.cfg && m.cfg.match === '1ag6');
-    if(pq) for(let k=0;k<10;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-400 + k*20, y:0, z:-40 + (k%2)*80 }, 'pq', k);
+    if(pq){ for(let k=0;k<10;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-400 + k*20, y:0, z:-40 + (k%2)*80 }, 'pq', k);   // set A (k 0-9): PSII <-> b6f's PSII side
+      for(let k=10;k<20;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-60 + (k-10)*20, y:0, z:-40 + (k%2)*80 }, 'pq', k); }   // set B (k 10-19): NDH-1 <-> b6f's other side (owner 14.9.2026: 'two different sets of PQB')
     if(pc){ pc.shuttle = 'pc'; pc.shuttleK = 0; for(let k=1;k<10;k++) clone(pc, { match:'pc-shuttle-'+k, label:'Plastosyaniini', x:-100 + k*30, y:-190, z:-60 + (k%3)*60 }, 'pc', k); }
     { const fd = mols.find(m => m.cfg && m.cfg.match === '1a70'); if(fd) for(let k=1;k<4;k++) clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + k*70, y:fd.cfg.y, z:fd.cfg.z }, undefined, 0); }   // four ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
     /* Fill the membrane. The complexes sit in one strip along x at z about 0, while the sheet is 1240
@@ -4280,7 +4284,7 @@ void main(void){
   const gDimCenterW = new BABYLON.Vector3();   // point-selection centre, world space
   const gFocusCenterV = new BABYLON.Vector3(); // …the same, transformed to VIEW space each frame (the shaders test against this)
   let gDimRadius = 20;          // point-selection radius (world units)
-  const gFocusSet = new Float32Array(24);      // mode 2: 1 = this model index is in the F selection (the shaders keep its atoms coloured)
+  const gFocusSet = new Float32Array(80);   // (80 = MAX_MODELS: with twenty quinone shuttles the LHC pieces' slots pass 48, 14.9.2026)      // mode 2: 1 = this model index is in the F selection (the shaders keep its atoms coloured)
   let gFocusDark = 0.0;         // O: how much the grayscale (non-selection) environment darkens (0 = just grey, 1 = to black). Dev slider.
   let gFVigStr = 0.68;          // vignette edge darkness (0 = off, 1 = black corners). Dev slider. Always shown.
   let gFVigReach = 40;          // how far the vignette reaches inward from the edges, % of the radius. Dev slider.
@@ -4400,6 +4404,9 @@ void main(void){
     'STN7':'Tylakoidikinaasi, joka aistii elektroninsiirtoketjun tilan ja fosforyloi LHCII-valonkeräyskompleksit. Siirtää niitä fotosysteemien välillä ja tasapainottaa valon jakautumisen (state transitions).',
     'PPH1':'Fosfataasi, joka poistaa LHCII:n fosfaattiryhmät ja palauttaa valonkeräyskompleksit fotosysteemi II:lle. Toimii STN7-kinaasin vastaparina valon säädössä.',
     'Zeaxanthin epoxidase':'Muuntaa zeaksantiinin takaisin violaksantiiniksi hämärässä NADPH:n ja hapen avulla. Palauttaa ksantofyllikierron ja valmistaa lehden tehokkaaseen valonkeräykseen.' };
+  const PROTEIN_FI = { 'Photosystem II':'Fotosysteemi II', 'Cytochrome b6f':'Sytokromi b6f', 'Photosystem I':'Fotosysteemi I', 'NDH-1':'NDH-1', 'ATP synthase':'ATP-syntaasi',
+    'Plastocyanin':'Plastosyaniini', 'Violaxanthin de-epoxidase':'Violaksantiinide-epoksidaasi', 'Ferredoxin':'Ferredoksiini', 'FNR':'FNR', 'RuBisCO':'RuBisCO', 'PGR5':'PGR5', 'PGRL1':'PGRL1',
+    'STN7':'STN7', 'PPH1':'PPH1', 'Zeaxanthin epoxidase':'Zeaksantiiniepoksidaasi', 'Chlorophyll':'Klorofylli', 'Plastoquinone':'Plastokinoni', 'NADPH':'NADPH' };   // the card's names (owner 14.9.2026: 'make the names Finnish in the info cards')
   const PROTEIN_SUBSTRATE = {
     'Photosystem II':['Vesi (H₂O)','Plastokinoni'],
     'Cytochrome b6f':['Plastokinoli (PQH₂)','Plastosyaniini'],
@@ -4438,7 +4445,27 @@ void main(void){
     'Zeaksantiini':{cof:8}, 'Violaksantiini':{cof:8} };
   // ── SAME method as the protein image: a 2D atom scatter (dark rim + z-shaded fill), drawn from the
   //    object's own coordinates. No network / PubChem. ──
-  const drawScatter = (canvas, pts, col) => {
+  /* LIKE THE SIMULATION (owner 14.9.2026: 'make the protein images in the info cards look like the ones in the simulation'): every atom a
+     vdW sphere (its element's radius x FILL_SCALE, as drawn), the model's colour flat as the sim colours a complex, its cofactors in their
+     type colours, back to front, each sphere with its own ink rim drawn just before it - so the ink stays only in the crevices and on the
+     silhouette, which is what the painterly pass does - and a key light from the top left (a highlight dot on the bigger spheres). */
+  const drawAtomsSim = (canvas, pts, col) => {
+    const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height; ctx.clearRect(0,0,W,H);
+    if(!pts || !pts.length) return;
+    let miX=1e9,maX=-1e9,miY=1e9,maY=-1e9,miZ=1e9,maZ=-1e9;
+    for(const p of pts){ const r=p.r||1.2; if(p.x-r<miX)miX=p.x-r; if(p.x+r>maX)maX=p.x+r; if(p.y-r<miY)miY=p.y-r; if(p.y+r>maY)maY=p.y+r; if(p.z<miZ)miZ=p.z; if(p.z>maZ)maZ=p.z; }
+    const pad=4, sc=Math.min((W-2*pad)/Math.max(0.5,maX-miX),(H-2*pad)/Math.max(0.5,maY-miY));
+    const ox=(W-(maX-miX)*sc)/2, oy=(H-(maY-miY)*sc)/2, dz=Math.max(1,maZ-miZ);
+    const sorted=[...pts].sort((a,b)=>a.z-b.z), px=p=>ox+(p.x-miX)*sc, py=p=>H-(oy+(p.y-miY)*sc);
+    const ink='rgba(24,18,10,0.95)', big = 1.4*sc >= 3.0;   // big spheres (a chip): each with its own rim; tiny ones (a whole complex): one silhouette pass, or the ink would swallow the picture
+    if(!big){ ctx.fillStyle=ink; for(const p of sorted){ const R=Math.max(0.9,(p.r||1.2)*sc); ctx.beginPath(); ctx.arc(px(p),py(p),R+1.1,0,6.2832); ctx.fill(); } }
+    for(const p of sorted){ const R=Math.max(0.9,(p.r||1.2)*sc), c=p.c||col, sh=0.72+0.30*((p.z-miZ)/dz), x=px(p), y=py(p);
+      if(big){ ctx.fillStyle=ink; ctx.beginPath(); ctx.arc(x,y,R+Math.max(0.9,R*0.16),0,6.2832); ctx.fill(); }   // its own rim - covered by the spheres in front, left in the crevices
+      ctx.fillStyle='rgb('+Math.round(Math.min(255,c[0]*255*sh))+','+Math.round(Math.min(255,c[1]*255*sh))+','+Math.round(Math.min(255,c[2]*255*sh))+')'; ctx.beginPath(); ctx.arc(x,y,R,0,6.2832); ctx.fill();
+      if(R >= 2.2){ ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.beginPath(); ctx.arc(x-R*0.32,y-R*0.32,R*0.42,0,6.2832); ctx.fill(); } }   // the key light
+  };
+  const drawScatter = (canvas, pts, col) => drawAtomsSim(canvas, pts, col);
+  const drawScatterOld = (canvas, pts, col) => {
     const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height; ctx.clearRect(0,0,W,H);
     if(!pts || !pts.length) return;
     let miX=1e9,maX=-1e9,miY=1e9,maY=-1e9,miZ=1e9,maZ=-1e9;
@@ -4452,25 +4479,35 @@ void main(void){
       ctx.fillStyle='rgb('+Math.round(c[0]*255*sh)+','+Math.round(c[1]*255*sh)+','+Math.round(c[2]*255*sh)+')';
       ctx.beginPath(); ctx.arc(px(p),py(p),r,0,6.2832); ctx.fill(); }
   };
-  const cofPts = t => { if(typeof etcGroups==='undefined') return null; const g=etcGroups.find(g=>g.type===t); if(!g||!g.atoms.length) return null;
+  const cofPts = (t, mi) => { if(typeof etcGroups==='undefined') return null;
+    let g=null; for(const q of etcGroups){ if(q.type!==t || !q.atoms.length) continue; if(mi!=null && mi>=0 && typeof modelOf==='function' && modelOf(q.cx,q.cy,q.cz)!==mi) continue; if(!g || q.n>g.n) g=q; }   // this complex's own, the biggest whole one (owner 14.9.2026: the Fe-S chip showed the first fragment found anywhere)
+    if(!g) g=etcGroups.find(q=>q.type===t && q.atoms.length); if(!g) return null;
     const tc=(typeof ETC_COL!=='undefined' && ETC_COL[t]) || [0.6,0.6,0.6];   // C/H backbone keeps the cofactor identity colour; heteroatoms (Fe/S/Mg/N/O…) get their element colour so a metal cluster reads right
-    return g.atoms.map(i=>{ const sym=EL_LIST[etcEl[i]]; return { x:etcM[i*16+12], y:etcM[i*16+13], z:etcM[i*16+14], c:(sym==='C'||sym==='H')?tc:info(etcEl[i]).c }; }); };
+    return g.atoms.map(i=>{ const sym=EL_LIST[etcEl[i]]; return { x:etcM[i*16+12], y:etcM[i*16+13], z:etcM[i*16+14], r:info(etcEl[i]).vr*FILL_SCALE, c:(sym==='C'||sym==='H')?tc:info(etcEl[i]).c }; }); };
   const molPts = name => { const b=(typeof MOL_BUILD!=='undefined')&&MOL_BUILD[name]; if(!b) return null;
-    return b().map(a=>{ const el=ELEM[a.sym]||ELEM.FB; return { x:a.x, y:a.y, z:a.z, c:el.c }; }); };   // a spawn-molecule template, coloured by element
+    return b().map(a=>{ const el=ELEM[a.sym]||ELEM.FB; return { x:a.x, y:a.y, z:a.z, r:el.vr*FILL_SCALE, c:el.c }; }); };   // a spawn-molecule template, coloured by element
   const modelPts = nm => { let mi=-1; for(let i=0;i<mols.length;i++) if(mInfo[i].name===nm){ mi=i; break; } if(mi<0) return null;
-    const m=mols[mi], st=Math.max(1,Math.floor(m.na/3000)), pts=[]; for(let k=0;k<m.na;k+=st) pts.push({ x:m.x[k], y:m.y[k], z:m.z[k] });
+    const m=mols[mi], st=Math.max(1,Math.floor(m.na/6000)), pts=[]; for(let k=0;k<m.na;k+=st) pts.push({ x:m.x[k], y:m.y[k], z:m.z[k], r:info(m.el[k]).vr*FILL_SCALE });
     return { pts, col:[gModelCol[mi*3],gModelCol[mi*3+1],gModelCol[mi*3+2]] }; };
   // A labelled chip whose 44×44 canvas is drawn by drawFn (else a plain colour swatch).
   const scatterChip = (label, drawFn, swatch) => {
-    const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;width:60px';
+    const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:2px;width:76px';
     const cv=document.createElement('canvas'); cv.width=cv.height=100; cv.style.cssText='width:44px;height:44px;border-radius:6px;border:1px solid var(--brown);background:'+(swatch||'var(--paper2)');
-    const lab=document.createElement('div'); lab.textContent=label; lab.style.cssText='font-size:9px;text-align:center;line-height:1.15';
+    const lab=document.createElement('div'); lab.textContent=label; lab.style.cssText='font-size:9px;text-align:center;line-height:1.15;width:76px;overflow-wrap:break-word';   // (never into the neighbour's label - owner 14.9.2026)
     wrap.appendChild(cv); wrap.appendChild(lab); if(drawFn) drawFn(cv); return wrap; };
   // Gene → a coloured rounded pill; the colour cycles by index so each gene reads distinctly.
   const genePill = (g, i) => { const h=(i*57)%360; return '<span style="display:inline-block;background:hsl('+h+',60%,82%);color:#2a2a2a;border:1.5px solid hsl('+h+',55%,42%);border-radius:999px;padding:1px 9px;margin:2px;font-size:11px;font-weight:bold;font-style:italic">'+g+'</span>'; };
   // A 2D scatter of the model's atoms (projected X-Y, z-shaded in the model colour) → a recognisable
   // image of the protein's shape, drawn straight from its atom coordinates.
   const drawProteinImage = (canvas, mi) => {
+    const m=mols[mi]; if(!m || !m.na) return;
+    const stride=Math.max(1, Math.floor(m.na/24000)), pts=[], col=[gModelCol[mi*3],gModelCol[mi*3+1],gModelCol[mi*3+2]];
+    for(let k=0;k<m.na;k+=stride) pts.push({ x:m.x[k], y:m.y[k], z:m.z[k], r:info(m.el[k]).vr*FILL_SCALE });
+    if(typeof etcGroups!=='undefined' && typeof modelOf==='function'){ const ox=m.ox||0, oy=m.oy||0, oz=m.oz||0;   // its cofactors as the ETC overlay shows them: by type colour, a little enlarged
+      for(const g of etcGroups){ if(!g.atoms.length || modelOf(g.cx,g.cy,g.cz)!==mi) continue; const tc=(typeof ETC_COL!=='undefined' && ETC_COL[g.type]) || [0.6,0.6,0.6];
+        for(const i of g.atoms) pts.push({ x:etcM[i*16+12]-ox, y:etcM[i*16+13]-oy, z:etcM[i*16+14]-oz+0.01, r:info(etcEl[i]).vr*FILL_SCALE*1.15, c:tc }); } }
+    drawAtomsSim(canvas, pts, col); };
+  const drawProteinImageOld = (canvas, mi) => {
     const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height; ctx.clearRect(0,0,W,H);
     const m=mols[mi]; if(!m || !m.na) return;
     let miX=1e9,maX=-1e9,miY=1e9,maY=-1e9,miZ=1e9,maZ=-1e9;
@@ -4493,13 +4530,13 @@ void main(void){
   };
   const showCenterProtein = mi => { const cp=document.getElementById('center-protein'); if(!cp) return; const md=mInfo[mi];
     const img=document.getElementById('center-protein-img'); if(img) drawProteinImage(img, mi);
-    const nm=document.getElementById('center-protein-name'); if(nm) nm.textContent=md.name;
+    const nm=document.getElementById('center-protein-name'); if(nm) nm.textContent=PROTEIN_FI[md.name]||md.name;   // (Finnish on the card, owner 14.9.2026)
     const ds=document.getElementById('center-protein-desc'); if(ds) ds.textContent=PROTEIN_DESC[md.name]||'';
     const rowCss = 'display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:3px';
     const etn = (typeof ETC_NAMES!=='undefined') ? ETC_NAMES : {}, ecol = (typeof ETC_COL!=='undefined') ? ETC_COL : {};
     const cofEl=document.getElementById('center-protein-cof'); if(cofEl){ cofEl.innerHTML=''; const cof=PROTEIN_COF[md.name]||[];
       if(cof.length){ cofEl.innerHTML='<b>Kofaktorit:</b>'; const row=document.createElement('div'); row.style.cssText=rowCss;
-        for(const t of cof){ const pts=cofPts(t), col=ecol[t]||[0.7,0.7,0.7];
+        for(const t of cof){ const pts=cofPts(t, mi), col=ecol[t]||[0.7,0.7,0.7];
           row.appendChild(scatterChip(etn[t]||'Kofaktori', pts?(cv=>drawScatter(cv,pts,col)):null, pts?null:cofColCss(t))); }
         cofEl.appendChild(row); } }
     const su=document.getElementById('center-protein-subs'); if(su){ su.innerHTML=''; const subs=PROTEIN_SUBSTRATE[md.name]||[];
@@ -6226,7 +6263,16 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(etcOverlay){ const ir = new Float32Array(NA); for(let i=0;i<NA;i++) ir[i] = etcTypeOn[etcT[i]] ? etcR[i] : 0.0; etcOverlay.thinInstanceSetBuffer('instR', ir, 1, true); }
       };
       refreshCofDiscs();
-      cofDepthRT.renderList = [disc];
+      /* the bound ADP and phosphate (owner 14.9.2026: 'make the bound ADP and P be revealed like the ETC with the foreground atoms hidden'): a second
+         disc mesh whose few instances stand at the OCCUPIED slots the light reactions publish (rest-frame position + model), one wide tube per molecule */
+      const discX = BABYLON.MeshBuilder.CreatePlane('cofDiscX', {size:2}, scene); discX.material = cofdMat; discX.isPickable = false; discX.alwaysSelectAsActiveMesh = true; discX.layerMask = 0x20000000;
+      const XN = 8, xM = new Float32Array(XN*16), xDr = new Float32Array(XN), xMid = new Float32Array(XN);
+      discX.thinInstanceSetBuffer('matrix', xM, 16, false); discX.thinInstanceSetBuffer('dr', xDr, 1, false); discX.thinInstanceSetBuffer('modelId', xMid, 1, false); discX.thinInstanceCount = 0; discX.setEnabled(false);
+      scene.onBeforeRenderObservable.add(() => { const L = window.gRevealSlots ? window.gRevealSlots() : null; let n = 0;
+        if(L) for(const s of L){ if(n >= XN) break; const m = n*16; xM[m]=1; xM[m+5]=1; xM[m+10]=1; xM[m+15]=1; xM[m+1]=xM[m+2]=xM[m+3]=xM[m+4]=xM[m+6]=xM[m+7]=xM[m+8]=xM[m+9]=xM[m+11]=0; xM[m+12]=s.p[0]; xM[m+13]=s.p[1]; xM[m+14]=s.p[2]; xDr[n] = s.r; xMid[n] = s.mi; n++; }
+        if(n){ discX.thinInstancePartialBufferUpdate('matrix', xM.subarray(0, n*16), 0); discX.thinInstancePartialBufferUpdate('dr', xDr.subarray(0, n), 0); discX.thinInstancePartialBufferUpdate('modelId', xMid.subarray(0, n), 0); }
+        discX.thinInstanceCount = n; discX.setEnabled(n > 0); });
+      cofDepthRT.renderList = [disc, discX];
       scene.customRenderTargets.push(cofDepthRT);
       gCofDisc = disc;
     }
@@ -7720,7 +7766,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           let vis = true; for(let q=0;q<6;q++){ const pl=fp[q]; if(pl.normal.x*e.cx + pl.normal.y*e.cy + pl.normal.z*e.cz + pl.d < -(e.r+14)){ vis=false; break; } }
           if(!vis) continue;
           const rowCut = gMemCut && gCut[2] > 0.5 && gMemRow > 0;   // Puolikas: the kept half is ten rows of CHEAP lipids (the far tier: every atom an opaque sphere - the coarse merged spheres read as 'large spheres', owner 14.9.2026) at the cut, the shell strip beyond (see memRow)
-          const near = !rowCut && d2 < full2, P = e.pos, Rt = e.rot;
+          const near = !rowCut && !gTopDown && d2 < full2, P = e.pos, Rt = e.rot;   // (top-down, both halves showing: the whole membrane in the cheap tier - owner 14.9.2026)
           for(let q=0;q<e.n;q++){ const E = sphTpl[e.tpl[q]]; if(!E) continue; const o=q*3, r9=q*9;
             if(rowCut){ const dz = (P[o+2] - gCut[0]) * (-gCut[1]); if(dz < -1 || dz > gMemRow) continue; }   // (the camera side is cut anyway - only the first rows of the kept side)
             let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(!rowCut && d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
@@ -7728,7 +7774,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             Mx[m]=Rt[r9]; Mx[m+1]=Rt[r9+1]; Mx[m+2]=Rt[r9+2]; Mx[m+3]=0; Mx[m+4]=Rt[r9+3]; Mx[m+5]=Rt[r9+4]; Mx[m+6]=Rt[r9+5]; Mx[m+7]=0;
             Mx[m+8]=Rt[r9+6]; Mx[m+9]=Rt[r9+7]; Mx[m+10]=Rt[r9+8]; Mx[m+11]=0; Mx[m+12]=P[o]; Mx[m+13]=P[o+1]; Mx[m+14]=P[o+2]; Mx[m+15]=1;
             A[k] = P[o+2]; }
-          if(orbOn && !rowCut && d2 <= (oR + e.r)*(oR + e.r)) for(let q=0;q<e.n;q++){ const o=q*3, lx=P[o], ly=P[o+1], lz=P[o+2];   // (no orbitals on the coarse row)
+          if(orbOn && !rowCut && !gTopDown && d2 <= (oR + e.r)*(oR + e.r)) for(let q=0;q<e.n;q++){ const o=q*3, lx=P[o], ly=P[o+1], lz=P[o+2];   // (no orbitals on the coarse row, nor top-down)
             const qx=lx-cp.x, qy=ly-cp.y, qz=lz-cp.z, e2=qx*qx+qy*qy+qz*qz; if(e2 > oR2) continue;
             let v2 = true; for(let k=0;k<6;k++){ const pl=fp[k]; if(pl.normal.x*lx + pl.normal.y*ly + pl.normal.z*lz + pl.d < -LOBE_MARGIN){ v2=false; break; } }
             if(!v2 || nC >= ORB_SCRATCH) continue;
@@ -7755,14 +7801,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
               if(!vis) continue;
               const dEdge = memR + r - Math.sqrt(d2);
               const take = dEdge >= gMemBlend ? e.n : Math.round(e.n * Math.max(0, dEdge)/gMemBlend);
-              const near = d2 < full2, P = e.pos, Rt = e.rot;
+              const near = !gTopDown && d2 < full2, P = e.pos, Rt = e.rot;
               for(let q=0;q<take;q++){ const E = sphTpl[e.tpl[q]]; if(!E) continue; const o=q*3, r9=q*9;
                 let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
                 const m = k*16, tn = M.tint; if(tn){ Tn[k*4]=tn[0]; Tn[k*4+1]=tn[1]; Tn[k*4+2]=tn[2]; Tn[k*4+3]=0.72; } else Tn[k*4+3]=0; Sn[k] = e.shd[q];
                 Mx[m]=Rt[r9]; Mx[m+1]=Rt[r9+1]; Mx[m+2]=Rt[r9+2]; Mx[m+3]=0; Mx[m+4]=Rt[r9+3]; Mx[m+5]=Rt[r9+4]; Mx[m+6]=Rt[r9+5]; Mx[m+7]=0;
                 Mx[m+8]=Rt[r9+6]; Mx[m+9]=Rt[r9+7]; Mx[m+10]=Rt[r9+8]; Mx[m+11]=0; Mx[m+12]=P[o]; Mx[m+13]=P[o+1]; Mx[m+14]=P[o+2]; Mx[m+15]=1;
                 A[k] = P[o+2]; }
-              if(orbOn && d2 <= (oR + r)*(oR + r)) for(let q=0;q<e.n;q++){ const o=q*3, lx=P[o], ly=P[o+1], lz=P[o+2];
+              if(orbOn && !gTopDown && d2 <= (oR + r)*(oR + r)) for(let q=0;q<e.n;q++){ const o=q*3, lx=P[o], ly=P[o+1], lz=P[o+2];
                 const qx=lx-cp.x, qy=ly-cp.y, qz=lz-cp.z, e2=qx*qx+qy*qy+qz*qz; if(e2 > oR2) continue;
                 let v2 = true; for(let k=0;k<6;k++){ const pl=fp[k]; if(pl.normal.x*lx + pl.normal.y*ly + pl.normal.z*lz + pl.d < -LOBE_MARGIN){ v2=false; break; } }
                 if(!v2 || nC >= ORB_SCRATCH) continue;
@@ -7906,7 +7952,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       /* perf (14.9.2026): the walk placed the same lipids again every frame (4.9 ms) - nothing in it changes unless the camera, a model, the
          LoD or the mode did. It runs only when its inputs changed, and while they keep changing (a drag) every other frame at most */
       { const vm = cam.getViewMatrix().m, sig = vm[0].toFixed(4)+vm[1].toFixed(4)+vm[2].toFixed(4)+vm[4].toFixed(4)+vm[5].toFixed(4)+vm[6].toFixed(4)+vm[12].toFixed(1)+vm[13].toFixed(1)+vm[14].toFixed(1)+'|'+xformSig()+'|'+gGfxMode+'|'+gCrisp+'|'+gSlabLod+'|'+gMemBlend+'|'+gOrbBudget.toFixed(0)+'|'+gViewBox+'|'+gPlaneDim+'|'+gIsoModel+'|'+gXsec+'|'+gMembrane+'|'+gMemCut+'|'+(gCut[2] > 0.5)+'|'+gCut[1]
-          +'|'+gMega+'|'+engine.getRenderWidth()+'x'+engine.getRenderHeight()+'|'+(gPsuLo ? gPsuLo.x.toFixed(0)+','+gPsuLo.y.toFixed(0)+','+gPsuHi.x.toFixed(0)+','+gPsuHi.y.toFixed(0)+','+gPsuHi.z.toFixed(0) : '');   // (the megahalpa slider, the viewport - the frustum - and the box were missing from the inputs: a change in them left the walk stale until the camera moved, 14.9.2026)
+          +'|'+gMega+'|'+gTopDown+'|'+engine.getRenderWidth()+'x'+engine.getRenderHeight()+'|'+(gPsuLo ? gPsuLo.x.toFixed(0)+','+gPsuLo.y.toFixed(0)+','+gPsuHi.x.toFixed(0)+','+gPsuHi.y.toFixed(0)+','+gPsuHi.z.toFixed(0) : '');   // (the megahalpa slider, the viewport - the frustum - and the box were missing from the inputs: a change in them left the walk stale until the camera moved, 14.9.2026)
         /* SETTLE (owner 14.9.2026: 'the membrane is not fully rendered each time - when I zoom a little back and forth it renders fully'): while the inputs
            keep changing the walk runs every other frame, so the last moving frame can go unwalked and the frame it did walk used the frustum of
            the frame before. Once the inputs stop changing the walk runs ONE more time, with everything settled. */
@@ -7948,7 +7994,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
            soft band instead of meeting at a line. */
         const dEdge = L.memR + bR - Math.sqrt(d2);                                     // distance left before the block would be culled
         const take = (!gSlabLod || dEdge >= gMemBlend) ? cnt : Math.round(cnt * Math.max(0, dEdge) / gMemBlend);
-        const near = d2 < full2, st = blkStart[b];
+        const near = !gTopDown && d2 < full2, st = blkStart[b];
         for(let q=0;q<take;q++){ const i = blkLip[st+q], o = i*3, E = sphTpl[lipT[i]]; if(!E) continue;
           const lx = lipO[o]+ox, ly = lipO[o+1], lz = lipO[o+2]+oz;
           if(lipInProt(lipT[i], lx, lz)) continue;   // never under a protein's footprint
@@ -7958,7 +8004,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           else    { if(E.nf >= E.cap) continue; const m=E.nf*16, M=E.fM; M[m]=1; M[m+5]=1; M[m+10]=1; M[m+15]=1; M[m+1]=M[m+2]=M[m+4]=M[m+6]=M[m+8]=M[m+9]=0; M[m+12]=lx; M[m+13]=ly; M[m+14]=lz; E.fA[E.nf]=lz; E.fT[E.nf*4+3]=0; E.fS[E.nf]=1; E.nf++; }
         }
         // orbital candidates: every lipid of a block that reaches into the orbital radius (never thinned there - it is inside the full band)
-        if(orbOn && d2 <= (oR+bR)*(oR+bR)) for(let q=0;q<cnt;q++){ const i = blkLip[st+q], o = i*3;
+        if(orbOn && !gTopDown && d2 <= (oR+bR)*(oR+bR)) for(let q=0;q<cnt;q++){ const i = blkLip[st+q], o = i*3;
           const lx = lipO[o]+ox, ly = lipO[o+1], lz = lipO[o+2]+oz;
           const ex = lx-cp.x, ey = ly-cp.y, ez = lz-cp.z, e2 = ex*ex+ey*ey+ez*ez; if(e2 > oR2) continue;
           if(lipInProt(lipT[i], lx, lz)) continue;   // never under a protein's footprint
@@ -8671,7 +8717,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(gPlaneDim && gPsuLo && Math.abs(out[2] - gTasoZ) > 2.0 && inPsu(out[0], out[1], out[2])) return false;   // the plane mode: inside the box only the plane's molecules are drawn
       return true; };
     const anaC = (c,v,i,T,out) => { drawnPos(sideOfC(c), c, v, i, T, out); };
-    const spinAt = (molId, c,v,i,T) => { anaC(c,v,i,T,_a3); spinS(molId, _a3[0],_a3[1],_a3[2], _S9); return _S9; };   // S for molecule i of a species at time T
+    const spinAt = (molId, c,v,i,T) => { anaC(c,v,i,T,_a3); const md = molId*4; if(gMolDisp[md+3] > 0.5){ _a3[0] += gMolDisp[md]; _a3[1] += gMolDisp[md+1]; _a3[2] += gMolDisp[md+2]; } spinS(molId, _a3[0],_a3[1],_a3[2], _S9); return _S9; };   // (placed: off the drawn position, as the shader)   // S for molecule i of a species at time T
     const gatherT = () => gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // the clock the per-frame gathers place at
     const wPick=new Int32Array(WCAP), wPickD=new Float32Array(WCAP), wPos=new Float32Array(WCAP*3);
     const _wp=[0,0,0];
@@ -8883,7 +8929,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const mx = (lo.x+hi.x)/2, my = (lo.y+hi.y)/2, mz = (lo.z+hi.z)/2, t = [0,0,0], cand = [];
       for(let i=0;i<sp.n;i++){ if(gMolHold[sp.base+i]) continue; gValoFree.pos(key, i, t); cand.push([(t[0]-mx)**2 + (t[1]-my)**2 + (t[2]-mz)**2, i]); }
       cand.sort((a, b) => b[0] - a[0]); let made = 0;
-      while(gGone[key] && gGone[key].length && n > 0){ const i = gGone[key].pop(); gMolHold[sp.base+i] = 0; gValoFree.setOff(key, i, 0, 0, 0); cand.unshift([0, i]); }   // the removed ones come back first
+      for(let back = 0; gGone[key] && gGone[key].length && back < n; back++){ const i = gGone[key].pop(); gMolHold[sp.base+i] = 0; gValoFree.setOff(key, i, 0, 0, 0); cand.unshift([0, i]); }   // the removed ones come back first - at most n of them (the loop brought the whole reserve back, 14.9.2026)
       const tx = Math.max(lo.x + 40, Math.min(hi.x - 40, cam.getTarget().x));   // where you are looking, so the new ones are seen
       for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1], x = Math.max(lo.x + 40, Math.min(hi.x - 40, tx + (Math.random()-0.5)*300)), z = gTasoZ, s = memSurfY(x, z) + gMemHalfT + 14;
         const y = Math.min(hi.y - 12, s + Math.random()*Math.min(120, Math.max(20, (hi.y - 12) - s))); gValoFree.home(key, i, x, y, z); made++; }
@@ -8898,6 +8944,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1]; gMolHold[sp.base+i] = 1; gValoFree.setOff(key, i, 0, -30000, 0); (gGone[key] || (gGone[key] = [])).push(i); gone++; }   // hidden under the cell, held (the box has no outside any more - 14.9.2026); the spawn brings it back
       if(gone) gValoFree.upload(); return gone; };
     const gGone = {};
+    window.gHideAllFree = key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); if(!sp || !sp.n) return 0; let gone = 0;   // the whole species into the reserve (owner 14.9.2026: 'spawn no ATP in the beginning, they can only be made by ATP synthase')
+      for(let i=0;i<sp.n;i++){ const was = gMolHold[sp.base+i]; gMolHold[sp.base+i] = 1; gValoFree.setOff(key, i, 0, -30000, 0); if(!was){ (gGone[key] || (gGone[key] = [])).push(i); gone++; } }   // (every one, held already or not: the first fit's rebox re-homes and clears the displacement)
+      gValoFree.upload(); return gone; };
+    window.gHideAllFree('atp');
     window.__freeNearest = (key, qx, qy, qz) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return null;
       const T = gWaveT, o = [0,0,0]; let best = null, bd = Infinity;
       for(let i=0;i<sp.n;i++){ let x, y, z;
@@ -8914,14 +8964,16 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        pick, the light gather) adds that displacement and is right for free. The shader's own shell
        repel skips the ATP synthase shell for them (shellSkip), so the channel is open on the GPU side too. */
     const P_N = FREE_P.n, pPos = new Float32Array(P_N*3), pVel = Float32Array.from(FREE_P.v), pOrg = new Float32Array(P_N*3);
-    const pIn = new Uint8Array(P_N);   // 1 = currently on its way up through the ATP synthase channel
+    const pIn = new Uint8Array(P_N);   // 1 = currently on its way up through the ATP synthase channel (leaving to the stroma), 2 = riding in the c-ring
     const pHold = new Uint8Array(P_N);   // 1 = held by the light reactions (bound at QB / Qi / FNR, or parked out of sight) - not integrated
     for(let i=0;i<P_N;i++){ const o=i*3; pOrg[o]=FREE_P.c[o]; pOrg[o+1]=bncY(FREE_P.c[o+1], 0, 0); pOrg[o+2]=FREE_P.c[o+2]; pPos[o]=pOrg[o]; pPos[o+1]=pOrg[o+1]; pPos[o+2]=pOrg[o+2]; }
     FREE_P.v.fill(0);
     { const z = new Float32Array(P_N*3); for(const nm of ['pH','pN','pG']){ const m=scene.getMeshByName(nm); if(m) m.thinInstanceSetBuffer('wVel', z, 3, true); } }
     const gAtpShell = gHulls.findIndex(h => h.mi === gAtpMid);
     if(gAtpShell >= 0) for(const nm of ['pH','pN','pG']){ const m=scene.getMeshByName(nm); if(m && m.material) glassA(m).setFloat('shellSkip', gAtpShell); }
-    const CH_R = 24, ROTOR_STEP = 2*Math.PI/14;   // channel radius about the rotor axis, and one c-subunit of turn per proton
+    const CH_R = 24, ROTOR_STEP = Math.PI/2, RIDE_R = 11, RING_N = 3;   // channel radius about the rotor axis; a QUARTER turn per proton (owner 14.9.2026: 'three protons inside the rotor at a time - the fourth makes the full rotation and releases one in the stroma'); the riders' radius about the axis; how many ride
+    const gRing = [];   // the protons riding in the c-ring, oldest first (pIn 2)
+    const pRingA = new Float32Array(P_N);   // a rider's angle about the axis, relative to the rotor's own angle
     const _pp = [0,0,0];
     /* Shell lookup grid: testing every proton against every shell was 360000 calls a frame (43 ms). A
        64-unit grid over the box lists the shells overlapping each cell, rebuilt each frame (the loose
@@ -8954,7 +9006,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
          is a slab or a solid mass of atoms, and a proton inside it is hidden. That is most of the 20000
          most of the time, and the bearing math is the expensive part. */
       const cpx = cam.position.x, cpy = cam.position.y, cpz = cam.position.z, nearR2 = (gMega + 60)*(gMega + 60);
+      const ringY = chOn ? memSurfY(axX, axZ) : 0;
       for(let i=0;i<P_N;i++){ const o=i*3; if(pHold[i]) continue;   // held by the light reactions: placed by them, its displacement already written
+        if(pIn[i] === 2){ const ang = pRingA[i] + gRotorTheta;   // a RIDER: it sits in the c-ring and turns with the rotor
+          const x = axX + Math.cos(ang)*RIDE_R, y = ringY, z = axZ + Math.sin(ang)*RIDE_R; pVel[o] = pVel[o+1] = pVel[o+2] = 0; pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z;
+          const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; gMolDisp[md+3]=1; continue; }
         let x=pPos[o]+pVel[o]*dt, y=pPos[o+1]+pVel[o+1]*dt, z=pPos[o+2]+pVel[o+2]*dt;
         if(x<pbLx){ x=pbLx; pVel[o]=Math.abs(pVel[o]); } else if(x>pbHx){ x=pbHx; pVel[o]=-Math.abs(pVel[o]); }
         if(y<pbLy){ y=pbLy; pVel[o+1]=Math.abs(pVel[o+1]); } else if(y>pbHy){ y=pbHy; pVel[o+1]=-Math.abs(pVel[o+1]); }
@@ -8969,10 +9025,15 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           if(pIn[i]){                                              // passing: keep climbing, funnelled onto the axis
             if(pVel[o+1] < 8) pVel[o+1] = 8;
             const k = 1 - Math.min(1, dt*3); x = axX + (x-axX)*k; z = axZ + (z-axZ)*k;
-          } else if(inCh && pVel[o+1] > 0 && pPos[o+1] <= bot && window.gAtpReady){ pIn[i] = 1; }   // came up from the lumen side into the channel - only while ADP and P are bound (owner 14.9.2026: 'dont let protons through before ADP and P are bound'); else it bounces below
+          } else if(inCh && pVel[o+1] > 0 && pPos[o+1] <= bot && window.gAtpReady){   // came up from the lumen side into the channel - only while ADP and P are bound (owner 14.9.2026: 'dont let protons through before ADP and P are bound'); else it bounces below
+            /* into the RING (owner 14.9.2026): each proton that enters turns the rotor a quarter and rides in the c-ring; when the fourth comes in the turn
+               is complete - the oldest rider leaves through the top to the stroma and the head makes its ATP (Kalvosto counts the entries: four per ATP) */
+            pIn[i] = 2; pRingA[i] = Math.atan2(z - axZ, x - axX) - gRotorTheta; gRing.push(i); passes++;
+            if(gRing.length > RING_N){ const old = gRing.shift(), oo = old*3; pIn[old] = 1; pPos[oo] = axX; pPos[oo+1] = ringY; pPos[oo+2] = axZ; pVel[oo] = 0; pVel[oo+1] = 12; pVel[oo+2] = 0; }
+            pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z; const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; gMolDisp[md+3]=1; continue; }
           else if(pPos[o+1] >= top){ y = top; pVel[o+1] = Math.abs(pVel[o+1]); }   // blocked from the stroma side (or outside the channel)
           else { y = bot; pVel[o+1] = -Math.abs(pVel[o+1]); }
-        } else if(pIn[i]){ pIn[i] = 0; if(y >= top) passes++; }   // out on the stroma side: one proton through, one rotor step
+        } else if(pIn[i]){ pIn[i] = 0; }   // out on the stroma side (the turn and the count happened as it entered the ring)
         // protein shells: pushed out and reflected - except the ATP synthase shell inside its channel
         _pp[0]=x; _pp[1]=y; _pp[2]=z; let pushed = false;
         const cdx=x-cpx, cdy=y-cpy, cdz=z-cpz;
@@ -9468,14 +9529,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const T = gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; live.T = T;
         if(--candT <= 0 || candR !== R || BABYLON.Vector3.DistanceSquared(cp, candCam) > (CAND_M/3)*(CAND_M/3)){ candT = CAND_F; candR = R; candCam.copyFrom(cp); candN = 0; const Rg2 = (R + CAND_M)*(R + CAND_M);
           const sx = bHi.x - bLo.x; for(let i=0;i<F.n && candN<cand.length;i++){
-            { let ex = bnc0(F.c[i*3] + F.v[i*3]*T, bLo.x, bHi.x) - cp.x; if(gCellWrap) ex -= Math.round(ex/sx)*sx; if(ex*ex > Rg2) continue; }   // the cheap x reject first (the copy nearest the camera in x) - drawnPos is the expensive part
+            { const md=(F.base+i)*4; let ex = bnc0(F.c[i*3] + F.v[i*3]*T, bLo.x, bHi.x) + (gMolDisp[md+3] > 0.5 ? gMolDisp[md] : 0) - cp.x; if(gCellWrap && gMolDisp[md+3] < 0.5) ex -= Math.round(ex/sx)*sx; if(ex*ex > Rg2) continue; }   // the cheap x reject first (the copy nearest the camera in x) - drawnPos is the expensive part; a PLACED molecule is judged where it is drawn (home + displacement - the O2 made at the OEC sat far from its home and never became a candidate: bare cores in the bubble, owner 14.9.2026: 'some O2 rendered without vdW')
             if(!drawnPos(F.side, F.c, F.v, i, T, _lp, F.base+i)) continue; const dx=_lp[0]-cp.x, dy=_lp[1]-cp.y, dz=_lp[2]-cp.z; if(dx*dx+dy*dy+dz*dz > Rg2) continue; cand[candN++] = i; } }
         let n=0;
         for(let ci=0;ci<candN && n<CAP;ci++){ const i = cand[ci];
           if(!drawnPos(F.side, F.c, F.v, i, T, _lp, F.base+i)) continue;   // orbitals only where the atoms are drawn
-          const px=_lp[0], py=_lp[1], pz=_lp[2]; const dx=px-cp.x, dy=py-cp.y, dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue;
           const md=(F.base+i)*4;   // same mirror, same order: displacement first, then the shells
-          _lp[0]=px+gMolDisp[md]; _lp[1]=py+gMolDisp[md+1]; _lp[2]=pz+gMolDisp[md+2];
+          _lp[0]+=gMolDisp[md]; _lp[1]+=gMolDisp[md+1]; _lp[2]+=gMolDisp[md+2];   // (the distance is judged where the molecule is DRAWN - a placed one sits far from its home, 14.9.2026)
+          { const dx=_lp[0]-cp.x, dy=_lp[1]-cp.y, dz=_lp[2]-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue; }
           repelShells(_lp);
           pick[n]=i; pos[n*3]=_lp[0]; pos[n*3+1]=_lp[1]; pos[n*3+2]=_lp[2]; n++;
         }
@@ -10454,6 +10515,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);
       if(gValoFree && !gLumenLifted){ gLumenLifted = true;
         gValoFree.rebox(gPsuLo, gPsuHi);   // the free box IS the unit box from here on (self-contained, owner 14.9.2026)
+        if(window.gHideAllFree) window.gHideAllFree('atp');   // (the rebox cleared the reserve's displacement - back under the cell: no ATP at the start, owner 14.9.2026)
         const c = gValoFree.orig('w'), n = gValoFree.count('w'); if(c){ const bot = gPsuLo.y + 12, W = Math.min(2500, n); let moved = 0;   // the plane's water into the LUMEN inside the box: under the cap's surface, above the box floor (2500, owner 14.9.2026: '5x more')
           for(let i=0;i<W;i++){ let x = c[i*3]; if(x < gPsuLo.x + 20 || x > gPsuHi.x - 20) x = gPsuLo.x + 20 + ((i*4241) % 1000)/1000*(gPsuHi.x - gPsuLo.x - 40); const top = memSurfY(x, gTasoZ) - gMemHalfT - 16; if(top <= bot) continue;
             gValoFree.home('w', i, x, bot + ((i*7919) % 1000)/1000*(top - bot), gTasoZ); moved++; }
@@ -10535,7 +10597,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const pq = m.shuttle === 'pq'; const A = pq ? pqA : pcA, B = pq ? pqB : pcB, hostA = pq ? psiiMi : b6fMi, hostB = pq ? b6fMi : psiMi;
       if(!A || !B) continue;
       const R = h.maxR; const offA = pq ? [0,0,0] : contact(hostA, A, R), offB = pq ? [0,0,0] : contact(hostB, B, R);
-      gShuttles.push({ mi:h.mi, R, pq, A, B, hostA, hostB, offA, offB, speed: pq ? 200 : 50, phase: (m.shuttleK % 2) ? 'toA' : 'toB', t: (m.shuttleK/10)*0.9, dock: 2.5 + (m.shuttleK % 4)*0.8, cur:[0,0,0], h:[1,0,0] });
+      gShuttles.push({ mi:h.mi, R, pq, k: m.shuttleK, A, B, hostA, hostB, offA, offB, speed: pq ? 200 : 50, phase: (m.shuttleK % 2) ? 'toA' : 'toB', t: ((m.shuttleK % 10)/10)*0.9, dock: 2.5 + (m.shuttleK % 4)*0.8, cur:[0,0,0], h:[1,0,0] });
     }
     for(let mi=0; mi<mols.length; mi++){ const m = mols[mi]; if(!m || !m.cfg || !m.cfg.label) continue; const f = mols.findIndex(x => x && x.cfg && x.cfg.label === m.cfg.label); if(f >= 0 && f < mi){ gModelCol[mi*3]=gModelCol[f*3]; gModelCol[mi*3+1]=gModelCol[f*3+1]; gModelCol[mi*3+2]=gModelCol[f*3+2]; } }   // one colour per LABEL (owner 14.9.2026: 'why is one ferredoxin a different colour' - the clones and the row copies each drew a pastel of their own)
     { const src = mols.find(x => x.cfg && x.cfg.match === 'plastoquinone'); if(src){ const si = mols.indexOf(src); for(const sh of gShuttles) if(sh.pq){ gModelCol[sh.mi*3]=gModelCol[si*3]; gModelCol[sh.mi*3+1]=gModelCol[si*3+1]; gModelCol[sh.mi*3+2]=gModelCol[si*3+2]; } } }
@@ -12322,7 +12384,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // protein-info card — image, name, role, substrates, stacked vertically for the narrow right module
     { const cp = document.createElement('div'); cp.id = 'center-protein';
       cp.style.cssText = 'display:none;flex-direction:column;align-items:center;gap:8px;width:100%;box-sizing:border-box;font-family:"Courier New",monospace;color:var(--ink)';
-      cp.innerHTML = '<canvas id="center-protein-img" width="230" height="170" style="width:100%;max-width:220px;height:auto;flex:0 0 auto"></canvas>'
+      cp.innerHTML = '<canvas id="center-protein-img" width="460" height="340" style="width:100%;max-width:220px;height:auto;flex:0 0 auto"></canvas>'
         + '<div id="center-protein-name" style="font-weight:bold;font-size:15px;text-align:center"></div>'
         + '<div id="center-protein-desc" style="font-size:12.5px;line-height:1.5;text-align:center;width:100%"></div>'
         + '<div id="center-protein-cof" style="font-size:12px;width:100%"></div>'
@@ -13085,7 +13147,7 @@ varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform vec2 elecUV;
 #define LN_MAX 128
-uniform vec4 elecUVs[LN_MAX];   // the lights on screen: xy, z = 0 an electron (blue), 1 a proton (orange), 2 an excited chlorophyll (green), w = the pool's radius as a fraction of the screen height - a WORLD size projected, so it scales with the zoom (owner 13.9.2026)
+uniform vec4 elecUVs[LN_MAX];   // the lights on screen: xy, z = 0 an electron (blue), 1 a proton (orange), 2 an excited chlorophyll (green), 3 an ATP (red), w = the pool's radius as a fraction of the screen height - a WORLD size projected, so it scales with the zoom (owner 13.9.2026)
 uniform float nElecs;
 uniform float lanternOn;
 uniform float aspect;
@@ -13106,23 +13168,23 @@ void main(void){
   /* an EXCITED PIGMENT is a HEAT WAVE, not a pool (owner 14.9.2026: 'the mg excitation glow should look different - a heatwave/ripple'): rings
      running outward from the Mg bend the picture behind them (a refraction-like shimmer, the scene sampled through the ripple) with a warm crest */
   vec2 uvOff = vec2(0.0); float heat = 0.0;
-  for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break; if(elecUVs[i].z < 1.5) continue;
+  for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break; if(elecUVs[i].z < 1.5 || elecUVs[i].z > 2.5) continue;
     vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].w * 3.0, r = length(d); if(r >= R) continue;
     float env = 1.0 - r/R; env *= env; float w = sin(r/R*16.0 - uT*9.0 + float(i)*1.3);
     vec2 dir = d / max(r, 1e-5); float amp = w * env * R * 0.22; uvOff += vec2(dir.x*amp/aspect, dir.y*amp);
     heat = max(heat, env * (0.35 + 0.65*max(0.0, w)) ); }
   vec3 c = texture2D(textureSampler, clamp(vUV + uvOff, vec2(0.0), vec2(1.0))).rgb;
-  float litE = 0.0, litP = 0.0, litG = 0.0;
+  float litE = 0.0, litP = 0.0, litG = 0.0, litA = 0.0;
   { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.05; litE = pool(d, R, 0.0); }   // (the old single electron - off-screen unless something sets it)
   for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
     vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].w;   // the pool's radius, projected from a world size
-    if(elecUVs[i].z > 1.5) continue;   // (a pigment is the heat wave above)
+    if(elecUVs[i].z > 1.5 && elecUVs[i].z < 2.5) continue;   // (a pigment is the heat wave above)
     if(dot(d, d) > R*R*36.0) continue;   // perf (14.9.2026): past six radii the pool is under 0.003 - no atan and five sines for every pixel of the screen per light
     float l = pool(d, R, float(i)*1.7);
-    if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
-  vec3 cE = vec3(0.25, 0.55, 1.00), cP = vec3(1.00, 0.55, 0.12), cG = vec3(0.40, 1.00, 0.45);
-  float lit = max(litE, max(litP, litG));
-  vec3 lc = (cE*litE + cP*litP + cG*litG) / max(litE + litP + litG, 1e-4);   // the light's colour where pools overlap
+    if(elecUVs[i].z > 2.5) litA = max(litA, l); else if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
+  vec3 cE = vec3(0.25, 0.55, 1.00), cP = vec3(1.00, 0.55, 0.12), cG = vec3(0.40, 1.00, 0.45), cA = vec3(1.00, 0.18, 0.12);   // ATP RED (owner 14.9.2026)
+  float lit = max(max(litE, litA), max(litP, litG));
+  vec3 lc = (cE*litE + cP*litP + cG*litG + cA*litA) / max(litE + litP + litG + litA, 1e-4);   // the light's colour where pools overlap
   if(lanternOn > 0.5){
     float dark = (1.0 - lanternDark) + lanternDark*min(1.0, lit*1.5);
     c = c*dark * mix(vec3(1.0), lc * 2.2, min(1.0, lit)) + lc * lit * 0.9;   // STRONG: the surface takes the colour, and the pool blazes over it
@@ -13165,6 +13227,13 @@ void main(void){
         for(const [d2, i] of cand){ if(n >= 128) break; const o=i*3, dist = Math.max(1, Math.sqrt(d2)), R = 7 / (2*dist*Math.tan(cam.fov/2)); if(R < 0.0015) break;   // sorted: the rest are farther still
           const q = BABYLON.Vector3.Project(new BABYLON.Vector3(P.pos[o], P.pos[o+1], P.pos[o+2]), BABYLON.Matrix.Identity(), tm, _lvp); if(q.z < 0.0 || q.z > 1.0) continue;
           _lnUV[n*4] = q.x / w; _lnUV[n*4+1] = 1.0 - q.y / h; _lnUV[n*4+2] = 1; _lnUV[n*4+3] = Math.min(0.12, R); n++; } }
+      /* every ATP glows RED (owner 14.9.2026): the free ATP instances that are out (not hidden in the reserve), nearest first */
+      if(gValoFree && gIsoModel < 0 && n < 128){ const F = gValoFree, na = F.count('atp'), cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, t = [0,0,0], cand = [];
+        for(let i=0;i<na;i++){ F.shown('atp', i, t); if(t[1] < -20000) continue; const dx=t[0]-cx, dy=t[1]-cy, dz=t[2]-cz; cand.push([dx*dx+dy*dy+dz*dz, t[0], t[1], t[2]]); }
+        cand.sort((a, b) => a[0] - b[0]); const tm = scene.getTransformMatrix();
+        for(const c of cand){ if(n >= 128) break; const dist = Math.max(1, Math.sqrt(c[0])), R = 9 / (2*dist*Math.tan(cam.fov/2)); if(R < 0.0015) break;
+          const q = BABYLON.Vector3.Project(new BABYLON.Vector3(c[1], c[2], c[3]), BABYLON.Matrix.Identity(), tm, _lvp); if(q.z < 0.0 || q.z > 1.0) continue;
+          _lnUV[n*4] = q.x / w; _lnUV[n*4+1] = 1.0 - q.y / h; _lnUV[n*4+2] = 3; _lnUV[n*4+3] = Math.min(0.12, R); n++; } }
       eff.setArray4('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark); eff.setFloat('uT', performance.now()*0.001);
       eff.setFloat('lanternOn', gLantern ? 1.0 : 0.0);
       eff.setFloat('aspect', w / h);

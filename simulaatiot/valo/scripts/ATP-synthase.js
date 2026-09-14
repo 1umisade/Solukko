@@ -2,7 +2,7 @@
 (function(){ const V = window.VALO; const white = V.white, dark = V.dark, slot = V.slot;
 V.SCRIPTS['ATP-synthase'] = {
   scene: { BindSites: [{ name: 'ADP', nearby: 400 }, { name: 'phosphate', nearby: 400 }], nearby: 90 },
-  _ready(self){ self.channeled_protons = 3; self.proton_positions = {}; },
+  _ready(self){ self.channeled_protons = 0; self.proton_positions = {}; },   // (3D 14.9.2026: the ring starts empty - the fourth proton IN makes the first ATP; 2D banked three)
   PULLING_special_actions(self, body){ },
   BINDING_special_conditions(self, body, BindSite){
     if(body.is_in_group('proton')){ if(white(slot(self, 'ADP')) && white(slot(self, 'phosphate'))){ } else { return null; } if((self.proton_positions[BindSite.name] || 0.0) === 0.0){ } else { return null; } }

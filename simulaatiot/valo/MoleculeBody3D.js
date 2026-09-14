@@ -228,6 +228,11 @@
       if(!V.is_instance_valid(body)){ this.debug_info('PULLING_conditions', 'body is not valid'); return null; }
       if(!(body instanceof MoleculeBody3D)){ return null; }
       if(body.hard_target != null){ this.debug_info('PULLING_conditions', 'body already has a hard_target', body); return null; }
+      /* 3D (owner 14.9.2026: 'the electron shuffles between the same two carriers - that should never happen'): an electron released toward the next
+         link lost its hard_target when that link bound another electron first (the slot clears every pulled body), and the SAME-PLACE twin of the
+         carrier it came from (PSII's two pheophytins, two tyrosines, b6f's hemes) pulled it straight back. A released electron is pulled only by
+         the link one past the carrier it left, in its lane. */
+      if(body.is_in_group('electron') && body._fromPlace != null && (this.place_in_the_chain !== body._fromPlace + 1 || !V.laneOk(body._fromBody || this, this))){ this.debug_info('PULLING_conditions', 'not the next link of where the electron came from (3D)', body); return null; }
       return this.BINDING_conditions(body); }
     try_PULLING(body){ const r = this.PULLING_conditions(body);
       if(r instanceof MoleculeBody3D){ const BindSite = r;
@@ -320,7 +325,7 @@
           const released_body = V.instantiate(BindSite.molecule_name, { position: BindSite.global_position, from_slot: BindSite });
           if(!released_body) continue;
           released_body.set_collision_layer_value(1, false); released_body.set_collision_mask_value(1, false); released_body.set_collision_layer_value(2, true); released_body.set_collision_mask_value(2, true);
-          released_body.set_meta('exiting', true); released_body.body_that_I_am_bound_to = null; released_body._exitFrom = BindSite;   // (3D: the slot it leaves - see _physics_process, the 'exiting' flag is also cleared by distance)
+          released_body.set_meta('exiting', true); released_body.body_that_I_am_bound_to = null; released_body._exitFrom = BindSite; released_body._fromPlace = this.place_in_the_chain; released_body._fromBody = this;   // (3D: where it came from - it may only go forward, see PULLING_conditions)   // (3D: the slot it leaves - see _physics_process, the 'exiting' flag is also cleared by distance)
           if(released_body.BindSites) for(const item of released_body.BindSites){ const source = BindSite.get_node('BindSites/' + item.name); if(!source) continue;
             item.modulate = source.modulate; if(item.ExcitedSprite && source.ExcitedSprite) item.ExcitedSprite.visible = source.ExcitedSprite.visible;
             if(item.is_in_group('electron')) item.EnergyLevel = source.EnergyLevel;

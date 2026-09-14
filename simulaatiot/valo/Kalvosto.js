@@ -160,7 +160,8 @@
       placeSlot(ndh, 'plastoquinone_B', mi, q, L).place_in_the_chain = 2 + chain.length;
       point(ndh, 'target_2', mi, [c.cx, c.y1 + 60, c.cz]); return ndh; });
     /* ATP synthase, RuBisCO */
-    const atps = atpMis.map(mi => { const c = mInfo[mi]; const a = body('ATP-synthase', mi, [c.cx, c.cy, c.cz], { nearby: 90 }); placeSlot(a, 'ADP', mi, [c.cx - 8, c.y1 - 10, c.cz]); placeSlot(a, 'phosphate', mi, [c.cx + 8, c.y1 - 10, c.cz]); a.passes0 = null; return a; });
+    const atps = atpMis.map(mi => { const c = mInfo[mi]; const a = body('ATP-synthase', mi, [c.cx, c.cy, c.cz], { nearby: 90 }); placeSlot(a, 'ADP', mi, [c.cx - 10, c.y1 - 30, c.cz]); placeSlot(a, 'phosphate', mi, [c.cx + 10, c.y1 - 30, c.cz]); a.passes0 = null; return a; });   // the nucleotide sites a little INSIDE the head (owner 14.9.2026: 'put those slightly inside the ATP synthase'; the reveal below cuts the atoms in front)
+    window.gRevealSlots = () => { const out = []; for(const a of atps){ if(!a.alive) continue; for(const nm of ['ADP', 'phosphate']){ const s = a.get_node('BindSites/' + nm); if(!s || s.modulate !== 'white' || s._instance == null || !s.frame) continue; out.push({ mi: s.frame.mi, p: s.frame.p, r: nm === 'ADP' ? 24 : 18 }); } } return out; };   // the occupied ADP / P slots -> the reveal cones (index.html cofDiscX)
     const rubs = rubMis.map(mi => { const c = mInfo[mi], R = mInfo[mi].vol > 0 ? Math.cbrt(mInfo[mi].vol)*0.5 : 40; const r = body('RuBisCO', mi, [c.cx, c.cy, c.cz], { nearby: 90 });
       for(let i=0;i<3;i++){ const a = i/3*6.283; placeSlot(r, 'CO2_' + (i+1), mi, [c.cx + Math.cos(a)*R, c.cy + 6, c.cz + Math.sin(a)*R]); }
       for(let i=0;i<2;i++){ const a = (i+0.5)/2*6.283; placeSlot(r, 'NADP_' + (i+1), mi, [c.cx + Math.cos(a)*R*0.8, c.cy + 14, c.cz + Math.sin(a)*R*0.8]); }
@@ -175,7 +176,7 @@
     /* ── the carriers: the shuttle models (plastoquinone_B, plastocyanin) and the loose bouncers (ferredoxin, VDE, zeaxanthin epoxidase, FNR, RuBisCO) ── */
     const kinOf = new Map();   // body -> { kind: 'sh' | 'bnc', sh | b }
     const carrierBody = (name, mi, kin) => { const b = new MB(name, { position: [0,0,0], radius: hullR(mi) }); b.kin = kin; b.mi = mi; kinOf.set(b, kin); kin.body = b; if(kin.sh) kin.sh.kin = kin; if(kin.b) kin.b.kin = kin; return b; };
-    for(const sh of gShuttles){ carrierBody(sh.pq ? 'plastoquinone_B' : 'plastocyanin', sh.mi, { kind:'sh', sh }); sh.cur[2] = get.gTasoZ(); }
+    for(const sh of gShuttles){ carrierBody(sh.pq ? 'plastoquinone_B' : 'plastocyanin', sh.mi, { kind:'sh', sh, pqSet: sh.pq ? (sh.k >= 10 ? 'ndh' : 'psii') : null }); sh.cur[2] = get.gTasoZ(); }   // two fixed quinone sets (owner 14.9.2026): k 0-9 PSII <-> b6f, k 10-19 NDH-1 <-> b6f
     for(const mi of fdMis){ const b = gBouncers.find(q => q.mi === mi); if(b) carrierBody('ferredoxin', mi, { kind:'bnc', b, side: 1 }); }
     for(const mi of vdeMis){ const b = gBouncers.find(q => q.mi === mi); if(b) carrierBody('VDE', mi, { kind:'bnc', b, side: -1 }); }
     for(const mi of zeMis){ const b = gBouncers.find(q => q.mi === mi); if(b) carrierBody('zeaxanthin_epoxidase', mi, { kind:'bnc', b, side: -1 }); }
@@ -231,7 +232,9 @@
         P.grab(i); P.place(i, from[0], from[1], from[2]);
         const b = new MB('proton', { position: from }); b.kin = { kind:'proton', i }; b.born = V.time; return b; }
       if(FREE_KEY[name]){ const F = get.gValoFree(); if(!F) return null; const key = FREE_KEY[name]; let i = slot && slot._instance != null ? slot._instance : -1; if(slot) slot._instance = null;
-        if(i < 0){ if(!F.count(key)) return null; i = F.nearest(key, at[0], at[1], at[2], 0); if(i < 0) return null; get.gMolHold()[F.base[key] + i] = 1; }
+        if(i < 0){ if(!F.count(key)) return null; i = F.nearest(key, at[0], at[1], at[2], 0);
+          if(i < 0 && window.gSpawnFree && window.gSpawnFree(key, 1) > 0){ i = F.nearest(key, at[0], at[1], at[2], 0); if(i >= 0){ F.home(key, i, at[0], at[1], at[2]); F.homeFlush(key); } }   // none out (ATP: every one starts in the reserve, owner 14.9.2026) - one is brought out, its home where it is made
+          if(i < 0) return null; get.gMolHold()[F.base[key] + i] = 1; }
         F.setWorld(key, i, at[0], at[1], at[2]); const b = new MB(name, { position: at }); b.kin = { kind:'free', key, i }; return b; }
       if(['plastoquinone_B', 'plastocyanin', 'ferredoxin', 'VDE', 'zeaxanthin_epoxidase'].includes(name)){ const kin = slot && slot._dormant; if(!kin) return null; slot._dormant = null; kin.dormantAt = null;
         const b = new MB(name, { position: at, radius: hullR(kin.sh ? kin.sh.mi : kin.b.mi) }); b.kin = kin; b.mi = kin.sh ? kin.sh.mi : kin.b.mi; kin.body = b; kinOf.set(b, kin); b.src = slot.body_that_I_am_bound_to ? slot.body_that_I_am_bound_to.molecule_name : null; b.srcSlot = slot.name;   // where it comes from, and which slot: a quinone's SIDE (V.pqSide) - the PSII side of b6f or the NDH-1 side

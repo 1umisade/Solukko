@@ -7,7 +7,7 @@ V.SCRIPTS['plastocyanin'] = {
   PULLING_special_actions(self, body){ },
   BINDING_special_conditions(self, body, BindSite){ return true; },
   BINDING_special_actions(self, BindSite){ },
-  RELEASING_special_conditions(self, BindSite_name_string, acceptor){ return true; },
+  RELEASING_special_conditions(self, BindSite_name_string, acceptor){ return self.body_that_I_am_bound_to != null ? true : null; },   // (3D 14.9.2026: a FREE plastocyanin sits at place 0 and b6f's quinol at place 1 - a full one passing b6f handed its electron back to the quinol, and it cycled quinol -> Rieske -> heme f -> plastocyanin -> quinol for good. It gives up its electron only where it is docked: at PSI, place 13 -> P700)
   RELEASING_special_actions(self, released_body){ },
   check_soft_target(self){
     if(self.body_that_I_am_bound_to != null) return;
