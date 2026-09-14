@@ -209,6 +209,12 @@ lisaa lajin simulaattorin SMALL/FORMULA/NAME_FI-tauluihin ja merkinnat smiles.js
 `python tyokalut/kaava2d.py && python tyokalut/kortti_build.py`. Laji piirtyy tasmalleen kuten muut (vdW-kuoret, orbitaalit)
 ja nakyy myos kemiaeditorin palettissa. Esimerkki: G6P (glukoosi-6-fosfaatti, CID 5958), lisatty 10.9.2026.
 
+Funktionaalisten ryhmien kortit (14.9.2026): `tyokalut/ryhmat_3d.py` rakentaa neljan yhdisteen mallit joka ryhmalle ja
+`ryhmat_smarts.py` loytaa ryhman atomit SMARTS-kaavalla; kortin `3D-malli`-kentta on `ryhma: AVAIN1, AVAIN2, AVAIN3, AVAIN4`.
+Sivusto (index.html `_embedBlock`) nayttaa 2x2-ruudukon ja antaa kehykselle `&korosta=1,4,5` (molekyylit.json `ryhmat`) →
+simulaattorin korttitila piirtaa niille atomeille vihrean aariviivan (dynShell-materiaalin `RYHMA`-define, instanceColor.a = 1);
+2D-kaavan vihrea reuna tulee `kaava2d.py`:sta (`kuva2d_ryhmat`). Popupissa vain ensimmainen yhdiste.
+
 ## DNA Webcytessa
 
 Tuman 1000 emasparin B-DNA on oikeita atomeja ja jokainen nukleotidi oma lenkkinsa: `tyokalut/dna_nukleotidit.py` tekee `simulaatiot/DNA.mol2`:sta (ChimeraX, 1D28 + addh) 8 nukleotidimallia (`nukleotidit.mol2`), ja katselija asettelee 2000 lenkkia joka frame huojuvalle koysiakselille tekstuuripohjaisella LINKS-shaderpolulla (kuoret, ytimet, orbitaalit ja kaukotaso samoilla shadereilla kuin proteiinit). Yksityiskohdat simulaatiot/AGENT_NOTES.md.

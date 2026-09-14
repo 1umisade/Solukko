@@ -5,11 +5,14 @@ palloina (C harmaa, N sininen, O punainen, P oranssi, H vaaleanharmaa) kirjaimin
 
 Lahde: tyokalut/smiles.json (PubChem, IsomericSMILES). 2D-koordinaatit ja eksplisiittiset vedyt RDKitilla.
 Tulos: simulaatiot/kortit/2d/<laji>.svg, lapinakyva tausta (popupin kortti on kermanvarinen).
+Funktionaalisten ryhmien kortit (omistaja 14.9.2026): smiles.json:n 'ryhmat'-listan lajeista piirretaan lisaksi
+2d/<laji>__<ryhma>.svg, jossa ryhman atomit (ryhmat_smarts.py) on ymparoity vihrealla aariviivalla mustan ulkopuolella.
 Vaatii: pip install rdkit"""
 import json, os, sys, math, io
 sys.stdout.reconfigure(encoding='utf-8')
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdDepictor
+from ryhmat_smarts import ryhman_atomit
 
 SC = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(SC)
 OUT = os.path.join(REPO, 'simulaatiot', 'kortit', '2d')
@@ -22,6 +25,7 @@ SILTA = 2.0 * 1.5 * S            # hehkusilta, kun sitoutumattomat atomit ovat a
 ULKO = 5                         # hehkun mustan aariviivan paksuus
 SIDOS = 6                        # sidosviivan paksuus
 HEHKU = '#e8221c'              # (ei enaa kaytossa: hehku on alkuaineen varinen, ks. piirra)
+VIHREA = '#2fa84f'; VIHREA_W = 9   # ryhmakorostus: vihrea aariviiva mustan ulkopuolella (omistaja 14.9.2026)
 
 
 def lighten(hexc, f=0.45):
@@ -93,13 +97,14 @@ def mol2d(smiles):
         atoms.append({'sym': a.GetSymbol(), 'x': x * S, 'y': -y * S, 'q': a.GetFormalCharge()})
     bonds = [(b.GetBeginAtomIdx(), b.GetEndAtomIdx(), int(round(b.GetBondTypeAsDouble()))) for b in m.GetBonds()]
     rings = [list(r) for r in m.GetRingInfo().AtomRings()]   # renkaan sisus taytetaan hehkulla, muuten keskelle jaa reika
+    mol2d.viimeisin = m   # ryhmakorostusta varten: sama molekyyli (atomit samassa jarjestyksessa kuin atoms)
     return atoms, bonds, rings
 
 
-def piirra(atoms, bonds, rings=(), lisa_merkki=None):
+def piirra(atoms, bonds, rings=(), lisa_merkki=None, korosta=()):
     r_of = lambda a: SADE.get(a['sym'], 24 if a['sym'] in ('P', 'Mg', 'S') else 21)
     xs = [a['x'] for a in atoms]; ys = [a['y'] for a in atoms]
-    pad = HALO + max(r_of(a) for a in atoms) + ULKO + 8
+    pad = HALO + max(r_of(a) for a in atoms) + ULKO + 8 + (VIHREA_W if korosta else 0)
     x0, y0 = min(xs) - pad, min(ys) - pad; W, H = max(xs) - min(xs) + 2 * pad, max(ys) - min(ys) + 2 * pad
     o = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="%.0f %.0f %.0f %.0f" width="%.0f" height="%.0f">' % (x0, y0, W, H, W, H), '<defs>']
     for sym, c in VARI.items():
@@ -118,6 +123,15 @@ def piirra(atoms, bonds, rings=(), lisa_merkki=None):
         oa = min(0.45, (r_of(a) + HALO) / L); ob = max(0.55, 1 - (r_of(b) + HALO) / L)
         liukut.append('<linearGradient id="%s" gradientUnits="userSpaceOnUse" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"><stop offset="%.2f" stop-color="%s"/><stop offset="%.2f" stop-color="%s"/></linearGradient>' % (gid, a['x'], a['y'], b['x'], b['y'], oa, hehku(a), ob, hehku(b)))
         o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="url(#%s)" stroke-width="%.1f" stroke-linecap="round"/>' % (a['x'], a['y'], b['x'], b['y'], gid, 2 * (HALO + extra)))
+    korosta = set(korosta)
+    if korosta:   # 0) vihrea aariviiva ryhman atomien ja niiden valisten sidosten ympari, mustan hehkureunan ulkopuolelle
+        o.append('<g fill="%s" stroke="%s" stroke-linecap="round" stroke-linejoin="round">' % (VIHREA, VIHREA))
+        for i, j, k in bonds:
+            if i in korosta and j in korosta:
+                o.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke-width="%.1f"/>' % (atoms[i]['x'], atoms[i]['y'], atoms[j]['x'], atoms[j]['y'], 2 * (HALO + ULKO + VIHREA_W)))
+        for i in korosta:
+            o.append('<circle cx="%.1f" cy="%.1f" r="%.1f" stroke="none"/>' % (atoms[i]['x'], atoms[i]['y'], r_of(atoms[i]) + HALO + ULKO + VIHREA_W))
+        o.append('</g>')
     o.append('<g fill="#111" stroke="#111" stroke-linecap="round" stroke-linejoin="round">')
     for i, j, k in bonds:
         a, b = atoms[i], atoms[j]
@@ -167,16 +181,24 @@ def piirra(atoms, bonds, rings=(), lisa_merkki=None):
 
 def main():
     lajit = json.load(open(os.path.join(SC, 'smiles.json'), encoding='utf-8'))
+    mp = os.path.join(REPO, 'simulaatiot', 'kortit', 'molekyylit.json'); molj = json.load(open(mp, encoding='utf-8'))
     os.makedirs(OUT, exist_ok=True)
     for key, d in lajit.items():
         atoms, bonds, rings = mol2d(d['smiles'])
         svg = piirra(atoms, bonds, rings)
         io.open(os.path.join(OUT, key + '.svg'), 'w', encoding='utf-8', newline='\n').write(svg)
         print('%-5s %3d atomia %3d sidosta -> %s.svg (%d kB)' % (key, len(atoms), len(bonds), key, len(svg) // 1024))
+        for ryhma in d.get('ryhmat', []):   # ryhmakortin korostettu kaava
+            idx = ryhman_atomit(mol2d.viimeisin, ryhma)
+            if not idx: print('  HUOM ryhmaa ei loydy 2D-kaavasta: %s / %s' % (ryhma, key)); continue
+            nimi = key + '__' + ryhma.replace(' ', '_') + '.svg'
+            io.open(os.path.join(OUT, nimi), 'w', encoding='utf-8', newline='\n').write(piirra(atoms, bonds, rings, korosta=idx))
+            molj.setdefault(key, {}).setdefault('kuva2d_ryhmat', {})[ryhma] = '2d/' + nimi
     # protoni: yksi vety plussalla
     a = [{'sym': 'H', 'x': 0, 'y': 0, 'q': 1}]
     io.open(os.path.join(OUT, 'Hplus.svg'), 'w', encoding='utf-8', newline='\n').write(piirra(a, []))
     print('Hplus -> Hplus.svg')
+    io.open(mp, 'w', encoding='utf-8', newline='\n').write(json.dumps(molj, ensure_ascii=False, indent=1) + '\n')   # kuva2d_ryhmat
     # vanhat PubChem-PNG:t pois
     for f in os.listdir(OUT):
         if f.endswith('.png'): os.remove(os.path.join(OUT, f)); print('poistettu', f)

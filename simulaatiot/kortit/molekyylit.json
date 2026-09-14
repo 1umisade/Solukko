@@ -638,7 +638,21 @@
    "glukoosi-6-fosfaatilla",
    "glukoosi-6-fosfaatille"
   ],
-  "kuva2d": "2d/G6P.svg"
+  "kuva2d": "2d/G6P.svg",
+  "ryhmat": {
+   "fosforyyliryhmä": [
+    0,
+    6,
+    7,
+    8,
+    9,
+    27,
+    28
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fosforyyliryhmä": "2d/G6P__fosforyyliryhmä.svg"
+  }
  },
  "ETAANI": {
   "nimi": "etaani",
@@ -661,7 +675,22 @@
    "etaaneja",
    "etaaneissa"
   ],
-  "kuva2d": "2d/ETAANI.svg"
+  "kuva2d": "2d/ETAANI.svg",
+  "ryhmat": {
+   "metyyliryhmä": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "metyyliryhmä": "2d/ETAANI__metyyliryhmä.svg"
+  }
  },
  "PROPAANI": {
   "nimi": "propaani",
@@ -684,7 +713,25 @@
    "propaaneja",
    "propaaneissa"
   ],
-  "kuva2d": "2d/PROPAANI.svg"
+  "kuva2d": "2d/PROPAANI.svg",
+  "ryhmat": {
+   "etyyliryhmä": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "etyyliryhmä": "2d/PROPAANI__etyyliryhmä.svg"
+  }
  },
  "TOLUEENI": {
   "nimi": "tolueeni",
@@ -726,7 +773,25 @@
    "metyylibentseeneja",
    "metyylibentseeneissa"
   ],
-  "kuva2d": "2d/TOLUEENI.svg"
+  "kuva2d": "2d/TOLUEENI.svg",
+  "ryhmat": {
+   "fenyyliryhmä": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    10,
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fenyyliryhmä": "2d/TOLUEENI__fenyyliryhmä.svg"
+  }
  },
  "ASETALDEHYDI": {
   "nimi": "asetaldehydi",
@@ -768,7 +833,22 @@
    "etanaaleja",
    "etanaaleissa"
   ],
-  "kuva2d": "2d/ASETALDEHYDI.svg"
+  "kuva2d": "2d/ASETALDEHYDI.svg",
+  "ryhmat": {
+   "karbonyyliryhmä": [
+    1,
+    2
+   ],
+   "aldehydiryhmä": [
+    1,
+    2,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karbonyyliryhmä": "2d/ASETALDEHYDI__karbonyyliryhmä.svg",
+   "aldehydiryhmä": "2d/ASETALDEHYDI__aldehydiryhmä.svg"
+  }
  },
  "ASETONI": {
   "nimi": "asetoni",
@@ -804,7 +884,21 @@
    "propanoneja",
    "propanoneissa"
   ],
-  "kuva2d": "2d/ASETONI.svg"
+  "kuva2d": "2d/ASETONI.svg",
+  "ryhmat": {
+   "karbonyyliryhmä": [
+    1,
+    3
+   ],
+   "ketoniryhmä": [
+    1,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karbonyyliryhmä": "2d/ASETONI__karbonyyliryhmä.svg",
+   "ketoniryhmä": "2d/ASETONI__ketoniryhmä.svg"
+  }
  },
  "ASETAATTI": {
   "nimi": "asetaatti",
@@ -840,7 +934,18 @@
    "asetaatti-ioneja",
    "asetaatti-ioneissa"
   ],
-  "kuva2d": "2d/ASETAATTI.svg"
+  "kuva2d": "2d/ASETAATTI.svg",
+  "ryhmat": {
+   "metyyliryhmä": [
+    0,
+    4,
+    5,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "metyyliryhmä": "2d/ASETAATTI__metyyliryhmä.svg"
+  }
  },
  "ETANOLI": {
   "nimi": "etanoli",
@@ -863,7 +968,26 @@
    "etanoleja",
    "etanoleissa"
   ],
-  "kuva2d": "2d/ETANOLI.svg"
+  "kuva2d": "2d/ETANOLI.svg",
+  "ryhmat": {
+   "etyyliryhmä": [
+    0,
+    1,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "hydroksyyliryhmä": [
+    2,
+    8
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "etyyliryhmä": "2d/ETANOLI__etyyliryhmä.svg",
+   "hydroksyyliryhmä": "2d/ETANOLI__hydroksyyliryhmä.svg"
+  }
  },
  "ETENOLI": {
   "nimi": "etenoli",
@@ -899,7 +1023,18 @@
    "vinyylialkoholeja",
    "vinyylialkoholeissa"
   ],
-  "kuva2d": "2d/ETENOLI.svg"
+  "kuva2d": "2d/ETENOLI.svg",
+  "ryhmat": {
+   "enoliryhmä": [
+    0,
+    1,
+    2,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "enoliryhmä": "2d/ETENOLI__enoliryhmä.svg"
+  }
  },
  "DME": {
   "nimi": "dimetyylieetteri",
@@ -928,7 +1063,17 @@
    "dimetyylieettereja",
    "dimetyylieettereissa"
   ],
-  "kuva2d": "2d/DME.svg"
+  "kuva2d": "2d/DME.svg",
+  "ryhmat": {
+   "eetteriryhmä": [
+    0,
+    1,
+    2
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "eetteriryhmä": "2d/DME__eetteriryhmä.svg"
+  }
  },
  "ETYYLIASETAATTI": {
   "nimi": "etyyliasetaatti",
@@ -951,7 +1096,27 @@
    "etyyliasetaatteja",
    "etyyliasetaateissa"
   ],
-  "kuva2d": "2d/ETYYLIASETAATTI.svg"
+  "kuva2d": "2d/ETYYLIASETAATTI.svg",
+  "ryhmat": {
+   "etyyliryhmä": [
+    4,
+    5,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "esteriryhmä": [
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "etyyliryhmä": "2d/ETYYLIASETAATTI__etyyliryhmä.svg",
+   "esteriryhmä": "2d/ETYYLIASETAATTI__esteriryhmä.svg"
+  }
  },
  "METYYLIASETAATTI": {
   "nimi": "metyyliasetaatti",
@@ -974,7 +1139,26 @@
    "metyyliasetaatteja",
    "metyyliasetaateissa"
   ],
-  "kuva2d": "2d/METYYLIASETAATTI.svg"
+  "kuva2d": "2d/METYYLIASETAATTI.svg",
+  "ryhmat": {
+   "esteriryhmä": [
+    1,
+    2,
+    3
+   ],
+   "asetyyliryhmä": [
+    0,
+    1,
+    2,
+    5,
+    6,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "esteriryhmä": "2d/METYYLIASETAATTI__esteriryhmä.svg",
+   "asetyyliryhmä": "2d/METYYLIASETAATTI__asetyyliryhmä.svg"
+  }
  },
  "ETIKKAHAPPOANHYDRIDI": {
   "nimi": "etikkahappoanhydridi",
@@ -1003,7 +1187,19 @@
    "etikkahappoanhydrideja",
    "etikkahappoanhydrideissa"
   ],
-  "kuva2d": "2d/ETIKKAHAPPOANHYDRIDI.svg"
+  "kuva2d": "2d/ETIKKAHAPPOANHYDRIDI.svg",
+  "ryhmat": {
+   "happoanhydridi": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "happoanhydridi": "2d/ETIKKAHAPPOANHYDRIDI__happoanhydridi.svg"
+  }
  },
  "METYYLIAMMONIUM": {
   "nimi": "metyyliammoniumioni",
@@ -1026,7 +1222,18 @@
    "metyyliammoniumioneja",
    "metyyliammoniumioneissa"
   ],
-  "kuva2d": "2d/METYYLIAMMONIUM.svg"
+  "kuva2d": "2d/METYYLIAMMONIUM.svg",
+  "ryhmat": {
+   "aminoryhmä": [
+    1,
+    5,
+    6,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "aminoryhmä": "2d/METYYLIAMMONIUM__aminoryhmä.svg"
+  }
  },
  "ASETAMIDI": {
   "nimi": "asetamidi",
@@ -1049,7 +1256,28 @@
    "asetamideja",
    "asetamideissa"
   ],
-  "kuva2d": "2d/ASETAMIDI.svg"
+  "kuva2d": "2d/ASETAMIDI.svg",
+  "ryhmat": {
+   "asetyyliryhmä": [
+    0,
+    1,
+    3,
+    4,
+    5,
+    6
+   ],
+   "amidiryhmä": [
+    1,
+    2,
+    3,
+    7,
+    8
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "asetyyliryhmä": "2d/ASETAMIDI__asetyyliryhmä.svg",
+   "amidiryhmä": "2d/ASETAMIDI__amidiryhmä.svg"
+  }
  },
  "ETAANIIMIINI": {
   "nimi": "etaani-imiini",
@@ -1072,7 +1300,17 @@
    "etaani-imiinejä",
    "etaani-imiineissä"
   ],
-  "kuva2d": "2d/ETAANIIMIINI.svg"
+  "kuva2d": "2d/ETAANIIMIINI.svg",
+  "ryhmat": {
+   "imiiniryhmä": [
+    1,
+    2,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imiiniryhmä": "2d/ETAANIIMIINI__imiiniryhmä.svg"
+  }
  },
  "NMETYYLIETAANIIMIINI": {
   "nimi": "N-metyylietaani-imiini",
@@ -1095,7 +1333,17 @@
    "N-metyylietaani-imiinejä",
    "N-metyylietaani-imiineissä"
   ],
-  "kuva2d": "2d/NMETYYLIETAANIIMIINI.svg"
+  "kuva2d": "2d/NMETYYLIETAANIIMIINI.svg",
+  "ryhmat": {
+   "Schiffin emäs": [
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "Schiffin emäs": "2d/NMETYYLIETAANIIMIINI__Schiffin_emäs.svg"
+  }
  },
  "METYYLIGUANIDINIUM": {
   "nimi": "metyyliguanidiniumioni",
@@ -1118,7 +1366,23 @@
    "metyyliguanidiniumioneja",
    "metyyliguanidiniumioneissa"
   ],
-  "kuva2d": "2d/METYYLIGUANIDINIUM.svg"
+  "kuva2d": "2d/METYYLIGUANIDINIUM.svg",
+  "ryhmat": {
+   "guanidiiniryhmä": [
+    1,
+    2,
+    3,
+    4,
+    8,
+    9,
+    10,
+    11,
+    12
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "guanidiiniryhmä": "2d/METYYLIGUANIDINIUM__guanidiiniryhmä.svg"
+  }
  },
  "METYYLIIMIDATSOLI": {
   "nimi": "4-metyyli-imidatsoli",
@@ -1141,7 +1405,22 @@
    "4-metyyli-imidatsoleja",
    "4-metyyli-imidatsoleissa"
   ],
-  "kuva2d": "2d/METYYLIIMIDATSOLI.svg"
+  "kuva2d": "2d/METYYLIIMIDATSOLI.svg",
+  "ryhmat": {
+   "imidatsoliryhmä": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    9,
+    10,
+    11
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imidatsoliryhmä": "2d/METYYLIIMIDATSOLI__imidatsoliryhmä.svg"
+  }
  },
  "METAANITIOLI": {
   "nimi": "metaanitioli",
@@ -1164,7 +1443,16 @@
    "metaanitioleja",
    "metaanitioleissa"
   ],
-  "kuva2d": "2d/METAANITIOLI.svg"
+  "kuva2d": "2d/METAANITIOLI.svg",
+  "ryhmat": {
+   "sulfhydryyliryhmä": [
+    1,
+    5
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "sulfhydryyliryhmä": "2d/METAANITIOLI__sulfhydryyliryhmä.svg"
+  }
  },
  "DMDS": {
   "nimi": "dimetyylidisulfidi",
@@ -1187,7 +1475,16 @@
    "dimetyylidisulfideja",
    "dimetyylidisulfideissa"
   ],
-  "kuva2d": "2d/DMDS.svg"
+  "kuva2d": "2d/DMDS.svg",
+  "ryhmat": {
+   "disulfidisidos": [
+    1,
+    2
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "disulfidisidos": "2d/DMDS__disulfidisidos.svg"
+  }
  },
  "METYYLITIOASETAATTI": {
   "nimi": "S-metyylitioasetaatti",
@@ -1210,7 +1507,17 @@
    "S-metyylitioasetaatteja",
    "S-metyylitioasetaateissa"
   ],
-  "kuva2d": "2d/METYYLITIOASETAATTI.svg"
+  "kuva2d": "2d/METYYLITIOASETAATTI.svg",
+  "ryhmat": {
+   "tioesteri": [
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "tioesteri": "2d/METYYLITIOASETAATTI__tioesteri.svg"
+  }
  },
  "METYYLIFOSFAATTI": {
   "nimi": "metyylifosfaatti",
@@ -1233,7 +1540,19 @@
    "metyylifosfaatteja",
    "metyylifosfaateissa"
   ],
-  "kuva2d": "2d/METYYLIFOSFAATTI.svg"
+  "kuva2d": "2d/METYYLIFOSFAATTI.svg",
+  "ryhmat": {
+   "fosforyyliryhmä": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fosforyyliryhmä": "2d/METYYLIFOSFAATTI__fosforyyliryhmä.svg"
+  }
  },
  "DIMETYYLIDIFOSFAATTI": {
   "nimi": "dimetyylidifosfaatti",
@@ -1256,7 +1575,17 @@
    "dimetyylidifosfaatteja",
    "dimetyylidifosfaateissa"
   ],
-  "kuva2d": "2d/DIMETYYLIDIFOSFAATTI.svg"
+  "kuva2d": "2d/DIMETYYLIDIFOSFAATTI.svg",
+  "ryhmat": {
+   "fosfoanhydridisidos": [
+    2,
+    5,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fosfoanhydridisidos": "2d/DIMETYYLIDIFOSFAATTI__fosfoanhydridisidos.svg"
+  }
  },
  "ASETYYLIFOSFAATTI": {
   "nimi": "asetyylifosfaatti",
@@ -1279,6 +1608,2269 @@
    "asetyylifosfaatteja",
    "asetyylifosfaateissa"
   ],
-  "kuva2d": "2d/ASETYYLIFOSFAATTI.svg"
+  "kuva2d": "2d/ASETYYLIFOSFAATTI.svg",
+  "ryhmat": {
+   "asyylifosfaatti": [
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "asyylifosfaatti": "2d/ASETYYLIFOSFAATTI__asyylifosfaatti.svg"
+  }
+ },
+ "ALANIINI": {
+  "nimi": "alaniini",
+  "kaava": "C₃H₇NO₂",
+  "kaavat": [
+   "C₃H₇NO₂"
+  ],
+  "sanat": [
+   "alaniini",
+   "alaniinin",
+   "alaniinia",
+   "alaniinissa",
+   "alaniinista",
+   "alaniiniin",
+   "alaniiniksi",
+   "alaniinilla",
+   "alaniinille",
+   "alaniinit",
+   "alaniinien",
+   "alaniineja",
+   "alaniineissa"
+  ],
+  "kuva2d": "2d/ALANIINI.svg",
+  "ryhmat": {
+   "metyyliryhmä": [
+    0,
+    6,
+    7,
+    8
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "metyyliryhmä": "2d/ALANIINI__metyyliryhmä.svg"
+  }
+ },
+ "TYMIINI": {
+  "nimi": "tymiini",
+  "kaava": "C₅H₆N₂O₂",
+  "kaavat": [
+   "C₅H₆N₂O₂"
+  ],
+  "sanat": [
+   "tymiini",
+   "tymiinin",
+   "tymiiniä",
+   "tymiinissä",
+   "tymiinistä",
+   "tymiiniin",
+   "tymiiniksi",
+   "tymiinillä",
+   "tymiinille",
+   "tymiinit",
+   "tymiinien",
+   "tymiinejä",
+   "tymiineissä",
+   "tymiinia",
+   "tymiinissa",
+   "tymiinista",
+   "tymiinilla",
+   "tymiineja",
+   "tymiineissa"
+  ],
+  "kuva2d": "2d/TYMIINI.svg",
+  "ryhmat": {
+   "metyyliryhmä": [
+    0,
+    9,
+    10,
+    11
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "metyyliryhmä": "2d/TYMIINI__metyyliryhmä.svg"
+  }
+ },
+ "ISOLEUSIINI": {
+  "nimi": "isoleusiini",
+  "kaava": "C₆H₁₃NO₂",
+  "kaavat": [
+   "C₆H₁₃NO₂"
+  ],
+  "sanat": [
+   "isoleusiini",
+   "isoleusiinin",
+   "isoleusiinia",
+   "isoleusiinissa",
+   "isoleusiinista",
+   "isoleusiiniin",
+   "isoleusiiniksi",
+   "isoleusiinilla",
+   "isoleusiinille",
+   "isoleusiinit",
+   "isoleusiinien",
+   "isoleusiineja",
+   "isoleusiineissa"
+  ],
+  "kuva2d": "2d/ISOLEUSIINI.svg",
+  "ryhmat": {
+   "etyyliryhmä": [
+    0,
+    1,
+    9,
+    10,
+    11,
+    12,
+    13
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "etyyliryhmä": "2d/ISOLEUSIINI__etyyliryhmä.svg"
+  }
+ },
+ "FENYYLIALANIINI": {
+  "nimi": "fenyylialaniini",
+  "kaava": "C₉H₁₁NO₂",
+  "kaavat": [
+   "C₉H₁₁NO₂"
+  ],
+  "sanat": [
+   "fenyylialaniini",
+   "fenyylialaniinin",
+   "fenyylialaniinia",
+   "fenyylialaniinissa",
+   "fenyylialaniinista",
+   "fenyylialaniiniin",
+   "fenyylialaniiniksi",
+   "fenyylialaniinilla",
+   "fenyylialaniinille",
+   "fenyylialaniinit",
+   "fenyylialaniinien",
+   "fenyylialaniineja",
+   "fenyylialaniineissa"
+  ],
+  "kuva2d": "2d/FENYYLIALANIINI.svg",
+  "ryhmat": {
+   "fenyyliryhmä": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    17,
+    18,
+    19,
+    20,
+    21
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fenyyliryhmä": "2d/FENYYLIALANIINI__fenyyliryhmä.svg"
+  }
+ },
+ "TYROSIINI": {
+  "nimi": "tyrosiini",
+  "kaava": "C₉H₁₁NO₃",
+  "kaavat": [
+   "C₉H₁₁NO₃"
+  ],
+  "sanat": [
+   "tyrosiini",
+   "tyrosiinin",
+   "tyrosiinia",
+   "tyrosiinissa",
+   "tyrosiinista",
+   "tyrosiiniin",
+   "tyrosiiniksi",
+   "tyrosiinilla",
+   "tyrosiinille",
+   "tyrosiinit",
+   "tyrosiinien",
+   "tyrosiineja",
+   "tyrosiineissa"
+  ],
+  "kuva2d": "2d/TYROSIINI.svg",
+  "ryhmat": {
+   "fenyyliryhmä": [
+    3,
+    4,
+    5,
+    6,
+    8,
+    9,
+    18,
+    19,
+    21,
+    22
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fenyyliryhmä": "2d/TYROSIINI__fenyyliryhmä.svg"
+  }
+ },
+ "BENTSOAATTI": {
+  "nimi": "bentsoaatti",
+  "kaava": "C₇H₅O₂⁻",
+  "kaavat": [
+   "C₇H₅O₂⁻"
+  ],
+  "sanat": [
+   "bentsoaatti",
+   "bentsoaatin",
+   "bentsoaattia",
+   "bentsoaatissa",
+   "bentsoaatista",
+   "bentsoaattiin",
+   "bentsoaatiksi",
+   "bentsoaatilla",
+   "bentsoaatille",
+   "bentsoaatit",
+   "bentsoaattien",
+   "bentsoaatteja",
+   "bentsoaateissa"
+  ],
+  "kuva2d": "2d/BENTSOAATTI.svg",
+  "ryhmat": {
+   "fenyyliryhmä": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fenyyliryhmä": "2d/BENTSOAATTI__fenyyliryhmä.svg"
+  }
+ },
+ "PYRUVAATTI": {
+  "nimi": "pyruvaatti",
+  "kaava": "C₃H₃O₃⁻",
+  "kaavat": [
+   "C₃H₃O₃⁻"
+  ],
+  "sanat": [
+   "pyruvaatti",
+   "pyruvaatin",
+   "pyruvaattia",
+   "pyruvaatissa",
+   "pyruvaatista",
+   "pyruvaattiin",
+   "pyruvaatiksi",
+   "pyruvaatilla",
+   "pyruvaatille",
+   "pyruvaatit",
+   "pyruvaattien",
+   "pyruvaatteja",
+   "pyruvaateissa"
+  ],
+  "kuva2d": "2d/PYRUVAATTI.svg",
+  "ryhmat": {
+   "karbonyyliryhmä": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "ketoniryhmä": [
+    1,
+    2
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karbonyyliryhmä": "2d/PYRUVAATTI__karbonyyliryhmä.svg",
+   "ketoniryhmä": "2d/PYRUVAATTI__ketoniryhmä.svg"
+  }
+ },
+ "GLYSERALDEHYDI": {
+  "nimi": "glyseraldehydi",
+  "kaava": "C₃H₆O₃",
+  "kaavat": [
+   "C₃H₆O₃"
+  ],
+  "sanat": [
+   "glyseraldehydi",
+   "glyseraldehydin",
+   "glyseraldehydiä",
+   "glyseraldehydissä",
+   "glyseraldehydistä",
+   "glyseraldehydiin",
+   "glyseraldehydiksi",
+   "glyseraldehydillä",
+   "glyseraldehydille",
+   "glyseraldehydit",
+   "glyseraldehydien",
+   "glyseraldehydejä",
+   "glyseraldehydeissä",
+   "glyseraldehydia",
+   "glyseraldehydissa",
+   "glyseraldehydista",
+   "glyseraldehydilla",
+   "glyseraldehydeja",
+   "glyseraldehydeissa"
+  ],
+  "kuva2d": "2d/GLYSERALDEHYDI.svg",
+  "ryhmat": {
+   "karbonyyliryhmä": [
+    4,
+    5
+   ],
+   "aldehydiryhmä": [
+    4,
+    5,
+    11
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karbonyyliryhmä": "2d/GLYSERALDEHYDI__karbonyyliryhmä.svg",
+   "aldehydiryhmä": "2d/GLYSERALDEHYDI__aldehydiryhmä.svg"
+  }
+ },
+ "FORMALDEHYDI": {
+  "nimi": "formaldehydi",
+  "kaava": "CH₂O",
+  "kaavat": [
+   "CH₂O"
+  ],
+  "sanat": [
+   "formaldehydi",
+   "formaldehydin",
+   "formaldehydiä",
+   "formaldehydissä",
+   "formaldehydistä",
+   "formaldehydiin",
+   "formaldehydiksi",
+   "formaldehydillä",
+   "formaldehydille",
+   "formaldehydit",
+   "formaldehydien",
+   "formaldehydejä",
+   "formaldehydeissä",
+   "formaldehydia",
+   "formaldehydissa",
+   "formaldehydista",
+   "formaldehydilla",
+   "formaldehydeja",
+   "formaldehydeissa",
+   "metanaali",
+   "metanaalin",
+   "metanaalia",
+   "metanaalissa",
+   "metanaalista",
+   "metanaaliin",
+   "metanaaliksi",
+   "metanaalilla",
+   "metanaalille",
+   "metanaalit",
+   "metanaalien",
+   "metanaaleja",
+   "metanaaleissa"
+  ],
+  "kuva2d": "2d/FORMALDEHYDI.svg",
+  "ryhmat": {
+   "aldehydiryhmä": [
+    0,
+    1,
+    2
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "aldehydiryhmä": "2d/FORMALDEHYDI__aldehydiryhmä.svg"
+  }
+ },
+ "GLUKOOSIAVO": {
+  "nimi": "glukoosi (avoketju)",
+  "kaava": "C₆H₁₂O₆",
+  "kaavat": [
+   "C₆H₁₂O₆"
+  ],
+  "sanat": [],
+  "kuva2d": "2d/GLUKOOSIAVO.svg",
+  "ryhmat": {
+   "aldehydiryhmä": [
+    10,
+    11,
+    23
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "aldehydiryhmä": "2d/GLUKOOSIAVO__aldehydiryhmä.svg"
+  }
+ },
+ "DIHYDROKSIASETONI": {
+  "nimi": "dihydroksiasetoni",
+  "kaava": "C₃H₆O₃",
+  "kaavat": [
+   "C₃H₆O₃"
+  ],
+  "sanat": [
+   "dihydroksiasetoni",
+   "dihydroksiasetonin",
+   "dihydroksiasetonia",
+   "dihydroksiasetonissa",
+   "dihydroksiasetonista",
+   "dihydroksiasetoniin",
+   "dihydroksiasetoniksi",
+   "dihydroksiasetonilla",
+   "dihydroksiasetonille",
+   "dihydroksiasetonit",
+   "dihydroksiasetonien",
+   "dihydroksiasetoneja",
+   "dihydroksiasetoneissa"
+  ],
+  "kuva2d": "2d/DIHYDROKSIASETONI.svg",
+  "ryhmat": {
+   "ketoniryhmä": [
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "ketoniryhmä": "2d/DIHYDROKSIASETONI__ketoniryhmä.svg"
+  }
+ },
+ "FRUKTOOSIAVO": {
+  "nimi": "fruktoosi (avoketju)",
+  "kaava": "C₆H₁₂O₆",
+  "kaavat": [
+   "C₆H₁₂O₆"
+  ],
+  "sanat": [],
+  "kuva2d": "2d/FRUKTOOSIAVO.svg",
+  "ryhmat": {
+   "ketoniryhmä": [
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "ketoniryhmä": "2d/FRUKTOOSIAVO__ketoniryhmä.svg"
+  }
+ },
+ "ETIKKAHAPPO": {
+  "nimi": "etikkahappo",
+  "kaava": "CH₃COOH",
+  "kaavat": [
+   "CH₃COOH"
+  ],
+  "sanat": [
+   "etikkahappo"
+  ],
+  "kuva2d": "2d/ETIKKAHAPPO.svg",
+  "ryhmat": {
+   "karboksyyliryhmä": [
+    1,
+    2,
+    3,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karboksyyliryhmä": "2d/ETIKKAHAPPO__karboksyyliryhmä.svg"
+  }
+ },
+ "MAITOHAPPO": {
+  "nimi": "maitohappo",
+  "kaava": "C₃H₆O₃",
+  "kaavat": [
+   "C₃H₆O₃"
+  ],
+  "sanat": [
+   "maitohappo"
+  ],
+  "kuva2d": "2d/MAITOHAPPO.svg",
+  "ryhmat": {
+   "karboksyyliryhmä": [
+    3,
+    4,
+    5,
+    11
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karboksyyliryhmä": "2d/MAITOHAPPO__karboksyyliryhmä.svg"
+  }
+ },
+ "GLYSIINI": {
+  "nimi": "glysiini",
+  "kaava": "C₂H₅NO₂",
+  "kaavat": [
+   "C₂H₅NO₂"
+  ],
+  "sanat": [
+   "glysiini",
+   "glysiinin",
+   "glysiiniä",
+   "glysiinissä",
+   "glysiinistä",
+   "glysiiniin",
+   "glysiiniksi",
+   "glysiinillä",
+   "glysiinille",
+   "glysiinit",
+   "glysiinien",
+   "glysiinejä",
+   "glysiineissä",
+   "glysiinia",
+   "glysiinissa",
+   "glysiinista",
+   "glysiinilla",
+   "glysiineja",
+   "glysiineissa"
+  ],
+  "kuva2d": "2d/GLYSIINI.svg",
+  "ryhmat": {
+   "karboksyyliryhmä": [
+    2,
+    3,
+    4,
+    9
+   ],
+   "aminoryhmä": [
+    0,
+    5,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karboksyyliryhmä": "2d/GLYSIINI__karboksyyliryhmä.svg",
+   "aminoryhmä": "2d/GLYSIINI__aminoryhmä.svg"
+  }
+ },
+ "PALMITIINIHAPPO": {
+  "nimi": "palmitiinihappo",
+  "kaava": "C₁₆H₃₂O₂",
+  "kaavat": [
+   "C₁₆H₃₂O₂"
+  ],
+  "sanat": [
+   "palmitiinihappo"
+  ],
+  "kuva2d": "2d/PALMITIINIHAPPO.svg",
+  "ryhmat": {
+   "karboksyyliryhmä": [
+    15,
+    16,
+    17,
+    49
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "karboksyyliryhmä": "2d/PALMITIINIHAPPO__karboksyyliryhmä.svg"
+  }
+ },
+ "GLYSEROLI": {
+  "nimi": "glyseroli",
+  "kaava": "C₃H₈O₃",
+  "kaavat": [
+   "C₃H₈O₃"
+  ],
+  "sanat": [
+   "glyseroli",
+   "glyserolin",
+   "glyserolia",
+   "glyserolissa",
+   "glyserolista",
+   "glyseroliin",
+   "glyseroliksi",
+   "glyserolilla",
+   "glyserolille",
+   "glyserolit",
+   "glyserolien",
+   "glyseroleja",
+   "glyseroleissa"
+  ],
+  "kuva2d": "2d/GLYSEROLI.svg",
+  "ryhmat": {
+   "hydroksyyliryhmä": [
+    0,
+    3,
+    5,
+    6,
+    10,
+    13
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "hydroksyyliryhmä": "2d/GLYSEROLI__hydroksyyliryhmä.svg"
+  }
+ },
+ "SERIINI": {
+  "nimi": "seriini",
+  "kaava": "C₃H₇NO₃",
+  "kaavat": [
+   "C₃H₇NO₃"
+  ],
+  "sanat": [
+   "seriini",
+   "seriinin",
+   "seriiniä",
+   "seriinissä",
+   "seriinistä",
+   "seriiniin",
+   "seriiniksi",
+   "seriinillä",
+   "seriinille",
+   "seriinit",
+   "seriinien",
+   "seriinejä",
+   "seriineissä"
+  ],
+  "kuva2d": "2d/SERIINI.svg",
+  "ryhmat": {
+   "hydroksyyliryhmä": [
+    3,
+    12
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "hydroksyyliryhmä": "2d/SERIINI__hydroksyyliryhmä.svg"
+  }
+ },
+ "GLUKOOSI": {
+  "nimi": "glukoosi",
+  "kaava": "C₆H₁₂O₆",
+  "kaavat": [
+   "C₆H₁₂O₆"
+  ],
+  "sanat": [
+   "glukoosi",
+   "glukoosin",
+   "glukoosia",
+   "glukoosissa",
+   "glukoosista",
+   "glukoosiin",
+   "glukoosiksi",
+   "glukoosilla",
+   "glukoosille",
+   "glukoosit",
+   "glukoosien",
+   "glukooseja",
+   "glukooseissa"
+  ],
+  "kuva2d": "2d/GLUKOOSI.svg",
+  "ryhmat": {
+   "hydroksyyliryhmä": [
+    0,
+    5,
+    7,
+    9,
+    11,
+    12,
+    17,
+    19,
+    21,
+    23
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "hydroksyyliryhmä": "2d/GLUKOOSI__hydroksyyliryhmä.svg"
+  }
+ },
+ "PEP": {
+  "nimi": "fosfoenolipyruvaatti",
+  "kaava": "C₃H₂O₆P³⁻",
+  "kaavat": [
+   "C₃H₂O₆P³⁻"
+  ],
+  "sanat": [
+   "fosfoenolipyruvaatti",
+   "fosfoenolipyruvaatin",
+   "fosfoenolipyruvaattia",
+   "fosfoenolipyruvaatissa",
+   "fosfoenolipyruvaatista",
+   "fosfoenolipyruvaattiin",
+   "fosfoenolipyruvaatiksi",
+   "fosfoenolipyruvaatilla",
+   "fosfoenolipyruvaatille",
+   "fosfoenolipyruvaatit",
+   "fosfoenolipyruvaattien",
+   "fosfoenolipyruvaatteja",
+   "fosfoenolipyruvaateissa"
+  ],
+  "kuva2d": "2d/PEP.svg",
+  "ryhmat": {
+   "enoliryhmä": [
+    0,
+    1,
+    2
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "enoliryhmä": "2d/PEP__enoliryhmä.svg"
+  }
+ },
+ "ASKORBIINIHAPPO": {
+  "nimi": "askorbiinihappo",
+  "kaava": "C₆H₈O₆",
+  "kaavat": [
+   "C₆H₈O₆"
+  ],
+  "sanat": [
+   "askorbiinihappo",
+   "C-vitamiini",
+   "C-vitamiinin",
+   "C-vitamiinia",
+   "C-vitamiinissa",
+   "C-vitamiinista",
+   "C-vitamiiniin",
+   "C-vitamiiniksi",
+   "C-vitamiinilla",
+   "C-vitamiinille",
+   "C-vitamiinit",
+   "C-vitamiinien",
+   "C-vitamiineja",
+   "C-vitamiineissa"
+  ],
+  "kuva2d": "2d/ASKORBIINIHAPPO.svg",
+  "ryhmat": {
+   "enoliryhmä": [
+    8,
+    9,
+    10,
+    11,
+    18,
+    19
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "enoliryhmä": "2d/ASKORBIINIHAPPO__enoliryhmä.svg"
+  }
+ },
+ "PROPEN2OLI": {
+  "nimi": "propen-2-oli",
+  "kaava": "C₃H₆O",
+  "kaavat": [
+   "C₃H₆O"
+  ],
+  "sanat": [
+   "propen-2-oli",
+   "propen-2-olin",
+   "propen-2-olia",
+   "propen-2-olissa",
+   "propen-2-olista",
+   "propen-2-oliin",
+   "propen-2-oliksi",
+   "propen-2-olilla",
+   "propen-2-olille",
+   "propen-2-olit",
+   "propen-2-olien",
+   "propen-2-oleja",
+   "propen-2-oleissa"
+  ],
+  "kuva2d": "2d/PROPEN2OLI.svg",
+  "ryhmat": {
+   "enoliryhmä": [
+    1,
+    2,
+    3,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "enoliryhmä": "2d/PROPEN2OLI__enoliryhmä.svg"
+  }
+ },
+ "DIETYYLIEETTERI": {
+  "nimi": "dietyylieetteri",
+  "kaava": "C₄H₁₀O",
+  "kaavat": [
+   "C₄H₁₀O"
+  ],
+  "sanat": [
+   "dietyylieetteri",
+   "dietyylieetterin",
+   "dietyylieetteriä",
+   "dietyylieetterissä",
+   "dietyylieetteristä",
+   "dietyylieetteriin",
+   "dietyylieetteriksi",
+   "dietyylieetterillä",
+   "dietyylieetterille",
+   "dietyylieetterit",
+   "dietyylieetterien",
+   "dietyylieetterejä",
+   "dietyylieettereissä",
+   "dietyylieetteria",
+   "dietyylieetterissa",
+   "dietyylieetterista",
+   "dietyylieetterilla",
+   "dietyylieettereja",
+   "dietyylieettereissa"
+  ],
+  "kuva2d": "2d/DIETYYLIEETTERI.svg",
+  "ryhmat": {
+   "eetteriryhmä": [
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "eetteriryhmä": "2d/DIETYYLIEETTERI__eetteriryhmä.svg"
+  }
+ },
+ "TETRAHYDROFURAANI": {
+  "nimi": "tetrahydrofuraani",
+  "kaava": "C₄H₈O",
+  "kaavat": [
+   "C₄H₈O"
+  ],
+  "sanat": [
+   "tetrahydrofuraani",
+   "tetrahydrofuraanin",
+   "tetrahydrofuraania",
+   "tetrahydrofuraanissa",
+   "tetrahydrofuraanista",
+   "tetrahydrofuraaniin",
+   "tetrahydrofuraaniksi",
+   "tetrahydrofuraanilla",
+   "tetrahydrofuraanille",
+   "tetrahydrofuraanit",
+   "tetrahydrofuraanien",
+   "tetrahydrofuraaneja",
+   "tetrahydrofuraaneissa"
+  ],
+  "kuva2d": "2d/TETRAHYDROFURAANI.svg",
+  "ryhmat": {
+   "eetteriryhmä": [
+    2,
+    3,
+    4
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "eetteriryhmä": "2d/TETRAHYDROFURAANI__eetteriryhmä.svg"
+  }
+ },
+ "MALTOOSI": {
+  "nimi": "maltoosi",
+  "kaava": "C₁₂H₂₂O₁₁",
+  "kaavat": [
+   "C₁₂H₂₂O₁₁"
+  ],
+  "sanat": [
+   "maltoosi",
+   "maltoosin",
+   "maltoosia",
+   "maltoosissa",
+   "maltoosista",
+   "maltoosiin",
+   "maltoosiksi",
+   "maltoosilla",
+   "maltoosille",
+   "maltoosit",
+   "maltoosien",
+   "maltooseja",
+   "maltooseissa"
+  ],
+  "kuva2d": "2d/MALTOOSI.svg",
+  "ryhmat": {
+   "eetteriryhmä": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    11,
+    13,
+    14
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "eetteriryhmä": "2d/MALTOOSI__eetteriryhmä.svg"
+  }
+ },
+ "ASETYYLIKOLIINI": {
+  "nimi": "asetyylikoliini",
+  "kaava": "C₇H₁₆NO₂⁺",
+  "kaavat": [
+   "C₇H₁₆NO₂⁺"
+  ],
+  "sanat": [
+   "asetyylikoliini",
+   "asetyylikoliinin",
+   "asetyylikoliinia",
+   "asetyylikoliinissa",
+   "asetyylikoliinista",
+   "asetyylikoliiniin",
+   "asetyylikoliiniksi",
+   "asetyylikoliinilla",
+   "asetyylikoliinille",
+   "asetyylikoliinit",
+   "asetyylikoliinien",
+   "asetyylikoliineja",
+   "asetyylikoliineissa"
+  ],
+  "kuva2d": "2d/ASETYYLIKOLIINI.svg",
+  "ryhmat": {
+   "esteriryhmä": [
+    1,
+    2,
+    3
+   ],
+   "asetyyliryhmä": [
+    0,
+    1,
+    2,
+    10,
+    11,
+    12
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "esteriryhmä": "2d/ASETYYLIKOLIINI__esteriryhmä.svg",
+   "asetyyliryhmä": "2d/ASETYYLIKOLIINI__asetyyliryhmä.svg"
+  }
+ },
+ "TRIBUTYRIINI": {
+  "nimi": "tributyriini",
+  "kaava": "C₁₅H₂₆O₆",
+  "kaavat": [
+   "C₁₅H₂₆O₆"
+  ],
+  "sanat": [
+   "tributyriini",
+   "tributyriinin",
+   "tributyriiniä",
+   "tributyriinissä",
+   "tributyriinistä",
+   "tributyriiniin",
+   "tributyriiniksi",
+   "tributyriinillä",
+   "tributyriinille",
+   "tributyriinit",
+   "tributyriinien",
+   "tributyriinejä",
+   "tributyriineissä",
+   "tributyriinia",
+   "tributyriinissa",
+   "tributyriinista",
+   "tributyriinilla",
+   "tributyriineja",
+   "tributyriineissa"
+  ],
+  "kuva2d": "2d/TRIBUTYRIINI.svg",
+  "ryhmat": {
+   "esteriryhmä": [
+    3,
+    4,
+    5,
+    9,
+    10,
+    11,
+    15,
+    16,
+    17
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "esteriryhmä": "2d/TRIBUTYRIINI__esteriryhmä.svg"
+  }
+ },
+ "NASETYYLIKYSTEIINI": {
+  "nimi": "N-asetyylikysteiini",
+  "kaava": "C₅H₉NO₃S",
+  "kaavat": [
+   "C₅H₉NO₃S"
+  ],
+  "sanat": [
+   "N-asetyylikysteiini",
+   "N-asetyylikysteiinin",
+   "N-asetyylikysteiiniä",
+   "N-asetyylikysteiinissä",
+   "N-asetyylikysteiinistä",
+   "N-asetyylikysteiiniin",
+   "N-asetyylikysteiiniksi",
+   "N-asetyylikysteiinillä",
+   "N-asetyylikysteiinille",
+   "N-asetyylikysteiinit",
+   "N-asetyylikysteiinien",
+   "N-asetyylikysteiinejä",
+   "N-asetyylikysteiineissä",
+   "N-asetyylikysteiinia",
+   "N-asetyylikysteiinissa",
+   "N-asetyylikysteiinista",
+   "N-asetyylikysteiinilla",
+   "N-asetyylikysteiineja",
+   "N-asetyylikysteiineissa"
+  ],
+  "kuva2d": "2d/NASETYYLIKYSTEIINI.svg",
+  "ryhmat": {
+   "asetyyliryhmä": [
+    0,
+    1,
+    2,
+    10,
+    11,
+    12
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "asetyyliryhmä": "2d/NASETYYLIKYSTEIINI__asetyyliryhmä.svg"
+  }
+ },
+ "PROPIONIHAPPOANHYDRIDI": {
+  "nimi": "propionihappoanhydridi",
+  "kaava": "C₆H₁₀O₃",
+  "kaavat": [
+   "C₆H₁₀O₃"
+  ],
+  "sanat": [
+   "propionihappoanhydridi",
+   "propionihappoanhydridin",
+   "propionihappoanhydridiä",
+   "propionihappoanhydridissä",
+   "propionihappoanhydridistä",
+   "propionihappoanhydridiin",
+   "propionihappoanhydridiksi",
+   "propionihappoanhydridillä",
+   "propionihappoanhydridille",
+   "propionihappoanhydridit",
+   "propionihappoanhydridien",
+   "propionihappoanhydridejä",
+   "propionihappoanhydrideissä",
+   "propionihappoanhydridia",
+   "propionihappoanhydridissa",
+   "propionihappoanhydridista",
+   "propionihappoanhydridilla",
+   "propionihappoanhydrideja",
+   "propionihappoanhydrideissa"
+  ],
+  "kuva2d": "2d/PROPIONIHAPPOANHYDRIDI.svg",
+  "ryhmat": {
+   "happoanhydridi": [
+    2,
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "happoanhydridi": "2d/PROPIONIHAPPOANHYDRIDI__happoanhydridi.svg"
+  }
+ },
+ "MERIPIHKAHAPPOANHYDRIDI": {
+  "nimi": "meripihkahappoanhydridi",
+  "kaava": "C₄H₄O₃",
+  "kaavat": [
+   "C₄H₄O₃"
+  ],
+  "sanat": [
+   "meripihkahappoanhydridi",
+   "meripihkahappoanhydridin",
+   "meripihkahappoanhydridiä",
+   "meripihkahappoanhydridissä",
+   "meripihkahappoanhydridistä",
+   "meripihkahappoanhydridiin",
+   "meripihkahappoanhydridiksi",
+   "meripihkahappoanhydridillä",
+   "meripihkahappoanhydridille",
+   "meripihkahappoanhydridit",
+   "meripihkahappoanhydridien",
+   "meripihkahappoanhydridejä",
+   "meripihkahappoanhydrideissä",
+   "meripihkahappoanhydridia",
+   "meripihkahappoanhydridissa",
+   "meripihkahappoanhydridista",
+   "meripihkahappoanhydridilla",
+   "meripihkahappoanhydrideja",
+   "meripihkahappoanhydrideissa"
+  ],
+  "kuva2d": "2d/MERIPIHKAHAPPOANHYDRIDI.svg",
+  "ryhmat": {
+   "happoanhydridi": [
+    0,
+    1,
+    4,
+    5,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "happoanhydridi": "2d/MERIPIHKAHAPPOANHYDRIDI__happoanhydridi.svg"
+  }
+ },
+ "MALEIINIHAPPOANHYDRIDI": {
+  "nimi": "maleiinihappoanhydridi",
+  "kaava": "C₄H₂O₃",
+  "kaavat": [
+   "C₄H₂O₃"
+  ],
+  "sanat": [
+   "maleiinihappoanhydridi",
+   "maleiinihappoanhydridin",
+   "maleiinihappoanhydridiä",
+   "maleiinihappoanhydridissä",
+   "maleiinihappoanhydridistä",
+   "maleiinihappoanhydridiin",
+   "maleiinihappoanhydridiksi",
+   "maleiinihappoanhydridillä",
+   "maleiinihappoanhydridille",
+   "maleiinihappoanhydridit",
+   "maleiinihappoanhydridien",
+   "maleiinihappoanhydridejä",
+   "maleiinihappoanhydrideissä",
+   "maleiinihappoanhydridia",
+   "maleiinihappoanhydridissa",
+   "maleiinihappoanhydridista",
+   "maleiinihappoanhydridilla",
+   "maleiinihappoanhydrideja",
+   "maleiinihappoanhydrideissa"
+  ],
+  "kuva2d": "2d/MALEIINIHAPPOANHYDRIDI.svg",
+  "ryhmat": {
+   "happoanhydridi": [
+    0,
+    1,
+    4,
+    5,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "happoanhydridi": "2d/MALEIINIHAPPOANHYDRIDI__happoanhydridi.svg"
+  }
+ },
+ "LYSIINI": {
+  "nimi": "lysiini",
+  "kaava": "C₆H₁₄N₂O₂",
+  "kaavat": [
+   "C₆H₁₄N₂O₂"
+  ],
+  "sanat": [
+   "lysiini",
+   "lysiinin",
+   "lysiiniä",
+   "lysiinissä",
+   "lysiinistä",
+   "lysiiniin",
+   "lysiiniksi",
+   "lysiinillä",
+   "lysiinille",
+   "lysiinit",
+   "lysiinien",
+   "lysiinejä",
+   "lysiineissä",
+   "lysiinia",
+   "lysiinissa",
+   "lysiinista",
+   "lysiinilla",
+   "lysiineja",
+   "lysiineissa"
+  ],
+  "kuva2d": "2d/LYSIINI.svg",
+  "ryhmat": {
+   "aminoryhmä": [
+    0,
+    6,
+    10,
+    11,
+    21,
+    22
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "aminoryhmä": "2d/LYSIINI__aminoryhmä.svg"
+  }
+ },
+ "ETANOLIAMIINI": {
+  "nimi": "etanoliamiini",
+  "kaava": "C₂H₇NO",
+  "kaavat": [
+   "C₂H₇NO"
+  ],
+  "sanat": [
+   "etanoliamiini",
+   "etanoliamiinin",
+   "etanoliamiinia",
+   "etanoliamiinissa",
+   "etanoliamiinista",
+   "etanoliamiiniin",
+   "etanoliamiiniksi",
+   "etanoliamiinilla",
+   "etanoliamiinille",
+   "etanoliamiinit",
+   "etanoliamiinien",
+   "etanoliamiineja",
+   "etanoliamiineissa"
+  ],
+  "kuva2d": "2d/ETANOLIAMIINI.svg",
+  "ryhmat": {
+   "aminoryhmä": [
+    0,
+    4,
+    5
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "aminoryhmä": "2d/ETANOLIAMIINI__aminoryhmä.svg"
+  }
+ },
+ "GLUTAMIINI": {
+  "nimi": "glutamiini",
+  "kaava": "C₅H₁₀N₂O₃",
+  "kaavat": [
+   "C₅H₁₀N₂O₃"
+  ],
+  "sanat": [
+   "glutamiini",
+   "glutamiinin",
+   "glutamiinia",
+   "glutamiinissa",
+   "glutamiinista",
+   "glutamiiniin",
+   "glutamiiniksi",
+   "glutamiinilla",
+   "glutamiinille",
+   "glutamiinit",
+   "glutamiinien",
+   "glutamiineja",
+   "glutamiineissa"
+  ],
+  "kuva2d": "2d/GLUTAMIINI.svg",
+  "ryhmat": {
+   "amidiryhmä": [
+    0,
+    1,
+    2,
+    10,
+    11
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "amidiryhmä": "2d/GLUTAMIINI__amidiryhmä.svg"
+  }
+ },
+ "ASPARAGIINI": {
+  "nimi": "asparagiini",
+  "kaava": "C₄H₈N₂O₃",
+  "kaavat": [
+   "C₄H₈N₂O₃"
+  ],
+  "sanat": [
+   "asparagiini",
+   "asparagiinin",
+   "asparagiinia",
+   "asparagiinissa",
+   "asparagiinista",
+   "asparagiiniin",
+   "asparagiiniksi",
+   "asparagiinilla",
+   "asparagiinille",
+   "asparagiinit",
+   "asparagiinien",
+   "asparagiineja",
+   "asparagiineissa"
+  ],
+  "kuva2d": "2d/ASPARAGIINI.svg",
+  "ryhmat": {
+   "amidiryhmä": [
+    0,
+    1,
+    2,
+    9,
+    10
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "amidiryhmä": "2d/ASPARAGIINI__amidiryhmä.svg"
+  }
+ },
+ "GLYSYYLIGLYSIINI": {
+  "nimi": "glysyyliglysiini",
+  "kaava": "C₄H₈N₂O₃",
+  "kaavat": [
+   "C₄H₈N₂O₃"
+  ],
+  "sanat": [
+   "glysyyliglysiini",
+   "glysyyliglysiinin",
+   "glysyyliglysiiniä",
+   "glysyyliglysiinissä",
+   "glysyyliglysiinistä",
+   "glysyyliglysiiniin",
+   "glysyyliglysiiniksi",
+   "glysyyliglysiinillä",
+   "glysyyliglysiinille",
+   "glysyyliglysiinit",
+   "glysyyliglysiinien",
+   "glysyyliglysiinejä",
+   "glysyyliglysiineissä",
+   "glysyyliglysiinia",
+   "glysyyliglysiinissa",
+   "glysyyliglysiinista",
+   "glysyyliglysiinilla",
+   "glysyyliglysiineja",
+   "glysyyliglysiineissa"
+  ],
+  "kuva2d": "2d/GLYSYYLIGLYSIINI.svg",
+  "ryhmat": {
+   "amidiryhmä": [
+    2,
+    3,
+    4,
+    13
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "amidiryhmä": "2d/GLYSYYLIGLYSIINI__amidiryhmä.svg"
+  }
+ },
+ "PROPAN2IMIINI": {
+  "nimi": "propan-2-imiini",
+  "kaava": "C₃H₇N",
+  "kaavat": [
+   "C₃H₇N"
+  ],
+  "sanat": [
+   "propan-2-imiini",
+   "propan-2-imiinin",
+   "propan-2-imiiniä",
+   "propan-2-imiinissä",
+   "propan-2-imiinistä",
+   "propan-2-imiiniin",
+   "propan-2-imiiniksi",
+   "propan-2-imiinillä",
+   "propan-2-imiinille",
+   "propan-2-imiinit",
+   "propan-2-imiinien",
+   "propan-2-imiinejä",
+   "propan-2-imiineissä"
+  ],
+  "kuva2d": "2d/PROPAN2IMIINI.svg",
+  "ryhmat": {
+   "imiiniryhmä": [
+    1,
+    3,
+    10
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imiiniryhmä": "2d/PROPAN2IMIINI__imiiniryhmä.svg"
+  }
+ },
+ "KREATINIINI": {
+  "nimi": "kreatiniini",
+  "kaava": "C₄H₇N₃O",
+  "kaavat": [
+   "C₄H₇N₃O"
+  ],
+  "sanat": [
+   "kreatiniini",
+   "kreatiniinin",
+   "kreatiniinia",
+   "kreatiniinissa",
+   "kreatiniinista",
+   "kreatiniiniin",
+   "kreatiniiniksi",
+   "kreatiniinilla",
+   "kreatiniinille",
+   "kreatiniinit",
+   "kreatiniinien",
+   "kreatiniineja",
+   "kreatiniineissa"
+  ],
+  "kuva2d": "2d/KREATINIINI.svg",
+  "ryhmat": {
+   "imiiniryhmä": [
+    5,
+    6
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imiiniryhmä": "2d/KREATINIINI__imiiniryhmä.svg"
+  }
+ },
+ "P5C": {
+  "nimi": "pyrroliini-5-karboksylaatti",
+  "kaava": "C₅H₇NO₂",
+  "kaavat": [
+   "C₅H₇NO₂"
+  ],
+  "sanat": [
+   "pyrroliini-5-karboksylaatti",
+   "pyrroliini-5-karboksylaatin",
+   "pyrroliini-5-karboksylaattia",
+   "pyrroliini-5-karboksylaatissa",
+   "pyrroliini-5-karboksylaatista",
+   "pyrroliini-5-karboksylaattiin",
+   "pyrroliini-5-karboksylaatiksi",
+   "pyrroliini-5-karboksylaatilla",
+   "pyrroliini-5-karboksylaatille",
+   "pyrroliini-5-karboksylaatit",
+   "pyrroliini-5-karboksylaattien",
+   "pyrroliini-5-karboksylaatteja",
+   "pyrroliini-5-karboksylaateissa"
+  ],
+  "kuva2d": "2d/P5C.svg",
+  "ryhmat": {
+   "imiiniryhmä": [
+    6,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imiiniryhmä": "2d/P5C__imiiniryhmä.svg"
+  }
+ },
+ "BENTSYLIDEENIMETYYLIAMIINI": {
+  "nimi": "N-bentsylideenimetyyliamiini",
+  "kaava": "C₈H₉N",
+  "kaavat": [
+   "C₈H₉N"
+  ],
+  "sanat": [
+   "N-bentsylideenimetyyliamiini",
+   "N-bentsylideenimetyyliamiinin",
+   "N-bentsylideenimetyyliamiinia",
+   "N-bentsylideenimetyyliamiinissa",
+   "N-bentsylideenimetyyliamiinista",
+   "N-bentsylideenimetyyliamiiniin",
+   "N-bentsylideenimetyyliamiiniksi",
+   "N-bentsylideenimetyyliamiinilla",
+   "N-bentsylideenimetyyliamiinille",
+   "N-bentsylideenimetyyliamiinit",
+   "N-bentsylideenimetyyliamiinien",
+   "N-bentsylideenimetyyliamiineja",
+   "N-bentsylideenimetyyliamiineissa"
+  ],
+  "kuva2d": "2d/BENTSYLIDEENIMETYYLIAMIINI.svg",
+  "ryhmat": {
+   "Schiffin emäs": [
+    0,
+    1,
+    2
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "Schiffin emäs": "2d/BENTSYLIDEENIMETYYLIAMIINI__Schiffin_emäs.svg"
+  }
+ },
+ "PLPMETYYLIIMIINI": {
+  "nimi": "PLP-metyyli-imiini",
+  "kaava": "C₉H₁₃N₂O₅P",
+  "kaavat": [
+   "C₉H₁₃N₂O₅P"
+  ],
+  "sanat": [
+   "PLP-metyyli-imiini",
+   "PLP-metyyli-imiinin",
+   "PLP-metyyli-imiiniä",
+   "PLP-metyyli-imiinissä",
+   "PLP-metyyli-imiinistä",
+   "PLP-metyyli-imiiniin",
+   "PLP-metyyli-imiiniksi",
+   "PLP-metyyli-imiinillä",
+   "PLP-metyyli-imiinille",
+   "PLP-metyyli-imiinit",
+   "PLP-metyyli-imiinien",
+   "PLP-metyyli-imiinejä",
+   "PLP-metyyli-imiineissä"
+  ],
+  "kuva2d": "2d/PLPMETYYLIIMIINI.svg",
+  "ryhmat": {
+   "Schiffin emäs": [
+    12,
+    13,
+    14
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "Schiffin emäs": "2d/PLPMETYYLIIMIINI__Schiffin_emäs.svg"
+  }
+ },
+ "ASETONIMETYYLIIMIINI": {
+  "nimi": "N-metyylipropan-2-imiini",
+  "kaava": "C₄H₉N",
+  "kaavat": [
+   "C₄H₉N"
+  ],
+  "sanat": [
+   "N-metyylipropan-2-imiini",
+   "N-metyylipropan-2-imiinin",
+   "N-metyylipropan-2-imiiniä",
+   "N-metyylipropan-2-imiinissä",
+   "N-metyylipropan-2-imiinistä",
+   "N-metyylipropan-2-imiiniin",
+   "N-metyylipropan-2-imiiniksi",
+   "N-metyylipropan-2-imiinillä",
+   "N-metyylipropan-2-imiinille",
+   "N-metyylipropan-2-imiinit",
+   "N-metyylipropan-2-imiinien",
+   "N-metyylipropan-2-imiinejä",
+   "N-metyylipropan-2-imiineissä"
+  ],
+  "kuva2d": "2d/ASETONIMETYYLIIMIINI.svg",
+  "ryhmat": {
+   "Schiffin emäs": [
+    1,
+    3,
+    4
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "Schiffin emäs": "2d/ASETONIMETYYLIIMIINI__Schiffin_emäs.svg"
+  }
+ },
+ "ARGINIINI": {
+  "nimi": "arginiini",
+  "kaava": "C₆H₁₄N₄O₂",
+  "kaavat": [
+   "C₆H₁₄N₄O₂"
+  ],
+  "sanat": [
+   "arginiini",
+   "arginiinin",
+   "arginiinia",
+   "arginiinissa",
+   "arginiinista",
+   "arginiiniin",
+   "arginiiniksi",
+   "arginiinilla",
+   "arginiinille",
+   "arginiinit",
+   "arginiinien",
+   "arginiineja",
+   "arginiineissa"
+  ],
+  "kuva2d": "2d/ARGINIINI.svg",
+  "ryhmat": {
+   "guanidiiniryhmä": [
+    5,
+    6,
+    7,
+    8,
+    21,
+    22,
+    23,
+    24
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "guanidiiniryhmä": "2d/ARGINIINI__guanidiiniryhmä.svg"
+  }
+ },
+ "KREATIINI": {
+  "nimi": "kreatiini",
+  "kaava": "C₄H₉N₃O₂",
+  "kaavat": [
+   "C₄H₉N₃O₂"
+  ],
+  "sanat": [
+   "kreatiini",
+   "kreatiinin",
+   "kreatiinia",
+   "kreatiinissa",
+   "kreatiinista",
+   "kreatiiniin",
+   "kreatiiniksi",
+   "kreatiinilla",
+   "kreatiinille",
+   "kreatiinit",
+   "kreatiinien",
+   "kreatiineja",
+   "kreatiineissa"
+  ],
+  "kuva2d": "2d/KREATIINI.svg",
+  "ryhmat": {
+   "guanidiiniryhmä": [
+    1,
+    6,
+    7,
+    8,
+    15,
+    16,
+    17
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "guanidiiniryhmä": "2d/KREATIINI__guanidiiniryhmä.svg"
+  }
+ },
+ "GUANIDIINI": {
+  "nimi": "guanidiini",
+  "kaava": "CH₅N₃",
+  "kaavat": [
+   "CH₅N₃"
+  ],
+  "sanat": [
+   "guanidiini",
+   "guanidiinin",
+   "guanidiinia",
+   "guanidiinissa",
+   "guanidiinista",
+   "guanidiiniin",
+   "guanidiiniksi",
+   "guanidiinilla",
+   "guanidiinille",
+   "guanidiinit",
+   "guanidiinien",
+   "guanidiineja",
+   "guanidiineissa"
+  ],
+  "kuva2d": "2d/GUANIDIINI.svg",
+  "ryhmat": {
+   "guanidiiniryhmä": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "guanidiiniryhmä": "2d/GUANIDIINI__guanidiiniryhmä.svg"
+  }
+ },
+ "HISTIDIINI": {
+  "nimi": "histidiini",
+  "kaava": "C₆H₉N₃O₂",
+  "kaavat": [
+   "C₆H₉N₃O₂"
+  ],
+  "sanat": [
+   "histidiini",
+   "histidiinin",
+   "histidiiniä",
+   "histidiinissä",
+   "histidiinistä",
+   "histidiiniin",
+   "histidiiniksi",
+   "histidiinillä",
+   "histidiinille",
+   "histidiinit",
+   "histidiinien",
+   "histidiinejä",
+   "histidiineissä"
+  ],
+  "kuva2d": "2d/HISTIDIINI.svg",
+  "ryhmat": {
+   "imidatsoliryhmä": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    16,
+    17,
+    18
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imidatsoliryhmä": "2d/HISTIDIINI__imidatsoliryhmä.svg"
+  }
+ },
+ "HISTAMIINI": {
+  "nimi": "histamiini",
+  "kaava": "C₅H₉N₃",
+  "kaavat": [
+   "C₅H₉N₃"
+  ],
+  "sanat": [
+   "histamiini",
+   "histamiinin",
+   "histamiinia",
+   "histamiinissa",
+   "histamiinista",
+   "histamiiniin",
+   "histamiiniksi",
+   "histamiinilla",
+   "histamiinille",
+   "histamiinit",
+   "histamiinien",
+   "histamiineja",
+   "histamiineissa"
+  ],
+  "kuva2d": "2d/HISTAMIINI.svg",
+  "ryhmat": {
+   "imidatsoliryhmä": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    14,
+    15,
+    16
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imidatsoliryhmä": "2d/HISTAMIINI__imidatsoliryhmä.svg"
+  }
+ },
+ "IMIDATSOLI": {
+  "nimi": "imidatsoli",
+  "kaava": "C₃H₄N₂",
+  "kaavat": [
+   "C₃H₄N₂"
+  ],
+  "sanat": [
+   "imidatsoli",
+   "imidatsolin",
+   "imidatsolia",
+   "imidatsolissa",
+   "imidatsolista",
+   "imidatsoliin",
+   "imidatsoliksi",
+   "imidatsolilla",
+   "imidatsolille",
+   "imidatsolit",
+   "imidatsolien",
+   "imidatsoleja",
+   "imidatsoleissa"
+  ],
+  "kuva2d": "2d/IMIDATSOLI.svg",
+  "ryhmat": {
+   "imidatsoliryhmä": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "imidatsoliryhmä": "2d/IMIDATSOLI__imidatsoliryhmä.svg"
+  }
+ },
+ "KYSTEIINI": {
+  "nimi": "kysteiini",
+  "kaava": "C₃H₇NO₂S",
+  "kaavat": [
+   "C₃H₇NO₂S"
+  ],
+  "sanat": [
+   "kysteiini",
+   "kysteiinin",
+   "kysteiiniä",
+   "kysteiinissä",
+   "kysteiinistä",
+   "kysteiiniin",
+   "kysteiiniksi",
+   "kysteiinillä",
+   "kysteiinille",
+   "kysteiinit",
+   "kysteiinien",
+   "kysteiinejä",
+   "kysteiineissä",
+   "kysteiinia",
+   "kysteiinissa",
+   "kysteiinista",
+   "kysteiinilla",
+   "kysteiineja",
+   "kysteiineissa"
+  ],
+  "kuva2d": "2d/KYSTEIINI.svg",
+  "ryhmat": {
+   "sulfhydryyliryhmä": [
+    3,
+    12
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "sulfhydryyliryhmä": "2d/KYSTEIINI__sulfhydryyliryhmä.svg"
+  }
+ },
+ "GLUTATIONI": {
+  "nimi": "glutationi",
+  "kaava": "C₁₀H₁₇N₃O₆S",
+  "kaavat": [
+   "C₁₀H₁₇N₃O₆S"
+  ],
+  "sanat": [
+   "glutationi",
+   "glutationin",
+   "glutationia",
+   "glutationissa",
+   "glutationista",
+   "glutationiin",
+   "glutationiksi",
+   "glutationilla",
+   "glutationille",
+   "glutationit",
+   "glutationien",
+   "glutationeja",
+   "glutationeissa"
+  ],
+  "kuva2d": "2d/GLUTATIONI.svg",
+  "ryhmat": {
+   "sulfhydryyliryhmä": [
+    9,
+    31
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "sulfhydryyliryhmä": "2d/GLUTATIONI__sulfhydryyliryhmä.svg"
+  }
+ },
+ "MERKAPTOETANOLI": {
+  "nimi": "merkaptoetanoli",
+  "kaava": "C₂H₆OS",
+  "kaavat": [
+   "C₂H₆OS"
+  ],
+  "sanat": [
+   "merkaptoetanoli",
+   "merkaptoetanolin",
+   "merkaptoetanolia",
+   "merkaptoetanolissa",
+   "merkaptoetanolista",
+   "merkaptoetanoliin",
+   "merkaptoetanoliksi",
+   "merkaptoetanolilla",
+   "merkaptoetanolille",
+   "merkaptoetanolit",
+   "merkaptoetanolien",
+   "merkaptoetanoleja",
+   "merkaptoetanoleissa"
+  ],
+  "kuva2d": "2d/MERKAPTOETANOLI.svg",
+  "ryhmat": {
+   "sulfhydryyliryhmä": [
+    3,
+    9
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "sulfhydryyliryhmä": "2d/MERKAPTOETANOLI__sulfhydryyliryhmä.svg"
+  }
+ },
+ "KYSTIINI": {
+  "nimi": "kystiini",
+  "kaava": "C₆H₁₂N₂O₄S₂",
+  "kaavat": [
+   "C₆H₁₂N₂O₄S₂"
+  ],
+  "sanat": [
+   "kystiini",
+   "kystiinin",
+   "kystiiniä",
+   "kystiinissä",
+   "kystiinistä",
+   "kystiiniin",
+   "kystiiniksi",
+   "kystiinillä",
+   "kystiinille",
+   "kystiinit",
+   "kystiinien",
+   "kystiinejä",
+   "kystiineissä",
+   "kystiinia",
+   "kystiinissa",
+   "kystiinista",
+   "kystiinilla",
+   "kystiineja",
+   "kystiineissa"
+  ],
+  "kuva2d": "2d/KYSTIINI.svg",
+  "ryhmat": {
+   "disulfidisidos": [
+    3,
+    4
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "disulfidisidos": "2d/KYSTIINI__disulfidisidos.svg"
+  }
+ },
+ "LIPOIINIHAPPO": {
+  "nimi": "lipoiinihappo",
+  "kaava": "C₈H₁₄O₂S₂",
+  "kaavat": [
+   "C₈H₁₄O₂S₂"
+  ],
+  "sanat": [
+   "lipoiinihappo"
+  ],
+  "kuva2d": "2d/LIPOIINIHAPPO.svg",
+  "ryhmat": {
+   "disulfidisidos": [
+    10,
+    11
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "disulfidisidos": "2d/LIPOIINIHAPPO__disulfidisidos.svg"
+  }
+ },
+ "DIETYYLIDISULFIDI": {
+  "nimi": "dietyylidisulfidi",
+  "kaava": "C₄H₁₀S₂",
+  "kaavat": [
+   "C₄H₁₀S₂"
+  ],
+  "sanat": [
+   "dietyylidisulfidi",
+   "dietyylidisulfidin",
+   "dietyylidisulfidia",
+   "dietyylidisulfidissa",
+   "dietyylidisulfidista",
+   "dietyylidisulfidiin",
+   "dietyylidisulfidiksi",
+   "dietyylidisulfidilla",
+   "dietyylidisulfidille",
+   "dietyylidisulfidit",
+   "dietyylidisulfidien",
+   "dietyylidisulfideja",
+   "dietyylidisulfideissa"
+  ],
+  "kuva2d": "2d/DIETYYLIDISULFIDI.svg",
+  "ryhmat": {
+   "disulfidisidos": [
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "disulfidisidos": "2d/DIETYYLIDISULFIDI__disulfidisidos.svg"
+  }
+ },
+ "SASETYYLIKYSTEAMIINI": {
+  "nimi": "S-asetyylikysteamiini",
+  "kaava": "C₄H₉NOS",
+  "kaavat": [
+   "C₄H₉NOS"
+  ],
+  "sanat": [
+   "S-asetyylikysteamiini",
+   "S-asetyylikysteamiinin",
+   "S-asetyylikysteamiinia",
+   "S-asetyylikysteamiinissa",
+   "S-asetyylikysteamiinista",
+   "S-asetyylikysteamiiniin",
+   "S-asetyylikysteamiiniksi",
+   "S-asetyylikysteamiinilla",
+   "S-asetyylikysteamiinille",
+   "S-asetyylikysteamiinit",
+   "S-asetyylikysteamiinien",
+   "S-asetyylikysteamiineja",
+   "S-asetyylikysteamiineissa"
+  ],
+  "kuva2d": "2d/SASETYYLIKYSTEAMIINI.svg",
+  "ryhmat": {
+   "tioesteri": [
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "tioesteri": "2d/SASETYYLIKYSTEAMIINI__tioesteri.svg"
+  }
+ },
+ "ASETYYLIPANTETEIINI": {
+  "nimi": "asetyylipanteteiini",
+  "kaava": "C₁₃H₂₄N₂O₄S",
+  "kaavat": [
+   "C₁₃H₂₄N₂O₄S"
+  ],
+  "sanat": [
+   "asetyylipanteteiini",
+   "asetyylipanteteiinin",
+   "asetyylipanteteiinia",
+   "asetyylipanteteiinissa",
+   "asetyylipanteteiinista",
+   "asetyylipanteteiiniin",
+   "asetyylipanteteiiniksi",
+   "asetyylipanteteiinilla",
+   "asetyylipanteteiinille",
+   "asetyylipanteteiinit",
+   "asetyylipanteteiinien",
+   "asetyylipanteteiineja",
+   "asetyylipanteteiineissa"
+  ],
+  "kuva2d": "2d/ASETYYLIPANTETEIINI.svg",
+  "ryhmat": {
+   "tioesteri": [
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "tioesteri": "2d/ASETYYLIPANTETEIINI__tioesteri.svg"
+  }
+ },
+ "ASETYYLICOA": {
+  "nimi": "asetyylikoentsyymi A",
+  "kaava": "C₂₃H₃₈N₇O₁₇P₃S",
+  "kaavat": [
+   "C₂₃H₃₈N₇O₁₇P₃S"
+  ],
+  "sanat": [
+   "asetyylikoentsyymi A",
+   "asetyyli-CoA"
+  ],
+  "kuva2d": "2d/ASETYYLICOA.svg",
+  "ryhmat": {
+   "tioesteri": [
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "tioesteri": "2d/ASETYYLICOA__tioesteri.svg"
+  }
+ },
+ "FOSFOSERIINI": {
+  "nimi": "fosfoseriini",
+  "kaava": "C₃H₆NO₆P²⁻",
+  "kaavat": [
+   "C₃H₆NO₆P²⁻"
+  ],
+  "sanat": [
+   "fosfoseriini",
+   "fosfoseriinin",
+   "fosfoseriinia",
+   "fosfoseriinissa",
+   "fosfoseriinista",
+   "fosfoseriiniin",
+   "fosfoseriiniksi",
+   "fosfoseriinilla",
+   "fosfoseriinille",
+   "fosfoseriinit",
+   "fosfoseriinien",
+   "fosfoseriineja",
+   "fosfoseriineissa"
+  ],
+  "kuva2d": "2d/FOSFOSERIINI.svg",
+  "ryhmat": {
+   "fosforyyliryhmä": [
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fosforyyliryhmä": "2d/FOSFOSERIINI__fosforyyliryhmä.svg"
+  }
+ },
+ "PYROFOSFAATTI": {
+  "nimi": "pyrofosfaatti",
+  "kaava": "P₂O₇⁴⁻",
+  "kaavat": [
+   "P₂O₇⁴⁻"
+  ],
+  "sanat": [
+   "pyrofosfaatti",
+   "pyrofosfaatin",
+   "pyrofosfaattia",
+   "pyrofosfaatissa",
+   "pyrofosfaatista",
+   "pyrofosfaattiin",
+   "pyrofosfaatiksi",
+   "pyrofosfaatilla",
+   "pyrofosfaatille",
+   "pyrofosfaatit",
+   "pyrofosfaattien",
+   "pyrofosfaatteja",
+   "pyrofosfaateissa",
+   "difosfaatti",
+   "difosfaatin",
+   "difosfaattia",
+   "difosfaatissa",
+   "difosfaatista",
+   "difosfaattiin",
+   "difosfaatiksi",
+   "difosfaatilla",
+   "difosfaatille",
+   "difosfaatit",
+   "difosfaattien",
+   "difosfaatteja",
+   "difosfaateissa"
+  ],
+  "kuva2d": "2d/PYROFOSFAATTI.svg",
+  "ryhmat": {
+   "fosfoanhydridisidos": [
+    1,
+    4,
+    5
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fosfoanhydridisidos": "2d/PYROFOSFAATTI__fosfoanhydridisidos.svg"
+  }
+ },
+ "BPG13": {
+  "nimi": "1,3-bisfosfoglyseraatti",
+  "kaava": "C₃H₄O₁₀P₂⁴⁻",
+  "kaavat": [
+   "C₃H₄O₁₀P₂⁴⁻"
+  ],
+  "sanat": [
+   "1,3-bisfosfoglyseraatti",
+   "1,3-bisfosfoglyseraatin",
+   "1,3-bisfosfoglyseraattia",
+   "1,3-bisfosfoglyseraatissa",
+   "1,3-bisfosfoglyseraatista",
+   "1,3-bisfosfoglyseraattiin",
+   "1,3-bisfosfoglyseraatiksi",
+   "1,3-bisfosfoglyseraatilla",
+   "1,3-bisfosfoglyseraatille",
+   "1,3-bisfosfoglyseraatit",
+   "1,3-bisfosfoglyseraattien",
+   "1,3-bisfosfoglyseraatteja",
+   "1,3-bisfosfoglyseraateissa"
+  ],
+  "kuva2d": "2d/BPG13.svg",
+  "ryhmat": {
+   "asyylifosfaatti": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "asyylifosfaatti": "2d/BPG13__asyylifosfaatti.svg"
+  }
+ },
+ "KARBAMOYYLIFOSFAATTI": {
+  "nimi": "karbamoyylifosfaatti",
+  "kaava": "CH₂NO₅P²⁻",
+  "kaavat": [
+   "CH₂NO₅P²⁻"
+  ],
+  "sanat": [
+   "karbamoyylifosfaatti",
+   "karbamoyylifosfaatin",
+   "karbamoyylifosfaattia",
+   "karbamoyylifosfaatissa",
+   "karbamoyylifosfaatista",
+   "karbamoyylifosfaattiin",
+   "karbamoyylifosfaatiksi",
+   "karbamoyylifosfaatilla",
+   "karbamoyylifosfaatille",
+   "karbamoyylifosfaatit",
+   "karbamoyylifosfaattien",
+   "karbamoyylifosfaatteja",
+   "karbamoyylifosfaateissa"
+  ],
+  "kuva2d": "2d/KARBAMOYYLIFOSFAATTI.svg",
+  "ryhmat": {
+   "asyylifosfaatti": [
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "asyylifosfaatti": "2d/KARBAMOYYLIFOSFAATTI__asyylifosfaatti.svg"
+  }
+ },
+ "PROPIONYYLIFOSFAATTI": {
+  "nimi": "propionyylifosfaatti",
+  "kaava": "C₃H₅O₅P²⁻",
+  "kaavat": [
+   "C₃H₅O₅P²⁻"
+  ],
+  "sanat": [
+   "propionyylifosfaatti",
+   "propionyylifosfaatin",
+   "propionyylifosfaattia",
+   "propionyylifosfaatissa",
+   "propionyylifosfaatista",
+   "propionyylifosfaattiin",
+   "propionyylifosfaatiksi",
+   "propionyylifosfaatilla",
+   "propionyylifosfaatille",
+   "propionyylifosfaatit",
+   "propionyylifosfaattien",
+   "propionyylifosfaatteja",
+   "propionyylifosfaateissa"
+  ],
+  "kuva2d": "2d/PROPIONYYLIFOSFAATTI.svg",
+  "ryhmat": {
+   "asyylifosfaatti": [
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "asyylifosfaatti": "2d/PROPIONYYLIFOSFAATTI__asyylifosfaatti.svg"
+  }
+ },
+ "ATPK": {
+  "nimi": "ATP",
+  "kaava": "C₁₀H₁₂N₅O₁₃P₃⁴⁻",
+  "kaavat": [
+   "C₁₀H₁₂N₅O₁₃P₃⁴⁻"
+  ],
+  "sanat": [],
+  "kuva2d": "2d/ATPK.svg",
+  "ryhmat": {
+   "fosforyyliryhmä": [
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26
+   ],
+   "fosfoanhydridisidos": [
+    15,
+    18,
+    19,
+    22,
+    23
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fosforyyliryhmä": "2d/ATPK__fosforyyliryhmä.svg",
+   "fosfoanhydridisidos": "2d/ATPK__fosfoanhydridisidos.svg"
+  }
+ },
+ "ADPK": {
+  "nimi": "ADP",
+  "kaava": "C₁₀H₁₂N₅O₁₀P₂³⁻",
+  "kaavat": [
+   "C₁₀H₁₂N₅O₁₀P₂³⁻"
+  ],
+  "sanat": [],
+  "kuva2d": "2d/ADPK.svg",
+  "ryhmat": {
+   "fosfoanhydridisidos": [
+    15,
+    18,
+    19
+   ]
+  },
+  "kuva2d_ryhmat": {
+   "fosfoanhydridisidos": "2d/ADPK__fosfoanhydridisidos.svg"
+  }
  }
 }
