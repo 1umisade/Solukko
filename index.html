@@ -182,6 +182,12 @@ body.dark-mode #home-hero .hero-manifest { color: #cbb9a0; }
 body.dark-mode .home-greet { background: #3a312b; color: #eadfce; border-color: #6d5f52; }
 body.dark-mode .home-greet::after { border-right-color: #3a312b; }
 .year-section { width: 100%; }
+.home-search { display: block; width: 100%; box-sizing: border-box; margin-top: 0.6rem; padding: 0.5rem 0.8rem; font: inherit; color: inherit; background: #fff; border: 1.5px solid #d4cec4; border-radius: 12px; outline: none; }   /* Mona's search bubble (owner 14.9.2026) */
+.home-search:focus { border-color: #a3b881; box-shadow: 0 0 0 3px rgba(163,184,129,0.35); }
+body.dark-mode .home-search { background: #2b2622; border-color: #6d5f52; }
+#home-search-results { width: 100%; }
+#home-search-results .home-search-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); margin-top: 8px; }
+#home-search-results .overview-card { cursor: pointer; font-size: 0.74rem; }
 .year-heading { font-family: 'Lora', serif; font-weight: 800; font-size: 2.3rem; color: #7a5230; border-bottom: 2px solid #d4cec4; padding-bottom: 6px; margin-bottom: 16px; }
 .year-row { display: flex; gap: 24px; align-items: flex-start; }
 .sem-col { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 18px 16px; align-content: flex-start; }
@@ -674,7 +680,7 @@ body.dark-mode .flashcard::-webkit-scrollbar-thumb:hover { background: #c99e64; 
 .card-embed-block { width: 100%; margin: 0.6rem auto 0; }
 .card-embed-block.embed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }   /* functional-group card: four compounds, 2x2 (owner 14.9.2026) */
 .card-embed-block.embed-grid .embed-stack { width: 100%; }
-.embed-nimi { font-family: 'Lora', serif; font-size: 0.95rem; color: #56533c; text-align: center; }
+.embed-nimi { font-family: 'Lora', serif; font-size: 0.95rem; color: #56533c; text-align: center; margin-top: 0.25rem; }
 body.dark-mode .embed-nimi { color: #eadfce; }
 #word-link-tooltip .card-embed-block, .wl-lapsi .card-embed-block { margin: 0.3rem auto 0.5rem; }   /* the card popup shows the first compound */
 #word-link-tooltip .card-embed-block .embed-stack, .wl-lapsi .card-embed-block .embed-stack { width: min(100%, 240px); }
@@ -2993,8 +2999,9 @@ function _parse3dField(v){ v=String(v||'').replace(/<[^>]*>/g,'').replace(/&nbsp
 function _embedCell(key, ryhma){   // one compound: the 2-D formula (group highlighted if the variant exists), the live 3-D frame, kaava/muoto switch
   const m=_molekyylit&&_molekyylit[key], idx=(m&&m.ryhmat&&ryhma&&m.ryhmat[ryhma])||null, kuva=(m&&((ryhma&&m.kuva2d_ryhmat&&m.kuva2d_ryhmat[ryhma])||m.kuva2d))||'';
   const emb=document.createElement('div'); emb.className='card-embed-3d'; emb.dataset.dim=kuva?'2d':'3d'; emb._auto=true;
-  emb.innerHTML=(ryhma?'<div class="embed-nimi">'+_esc(m?m.nimi:key)+'</div>':'')+'<div class="embed-stack">'+(kuva?'<img class="embed-2d" src="simulaatiot/kortit/'+kuva+'" alt="'+_esc(m&&m.nimi||key)+' rakennekaava">':'')
+  emb.innerHTML='<div class="embed-stack">'+(kuva?'<img class="embed-2d" src="simulaatiot/kortit/'+kuva+'" alt="'+_esc(m&&m.nimi||key)+' rakennekaava">':'')
     +'<iframe class="embed-3d-frame" src="'+EMBED_3D_BASE+encodeURIComponent(key)+(idx?'&korosta='+idx.join(','):'')+'&v='+Math.floor(Date.now()/3.6e6)+'" title="'+_esc(m?m.nimi:key)+' - vedä kääntääksesi, rulla zoomaa" referrerpolicy="no-referrer"></iframe></div>'
+    +(ryhma?'<div class="embed-nimi">'+_esc(m?m.nimi:key)+'</div>':'')   // the compound's name under the model, above the kaava/muoto switch (owner 14.9.2026)
     +(kuva?'<div class="wl-dim-switch"><button type="button" class="wl-dim" data-dim="2d">kaava</button><button type="button" class="wl-dim" data-dim="3d">muoto</button></div>':'');
   _embedDim(emb, emb.dataset.dim);
   emb.addEventListener('click', e=>{ const b=e.target.closest('.wl-dim'); if(!b) return; e.stopPropagation(); emb._auto=false; _embedDim(emb, b.dataset.dim); });   // the switch never counts as a click on the card
@@ -3436,7 +3443,38 @@ function renderGreet(){   // render the current homepage greeting bubble (its in
   const key=order[((_greetIdx%order.length)+order.length)%order.length];
   if(key==='__golden__'){ greet.classList.add('win-bubble'); greet.innerHTML=_goldenWinText(); }
   else { greet.classList.remove('win-bubble'); greet.innerHTML=MONA_BUBBLES[key]||''; greet.querySelectorAll('.user-word').forEach(el=>el.textContent=getUserWord()); if(typeof updateTietovisaAika==='function') updateTietovisaAika(); }
+  if(key==='home_search'){ const f=greet.querySelector('.home-search'); /* by class: buildMonaBubbles injects copies of every bubble elsewhere */ if(f){ f.value=_homeSearchQ; setTimeout(()=>f.focus(),50); } homeSearch(_homeSearchQ); }
+  else if(_homeSearchQ){ _homeSearchQ=''; homeSearch(''); }   // another bubble: the search is over, the course tiles come back
   requestAnimationFrame(positionGreetTail);   // re-point the tail after the bubble's new height settles
+}
+// ── Etsi kysymyskortti (owner 14.9.2026): the homepage's search bubble. From two characters on the course tiles give way to a
+//    grid of every card whose question or answer contains the text; a tile opens the card in its own deck.
+let _homeSearchQ='';
+function _plainText(h){ return String(h||'').replace(/<[^>]*>/g,' ').replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g,'$1').replace(/&nbsp;/g,' ').replace(/&[a-z]+;/gi,' ').replace(/\s+/g,' ').trim(); }
+function _courseDeckOf(card){   // the homepage deck a card belongs to (the course under year/semester/period, or the flat top deck)
+  const d=card.deckName||''; if(!d.startsWith('SOLUKKO::')) return d;
+  const segs=d.slice('SOLUKKO::'.length).split('::');
+  if(/LUKUVUOSI/i.test(segs[0])){ let ci=2; if(segs[ci] && /periodi/i.test(segs[ci])) ci++; return 'SOLUKKO::'+segs.slice(0, Math.min(ci+1, segs.length)).join('::'); }
+  return 'SOLUKKO::'+segs[0];
+}
+function homeSearch(q){
+  _homeSearchQ=String(q||''); const list=document.getElementById('deck-list'); if(!list) return;
+  let box=document.getElementById('home-search-results');
+  const qq=_homeSearchQ.trim().toLowerCase(), on=qq.length>=2;
+  list.querySelectorAll('.year-section').forEach(y=>{ y.hidden=on; });
+  if(!on){ if(box) box.hidden=true; return; }
+  if(!box){ box=document.createElement('div'); box.id='home-search-results'; list.appendChild(box); }
+  box.hidden=false;
+  const hits=[]; for(const c of allCards){ const qt=_plainText(c.question), at=_plainText(c.answer)+' '+_plainText(c.suppea); if(qt.toLowerCase()==='esittely') continue;
+    if(qt.toLowerCase().includes(qq)||at.toLowerCase().includes(qq)) hits.push([c, qt]); if(hits.length>=300) break; }
+  const tiles=hits.map(([c,qt],i)=>{ const st=cardStarCount(c); return '<div class="overview-card" data-search-index="'+i+'" title="'+_esc((c.deckName||'').split('::').pop())+'"><span class="oc-text">'+_esc(qt||'(tyhjä kortti)')+'</span>'+(st?'<span class="overview-card-stars">'+'★︎'.repeat(st)+'</span>':'')+'</div>'; }).join('');
+  box.innerHTML='<div class="period-label"><b>'+hits.length+(hits.length>=300?'+':'')+' korttia</b> hakusanalla "'+_esc(_homeSearchQ.trim())+'"'+(hits.length?'':' – ei osumia.')+'</div><div class="overview-section-grid home-search-grid">'+tiles+'</div>';
+  box._hits=hits.map(h=>h[0]);
+  box.onclick=e=>{ const t=e.target.closest('.overview-card'); if(!t) return; const card=box._hits[+t.dataset.searchIndex]; if(card) openCardFromSearch(card); };
+}
+async function openCardFromSearch(card){   // open the card's own deck (no intro animation) and jump straight to the card in fullscreen
+  await startDeck(_courseDeckOf(card), false); await new Promise(r=>setTimeout(r,60));   // let the deck's own first render settle, or it lands on the wrong card
+  const i=reviewCards.indexOf(card); if(i>=0) jumpToOverviewCard(i, true);
 }
 window.addEventListener('resize', ()=>{ if(typeof positionGreetTail==='function') positionGreetTail(); }, {passive:true});
 // homepage loading state: while the decks load, Mona sleeps and her speech bubble shows a progress bar; on reveal she wakes and the greeting returns
@@ -3468,6 +3506,7 @@ function heroMonaClick(){
 // and the edge-peeking Mona (#peek-logo, .peek-bubble). Edit the text here; each context sets its own order below.
 const MONA_BUBBLES={
   home_decks:'Alla näet hirmuisen määrän korttipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Aloita klikkaamalla haluamaasi korttipakkaa!',
+  home_search:'Etsi kysymyskortti. Kirjoita sana, niin näytän kaikki kortit, joissa se esiintyy.<input class="home-search" type="search" placeholder="Etsi kortteja…" autocomplete="off" oninput="homeSearch(this.value)">',   // omistaja 14.9.2026: hakukupla - kurssilaatat vaihtuvat osumaruudukoksi
   home_quiz:'Tietovisoja joka viikko! Näytä osaamisesi tai esitä kysymyksiä edellisviikon luennoista Solukko-tietovisoissa maanantaisin Aurumin TEK Loungessa klo 16:00&ndash;18:00. Kaikki ovat tervetulleita ja jaossa on myös pieniä palkintoja. Seuraava tietovisa alkaa <span class="tietovisa-aika"></span>.',   // the span is a live countdown (updateTietovisaAika)
   homepage1:'<span>Tervetuloa Solukkoon! Täällä voit opiskella yliopistokurssit valmiiden kysymyskorttien avulla! Nimeni on Mona ja toimin sivuston oppaana. Klikkaa minua, jos haluat ohjeistusta opiskelun aloittamiseen.</span>',
   homepage2:'Alla näet hirmuisen määrän kurssipakkoja, joista jokainen vastaa tiettyä Turun yliopiston kurssia. Pakka koostuu kysymyskorteista, joita kertaamalla voit opiskella koko kurssialueen. Helppoa eikö?',
@@ -3483,7 +3522,7 @@ const MONA_BUBBLES={
   shuffle:'Kertaa kortteja satunnaisesti tai järjestyksessä<button class="peek-act-btn peek-shuffle-btn" onclick="shuffleDeck()" title="Sekoita kortit">🔀</button>',
   comment:'Kommentoijien kesken arvotaan 5€ joka viikko – Kaikenlaiset kehitysideat ovat toivottuja!'
 };
-const HOME_BUBBLE_ORDER=['homepage1','home_decks','home_quiz'];   // homepage bubbles Mona cycles through
+const HOME_BUBBLE_ORDER=['homepage1','home_decks','home_search','home_quiz'];   // homepage bubbles Mona cycles through
 const PEEK_BUBBLE_ORDER=Object.keys(MONA_BUBBLES);   // edge-peeker retired; keys kept valid
 function buildMonaBubbles(){   // inject the bubble divs into both containers from the shared definitions
   const home=document.getElementById('site-brand');
