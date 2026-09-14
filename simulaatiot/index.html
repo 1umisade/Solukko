@@ -843,6 +843,8 @@ uniform vec3 boxLo;
 uniform vec3 boxHi;
 uniform float memY;
 uniform float memHalf;
+uniform float sideOnly;    // 1 = a STROMAL species (NADP+, ADP, Pi, ATP, CO2): folded back above the thylakoid cap wherever its path dips under it (owner 14.9.2026: 'CO2, ADP and Pi only in the stroma')
+uniform float sideClear;   // how far above the cap's surface the fold sits (clear of the bilayer band)
 #ifdef CELLCLIP
 /* CELL MODE. The box repeats around the camera: each molecule is drawn on the copy nearest it, so the medium
    is everywhere you fly. A copy (never the base box, where the physics lives) is only shown inside the cytosol:
@@ -973,6 +975,10 @@ void main(void){
   vec3 wCen = vec3(bnc(wOrig.x + wVel.x*uT, boxLo.x, boxHi.x),
                    bnc(yO + wVel.y*uT, yLo, yHi),
                    bnc(wOrig.z + wVel.z*uT, boxLo.z, boxHi.z));
+#ifdef CELLCLIP
+  if(sideOnly > 0.5 && thyA.w > 0.0){ vec2 dq = wCen.xz - thyA.xz; float rr = thyA.w*thyA.w - dot(dq, dq); float surf = thyA.y + (rr > 0.0 ? sqrt(rr) : 0.0) + sideClear;
+    if(wCen.y < surf) wCen.y = min(yHi, 2.0*surf - wCen.y); }   // stroma only: mirrored about the cap's surface (a fold, so the path stays continuous)
+#endif
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
   { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
@@ -8153,7 +8159,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const wMat=(rad, solid, glow, bias, outline, haze)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':''),scene,'imp',{
         attributes:['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
         uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK','depthBias',
-                  'cellWrap','wrapScale','fadeNear','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
+                  'sideOnly','sideClear','cellWrap','wrapScale','fadeNear','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
                       : ['#define WATERBOX']).concat(glow ? ['#define PGLOW'] : ['#define PLIGHT']).concat(SOLU_CELL ? ['#define CELLCLIP', '#define DEPTHSHADE'] : []).concat(haze ? ['#define HAZE'] : []) });   // DEPTHSHADE: in cell mode the free molecules and the haze darken with distance like everything else   // CELLCLIP: cell mode wraps the medium around the camera and keeps it to the cytosol - HAZE: the sparse far fill
@@ -8167,7 +8173,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       m.onBindObservable.add(()=>{const eff=m.getEffect();if(!eff)return; eff.setFloat('uT',gWaveT); eff.setFloat('planeDim', gPlaneDim ? 1 : 0); eff.setFloat('planeZ', gTasoZ); eff.setVector3('psuLo', gPsuLo || bLo); eff.setVector3('psuHi', gPsuHi || bHi); eff.setFloat('viewBox', gViewBox);
         eff.setFloat('bubbleR', solid ? 0 : gCrisp);   // glass only where the orbitals are actually drawn
         if(!glow) bindPLight(eff);
-        eff.setVector3('boxLo',bLo); eff.setVector3('boxHi',bHi); eff.setFloat('memY', MEMBRANE_Y); eff.setFloat('memHalf', SOLU ? 0 : gMemHalfT);   // cell mode: the thylakoid is a curved cap, not this plane - the cap's band is cut in CELLCLIP instead
+        eff.setVector3('boxLo',bLo); eff.setVector3('boxHi',bHi); eff.setFloat('memY', MEMBRANE_Y); eff.setFloat('memHalf', SOLU ? 0 : gMemHalfT); eff.setFloat('sideClear', gMemHalfT + 10);   // cell mode: the thylakoid is a curved cap, not this plane - the cap's band is cut in CELLCLIP instead
         if(gCellBind) gCellBind(eff, !!haze, !!m._far);   // cell mode: the wrap period, the cytosol and the organelles (m._far: this is a far-set material)
         if(SOLU_CELL){ eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); }
         eff.setFloat('molTexDim', MOLTEX_DIM); eff.setTexture('molTex', gMolTex);
@@ -8577,18 +8583,23 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       { c: FREE_P.c,    v: FREE_P.v,    base: MOLBASE.p,   n: FREE_P.n },
       { c: FREE_CO2.c,  v: FREE_CO2.v,  base: MOLBASE.co2, n: FREE_CO2.n },
       { c: FREE_O2.c,   v: FREE_O2.v,   base: MOLBASE.o2,  n: FREE_O2.n }];
-    if(FREE_NADP) gSpecies.push({ c: FREE_NADP.c, v: FREE_NADP.v, base: MOLBASE.nadp, n: FREE_NADP.n, meshes: FREE_NADP.meshes });
-    for(const F of [FREE_ATP, FREE_ADP, FREE_PI]) gSpecies.push({ c: F.c, v: F.v, base: F.base, n: F.n, meshes: F.meshes });
+    if(FREE_NADP) gSpecies.push({ c: FREE_NADP.c, v: FREE_NADP.v, base: MOLBASE.nadp, n: FREE_NADP.n, meshes: FREE_NADP.meshes, side: 1 });
+    for(const F of [FREE_ATP, FREE_ADP, FREE_PI]) gSpecies.push({ c: F.c, v: F.v, base: F.base, n: F.n, meshes: F.meshes, side: 1 });
+    /* STROMAL species (owner 14.9.2026): NADP+, ATP, ADP, Pi and CO2 never go under the thylakoid cap - the shader folds their paths back above it (sideOnly), the CPU mirror below does the same */
+    { const co2sp = gSpecies.find(q => q.base === MOLBASE.co2); if(co2sp){ co2sp.side = 1; co2sp.meshes = FREE_CO2.meshes; }
+      for(const sp of gSpecies){ if(!sp.side || !sp.meshes) continue; for(const m of sp.meshes){ const mat = m.material; if(!mat) continue; if(mat.subMaterials){ for(const sm of mat.subMaterials) if(sm) sm.setFloat('sideOnly', 1); } else mat.setFloat('sideOnly', 1); } } }
     const gDVel = new Float32Array(MOL_N*3);   // velocity DELTA from collisions (added to the analytic one)
     /* The light reactions' handle on the analytic molecules: a molecule is moved by writing target minus analytic point into its
        molTex displacement, every frame while held (the analytic path keeps running underneath). Water goes into the OEC, O2 comes
        out of it, NADP+ is drawn onto FNR. */
     gValoFree = { hold: gMolHold, disp: gMolDisp, base: MOLBASE, count: key => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); return sp ? sp.n : 0; },
       pos: (key, i, out) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); const T = gWaveT, c = sp.c, v = sp.v;
-        out[0] = bnc(c[i*3] + v[i*3]*T, bLo.x, bHi.x); out[1] = bncY(c[i*3+1], v[i*3+1], T); out[2] = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z); return out; },
+        out[0] = bnc(c[i*3] + v[i*3]*T, bLo.x, bHi.x); out[1] = bncY(c[i*3+1], v[i*3+1], T); out[2] = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z);
+        if(sp.side > 0 && SOLU_CELL && SOLU_CELL.THY){ const surf = memSurfY(out[0], out[2]) + gMemHalfT + 10; if(out[1] < surf) out[1] = Math.min(bHi.y, 2*surf - out[1]); }   // the stromal fold, exactly as the shader
+        return out; },
       shown: (key, i, out) => { gValoFree.pos(key, i, out); const o = (MOLBASE[key]+i)*4; out[0] += gMolDisp[o]; out[1] += gMolDisp[o+1]; out[2] += gMolDisp[o+2]; return out; },
       nearest: (key, x, y, z, side, skip) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return -1; const t=[0,0,0]; let b=-1, bd=Infinity;
-        for(let i=0;i<sp.n;i++){ const id = sp.base + i; if(gMolHold[id] || (skip && skip.has(i))) continue; gValoFree.pos(key, i, t); if(side > 0 && t[1] < MEMBRANE_Y) continue; if(side < 0 && t[1] > MEMBRANE_Y) continue;
+        for(let i=0;i<sp.n;i++){ const id = sp.base + i; if(gMolHold[id] || (skip && skip.has(i))) continue; gValoFree.pos(key, i, t); const my = memSurfY(t[0], t[2]); if(side > 0 && t[1] < my) continue; if(side < 0 && t[1] > my) continue;
           const d=(t[0]-x)*(t[0]-x)+(t[1]-y)*(t[1]-y)+(t[2]-z)*(t[2]-z); if(d < bd){ bd=d; b=i; } } return b; },
       setWorld: (key, i, x, y, z) => { const t=[0,0,0]; gValoFree.pos(key, i, t); const o=(MOLBASE[key]+i)*4; gMolDisp[o]=x-t[0]; gMolDisp[o+1]=y-t[1]; gMolDisp[o+2]=z-t[2]; },
       setOff: (key, i, dx, dy, dz) => { const o=(MOLBASE[key]+i)*4; gMolDisp[o]=dx; gMolDisp[o+1]=dy; gMolDisp[o+2]=dz; },
@@ -8613,8 +8624,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const mx = (lo.x+hi.x)/2, my = (lo.y+hi.y)/2, mz = (lo.z+hi.z)/2, t = [0,0,0], cand = [];
       for(let i=0;i<sp.n;i++){ if(gMolHold[sp.base+i]) continue; gValoFree.pos(key, i, t); cand.push([(t[0]-mx)**2 + (t[1]-my)**2 + (t[2]-mz)**2, i]); }
       cand.sort((a, b) => b[0] - a[0]); let made = 0;
-      for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1], x = lo.x + 40 + Math.random()*(hi.x-lo.x-80), z = gTasoZ, s = memSurfY(x, z) + gMemHalfT + 12;
-        const y = Math.min(hi.y - 12, s + Math.random()*Math.max(20, (hi.y - 12) - s)); gValoFree.home(key, i, x, y, z); made++; }
+      const tx = Math.max(lo.x + 40, Math.min(hi.x - 40, cam.getTarget().x));   // where you are looking, so the new ones are seen
+      for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1], x = Math.max(lo.x + 40, Math.min(hi.x - 40, tx + (Math.random()-0.5)*300)), z = gTasoZ, s = memSurfY(x, z) + gMemHalfT + 14;
+        const y = Math.min(hi.y - 12, s + Math.random()*Math.min(120, Math.max(20, (hi.y - 12) - s))); gValoFree.home(key, i, x, y, z); made++; }
       gValoFree.homeFlush(key); gValoFree.upload(); return made; };
     window.__freeNearest = (key, qx, qy, qz) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return null;
       const T = gWaveT, o = [0,0,0]; let best = null, bd = Infinity;

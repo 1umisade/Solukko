@@ -206,8 +206,9 @@
     const parkedP = [], reserveP = []; let protonsHomed = false;
     /* the spawn button (owner 14.9.2026): n new protons from the reserve onto the particle plane, half in the stroma and half in the lumen, inside the box */
     window.gValoSpawnProtons = n => { const P = get.gValoProtons(), lo = get.gPsuLo(), hi = get.gPsuHi(); if(!P || !lo) return 0; const hT = get.gMemHalfT(), z = get.gTasoZ(); let made = 0;
-      for(let k=0;k<n;k++){ if(!reserveP.length) break; const i = reserveP.pop(), side = k % 2 === 0 ? 1 : -1, x = lo.x + 40 + Math.random()*(hi.x-lo.x-80), my = P.memY(x, z);
-        const y = side > 0 ? Math.min(hi.y - 8, my + hT + 8 + Math.random()*80) : Math.max(lo.y + 8, my - hT - 8 - Math.random()*80);
+      const tx = Math.max(lo.x + 40, Math.min(hi.x - 40, cam.getTarget().x));   // where you are looking, so the new ones are seen (14.9.2026: 'no protons appear when I press it' - they went anywhere along the 3200-unit box)
+      for(let k=0;k<n;k++){ if(!reserveP.length) break; const i = reserveP.pop(), side = k % 2 === 0 ? 1 : -1, x = Math.max(lo.x + 40, Math.min(hi.x - 40, tx + (Math.random()-0.5)*300)), my = P.memY(x, z);
+        const y = side > 0 ? Math.min(hi.y - 8, my + hT + 14 + Math.random()*80) : Math.max(lo.y + 8, my - hT - 14 - Math.random()*80);
         P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), (Math.random()-0.5)*sp, sp*Math.sin(th)); made++; }
       P.homeFlush(); return made; };   // (parkedP: no longer used for protons - a bound proton rides its slot in plain sight, 13.9.2026)
     V.env.instantiate = (name, opts) => { const at = opts.position || [0,0,0], slot = opts.from_slot;

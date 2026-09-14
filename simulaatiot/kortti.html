@@ -435,6 +435,8 @@ uniform vec3 boxLo;
 uniform vec3 boxHi;
 uniform float memY;
 uniform float memHalf;
+uniform float sideOnly;    // 1 = a STROMAL species (NADP+, ADP, Pi, ATP, CO2): folded back above the thylakoid cap wherever its path dips under it (owner 14.9.2026: 'CO2, ADP and Pi only in the stroma')
+uniform float sideClear;   // how far above the cap's surface the fold sits (clear of the bilayer band)
 #ifdef CELLCLIP
 /* CELL MODE. The box repeats around the camera: each molecule is drawn on the copy nearest it, so the medium
    is everywhere you fly. A copy (never the base box, where the physics lives) is only shown inside the cytosol:
@@ -565,6 +567,10 @@ void main(void){
   vec3 wCen = vec3(bnc(wOrig.x + wVel.x*uT, boxLo.x, boxHi.x),
                    bnc(yO + wVel.y*uT, yLo, yHi),
                    bnc(wOrig.z + wVel.z*uT, boxLo.z, boxHi.z));
+#ifdef CELLCLIP
+  if(sideOnly > 0.5 && thyA.w > 0.0){ vec2 dq = wCen.xz - thyA.xz; float rr = thyA.w*thyA.w - dot(dq, dq); float surf = thyA.y + (rr > 0.0 ? sqrt(rr) : 0.0) + sideClear;
+    if(wCen.y < surf) wCen.y = min(yHi, 2.0*surf - wCen.y); }   // stroma only: mirrored about the cap's surface (a fold, so the path stays continuous)
+#endif
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
   { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
