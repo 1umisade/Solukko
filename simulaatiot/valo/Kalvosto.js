@@ -48,7 +48,7 @@
         const c = [0,0,0]; for(const g of cl){ c[0] += G[g].cx/cl.length; c[1] += G[g].cy/cl.length; c[2] += G[g].cz/cl.length; } mine.push({ mi, oec: cl, oecC: c }); }
       const tyrs = ofType(mi, 9), pheos = ofType(mi, 2), quins = ofType(mi, 3), chls = ofType(mi, 7), cars = ofType(mi, 8), fes = ofType(mi, 5).filter(g => G[g].n <= 2);
       for(const u of mine){ u.tyrZ = nearest(tyrs, u.oecC); const tz = u.tyrZ >= 0 ? cen(u.tyrZ) : u.oecC; u.pheo = nearest(pheos, tz); const ph = u.pheo >= 0 ? cen(u.pheo) : tz; u.qa = nearest(quins, ph); const qa = u.qa >= 0 ? cen(u.qa) : ph;
-        u.fe = nearest(fes, qa); if(u.fe >= 0 && d3(cen(u.fe), qa) > 12) u.fe = -1; const ex = new Set(); u.p680 = []; for(let k=0;k<2;k++){ const g = nearest(chls, tz, ex); if(g >= 0){ ex.add(g); u.p680.push(g); } }
+        u.fe = nearest(fes, qa); if(u.fe >= 0 && d3(cen(u.fe), qa) > 30) u.fe = -1;   /* (30, was 12: the quinone's centroid sits mid-tail, 12+ from the non-heme iron that is 7 from its ring - no unit ever got its Fe, and the chain broke between QA 6 and the pocket 8; 14.9.2026) */ const ex = new Set(); u.p680 = []; for(let k=0;k<2;k++){ const g = nearest(chls, tz, ex); if(g >= 0){ ex.add(g); u.p680.push(g); } }
         { const pts = [u.pheo, nearest(pheos, ph, new Set([u.pheo])), ...u.p680].filter(g => g >= 0).map(cen); const Mc = [0,0,0]; for(const c of pts){ Mc[0] += c[0]/pts.length; Mc[1] += c[1]/pts.length; Mc[2] += c[2]/pts.length; }
           const c2 = [2*Mc[0]-qa[0], qa[1], 2*Mc[2]-qa[2]]; let mir = c2; if(u.fe >= 0){ const fe = cen(u.fe), m2 = [2*fe[0]-qa[0], 2*fe[1]-qa[1], 2*fe[2]-qa[2]]; if(Math.abs(m2[1]-qa[1]) < 6) mir = m2; }
           const qb = nearest(quins, mir, new Set([u.qa])); u.qb = (qb >= 0 && d3(cen(qb), mir) < 10) ? qb : -1; u.qbSite = u.qb >= 0 ? cen(u.qb) : mir; }
@@ -99,7 +99,7 @@
     /* PSII: OEC 2 -> Tyr Z 3 -> P680 4 -> ChlD1 5 -> PheoD1 6 -> QA 7 -> Fe 8 -> the QB pocket (lane p<k>): the 2D numbers, with the accessory chlorophyll and the non-heme iron as their own stops */
     units.forEach((u, k) => { const L = 'p' + k, mi = u.mi, c = mInfo[mi];
       u.psii = body('photosystem_II', mi, [c.cx, c.cy, c.cz], { lane: L, nearby: 90 }); u.psii.psId = L;
-      placeSlot(u.psii, 'plastoquinone_B', mi, u.qbSite, L).place_in_the_chain = u.fe >= 0 ? 9 : 8;
+      placeSlot(u.psii, 'plastoquinone_B', mi, u.qbSite, L).place_in_the_chain = u.fe >= 0 ? 8 : 7;   /* the next link after the Fe (7), or after QA (6) when the structure has no iron (was 9 / 8: one place past the last link either way, so QA never handed on - 14.9.2026) */
       { const sx = u.oecC[0] >= c.cx ? 1 : -1; placeSlot(u.psii, 'VDE', mi, [c.cx + sx*(hullR(mi) + 26), u.oecC[1], c.cz], L); }   // beside the complex at the OEC's height (no room under it: PSII stands on the box floor)
       point(u.psii, 'target_4', mi, [u.oecC[0], u.oecC[1] - 45, u.oecC[2]]);   // where oxygen atoms and protons head after the OEC (the lumen)
       u.oecM = body('OEC', mi, u.oecC, { lane: L, nearby: 45 }); u.psii.namedChildren.set('OEC', u.oecM);
@@ -232,8 +232,15 @@
       return null; };
     V.env.consumed = (b, BindSite) => { const kin = b.kin; if(!kin) return;
       if(kin.kind === 'sh' || kin.kind === 'bnc'){ BindSite._dormant = kin; kin.dormantAt = BindSite; kin.body = null; if(kin.b){ kin.b.vx = kin.b.vy = 0; kin.b.dockedAt = BindSite; } b.kin = null; }
-      else if(kin.kind === 'free'){ BindSite._instance = kin.i; BindSite._key = kin.key; b.kin = null; }
-      else if(kin.kind === 'proton'){ BindSite._proton = kin.i; b.kin = null; } };   // the proton RIDES the slot, in plain sight - a quinol carries its two protons to b6f (the per-frame placement below); it used to be parked out of sight
+      else if(kin.kind === 'free'){
+        const host = BindSite.body_that_I_am_bound_to;
+        if(host && host.molecule_name === 'RuBisCO' && kin.key === 'nadp'){   // owner 14.9.2026: 'store the NADPs carrying electrons and protons on the surface of RuBisCO' - never consumed, never returned
+          const th = Math.random()*6.283, ph = Math.acos(2*Math.random()-1), rec = { key: kin.key, i: kin.i, mi: host.frame.mi, dir: [Math.sin(ph)*Math.cos(th), Math.cos(ph), Math.sin(ph)*Math.sin(th)], protons: [] };
+          if(b.BindSites) for(const sl of b.BindSites) if(sl._proton != null){ rec.protons.push(sl._proton); sl._proton = null; }   // its protons stay with it (dispose would let them go)
+          stored.push(rec); BindSite._storeReset = true; b.kin = null; return; }
+        BindSite._instance = kin.i; BindSite._key = kin.key; b.kin = null; }
+      else if(kin.kind === 'proton'){ BindSite._proton = kin.i; b.kin = null; } };
+    const stored = [];   // the NADPH stuck to RuBisCO's surface: { key, i, mi, dir, protons }   // the proton RIDES the slot, in plain sight - a quinol carries its two protons to b6f (the per-frame placement below); it used to be parked out of sight
     V.env.dispose = b => { if(b.BindSites){ const P = get.gValoProtons(); for(const sl of b.BindSites) if(sl._proton != null && P){ const q = b._pos; P.release(sl._proton, q[0], q[1], q[2], (Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20); sl._proton = null; } }   // its protons go free where it is
       const kin = b.kin; if(!kin) return; b.kin = null;
       if(kin.kind === 'sprite'){ kin.s.body = null; kin.s.mesh.setEnabled(false); if(kin.s.corona) kin.s.corona.setEnabled(false); }
@@ -321,7 +328,7 @@
       if(b.molecule_name === 'O' || b.molecule_name === 'O2' || b.molecule_name === 'proton' || kin.kind === 'free'){ const lo = get.gPsuLo() || get.gBoxLo(), hi = get.gPsuHi() || get.gBoxHi();
         if(lo){ if(p[0] < lo.x){ p[0] = lo.x; n = [1,0,0]; } if(p[0] > hi.x){ p[0] = hi.x; n = [-1,0,0]; } if(p[1] < lo.y){ p[1] = lo.y; n = [0,1,0]; } if(p[1] > hi.y){ p[1] = hi.y; n = [0,-1,0]; } }
         if(b.molecule_name === 'O' || b.molecule_name === 'O2'){ const top = V.env.membraneY(p[0], p[2]) - get.gMemHalfT() - 2; if(p[1] > top){ p[1] = top; n = [0,-1,0]; } p[2] = get.gTasoZ(); }
-        if(b.molecule_name === 'proton' && !b.get_meta('exiting', false)){ const my = V.env.membraneY(p[0], p[2]), hT = get.gMemHalfT();   // the membrane is a wall for a proton body too: it keeps to the side it is on
+        if(b.molecule_name === 'proton' && !b.get_meta('exiting', false) && !b.hard_target){ const my = V.env.membraneY(p[0], p[2]), hT = get.gMemHalfT();   /* the membrane is a wall for a proton body too: it keeps to the side it is on - unless a site is pulling it (hard_target): PSII's QB pocket lies inside the bilayer band, and the wall held the pulled protons 11 units short of it for ever (14.9.2026) */
           if(b.side == null) b.side = p[1] - dy > my ? 1 : -1;
           if(b.side > 0 && p[1] < my + hT){ p[1] = my + hT; n = [0,1,0]; } else if(b.side < 0 && p[1] > my - hT){ p[1] = my - hT; n = [0,-1,0]; } } }
       if(kin.kind === 'free') get.gValoFree().setWorld(kin.key, kin.i, p[0], p[1], p[2]);
@@ -367,6 +374,9 @@
       // the free instances sitting in slots ride the slots; the parked and released ones go back to their pools
       const F = get.gValoFree(), P = get.gValoProtons();
       if(F){ for(const s of V.all){ if(!s.alive || !s.parent_is_BindSites || s._instance == null) continue; if(s.modulate === 'dark'){ V.env.slotEmptied(s); continue; } const p = s.global_position; F.setWorld(s._key, s._instance, p[0], p[1], p[2]); }
+        for(const s of V.all){ if(s._storeReset && s.alive && s.parent_is_BindSites && !s.get_meta('binding_ongoing', false)){ s._storeReset = false; s.modulate = 'dark'; if(s.BindSites) for(const q of s.BindSites) q.modulate = 'dark'; } }   // RuBisCO's NADP slot frees itself for the next one (the arrived NADPH lives on the surface now)
+        for(const r of stored){ const c = mInfo[r.mi], R = hullR(r.mi) + 3, cx = c.cx + gModelOff[r.mi*3], cy = c.cy + gModelOff[r.mi*3+1], cz = c.cz + gModelOff[r.mi*3+2];   // stuck to RuBisCO's surface, riding the model
+          const x = cx + r.dir[0]*R, y = cy + r.dir[1]*R, z = cz + r.dir[2]*R; F.setWorld(r.key, r.i, x, y, z); if(P) for(const pi of r.protons) P.place(pi, x, y + 4, z); }
         for(let q = parkedF.length-1; q >= 0; q--){ const pf = parkedF[q]; pf.t += dt; const pk = PARK(); F.setWorld(pf.key, pf.i, pk[0], pk[1], pk[2]); if(pf.t > 25){ parkedF.splice(q, 1); get.gMolHold()[F.base[pf.key] + pf.i] = 0; F.setOff(pf.key, pf.i, 0, 0, 0); } }
         for(let q = released.length-1; q >= 0; q--){ const r = released[q]; r.t += dt; const k = Math.min(1, r.t/r.life), k2 = k*k; const dmp = Math.max(0, 1 - dt*0.5); r.vx *= dmp; r.vy *= dmp; r.vz *= dmp; r.x += r.vx*dt; r.y += r.vy*dt; r.z += r.vz*dt;
           F.pos(r.key, r.i, _a); F.setWorld(r.key, r.i, r.x*(1-k2) + _a[0]*k2, r.y*(1-k2) + _a[1]*k2, r.z*(1-k2) + _a[2]*k2); if(k >= 1){ released.splice(q, 1); get.gMolHold()[F.base[r.key] + r.i] = 0; F.setOff(r.key, r.i, 0, 0, 0); } } }

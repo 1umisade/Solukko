@@ -1257,8 +1257,8 @@ uniform float outlineK;    // dev slider 'proteiinin atomireuna': the protein at
 #if defined(MACRON) || defined(WATERBOX) || defined(LIPTPL)
 varying vec4 vMacroN;
 #endif
-#if defined(MACRON) || defined(LIPTPL) || (defined(WATERBOX) && defined(PLIGHT))
-#define INKRIM
+#ifdef MACRON
+#define INKRIM   // the ink-rim rules are the PROTEIN atoms' alone (14.9.2026: extending them to the lipids and the free molecules was cancelled by the owner)
 #endif
 float keyLight(vec3 nW){ if(dot(keyDir, keyDir) < 0.5) return 1.0;
   return keyFloor + (1.0 - keyFloor) * pow(max(dot(normalize(nW), keyDir), 0.0), 1.1); }   // the shadow side drops to keyFloor (0.5 by default, was 0.6) - with the MACRO normals below the light reads as a shape, so it can afford to be firm
@@ -1376,11 +1376,7 @@ void main(void){
     colF += vec3(0.10, 0.24, 0.55) * fresF * (0.34 + 0.5*shimF);
   }
 #ifdef INKRIM
-#ifdef WATERBOX
-  colF = mix(colF, vColor * mix(1.0, outlineK, rimKF), rimF);   // a free molecule far away: the rim takes the atom's OWN colour as the disc shrinks, so water reads as blue dots, not black specks (owner 14.9.2026)
-#else
-  colF = mix(colF, vColor * outlineK, rimF);
-#endif   // the protein atoms' very dark rim (dev slider) - and the free molecules' (owner 14.9.2026: 'the molecules dont have those crisp black outlines on vdW as the proteins')
+  colF = mix(colF, vColor * outlineK, rimF);   // the protein atoms' very dark rim (dev slider) - and the free molecules' (owner 14.9.2026: 'the molecules dont have those crisp black outlines on vdW as the proteins')
 #else
   colF = mix(colF, vColor * 0.40, rimF);
 #endif
@@ -1542,7 +1538,7 @@ void main(void){
   #endif
  #else
   #ifdef INKRIM
-    col = mix(col, vColor * mix(1.0, outlineK, rimK), rim);   // a free molecule's atoms get the protein atoms' ink rim - fading to the atom's own colour on tiny discs, so far water is blue dots (owner 14.9.2026)
+    col = mix(col, vColor * outlineK, rim);
   #else
     col = mix(col, vColor * 0.40, rim);                    // rim → a FIXED 40% shade of the atom's own UNLIT colour → same darkness whichever way the sphere faces the light (was col *= mix(1.0,0.40,rim), whose 40%-of-LIT-colour went near-black on shadowed edges → the inconsistent thick-black outlines)
   #endif
@@ -4459,7 +4455,8 @@ void main(void){
     cp.style.display='flex'; };
   const hideCenterProtein = () => { const cp=document.getElementById('center-protein'); if(cp) cp.style.display='none'; };
   const updateSelectionUI = () => {
-    if(!gSel.size){ selPanel.style.display='none'; hideCenterProtein(); if(updateCofInfo && etcSel<0) updateCofInfo(-1); return; }
+    if(!gSel.size){ if(gSelFree.size){ selPanel.innerHTML = '<div style="font-weight:bold;font-size:14px">Valittu: '+gSelFree.size+' hiukkasta</div><div style="font-size:12px;opacity:.8">oikea napautus siirtää ne</div>'; selPanel.style.display='block'; } else selPanel.style.display='none';   // a particle selection (the box grabs the plane's free molecules and protons too, owner 14.9.2026)
+      hideCenterProtein(); if(updateCofInfo && etcSel<0) updateCofInfo(-1); return; }
     { const ca=document.getElementById('center-atom'); if(ca) ca.style.display='none'; }   // an RTS selection owns the centre → drop any leftover atom card
     let cof = -1, protein = false;
     if(gSel.size === 1){ const mi=[...gSel][0], md=mInfo[mi];
@@ -4515,8 +4512,41 @@ void main(void){
     return Math.max(11, Math.min(140, wr * (canvas.clientHeight/(2*Math.tan(cam.fov/2))) / d)); };
   const projMol = m => { _vpSel.width=canvas.clientWidth; _vpSel.height=canvas.clientHeight;
     return BABYLON.Vector3.Project(new BABYLON.Vector3(m.cx, m.cy, FLOOR_Z), BABYLON.Matrix.Identity(), scene.getTransformMatrix(), _vpSel); };
-  const selectBox = (x0,y0,x1,y1, add) => { if(!gSelEnabled) return; if(!add){ gSel.clear(); gSelMol.clear(); }
+  /* FREE PARTICLES IN THE BOX SELECTION (owner 14.9.2026: 'box select and move all the particles, absolutely every single one of them in the
+     2D plane'): every drawn free molecule and proton on the particle plane whose screen point falls in the box joins gSelFree ('key:i'),
+     gets a sage marker, and a right tap moves the whole selection to the tapped point of the plane, relative layout kept. */
+  const gSelFree = new Set();
+  { const FM_CAP = 4000; const mk = BABYLON.MeshBuilder.CreateSphere('freeSelMark', { diameter: 1, segments: 8 }, scene); const mat = new BABYLON.StandardMaterial('freeSelMarkMat', scene);
+    mat.emissiveColor = new BABYLON.Color3(0.30, 0.95, 0.45); mat.disableLighting = true; mat.alpha = 0.35; mat.alphaMode = BABYLON.Constants.ALPHA_ADD; mat.disableDepthWrite = true; mat.backFaceCulling = false;
+    mk.material = mat; mk.isPickable = false; mk.alwaysSelectAsActiveMesh = true; mk.renderingGroupId = 3; const buf = new Float32Array(FM_CAP*16); mk.thinInstanceSetBuffer('matrix', buf, 16, false); mk.thinInstanceCount = 0; mk.setEnabled(false);
+    scene.onBeforeRenderObservable.add(() => { if(!gSelFree.size){ if(mk.isEnabled()) mk.setEnabled(false); return; } let n = 0;
+      for(const id of gSelFree){ if(n >= FM_CAP) break; const k = id.indexOf(':'), key = id.slice(0, k), i = +id.slice(k+1); if(!freeWorld(key, i, _pFree)) continue;
+        const r = key === 'p' ? 3.5 : key === 'w' ? 4.5 : 9; const m = n*16; buf[m]=r; buf[m+1]=0; buf[m+2]=0; buf[m+3]=0; buf[m+4]=0; buf[m+5]=r; buf[m+6]=0; buf[m+7]=0; buf[m+8]=0; buf[m+9]=0; buf[m+10]=r; buf[m+11]=0; buf[m+12]=_pFree[0]; buf[m+13]=_pFree[1]; buf[m+14]=_pFree[2]; buf[m+15]=1; n++; }
+      if(n) mk.thinInstancePartialBufferUpdate('matrix', buf.subarray(0, n*16), 0); mk.thinInstanceCount = n; mk.setEnabled(n > 0); }); }
+  const _pFree = [0,0,0];
+  const freeWorld = (key, i, out) => { if(key === 'p'){ const P = gValoProtons; if(!P) return false; out[0]=P.pos[i*3]; out[1]=P.pos[i*3+1]; out[2]=P.pos[i*3+2]; return true; }
+    const F = gValoFree; if(!F || !F.drawn) return false; if(!F.drawn(key, i, out)) return false; const o = (F.base[key]+i)*4; out[0]+=F.disp[o]; out[1]+=F.disp[o+1]; out[2]+=F.disp[o+2]; return true; };
+  const projPt = (x, y, z) => { _vpSel.width=canvas.clientWidth; _vpSel.height=canvas.clientHeight; return BABYLON.Vector3.Project(new BABYLON.Vector3(x, y, z), BABYLON.Matrix.Identity(), scene.getTransformMatrix(), _vpSel); };
+  const selectFreeBox = (lx, ly, hx, hy) => { if(!gValoFree || !gValoFree.keys) return;
+    for(const key of gValoFree.keys){ const n = key === 'p' ? (gValoProtons ? gValoProtons.n : 0) : gValoFree.count(key);
+      for(let i=0;i<n;i++){ if(key === 'p' ? (gValoProtons.hold[i] || gValoProtons.pos[i*3+1] < -20000) : gValoFree.hold[gValoFree.base[key]+i]) continue;   // the hidden reserve / a particle held in a slot
+        if(!freeWorld(key, i, _pFree)) continue; if(Math.abs(_pFree[2] - gTasoZ) > 3) continue;   // the plane's particles only
+        const q = projPt(_pFree[0], _pFree[1], _pFree[2]); if(q.z < 0 || q.z > 1 || q.x < lx || q.x > hx || q.y < ly || q.y > hy) continue;
+        gSelFree.add(key + ':' + i); if(gSelFree.size >= 4000) return; } } };
+  const moveFreeTo = (px, py) => { if(!gSelFree.size) return;
+    const ray = scene.createPickingRay(px, py, BABYLON.Matrix.Identity(), cam); if(Math.abs(ray.direction.z) < 1e-6) return;
+    const t = (gTasoZ - ray.origin.z)/ray.direction.z; if(t < 0) return; const tx = ray.origin.x + ray.direction.x*t, ty = ray.origin.y + ray.direction.y*t;
+    let cx = 0, cy = 0, n = 0; const pts = [];
+    for(const id of gSelFree){ const k = id.indexOf(':'), key = id.slice(0, k), i = +id.slice(k+1); if(!freeWorld(key, i, _pFree)) continue; pts.push([key, i, _pFree[0], _pFree[1]]); cx += _pFree[0]; cy += _pFree[1]; n++; }
+    if(!n) return; cx /= n; cy /= n; const dx = tx - cx, dy = ty - cy; const touched = new Set();
+    for(const [key, i, x, y] of pts){ const nx = x + dx, ny = y + dy;
+      if(key === 'p'){ const P = gValoProtons; const o = i*3; P.grab(i); P.home(i, nx, ny, gTasoZ); P.release(i, nx, ny, gTasoZ, 0, 0, 0); }
+      else { gValoFree.home(key, i, nx, ny, gTasoZ); touched.add(key); } }
+    if(touched.has('p') || pts.some(q => q[0] === 'p')) gValoProtons.homeFlush(); for(const key of touched) gValoFree.homeFlush(key); if(gValoFree.upload) gValoFree.upload();
+    gPing = { x:tx, y:ty, z:gTasoZ, t0:performance.now() }; };
+  const selectBox = (x0,y0,x1,y1, add) => { if(!gSelEnabled) return; if(!add){ gSel.clear(); gSelMol.clear(); gSelFree.clear(); }
     const lx=Math.min(x0,x1), hx=Math.max(x0,x1), ly=Math.min(y0,y1), hy=Math.max(y0,y1);
+    selectFreeBox(lx, ly, hx, hy);
     for(let mi=0; mi<mols.length; mi++){ const s=projModel(mi);
       if(s.z>=0 && s.z<=1 && s.x>=lx && s.x<=hx && s.y>=ly && s.y<=hy && !camInsideModel(mi)) gSel.add(mi); }   // a box never grabs the complex you are inside
     for(const m of gMolecules){ const s=projMol(m);   // a box also grabs every spawned molecule whose centre falls inside it
@@ -4861,6 +4891,7 @@ void main(void){
         return; }                                                                       // swallow the release (no select / move / spawn)
       if(e.button === 1){ rotating = false; return; }   // middle-drag rotate ends (inertia carries on)
       if(e.button === 2){ if(rightPan){ rightPan = false;
+          if(!rightMoved && gSelFree.size) moveFreeTo(scene.pointerX, scene.pointerY);   // a right TAP with particles selected: they move to the tapped point of the plane (owner 14.9.2026)
           if(!rightMoved && gRightMove){   // a right TAP (no drag) = the move order (dev switch, off by default)
             if(gSel.size) moveSelectedTo(scene.pointerX, scene.pointerY);   // sets the glide target + drops the ping
             if(gSelMol.size) moveMoleculesTo(scene.pointerX, scene.pointerY); } }   // selected molecules → move to the point and stop
@@ -5415,7 +5446,7 @@ void main(void){
   let gDev = false;
   let gDevBox = null;                 // dev: the container box the free molecules and the loose proteins bounce in
 let gDevPlane = null, gPlaneDim = false, gViewBoxWas = 0, gTasoZ = 0, gDevTasoOn = false; const TASO_N = 500;   // (owner 14.9.2026: '5x the amount of particles in the hiukkastaso')   // gDevTasoOn: the yellow particle-plane sheet is off even in dev mode (owner 13.9.2026), the dev button 'hiukkastason levy' shows it
-let gDevPsuBox = null, gPsuLo = null, gPsuHi = null, gCbox = null;
+let gDevPsuBox = null, gPsuLo = null, gPsuHi = null, gCbox = null, gLumenLifted = false;
 let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block for the DNA links   // the box around the photosynthetic unit that keeps the loose proteins near it (drawn in dev mode)   // dev: the particle plane (100 of every free species live on it) and the 'dim the rest' switch
   let gBoxLo = null, gBoxHi = null;
   let gCellWrap = false;   // cell mode: the free molecules' box repeats around the camera (bnc / bncY wrap like the shader)
@@ -8469,7 +8500,22 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const surf = memSurfY(x, z) + sg*(gMemHalfT + 10);
       if(sg > 0){ if(y < surf) return Math.min(bHi.y, 2*surf - y); } else { if(y > surf) return Math.max(bLo.y, 2*surf - y); } return y; };
     const sideOfC = c => { for(const z of gSpecies) if(z.c === c) return z.side || 0; return 0; };   // which species owns this origin array (a handful of species, called per molecule near the camera)
-    const anaC = (c,v,i,T,out) => { out[0]=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[2]=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); out[1]=sideFold(sideOfC(c), c, i, out[0], bncY(c[i*3+1],v[i*3+1],T), out[2]); };
+    /* WHERE THE SHADER DRAWS a free molecule (14.9.2026, owner: 'still hover outlines on invisible floaters'): the bounced path, the side
+       fold, then - only if that home lies OUTSIDE the light-reaction box - the copy nearest the camera (a home inside the box is drawn
+       there, never as a copy). bnc/bncY above wrap unconditionally, which put the pick, the spin and the orbitals on a copy the shader
+       had drawn at home, or - in the box-only view - on a copy the shader had not drawn at all. drawnPos returns false when it is not
+       drawn: outside the box while the camera is inside it, off the plane in the plane mode, outside the cytosol. */
+    const bnc0 = (x,lo,hi) => { const sp=hi-lo; let t=(x-lo)%(2*sp); if(t<0) t+=2*sp; return lo+(t<sp?t:2*sp-t); };
+    const bncY0 = (y0, vy, T) => { let lo = bLo.y, hi = bHi.y; if(gMemHalfT > 0 && !SOLU){ if(y0 >= MEMBRANE_Y) lo = Math.max(lo, MEMBRANE_Y + gMemHalfT); else hi = Math.min(hi, MEMBRANE_Y - gMemHalfT); } return bnc0(Math.min(hi, Math.max(lo, y0)) + vy*T, lo, hi); };
+    const inPsu = (x, y, z) => !!gPsuLo && x >= gPsuLo.x && x <= gPsuHi.x && y >= gPsuLo.y && y <= gPsuHi.y && z >= gPsuLo.z && z <= gPsuHi.z;
+    const drawnPos = (side, c, v, i, T, out) => { out[0]=bnc0(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[2]=bnc0(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); out[1]=sideFold(side, c, i, out[0], bncY0(c[i*3+1],v[i*3+1],T), out[2]);
+      const home = inPsu(out[0], out[1], out[2]);
+      if(!home && gCellWrap){ const cp = cam.position, sx=bHi.x-bLo.x, sy=bHi.y-bLo.y, sz=bHi.z-bLo.z; out[0]+=Math.round((cp.x-out[0])/sx)*sx; out[1]+=Math.round((cp.y-out[1])/sy)*sy; out[2]+=Math.round((cp.z-out[2])/sz)*sz;
+        if(gViewBox && !inPsu(out[0], out[1], out[2])) return false;   // the box-only view: a copy outside the box is not drawn
+        if(gCellDrop && gCellDrop(out[0], out[1], out[2])) return false; }   // a copy outside the cytosol is not drawn
+      if(gPlaneDim && gPsuLo && Math.abs(out[2] - gTasoZ) > 2.0 && inPsu(out[0], out[1], out[2])) return false;   // the plane mode: inside the box only the plane's molecules are drawn
+      return true; };
+    const anaC = (c,v,i,T,out) => { drawnPos(sideOfC(c), c, v, i, T, out); };
     const spinAt = (molId, c,v,i,T) => { anaC(c,v,i,T,_a3); spinS(molId, _a3[0],_a3[1],_a3[2], _S9); return _S9; };   // S for molecule i of a species at time T
     const gatherT = () => gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // the clock the per-frame gathers place at
     const wPick=new Int32Array(WCAP), wPickD=new Float32Array(WCAP), wPos=new Float32Array(WCAP*3);
@@ -8613,7 +8659,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       { c: wc,          v: wv,          base: MOLBASE.w,   n: NW, side: 2 },   // water keeps the side of the cap it started on
       { c: FREE_P.c,    v: FREE_P.v,    base: MOLBASE.p,   n: FREE_P.n },
       { c: FREE_CO2.c,  v: FREE_CO2.v,  base: MOLBASE.co2, n: FREE_CO2.n },
-      { c: FREE_O2.c,   v: FREE_O2.v,   base: MOLBASE.o2,  n: FREE_O2.n }];
+      { c: FREE_O2.c,   v: FREE_O2.v,   base: MOLBASE.o2,  n: FREE_O2.n, meshes: FREE_O2.meshes }];
     if(FREE_NADP) gSpecies.push({ c: FREE_NADP.c, v: FREE_NADP.v, base: MOLBASE.nadp, n: FREE_NADP.n, meshes: FREE_NADP.meshes, side: 1 });
     for(const F of [FREE_ATP, FREE_ADP, FREE_PI]) gSpecies.push({ c: F.c, v: F.v, base: F.base, n: F.n, meshes: F.meshes, side: 1 });
     /* STROMAL species (owner 14.9.2026): NADP+, ATP, ADP, Pi and CO2 never go under the thylakoid cap - the shader folds their paths back above it (sideOnly), the CPU mirror below does the same */
@@ -8627,16 +8673,15 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        out of it, NADP+ is drawn onto FNR. */
     gValoFree = { hold: gMolHold, disp: gMolDisp, base: MOLBASE, count: key => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); return sp ? sp.n : 0; },
       pos: (key, i, out) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); const T = gWaveT, c = sp.c, v = sp.v;
-        out[0] = bnc(c[i*3] + v[i*3]*T, bLo.x, bHi.x); out[1] = bncY(c[i*3+1], v[i*3+1], T); out[2] = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z);
-        out[1] = sideFold(sp.side, c, i, out[0], out[1], out[2]);   // the side fold, exactly as the shader
-        return out; },
+        drawnPos(sp.side, c, v, i, T, out); return out; },   // the drawn position (home inside the box, else the copy nearest the camera)
       shown: (key, i, out) => { gValoFree.pos(key, i, out); const o = (MOLBASE[key]+i)*4; out[0] += gMolDisp[o]; out[1] += gMolDisp[o+1]; out[2] += gMolDisp[o+2]; return out; },
       nearest: (key, x, y, z, side, skip) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return -1; const t=[0,0,0]; let b=-1, bd=Infinity;
         for(let i=0;i<sp.n;i++){ const id = sp.base + i; if(gMolHold[id] || (skip && skip.has(i))) continue; gValoFree.pos(key, i, t); const my = memSurfY(t[0], t[2]); if(side > 0 && t[1] < my) continue; if(side < 0 && t[1] > my) continue;
           const d=(t[0]-x)*(t[0]-x)+(t[1]-y)*(t[1]-y)+(t[2]-z)*(t[2]-z); if(d < bd){ bd=d; b=i; } } return b; },
       setWorld: (key, i, x, y, z) => { const t=[0,0,0]; gValoFree.pos(key, i, t); const o=(MOLBASE[key]+i)*4; gMolDisp[o]=x-t[0]; gMolDisp[o+1]=y-t[1]; gMolDisp[o+2]=z-t[2]; },
       setOff: (key, i, dx, dy, dz) => { const o=(MOLBASE[key]+i)*4; gMolDisp[o]=dx; gMolDisp[o+1]=dy; gMolDisp[o+2]=dz; },
-      upload: () => gMolTex.update(gMolDisp),
+      upload: () => gMolTex.update(gMolDisp), orig: key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); return sp ? sp.c : null; }, keys: ['w','p','co2','o2','nadp','atp','adp','pi'],
+      drawn: (key, i, out) => { if(key === 'p') return false; const sp = gSpecies.find(q => q.base === MOLBASE[key]); return sp ? drawnPos(sp.side, sp.c, sp.v, i, gWaveT, out) : false; },   // where it is drawn right now (false = not drawn)
       /* a NEW HOME (14.9.2026, owner: 'buttons to spawn more free molecules'): the origin is moved so the analytic path is at (x, y, z) right now
          (c = p - v*T, the same fold the shader uses), the displacement cleared, and the species' wOrig buffers re-uploaded */
       home: (key, i, x, y, z) => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); if(!sp) return; const T = gWaveT, c = sp.c, v = sp.v;
@@ -8646,7 +8691,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const fix = (lo, hi, vv) => { const m = 2*(hi - lo); if(m <= 0 || T <= 0) return vv; return m*Math.round(vv*T/m)/T; };
         c[i*3] = x; c[i*3+1] = y; c[i*3+2] = z; v[i*3] = fix(bLo.x, bHi.x, v[i*3]); v[i*3+1] = fix(bLo.y, bHi.y, v[i*3+1]); v[i*3+2] = fix(bLo.z, bHi.z, v[i*3+2]);
         const o = (MOLBASE[key]+i)*4; gMolDisp[o] = gMolDisp[o+1] = gMolDisp[o+2] = 0; },
-      homeFlush: key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); if(!sp || !sp.meshes) return; const og = new Float32Array(sp.c), vl = new Float32Array(sp.v); for(const m of sp.meshes){ m.thinInstanceSetBuffer('wOrig', og, 3, true); m.thinInstanceSetBuffer('wVel', vl, 3, true); } } };
+      homeFlush: key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); if(!sp) return;
+        if(key === 'w'){   // water: wO/wOF one instance per molecule, wH/wHF two (the same origin twice)
+          const og = new Float32Array(sp.c), vl = new Float32Array(sp.v), og2 = new Float32Array(sp.n*6), vl2 = new Float32Array(sp.n*6);
+          for(let i=0;i<sp.n;i++){ for(let h=0;h<2;h++){ const k=(i*2+h)*3; og2[k]=og[i*3]; og2[k+1]=og[i*3+1]; og2[k+2]=og[i*3+2]; vl2[k]=vl[i*3]; vl2[k+1]=vl[i*3+1]; vl2[k+2]=vl[i*3+2]; } }
+          for(const nm of ['wO','wOF','wH','wHF']){ const m = scene.getMeshByName(nm); if(!m) continue; const two = nm[1] === 'H'; m.thinInstanceSetBuffer('wOrig', two ? og2 : og, 3, true); m.thinInstanceSetBuffer('wVel', two ? vl2 : vl, 3, true); } return; }
+        if(!sp.meshes) return; const og = new Float32Array(sp.c), vl = new Float32Array(sp.v); for(const m of sp.meshes){ m.thinInstanceSetBuffer('wOrig', og, 3, true); m.thinInstanceSetBuffer('wVel', vl, 3, true); } } };
     /* For the pill right-click flight (top pill row): the world centre of the instance of a free species
        nearest to a point. Analytic bounce position plus the collision displacement (the same mirror the
        pick uses), protons from their simulated positions. key = a MOLBASE key (w, p, co2, o2, nadp, atp, adp, pi). */
@@ -8764,6 +8814,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       home: (i, x, y, z) => { const o=i*3; pOrg[o]=x; pOrg[o+1]=y; pOrg[o+2]=z; FREE_P.c[o]=x; FREE_P.c[o+1]=y; FREE_P.c[o+2]=z; gValoProtons.place(i, x, y, z); },
       homeFlush: () => { const og = new Float32Array(pOrg); for(const nm of ['pH','pN','pG','pHF','pNF','pGF']){ const m=scene.getMeshByName(nm); if(m) m.thinInstanceSetBuffer('wOrig', og, 3, true); } },
       reserve: 100,   // the first 100 live in the box, the rest are the OEC's reserve (hidden until made)
+      keys: ['p'],
       memY: memSurfY, box: () => gPsuLo ? [Math.max(bLo.x, gPsuLo.x), Math.max(bLo.y, gPsuLo.y), Math.max(bLo.z, gPsuLo.z), Math.min(bHi.x, gPsuHi.x), Math.min(bHi.y, gPsuHi.y), Math.min(bHi.z, gPsuHi.z)] : [bLo.x, bLo.y, bLo.z, bHi.x, bHi.y, bHi.z] };
     let gCollideOn = true;
     let gSimActive = 0;   // how many molecules were simulated this frame (shown in the dev readout)
@@ -8960,17 +9011,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const d2=px*px+py*py+pz*pz-tca*tca; if(d2>r*r) return;
         const t=tca-Math.sqrt(r*r-d2); if(t>0 && t<bestT){ bestT=t; best={ax,ay,az,e}; src=s; } };
       const centre = (c,v,i,base) => {
-        _p[0]=bnc(c[i*3]  +v[i*3]  *T, bLo.x, bHi.x); _p[2]=bnc(c[i*3+2]+v[i*3+2]*T, bLo.z, bHi.z); _p[1]=sideFold(sideOfC(c), c, i, _p[0], bncY(c[i*3+1], v[i*3+1], T), _p[2]);
-        if(gCellDrop && gCellDrop(_p[0],_p[1],_p[2])){ _p[0]=_p[1]=_p[2]=1e9; return _p; }   // cell mode: not drawn, so never hit
+        if(!drawnPos(sideOfC(c), c, v, i, T, _p)){ _p[0]=_p[1]=_p[2]=1e9; return _p; }   // not drawn, so never hit (a copy outside the box or the cytosol, off the plane in the plane mode)
         const md=(base+i)*4; _p[0]+=gMolDisp[md]; _p[1]+=gMolDisp[md+1]; _p[2]+=gMolDisp[md+2];
         repelShells(_p);
         if(gPlaneDim && gPsuLo && Math.abs(_p[2] - gTasoZ) > 2.0 && _p[0] >= gPsuLo.x && _p[0] <= gPsuHi.x && _p[1] >= gPsuLo.y && _p[1] <= gPsuHi.y && _p[2] >= gPsuLo.z && _p[2] <= gPsuHi.z){ _p[0]=_p[1]=_p[2]=1e9; }   // Hiukkastaso: culled by the shader (tasoDim), so never hovered or picked (owner 12.9.2026)
         return _p; };
-      const near = (c,v,i) => { const px=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x)-cp.x; if(px*px>R2) return false;
-        const pz=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z)-cp.z;
-        const py=sideFold(sideOfC(c), c, i, px+cp.x, bncY(c[i*3+1], v[i*3+1], T), pz+cp.z)-cp.y; if(px*px+py*py>R2) return false;
-        if(px*px+py*py+pz*pz>R2) return false;
-        return !(gCellDrop && gCellDrop(px+cp.x, py+cp.y, pz+cp.z)); };
+      const near = (c,v,i) => { if(!drawnPos(sideOfC(c), c, v, i, T, _p)) return false; const px=_p[0]-cp.x, py=_p[1]-cp.y, pz=_p[2]-cp.z; return px*px+py*py+pz*pz <= R2; };
       const hRad = info(codeH).vr*FILL_SCALE, oRad = info(codeO).vr*FILL_SCALE, cRad = info(codeC).vr*FILL_SCALE;
       const rot = (S, x,y,z, out) => { out[0]=S[0]*x+S[1]*y+S[2]*z; out[1]=S[3]*x+S[4]*y+S[5]*z; out[2]=S[6]*x+S[7]*y+S[8]*z; return out; };
       const _o3 = [0,0,0];
@@ -9225,13 +9271,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const T = gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; live.T = T;
         let n=0;
         for(let i=0;i<F.n && n<CAP;i++){
-          const px=bnc(F.c[i*3]  +F.v[i*3]  *T, bLo.x, bHi.x);
-          const dx=px-cp.x; if(dx*dx>R2) continue;
-          const pz=bnc(F.c[i*3+2]+F.v[i*3+2]*T, bLo.z, bHi.z);
-          const py=sideFold(F.side, F.c, i, px, bncY(F.c[i*3+1], F.v[i*3+1], T), pz);
-          const dy=py-cp.y; if(dx*dx+dy*dy>R2) continue;
-          const dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue;
-          if(gCellDrop && gCellDrop(px,py,pz)) continue;
+          if(!drawnPos(F.side, F.c, F.v, i, T, _lp)) continue;   // orbitals only where the atoms are drawn
+          const px=_lp[0], py=_lp[1], pz=_lp[2]; const dx=px-cp.x, dy=py-cp.y, dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue;
           const md=(F.base+i)*4;   // same mirror, same order: displacement first, then the shells
           _lp[0]=px+gMolDisp[md]; _lp[1]=py+gMolDisp[md+1]; _lp[2]=pz+gMolDisp[md+2];
           repelShells(_lp);
@@ -10201,7 +10242,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         lz = gTasoZ - hz2; hz = gTasoZ + hz2; }   // the particle plane lies in the MIDDLE of the box, so the two membrane halves Puolikas divides are equally wide (owner 12.9.2026)
       if(!gPsuLo){ gPsuLo=new BABYLON.Vector3(); gPsuHi=new BABYLON.Vector3(); }
       { const cx=(lx+hx)/2, hw=(hx-lx)/2; lx=cx-2*hw; hx=cx+2*hw; }   // twice as long along the line of complexes (x), both ways (owner 13.9.2026)
-      gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
+      gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);
+      if(gValoFree && !gLumenLifted){ gLumenLifted = true;   // the plane's lumen water was laid down to the FREE box's floor, 300 under the unit box's: the part below the unit box is drawn as a wrapped copy elsewhere - lift it into the box (owner 14.9.2026: '500 H2O in the plane in the lumen')
+        const c = gValoFree.orig('w'), n = gValoFree.count('w'); if(c){ const bot = gPsuLo.y + 12; let moved = 0;
+          for(let i=0;i<Math.min(TASO_N, n);i++){ const x = c[i*3], y = c[i*3+1]; if(y >= bot) continue; const top = memSurfY(x, gTasoZ) - gMemHalfT - 16; if(top <= bot) continue;
+            gValoFree.home('w', i, x, bot + ((i*7919) % 1000)/1000*(top - bot), gTasoZ); moved++; }
+          if(moved){ gValoFree.homeFlush('w'); gValoFree.upload(); } } }   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
       if(!gDevPsuBox){ const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {size:1}, scene);
         const bm=new BABYLON.StandardMaterial('devPsuBoxMat', scene); bm.wireframe=true; bm.emissiveColor=new BABYLON.Color3(0.35,0.85,0.75); bm.disableLighting=true;
         bx.material=bm; bx.isPickable=false; bx.setEnabled(gDev); gDevPsuBox=bx; }
@@ -10315,7 +10361,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             const hl = Math.hypot(hx,hy,hz)||1; hx/=hl; hy/=hl; hz/=hl;
             let x = sh.cur[0]+hx*Math.min(step, dSite), y = sh.cur[1]+hy*Math.min(step, dSite), z = sh.cur[2]+hz*Math.min(step, dSite);
             if(sh.pq){ const my = memSurfY(x, z); let ty = my;   // a quinone lives IN the membrane: its height is the membrane's under it (the cap's surface), eased onto the pocket's over the last 80 units
-              if(haveT){ const k = Math.max(0, 1 - dSite/80); ty = my + (_tw[1] - my)*k; }
+              if(haveT){ const reach = Math.max(80, 2*Math.abs(_tw[1] - my)); const k = Math.max(0, 1 - dSite/reach); ty = my + (_tw[1] - my)*k; }   // (the easing reaches at least twice the pocket's height over the membrane: NDH-1's pocket sits 95 up, and a quinone under it never rose - the 80-unit reach was all vertical, owner 14.9.2026)
               y = ty + (sh.cur[1]-ty)*Math.max(0, 1-dt*3); }
             else { const cap = memSurfY(x, z) - gMemHalfT - sh.R; if(y > cap && dSite > 40){ y = cap; hy = -Math.abs(hy); } if(gBoxLo && y < gBoxLo.y + sh.R){ y = gBoxLo.y + sh.R; hy = Math.abs(hy); } }
             let onShell = false;   // set below when a complex's shell pushes this frame - then the plane easing waits, so the carrier can slide round the shell
@@ -12677,7 +12723,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     }
     if(gFlashGroup < 0){ gHlGroup = gHoverGroup; gHlBright = gHoverGroup >= 0 ? 1.25 : 1.0; }
   });
-  window.gDeselectAll = () => { gSel.clear(); gSelMol.clear(); updateSelectionUI(); if(selAtom) clearAtomSel(); if(etcSel >= 0) showEtcSel(-1); };   // everything deselected (a click on empty, Escape, the info card's X)
+  window.gDeselectAll = () => { gSel.clear(); gSelMol.clear(); gSelFree.clear(); updateSelectionUI(); if(selAtom) clearAtomSel(); if(etcSel >= 0) showEtcSel(-1); };   // everything deselected (a click on empty, Escape, the info card's X)
   scene.onPointerObservable.add(p => {
     if(p.type === BABYLON.PointerEventTypes.POINTERDOUBLETAP){ if(!p.event.button) onDouble(); return; }   // primary button / touch only: Babylon fires this for the middle button too, so two quick middle-drags swung the camera to the default framing (viewPerp) mid-look (owner 11.9.2026)        // touch double-tap
     if(p.type === BABYLON.PointerEventTypes.POINTERMOVE){                                   // hover highlight

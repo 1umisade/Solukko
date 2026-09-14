@@ -849,8 +849,8 @@ uniform float outlineK;    // dev slider 'proteiinin atomireuna': the protein at
 #if defined(MACRON) || defined(WATERBOX) || defined(LIPTPL)
 varying vec4 vMacroN;
 #endif
-#if defined(MACRON) || defined(LIPTPL) || (defined(WATERBOX) && defined(PLIGHT))
-#define INKRIM
+#ifdef MACRON
+#define INKRIM   // the ink-rim rules are the PROTEIN atoms' alone (14.9.2026: extending them to the lipids and the free molecules was cancelled by the owner)
 #endif
 float keyLight(vec3 nW){ if(dot(keyDir, keyDir) < 0.5) return 1.0;
   return keyFloor + (1.0 - keyFloor) * pow(max(dot(normalize(nW), keyDir), 0.0), 1.1); }   // the shadow side drops to keyFloor (0.5 by default, was 0.6) - with the MACRO normals below the light reads as a shape, so it can afford to be firm
@@ -968,11 +968,7 @@ void main(void){
     colF += vec3(0.10, 0.24, 0.55) * fresF * (0.34 + 0.5*shimF);
   }
 #ifdef INKRIM
-#ifdef WATERBOX
-  colF = mix(colF, vColor * mix(1.0, outlineK, rimKF), rimF);   // a free molecule far away: the rim takes the atom's OWN colour as the disc shrinks, so water reads as blue dots, not black specks (owner 14.9.2026)
-#else
-  colF = mix(colF, vColor * outlineK, rimF);
-#endif   // the protein atoms' very dark rim (dev slider) - and the free molecules' (owner 14.9.2026: 'the molecules dont have those crisp black outlines on vdW as the proteins')
+  colF = mix(colF, vColor * outlineK, rimF);   // the protein atoms' very dark rim (dev slider) - and the free molecules' (owner 14.9.2026: 'the molecules dont have those crisp black outlines on vdW as the proteins')
 #else
   colF = mix(colF, vColor * 0.40, rimF);
 #endif
@@ -1134,7 +1130,7 @@ void main(void){
   #endif
  #else
   #ifdef INKRIM
-    col = mix(col, vColor * mix(1.0, outlineK, rimK), rim);   // a free molecule's atoms get the protein atoms' ink rim - fading to the atom's own colour on tiny discs, so far water is blue dots (owner 14.9.2026)
+    col = mix(col, vColor * outlineK, rim);
   #else
     col = mix(col, vColor * 0.40, rim);                    // rim → a FIXED 40% shade of the atom's own UNLIT colour → same darkness whichever way the sphere faces the light (was col *= mix(1.0,0.40,rim), whose 40%-of-LIT-colour went near-black on shadowed edges → the inconsistent thick-black outlines)
   #endif
