@@ -17,7 +17,7 @@ from ryhmat_smarts import ryhman_atomit
 SC = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(SC)
 OUT = os.path.join(REPO, 'simulaatiot', 'kortit', '2d')
 
-VARI = {'C': '#9d9d9d', 'H': '#c6c6c6', 'N': '#5a79d9', 'O': '#e5382d', 'P': '#f0932b', 'S': '#e3cf46', 'Mg': '#7fcf7f'}
+VARI = {'C': '#9d9d9d', 'H': '#c6c6c6', 'N': '#5a79d9', 'O': '#e5382d', 'P': '#f0932b', 'S': '#e3cf46', 'Mg': '#7fcf7f', 'Fe': '#e0764a', 'Mn': '#a58ac9', 'Ca': '#5fcf5f', 'Cu': '#c98a4a'}   # metallit simulaattorin ELEM-varein (kofaktorit 14.9.2026)
 SADE = {'H': 15}                 # muut 21 px, P/Mg 24
 S = 50                           # px per RDKit-yksikko (sidos ~1.5 -> ~75 px)
 HALO = 30                        # hehkun paksuus atomin/sidoksen ympari
@@ -68,7 +68,9 @@ def sijoita_vedyt(m, pts):
     return pts
 
 
-def mol2d(smiles):
+def mol2d(smiles, metalli=None):
+    """metalli (smiles.json 'metalli', omistaja 14.9.2026: hemi, klorofylli): porfyriinin metalli piirretaan renkaan neljan typen
+    keskelle sidottuna niihin - SMILES on ilman metallia, koska RDKitin 2D-asettelu vaantaa makrosyklin, jos metalli on sidottu."""
     m = Chem.MolFromSmiles(smiles)
     if m is None:   # esim. koordinoitunut Mg: osittainen sanitointi
         m = Chem.MolFromSmiles(smiles, sanitize=False); m.UpdatePropertyCache(strict=False)
@@ -80,6 +82,14 @@ def mol2d(smiles):
     # vaantyi (omistaja 10.9.2026: 'atoms too crowded').
     rdDepictor.SetPreferCoordGen(False)
     rdDepictor.Compute2DCoords(m)
+    if metalli:
+        from rdkit.Geometry import Point3D
+        rw = Chem.RWMol(m); c0 = rw.GetConformer()
+        ns = [a.GetIdx() for a in rw.GetAtoms() if a.GetSymbol() == 'N' and a.IsInRing()][:4]
+        mi = rw.AddAtom(Chem.Atom(metalli)); rw.GetAtomWithIdx(mi).SetNoImplicit(True)
+        c0.SetAtomPosition(mi, Point3D(sum(c0.GetAtomPosition(i).x for i in ns) / len(ns), sum(c0.GetAtomPosition(i).y for i in ns) / len(ns), 0))
+        for i in ns: rw.GetAtomWithIdx(i).SetFormalCharge(0); rw.GetAtomWithIdx(i).SetNumExplicitHs(0); rw.GetAtomWithIdx(i).SetNoImplicit(True); rw.AddBond(i, mi, Chem.BondType.SINGLE)
+        m = rw.GetMol(); m.UpdatePropertyCache(strict=False)
     m = Chem.AddHs(m, addCoords=True)
     conf = m.GetConformer()
     pts = [(conf.GetAtomPosition(i).x, conf.GetAtomPosition(i).y) for i in range(m.GetNumAtoms())]
@@ -101,8 +111,27 @@ def mol2d(smiles):
     return atoms, bonds, rings
 
 
+def mol2d_mol2(polku):
+    """Metalliklusterit (smiles.json 'mol2', kofaktorit_3d.py 14.9.2026): kaava suoraan kiderakenteen koordinaateista, paakomponenttitasoon
+    projisoituna - RDKitin 2D-asettelu latistaa kuutiomaisen Mn4CaO5- tai Fe4S4-klusterin ristikoksi, jossa sidokset jaavat atomien alle."""
+    t = io.open(polku, encoding='utf-8').read(); i = t.index('@<TRIPOS>ATOM'); j = t.index('@<TRIPOS>BOND')
+    at = []
+    for line in t[i:j].splitlines()[1:]:
+        p = line.split()
+        if len(p) >= 6: at.append((p[5].split('.')[0], float(p[2]), float(p[3]), float(p[4])))
+    bonds = []
+    for line in t[j:].splitlines()[1:]:
+        p = line.split()
+        if len(p) >= 3: bonds.append((int(p[1]) - 1, int(p[2]) - 1, 1))
+    import numpy as np
+    X = np.array([[x, y, z] for _, x, y, z in at]); X -= X.mean(axis=0)
+    _, _, vt = np.linalg.svd(X, full_matrices=False); P = X @ vt[:2].T * (S * 1.4)   # vaeljempi kuin RDKit-kaava: projektiossa syvyyssuunnan atomit tulevat lahelle toisiaan
+    atoms = [{'sym': at[k][0][0].upper() + at[k][0][1:].lower(), 'x': float(P[k][0]), 'y': -float(P[k][1]), 'q': 0} for k in range(len(at))]
+    return atoms, bonds, []
+
+
 def piirra(atoms, bonds, rings=(), lisa_merkki=None, korosta=()):
-    r_of = lambda a: SADE.get(a['sym'], 24 if a['sym'] in ('P', 'Mg', 'S') else 21)
+    r_of = lambda a: SADE.get(a['sym'], 24 if a['sym'] in ('P', 'Mg', 'S', 'Fe', 'Mn', 'Ca', 'Cu') else 21)
     xs = [a['x'] for a in atoms]; ys = [a['y'] for a in atoms]
     pad = HALO + max(r_of(a) for a in atoms) + ULKO + 8 + (VIHREA_W if korosta else 0)
     x0, y0 = min(xs) - pad, min(ys) - pad; W, H = max(xs) - min(xs) + 2 * pad, max(ys) - min(ys) + 2 * pad
@@ -184,7 +213,7 @@ def main():
     mp = os.path.join(REPO, 'simulaatiot', 'kortit', 'molekyylit.json'); molj = json.load(open(mp, encoding='utf-8'))
     os.makedirs(OUT, exist_ok=True)
     for key, d in lajit.items():
-        atoms, bonds, rings = mol2d(d['smiles'])
+        atoms, bonds, rings = mol2d_mol2(os.path.join(REPO, 'simulaatiot', d['mol2'])) if d.get('mol2') else mol2d(d['smiles'], d.get('metalli'))
         svg = piirra(atoms, bonds, rings)
         io.open(os.path.join(OUT, key + '.svg'), 'w', encoding='utf-8', newline='\n').write(svg)
         print('%-5s %3d atomia %3d sidosta -> %s.svg (%d kB)' % (key, len(atoms), len(bonds), key, len(svg) // 1024))

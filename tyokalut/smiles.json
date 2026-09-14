@@ -36,8 +36,9 @@
  },
  "CHL": {
   "nimi": "chlorophyll a",
-  "smiles": "CCC1=C(C2=NC1=CC3=C(C4=C([N-]3)C(=C5[C@H]([C@@H](C(=N5)C=C6C(=C(C(=C2)[N-]6)C=C)C)C)CCC(=O)OC/C=C(\\C)/CCC[C@H](C)CCC[C@H](C)CCCC(C)C)[C@H](C4=O)C(=O)OC)C)C.[Mg+2]",
-  "kaava": "C55H72MgN4O5"
+  "smiles": "CCC1=C(C2=NC1=CC3=C(C4=C([N-]3)C(=C5[C@H]([C@@H](C(=N5)C=C6C(=C(C(=C2)[N-]6)C=C)C)C)CCC(=O)OC/C=C(\\C)/CCC[C@H](C)CCC[C@H](C)CCCC(C)C)[C@H](C4=O)C(=O)OC)C)C",
+  "kaava": "C55H72MgN4O5",
+  "metalli": "Mg"
  },
  "PQ": {
   "nimi": "plastoquinone",
@@ -771,5 +772,44 @@
   "ryhmat": [
    "fosfoanhydridisidos"
   ]
+ },
+ "FYLLOKINONI": {
+  "nimi": "fyllokinoni",
+  "smiles": "CC1=C(C(=O)c2ccccc2C1=O)C/C=C(\\C)/CCC[C@H](C)CCC[C@H](C)CCCC(C)C",
+  "kaava": "C31H46O2"
+ },
+ "FEOFYTIINI": {
+  "nimi": "feofytiini a",
+  "smiles": "CCC1=C(C2=NC1=CC3=C(C4=C([C@@H](C(=C5[C@H]([C@@H](C(=CC6=NC(=C2)C(=C6C)C=C)N5)C)CCC(=O)OC/C=C(\\C)/CCC[C@H](C)CCC[C@H](C)CCCC(C)C)C4=N3)C(=O)OC)O)C)C",
+  "kaava": "C55H74N4O5"
+ },
+ "HEMI": {
+  "nimi": "hemi b",
+  "smiles": "CC1=C(C2=CC3=NC(=CC4=C(C(=C([N-]4)C=C5C(=C(C(=N5)C=C1[N-]2)C=C)C)C=C)C)C(=C3CCC(=O)O)C)CCC(=O)O",
+  "kaava": "C34H32N4O4Fe",
+  "metalli": "Fe"
+ },
+ "BEETAKAROTEENI": {
+  "nimi": "β-karoteeni",
+  "smiles": "CC1=C(C(CCC1)(C)C)/C=C/C(=C/C=C/C(=C/C=C/C=C(/C=C/C=C(/C=C/C2=C(CCCC2(C)C)C)\\C)\\C)/C)/C",
+  "kaava": "C40H56"
+ },
+ "OEC": {
+  "nimi": "Mn₄CaO₅-klusteri",
+  "smiles": "[O]1[Mn][O]23[Ca]4[O]5[Mn]6[O]4[Mn]12[O]6[Mn]53",
+  "kaava": "CaMn4O5",
+  "mol2": "OEC.mol2"
+ },
+ "FE4S4": {
+  "nimi": "Fe₄S₄-klusteri",
+  "smiles": "[S]12[Fe]3[S]4[Fe]1[S]1[Fe]2[S]3[Fe]41",
+  "kaava": "Fe4S4",
+  "mol2": "FE4S4.mol2"
+ },
+ "FE2S2": {
+  "nimi": "Fe₂S₂-klusteri",
+  "smiles": "[S]1[Fe][S][Fe]1",
+  "kaava": "Fe2S2",
+  "mol2": "FE2S2.mol2"
  }
 }

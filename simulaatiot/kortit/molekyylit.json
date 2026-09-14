@@ -3872,5 +3872,201 @@
   "kuva2d_ryhmat": {
    "fosfoanhydridisidos": "2d/ADPK__fosfoanhydridisidos.svg"
   }
+ },
+ "FYLLOKINONI": {
+  "nimi": "fyllokinoni",
+  "kaava": "C₃₁H₄₆O₂",
+  "kaavat": [
+   "C₃₁H₄₆O₂"
+  ],
+  "sanat": [
+   "fyllokinoni",
+   "fyllokinonin",
+   "fyllokinonia",
+   "fyllokinonissa",
+   "fyllokinonista",
+   "fyllokinoniin",
+   "fyllokinoniksi",
+   "fyllokinonilla",
+   "fyllokinonille",
+   "fyllokinonit",
+   "fyllokinonien",
+   "fyllokinoneja",
+   "fyllokinoneissa",
+   "K-vitamiini",
+   "K-vitamiinin",
+   "K-vitamiinia",
+   "K-vitamiinissa",
+   "K-vitamiinista",
+   "K-vitamiiniin",
+   "K-vitamiiniksi",
+   "K-vitamiinilla",
+   "K-vitamiinille",
+   "K-vitamiinit",
+   "K-vitamiinien",
+   "K-vitamiineja",
+   "K-vitamiineissa"
+  ],
+  "kuva2d": "2d/FYLLOKINONI.svg"
+ },
+ "FEOFYTIINI": {
+  "nimi": "feofytiini a",
+  "kaava": "C₅₅H₇₄N₄O₅",
+  "kaavat": [
+   "C₅₅H₇₄N₄O₅"
+  ],
+  "sanat": [
+   "feofytiini",
+   "feofytiinin",
+   "feofytiiniä",
+   "feofytiinissä",
+   "feofytiinistä",
+   "feofytiiniin",
+   "feofytiiniksi",
+   "feofytiinillä",
+   "feofytiinille",
+   "feofytiinit",
+   "feofytiinien",
+   "feofytiinejä",
+   "feofytiineissä",
+   "feofytiinia",
+   "feofytiinissa",
+   "feofytiinista",
+   "feofytiinilla",
+   "feofytiineja",
+   "feofytiineissa",
+   "feofytiini",
+   "feofytiinin",
+   "feofytiiniä",
+   "feofytiinissä",
+   "feofytiinistä",
+   "feofytiiniin",
+   "feofytiiniksi",
+   "feofytiinillä",
+   "feofytiinille",
+   "feofytiinit",
+   "feofytiinien",
+   "feofytiinejä",
+   "feofytiineissä",
+   "feofytiinia",
+   "feofytiinissa",
+   "feofytiinista",
+   "feofytiinilla",
+   "feofytiineja",
+   "feofytiineissa"
+  ],
+  "kuva2d": "2d/FEOFYTIINI.svg"
+ },
+ "HEMI": {
+  "nimi": "hemi b",
+  "kaava": "C₃₄H₃₂FeN₄O₄",
+  "kaavat": [
+   "C₃₄H₃₂FeN₄O₄"
+  ],
+  "sanat": [
+   "hemi",
+   "hemin",
+   "hemiä",
+   "hemissä",
+   "hemistä",
+   "hemiin",
+   "hemiksi",
+   "hemillä",
+   "hemille",
+   "hemit",
+   "hemien",
+   "hemejä",
+   "hemeissä",
+   "hemi",
+   "hemin",
+   "hemiä",
+   "hemissä",
+   "hemistä",
+   "hemiin",
+   "hemiksi",
+   "hemillä",
+   "hemille",
+   "hemit",
+   "hemien",
+   "hemejä",
+   "hemeissä",
+   "heemi",
+   "heemin",
+   "heemiä",
+   "heemissä",
+   "heemistä",
+   "heemiin",
+   "heemiksi",
+   "heemillä",
+   "heemille",
+   "heemit",
+   "heemien",
+   "heemejä",
+   "heemeissä"
+  ],
+  "kuva2d": "2d/HEMI.svg"
+ },
+ "BEETAKAROTEENI": {
+  "nimi": "β-karoteeni",
+  "kaava": "C₄₀H₅₆",
+  "kaavat": [
+   "C₄₀H₅₆"
+  ],
+  "sanat": [
+   "β-karoteeni",
+   "β-karoteenin",
+   "β-karoteenia",
+   "β-karoteenissa",
+   "β-karoteenista",
+   "β-karoteeniin",
+   "β-karoteeniksi",
+   "β-karoteenilla",
+   "β-karoteenille",
+   "β-karoteenit",
+   "β-karoteenien",
+   "β-karoteeneja",
+   "β-karoteeneissa",
+   "beetakaroteeni",
+   "beetakaroteenin",
+   "beetakaroteenia",
+   "beetakaroteenissa",
+   "beetakaroteenista",
+   "beetakaroteeniin",
+   "beetakaroteeniksi",
+   "beetakaroteenilla",
+   "beetakaroteenille",
+   "beetakaroteenit",
+   "beetakaroteenien",
+   "beetakaroteeneja",
+   "beetakaroteeneissa"
+  ],
+  "kuva2d": "2d/BEETAKAROTEENI.svg"
+ },
+ "OEC": {
+  "nimi": "Mn₄CaO₅-klusteri",
+  "kaava": "Mn₄CaO₅",
+  "kaavat": [
+   "Mn₄CaO₅"
+  ],
+  "sanat": [],
+  "kuva2d": "2d/OEC.svg"
+ },
+ "FE4S4": {
+  "nimi": "Fe₄S₄-klusteri",
+  "kaava": "Fe₄S₄",
+  "kaavat": [
+   "Fe₄S₄"
+  ],
+  "sanat": [],
+  "kuva2d": "2d/FE4S4.svg"
+ },
+ "FE2S2": {
+  "nimi": "Fe₂S₂-klusteri",
+  "kaava": "Fe₂S₂",
+  "kaavat": [
+   "Fe₂S₂"
+  ],
+  "sanat": [],
+  "kuva2d": "2d/FE2S2.svg"
  }
 }
