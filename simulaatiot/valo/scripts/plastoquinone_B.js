@@ -26,7 +26,8 @@ V.SCRIPTS['plastoquinone_B'] = {
     const heading = (target) => V.get_nodes_in_group('plastoquinone_B').filter(item => item !== self && item !== target && (item.soft_target === target || item.hard_target === target)).length;
     const nearestFree = (list, spare) => { let best = null, bd = Infinity; for(const s of list){ if(!s || white(s) || (spare && heading(s) > 0)) continue; const d = self.distance_to(s); if(d < bd){ bd = d; best = s; } } return best; };
     const b6f = V.get_nodes_in_group('cytochrome_b6f');
-    if(filled === 4){ const qo = b6f.flatMap(c => [c.get_node('BindSites/plastoquinone_B_LUMENAL'), c.get_node('BindSites/plastoquinone_B_LUMENAL2')]); self.soft_target = nearestFree(qo, true) || nearestFree(qo, false) || null; return; }
+    if(filled === 4){ const side = self.src === 'NDH-1' ? 'plastoquinone_B_LUMENAL2' : 'plastoquinone_B_LUMENAL'; const qo = b6f.map(c => c.get_node('BindSites/' + side));   // one monomer's Qo for PSII's quinols, the other's for NDH-1's (owner 14.9.2026)
+      self.soft_target = nearestFree(qo, true) || nearestFree(qo, false) || null; return; }
     const psiiSlots = V.get_nodes_in_group('photosystem_II').map(p => p.get_node('BindSites/plastoquinone_B'));
     self.soft_target = nearestFree(psiiSlots, true)
       || nearestFree(b6f.flatMap(c => [c.get_node('BindSites/plastoquinone_B_STROMAL'), c.get_node('BindSites/plastoquinone_B_STROMAL2')]), true)

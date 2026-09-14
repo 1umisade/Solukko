@@ -267,7 +267,7 @@
           rate = rate + (0.5 - rate)*(0.1/distance);
           body.global_position = [bp[0] + (sp[0]-bp[0])*rate, bp[1] + (sp[1]-bp[1])*rate, bp[2] + (sp[2]-bp[2])*rate];
           const np = body.global_position;
-          if(Math.hypot(np[0]-sp[0], np[1]-sp[1], np[2]-sp[2]) < 1){
+          if(Math.hypot(np[0]-sp[0], np[1]-sp[1], np[2]-sp[2]) < 1 || (rate > 0.45 && Math.hypot(np[0]-sp[0], np[1]-sp[1], np[2]-sp[2]) < 12)){   // (3D 14.9.2026: a slot on a MOVING host - FNR is a loose protein - runs ahead of the glide, which closes half the gap a frame: at 3x speed the gap settled at 5-10 units and the ferredoxin never bound - so once the glide is at full rate, 12 units (under a ferredoxin's radius) is close enough)
             if(body.BindSites) for(const item of body.BindSites){ const dest = BindSite.get_node('BindSites/' + item.name); if(!dest) continue;
               dest.modulate = item.modulate; if(item.ExcitedSprite && dest.ExcitedSprite) dest.ExcitedSprite.visible = item.ExcitedSprite.visible;
               if(item.is_in_group('electron')) dest.EnergyLevel = item.EnergyLevel;

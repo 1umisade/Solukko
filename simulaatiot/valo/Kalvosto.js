@@ -142,10 +142,10 @@
     /* FNR: the sink (owner 13.9.2026). It stands against PSI's FB face (Node2), FB hands electrons straight to its 'electron' BindSite (one past FB, no lane - the
        ferredoxin dock is one before it), and FNR.js empties that slot the moment it fills. The NADP+ dock stays and shows the count. */
     const fnrs = fnrMis.map((mi, k) => { const c = mInfo[mi], fad = ofType(mi, 10), ps = psis[0], sinkPlace = ps ? ps.fdPlace : 21;
-      const fnr = body('FNR', mi, [c.cx, c.cy, c.cz], { place: sinkPlace, nearby: 180 }); const fadC = fad.length ? cen(fad[0]) : [c.cx, c.cy, c.cz];
-      placeSlot(fnr, 'electron', mi, fadC).place_in_the_chain = sinkPlace; fnr.get_node('BindSites/electron').nearby_area.radius = 45;
-      placeSlot(fnr, 'ferredoxin', mi, [c.cx, c.cy + hullR(mi) + 16 + 2, c.cz]).place_in_the_chain = sinkPlace - 1;
-      placeSlot(fnr, 'NADP', mi, [fadC[0] + 12, fadC[1] + 6, fadC[2]]).place_in_the_chain = sinkPlace + 1;
+      const LF = 'fnr' + k, fnr = body('FNR', mi, [c.cx, c.cy, c.cz], { place: sinkPlace, nearby: 180, lane: LF }); const fadC = fad.length ? cen(fad[0]) : [c.cx, c.cy, c.cz];   // its own LANE (owner 14.9.2026: 'I saw PSI giving an electron directly to FNR'): FB (lane psi) sees FNR's electron slot as the next link only if the lanes agree - now only the ferredoxin docked at FNR can hand on
+      placeSlot(fnr, 'electron', mi, fadC, LF).place_in_the_chain = sinkPlace; fnr.get_node('BindSites/electron').nearby_area.radius = 45;
+      placeSlot(fnr, 'ferredoxin', mi, [c.cx, c.cy + hullR(mi) + 16 + 2, c.cz], LF).place_in_the_chain = sinkPlace - 1;
+      placeSlot(fnr, 'NADP', mi, [fadC[0] + 12, fadC[1] + 6, fadC[2]], LF).place_in_the_chain = sinkPlace + 1;
       const home = ps ? (() => { const d = ps.fdDir, l = Math.hypot(d[0], d[1], d[2]) || 1, R = hullR(ps.mi) + hullR(mi) - 6, cc = mInfo[ps.mi]; return wpt(ps.mi, [cc.cx + d[0]/l*R, cc.cy + d[1]/l*R, cc.cz + d[2]/l*R], [0,0,0]); })() : [c.cx + gModelOff[mi*3], c.cy + gModelOff[mi*3+1], get.gTasoZ()];
       home[2] = get.gTasoZ(); fnr.namedChildren.set('Node2', new Point(home, 'Node2')); return fnr; });
     /* NDH-1 (cyclic flow): the ferredoxin dock 1 -> its Fe-S clusters 2.. -> the plastoquinone dock last (lane ndh<k>) */
@@ -153,7 +153,7 @@
       const ndh = body('NDH-1', mi, [c.cx, c.cy, c.cz], { lane: L, nearby: 90 }); const top = [c.cx, c.y1, c.cz];
       const chain = fes.slice().sort((a, b) => d3(cen(a), top) - d3(cen(b), top)).slice(0, 6); ndh.fes = chain.map((g, i) => cof(g, 'iron_sulfur_cluster_inside_photosystem_I', { lane: L, place: 2 + i }));
       const f0 = chain.length ? cen(chain[0]) : top; placeSlot(ndh, 'ferredoxin', mi, [f0[0], f0[1] + 26, f0[2]], L);
-      let q = quins.length ? cen(quins[0]) : null; if(chain.length){ const l = cen(chain[chain.length-1]); if(!q || d3(q, l) > 50){ const f = cen(chain[0]), d = [l[0]-f[0], l[1]-f[1], l[2]-f[2]], n = Math.hypot(d[0], d[1], d[2]) || 1; q = [l[0] + d[0]/n*22, l[1] + d[1]/n*22, l[2] + d[2]/n*22]; } } if(!q) q = [c.cx, c.cy, c.cz];
+      let q = quins.length ? cen(quins[0]) : null; if(chain.length && !q){ const l = cen(chain[chain.length-1]); {   /* the STRUCTURE's quinone site when the model has one (owner 14.9.2026: 'is your spot the real binding site' - the point past the last cluster stood in even when 6L7O carries its own PQ) */ const f = cen(chain[0]), d = [l[0]-f[0], l[1]-f[1], l[2]-f[2]], n = Math.hypot(d[0], d[1], d[2]) || 1; q = [l[0] + d[0]/n*22, l[1] + d[1]/n*22, l[2] + d[2]/n*22]; } } if(!q) q = [c.cx, c.cy, c.cz];
       placeSlot(ndh, 'plastoquinone_B', mi, q, L).place_in_the_chain = 2 + chain.length;
       point(ndh, 'target_2', mi, [c.cx, c.y1 + 60, c.cz]); return ndh; });
     /* ATP synthase, RuBisCO */
@@ -231,7 +231,7 @@
         if(i < 0){ if(!F.count(key)) return null; i = F.nearest(key, at[0], at[1], at[2], 0); if(i < 0) return null; get.gMolHold()[F.base[key] + i] = 1; }
         F.setWorld(key, i, at[0], at[1], at[2]); const b = new MB(name, { position: at }); b.kin = { kind:'free', key, i }; return b; }
       if(['plastoquinone_B', 'plastocyanin', 'ferredoxin', 'VDE', 'zeaxanthin_epoxidase'].includes(name)){ const kin = slot && slot._dormant; if(!kin) return null; slot._dormant = null; kin.dormantAt = null;
-        const b = new MB(name, { position: at, radius: hullR(kin.sh ? kin.sh.mi : kin.b.mi) }); b.kin = kin; b.mi = kin.sh ? kin.sh.mi : kin.b.mi; kin.body = b; kinOf.set(b, kin);
+        const b = new MB(name, { position: at, radius: hullR(kin.sh ? kin.sh.mi : kin.b.mi) }); b.kin = kin; b.mi = kin.sh ? kin.sh.mi : kin.b.mi; kin.body = b; kinOf.set(b, kin); b.src = slot.body_that_I_am_bound_to ? slot.body_that_I_am_bound_to.molecule_name : null;   // where it comes from (a quinol from PSII goes to b6f's first Qo, one from NDH-1 to the second)
         if(kin.b){ const sp = V.Globals.get(name + '_speed') || 30; kin.b.vx = (Math.random()-0.5)*sp; kin.b.vy = (kin.side || 1)*sp*0.7; kin.b.vz = 0; } return b; }
       return null; };
     V.env.consumed = (b, BindSite) => { const kin = b.kin; if(!kin) return;
@@ -354,9 +354,9 @@
         if(!protonsHomed && get.gPsuLo()){ protonsHomed = true; const bx = P.box(), hT = get.gMemHalfT();   // 100 protons, 50 in the stroma and 50 in the lumen, inside the box (owner 13.9.2026)
           const N0 = Math.min(P.n, P.reserve || P.n);
           for(let i=N0;i<P.n;i++){ const o = i*3; P.grab(i); P.place(i, P.pos[o], -30000, P.pos[o+2]); reserveP.push(i); }   // the reserve: held and far under the cell, unseen, until the OEC makes one
-          for(let i=0;i<N0;i++){ const side = i < N0/2 ? 1 : -1; let x, y, z; for(let k=0;k<40;k++){ x = bx[0] + Math.random()*(bx[3]-bx[0]); z = bx[2] + Math.random()*(bx[5]-bx[2]); const my = P.memY(x, z);
+          for(let i=0;i<N0;i++){ const side = 1; /* all in the STROMA at the start (owner 14.9.2026) - the lumen's come from water */ let x, y, z; for(let k=0;k<40;k++){ x = bx[0] + Math.random()*(bx[3]-bx[0]); z = bx[2] + Math.random()*(bx[5]-bx[2]); const my = P.memY(x, z);
               y = side > 0 ? my + hT + 14 + Math.random()*Math.max(10, bx[4] - my - hT - 20) : bx[1] + Math.random()*Math.max(10, my - hT - 14 - bx[1]); if(y > bx[1] && y < bx[4]) break; }
-            z = get.gTasoZ(); P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), sp*Math.sin(th), 0); }   // on the particle plane (14.9.2026: the plane mode is on inside the box), no drift off it
+            { const my = P.memY(x, get.gTasoZ()); if(y < my + hT + 14) y = my + hT + 14; }   /* (whatever the tries left: above the membrane - 5 of 100 started in the lumen) */ z = get.gTasoZ(); P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), sp*Math.sin(th), 0); }   // on the particle plane (14.9.2026: the plane mode is on inside the box), no drift off it
           P.homeFlush(); }
         for(const sl of V.all){ if(sl.alive && sl.parent_is_BindSites && sl._proton != null){ const q = sl.global_position; P.place(sl._proton, q[0], q[1], q[2]); } } } }   // a bound proton rides its slot
       for(const b of V.all){ if(!b.alive || !b.kin) continue; for(const t of [b.hard_target, b.soft_target]){ if(t instanceof Point && b.distance_to(t) <= t.radius + b.body_radius) t.when_body_enters_me(b); } }   // the target areas fire
@@ -375,6 +375,7 @@
         if(kin.detour){ kin.detour.t -= dt; if(kin.detour.t <= 0){ kin.detour = null; kin.bestD = null; } else { dx = kin.detour.x; dy = kin.detour.y; d = 1; } } else if(kin.stuckT > 3 && !kin.home){ const sgn = Math.random() < 0.5 ? 1 : -1; kin.detour = { x: -dy/d*sgn, y: dx/d*sgn, t: 2.5 }; kin.stuckT = 0; }
         const k = (b.alive && b.hard_target) ? 0.5 : 0.06, f = 1 - Math.pow(1-k, dt*60); const vx = bb.vx + (dx/d*sp - bb.vx)*f, vy = bb.vy + (dy/d*sp - bb.vy)*f, l = Math.hypot(vx, vy) || 1; bb.vx = vx/l*sp; bb.vy = vy/l*sp; }
       // ATP synthase: the proton channel's passes are its channeled protons (ATP-synthase.gd counted the proton BindSites' animation)
+      window.gAtpReady = atps.some(a => V.white(a.get_node('BindSites/ADP')) && V.white(a.get_node('BindSites/phosphate')));   // the channel opens only with ADP and P bound (the proton loop reads this)
       for(const a of atps){ const passes = get.gProtonPasses(); if(a.passes0 == null) a.passes0 = passes; if(passes > a.passes0){ if(V.white(a.get_node('BindSites/ADP')) && V.white(a.get_node('BindSites/phosphate'))){ a.channeled_protons += passes - a.passes0; a.try_RELEASING(); } a.passes0 = passes; } }   // (ATP-synthase.gd: a proton binds only while ADP and phosphate are bound)
       // the free instances sitting in slots ride the slots; the parked and released ones go back to their pools
       const F = get.gValoFree(), P = get.gValoProtons();

@@ -128,10 +128,10 @@ html.nopills #toplist, html.nopills #scorebox, html.nopills #timerbox{display:no
   font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
 #pills-btn.on{background:var(--sage);color:var(--sageink)}
-#spawn-nadp-btn,#spawn-adp-btn,#spawn-pi-btn,#spawn-h-btn,#spawn-hl-btn,#follow-btn{touch-action:manipulation;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
+#spawn-nadp-btn,#spawn-adp-btn,#spawn-pi-btn,#spawn-h-btn,#spawn-hl-btn,#follow-btn,#cartoon-btn{touch-action:manipulation;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
 #spawn-nadp-btn:active,#spawn-adp-btn:active,#spawn-pi-btn:active,#spawn-h-btn:active,#spawn-hl-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--brown)}
-#follow-btn.on{background:var(--sage);color:var(--sageink)}
+#follow-btn.on,#cartoon-btn.on{background:var(--sage);color:var(--sageink)}
 #zoomin-btn{position:absolute;left:16px;top:300px;z-index:12;touch-action:manipulation;
   font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
@@ -1205,7 +1205,7 @@ uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - an atom on its positive side is not drawn (0,0,0,-1 = off)
 varying float vIsoKeep;    // ISOLATE a cofactor: 0 = not one of the group's atoms
-uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
+uniform float isoModel;    // 0 = off, otherwise the one model index PLUS ONE still drawn (double-tap F) - the default of an unset uniform is 0, so a page that never sets it (kortti.html) draws everything - no semicolon in this comment, the preprocessor splits on them
 uniform mat4 projection;
 uniform float uT;
 uniform float boilHzAdj;        // shared clock → the moving electric-blue shimmer
@@ -1342,9 +1342,9 @@ void main(void){
   if(dot(cutPlane.xyz, vWCen) + cutPlane.w > 0.0) discard;      // POIKKILEIKKAUS: the removed half of the cell
   if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: the protein around it goes too
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
+  if(isoModel > 0.5 && abs(vMid - (isoModel - 1.0)) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
-  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+  if(isoModel > 0.5) discard;                                   // ... and nothing that is not a model at all
 #endif
 #ifdef MEMFADE
   if(viewBox > 0.5 && outsideBox(vMemW) > 0.5) discard;   // box-only view: a lipid outside the light-reaction box is not drawn
@@ -1968,7 +1968,7 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
+uniform float isoModel;    // 0 = off, otherwise the one model index PLUS ONE still drawn (double-tap F) - the default of an unset uniform is 0, so a page that never sets it (kortti.html) draws everything - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform float opacity;
 uniform vec3 fogColor;
@@ -2094,9 +2094,9 @@ void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
+  if(isoModel > 0.5 && abs(vMid - (isoModel - 1.0)) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
-  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+  if(isoModel > 0.5) discard;                                   // ... and nothing that is not a model at all
 #endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
@@ -2361,7 +2361,7 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
+uniform float isoModel;    // 0 = off, otherwise the one model index PLUS ONE still drawn (double-tap F) - the default of an unset uniform is 0, so a page that never sets it (kortti.html) draws everything - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform vec3 fogColor;
 uniform float fogStart;
@@ -2491,9 +2491,9 @@ void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
+  if(isoModel > 0.5 && abs(vMid - (isoModel - 1.0)) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
-  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+  if(isoModel > 0.5) discard;                                   // ... and nothing that is not a model at all
 #endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
@@ -3089,6 +3089,7 @@ void main(void){
   float gy = -tl - 2.0*tc - tr + bl + 2.0*bc + br;
   float g  = sqrt(gx*gx + gy*gy) * edgeAmt;
   float ink = smoothstep(0.55, 0.82, g);   // higher, narrower band → thinner ink lines
+  ink *= 1.0 - 0.6 * smoothstep(0.82, 1.0, luma(c));   // less ink inside a bright glow (the photons' outline, owner 14.9.2026: '3x thinner') - the pastel atoms sit under 0.8
   vec3 col = mix(p, vec3(0.12), ink);   // outline = a FIXED dark ink → uniform darkness whatever the local brightness (was p*0.26, which inked dark/shadowed regions near-black but light regions pale → light-direction-dependent outlines)
 
   // Static paper grain (per-2px, no time → no shimmer).
@@ -3451,7 +3452,8 @@ async function run(){
         cfg._used = true; cfg.file = fn; m.cfg = cfg; m.name = cfg.label;
         markTyrZ(m);                                   // tag the OEC-adjacent tyrosine as Tyr Z (needs raw, pre-transform coords)
         if(cfg.match === '7r0w') dropCofTypes(m, [3, 7, 8]);
-        if(cfg.match === '1gjr') dropCofTypes(m, [10]);   // FNR without its bound NADP+ (owner 14.9.2026) - the simulated NADP+ docks on it instead   // cyt b6f without its bound quinones, chlorophyll and carotenoids (owner 14.9.2026: 'remove quinones and carotenoids from cytb6f - and chl too')
+        if(cfg.match === '1gjr') dropCofTypes(m, [10]);
+        if(cfg.match === '6l7o') dropCofTypes(m, [8]);   // NDH-1 without its carotenoids (owner 14.9.2026)   // FNR without its bound NADP+ (owner 14.9.2026) - the simulated NADP+ docks on it instead   // cyt b6f without its bound quinones, chlorophyll and carotenoids (owner 14.9.2026: 'remove quinones and carotenoids from cytb6f - and chl too')
         mols.push(m); }
     }catch(err){ console.warn('failed to load', fn, err); }
     await yield_();
@@ -3759,7 +3761,7 @@ async function run(){
      whatever was set there was thrown away when they were initialised - and Babylon caches a compiled effect by shader name + defines
      alone, so a uniform first named after the first compile of that key never binds on ANY material sharing it (the cell shells'
      cutPlane). So the shared uniforms are put on the material right before it compiles: its readiness check is wrapped. */
-  const shareUniforms = m => { if(m.__shared) return; m.__shared = true; m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', -1);
+  const shareUniforms = m => { if(m.__shared) return; m.__shared = true; m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', 0);
     m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); m.setArray3('isoAt', gIsoAt); m.setFloat('isoN', 0); gShaderMats.push(m); };
   for(const fn of ['isReady', 'isReadyForSubMesh']){ const orig = BABYLON.ShaderMaterial.prototype[fn]; if(!orig) continue;
     BABYLON.ShaderMaterial.prototype[fn] = function(){ shareUniforms(this); return orig.apply(this, arguments); }; }
@@ -3892,7 +3894,7 @@ void main(void){
   float wv = smoothstep(-0.5, -0.25, v) * smoothstep(1.0, 0.8, v);
   float fil = (exp(-pow((x - w1) / 0.10, 2.0)) + exp(-pow((x - w2) / 0.10, 2.0)) * 0.8) * win * 0.30;
   float core = exp(-pow(r / 0.22, 2.0)) * 0.28 * win;
-  float halo = exp(-pow(r / 0.60, 2.0)) * 0.30 * win;
+  float halo = exp(-pow(r / 0.36, 2.0)) * 0.30 * win;   // (0.60 -> 0.36: the toon pass inks the glow's slope, a tighter halo = a thinner line - owner 14.9.2026)
   float dHead = length(vec2(v * vDim.x, r * vDim.y));
   float headGlow = (exp(-pow(dHead / 12.0, 2.0)) * 0.5 + exp(-pow(dHead / 22.0, 2.0)) * 0.2) * win * wv;
   float fade = smoothstep(1.0, 0.3, v) * smoothstep(-0.2, 0.15, v) * wv;
@@ -4572,12 +4574,17 @@ void main(void){
      2D plane'): every drawn free molecule and proton on the particle plane whose screen point falls in the box joins gSelFree ('key:i'),
      gets a sage marker, and a right tap moves the whole selection to the tapped point of the plane, relative layout kept. */
   const gSelFree = new Set();
-  { const FM_CAP = 4000; const mk = BABYLON.MeshBuilder.CreateSphere('freeSelMark', { diameter: 1, segments: 8 }, scene); const mat = new BABYLON.StandardMaterial('freeSelMarkMat', scene);
-    mat.emissiveColor = new BABYLON.Color3(0.30, 0.95, 0.45); mat.disableLighting = true; mat.alpha = 0.35; mat.alphaMode = BABYLON.Constants.ALPHA_ADD; mat.disableDepthWrite = true; mat.backFaceCulling = false;
+  { const FM_CAP = 4000; const mk = BABYLON.MeshBuilder.CreateTorus('freeSelMark', { diameter: 1, thickness: 0.09, tessellation: 28 }, scene); const mat = new BABYLON.StandardMaterial('freeSelMarkMat', scene);   // a RING facing the camera - the green selection outline's look, not a bubble (owner 14.9.2026: 'why some molecules show this bright bubble instead of the green selection outline')
+    mat.emissiveColor = new BABYLON.Color3(0.16, 0.72, 0.30); mat.disableLighting = true; mat.alpha = 0.95; mat.disableDepthWrite = true; mat.backFaceCulling = false;
     mk.material = mat; mk.isPickable = false; mk.alwaysSelectAsActiveMesh = true; mk.renderingGroupId = 3; const buf = new Float32Array(FM_CAP*16); mk.thinInstanceSetBuffer('matrix', buf, 16, false); mk.thinInstanceCount = 0; mk.setEnabled(false);
     scene.onBeforeRenderObservable.add(() => { if(!gSelFree.size){ if(mk.isEnabled()) mk.setEnabled(false); return; } let n = 0;
       for(const id of gSelFree){ if(n >= FM_CAP) break; const k = id.indexOf(':'), key = id.slice(0, k), i = +id.slice(k+1); if(!freeWorld(key, i, _pFree)) continue;
-        const r = key === 'p' ? 3.5 : key === 'w' ? 4.5 : 9; const m = n*16; buf[m]=r; buf[m+1]=0; buf[m+2]=0; buf[m+3]=0; buf[m+4]=0; buf[m+5]=r; buf[m+6]=0; buf[m+7]=0; buf[m+8]=0; buf[m+9]=0; buf[m+10]=r; buf[m+11]=0; buf[m+12]=_pFree[0]; buf[m+13]=_pFree[1]; buf[m+14]=_pFree[2]; buf[m+15]=1; n++; }
+        const r = key === 'p' ? 3.5 : key === 'w' ? 4.5 : 9; const m = n*16;
+        // the ring's axis (the torus's y) points at the camera, so it reads as an outline round the particle
+        let ax = cam.position.x - _pFree[0], ay = cam.position.y - _pFree[1], az = cam.position.z - _pFree[2]; const al = Math.hypot(ax, ay, az) || 1; ax /= al; ay /= al; az /= al;
+        let ux = -ay, uy = ax, uz = 0; if(Math.abs(ax) + Math.abs(ay) < 1e-3){ ux = 1; uy = 0; uz = 0; } const ul = Math.hypot(ux, uy, uz) || 1; ux /= ul; uy /= ul; uz /= ul;
+        const wx = ay*uz - az*uy, wy = az*ux - ax*uz, wz = ax*uy - ay*ux;
+        buf[m]=ux*r; buf[m+1]=uy*r; buf[m+2]=uz*r; buf[m+3]=0; buf[m+4]=ax*r; buf[m+5]=ay*r; buf[m+6]=az*r; buf[m+7]=0; buf[m+8]=wx*r; buf[m+9]=wy*r; buf[m+10]=wz*r; buf[m+11]=0; buf[m+12]=_pFree[0]; buf[m+13]=_pFree[1]; buf[m+14]=_pFree[2]; buf[m+15]=1; n++; }
       if(n) mk.thinInstancePartialBufferUpdate('matrix', buf.subarray(0, n*16), 0); mk.thinInstanceCount = n; mk.setEnabled(n > 0); }); }
   const _pFree = [0,0,0];
   const freeWorld = (key, i, out) => { if(key === 'p'){ const P = gValoProtons; if(!P) return false; out[0]=P.pos[i*3]; out[1]=P.pos[i*3+1]; out[2]=P.pos[i*3+2]; return true; }
@@ -5526,6 +5533,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(gDevBox) gDevBox.setEnabled(gDev);
       if(gDevPlane) gDevPlane.setEnabled(gDev && gDevTasoOn);
       if(gDevPsuBox) gDevPsuBox.setEnabled(gDev);
+      if(gCbox) gCbox.setEnabled(gDev);
       applyDevMode(); }); }
   { const etcBtn = document.getElementById('etc-btn');   // highlight the electron-transport cofactors on top of everything
     if(etcBtn) etcBtn.addEventListener('click', () => { gEtc = !gEtc;
@@ -8233,7 +8241,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const V=[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]];
     const E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
     const box=BABYLON.MeshBuilder.CreateLineSystem('cbox',{lines:E.map(e=>[new BABYLON.Vector3(...V[e[0]]), new BABYLON.Vector3(...V[e[1]])]), updatable:true},scene);
-    box.color=new BABYLON.Color3(0.42,0.5,0.6); box.alpha=0.5; box.isPickable=false; gCbox = box;   // cell mode: fit() below moves these lines onto the unit box, so THE box you see is the one every cull, cut and wall uses (owner 13.9.2026: 'stop rendering everything outside the box')
+    box.color=new BABYLON.Color3(0.42,0.5,0.6); box.alpha=0.5; box.isPickable=false; gCbox = box; box.setEnabled(gDev);   // the box outline only in dev mode (owner 14.9.2026)   // cell mode: fit() below moves these lines onto the unit box, so THE box you see is the one every cull, cut and wall uses (owner 13.9.2026: 'stop rendering everything outside the box')
 
     // Spawn plane for hand-dropped atoms: the mid-Z plane through the scene centre, bounded to a
     // region around the models. (The inner reference cage that used to visualise this was removed.)
@@ -8910,7 +8918,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           if(pIn[i]){                                              // passing: keep climbing, funnelled onto the axis
             if(pVel[o+1] < 8) pVel[o+1] = 8;
             const k = 1 - Math.min(1, dt*3); x = axX + (x-axX)*k; z = axZ + (z-axZ)*k;
-          } else if(inCh && pVel[o+1] > 0 && pPos[o+1] <= bot){ pIn[i] = 1; }   // came up from the lumen side into the channel
+          } else if(inCh && pVel[o+1] > 0 && pPos[o+1] <= bot && window.gAtpReady){ pIn[i] = 1; }   // came up from the lumen side into the channel - only while ADP and P are bound (owner 14.9.2026: 'dont let protons through before ADP and P are bound'); else it bounces below
           else if(pPos[o+1] >= top){ y = top; pVel[o+1] = Math.abs(pVel[o+1]); }   // blocked from the stroma side (or outside the channel)
           else { y = bot; pVel[o+1] = -Math.abs(pVel[o+1]); }
         } else if(pIn[i]){ pIn[i] = 0; if(y >= top) passes++; }   // out on the stroma side: one proton through, one rotor step
@@ -9504,7 +9512,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const sig = gIsoModel + '|' + isoR[0] + '|' + isoR[1] + '|' + gSelModel + '|' + selR[0] + '|' + selR[1] + '|' + gIsoN + '|' + (gXsec ? cutW.x + ',' + cutW.y + ',' + cutW.z + ',' + cutW.w + ',' + cutV.x + ',' + cutV.y + ',' + cutV.z + ',' + cutV.w : 'off') + '|' + gShaderMats.length;
       const changed = sig !== gShareSig; gShareSig = sig;   // (perf 14.9.2026: nine uniforms on ~300 materials every frame was 1 ms - the rarely-changing ones go out only when they change)
       for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT);
-        if(changed){ m.setFloat('isoModel', gIsoModel); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); } } }
+        if(changed){ m.setFloat('isoModel', gIsoModel + 1); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); } } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
     const u = cam.getDirection(BABYLON.Axis.Y);   // view up
     const r = cam.getDirection(BABYLON.Axis.X);   // view right
@@ -10475,6 +10483,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const R = h.maxR; const offA = pq ? [0,0,0] : contact(hostA, A, R), offB = pq ? [0,0,0] : contact(hostB, B, R);
       gShuttles.push({ mi:h.mi, R, pq, A, B, hostA, hostB, offA, offB, speed: pq ? 200 : 50, phase: (m.shuttleK % 2) ? 'toA' : 'toB', t: (m.shuttleK/10)*0.9, dock: 2.5 + (m.shuttleK % 4)*0.8, cur:[0,0,0], h:[1,0,0] });
     }
+    for(let mi=0; mi<mols.length; mi++){ const m = mols[mi]; if(!m || !m.cfg || !m.cfg.label) continue; const f = mols.findIndex(x => x && x.cfg && x.cfg.label === m.cfg.label); if(f >= 0 && f < mi){ gModelCol[mi*3]=gModelCol[f*3]; gModelCol[mi*3+1]=gModelCol[f*3+1]; gModelCol[mi*3+2]=gModelCol[f*3+2]; } }   // one colour per LABEL (owner 14.9.2026: 'why is one ferredoxin a different colour' - the clones and the row copies each drew a pastel of their own)
     { const src = mols.find(x => x.cfg && x.cfg.match === 'plastoquinone'); if(src){ const si = mols.indexOf(src); for(const sh of gShuttles) if(sh.pq){ gModelCol[sh.mi*3]=gModelCol[si*3]; gModelCol[sh.mi*3+1]=gModelCol[si*3+1]; gModelCol[sh.mi*3+2]=gModelCol[si*3+2]; } } }
     { const src = mols.find(x => x.cfg && x.cfg.match === '1ag6'); if(src){ const si = mols.indexOf(src); for(const sh of gShuttles) if(!sh.pq){ gModelCol[sh.mi*3]=gModelCol[si*3]; gModelCol[sh.mi*3+1]=gModelCol[si*3+1]; gModelCol[sh.mi*3+2]=gModelCol[si*3+2]; } } }
     window.__sites = () => { const byType = {}; for(const g of etcGroups){ if(!g.n) continue; const mi = modelOf(g.cx, g.cy, g.cz); const k = mi+':'+g.type; byType[k] = (byType[k]||0)+1; }
@@ -10579,8 +10588,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        units wide over a 1600 x 2000 face would otherwise hardly ever meet one), the rest anywhere on the face. */
     const spawn = i => { const lo = gPsuLo || gBoxLo, hi = gPsuHi || gBoxHi; if(!lo) return; const o = i*3;
       let x = lo.x + Math.random()*(hi.x-lo.x), z = lo.z + Math.random()*(hi.z-lo.z);
-      if(Math.random() < 0.8 && N_CH){ for(let tries = 0; tries < 8; tries++){ const k = (Math.random()*N_CH)|0, cx = chW[k*3], cy = chW[k*3+1], cz = chW[k*3+2];
-          if(cx > lo.x && cx < hi.x && cy > lo.y && cy < hi.y && cz > lo.z && cz < hi.z){ x = cx + (Math.random()-0.5)*6; z = cz + (Math.random()-0.5)*6; break; } } }
+      if(gPlaneDim) z = gTasoZ + (Math.random()-0.5)*4;   // the plane mode: only the plane's photons are shown, so only they are made (owner 14.9.2026)
+      if(Math.random() < 0.8 && N_CH){ for(let tries = 0; tries < 12; tries++){ const k = (Math.random()*N_CH)|0, cx = chW[k*3], cy = chW[k*3+1], cz = chW[k*3+2];
+          if(gPlaneDim && Math.abs(cz - gTasoZ) > 14) continue;   // (aimed only at the plane's chlorophylls)
+          if(cx > lo.x && cx < hi.x && cy > lo.y && cy < hi.y && cz > lo.z && cz < hi.z){ x = cx + (Math.random()-0.5)*6; z = gPlaneDim ? gTasoZ + (Math.random()-0.5)*4 : cz + (Math.random()-0.5)*6; break; } } }
       px[o]=x; px[o+1]=hi.y; px[o+2]=z; pd[o]=0; pd[o+1]=-1; pd[o+2]=0; alive[i] = 1; phase[i] = Math.random()*6.283; };
     let seeded = false, phBudget = 0; const PH_RATE = 4;
     scene.onBeforeRenderObservable.add(() => {
@@ -12300,11 +12311,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         ['spawn-h-btn', '± H⁺ strooma', 'Vasen: lisää yksi protoni hiukkastasolle stroomaan · oikea: poista yksi', () => window.gValoSpawnProtons && window.gValoSpawnProtons(1, 1), () => window.gValoRemoveProtons && window.gValoRemoveProtons(1, 1)],
         ['spawn-hl-btn', '± H⁺ luumen', 'Vasen: lisää yksi protoni hiukkastasolle luumeniin · oikea: poista yksi', () => window.gValoSpawnProtons && window.gValoSpawnProtons(1, -1), () => window.gValoRemoveProtons && window.gValoRemoveProtons(1, -1)]]){   // (owner 14.9.2026: one particle per press, a right click removes one)
       const b = document.createElement('button'); b.id = id; b.textContent = txt; b.title = title; b.addEventListener('click', run); b.addEventListener('contextmenu', e => { e.preventDefault(); del(); }); document.body.appendChild(b); }   // owner 14.9.2026: the spawn buttons
+    { const cb = document.createElement('button'); cb.id = 'cartoon-btn'; cb.textContent = '🎨 Sarjakuva'; cb.title = 'Sarjakuvamainen piirtotyyli (musteviivat, väripinnat, paperi) päälle/pois'; cb.classList.add('on');   // owner 14.9.2026: 'a button to disable the cartoon graphics'
+      cb.addEventListener('click', () => { if(window.gTogglePainterly) window.gTogglePainterly(); cb.classList.toggle('on', !!window.gPainterlyOn); }); document.body.appendChild(cb); }
     { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 500 hiukkasta joka lajia, muut jätetään piirtämättä (kytkeytyy itsestään päälle laatikon sisällä)';   // in the gear menu for everyone (owner 12.9.2026)
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn',
-                     'memcut-btn','xsec-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','spawn-nadp-btn','spawn-adp-btn','spawn-pi-btn','spawn-h-btn','spawn-hl-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
+                     'memcut-btn','xsec-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','spawn-nadp-btn','spawn-adp-btn','spawn-pi-btn','spawn-h-btn','spawn-hl-btn','cartoon-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
       const b = document.getElementById(id); if(!b) continue;
       b.style.position = 'static'; b.style.left = 'auto'; b.style.top = 'auto'; menu.appendChild(b);   // static → they stack in the menu
     }
@@ -12871,8 +12884,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     { const rts = scene.customRenderTargets;
       const setRT = (rt, want) => { if(!rt) return; const i = rts.indexOf(rt);
         if(want && i < 0) rts.push(rt); else if(!want && i >= 0) rts.splice(i, 1); };
-      const wantSel = gOutlines && (gSel.size || etcSel >= 0);           // green ring needs its mask
-      const wantCof = gOutlines && gEtc;                                 // black silhouette needs its mask
+      const wantSel = gOutlines && gIsoModel < 0 && (gSel.size || etcSel >= 0);           // green ring needs its mask (none in the isolate view - owner 14.9.2026: 'show only the selected thing without outline and other distractions')
+      const wantCof = gOutlines && gIsoModel < 0 && gEtc;                                 // black silhouette needs its mask
       setRT(cofDepthRT, gRevealOn > 0.5);
       setRT(cofMaskRT,  wantCof);
       setRT(gSelMaskRT, wantSel);
@@ -12908,7 +12921,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const overAtom = !!a && BABYLON.Vector3.Distance(cam.position, a.center) <= BUBBLE_R;   // hover an atom anywhere it renders (matches the selection gate)
       if(overAtom){   // CLOSE → hover the ATOM (same tier as selecting)
         // don't hover-outline the atom that's already selected → its selOut is enough (no doubled stroke)
-        if(BABYLON.Vector3.DistanceSquared(a.center, selCenter) > 0.09) setHL(a); else hl.setEnabled(false);
+        if(a.free || a.lipid || gIsoModel >= 0) hl.setEnabled(false);   // NEVER a hover outline on a free molecule or a lipid (owner 14.9.2026: 'I can still see hover outlines of hidden free floaters - never show their outline'), nor in the isolate view
+        else if(BABYLON.Vector3.DistanceSquared(a.center, selCenter) > 0.09) setHL(a); else hl.setEnabled(false);
         gHoverGroup = -1;                                                  // not hovering a whole cofactor
       } else {                                                            // FAR → hover the whole MOLECULE (cofactor) → it renders 25% brighter
         hl.setEnabled(false);
@@ -12999,7 +13013,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Painterly / comic-book grade — runs last, over the anti-aliased frame. Toggle with "P".
   let painterlyOn = true;
   window.gPainterlyOn = () => painterlyOn;
-  window.gTogglePainterly = () => { painterlyOn = !painterlyOn; if(painterlyOn) cam.attachPostProcess(painterly); else cam.detachPostProcess(painterly); };   // K key and the dev panel's Valaistus button
+  window.gPainterlyOn = true; window.gTogglePainterly = () => { painterlyOn = !painterlyOn; window.gPainterlyOn = painterlyOn; if(painterlyOn) cam.attachPostProcess(painterly); else cam.detachPostProcess(painterly); const b = document.getElementById('cartoon-btn'); if(b) b.classList.toggle('on', painterlyOn); };   // K key and the dev panel's Valaistus button
   const painterly = new BABYLON.PostProcess('painterly', 'painterly',
     ['texel', 'edgeAmt', 'bands', 'paperAmt', 'bright'], null, 1.0, cam);
   painterly.onApply = eff => {
@@ -13016,7 +13030,7 @@ precision highp float;
 varying vec2 vUV;
 uniform sampler2D textureSampler;
 uniform vec2 elecUV;
-#define LN_MAX 64
+#define LN_MAX 128
 uniform vec4 elecUVs[LN_MAX];   // the lights on screen: xy, z = 0 an electron (blue), 1 a proton (orange), 2 an excited chlorophyll (green), w = the pool's radius as a fraction of the screen height - a WORLD size projected, so it scales with the zoom (owner 13.9.2026)
 uniform float nElecs;
 uniform float lanternOn;
@@ -13065,7 +13079,7 @@ void main(void){
   gl_FragColor = vec4(min(c, vec3(1.0)), 1.0);
 }`;
   const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect','lanternDark','uT'], null, 1.0, cam);
-  const _lnUV = new Float32Array(64*4);
+  const _lnUV = new Float32Array(128*4);   // (128 lights, was 64: the cap made the farther protons' glows come and go - owner 14.9.2026)
   { const _lvp = new BABYLON.Viewport(0, 0, 1, 1);
     lanternPP.onApply = eff => {
       const w = engine.getRenderWidth(), h = engine.getRenderHeight();
@@ -13075,7 +13089,7 @@ void main(void){
       eff.setFloat2('elecUV', onScreen ? p.x / w : -10.0, onScreen ? 1.0 - p.y / h : -10.0);
       let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
       if(window.gValoElecs && gIsoModel < 0){ const tm = scene.getTransformMatrix();   // (no glows in the isolate view - double-tap F)
-        for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
+        for(const e of window.gValoElecs){ if(!e.on || n >= 128) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
           if(q.z < 0.0 || q.z > 1.0) continue;
           /* the pool's size is a WORLD size (owner 13.9.2026: 'the glow should scale with the simulation'): about 7 units round an electron or a proton,
              5 round a pigment's Mg, projected at the light's distance - a fraction of the screen height. Too small to see from the whole cell, so it is not drawn */
@@ -13090,11 +13104,11 @@ void main(void){
       /* FREE protons glow too (owner 14.9.2026: 'the spawned H+ dont have the glow ... the protons released into the lumen lose their glow'):
          the light reactions only list the protons they hold, so a proton let go into the lumen, or one made by the spawn button, went dark.
          The nearest free ones fill the spotlight slots that are left (the 64 cap is the shader's), so the ones you look at glow. */
-      if(gValoProtons && gIsoModel < 0 && n < 64){ const P = gValoProtons, cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, cand = [];
+      if(gValoProtons && gIsoModel < 0 && n < 128){ const P = gValoProtons, cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, cand = [];
         for(let i=0;i<P.n;i++){ if(P.hold[i]) continue; const o=i*3, y=P.pos[o+1]; if(y < -20000) continue;   // held by the sim (it lists those itself) or parked in the reserve
           const dx=P.pos[o]-cx, dy=y-cy, dz=P.pos[o+2]-cz; cand.push([dx*dx+dy*dy+dz*dz, i]); }
         cand.sort((a, b) => a[0] - b[0]); const tm = scene.getTransformMatrix();
-        for(const [d2, i] of cand){ if(n >= 64) break; const o=i*3, dist = Math.max(1, Math.sqrt(d2)), R = 7 / (2*dist*Math.tan(cam.fov/2)); if(R < 0.0015) break;   // sorted: the rest are farther still
+        for(const [d2, i] of cand){ if(n >= 128) break; const o=i*3, dist = Math.max(1, Math.sqrt(d2)), R = 7 / (2*dist*Math.tan(cam.fov/2)); if(R < 0.0015) break;   // sorted: the rest are farther still
           const q = BABYLON.Vector3.Project(new BABYLON.Vector3(P.pos[o], P.pos[o+1], P.pos[o+2]), BABYLON.Matrix.Identity(), tm, _lvp); if(q.z < 0.0 || q.z > 1.0) continue;
           _lnUV[n*4] = q.x / w; _lnUV[n*4+1] = 1.0 - q.y / h; _lnUV[n*4+2] = 1; _lnUV[n*4+3] = Math.min(0.12, R); n++; } }
       eff.setArray4('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark); eff.setFloat('uT', performance.now()*0.001);
@@ -13149,6 +13163,7 @@ void main(void){
       if(selAtom && selAtom.center) return modelOf(selAtom.center.x, selAtom.center.y, selAtom.center.z);
       if(etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel]; return modelOf(g.cx, g.cy, g.cz); } return -1; };
     const ISO_SHADERS = new Set(['hull', 'slab', 'cellshell', 'beam', 'bigelec', 'ecorona']);
+    const ISO_HIDE = new Set(['selOut', 'selOutDim', 'hl', 'selMask', 'selMaskMesh', 'cofMaskMesh', 'cofDisc', 'freeSelMark', 'etcOverlay', 'cbox', 'devPsuBox', 'photons']);   // the outlines, masks, markers and lights: distractions in the isolate view (owner 14.9.2026)
     const isoOff = () => { if(gIsoModel < 0) return; gIsoModel = -1; gIsoN = 0; for(const m of gIsoHidden) m.isVisible = true; gIsoHidden = []; if(gIsoTheme){ scene.clearColor = gIsoTheme; gIsoTheme = null; } };
     const isoOn = mi => { if(mi < 0) return; if(gIsoModel >= 0) isoOff(); gIsoModel = mi; gIsoTheme = scene.clearColor; scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
       gIsoN = 0;   // a selected COFACTOR inside a complex (no complex selected): only the group's own atoms are drawn, the protein around it goes (owner 14.9.2026: 'double F doesnt hide the protein if the selected cofactor is part of the protein')
@@ -13157,7 +13172,7 @@ void main(void){
         gIsoN = n; for(const m of gShaderMats) m.setArray3('isoAt', gIsoAt); }
       for(const m of scene.meshes){ if(m === bgQuad || !m.isVisible) continue; let mat = m.material; if(mat && mat.subMaterials) mat = mat.subMaterials[0]; if(!mat) continue;
         const shader = mat instanceof BABYLON.ShaderMaterial ? String(mat.shaderPath) : null;
-        if(mat instanceof BABYLON.StandardMaterial || m instanceof BABYLON.LinesMesh || (shader && ISO_SHADERS.has(shader))){ m.isVisible = false; gIsoHidden.push(m); } } };
+        if(mat instanceof BABYLON.StandardMaterial || m instanceof BABYLON.LinesMesh || (shader && ISO_SHADERS.has(shader)) || ISO_HIDE.has(m.name)){ m.isVisible = false; gIsoHidden.push(m); } } };
     window.gIsoToggle = () => { if(gIsoModel >= 0) isoOff(); else isoOn(selModelOf()); }; window.__isoOn = isoOn; window.__isoOff = isoOff; window.__etcSel = gi => { if(gi !== undefined) showEtcSel(gi); return { sel: etcSel, model: selModelOf(), atom: !!selAtom, rts: gSel.size, free: gSelFree.size }; };   // (dev)
     let gFLastTap = 0;
     window.addEventListener('keydown', e => { if(e.repeat || (e.key !== 'f' && e.key !== 'F') || (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) return;

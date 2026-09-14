@@ -788,7 +788,7 @@ uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlane;     // POIKKILEIKKAUS: the cut plane in world space (xyz normal, w offset) - an atom on its positive side is not drawn (0,0,0,-1 = off)
 varying float vIsoKeep;    // ISOLATE a cofactor: 0 = not one of the group's atoms
-uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
+uniform float isoModel;    // 0 = off, otherwise the one model index PLUS ONE still drawn (double-tap F) - the default of an unset uniform is 0, so a page that never sets it (kortti.html) draws everything - no semicolon in this comment, the preprocessor splits on them
 uniform mat4 projection;
 uniform float uT;
 uniform float boilHzAdj;        // shared clock → the moving electric-blue shimmer
@@ -925,9 +925,9 @@ void main(void){
   if(dot(cutPlane.xyz, vWCen) + cutPlane.w > 0.0) discard;      // POIKKILEIKKAUS: the removed half of the cell
   if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: the protein around it goes too
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
+  if(isoModel > 0.5 && abs(vMid - (isoModel - 1.0)) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
-  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+  if(isoModel > 0.5) discard;                                   // ... and nothing that is not a model at all
 #endif
 #ifdef MEMFADE
   if(viewBox > 0.5 && outsideBox(vMemW) > 0.5) discard;   // box-only view: a lipid outside the light-reaction box is not drawn
@@ -1551,7 +1551,7 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
+uniform float isoModel;    // 0 = off, otherwise the one model index PLUS ONE still drawn (double-tap F) - the default of an unset uniform is 0, so a page that never sets it (kortti.html) draws everything - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform float opacity;
 uniform vec3 fogColor;
@@ -1677,9 +1677,9 @@ void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
+  if(isoModel > 0.5 && abs(vMid - (isoModel - 1.0)) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
-  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+  if(isoModel > 0.5) discard;                                   // ... and nothing that is not a model at all
 #endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
@@ -1944,7 +1944,7 @@ uniform float isoHi;
 uniform float selLo;       // the same for the selected model's tint
 uniform float selHi;
 uniform vec4 cutPlaneV;    // POIKKILEIKKAUS: the cut plane in view space (xyz normal, w offset) - a fragment on its positive side is not drawn (0,0,0,-1 = off)
-uniform float isoModel;    // -1 = off, otherwise the one model index still drawn (double-tap F) - no semicolon in this comment, the preprocessor splits on them
+uniform float isoModel;    // 0 = off, otherwise the one model index PLUS ONE still drawn (double-tap F) - the default of an unset uniform is 0, so a page that never sets it (kortti.html) draws everything - no semicolon in this comment, the preprocessor splits on them
 uniform float bubbleR;
 uniform vec3 fogColor;
 uniform float fogStart;
@@ -2074,9 +2074,9 @@ void main(void){
   if(dot(cutPlaneV.xyz, vViewPos) + cutPlaneV.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   if(vIsoKeep < 0.5) discard;   // ISOLATE a cofactor: only its own orbitals
 #ifdef MODELMOVE
-  if(isoModel >= 0.0 && abs(vMid - isoModel) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
+  if(isoModel > 0.5 && abs(vMid - (isoModel - 1.0)) > 0.5 && (vMid < isoLo || vMid > isoHi)) discard;   // ISOLATE (double-tap F): only the selected model is drawn (and its extra slots: the LHC pieces)
 #else
-  if(isoModel >= 0.0) discard;                                  // ... and nothing that is not a model at all
+  if(isoModel > 0.5) discard;                                   // ... and nothing that is not a model at all
 #endif
   // TRUE ALPHA — real blended coverage, no screen-door dither.
   float alpha = 1.0;
@@ -2672,6 +2672,7 @@ void main(void){
   float gy = -tl - 2.0*tc - tr + bl + 2.0*bc + br;
   float g  = sqrt(gx*gx + gy*gy) * edgeAmt;
   float ink = smoothstep(0.55, 0.82, g);   // higher, narrower band → thinner ink lines
+  ink *= 1.0 - 0.6 * smoothstep(0.82, 1.0, luma(c));   // less ink inside a bright glow (the photons' outline, owner 14.9.2026: '3x thinner') - the pastel atoms sit under 0.8
   vec3 col = mix(p, vec3(0.12), ink);   // outline = a FIXED dark ink → uniform darkness whatever the local brightness (was p*0.26, which inked dark/shadowed regions near-black but light regions pale → light-direction-dependent outlines)
 
   // Static paper grain (per-2px, no time → no shimmer).
