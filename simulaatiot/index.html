@@ -5440,7 +5440,7 @@ void main(void){
   let gShell   = 0;           // vdW spheres: 1 = translucent where the atom reveals orbitals, 0 = always solid
   let gShellMin = 0.0;        // alpha the vdW shell fades TO where revealed (0 = fully hidden, 0.5 = half-transparent)
   let gRevealFade = 0.95;     // revealed-shell opacity at the FAR reveal edge → distant atoms stay ~solid, close ones go glass. Dev slider.
-  let gEtc = false, etcOverlay = null;  // ETC cofactor overlay toggle + its mesh (built later) — OFF by default (it also drives the see-through reveal and a heavy depth pass, so the scene starts plain and fast)
+  let gEtc = true, etcOverlay = null;   // ETC cofactor overlay toggle + its mesh (built later) - ON by default (owner 14.9.2026: 'make etc show by default'; was off: it also drives the see-through reveal and a heavy depth pass)
   let gOutlines = true;                 // black molecule silhouette + green selection ring — both off together via the "Reunat" button
   let gCullOnly = false;                // DEV: draw ONLY the cells right next to the camera, so you can see exactly what is close by
   // THE crisp zone. Inside it atoms get the full treatment (orbitals, nuclei, ray-traced spheres, ink
@@ -6185,6 +6185,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       refreshCofDiscs = () => {   // per-atom tube radius (Å); 0 = that atom's type is toggled off
         for(let i=0;i<NA;i++) gCofDR[i] = etcTypeOn[etcT[i]] ? WORLD_TUBE_R : 0.0;
         disc.thinInstanceSetBuffer('dr', gCofDR, 1, true);
+        /* the black silhouette (the cofmask's dr) and the on-top overlay sphere (instR) go with the switch too: a type that is off - the pigments by default - is
+           drawn as plain protein atoms, not inked as a chain member (owner 14.9.2026: 'the pigments still have a black outline even though they dont count as ETC') */
+        if(gCofMaskMesh){ const dr = new Float32Array(NA); for(let i=0;i<NA;i++) dr[i] = etcTypeOn[etcT[i]] ? etcR[i] : 0.0; gCofMaskMesh.thinInstanceSetBuffer('dr', dr, 1, true); }
+        if(etcOverlay){ const ir = new Float32Array(NA); for(let i=0;i<NA;i++) ir[i] = etcTypeOn[etcT[i]] ? etcR[i] : 0.0; etcOverlay.thinInstanceSetBuffer('instR', ir, 1, true); }
       };
       refreshCofDiscs();
       cofDepthRT.renderList = [disc];
@@ -6222,6 +6226,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       cofMaskRT.renderList = [maskMesh];
       scene.customRenderTargets.push(cofMaskRT);
       gCofMaskMesh = maskMesh;
+      refreshCofDiscs();   // the mask's and the overlay's radii by the type switches (the pigments off)
     }
   }
 
@@ -12961,16 +12966,25 @@ float pool(vec2 d, float R, float ph){
   float rays = 0.55 + 0.45 * sin(ang*13.0 + uT*11.0 + ph) * sin(ang*7.0 - uT*17.0 + ph*2.1);
   float arcs = 0.7 + 0.3 * sin(r/R*9.0 - uT*23.0 + ph);
   float flick = 0.8 + 0.2 * sin(uT*41.0 + ph*3.0) * sin(uT*29.0 + ph);
-  return core * (0.6 + 0.9*rays*arcs) * flick;
+  return core * (0.6 + 0.9*rays*arcs) * flick * 3.0;   // 3x (owner 14.9.2026: 'make the glow of all 3x more intense')
 }
 void main(void){
-  vec3 c = texture2D(textureSampler, vUV).rgb;
+  /* an EXCITED PIGMENT is a HEAT WAVE, not a pool (owner 14.9.2026: 'the mg excitation glow should look different - a heatwave/ripple'): rings
+     running outward from the Mg bend the picture behind them (a refraction-like shimmer, the scene sampled through the ripple) with a warm crest */
+  vec2 uvOff = vec2(0.0); float heat = 0.0;
+  for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break; if(elecUVs[i].z < 1.5) continue;
+    vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].w * 3.0, r = length(d); if(r >= R) continue;
+    float env = 1.0 - r/R; env *= env; float w = sin(r/R*16.0 - uT*9.0 + float(i)*1.3);
+    vec2 dir = d / max(r, 1e-5); float amp = w * env * R * 0.22; uvOff += vec2(dir.x*amp/aspect, dir.y*amp);
+    heat = max(heat, env * (0.35 + 0.65*max(0.0, w)) ); }
+  vec3 c = texture2D(textureSampler, clamp(vUV + uvOff, vec2(0.0), vec2(1.0))).rgb;
   float litE = 0.0, litP = 0.0, litG = 0.0;
   { vec2 d = vUV - elecUV; d.x *= aspect; float R = 0.05; litE = pool(d, R, 0.0); }   // (the old single electron - off-screen unless something sets it)
   for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
     vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].w;   // the pool's radius, projected from a world size
+    if(elecUVs[i].z > 1.5) continue;   // (a pigment is the heat wave above)
     float l = pool(d, R, float(i)*1.7);
-    if(elecUVs[i].z > 1.5) litG = max(litG, l); else if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
+    if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
   vec3 cE = vec3(0.25, 0.55, 1.00), cP = vec3(1.00, 0.55, 0.12), cG = vec3(0.40, 1.00, 0.45);
   float lit = max(litE, max(litP, litG));
   vec3 lc = (cE*litE + cP*litP + cG*litG) / max(litE + litP + litG, 1e-4);   // the light's colour where pools overlap
@@ -12980,6 +12994,7 @@ void main(void){
   } else {
     c = c * mix(vec3(1.0), lc * 1.5, min(1.0, lit)) + lc * lit * 0.7;   // outside the lantern the same electric glows, no darkening: blue electrons, orange protons, green excited chlorophylls (owner 14.9.2026)
   }
+  c += vec3(1.0, 0.92, 0.55) * heat * 0.9 + vec3(0.4, 1.0, 0.45) * heat * heat * 0.6;   // the wave's warm crest, greenish at the Mg itself
   gl_FragColor = vec4(min(c, vec3(1.0)), 1.0);
 }`;
   const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect','lanternDark','uT'], null, 1.0, cam);
