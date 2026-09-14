@@ -7391,7 +7391,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const BL = 4, nbx = Math.ceil(Gx/BL), nbz = Math.ceil(Gz/BL), NBLK = nbx*nbz*2;
     const blockR = 0.5*Math.hypot(BL*S, ySpan+2*Math.max(xr,zr,1), BL*S) + JIT + S*0.5;   // +S*0.5 = the odd-row stagger
     gMemCellR = blockR;   // every LOD margin is measured against a whole block, because the ramp is decided per block
-    gMemRow = S*1.25;   // Puolikas (owner 14.9.2026: 'the first row of lipids in the halved membrane edge with the cheap LoD, fill the rest with the slab')
+    gMemRow = S*10;   // Puolikas (owner 14.9.2026): ten rows of lipids deep at the cut, in the CHEAP tier (opaque atoms, no glass, no orbitals), the slab strip behind - 'the invisible parts of the inner membrane are not rendered in vain'
     const gCoarseD = 520, gCoarse2 = gCoarseD*gCoarseD;   // beyond this a lipid is drawn as its coarse twin (a merged sphere per slice) - its atoms are 1-2 px there
     const blkStart = new Int32Array(NBLK+1), blkCnt = new Int32Array(NBLK);
     const blkCx = new Float32Array(NBLK), blkCz = new Float32Array(NBLK);
@@ -7696,11 +7696,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const ddx = e.cx-cp.x, ddy = e.cy-cp.y, ddz = e.cz-cp.z, d2 = ddx*ddx+ddy*ddy+ddz*ddz;
           let vis = true; for(let q=0;q<6;q++){ const pl=fp[q]; if(pl.normal.x*e.cx + pl.normal.y*e.cy + pl.normal.z*e.cz + pl.d < -(e.r+14)){ vis=false; break; } }
           if(!vis) continue;
-          const rowCut = gMemCut && gCut[2] > 0.5 && gMemRow > 0;   // Puolikas: the kept half is one row of coarse lipids at the cut, the shell beyond (the cellshell shader draws the shell there, see memRow)
+          const rowCut = gMemCut && gCut[2] > 0.5 && gMemRow > 0;   // Puolikas: the kept half is ten rows of CHEAP lipids (the far tier: every atom an opaque sphere - the coarse merged spheres read as 'large spheres', owner 14.9.2026) at the cut, the shell strip beyond (see memRow)
           const near = !rowCut && d2 < full2, P = e.pos, Rt = e.rot;
           for(let q=0;q<e.n;q++){ const E = sphTpl[e.tpl[q]]; if(!E) continue; const o=q*3, r9=q*9;
-            if(rowCut){ const dz = (P[o+2] - gCut[0]) * (-gCut[1]); if(dz < -1 || dz > gMemRow) continue; }   // (the camera side is cut anyway - only the first row of the kept side)
-            let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(rowCut || d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
+            if(rowCut){ const dz = (P[o+2] - gCut[0]) * (-gCut[1]); if(dz < -1 || dz > gMemRow) continue; }   // (the camera side is cut anyway - only the first rows of the kept side)
+            let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(!rowCut && d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
             const m = k*16, tn = M.tint; if(tn){ Tn[k*4]=tn[0]; Tn[k*4+1]=tn[1]; Tn[k*4+2]=tn[2]; Tn[k*4+3]=0.72; } else Tn[k*4+3]=0; Sn[k] = e.shd[q];
             Mx[m]=Rt[r9]; Mx[m+1]=Rt[r9+1]; Mx[m+2]=Rt[r9+2]; Mx[m+3]=0; Mx[m+4]=Rt[r9+3]; Mx[m+5]=Rt[r9+4]; Mx[m+6]=Rt[r9+5]; Mx[m+7]=0;
             Mx[m+8]=Rt[r9+6]; Mx[m+9]=Rt[r9+7]; Mx[m+10]=Rt[r9+8]; Mx[m+11]=0; Mx[m+12]=P[o]; Mx[m+13]=P[o+1]; Mx[m+14]=P[o+2]; Mx[m+15]=1;
