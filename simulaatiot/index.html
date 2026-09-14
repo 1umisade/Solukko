@@ -4608,23 +4608,24 @@ void main(void){
     gPing = { x:wx, y:wy, z:FLOOR_Z, t0:performance.now() };
     for(const m of gSelMol){ m.mtx = wx; m.mty = wy; m.av = 0; }   // steer to the point, no tumble - the physics observer stops it on arrival
   };
-  const moveSelectedTo = (px, py) => { if(!gSel.size) return;
+  const immovable = mi => !!(gMemBound[mi] && mols[mi] && !mols[mi].shuttle);   // a membrane complex (PSII, b6f, PSI, ATP synthase, NDH-1...) is IMMOVABLE (owner 14.9.2026): no move order, no gizmo - only the loose proteins and the level's carriers move
+  const moveSelectedTo = (px, py) => { const sel = [...gSel].filter(mi => !immovable(mi)); if(!sel.length) return;
     const tmi = pickModelAtCursor();                                    // right-clicked directly ON a molecule → FOLLOW it
     if(tmi >= 0 && !gSel.has(tmi)){
       const fx=mInfo[tmi].cx+gModelOff[tmi*3], fy=mInfo[tmi].cy+gModelOff[tmi*3+1];
-      for(const mi of gSel){ if(mi===tmi) continue; snapshotModel(mi);
+      for(const mi of sel){ if(mi===tmi) continue; snapshotModel(mi);
         const ang=Math.atan2((mInfo[mi].cy+gModelOff[mi*3+1])-fy, (mInfo[mi].cx+gModelOff[mi*3])-fx);   // approach from / hold the side they came from
         gFollow.set(mi, { tmi, ang, ring: 0.5*modelSize(tmi)+0.5*modelSize(mi) }); }   // stand off just outside the followed molecule
       gPing = { x:fx, y:fy, z:FLOOR_Z, t0:performance.now(), follow:true };   // gold ping on the followed molecule
       return;
     }
-    for(const mi of gSel) gFollow.delete(mi);                           // a ground order cancels any follow on the selected units only
+    for(const mi of sel) gFollow.delete(mi);                            // a ground order cancels any follow on the selected units only
     const ray=scene.createPickingRay(px,py,BABYLON.Matrix.Identity(),cam);
     if(Math.abs(ray.direction.z) < 1e-6) return;                       // ray parallel to the floor → no destination
     const t=(FLOOR_Z - ray.origin.z)/ray.direction.z; if(t < 0) return;   // intersect the FLOOR plane Z = FLOOR_Z
     const wx=ray.origin.x + ray.direction.x*t, wy=ray.origin.y + ray.direction.y*t;   // destination on the floor
     gPing = { x:wx, y:wy, z:FLOOR_Z, t0:performance.now() };               // green move-order ping there
-    const units=[...gSel];
+    const units=sel;
     if(units.length===1){ const mi=units[0]; snapshotModel(mi);           // single unit → straight to the point
       gMoveTarget.set(mi, [wx - mInfo[mi].cx, wy - mInfo[mi].cy, FLOOR_Z - mInfo[mi].cz]); return; }
     // PACK the group as tightly as possible AROUND the target (a filled cluster, not a ring): the units
@@ -10153,7 +10154,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const encR = Math.hypot((mi.x1-mi.x0)/2, (mi.y1-mi.y0)/2, (mi.z1-mi.z0)/2);
     const gs = Math.max(1, encR * GIZ_SCALE);
     modelGizmo.scaleRatio = gs; modelRotGizmo.scaleRatio = gs;
-    modelGizmo.attachedNode = modelNode; modelRotGizmo.attachedNode = modelNode;   // the 3-D move/rotate gizmo, back on the model
+    if(immovable(mid)){ modelGizmo.attachedNode = null; modelRotGizmo.attachedNode = null; }   // a membrane complex has no gizmo (immovable, owner 14.9.2026)
+    else { modelGizmo.attachedNode = modelNode; modelRotGizmo.attachedNode = modelNode; }   // the 3-D move/rotate gizmo, back on the model
     highlightModel(mid);                                   // thick sage silhouette on the selected complex
     orbitLocked = true;                                    // camera orbits the complex you picked
     orbitCenter.set(mi.cx+gModelOff[mid*3], mi.cy+gModelOff[mid*3+1], mi.cz+gModelOff[mid*3+2]); };
@@ -13066,15 +13068,15 @@ void main(void){
     /* F HELD FOLLOWS (owner 13.9.2026: 'if I hold down F it should follow the selection'): while the key is down the target rides on the
        selection's centre every frame - alpha, beta and radius untouched, so the camera keeps its offset and glides after a moving carrier. */
     scene.onBeforeRenderObservable.add(() => { if(!gFHold) return; const c = selCentreOf(); if(c) cam.target.copyFrom(c); });
-    /* ORBIT (owner 14.9.2026: 'selecting something with double click should center the camera on it and rotate the camera around it as
-       long as it remains selected'): armed by a double-click selection (atom, cofactor or complex), the target rides the selection's
-       centre every frame and the camera circles it slowly - not while you drag it yourself - until the selection is gone. The centring
-       animation the double-click starts runs first (the orbit waits for it). */
-    let gOrbitOn = false; const ORBIT_RATE = 0.22;   // rad/s
+    /* PIVOT ON THE SELECTION (owner 14.9.2026: 'selecting something with double click should center the camera on it' - and then 'no
+       autorotating, only keep the camera on it if I rotate'): armed by a double-click selection (atom, cofactor or complex), the target
+       rides the selection's centre every frame, so your own rotation circles it - no rotation of its own - until the selection is gone.
+       The centring animation the double-click starts runs first. */
+    let gOrbitOn = false;
     window.gOrbitArm = () => { gOrbitOn = true; gLookPivot = null; };
     scene.onBeforeRenderObservable.add(() => { if(!gOrbitOn) return; const c = selCentreOf(); if(!c){ gOrbitOn = false; return; }
       if(scene.getAllAnimatablesByTarget(cam).length) return;   // the centring flight first
-      cam.target.copyFrom(c); if(!dragging && !gFHold) cam.alpha += ORBIT_RATE * Math.min(engine.getDeltaTime(), 50) * 0.001; }); }
+      cam.target.copyFrom(c); }); }
   window.addEventListener('keydown', e => {
     if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // don't hijack typing in dev inputs
     const k = e.key;
