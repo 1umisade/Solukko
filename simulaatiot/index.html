@@ -4215,7 +4215,7 @@ void main(void){
      drag and its inertia have ended, put back at the old distance along the NEW view direction, so the radius
      that the zoom, the shading plane and the readouts use is only 20 for the duration of the turn. The shading
      plane keeps the old distance even then (gFocalD). The thylakoid mode keeps its orbit. */
-  let gIsoModel = -1, gIsoHidden = [], gIsoTheme = null, gIsoN = 0; const gIsoAt = new Array(96*3).fill(0);   // (an isolated COFACTOR alone, its protein gone: the group's atom centres, the shaders keep only atoms on them - owner 14.9.2026)   // ISOLATE (owner 13.9.2026: double-tap F): the one model still drawn, the meshes hidden for it, the theme to restore
+  let gIsoModel = -1, gIsoHidden = [], gIsoTheme = null, gIsoN = 0, gShareSig = ''; const gIsoAt = new Array(96*3).fill(0);   // (an isolated COFACTOR alone, its protein gone: the group's atom centres, the shaders keep only atoms on them - owner 14.9.2026)   // ISOLATE (owner 13.9.2026: double-tap F): the one model still drawn, the meshes hidden for it, the theme to restore
   const LOOK_R = 20; let gLookPivot = null, gFHold = false, gFHoldR = 0;   // gFHold: F is held - the pivot sits on the selection and the look-around stays out of the way, gFHoldR = the selection's radius (the zoom stops there)
   const gFocalD = () => gLookPivot ? gLookPivot.r : cam.radius;
   /* THE DEPTH CUE (owner, 2026-09-09: 'everything needs a depth cue'). On the sheet the darkening is measured from the
@@ -7379,6 +7379,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const BL = 4, nbx = Math.ceil(Gx/BL), nbz = Math.ceil(Gz/BL), NBLK = nbx*nbz*2;
     const blockR = 0.5*Math.hypot(BL*S, ySpan+2*Math.max(xr,zr,1), BL*S) + JIT + S*0.5;   // +S*0.5 = the odd-row stagger
     gMemCellR = blockR;   // every LOD margin is measured against a whole block, because the ramp is decided per block
+    const gCoarseD = 520, gCoarse2 = gCoarseD*gCoarseD;   // beyond this a lipid is drawn as its coarse twin (a merged sphere per slice) - its atoms are 1-2 px there
     const blkStart = new Int32Array(NBLK+1), blkCnt = new Int32Array(NBLK);
     const blkCx = new Float32Array(NBLK), blkCz = new Float32Array(NBLK);
     const blkOf = i => { const leaf = Math.floor(i/(Gx*Gz)), r = i - leaf*Gx*Gz, gi = Math.floor(r/Gz), gj = r - gi*Gz;
@@ -7422,12 +7423,28 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         far.makeGeometryUnique();   // NOT shared: thin-instance buffers (world0..3, memAnc) are stored on the geometry, so twins on one geometry overwrite each other's instances
         for(const m of [near, far]){ m.isPickable=false; m.alwaysSelectAsActiveMesh=true; m.renderingGroupId=1; m.setEnabled(false); }
         near.material = vdwMatStatic; glassSplit(near); far.material = vdwStaticFarMat;
+        /* the COARSE twin (perf, 14.9.2026): beyond gCoarseD a lipid's ~120 atoms are 1-3 px each, and the far tier - 160000 lipids x 120 quads - was
+           10.7 of the 15.8 ms the GPU spent on a frame (primitive-bound). Past that distance a lipid is K merged spheres: the atoms sorted along the
+           lipid (y), cut into K slices, each slice one sphere at its mean with the radius that covers it and its mean colour. Same material,
+           same streams, the walk picks the stream by the block's distance. */
+        const K = Math.max(3, Math.min(14, Math.round(LN/12))), order = Array.from({length:LN}, (_,k) => k).sort((a,b) => tp[a*3+1] - tp[b*3+1]);
+        const cpos=new Float32Array(K*4*3), coff=new Float32Array(K*4*3), ccol=new Float32Array(K*4*4), crad=new Float32Array(K*4), cidx=new Uint32Array(K*6);
+        for(let sl=0;sl<K;sl++){ const a0=Math.floor(sl*LN/K), a1=Math.max(a0+1, Math.floor((sl+1)*LN/K)); let cx=0,cy=0,cz=0,cr=0,cg=0,cb=0,n=0;
+          for(let q=a0;q<a1;q++){ const k=order[q], cc=lipCol(L.el[k]); cx+=tp[k*3]; cy+=tp[k*3+1]; cz+=tp[k*3+2]; cr+=cc[0]; cg+=cc[1]; cb+=cc[2]; n++; } cx/=n; cy/=n; cz/=n; cr/=n; cg/=n; cb/=n;
+          let R=0; for(let q=a0;q<a1;q++){ const k=order[q]; const d=Math.hypot(tp[k*3]-cx, tp[k*3+1]-cy, tp[k*3+2]-cz) + info(L.el[k]).vr*FILL_SCALE*0.85; if(d>R) R=d; }
+          for(let c=0;c<4;c++){ const vtx=sl*4+c; cpos[vtx*3]=corner[c*2]; cpos[vtx*3+1]=corner[c*2+1]; cpos[vtx*3+2]=0; coff[vtx*3]=cx; coff[vtx*3+1]=cy; coff[vtx*3+2]=cz; ccol[vtx*4]=cr; ccol[vtx*4+1]=cg; ccol[vtx*4+2]=cb; ccol[vtx*4+3]=0; crad[vtx]=R; }
+          const b=sl*4, q=sl*6; cidx[q]=b; cidx[q+1]=b+1; cidx[q+2]=b+2; cidx[q+3]=b; cidx[q+4]=b+2; cidx[q+5]=b+3; }
+        const coarse = new BABYLON.Mesh('lipTplC'+T, scene); { const vd2 = new BABYLON.VertexData(); vd2.positions=cpos; vd2.indices=cidx; vd2.applyToMesh(coarse, false); }
+        coarse.setVerticesData('atomOff', coff, false, 3); coarse.setVerticesData('instanceColor', ccol, false, 4); coarse.setVerticesData('instR', crad, false, 1);
+        coarse.isPickable=false; coarse.alwaysSelectAsActiveMesh=true; coarse.renderingGroupId=1; coarse.setEnabled(false); coarse.material = vdwStaticFarMat;
         const cap = Math.max(1, tplN[T]) + CELL_EXTRA;   // cell mode: the plasma membrane and the nuclear envelope write into the same streams
         const nM=new Float32Array(cap*16), fM=new Float32Array(cap*16), nA=new Float32Array(cap), fA=new Float32Array(cap), nT=new Float32Array(cap*4), fT=new Float32Array(cap*4), nS=new Float32Array(cap).fill(1), fS=new Float32Array(cap).fill(1);
         near.thinInstanceSetBuffer('matrix', nM, 16, false); near.thinInstanceSetBuffer('memAnc', nA, 1, false); near.thinInstanceSetBuffer('tint', nT, 4, false); near.thinInstanceSetBuffer('shade', nS, 1, false);
         far.thinInstanceSetBuffer('matrix', fM, 16, false);  far.thinInstanceSetBuffer('memAnc', fA, 1, false);  far.thinInstanceSetBuffer('tint', fT, 4, false);  far.thinInstanceSetBuffer('shade', fS, 1, false);
-        near.thinInstanceCount = 0; far.thinInstanceCount = 0;
-        sphTpl[T] = { near, far, nM, fM, nA, fA, nT, fT, nS, fS, nn:0, nf:0, cap };
+        const cM2=new Float32Array(cap*16), cA2=new Float32Array(cap), cT2=new Float32Array(cap*4), cS2=new Float32Array(cap).fill(1);
+        coarse.thinInstanceSetBuffer('matrix', cM2, 16, false); coarse.thinInstanceSetBuffer('memAnc', cA2, 1, false); coarse.thinInstanceSetBuffer('tint', cT2, 4, false); coarse.thinInstanceSetBuffer('shade', cS2, 1, false);
+        near.thinInstanceCount = 0; far.thinInstanceCount = 0; coarse.thinInstanceCount = 0;
+        sphTpl[T] = { near, far, coarse, nM, fM, cM: cM2, nA, fA, cA: cA2, nT, fT, cT: cT2, nS, fS, cS: cS2, nn:0, nf:0, nc:0, cap };
       } }
 
     /* THE GATHER - spheres and orbitals in one pass over the blocks. Each block is wrapped onto the copy
@@ -7668,7 +7685,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           if(!vis) continue;
           const near = d2 < full2, P = e.pos, Rt = e.rot;
           for(let q=0;q<e.n;q++){ const E = sphTpl[e.tpl[q]]; if(!E) continue; const o=q*3, r9=q*9;
-            let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
+            let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
             const m = k*16, tn = M.tint; if(tn){ Tn[k*4]=tn[0]; Tn[k*4+1]=tn[1]; Tn[k*4+2]=tn[2]; Tn[k*4+3]=0.72; } else Tn[k*4+3]=0; Sn[k] = e.shd[q];
             Mx[m]=Rt[r9]; Mx[m+1]=Rt[r9+1]; Mx[m+2]=Rt[r9+2]; Mx[m+3]=0; Mx[m+4]=Rt[r9+3]; Mx[m+5]=Rt[r9+4]; Mx[m+6]=Rt[r9+5]; Mx[m+7]=0;
             Mx[m+8]=Rt[r9+6]; Mx[m+9]=Rt[r9+7]; Mx[m+10]=Rt[r9+8]; Mx[m+11]=0; Mx[m+12]=P[o]; Mx[m+13]=P[o+1]; Mx[m+14]=P[o+2]; Mx[m+15]=1;
@@ -7702,7 +7719,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
               const take = dEdge >= gMemBlend ? e.n : Math.round(e.n * Math.max(0, dEdge)/gMemBlend);
               const near = d2 < full2, P = e.pos, Rt = e.rot;
               for(let q=0;q<take;q++){ const E = sphTpl[e.tpl[q]]; if(!E) continue; const o=q*3, r9=q*9;
-                let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
+                let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
                 const m = k*16, tn = M.tint; if(tn){ Tn[k*4]=tn[0]; Tn[k*4+1]=tn[1]; Tn[k*4+2]=tn[2]; Tn[k*4+3]=0.72; } else Tn[k*4+3]=0; Sn[k] = e.shd[q];
                 Mx[m]=Rt[r9]; Mx[m+1]=Rt[r9+1]; Mx[m+2]=Rt[r9+2]; Mx[m+3]=0; Mx[m+4]=Rt[r9+3]; Mx[m+5]=Rt[r9+4]; Mx[m+6]=Rt[r9+5]; Mx[m+7]=0;
                 Mx[m+8]=Rt[r9+6]; Mx[m+9]=Rt[r9+7]; Mx[m+10]=Rt[r9+8]; Mx[m+11]=0; Mx[m+12]=P[o]; Mx[m+13]=P[o+1]; Mx[m+14]=P[o+2]; Mx[m+15]=1;
@@ -7840,6 +7857,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         for(let k=0;k<N;k++) if(!vis[k]) g[k] = 1;
       }
     };
+    let memWalkSig = '', memWalkSkip = false;   // (the membrane walk's last inputs, see the observer)
     const xformSig = () => { let t = 0;   // hull models only, quantised to 0.01 - anything else changing must not rebuild the grid
       for(const h of gHulls){ if(!gMemBound[h.mi] || mols[h.mi].shuttle) continue; const o = h.mi*16; for(let i=0;i<16;i++) t += Math.round(gModelXform[o+i]*100)*(1 + i*0.37); } return t; };
     window.__foot = () => ({ footW, footH, footX0, footZ0, cell: FOOT_CELL, grid: footUp, sig: footSig, lipH: LIP_H, memFoot:[gMemFootX, gMemFootZ], cen:[bilayerCen.x, bilayerCen.y, bilayerCen.z], hulls: gHulls.map(h=>({mi:h.mi, c:[h.c.x,h.c.y,h.c.z], maxR:h.maxR})) });   // dev: inspect the footprint from the console
@@ -7847,8 +7865,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const ov = document.getElementById('overlay');
       if(ov && !ov.classList.contains('gone')) return;
       const cp = cam.position;
+      /* perf (14.9.2026): the walk placed the same lipids again every frame (4.9 ms) - nothing in it changes unless the camera, a model, the
+         LoD or the mode did. It runs only when its inputs changed, and while they keep changing (a drag) every other frame at most */
+      { const vm = cam.getViewMatrix().m, sig = vm[0].toFixed(4)+vm[1].toFixed(4)+vm[2].toFixed(4)+vm[4].toFixed(4)+vm[5].toFixed(4)+vm[6].toFixed(4)+vm[12].toFixed(1)+vm[13].toFixed(1)+vm[14].toFixed(1)+'|'+xformSig()+'|'+gGfxMode+'|'+gCrisp+'|'+gSlabLod+'|'+gMemBlend+'|'+gOrbBudget.toFixed(0)+'|'+gViewBox+'|'+gPlaneDim+'|'+gIsoModel+'|'+gXsec+'|'+gMembrane;
+        if(sig === memWalkSig) return; if(memWalkSkip){ memWalkSkip = false; return; } memWalkSkip = true; memWalkSig = sig; }
       if(!gMembrane || !(gMemSpanX > 0)){
-        if(gSphLive){ gSphLive=false; for(const E of sphTpl){ if(!E) continue; E.nn=E.nf=0; E.near.setEnabled(false); E.far.setEnabled(false); } }
+        if(gSphLive){ gSphLive=false; for(const E of sphTpl){ if(!E) continue; E.nn=E.nf=E.nc=0; E.near.setEnabled(false); E.far.setEnabled(false); E.coarse.setEnabled(false); } }
         if(gOrbLive){ gOrbLive=false; for(let T=0;T<NTPL;T++){ const E=orbTpl[T]; if(!E) continue; E.n=0; E.core.setEnabled(false); E.bond.setEnabled(false); } }
         return; }
       gSphLive = true;
@@ -7856,7 +7878,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const L = deriveLod(), memR2 = L.memR*L.memR, full2 = L.memFull*L.memFull, ST = L.step;
       const oR = L.orbR, oR2 = oR*oR, bR = blockR, bM2 = (bR + 14)*(bR + 14);
       const fp = BABYLON.Frustum.GetPlanes(cam.getTransformationMatrix()), LOBE_MARGIN = 14;
-      for(const E of sphTpl){ if(E){ E.nn=0; E.nf=0; } }
+      for(const E of sphTpl){ if(E){ E.nn=0; E.nf=0; E.nc=0; } }
       for(let T=0;T<NTPL;T++) if(orbTpl[T]) orbTpl[T].n = 0;
       let nC = 0;
       { const sig = xformSig(); if(sig !== footSig){ footSig = sig; buildProtFoot(); } }   // (re)build the footprints when a model has moved
@@ -7889,6 +7911,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           if(lipInProt(lipT[i], lx, lz)) continue;   // never under a protein's footprint
           // the off-diagonals are written too: in cell mode a slot may have held a ROTATED lipid the frame before
           if(near){ if(E.nn >= E.cap) continue; const m=E.nn*16, M=E.nM; M[m]=1; M[m+5]=1; M[m+10]=1; M[m+15]=1; M[m+1]=M[m+2]=M[m+4]=M[m+6]=M[m+8]=M[m+9]=0; M[m+12]=lx; M[m+13]=ly; M[m+14]=lz; E.nA[E.nn]=lz; E.nT[E.nn*4+3]=0; E.nS[E.nn]=1; E.nn++; }
+          else if(d2 > gCoarse2){ if(E.nc >= E.cap) continue; const m=E.nc*16, M=E.cM; M[m]=1; M[m+5]=1; M[m+10]=1; M[m+15]=1; M[m+1]=M[m+2]=M[m+4]=M[m+6]=M[m+8]=M[m+9]=0; M[m+12]=lx; M[m+13]=ly; M[m+14]=lz; E.cA[E.nc]=lz; E.cT[E.nc*4+3]=0; E.cS[E.nc]=1; E.nc++; }
           else    { if(E.nf >= E.cap) continue; const m=E.nf*16, M=E.fM; M[m]=1; M[m+5]=1; M[m+10]=1; M[m+15]=1; M[m+1]=M[m+2]=M[m+4]=M[m+6]=M[m+8]=M[m+9]=0; M[m+12]=lx; M[m+13]=ly; M[m+14]=lz; E.fA[E.nf]=lz; E.fT[E.nf*4+3]=0; E.fS[E.nf]=1; E.nf++; }
         }
         // orbital candidates: every lipid of a block that reaches into the orbital radius (never thinned there - it is inside the full band)
@@ -7906,8 +7929,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(const E of sphTpl){ if(!E) continue;
         if(E.nn){ E.near.thinInstancePartialBufferUpdate('matrix', E.nM.subarray(0,E.nn*16), 0); E.near.thinInstancePartialBufferUpdate('memAnc', E.nA.subarray(0,E.nn), 0); E.near.thinInstancePartialBufferUpdate('tint', E.nT.subarray(0,E.nn*4), 0); E.near.thinInstancePartialBufferUpdate('shade', E.nS.subarray(0,E.nn), 0); }
         if(E.nf){ E.far.thinInstancePartialBufferUpdate('matrix', E.fM.subarray(0,E.nf*16), 0);  E.far.thinInstancePartialBufferUpdate('memAnc', E.fA.subarray(0,E.nf), 0);  E.far.thinInstancePartialBufferUpdate('tint', E.fT.subarray(0,E.nf*4), 0); E.far.thinInstancePartialBufferUpdate('shade', E.fS.subarray(0,E.nf), 0); }
-        E.near.thinInstanceCount = E.nn; E.far.thinInstanceCount = E.nf;
-        E.near.setEnabled(E.nn>0); E.far.setEnabled(E.nf>0); }
+        if(E.nc){ E.coarse.thinInstancePartialBufferUpdate('matrix', E.cM.subarray(0,E.nc*16), 0); E.coarse.thinInstancePartialBufferUpdate('memAnc', E.cA.subarray(0,E.nc), 0); E.coarse.thinInstancePartialBufferUpdate('tint', E.cT.subarray(0,E.nc*4), 0); E.coarse.thinInstancePartialBufferUpdate('shade', E.cS.subarray(0,E.nc), 0); }
+        E.near.thinInstanceCount = E.nn; E.far.thinInstanceCount = E.nf; E.coarse.thinInstanceCount = E.nc;
+        E.near.setEnabled(E.nn>0); E.far.setEnabled(E.nf>0); E.coarse.setEnabled(E.nc>0); }
       if(!orbOn){ for(let T=0;T<NTPL;T++){ const E=orbTpl[T]; if(!E) continue; E.core.setEnabled(false); E.bond.setEnabled(false); } return; }
       // the orbital budget: nearest first, adaptive to the frame rate
       { const f = engine.getFps();
@@ -8277,13 +8301,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // (isShell must stay 1 either way — with isShell 0 the alpha is scaled BY the reveal, so the sphere
     // would be invisible everywhere except inside the crisp zone.)
     // glow = the proton corona: same stateless positioning, but the fragment draws a soft additive red disc
-    const wMat=(rad, solid, glow, bias, outline, haze)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':''),scene,'imp',{
-        attributes:['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
+    const wMat=(rad, solid, glow, bias, outline, haze, perInst)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':'')+(perInst?'i':''),scene,'imp',{
+        attributes: perInst ? ['position','instanceColor','wOrig','wVel','molId','instR','world0','world1','world2','world3'] : ['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
         uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK','depthBias',
                   'sideOnly','sideClear','cellWrap','wrapScale','fadeNear','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
-                      : ['#define WATERBOX']).concat(glow ? ['#define PGLOW'] : ['#define PLIGHT']).concat(SOLU_CELL ? ['#define CELLCLIP', '#define DEPTHSHADE'] : []).concat(haze ? ['#define HAZE'] : []) });   // DEPTHSHADE: in cell mode the free molecules and the haze darken with distance like everything else   // CELLCLIP: cell mode wraps the medium around the camera and keeps it to the cytosol - HAZE: the sparse far fill
+                      : ['#define WATERBOX']).concat(glow ? ['#define PGLOW'] : ['#define PLIGHT']).concat(SOLU_CELL ? ['#define CELLCLIP', '#define DEPTHSHADE'] : []).concat(haze ? ['#define HAZE'] : []).concat(perInst ? ['#define IMPRAD'] : []) });   // IMPRAD: the radius per instance (a merged species mesh)   // DEPTHSHADE: in cell mode the free molecules and the haze darken with distance like everything else   // CELLCLIP: cell mode wraps the medium around the camera and keeps it to the cytosol - HAZE: the sparse far fill
       // isShell = 1 so the sphere turns to GLASS inside the reveal radius, exactly as the protein vdW does
       // — otherwise the orbitals built below are drawn correctly but sit hidden inside an opaque ball.
       m.setFloat('radius',rad);m.setFloat('isShell',1);m.setFloat('shellMin',0.18);m.setFloat('revealFade',0.95);
@@ -8307,7 +8331,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        molecules over a box eight times as wide and the shader drops everything nearer than the near set's fade. Only enabled
        while the reach slider is past the box limit (see the slider), so the extra draws cost nothing until asked for. */
     const gFarMeshes = []; window.gFarMeshes = gFarMeshes;
-    const mkFar = (base, rad, bias, outline) => { const f = base.clone(base.name + 'F'); f.material = wMat(rad, true, false, bias, outline); f.material._far = true;
+    const mkFar = (base, rad, bias, outline, perInst) => { const f = base.clone(base.name + 'F'); f.material = wMat(rad, true, false, bias, outline, undefined, perInst); f.material._far = true; f.__atoms = base.__atoms;
       f.isPickable = false; f.alwaysSelectAsActiveMesh = true; f.renderingGroupId = 1; f.thinInstanceCount = base.thinInstanceCount; f.setEnabled(false); gFarMeshes.push(f); return f; };
     const mkImp=(nm,rad,col,cnt,off)=>{ const mesh=BABYLON.MeshBuilder.CreatePlane(nm,{size:2},scene); mesh.material=wMat(rad,false); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
       // Group 1, like every other vdW shell in the scene: the ORBITALS live in group 0 and are drawn
@@ -8364,6 +8388,24 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       }
       tasoita(c, v, n);   // dev plane: the first TASO_N of this species too
       const meshes = [];   // the species' meshes (the near tier and its far twin), for re-uploading the origins (14.9.2026: the spawn buttons)
+      /* ONE MESH for the whole species when every atom shares one style (perf, 14.9.2026): NADP+ alone was 75 meshes = 75 draw calls a frame,
+         each rebinding this material's ~100 uniforms (the light arrays, the organelle tables) - ATP 42, ADP 38 more. The merged mesh holds
+         n x NA instances (atom-major: instance a*n + i), the radius per instance (instR, IMPRAD), and its wOrig/wVel/molId repeated per atom
+         (homeFlush knows: mesh.__atoms). The protons keep their three layers - different styles. */
+      const same = atoms.length > 1 && atoms.every(a => !a.glow && (a.solid === undefined ? solid : a.solid) === (atoms[0].solid === undefined ? solid : atoms[0].solid) && (a.bias||0) === (atoms[0].bias||0) && !!a.outline === !!atoms[0].outline);
+      if(same){ const NA = atoms.length, a0 = atoms[0], tot = n*NA;
+        const mesh=BABYLON.MeshBuilder.CreatePlane(nm+'all',{size:2},scene);
+        mesh.material=wMat(1.0, (a0.solid===undefined ? solid : a0.solid), false, a0.bias, a0.outline, undefined, true); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true; mesh.renderingGroupId=1; mesh.__atoms = NA;
+        const cb=new Float32Array(tot*4), mb=new Float32Array(tot*16), og=new Float32Array(tot*3), vl=new Float32Array(tot*3), mid=new Float32Array(tot), ir=new Float32Array(tot);
+        for(let k=0;k<NA;k++){ const a = atoms[k]; for(let i=0;i<n;i++){ const j = k*n + i;
+          mid[j]=molBase+i; ir[j]=a.r; cb[j*4]=a.col[0]; cb[j*4+1]=a.col[1]; cb[j*4+2]=a.col[2]; cb[j*4+3]=0;
+          mb[j*16]=1; mb[j*16+5]=1; mb[j*16+10]=1; mb[j*16+15]=1;
+          if(a.p){ const q=a.p; mb[j*16+12]=fu[i*3]*q[0]+fv[i*3]*q[1]+ax[i*3]*q[2]; mb[j*16+13]=fu[i*3+1]*q[0]+fv[i*3+1]*q[1]+ax[i*3+1]*q[2]; mb[j*16+14]=fu[i*3+2]*q[0]+fv[i*3+2]*q[1]+ax[i*3+2]*q[2]; }
+          else { mb[j*16+12]=ax[i*3]*a.d; mb[j*16+13]=ax[i*3+1]*a.d; mb[j*16+14]=ax[i*3+2]*a.d; }
+          og[j*3]=c[i*3]; og[j*3+1]=c[i*3+1]; og[j*3+2]=c[i*3+2]; vl[j*3]=v[i*3]; vl[j*3+1]=v[i*3+1]; vl[j*3+2]=v[i*3+2]; } }
+        mesh.thinInstanceSetBuffer('instanceColor',cb,4,true); mesh.thinInstanceSetBuffer('matrix',mb,16,true); mesh.thinInstanceSetBuffer('wOrig',og,3,true); mesh.thinInstanceSetBuffer('wVel',vl,3,true); mesh.thinInstanceSetBuffer('molId',mid,1,true); mesh.thinInstanceSetBuffer('instR',ir,1,true);
+        mesh.thinInstanceCount=tot; gFreeMeshes.push(mesh); meshes.push(mesh); const f = mkFar(mesh, 1.0, a0.bias, a0.outline, true); if(f){ f.thinInstanceSetBuffer('instR', ir, 1, true); meshes.push(f); }
+        return {c, v, ax, fu, fv, n, meshes}; }
       for(const a of atoms){
         const mesh=BABYLON.MeshBuilder.CreatePlane(nm+a.tag,{size:2},scene);
         mesh.material=wMat(a.r, (a.solid===undefined ? solid : a.solid), !!a.glow, a.bias, a.outline); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
@@ -8589,6 +8631,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const gatherT = () => gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // the clock the per-frame gathers place at
     const wPick=new Int32Array(WCAP), wPickD=new Float32Array(WCAP), wPos=new Float32Array(WCAP*3);
     const _wp=[0,0,0];
+    const WC_M = 60, WC_F = 6, wCand = new Int32Array(Math.min(NW, 20000)); let wCandN = 0, wCandT = 0, wCandR = -1; const wCandCam = new BABYLON.Vector3(1e9, 1e9, 1e9);   // the water candidates (see the placer)
     let wPartial = typeof wCoreMesh.thinInstancePartialBufferUpdate === 'function';   // see the upload below
     gFreeMeshes.push(wCoreMesh, wBondMesh);
     scene.onBeforeRenderObservable.add(()=>{
@@ -8609,8 +8652,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
          for every other per-frame observer in the scene put together — the stutter that showed up exactly
          when the crisp zone lit up. Uncapped now appends and the sorted path is kept for a real cap. */
       const capped = WCAP < NW;
+      /* CANDIDATES (perf, 14.9.2026): the 80000 water are scanned every WC_F frames (or when the camera has moved), those within R + WC_M kept, and
+         only they are tested each frame - the full scan cost 2.5 ms a frame */
+      if(--wCandT <= 0 || wCandR !== R || BABYLON.Vector3.DistanceSquared(cp, wCandCam) > (WC_M/3)*(WC_M/3)){ wCandT = WC_F; wCandR = R; wCandCam.copyFrom(cp); wCandN = 0; const Rg2 = (R + WC_M)*(R + WC_M);
+        for(let i=0;i<NW && wCandN<wCand.length;i++){ const px=bnc(wc[i*3]+wv[i*3]*T, bLo.x, bHi.x); const dx=px-cp.x; if(dx*dx>Rg2) continue; const pz=bnc(wc[i*3+2]+wv[i*3+2]*T, bLo.z, bHi.z); const py=sideFold(2, wc, i, px, bncY(wc[i*3+1], wv[i*3+1], T), pz);
+          const dy=py-cp.y, dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz > Rg2) continue; wCand[wCandN++] = i; } }
       let n=0, worst=Infinity;
-      for(let i=0;i<NW;i++){
+      for(let ci=0;ci<wCandN;ci++){ const i = wCand[ci];
         const px=bnc(wc[i*3]  +wv[i*3]  *T, bLo.x, bHi.x);
         const dx=px-cp.x; if(dx*dx>R2) continue;                       // cheap axis reject before the rest
         const pz=bnc(wc[i*3+2]+wv[i*3+2]*T, bLo.z, bHi.z);
@@ -8765,7 +8813,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const og = new Float32Array(sp.c), vl = new Float32Array(sp.v), og2 = new Float32Array(sp.n*6), vl2 = new Float32Array(sp.n*6);
           for(let i=0;i<sp.n;i++){ for(let h=0;h<2;h++){ const k=(i*2+h)*3; og2[k]=og[i*3]; og2[k+1]=og[i*3+1]; og2[k+2]=og[i*3+2]; vl2[k]=vl[i*3]; vl2[k+1]=vl[i*3+1]; vl2[k+2]=vl[i*3+2]; } }
           for(const nm of ['wO','wOF','wH','wHF']){ const m = scene.getMeshByName(nm); if(!m) continue; const two = nm[1] === 'H'; m.thinInstanceSetBuffer('wOrig', two ? og2 : og, 3, true); m.thinInstanceSetBuffer('wVel', two ? vl2 : vl, 3, true); } return; }
-        if(!sp.meshes) return; const og = new Float32Array(sp.c), vl = new Float32Array(sp.v); for(const m of sp.meshes){ m.thinInstanceSetBuffer('wOrig', og, 3, true); m.thinInstanceSetBuffer('wVel', vl, 3, true); } } };
+        if(!sp.meshes) return; const og = new Float32Array(sp.c), vl = new Float32Array(sp.v); let ogR = null, vlR = null;
+        for(const m of sp.meshes){ const NA = m.__atoms || 1; if(NA > 1){ if(!ogR){ ogR = new Float32Array(sp.n*NA*3); vlR = new Float32Array(sp.n*NA*3); for(let k=0;k<NA;k++){ ogR.set(og, k*sp.n*3); vlR.set(vl, k*sp.n*3); } } m.thinInstanceSetBuffer('wOrig', ogR, 3, true); m.thinInstanceSetBuffer('wVel', vlR, 3, true); }   // a merged species mesh: the origins per atom block
+          else { m.thinInstanceSetBuffer('wOrig', og, 3, true); m.thinInstanceSetBuffer('wVel', vl, 3, true); } } } };
     /* For the pill right-click flight (top pill row): the world centre of the instance of a free species
        nearest to a point. Analytic bounce position plus the collision displacement (the same mirror the
        pick uses), protons from their simulated positions. key = a MOLBASE key (w, p, co2, o2, nadp, atp, adp, pi). */
@@ -8830,6 +8880,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     scene.onBeforeRenderObservable.add(()=>{
       { const ov = document.getElementById('overlay'); if(ov && !ov.classList.contains('gone')) return; }
       const dt = Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; if(!gFreeOn || dt <= 0) return;
+      const _tp0 = performance.now(); const _st = (window.__simT = window.__simT || {});   // (dev profile: where the proton pass spends its time)
       const memY = MEMBRANE_Y, hT = gMemHalfT;
       // the protons' box: the visible box (owner 13.9.2026: 'within the box') - the free-molecule box cut down to the unit box where that is tighter
       const pbLx = gPsuLo ? Math.max(bLo.x, gPsuLo.x) : bLo.x, pbLy = gPsuLo ? Math.max(bLo.y, gPsuLo.y) : bLo.y, pbLz = gPsuLo ? Math.max(bLo.z, gPsuLo.z) : bLo.z;
@@ -8878,7 +8929,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; gMolDisp[md+3]=1;   /* (placed) */
       }
       if(passes){ gProtonPasses += passes; gRotorTarget += passes*ROTOR_STEP; }
-      gMolTex.update(gMolDisp);
+      const _tp1 = performance.now(); gMolTex.update(gMolDisp); const _tp2 = performance.now(); _st.pLoop = (_st.pLoop||0)*0.9 + (_tp1-_tp0)*0.1; _st.pUpload = (_st.pUpload||0)*0.9 + (_tp2-_tp1)*0.1;
     }, -1, true);   // first in the frame, so every mirror this frame sees the new positions
     gValoProtons = { n: P_N, pos: pPos, hold: pHold,
       place: (i, x, y, z) => { const o=i*3; pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z; const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; gMolDisp[md+3]=1; },   // a proton is always PLACED (the CPU simulates it)
@@ -8957,6 +9008,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             }
           }
         }
+        const _tg = performance.now(); { const _st = (window.__simT = window.__simT || {}); _st.gather = (_st.gather||0)*0.9 + (_tg - t0)*0.1; }
         const n = nAct;
         for(let k=0;k<n;k++){
           const sp = gSpecies[spk[k]], i = mi_[k], id = idx[k], c = sp.c, v = sp.v;
@@ -9031,7 +9083,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const t = prevActive; prevActive = curActive; curActive = t;
         // Only re-upload when something is actually deviating. Pointing the camera at empty space, or
         // away from the box, then costs nothing at all instead of 1 MB a frame.
-        if(prevActive.size || _hadActive) gMolTex.update(gMolDisp);
+        const _tu = performance.now(); if(prevActive.size || _hadActive) gMolTex.update(gMolDisp);
+        { const _st = window.__simT; _st.pass = (_st.pass||0)*0.9 + (_tu - _tg)*0.1; _st.cUpload = (_st.cUpload||0)*0.9 + (performance.now() - _tu)*0.1; _st.nAct = n; }
         _hadActive = prevActive.size > 0;
         gSimActive = n;
         gSimMs += (performance.now() - t0 - gSimMs) * 0.1;
@@ -9346,12 +9399,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       bMesh.thinInstanceSetBuffer('matrix',bM,16,false); bMesh.thinInstanceSetBuffer('ocen',bC,3,false);
       const pick=new Int32Array(CAP), pos=new Float32Array(CAP*3), _lp=[0,0,0];
       const live = { cM, cC, bM, bC, pick, pos, coreN, bondN, core, bond, cMesh, T: 0 };   // live buffers, for the selection outline
+      /* CANDIDATES (perf, 14.9.2026): scanning every instance of the species every frame - drawnPos on 80000 CO2 - cost 8 ms a frame. The
+         instances within R + CAND_M are gathered every CAND_F frames, or sooner when the camera has moved more than a third of the margin,
+         and only they are re-placed each frame. Molecules move under 40 units/s, so the margin is never crossed between gathers. */
+      const CAND_M = 60, CAND_F = 6; const cand = new Int32Array(Math.min(F.n, 20000)); let candN = 0, candT = 0; const candCam = new BABYLON.Vector3(1e9, 1e9, 1e9); let candR = -1;
       scene.onBeforeRenderObservable.add(()=>{
         if(!gFreeOn){ cMesh.setEnabled(false); bMesh.setEnabled(false); return; }
         const cp=cam.position, R=gCrisp, R2=R*R;
         const T = gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; live.T = T;
+        if(--candT <= 0 || candR !== R || BABYLON.Vector3.DistanceSquared(cp, candCam) > (CAND_M/3)*(CAND_M/3)){ candT = CAND_F; candR = R; candCam.copyFrom(cp); candN = 0; const Rg2 = (R + CAND_M)*(R + CAND_M);
+          const sx = bHi.x - bLo.x; for(let i=0;i<F.n && candN<cand.length;i++){
+            { let ex = bnc0(F.c[i*3] + F.v[i*3]*T, bLo.x, bHi.x) - cp.x; if(gCellWrap) ex -= Math.round(ex/sx)*sx; if(ex*ex > Rg2) continue; }   // the cheap x reject first (the copy nearest the camera in x) - drawnPos is the expensive part
+            if(!drawnPos(F.side, F.c, F.v, i, T, _lp, F.base+i)) continue; const dx=_lp[0]-cp.x, dy=_lp[1]-cp.y, dz=_lp[2]-cp.z; if(dx*dx+dy*dy+dz*dz > Rg2) continue; cand[candN++] = i; } }
         let n=0;
-        for(let i=0;i<F.n && n<CAP;i++){
+        for(let ci=0;ci<candN && n<CAP;ci++){ const i = cand[ci];
           if(!drawnPos(F.side, F.c, F.v, i, T, _lp, F.base+i)) continue;   // orbitals only where the atoms are drawn
           const px=_lp[0], py=_lp[1], pz=_lp[2]; const dx=px-cp.x, dy=py-cp.y, dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue;
           const md=(F.base+i)*4;   // same mirror, same order: displacement first, then the shells
@@ -9440,7 +9501,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gWaveT += Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // advance the thermal-shake clock
     { const dtR = Math.min(engine.getDeltaTime(), 50) * 0.001; if(!gPaused){ gBoilT += dtR * gBoilSpeed; gElecT += dtR * gElecSpeed; }   // own clocks (space still pauses them)
       const isoR = pieceRange(gIsoModel), selR = pieceRange(gSelModel), cutW = gXsec ? gXsecPlane : XSEC_OFF, cutV = gXsec ? xsecViewPlane() : XSEC_OFF;
-      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT); m.setFloat('isoModel', gIsoModel); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); } }
+      const sig = gIsoModel + '|' + isoR[0] + '|' + isoR[1] + '|' + gSelModel + '|' + selR[0] + '|' + selR[1] + '|' + gIsoN + '|' + (gXsec ? cutW.x + ',' + cutW.y + ',' + cutW.z + ',' + cutW.w + ',' + cutV.x + ',' + cutV.y + ',' + cutV.z + ',' + cutV.w : 'off') + '|' + gShaderMats.length;
+      const changed = sig !== gShareSig; gShareSig = sig;   // (perf 14.9.2026: nine uniforms on ~300 materials every frame was 1 ms - the rarely-changing ones go out only when they change)
+      for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT);
+        if(changed){ m.setFloat('isoModel', gIsoModel); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); } } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
     const u = cam.getDirection(BABYLON.Axis.Y);   // view up
     const r = cam.getDirection(BABYLON.Axis.X);   // view right
@@ -12985,6 +13049,7 @@ void main(void){
   for(int i = 0; i < LN_MAX; i++){ if(float(i) >= nElecs) break;
     vec2 d = vUV - elecUVs[i].xy; d.x *= aspect; float R = elecUVs[i].w;   // the pool's radius, projected from a world size
     if(elecUVs[i].z > 1.5) continue;   // (a pigment is the heat wave above)
+    if(dot(d, d) > R*R*36.0) continue;   // perf (14.9.2026): past six radii the pool is under 0.003 - no atan and five sines for every pixel of the screen per light
     float l = pool(d, R, float(i)*1.7);
     if(elecUVs[i].z > 0.5) litP = max(litP, l); else litE = max(litE, l); }
   vec3 cE = vec3(0.25, 0.55, 1.00), cP = vec3(1.00, 0.55, 0.12), cG = vec3(0.40, 1.00, 0.45);

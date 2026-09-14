@@ -100,13 +100,32 @@
       const test = b => { if(b === a.owner) return; const p = pos.get(b); const dx = p[0]-c[0], dy = p[1]-c[1], dz = p[2]-c[2]; const rr = r + b.body_radius; if(dx*dx+dy*dy+dz*dz <= rr*rr) into.add(b); };
       if((i1-i0+1)*(j1-j0+1)*(k1-k0+1) > 64 || grid.all.length < 64){ for(const b of grid.all) test(b); return; }   // a wide area (a water pull of 400) or a short list: just walk the bodies
       for(let i=i0;i<=i1;i++) for(let j=j0;j<=j1;j++) for(let k=k0;k<=k1;k++){ const l = grid.get(this._key(i, j, k)); if(!l) continue; for(const b of l) test(b); } },
+    /* perf (14.9.2026): 1650 areas each querying the moving bodies' grid was 1770 grid walks a frame (2 ms, plus a Set spread per area in
+       _diff). INVERTED for the static-owner areas (nine in ten): the static areas are hashed once per refresh (their owners stand still),
+       and each frame the ~90 MOVING bodies look up the areas of their own cell - a few thousand tests - and the areas with no hit and no
+       previous overlap are not touched at all. Areas on moving owners keep the old per-area query. */
+    _hit(a, b, p, hits){ if(!a.enabled || b === a.owner || !a.owner.alive) return; const c = this._pos.get(a.owner); if(!c) return; const dx = p[0]-c[0], dy = p[1]-c[1], dz = p[2]-c[2], rr = a.radius + b.body_radius; if(dx*dx+dy*dy+dz*dz > rr*rr) return; let s = hits.get(a); if(!s){ s = new Set(); hits.set(a, s); } s.add(b); },
+    _areaGrid(){ const grid = new Map(), wide = [], cell = this.cell, M = 40; let n = 0;   // M: the largest moving body's radius - an area is entered into every cell its sphere plus M covers, so a point lookup at the body's centre is enough
+      for(const a of V.areas){ if(!a.owner.is_static || !a.owner.alive) continue; n++; const c = this._pos.get(a.owner); if(!c) continue; const r = a.radius + M;
+        const i0 = Math.floor((c[0]-r)/cell), i1 = Math.floor((c[0]+r)/cell), j0 = Math.floor((c[1]-r)/cell), j1 = Math.floor((c[1]+r)/cell), k0 = Math.floor((c[2]-r)/cell), k1 = Math.floor((c[2]+r)/cell);
+        if((i1-i0+1)*(j1-j0+1)*(k1-k0+1) > 512){ wide.push(a); continue; }   // a wide area (a 400-unit pull) is simply tested against every moving body
+        for(let i=i0;i<=i1;i++) for(let j=j0;j<=j1;j++) for(let k=k0;k<=k1;k++){ const kk = this._key(i, j, k); let l = grid.get(kk); if(!l){ l = []; grid.set(kk, l); } l.push(a); } }
+      return { grid, wide, n, areas: V.areas.length }; },
     update(dt){ const pos = this._pos; pos.clear(); const dyn = [], stat = [];
       for(const b of V.all){ if(!b.alive) continue; pos.set(b, b.global_position); if(!b.has_collision) continue; (b.is_static ? stat : dyn).push(b); }
-      this.staticT += dt || 0; const refresh = !this._sgrid || this.staticDirty || this.staticT >= this.STATIC_REFRESH; if(refresh){ this.staticT = 0; this.staticDirty = false; this._sgrid = this._grid(stat); }
-      const dgrid = this._grid(dyn), now = new Set();
-      for(const a of V.areas){ if(!a.enabled || !a.owner.alive) continue; const c = pos.get(a.owner); if(!c) continue;
-        if(refresh || !a.owner.is_static){ now.clear(); this._query(this._sgrid, a, c, now); a._diff(a._static, now); }   // the static half: once per refresh for a static area, every frame for a moving one
-        now.clear(); this._query(dgrid, a, c, now); a._diff(a._dyn, now); } } };
+      this.staticT += dt || 0; const refresh = !this._sgrid || this.staticDirty || this.staticT >= this.STATIC_REFRESH; if(refresh){ this.staticT = 0; this.staticDirty = false; this._sgrid = this._grid(stat); this._agrid = null; }
+      const dgrid = this._grid(dyn), now = new Set(), cell = this.cell;
+      if(!this._agrid || this._agrid.areas !== V.areas.length) this._agrid = this._areaGrid();
+      const ag = this._agrid, hits = this._hits || (this._hits = new Map()); hits.clear();
+      for(const b of dyn){ const p = pos.get(b); const l = ag.grid.get(this._key(Math.floor(p[0]/cell), Math.floor(p[1]/cell), Math.floor(p[2]/cell))); if(l) for(const a of l) this._hit(a, b, p, hits); for(const a of ag.wide) this._hit(a, b, p, hits); }
+      const EMPTY = this._empty || (this._empty = new Set());
+      for(const a of V.areas){ if(!a.owner.alive) continue;
+        if(!a.owner.is_static){ if(!a.enabled) continue; const c = pos.get(a.owner); if(!c) continue;   // a moving owner: its areas ask both grids every frame
+          now.clear(); this._query(this._sgrid, a, c, now); a._diff(a._static, now);
+          now.clear(); this._query(dgrid, a, c, now); a._diff(a._dyn, now); continue; }
+        if(!a.enabled) continue;   // (as before: a disabled area keeps what it had until it is enabled again)
+        if(refresh){ const c = pos.get(a.owner); if(c){ now.clear(); this._query(this._sgrid, a, c, now); a._diff(a._static, now); } }   // the static half: once per refresh
+        const h = hits.get(a); if(h) a._diff(a._dyn, h); else if(a._dyn.size) a._diff(a._dyn, EMPTY); } } };
 
   /* ── MoleculeBody3D ── */
   let seq = 0;

@@ -340,14 +340,15 @@
       return n ? { normal: n, collider: null } : null; };
 
     /* ── per frame: the clock, the sensors, physics, the bodies the sheet holds, the visuals ── */
-    let valoRow = null, dev = 0, wasDragging = false; const prof = { all: 0, sens: 0 };
+    let valoRow = null, dev = 0, wasDragging = false, sensAcc = 0, sensFrame = 0; const prof = { all: 0, sens: 0 };
     scene.onBeforeRenderObservable.add(() => {
       { const ov = document.getElementById('overlay'); if(ov && !ov.classList.contains('gone')) return; }
       const dt = Math.min(engine.getDeltaTime(), 50)*0.001*get.gSpeed(); if(dt <= 0) return; V.dt = dt; const t0 = performance.now();
       // the carriers' bodies read their models' positions (the movers ran first this frame)
       for(const [b, kin] of kinOf){ if(!b.alive || !b.physics_processing) continue; if(kin.kind === 'sh'){ b._pos[0] = kin.sh.cur[0]; b._pos[1] = kin.sh.cur[1]; b._pos[2] = kin.sh.cur[2]; } else if(kin.kind === 'bnc' && !kin.home){ const mi = kin.b.mi, c = mInfo[mi]; b._pos[0] = c.cx + gModelOff[mi*3]; b._pos[1] = c.cy + gModelOff[mi*3+1]; b._pos[2] = c.cz + gModelOff[mi*3+2]; } }
       if(get.gizmoDragging && get.gizmoDragging()) wasDragging = true; else if(wasDragging){ wasDragging = false; V.Sensors.staticDirty = true; }   // a dragged model: the static hash is stale
-      V.tick(dt); V.Sensors.update(dt); prof.sens = performance.now() - t0;
+      V.tick(dt); sensAcc += dt; if((sensFrame = (sensFrame + 1) & 1) === 0){ V.Sensors.update(sensAcc); sensAcc = 0; }   // perf (14.9.2026): the sensors (every body's position, the grids, every area's overlaps) every OTHER frame - 2.1 ms a frame, and a one-frame lag is under a body radius
+      prof.sens = performance.now() - t0;
       tickSpawners(dt);
       { const P = get.gValoProtons(); if(P){
         if(!protonsHomed && get.gPsuLo()){ protonsHomed = true; const bx = P.box(), hT = get.gMemHalfT();   // 100 protons, 50 in the stroma and 50 in the lumen, inside the box (owner 13.9.2026)
