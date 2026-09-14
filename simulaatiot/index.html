@@ -6132,7 +6132,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       disc.thinInstanceSetBuffer('matrix', new Float32Array(etcM), 16, true);   // one disc per cofactor ATOM (reuse the overlay's atom matrices)
       disc.thinInstanceSetBuffer('modelId', mdlBuf(etcM), 1, true);             // per-atom model index → the cone follows a dragged molecule
       gCofDR = new Float32Array(NA);
-      for(let i=0;i<NA;i++) if(etcTypeOn[etcT[i]] === undefined) etcTypeOn[etcT[i]] = true;   // every cofactor type defaults to line-of-sight ON
+      for(let i=0;i<NA;i++) if(etcTypeOn[etcT[i]] === undefined) etcTypeOn[etcT[i]] = !(etcT[i] === 7 || etcT[i] === 8);   // every cofactor type defaults to line-of-sight ON - except the pigments: chlorophylls (7) and carotenoids (8) are antenna, not the electron chain, and stay unrevealed unless toggled on in the list (owner 14.9.2026)
       refreshCofDiscs = () => {   // per-atom tube radius (Å); 0 = that atom's type is toggled off
         for(let i=0;i<NA;i++) gCofDR[i] = etcTypeOn[etcT[i]] ? WORLD_TUBE_R : 0.0;
         disc.thinInstanceSetBuffer('dr', gCofDR, 1, true);
@@ -8815,7 +8815,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gValoProtons = { n: P_N, pos: pPos, hold: pHold,
       place: (i, x, y, z) => { const o=i*3; pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z; const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; },
       grab: i => { pHold[i] = 1; pIn[i] = 0; const o=i*3; pVel[o]=pVel[o+1]=pVel[o+2]=0; },
-      release: (i, x, y, z, vx, vy, vz) => { gValoProtons.place(i, x, y, z); const o=i*3; pVel[o]=vx; pVel[o+1]=vy; pVel[o+2]=vz; pHold[i] = 0; pIn[i] = 0; },
+      release: (i, x, y, z, vx, vy, vz) => { if(gPlaneDim){ z = gTasoZ; vz = 0; }   // plane mode (owner 14.9.2026): a proton let go off the plane was culled by the plane switch and 'just disappeared' - it lands on the plane and stays there
+        gValoProtons.place(i, x, y, z); const o=i*3; pVel[o]=vx; pVel[o+1]=vy; pVel[o+2]=vz; pHold[i] = 0; pIn[i] = 0; },
       /* the free proton nearest a point on one side of the membrane (+1 stroma, -1 lumen, 0 either), skipping held ones and those in the channel */
       nearestFree: (x, y, z, side, maxD) => { let b=-1, bd=(maxD||1e9)*(maxD||1e9);
         for(let i=0;i<P_N;i++){ if(pHold[i] || pIn[i]) continue; const o=i*3, py=pPos[o+1], my = memSurfY(pPos[o], pPos[o+2]); if(side > 0 && py < my + gMemHalfT) continue; if(side < 0 && py > my - gMemHalfT) continue;
@@ -11078,10 +11079,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     if(gi < 0 || !etcGroupPos){ modelLabel.style.display='none'; return; }
     const g = etcGroups[gi];
     gFlashGroup = gi; gFlashT0 = performance.now();            // flash the picked cofactor bright a few times, then back to normal
-    orbitCenter.set(g.cx, g.cy, g.cz); orbitLocked = true;      // camera orbits the cofactor you picked
+    // Where the cofactor IS now, not where its model was loaded (owner 14.9.2026: the selected PQ_B rides a moving carrier and the
+    // focus went to the stale home position). No name label either: the info panel already names it.
+    const w = { x:g.cx, y:g.cy, z:g.cz }; if(gReactSites) gReactSites.siteWorld(gi, w);
+    orbitCenter.set(w.x, w.y, w.z); orbitLocked = true;         // camera orbits the cofactor you picked
     focusAlongMembrane(orbitCenter);                            // centre the picked cofactor AND level to the membrane-parallel view
-    modelLabel.textContent = (ETC_NAMES[g.type]||'Kofaktori') + '   ' + g.n + ' atomia';
-    modelLabel._w = new BABYLON.Vector3(g.cx, g.cy, g.cz);
+    modelLabel.style.display='none'; modelLabel._w = null;
   };
   const clearEtcSel = () => showEtcSel(-1);
   // ── Cofactor-type list (right side): click a type to toggle its line-of-sight see-through. ──
@@ -12918,6 +12921,16 @@ void main(void){
           const dist = Math.max(1, Math.hypot(e.x - cam.position.x, e.y - cam.position.y, e.z - cam.position.z)), R = ((e.p === 2 ? 5 : 7) / (2*dist*Math.tan(cam.fov/2)));
           if(R < 0.0015) continue;
           _lnUV[n*4] = q.x / w; _lnUV[n*4+1] = 1.0 - q.y / h; _lnUV[n*4+2] = e.p || 0; _lnUV[n*4+3] = Math.min(0.12, R); n++; } }
+      /* FREE protons glow too (owner 14.9.2026: 'the spawned H+ dont have the glow ... the protons released into the lumen lose their glow'):
+         the light reactions only list the protons they hold, so a proton let go into the lumen, or one made by the spawn button, went dark.
+         The nearest free ones fill the spotlight slots that are left (the 64 cap is the shader's), so the ones you look at glow. */
+      if(gValoProtons && gIsoModel < 0 && n < 64){ const P = gValoProtons, cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, cand = [];
+        for(let i=0;i<P.n;i++){ if(P.hold[i]) continue; const o=i*3, y=P.pos[o+1]; if(y < -20000) continue;   // held by the sim (it lists those itself) or parked in the reserve
+          const dx=P.pos[o]-cx, dy=y-cy, dz=P.pos[o+2]-cz; cand.push([dx*dx+dy*dy+dz*dz, i]); }
+        cand.sort((a, b) => a[0] - b[0]); const tm = scene.getTransformMatrix();
+        for(const [d2, i] of cand){ if(n >= 64) break; const o=i*3, dist = Math.max(1, Math.sqrt(d2)), R = 7 / (2*dist*Math.tan(cam.fov/2)); if(R < 0.0015) break;   // sorted: the rest are farther still
+          const q = BABYLON.Vector3.Project(new BABYLON.Vector3(P.pos[o], P.pos[o+1], P.pos[o+2]), BABYLON.Matrix.Identity(), tm, _lvp); if(q.z < 0.0 || q.z > 1.0) continue;
+          _lnUV[n*4] = q.x / w; _lnUV[n*4+1] = 1.0 - q.y / h; _lnUV[n*4+2] = 1; _lnUV[n*4+3] = Math.min(0.12, R); n++; } }
       eff.setArray4('elecUVs', _lnUV); eff.setFloat('nElecs', n); eff.setFloat('lanternDark', gLanternDark); eff.setFloat('uT', performance.now()*0.001);
       eff.setFloat('lanternOn', gLantern ? 1.0 : 0.0);
       eff.setFloat('aspect', w / h);
@@ -12960,7 +12973,7 @@ void main(void){
         gFHoldR = hs >= 0 ? gHulls[hs].maxR * 1.05 : 0.5 * Math.hypot(md.x1-md.x0, md.y1-md.y0, md.z1-md.z0);
         return new BABYLON.Vector3(md.cx + gModelOff[mi*3], md.cy + gModelOff[mi*3+1], md.cz + gModelOff[mi*3+2]); }
       if(selAtom && selAtom.world){ gFHoldR = 6; return selAtom.world.clone(); }
-      if(etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel]; gFHoldR = g.r * 2.5; return new BABYLON.Vector3(g.cx, g.cy, g.cz); }
+      if(etcSel >= 0 && etcGroups[etcSel]){ const g = etcGroups[etcSel]; gFHoldR = g.r * 2.5; const w = { x:g.cx, y:g.cy, z:g.cz }; if(gReactSites) gReactSites.siteWorld(etcSel, w); return new BABYLON.Vector3(w.x, w.y, w.z); }   // live position: a cofactor on a moving carrier (PQ, PC) is followed where it is now (owner 14.9.2026)
       return null; };
     /* ISOLATE (owner 13.9.2026: 'if I double tap the F button, the focus should make the bg white and hide ALL the other particles besides
        the one selected'): the selection's model alone, on white. Every shader drops the other models' instances (isoModel), the cell LoD and
