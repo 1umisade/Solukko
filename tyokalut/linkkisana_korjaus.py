@@ -45,9 +45,9 @@ if __name__ == '__main__':
         if q in POISTA_KORTIT or (q == 'Esittely' and pakka in POISTA_ESITTELY_PAKAT):
             cur.execute("delete from cards where nid=?", (nid,)); cur.execute("delete from notes where id=?", (nid,)); muutetut.append(nid)
             print('  poistettu kortti', q, '(poista se myos Ankista kasin)')
-    # Arkisanat: sanasto_massa/arkisanat.txt:n sanojen kortit kuuluvat SOLUKKO::Arkisanat-pakkaan (omistaja 13.9.2026). Ankin tuonti
+    # Arkisanat: sanasto_massa/arkisanat.txt:n sanojen kortit kuuluvat SOLUKKO::Sanasto-pakkaan (omistaja 13.9.2026, yhdistetty Sanastoon 14.9.2026). Ankin tuonti
     # ei siirra olemassa olevia kortteja, joten omistajan vienti voi tuoda ne takaisin luentopakkoihin - siirretaan joka ajolla.
-    arki = next((d for d in decks.values() if d['name'] == 'SOLUKKO::Arkisanat'), None)
+    arki = next((d for d in decks.values() if d['name'] == 'SOLUKKO::Sanasto'), None)
     ARKISANAT = set(w.strip() for w in io.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sanasto_massa', 'arkisanat.txt'), encoding='utf-8') if w.strip() and not w.startswith('#'))
     if arki:
         siirto = []
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             q = re.sub('<[^>]*>', '', flds.split(SEP)[0]); m = re.match(r'\(\d+\.\d+\) Mitä (.+?) tarkoittaa\?$', q)
             if m and m.group(1) in ARKISANAT and did != int(arki['id']): siirto.append(cid)
         for cid in siirto: cur.execute("update cards set did=?, mod=?, usn=-1 where id=?", (int(arki['id']), now, cid)); muutetut.append(cid)
-        if siirto: print('  siirretty Arkisanat-pakkaan:', len(siirto), 'korttia')
+        if siirto: print('  siirretty Sanasto-pakkaan:', len(siirto), 'korttia')
     for nid, mid, flds in cur.execute("select id, mid, flds from notes").fetchall():
         f = flds.split(SEP); q = re.sub('<[^>]*>', '', f[0]).replace('&nbsp;', ' ').strip()
         names = [x['name'].lower() for x in models[str(mid)]['flds']]

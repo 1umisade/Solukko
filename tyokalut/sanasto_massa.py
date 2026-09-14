@@ -49,5 +49,5 @@ for _a in JARJESTYS:
     _KORTIT[_a] = [r and (r[0], r[1], r[2], r[3] or 'Mitä %s tarkoittaa?' % r[0], _linkkisanat(r[0])) for r in _rivit(_a)]
 
 ARKI = set(w.strip() for w in io.open(os.path.join(SC, 'sanasto_massa', 'arkisanat.txt'), encoding='utf-8') if w.strip() and not w.startswith('#'))
-def kortit(avain):   # arkisanat saavat arki-lipun: rakentaja vie ne SOLUKKO::Arkisanat-pakkaan (sama guid ja numero)
+def kortit(avain):   # arkisanat saavat arki-lipun: rakentaja vie ne SOLUKKO::Sanasto-pakkaan (sama guid ja numero)
     return [r and K(r[3], r[2], '', r[1], r[4], arki=(r[0] in ARKI)) for r in _KORTIT.get(avain, [])]
