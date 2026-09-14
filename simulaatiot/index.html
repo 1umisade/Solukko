@@ -8442,7 +8442,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       S[0]=t*kx*kx+c;    S[1]=t*kx*ky-sn*kz; S[2]=t*kx*kz+sn*ky;
       S[3]=t*kx*ky+sn*kz; S[4]=t*ky*ky+c;    S[5]=t*ky*kz-sn*kx;
       S[6]=t*kx*kz-sn*ky; S[7]=t*ky*kz+sn*kx; S[8]=t*kz*kz+c; };
-    const anaC = (c,v,i,T,out) => { out[0]=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[1]=bncY(c[i*3+1],v[i*3+1],T); out[2]=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); };
+    /* the STROMAL FOLD (14.9.2026): a stromal species' path is mirrored above the thylakoid cap in the shader (sideOnly) - every CPU mirror of the
+       analytic path applies the same fold, or the orbitals, the spin, the collisions and the pick would sit where the molecule is NOT drawn
+       (owner: 'why cant I see the orbitals of the particles that fly near the camera, only the transparent vdW') */
+    const sideFold = (side, x, y, z) => { if(side > 0 && SOLU_CELL && SOLU_CELL.THY){ const surf = memSurfY(x, z) + gMemHalfT + 10; if(y < surf) return Math.min(bHi.y, 2*surf - y); } return y; };
+    const sideOfC = c => { for(const z of gSpecies) if(z.c === c) return z.side || 0; return 0; };   // which species owns this origin array (a handful of species, called per molecule near the camera)
+    const anaC = (c,v,i,T,out) => { out[0]=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[2]=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); out[1]=sideFold(sideOfC(c), out[0], bncY(c[i*3+1],v[i*3+1],T), out[2]); };
     const spinAt = (molId, c,v,i,T) => { anaC(c,v,i,T,_a3); spinS(molId, _a3[0],_a3[1],_a3[2], _S9); return _S9; };   // S for molecule i of a species at time T
     const gatherT = () => gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // the clock the per-frame gathers place at
     const wPick=new Int32Array(WCAP), wPickD=new Float32Array(WCAP), wPos=new Float32Array(WCAP*3);
@@ -8591,6 +8596,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     for(const F of [FREE_ATP, FREE_ADP, FREE_PI]) gSpecies.push({ c: F.c, v: F.v, base: F.base, n: F.n, meshes: F.meshes, side: 1 });
     /* STROMAL species (owner 14.9.2026): NADP+, ATP, ADP, Pi and CO2 never go under the thylakoid cap - the shader folds their paths back above it (sideOnly), the CPU mirror below does the same */
     { const co2sp = gSpecies.find(q => q.base === MOLBASE.co2); if(co2sp){ co2sp.side = 1; co2sp.meshes = FREE_CO2.meshes; }
+      for(const F of [FREE_NADP, FREE_ATP, FREE_ADP, FREE_PI, FREE_CO2]) if(F) F.side = 1;   // the placers read the species object
       for(const sp of gSpecies){ if(!sp.side || !sp.meshes) continue; for(const m of sp.meshes){ const mat = m.material; if(!mat) continue; if(mat.subMaterials){ for(const sm of mat.subMaterials) if(sm) sm.setFloat('sideOnly', 1); } else mat.setFloat('sideOnly', 1); } } }
     const gDVel = new Float32Array(MOL_N*3);   // velocity DELTA from collisions (added to the analytic one)
     /* The light reactions' handle on the analytic molecules: a molecule is moved by writing target minus analytic point into its
@@ -8786,9 +8792,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             for(let i=0; i<cnt && nAct<SIM_CAP; i++){
               const px = bnc(c[i*3]   + v[i*3]  *T, bLo.x, bHi.x);
               const dx = px - cp.x; if(dx*dx > R2) continue;
-              const py = bncY(c[i*3+1], v[i*3+1], T);
-              const dy = py - cp.y; if(dx*dx + dy*dy > R2) continue;
               const pz = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z);
+              const py = sideFold(sp.side, px, bncY(c[i*3+1], v[i*3+1], T), pz);
+              const dy = py - cp.y; if(dx*dx + dy*dy > R2) continue;
               const dz = pz - cp.z; if(dx*dx + dy*dy + dz*dz > R2) continue;
               if(gCellDrop && gCellDrop(px,py,pz)) continue;
               if(gMolHold[base + i]) continue;   // held by the light reactions: its displacement is theirs
@@ -8800,8 +8806,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         for(let k=0;k<n;k++){
           const sp = gSpecies[spk[k]], i = mi_[k], id = idx[k], c = sp.c, v = sp.v;
           const px = bnc(c[i*3]   + v[i*3]  *T, bLo.x, bHi.x);
-          const py = bncY(c[i*3+1], v[i*3+1], T);
           const pz = bnc(c[i*3+2] + v[i*3+2]*T, bLo.z, bHi.z);
+          const py = sideFold(sp.side, px, bncY(c[i*3+1], v[i*3+1], T), pz);
           ax_[k] = px; ay_[k] = py; az_[k] = pz;
           bx_[k] = v[i*3]; by_[k] = v[i*3+1]; bz_[k] = v[i*3+2];
           sx[k] = px + gMolDisp[id*4];               // analytic path plus whatever deviation it carries
@@ -8931,15 +8937,16 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const d2=px*px+py*py+pz*pz-tca*tca; if(d2>r*r) return;
         const t=tca-Math.sqrt(r*r-d2); if(t>0 && t<bestT){ bestT=t; best={ax,ay,az,e}; src=s; } };
       const centre = (c,v,i,base) => {
-        _p[0]=bnc(c[i*3]  +v[i*3]  *T, bLo.x, bHi.x); _p[1]=bncY(c[i*3+1], v[i*3+1], T); _p[2]=bnc(c[i*3+2]+v[i*3+2]*T, bLo.z, bHi.z);
+        _p[0]=bnc(c[i*3]  +v[i*3]  *T, bLo.x, bHi.x); _p[2]=bnc(c[i*3+2]+v[i*3+2]*T, bLo.z, bHi.z); _p[1]=sideFold(sideOfC(c), _p[0], bncY(c[i*3+1], v[i*3+1], T), _p[2]);
         if(gCellDrop && gCellDrop(_p[0],_p[1],_p[2])){ _p[0]=_p[1]=_p[2]=1e9; return _p; }   // cell mode: not drawn, so never hit
         const md=(base+i)*4; _p[0]+=gMolDisp[md]; _p[1]+=gMolDisp[md+1]; _p[2]+=gMolDisp[md+2];
         repelShells(_p);
         if(gPlaneDim && gPsuLo && Math.abs(_p[2] - gTasoZ) > 2.0 && _p[0] >= gPsuLo.x && _p[0] <= gPsuHi.x && _p[1] >= gPsuLo.y && _p[1] <= gPsuHi.y && _p[2] >= gPsuLo.z && _p[2] <= gPsuHi.z){ _p[0]=_p[1]=_p[2]=1e9; }   // Hiukkastaso: culled by the shader (tasoDim), so never hovered or picked (owner 12.9.2026)
         return _p; };
       const near = (c,v,i) => { const px=bnc(c[i*3]+v[i*3]*T,bLo.x,bHi.x)-cp.x; if(px*px>R2) return false;
-        const py=bncY(c[i*3+1], v[i*3+1], T)-cp.y; if(px*px+py*py>R2) return false;
-        const pz=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z)-cp.z; if(px*px+py*py+pz*pz>R2) return false;
+        const pz=bnc(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z)-cp.z;
+        const py=sideFold(sideOfC(c), px+cp.x, bncY(c[i*3+1], v[i*3+1], T), pz+cp.z)-cp.y; if(px*px+py*py>R2) return false;
+        if(px*px+py*py+pz*pz>R2) return false;
         return !(gCellDrop && gCellDrop(px+cp.x, py+cp.y, pz+cp.z)); };
       const hRad = info(codeH).vr*FILL_SCALE, oRad = info(codeO).vr*FILL_SCALE, cRad = info(codeC).vr*FILL_SCALE;
       const rot = (S, x,y,z, out) => { out[0]=S[0]*x+S[1]*y+S[2]*z; out[1]=S[3]*x+S[4]*y+S[5]*z; out[2]=S[6]*x+S[7]*y+S[8]*z; return out; };
@@ -9197,9 +9204,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         for(let i=0;i<F.n && n<CAP;i++){
           const px=bnc(F.c[i*3]  +F.v[i*3]  *T, bLo.x, bHi.x);
           const dx=px-cp.x; if(dx*dx>R2) continue;
-          const py=bncY(F.c[i*3+1], F.v[i*3+1], T);
-          const dy=py-cp.y; if(dx*dx+dy*dy>R2) continue;
           const pz=bnc(F.c[i*3+2]+F.v[i*3+2]*T, bLo.z, bHi.z);
+          const py=sideFold(F.side, px, bncY(F.c[i*3+1], F.v[i*3+1], T), pz);
+          const dy=py-cp.y; if(dx*dx+dy*dy>R2) continue;
           const dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue;
           if(gCellDrop && gCellDrop(px,py,pz)) continue;
           const md=(F.base+i)*4;   // same mirror, same order: displacement first, then the shells
