@@ -3762,7 +3762,7 @@ async function run(){
      alone, so a uniform first named after the first compile of that key never binds on ANY material sharing it (the cell shells'
      cutPlane). So the shared uniforms are put on the material right before it compiles: its readiness check is wrapped. */
   const shareUniforms = m => { if(m.__shared) return; m.__shared = true; m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', 0);
-    m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); m.setArray3('isoAt', gIsoAt); m.setFloat('isoN', 0); gShaderMats.push(m); };
+    m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); m.setArray3('isoAt', gIsoAt); m.setFloat('isoN', 0); m.setFloat('memRow', 0); gShaderMats.push(m); };
   for(const fn of ['isReady', 'isReadyForSubMesh']){ const orig = BABYLON.ShaderMaterial.prototype[fn]; if(!orig) continue;
     BABYLON.ShaderMaterial.prototype[fn] = function(){ shareUniforms(this); return orig.apply(this, arguments); }; }
   scene.skipPointerMovePicking = true;   // perf: we never auto-pick on pointer-move (all picking is done manually in our own handlers)
@@ -4140,14 +4140,17 @@ vec3 laatta(vec2 pq){
 }
 uniform vec3 memCut; uniform vec3 cutLo; uniform vec3 cutHi;   // Puolikas: the camera-side half inside the cut box is not drawn, like the lipids (owner 12.9.2026)
 uniform float viewBox;   // 1 = only what is inside the box is drawn
+uniform float memRow;    // Puolikas: the kept half's first row of lipids is drawn as lipids, the shell takes over beyond it (0 = off)
 uniform float boxKeep;   // 1 on the thylakoid the unit sits on: its shell is not clipped to the box (the membrane stays whole outside the box)
 void main(void){
   if(dot(cutPlane.xyz, vWP) + cutPlane.w > 0.0) discard;   // POIKKILEIKKAUS: the removed half of the cell
   float dCam = distance(vWP, camPos);
   if(holeR > 0.0 && dCam < holeR) discard;
   if(memCut.z * step(0.0, (vWP.z - memCut.x)*memCut.y) * (step(cutLo.x, vWP.x) * step(vWP.x, cutHi.x) * step(cutLo.y, vWP.y) * step(vWP.y, cutHi.y) * step(cutLo.z, vWP.z) * step(vWP.z, cutHi.z)) > 0.5) discard;
-  if(boxKeep > 0.5 && all(greaterThanEqual(vWP, cutLo)) && all(lessThanEqual(vWP, cutHi))) discard;   // the unit's thylakoid inside the light-reaction box is always its lipids in full - no shell under them
-  if(viewBox > 0.5) discard;   // box-only view: NO shell is drawn at all, not even the unit's thylakoid beyond the box (owner 13.9.2026: 'only render the boxed scene once the camera is inside') - a big envelope poking into the box drew as a hatched sliver. No semicolons in this comment, the preprocessor splits on them
+  bool inBox = all(greaterThanEqual(vWP, cutLo)) && all(lessThanEqual(vWP, cutHi));
+  if(memRow > 0.0 && memCut.z > 0.5 && inBox){ float dz = (vWP.z - memCut.x) * (-memCut.y); if(dz < memRow) discard; }   // Puolikas: the kept half beyond its first lipid row IS the shell (owner 14.9.2026)
+  else if(boxKeep > 0.5 && inBox) discard;   // the unit's thylakoid inside the light-reaction box is always its lipids in full - no shell under them
+  else if(viewBox > 0.5) discard;   // box-only view: NO shell is drawn at all, not even the unit's thylakoid beyond the box (owner 13.9.2026: 'only render the boxed scene once the camera is inside') - a big envelope poking into the box drew as a hatched sliver. No semicolons in this comment, the preprocessor splits on them
   bool onFacet = facetOn > 0.5 && distance(vWP.xz, cen.xz) < facetR;
   if(onFacet && abs(vWP.x - footCen.x) < footHalf.x && abs(vWP.z - footCen.y) < footHalf.y) discard;
   if(clipOn > 0.5 && length((vWP - clipC) * clipInvS) > clipR - 6.0) discard;   // the thylakoid cap ends at the inner envelope
@@ -5106,7 +5109,7 @@ void main(void){
   /* The destination is the owner's exact dev-readout view (13.9.2026, after the pole moved to the unit's centre): sij. 118, 180, -1004 ·
      katse -0.041, -0.145, 0.989 · ylä -0.027, 0.989, 0.144 · et. 426. The readout's katse/ylä lines ARE the rotation:
      target = sij. + katse·et., cam.upVector = ylä (the screen-up is a valid up vector - β comes out 90°, the roll stays). */
-  const POSE = (() => { const pos = new BABYLON.Vector3(118, 180, -1004), fw = new BABYLON.Vector3(-0.041, -0.145, 0.989).normalize(), up = new BABYLON.Vector3(-0.027, 0.989, 0.144), r = 426;
+  const POSE = (() => { const pos = new BABYLON.Vector3(119, 186, -1172), fw = new BABYLON.Vector3(-0.034, -0.095, 0.995).normalize(), up = new BABYLON.Vector3(-0.015, 0.995, 0.094), r = 593;   // (owner 14.9.2026: sij. 119, 186, -1172 - katse -0.034, -0.095, 0.995 - yla -0.015, 0.995, 0.094 - et. 593; the unit box's depth follows POSE, see fit)
     up.subtractInPlace(fw.scale(BABYLON.Vector3.Dot(up, fw))).normalize();   // exactly perpendicular to the view axis (the readout is rounded to three decimals)
     return { pos, tgt: pos.add(fw.scale(r)), up }; })();
   { const FLY_S = 14, TGT = POSE.tgt, POS = POSE.pos, UP = POSE.up;
@@ -6932,6 +6935,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   let gMemFullR = 1e9;        // radius out to which the sheet keeps FULL lipid density - orbitals never go past it
   let gWorldReach = 0;        // how far the furthest thing in the scene actually is - the far clip must clear it
   let gMemFootX = 1e9, gMemFootZ = 1e9;   // the slab's half-footprint - the wrapped sheet must not reach past it
+  let gMemRow = 0;            // Puolikas: the kept half's first row of lipids at the cut (one lattice pitch and a bit), the shell beyond - 0 = off
   let gMemCellR = 0;          // radius of one membrane cell - every margin below has to clear a whole one
   /* ── ONE derived set of membrane LOD radii ────────────────────────────────────────────────────────
      These are not independent numbers, and every time they were written out separately one of them
@@ -7387,6 +7391,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const BL = 4, nbx = Math.ceil(Gx/BL), nbz = Math.ceil(Gz/BL), NBLK = nbx*nbz*2;
     const blockR = 0.5*Math.hypot(BL*S, ySpan+2*Math.max(xr,zr,1), BL*S) + JIT + S*0.5;   // +S*0.5 = the odd-row stagger
     gMemCellR = blockR;   // every LOD margin is measured against a whole block, because the ramp is decided per block
+    gMemRow = S*1.25;   // Puolikas (owner 14.9.2026: 'the first row of lipids in the halved membrane edge with the cheap LoD, fill the rest with the slab')
     const gCoarseD = 520, gCoarse2 = gCoarseD*gCoarseD;   // beyond this a lipid is drawn as its coarse twin (a merged sphere per slice) - its atoms are 1-2 px there
     const blkStart = new Int32Array(NBLK+1), blkCnt = new Int32Array(NBLK);
     const blkCx = new Float32Array(NBLK), blkCz = new Float32Array(NBLK);
@@ -7691,14 +7696,16 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const ddx = e.cx-cp.x, ddy = e.cy-cp.y, ddz = e.cz-cp.z, d2 = ddx*ddx+ddy*ddy+ddz*ddz;
           let vis = true; for(let q=0;q<6;q++){ const pl=fp[q]; if(pl.normal.x*e.cx + pl.normal.y*e.cy + pl.normal.z*e.cz + pl.d < -(e.r+14)){ vis=false; break; } }
           if(!vis) continue;
-          const near = d2 < full2, P = e.pos, Rt = e.rot;
+          const rowCut = gMemCut && gCut[2] > 0.5 && gMemRow > 0;   // Puolikas: the kept half is one row of coarse lipids at the cut, the shell beyond (the cellshell shader draws the shell there, see memRow)
+          const near = !rowCut && d2 < full2, P = e.pos, Rt = e.rot;
           for(let q=0;q<e.n;q++){ const E = sphTpl[e.tpl[q]]; if(!E) continue; const o=q*3, r9=q*9;
-            let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
+            if(rowCut){ const dz = (P[o+2] - gCut[0]) * (-gCut[1]); if(dz < -1 || dz > gMemRow) continue; }   // (the camera side is cut anyway - only the first row of the kept side)
+            let Mx, k, A, Tn, Sn; if(near){ if(E.nn >= E.cap) continue; k = E.nn++; Mx = E.nM; A = E.nA; Tn = E.nT; Sn = E.nS; } else if(rowCut || d2 > gCoarse2){ if(E.nc >= E.cap) continue; k = E.nc++; Mx = E.cM; A = E.cA; Tn = E.cT; Sn = E.cS; } else { if(E.nf >= E.cap) continue; k = E.nf++; Mx = E.fM; A = E.fA; Tn = E.fT; Sn = E.fS; }
             const m = k*16, tn = M.tint; if(tn){ Tn[k*4]=tn[0]; Tn[k*4+1]=tn[1]; Tn[k*4+2]=tn[2]; Tn[k*4+3]=0.72; } else Tn[k*4+3]=0; Sn[k] = e.shd[q];
             Mx[m]=Rt[r9]; Mx[m+1]=Rt[r9+1]; Mx[m+2]=Rt[r9+2]; Mx[m+3]=0; Mx[m+4]=Rt[r9+3]; Mx[m+5]=Rt[r9+4]; Mx[m+6]=Rt[r9+5]; Mx[m+7]=0;
             Mx[m+8]=Rt[r9+6]; Mx[m+9]=Rt[r9+7]; Mx[m+10]=Rt[r9+8]; Mx[m+11]=0; Mx[m+12]=P[o]; Mx[m+13]=P[o+1]; Mx[m+14]=P[o+2]; Mx[m+15]=1;
             A[k] = P[o+2]; }
-          if(orbOn && d2 <= (oR + e.r)*(oR + e.r)) for(let q=0;q<e.n;q++){ const o=q*3, lx=P[o], ly=P[o+1], lz=P[o+2];
+          if(orbOn && !rowCut && d2 <= (oR + e.r)*(oR + e.r)) for(let q=0;q<e.n;q++){ const o=q*3, lx=P[o], ly=P[o+1], lz=P[o+2];   // (no orbitals on the coarse row)
             const qx=lx-cp.x, qy=ly-cp.y, qz=lz-cp.z, e2=qx*qx+qy*qy+qz*qz; if(e2 > oR2) continue;
             let v2 = true; for(let k=0;k<6;k++){ const pl=fp[k]; if(pl.normal.x*lx + pl.normal.y*ly + pl.normal.z*lz + pl.d < -LOBE_MARGIN){ v2=false; break; } }
             if(!v2 || nC >= ORB_SCRATCH) continue;
@@ -7875,7 +7882,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const cp = cam.position;
       /* perf (14.9.2026): the walk placed the same lipids again every frame (4.9 ms) - nothing in it changes unless the camera, a model, the
          LoD or the mode did. It runs only when its inputs changed, and while they keep changing (a drag) every other frame at most */
-      { const vm = cam.getViewMatrix().m, sig = vm[0].toFixed(4)+vm[1].toFixed(4)+vm[2].toFixed(4)+vm[4].toFixed(4)+vm[5].toFixed(4)+vm[6].toFixed(4)+vm[12].toFixed(1)+vm[13].toFixed(1)+vm[14].toFixed(1)+'|'+xformSig()+'|'+gGfxMode+'|'+gCrisp+'|'+gSlabLod+'|'+gMemBlend+'|'+gOrbBudget.toFixed(0)+'|'+gViewBox+'|'+gPlaneDim+'|'+gIsoModel+'|'+gXsec+'|'+gMembrane;
+      { const vm = cam.getViewMatrix().m, sig = vm[0].toFixed(4)+vm[1].toFixed(4)+vm[2].toFixed(4)+vm[4].toFixed(4)+vm[5].toFixed(4)+vm[6].toFixed(4)+vm[12].toFixed(1)+vm[13].toFixed(1)+vm[14].toFixed(1)+'|'+xformSig()+'|'+gGfxMode+'|'+gCrisp+'|'+gSlabLod+'|'+gMemBlend+'|'+gOrbBudget.toFixed(0)+'|'+gViewBox+'|'+gPlaneDim+'|'+gIsoModel+'|'+gXsec+'|'+gMembrane+'|'+gMemCut+'|'+(gCut[2] > 0.5)+'|'+gCut[1];
         if(sig === memWalkSig) return; if(memWalkSkip){ memWalkSkip = false; return; } memWalkSkip = true; memWalkSig = sig; }
       if(!gMembrane || !(gMemSpanX > 0)){
         if(gSphLive){ gSphLive=false; for(const E of sphTpl){ if(!E) continue; E.nn=E.nf=E.nc=0; E.near.setEnabled(false); E.far.setEnabled(false); E.coarse.setEnabled(false); } }
@@ -9509,10 +9516,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gWaveT += Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // advance the thermal-shake clock
     { const dtR = Math.min(engine.getDeltaTime(), 50) * 0.001; if(!gPaused){ gBoilT += dtR * gBoilSpeed; gElecT += dtR * gElecSpeed; }   // own clocks (space still pauses them)
       const isoR = pieceRange(gIsoModel), selR = pieceRange(gSelModel), cutW = gXsec ? gXsecPlane : XSEC_OFF, cutV = gXsec ? xsecViewPlane() : XSEC_OFF;
-      const sig = gIsoModel + '|' + isoR[0] + '|' + isoR[1] + '|' + gSelModel + '|' + selR[0] + '|' + selR[1] + '|' + gIsoN + '|' + (gXsec ? cutW.x + ',' + cutW.y + ',' + cutW.z + ',' + cutW.w + ',' + cutV.x + ',' + cutV.y + ',' + cutV.z + ',' + cutV.w : 'off') + '|' + gShaderMats.length;
+      const sig = gIsoModel + '|' + isoR[0] + '|' + isoR[1] + '|' + gSelModel + '|' + selR[0] + '|' + selR[1] + '|' + gIsoN + '|' + gMemRow + '|' + (gXsec ? cutW.x + ',' + cutW.y + ',' + cutW.z + ',' + cutW.w + ',' + cutV.x + ',' + cutV.y + ',' + cutV.z + ',' + cutV.w : 'off') + '|' + gShaderMats.length;
       const changed = sig !== gShareSig; gShareSig = sig;   // (perf 14.9.2026: nine uniforms on ~300 materials every frame was 1 ms - the rarely-changing ones go out only when they change)
       for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT);
-        if(changed){ m.setFloat('isoModel', gIsoModel + 1); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); } } }
+        if(changed){ m.setFloat('isoModel', gIsoModel + 1); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); m.setFloat('memRow', gMemRow); } } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
     const u = cam.getDirection(BABYLON.Axis.Y);   // view up
     const r = cam.getDirection(BABYLON.Axis.X);   // view right

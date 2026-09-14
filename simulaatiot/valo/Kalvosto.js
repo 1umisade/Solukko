@@ -340,7 +340,7 @@
       return n ? { normal: n, collider: null } : null; };
 
     /* ── per frame: the clock, the sensors, physics, the bodies the sheet holds, the visuals ── */
-    let valoRow = null, dev = 0, wasDragging = false, sensAcc = 0, sensFrame = 0; const prof = { all: 0, sens: 0 };
+    let valoRow = null, dev = 0, wasDragging = false, sensAcc = 0, sensFrame = 0, relT = 0; const prof = { all: 0, sens: 0 };
     scene.onBeforeRenderObservable.add(() => {
       { const ov = document.getElementById('overlay'); if(ov && !ov.classList.contains('gone')) return; }
       const dt = Math.min(engine.getDeltaTime(), 50)*0.001*get.gSpeed(); if(dt <= 0) return; V.dt = dt; const t0 = performance.now();
@@ -375,6 +375,7 @@
         if(kin.detour){ kin.detour.t -= dt; if(kin.detour.t <= 0){ kin.detour = null; kin.bestD = null; } else { dx = kin.detour.x; dy = kin.detour.y; d = 1; } } else if(kin.stuckT > 3 && !kin.home){ const sgn = Math.random() < 0.5 ? 1 : -1; kin.detour = { x: -dy/d*sgn, y: dx/d*sgn, t: 2.5 }; kin.stuckT = 0; }
         const k = (b.alive && b.hard_target) ? 0.5 : 0.06, f = 1 - Math.pow(1-k, dt*60); const vx = bb.vx + (dx/d*sp - bb.vx)*f, vy = bb.vy + (dy/d*sp - bb.vy)*f, l = Math.hypot(vx, vy) || 1; bb.vx = vx/l*sp; bb.vy = vy/l*sp; }
       // ATP synthase: the proton channel's passes are its channeled protons (ATP-synthase.gd counted the proton BindSites' animation)
+      relT += dt; if(relT > 2){ relT = 0; for(const b of [...units.map(u => u.psii), ...b6fs.map(r => r.b6f), ...psis.map(u => u.psi), ...fnrs, ...ndhs]) if(b && b.alive) b.try_RELEASING(); }   // the complexes' docks let go on their own (owner 14.9.2026: 'a plastocyanin permanently part of PSI' - an empty carrier parked in a dock was released only when a passer-by asked)
       window.gAtpReady = atps.some(a => V.white(a.get_node('BindSites/ADP')) && V.white(a.get_node('BindSites/phosphate')));   // the channel opens only with ADP and P bound (the proton loop reads this)
       for(const a of atps){ const passes = get.gProtonPasses(); if(a.passes0 == null) a.passes0 = passes; if(passes > a.passes0){ if(V.white(a.get_node('BindSites/ADP')) && V.white(a.get_node('BindSites/phosphate'))){ a.channeled_protons += passes - a.passes0; a.try_RELEASING(); } a.passes0 = passes; } }   // (ATP-synthase.gd: a proton binds only while ADP and phosphate are bound)
       // the free instances sitting in slots ride the slots; the parked and released ones go back to their pools
