@@ -86,6 +86,17 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
                 arki_did[0] = max(int(k) for k in decks) + 1; t = dict(sisar); t.update({'id': arki_did[0], 'name': ARKI, 'mod': now, 'usn': -1}); decks[str(arki_did[0])] = t
                 cur.execute("update col set decks=?", (json.dumps(decks),)); print('uusi pakka:', ARKI)
         return arki_did[0]
+    # Sanasto (omistaja 14.9.2026: 'siirra ne Sanasto-pakkaan, joka ei nay etusivulla'): sanastomoduulien (TIEDOSTO) kortit menevat
+    # piilotettuun SOLUKKO::Sanasto-pakkaan, luentopakkoihin jaavat vain luentojen omat kortit. Guid ja numero pysyvat luennon mukaisina.
+    SANASTO = 'SOLUKKO::Sanasto'; sanasto_did = [None]
+    def sanasto_deck():
+        if sanasto_did[0] is None:
+            t = next((d for d in decks.values() if d['name'] == SANASTO), None)
+            if t: sanasto_did[0] = int(t['id'])
+            else:
+                sanasto_did[0] = max(int(k) for k in decks) + 1; t = dict(sisar); t.update({'id': sanasto_did[0], 'name': SANASTO, 'mod': now, 'usn': -1}); decks[str(sanasto_did[0])] = t
+                cur.execute("update col set decks=?", (json.dumps(decks),)); print('uusi pakka:', SANASTO)
+        return sanasto_did[0]
     for li, M in enumerate(luennot):
         LEHTI, NRO, KORTIT = _g(M, 'LEHTI'), str(_g(M, 'NRO')), _g(M, 'KORTIT')
         ALKU = (M.get('ALKU', 0) if isinstance(M, dict) else getattr(M, 'ALKU', 0))   # numeroinnin alku: lisays olemassa olevaan pakkaan jatkaa sen numeroita (esim. 300 -> 1.301...)
@@ -96,6 +107,7 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
             did = max(int(k) for k in decks) + 1
             target = dict(sisar); target.update({'id': did, 'name': name, 'mod': now, 'usn': -1}); decks[str(did)] = target
             cur.execute("update col set decks=?", (json.dumps(decks),)); print('uusi pakka:', name)
+        sanasto_mod = bool(M.get('TIEDOSTO') if isinstance(M, dict) else getattr(M, 'TIEDOSTO', None))   # sanastomoduuli: kortit Sanasto-pakkaan
         uudet = paivitetyt = 0; nids = []; omat = {}; jak = {'1': 0, '2': 0, '3': 0}; termit = 0
         for i, k in enumerate(KORTIT):
             if k is None: continue   # None pitaa numeron varattuna (poistettu kortti, jonka jalkeiset ovat jo omistajan Ankissa numeroituina)
@@ -117,12 +129,12 @@ def rakenna(kansio, parent_loppu, luennot, guid_etuliite, sisar_loppu=None):
                 nid = row[0]
                 if row[1] != SEP.join(fields):
                     cur.execute("update notes set flds=?, sfld=?, csum=?, mod=?, usn=-1 where id=?", (SEP.join(fields), sfld, csum, now, nid)); paivitetyt += 1
-                kdid = arki_deck() if k.get('arki') else did; ktag = ''
+                kdid = arki_deck() if k.get('arki') else (sanasto_deck() if sanasto_mod else did); ktag = ''
                 if cur.execute("select did from cards where nid=?", (nid,)).fetchone()[0] != kdid or cur.execute("select tags from notes where id=?", (nid,)).fetchone()[0] != ktag:
                     cur.execute("update cards set did=?, mod=?, usn=-1 where nid=?", (kdid, now, nid)); cur.execute("update notes set tags=?, mod=?, usn=-1 where id=?", (ktag, now, nid)); paivitetyt += 1
             else:
                 nid = seuraava[0]; seuraava[0] += 2
-                kdid = arki_deck() if k.get('arki') else did; ktag = ''
+                kdid = arki_deck() if k.get('arki') else (sanasto_deck() if sanasto_mod else did); ktag = ''
                 cur.execute("insert into notes values (?,?,?,?,?,?,?,?,?,?,?)", (nid, guid, MID, now, -1, ktag, SEP.join(fields), sfld, csum, 0, ''))
                 cur.execute("insert into cards values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (nid + 1, nid, kdid, 0, now, -1, 0, 0, ALKU + i + 1, 0, 0, 0, 0, 0, 0, 0, 0, ''))
                 uudet += 1
