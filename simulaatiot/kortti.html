@@ -497,10 +497,11 @@ bool cytosol(vec3 w){
 attribute float molId;
 uniform sampler2D molTex;
 uniform float molTexDim;
-vec3 molDisp(){
+vec4 molDisp4(){
   float x = mod(molId, molTexDim), y = floor(molId / molTexDim);
-  return texture2D(molTex, vec2((x + 0.5)/molTexDim, (y + 0.5)/molTexDim)).xyz;
-}
+  return texture2D(molTex, vec2((x + 0.5)/molTexDim, (y + 0.5)/molTexDim));
+}   // xyz the displacement, w = 1 for a PLACED molecule (the CPU put it there: a simulated proton, a molecule held in a slot)
+vec3 molDisp(){ return molDisp4().xyz; }
 float hsh(uint x){ x ^= x >> 16u; x *= 0x7feb352du; x ^= x >> 15u; x *= 0x846ca68bu; x ^= x >> 16u; return float(x & 0xffffffu) / 16777216.0; }   // lowbias32, bit-identical to spinS in JS
 float bnc(float x, float lo, float hi){
   float s = hi - lo;
@@ -588,7 +589,9 @@ void main(void){
 #endif
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
-  { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
+  vec4 mdisp = molDisp4(); bool placed = mdisp.w > 0.5;   // PLACED (owner 14.9.2026: 'not all protons are rendered'): the CPU's position is final - no camera wrap, no drop, no fade judged on the HOME (an OEC-made proton's home lay in the bilayer band and was dropped for good)
+  if(placed){ if(wCen.y + mdisp.y < boxLo.y - 1000.0) cellDrop = true; }   // (the hidden reserve, 30000 under the cell)
+  else { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
     if(wrapScale > 1.0){ vec3 mid = 0.5 * (boxLo + boxHi); wCen = mid + (wCen - mid) * wrapScale; }   // the far set: the box stretched about its centre
     bool homeInPsu = wrapScale <= 1.0 && all(greaterThanEqual(wCen, psuLo)) && all(lessThanEqual(wCen, psuHi));   // its home is inside the light-reaction box (owner 13.9.2026: everything in the box at full quality, at any distance)
     vec3 k = (wrapP.x > 0.0 && !homeInPsu) ? floor((cellCam - wCen) / wrapP + 0.5) : vec3(0.0);   // ...so it is drawn THERE, not at the copy nearest the camera

@@ -914,10 +914,11 @@ bool cytosol(vec3 w){
 attribute float molId;
 uniform sampler2D molTex;
 uniform float molTexDim;
-vec3 molDisp(){
+vec4 molDisp4(){
   float x = mod(molId, molTexDim), y = floor(molId / molTexDim);
-  return texture2D(molTex, vec2((x + 0.5)/molTexDim, (y + 0.5)/molTexDim)).xyz;
-}
+  return texture2D(molTex, vec2((x + 0.5)/molTexDim, (y + 0.5)/molTexDim));
+}   // xyz the displacement, w = 1 for a PLACED molecule (the CPU put it there: a simulated proton, a molecule held in a slot)
+vec3 molDisp(){ return molDisp4().xyz; }
 float hsh(uint x){ x ^= x >> 16u; x *= 0x7feb352du; x ^= x >> 15u; x *= 0x846ca68bu; x ^= x >> 16u; return float(x & 0xffffffu) / 16777216.0; }   // lowbias32, bit-identical to spinS in JS
 float bnc(float x, float lo, float hi){
   float s = hi - lo;
@@ -1005,7 +1006,9 @@ void main(void){
 #endif
 #ifdef CELLCLIP
   bool cellDrop = false; float cellShrink = 1.0;
-  { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
+  vec4 mdisp = molDisp4(); bool placed = mdisp.w > 0.5;   // PLACED (owner 14.9.2026: 'not all protons are rendered'): the CPU's position is final - no camera wrap, no drop, no fade judged on the HOME (an OEC-made proton's home lay in the bilayer band and was dropped for good)
+  if(placed){ if(wCen.y + mdisp.y < boxLo.y - 1000.0) cellDrop = true; }   // (the hidden reserve, 30000 under the cell)
+  else { vec3 wrapP = cellWrap * max(wrapScale, 1.0);
     if(wrapScale > 1.0){ vec3 mid = 0.5 * (boxLo + boxHi); wCen = mid + (wCen - mid) * wrapScale; }   // the far set: the box stretched about its centre
     bool homeInPsu = wrapScale <= 1.0 && all(greaterThanEqual(wCen, psuLo)) && all(lessThanEqual(wCen, psuHi));   // its home is inside the light-reaction box (owner 13.9.2026: everything in the box at full quality, at any distance)
     vec3 k = (wrapP.x > 0.0 && !homeInPsu) ? floor((cellCam - wCen) / wrapP + 0.5) : vec3(0.0);   // ...so it is drawn THERE, not at the copy nearest the camera
@@ -8560,7 +8563,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const bnc0 = (x,lo,hi) => { const sp=hi-lo; let t=(x-lo)%(2*sp); if(t<0) t+=2*sp; return lo+(t<sp?t:2*sp-t); };
     const bncY0 = (y0, vy, T) => { let lo = bLo.y, hi = bHi.y; if(gMemHalfT > 0 && !SOLU){ if(y0 >= MEMBRANE_Y) lo = Math.max(lo, MEMBRANE_Y + gMemHalfT); else hi = Math.min(hi, MEMBRANE_Y - gMemHalfT); } return bnc0(Math.min(hi, Math.max(lo, y0)) + vy*T, lo, hi); };
     const inPsu = (x, y, z) => !!gPsuLo && x >= gPsuLo.x && x <= gPsuHi.x && y >= gPsuLo.y && y <= gPsuHi.y && z >= gPsuLo.z && z <= gPsuHi.z;
-    const drawnPos = (side, c, v, i, T, out) => { out[0]=bnc0(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[2]=bnc0(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); out[1]=sideFold(side, c, i, out[0], bncY0(c[i*3+1],v[i*3+1],T), out[2]);
+    const homePos = (side, c, v, i, T, out) => { out[0]=bnc0(c[i*3]+v[i*3]*T,bLo.x,bHi.x); out[2]=bnc0(c[i*3+2]+v[i*3+2]*T,bLo.z,bHi.z); out[1]=sideFold(side, c, i, out[0], bncY0(c[i*3+1],v[i*3+1],T), out[2]); return out; };   // the analytic home, no camera wrap
+    const drawnPos = (side, c, v, i, T, out, id) => { homePos(side, c, v, i, T, out);
+      if(id != null && gMolDisp[id*4+3] > 0.5){ return !(gPlaneDim && gPsuLo && Math.abs(out[2] + gMolDisp[id*4+2] - gTasoZ) > 2.0 && inPsu(out[0] + gMolDisp[id*4], out[1] + gMolDisp[id*4+1], out[2] + gMolDisp[id*4+2])); }   // PLACED: the home plus the displacement is final (the shader skips the wrap and the drops for it)
       const home = inPsu(out[0], out[1], out[2]);
       if(!home && gCellWrap){ const cp = cam.position, sx=bHi.x-bLo.x, sy=bHi.y-bLo.y, sz=bHi.z-bLo.z; out[0]+=Math.round((cp.x-out[0])/sx)*sx; out[1]+=Math.round((cp.y-out[1])/sy)*sy; out[2]+=Math.round((cp.z-out[2])/sz)*sz;
         if(gViewBox && !inPsu(out[0], out[1], out[2])) return false;   // the box-only view: a copy outside the box is not drawn
@@ -8725,13 +8730,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        out of it, NADP+ is drawn onto FNR. */
     gValoFree = { hold: gMolHold, disp: gMolDisp, base: MOLBASE, count: key => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); return sp ? sp.n : 0; },
       pos: (key, i, out) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); const T = gWaveT, c = sp.c, v = sp.v;
-        drawnPos(sp.side, c, v, i, T, out); return out; },   // the drawn position (home inside the box, else the copy nearest the camera)
+        drawnPos(sp.side, c, v, i, T, out, MOLBASE[key]+i); return out; },   // the drawn position (home inside the box, else the copy nearest the camera; a placed one: its home, the displacement is added by the caller)
       shown: (key, i, out) => { gValoFree.pos(key, i, out); const o = (MOLBASE[key]+i)*4; out[0] += gMolDisp[o]; out[1] += gMolDisp[o+1]; out[2] += gMolDisp[o+2]; return out; },
       nearest: (key, x, y, z, side, skip) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return -1; const t=[0,0,0]; let b=-1, bd=Infinity;
         for(let i=0;i<sp.n;i++){ const id = sp.base + i; if(gMolHold[id] || (skip && skip.has(i))) continue; gValoFree.pos(key, i, t); const my = memSurfY(t[0], t[2]); if(side > 0 && t[1] < my) continue; if(side < 0 && t[1] > my) continue;
           const d=(t[0]-x)*(t[0]-x)+(t[1]-y)*(t[1]-y)+(t[2]-z)*(t[2]-z); if(d < bd){ bd=d; b=i; } } return b; },
-      setWorld: (key, i, x, y, z) => { const t=[0,0,0]; gValoFree.pos(key, i, t); const o=(MOLBASE[key]+i)*4; gMolDisp[o]=x-t[0]; gMolDisp[o+1]=y-t[1]; gMolDisp[o+2]=z-t[2]; },
-      setOff: (key, i, dx, dy, dz) => { const o=(MOLBASE[key]+i)*4; gMolDisp[o]=dx; gMolDisp[o+1]=dy; gMolDisp[o+2]=dz; },
+      setWorld: (key, i, x, y, z) => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); const t=[0,0,0]; homePos(sp.side, sp.c, sp.v, i, gWaveT, t); const o=(MOLBASE[key]+i)*4; gMolDisp[o]=x-t[0]; gMolDisp[o+1]=y-t[1]; gMolDisp[o+2]=z-t[2]; gMolDisp[o+3]=1; },   // PLACED: against the unwrapped home, flagged - the shader draws it exactly there
+      setOff: (key, i, dx, dy, dz) => { const o=(MOLBASE[key]+i)*4; gMolDisp[o]=dx; gMolDisp[o+1]=dy; gMolDisp[o+2]=dz; gMolDisp[o+3]=0; },
       upload: () => gMolTex.update(gMolDisp), orig: key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); return sp ? sp.c : null; }, keys: ['w','p','co2','o2','nadp','atp','adp','pi'],
       drawn: (key, i, out) => { if(key === 'p') return false; const sp = gSpecies.find(q => q.base === MOLBASE[key]); return sp ? drawnPos(sp.side, sp.c, sp.v, i, gWaveT, out) : false; },   // where it is drawn right now (false = not drawn)
       /* a NEW HOME (14.9.2026, owner: 'buttons to spawn more free molecules'): the origin is moved so the analytic path is at (x, y, z) right now
@@ -8742,7 +8747,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
            the triangle wave being what it is - and the origin must lie inside the box (the y origin is clamped to it, shader and mirror alike) */
         const fix = (lo, hi, vv) => { const m = 2*(hi - lo); if(m <= 0 || T <= 0) return vv; return m*Math.round(vv*T/m)/T; };
         c[i*3] = x; c[i*3+1] = y; c[i*3+2] = z; v[i*3] = fix(bLo.x, bHi.x, v[i*3]); v[i*3+1] = fix(bLo.y, bHi.y, v[i*3+1]); v[i*3+2] = fix(bLo.z, bHi.z, v[i*3+2]);
-        const o = (MOLBASE[key]+i)*4; gMolDisp[o] = gMolDisp[o+1] = gMolDisp[o+2] = 0; },
+        const o = (MOLBASE[key]+i)*4; gMolDisp[o] = gMolDisp[o+1] = gMolDisp[o+2] = gMolDisp[o+3] = 0; },
       homeFlush: key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); if(!sp) return;
         if(key === 'w'){   // water: wO/wOF one instance per molecule, wH/wHF two (the same origin twice)
           const og = new Float32Array(sp.c), vl = new Float32Array(sp.v), og2 = new Float32Array(sp.n*6), vl2 = new Float32Array(sp.n*6);
@@ -8857,13 +8862,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           if(nl > 1e-6){ const d=(pVel[o]*nx+pVel[o+1]*ny+pVel[o+2]*nz)/nl; if(d < 0){ pVel[o]-=2*d*nx/nl; pVel[o+1]-=2*d*ny/nl; pVel[o+2]-=2*d*nz/nl; } }
           x=_pp[0]; y=_pp[1]; z=_pp[2]; }
         pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z;
-        const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2];
+        const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; gMolDisp[md+3]=1;   /* (placed) */
       }
       if(passes){ gProtonPasses += passes; gRotorTarget += passes*ROTOR_STEP; }
       gMolTex.update(gMolDisp);
     }, -1, true);   // first in the frame, so every mirror this frame sees the new positions
     gValoProtons = { n: P_N, pos: pPos, hold: pHold,
-      place: (i, x, y, z) => { const o=i*3; pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z; const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; },
+      place: (i, x, y, z) => { const o=i*3; pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z; const md=(MOLBASE.p+i)*4; gMolDisp[md]=x-pOrg[o]; gMolDisp[md+1]=y-pOrg[o+1]; gMolDisp[md+2]=z-pOrg[o+2]; gMolDisp[md+3]=1; },   // a proton is always PLACED (the CPU simulates it)
       grab: i => { pHold[i] = 1; pIn[i] = 0; const o=i*3; pVel[o]=pVel[o+1]=pVel[o+2]=0; },
       release: (i, x, y, z, vx, vy, vz) => { if(gPlaneDim){ z = gTasoZ; vz = 0; }   // plane mode (owner 14.9.2026): a proton let go off the plane was culled by the plane switch and 'just disappeared' - it lands on the plane and stays there
         gValoProtons.place(i, x, y, z); const o=i*3; pVel[o]=vx; pVel[o+1]=vy; pVel[o+2]=vz; pHold[i] = 0; pIn[i] = 0; },
@@ -9074,7 +9079,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const d2=px*px+py*py+pz*pz-tca*tca; if(d2>r*r) return;
         const t=tca-Math.sqrt(r*r-d2); if(t>0 && t<bestT){ bestT=t; best={ax,ay,az,e}; src=s; } };
       const centre = (c,v,i,base) => {
-        if(!drawnPos(sideOfC(c), c, v, i, T, _p)){ _p[0]=_p[1]=_p[2]=1e9; return _p; }   // not drawn, so never hit (a copy outside the box or the cytosol, off the plane in the plane mode)
+        if(!drawnPos(sideOfC(c), c, v, i, T, _p, base+i)){ _p[0]=_p[1]=_p[2]=1e9; return _p; }   // not drawn, so never hit (a copy outside the box or the cytosol, off the plane in the plane mode)
         const md=(base+i)*4; _p[0]+=gMolDisp[md]; _p[1]+=gMolDisp[md+1]; _p[2]+=gMolDisp[md+2];
         repelShells(_p);
         if(gPlaneDim && gPsuLo && Math.abs(_p[2] - gTasoZ) > 2.0 && _p[0] >= gPsuLo.x && _p[0] <= gPsuHi.x && _p[1] >= gPsuLo.y && _p[1] <= gPsuHi.y && _p[2] >= gPsuLo.z && _p[2] <= gPsuHi.z){ _p[0]=_p[1]=_p[2]=1e9; }   // Hiukkastaso: culled by the shader (tasoDim), so never hovered or picked (owner 12.9.2026)
@@ -9334,7 +9339,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const T = gWaveT + Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed; live.T = T;
         let n=0;
         for(let i=0;i<F.n && n<CAP;i++){
-          if(!drawnPos(F.side, F.c, F.v, i, T, _lp)) continue;   // orbitals only where the atoms are drawn
+          if(!drawnPos(F.side, F.c, F.v, i, T, _lp, F.base+i)) continue;   // orbitals only where the atoms are drawn
           const px=_lp[0], py=_lp[1], pz=_lp[2]; const dx=px-cp.x, dy=py-cp.y, dz=pz-cp.z; if(dx*dx+dy*dy+dz*dz>R2) continue;
           const md=(F.base+i)*4;   // same mirror, same order: displacement first, then the shells
           _lp[0]=px+gMolDisp[md]; _lp[1]=py+gMolDisp[md+1]; _lp[2]=pz+gMolDisp[md+2];
@@ -13060,7 +13065,7 @@ void main(void){
       for(const m of scene.meshes){ if(m === bgQuad || !m.isVisible) continue; let mat = m.material; if(mat && mat.subMaterials) mat = mat.subMaterials[0]; if(!mat) continue;
         const shader = mat instanceof BABYLON.ShaderMaterial ? String(mat.shaderPath) : null;
         if(mat instanceof BABYLON.StandardMaterial || m instanceof BABYLON.LinesMesh || (shader && ISO_SHADERS.has(shader))){ m.isVisible = false; gIsoHidden.push(m); } } };
-    window.gIsoToggle = () => { if(gIsoModel >= 0) isoOff(); else isoOn(selModelOf()); }; window.__isoOn = isoOn; window.__isoOff = isoOff; window.__etcSel = gi => { showEtcSel(gi); return { sel: etcSel, model: selModelOf() }; };   // (dev)
+    window.gIsoToggle = () => { if(gIsoModel >= 0) isoOff(); else isoOn(selModelOf()); }; window.__isoOn = isoOn; window.__isoOff = isoOff; window.__etcSel = gi => { if(gi !== undefined) showEtcSel(gi); return { sel: etcSel, model: selModelOf(), atom: !!selAtom, rts: gSel.size, free: gSelFree.size }; };   // (dev)
     let gFLastTap = 0;
     window.addEventListener('keydown', e => { if(e.repeat || (e.key !== 'f' && e.key !== 'F') || (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) return;
       const now = performance.now(); if(now - gFLastTap < 400){ gFLastTap = 0; window.gIsoToggle(); return; } gFLastTap = now;   // a double tap: isolate the selection (or leave the isolation)
