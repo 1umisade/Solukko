@@ -14,7 +14,7 @@
   class Point { constructor(p, name){ this.alive = true; this._p = p; this.name = name || 'point'; this.radius = 12; this.parent_is_BindSites = false; }
     get global_position(){ return this._p.slice(); }
     when_body_enters_me(body){ const n = this.name;
-      if(n === 'target_1' || n === 'target_2'){ if(body.is_in_group('plastocyanin')) body.hard_target = null; }
+      if(n === 'target_1' || n === 'target_2'){ if(body.is_in_group('plastocyanin') || body.is_in_group('ferredoxin')) body.hard_target = null; }   // (target_2 is where NDH-1 sends a released ferredoxin: it was never let go of it - 14.9.2026)
       else if(n === 'target_3'){ if(body.is_in_group('proton')){ body.hard_target = null; body.soft_target = null; body.reachedTarget3 = true; } }
       else if(n === 'target_4'){ if(body.is_in_group('proton') || body.is_in_group('O')) body.soft_target = null; if(body.is_in_group('VDE')){ const p = V.pick_random(V.get_nodes_in_group('photosystem_II')); body.soft_target = p ? p.get_node('BindSites/VDE') : null; } }
       else if(n === 'target_5'){ if(body.is_in_group('ferredoxin')) body.hard_target = null; } } }
@@ -77,6 +77,9 @@
       const B = qm || (u.fx >= 0 ? [A[0], A[1] + 45*dirY, A[2]] : [mInfo[mi].cx, mInfo[mi].y0, mInfo[mi].cz]); const ab = [B[0]-A[0], B[1]-A[1], B[2]-A[2]], L2 = ab[0]*ab[0]+ab[1]*ab[1]+ab[2]*ab[2] || 1;
       const par = chls.map(g => { const c = cen(g), t = ((c[0]-A[0])*ab[0]+(c[1]-A[1])*ab[1]+(c[2]-A[2])*ab[2])/L2; const px=A[0]+ab[0]*t, py=A[1]+ab[1]*t, pz=A[2]+ab[2]*t; return { g, t, r: Math.hypot(c[0]-px, c[1]-py, c[2]-pz) }; }).filter(o => o.r < 10 && o.t > (qm ? 0.8 : 0.25)).sort((a, b) => b.t - a.t);
       u.p700 = par.slice(0, 2).map(o => o.g); const rest = par.slice(2).sort((a, b) => a.t - b.t); u.a0 = rest.length ? rest[0].g : -1; if(!u.p700.length) u.p700 = [nearest(chls, B)];
+      if(u.a0 < 0 && u.p700.length && u.fx >= 0){ const C = cen(u.p700[0]), ac = [C[0]-A[0], C[1]-A[1], C[2]-A[2]], l2 = ac[0]*ac[0]+ac[1]*ac[1]+ac[2]*ac[2] || 1; let best = -1, bestR = 14;   // A0 on the FX -> P700 line itself (the vertical axis missed it: the branch is tilted, 14.9.2026 - PSI stands right side up now and FX is FX)
+        for(const g of chls){ if(u.p700.includes(g)) continue; const c = cen(g), t = ((c[0]-A[0])*ac[0]+(c[1]-A[1])*ac[1]+(c[2]-A[2])*ac[2])/l2; if(t < 0.15 || t > 0.85) continue; const r = Math.hypot(c[0]-A[0]-ac[0]*t, c[1]-A[1]-ac[1]*t, c[2]-A[2]-ac[2]*t); if(r < bestR){ bestR = r; best = g; } }
+        u.a0 = best; }
       u.a1 = (u.a0 >= 0 && quins.length) ? nearest(quins, cen(u.a0)) : (quins.length ? quins[0] : -1); u.rc = new Set([...u.p700, u.a0].filter(g => g >= 0)); for(const g of chls) if(!u.rc.has(g)) u.ant.push(g);
       u.fdDir = [A[0]-B[0], A[1]-B[1], A[2]-B[2]]; psis.push(u); }
     const byLabel = re => { const out = []; for(let mi=0; mi<M.length; mi++) if(M[mi].cfg && !M[mi].shuttle && onSheet(mi) && re.test(labelOf(mi))) out.push(mi); return out; };
@@ -232,7 +235,7 @@
         F.setWorld(key, i, at[0], at[1], at[2]); const b = new MB(name, { position: at }); b.kin = { kind:'free', key, i }; return b; }
       if(['plastoquinone_B', 'plastocyanin', 'ferredoxin', 'VDE', 'zeaxanthin_epoxidase'].includes(name)){ const kin = slot && slot._dormant; if(!kin) return null; slot._dormant = null; kin.dormantAt = null;
         const b = new MB(name, { position: at, radius: hullR(kin.sh ? kin.sh.mi : kin.b.mi) }); b.kin = kin; b.mi = kin.sh ? kin.sh.mi : kin.b.mi; kin.body = b; kinOf.set(b, kin); b.src = slot.body_that_I_am_bound_to ? slot.body_that_I_am_bound_to.molecule_name : null; b.srcSlot = slot.name;   // where it comes from, and which slot: a quinone's SIDE (V.pqSide) - the PSII side of b6f or the NDH-1 side
-        if(kin.b){ const sp = V.Globals.get(name + '_speed') || 30; kin.b.vx = (Math.random()-0.5)*sp; kin.b.vy = (kin.side || 1)*sp*0.7; kin.b.vz = 0; } return b; }
+        if(kin.b){ kin.b.dockedAt = null; const sp = V.Globals.get(name + '_speed') || 30; kin.b.vx = (Math.random()-0.5)*sp; kin.b.vy = (kin.side || 1)*sp*0.7; kin.b.vz = 0; } return b; }   // (dockedAt cleared - it never was, so a released ferredoxin was skipped by the steering below and wandered with its bounce velocity for good; owner 14.9.2026: 'they dont target the FNR and just wander aimlessly')
       return null; };
     V.env.consumed = (b, BindSite) => { const kin = b.kin; if(!kin) return;
       if(kin.kind === 'sh' || kin.kind === 'bnc'){ BindSite._dormant = kin; kin.dormantAt = BindSite; kin.body = null; if(kin.b){ kin.b.vx = kin.b.vy = 0; kin.b.dockedAt = BindSite; } b.kin = null; }
@@ -359,7 +362,7 @@
             { const my = P.memY(x, get.gTasoZ()); if(y < my + hT + 14) y = my + hT + 14; }   /* (whatever the tries left: above the membrane - 5 of 100 started in the lumen) */ z = get.gTasoZ(); P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), sp*Math.sin(th), 0); }   // on the particle plane (14.9.2026: the plane mode is on inside the box), no drift off it
           P.homeFlush(); }
         for(const sl of V.all){ if(sl.alive && sl.parent_is_BindSites && sl._proton != null){ const q = sl.global_position; P.place(sl._proton, q[0], q[1], q[2]); } } } }   // a bound proton rides its slot
-      for(const b of V.all){ if(!b.alive || !b.kin) continue; for(const t of [b.hard_target, b.soft_target]){ if(t instanceof Point && b.distance_to(t) <= t.radius + b.body_radius) t.when_body_enters_me(b); } }   // the target areas fire
+      for(const b of V.all){ if(!b.alive || !b.kin) continue; for(const t of [b.hard_target, b.soft_target]){ if(!(t instanceof Point)) continue; let d = b.distance_to(t); if(b.kin.kind === 'bnc'){ const q = t.global_position, p = b._pos; d = Math.hypot(q[0]-p[0], q[1]-p[1]); } if(d <= t.radius + b.body_radius) t.when_body_enters_me(b); } }   // the target areas fire (a bouncer lives on the plane: its exit point is reached in x and y - NDH-1's target_2 sits 32 off the plane, 14.9.2026)
       for(const b of V.all.slice()){ if(!b.alive) continue;
         if(b.kin && b.kin.kind === 'static' && V.frame - b.born > 2){ b.queue_free(); continue; }   // a photon nobody took (the pigment was busy): gone as heat
         if(b.kin && b.kin.kind === 'proton' && b.reachedTarget3){ b.queue_free(); stats.hplus++; continue; }   // a proton at target_3 (the lumen under b6f): back into the simulated pool
@@ -368,7 +371,8 @@
         if(b.script._physics_process) b.script._physics_process(b, dt); if(!b.alive) continue;
         b._physics_process(dt); }
       // the bouncers steer (ferredoxin, VDE: to their targets; FNR / RuBisCO: home)
-      for(const [b, kin] of kinOf){ if(kin.kind !== 'bnc' || !kin.b) continue; const bb = kin.b; if(bb.dockedAt || (b.alive && !b.physics_processing)) continue;
+      for(const [b, kin] of kinOf){ if(kin.kind !== 'bnc' || !kin.b) continue; if(!b.alive && kin.body !== b && !kin.home){ kinOf.delete(b); continue; }   // (a superseded body: every re-instantiation added one)
+        const bb = kin.b; if(bb.dockedAt || (b.alive && !b.physics_processing)) continue;
         const t = b.alive ? carrierTarget(b) : null; const tp = t ? t.global_position : (kin.home && b.soft_target ? b.soft_target.global_position : null); if(!tp) continue;
         const mi = bb.mi, c = mInfo[mi], x = c.cx + gModelOff[mi*3], y = c.cy + gModelOff[mi*3+1]; let dx = tp[0]-x, dy = tp[1]-y, d = Math.hypot(dx, dy) || 1e-3; const sp = kin.home ? V.Globals.get(b.molecule_name + '_speed') || 8 : (b.speed || 30);
         if(kin.bestD == null || d < kin.bestD - 2){ kin.bestD = d; kin.stuckT = 0; } else kin.stuckT = (kin.stuckT || 0) + dt;   // no headway for 3 s (a shell in the way): detour sideways for a while

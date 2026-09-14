@@ -4,6 +4,7 @@ V.SCRIPTS['ferredoxin'] = {
   scene: { BindSites: ['electron'], place: 20, nearby: 60, radius: 16 },
   ferredoxin_goes_to_ndh: false,   // static var: FNR and NDH-1 in turn
   _ready(self){ },
+  _physics_process(self, delta){ self.retarget_t = (self.retarget_t || 0) + delta; if(self.retarget_t > 3 && self.body_that_I_am_bound_to == null){ self.retarget_t = 0; self.check_soft_target(); } },   // (every 3 s while free: a carrier always has a target - full it heads for FNR / NDH-1, empty for PSI; owner 14.9.2026)
   PULLING_special_actions(self, body){ },
   BINDING_special_conditions(self, body, BindSite){ return true; },
   BINDING_special_actions(self, BindSite){ },

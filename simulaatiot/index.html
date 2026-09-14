@@ -3423,7 +3423,7 @@ async function run(){
   const MODELS = [
     {match:'3jcu',   x:-560, y:0,    z:0,    rot:[54,-171,-180], label:'Photosystem II'},
     {match:'7r0w',   x:-221, y:8,    z:11,   rot:[-62,-38,102], label:'Cytochrome b6f'},
-    {match:'9e0j',   x:460,  y:0,    z:0,    rot:[-77,132,-130], label:'Photosystem I'},
+    {match:'9e0j',   x:460,  y:0,    z:0,    rot:[77,48,50], label:'Photosystem I'},   // (14.9.2026: the old [-77,132,-130] stood PSI on its head - its Fe-S clusters FX/FA/FB lay on the LUMEN side of its chlorophylls, so the ferredoxin dock, FNR's home and the electron hand-off were all in the lumen; this is the same pose turned 180 degrees about x)
     {match:'6l7o',   x:97,   y:35,   z:30,   rot:[51,-159,70],   label:'NDH-1'},
     {match:'6vm1',   x:760,  y:84,   z:0,    rot:[-69,102,33],   label:'ATP synthase'},
     {match:'1ag6',   x:-10,  y:-190, z:0,    label:'Plastocyanin'},
@@ -5527,6 +5527,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   let gMemHalfT = 0;                  // half-thickness of the lipid layer (0 = no membrane) - nothing free crosses it
   let gRotorTheta = 0, gRotorTarget = 0, gProtonPasses = 0;   // ATP synthase rotor: eased angle, target angle, protons passed
   let ROTOR_SLOT = -1, gAtpMid = -1, gAtpAxisX = 0, gAtpAxisZ = 0, gRotorHeadMid = 0;   // the rotor's own transform slot and the axis it turns about (rest frame)
+  const gRotorKey = new Set();   // rounded rest-frame position -> a rotor atom (by chain, see the rotor block); empty = the geometric rule
   let gDevPanelEl = null, gDevTopSet = false;   // the slider panel, and whether its top has been dropped below the camera readout yet
   let applyDevMode = () => {};   // real implementation installed once deselectModel + labels exist
   { const devBtn = document.getElementById('dev-btn');
@@ -5947,6 +5948,26 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       gRotorHeadMid = yMin + (yMax-yMin)*0.55;
       let sx=0, sz=0, n=0; for(let k=0;k<m.na;k++){ if(m.y[k]+m.oy < gRotorHeadMid) continue; sx += m.x[k]+m.ox; sz += m.z[k]+m.oz; n++; }
       gAtpAxisX = n ? sx/n : mInfo[ai].cx; gAtpAxisZ = n ? sz/n : mInfo[ai].cz;
+      /* BY CHAIN (owner 14.9.2026: 'the rotor is not properly recognised, only a part of the rotor is spinning' - the geometric split above
+         missed the c-ring's outer atoms and the stalk's wider parts, and took the head's centroid for the axis, which the peripheral stalk
+         pulls sideways): the mol2's SUBSTRUCTURE table names every residue's chain. The c-ring is the family of 8+ chains of one identical
+         size (6vm1: M-Z, 14 x 601 atoms); the axis runs from the ring's centre to the head's (the six largest chains, alpha3 beta3); the
+         rotor is the ring plus every chain whose centroid lies within 20 of that axis BETWEEN the ring and the head (gamma at 2, epsilon
+         at 17 - delta sits on top of the head, subunit a 41 off the axis, b/b' 50+). Membership is by atom position, like the LHCs. */
+      if(m.subCh && m.sid){ const ch = new Map();
+        for(let k=0;k<m.na;k++){ const c = m.subCh.get(m.sid[k]); if(c === undefined) continue; let e = ch.get(c); if(!e){ e = { atoms:[], sx:0, sy:0, sz:0 }; ch.set(c, e); } e.atoms.push(k); e.sx += m.x[k]+m.ox; e.sy += m.y[k]+m.oy; e.sz += m.z[k]+m.oz; }
+        const L = [...ch.values()].map(e => ({ e, n: e.atoms.length, cx: e.sx/e.atoms.length, cy: e.sy/e.atoms.length, cz: e.sz/e.atoms.length }));
+        const fam = new Map(); for(const c of L){ const q = Math.round(c.n/10); fam.set(q, (fam.get(q) || 0) + 1); }
+        let ringQ = -1, ringN = 0; for(const [q, cnt] of fam) if(cnt >= 8 && cnt > ringN){ ringN = cnt; ringQ = q; }
+        const ring = ringQ >= 0 ? L.filter(c => Math.round(c.n/10) === ringQ) : [], head = L.slice().sort((a, b) => b.n - a.n).slice(0, 6);
+        if(ring.length && head.length === 6){ const cen = A => { let x=0,y=0,z=0,n=0; for(const c of A){ x += c.cx*c.n; y += c.cy*c.n; z += c.cz*c.n; n += c.n; } return [x/n, y/n, z/n]; };
+          const R0 = cen(ring), H0 = cen(head); let ax = H0[0]-R0[0], ay = H0[1]-R0[1], az = H0[2]-R0[2]; const al = Math.hypot(ax, ay, az) || 1; ax /= al; ay /= al; az /= al;
+          const rotor = new Set(ring);
+          for(const c of L){ if(rotor.has(c)) continue; const vx = c.cx-R0[0], vy = c.cy-R0[1], vz = c.cz-R0[2], t = vx*ax + vy*ay + vz*az; if(t <= 0 || t >= al) continue;
+            const off = Math.hypot(vx - t*ax, vy - t*ay, vz - t*az); if(off < 20) rotor.add(c); }
+          gRotorKey.clear(); for(const c of rotor) for(const k of c.e.atoms) gRotorKey.add(lhcKf(Math.fround(m.x[k] + m.ox), Math.fround(m.y[k] + m.oy), Math.fround(m.z[k] + m.oz)));
+          gAtpAxisX = R0[0]; gAtpAxisZ = R0[2];   // the axis through the c-ring's own centre - the proton channel and the turn are about it
+          console.log('ATP synthase rotor: ' + ring.length + ' c-subunits + ' + (rotor.size - ring.length) + ' stalk chains, ' + gRotorKey.size + ' atoms, axis ' + gAtpAxisX.toFixed(1) + ', ' + gAtpAxisZ.toFixed(1)); } }
       gModelCol[ROTOR_SLOT*3]=gModelCol[ai*3]; gModelCol[ROTOR_SLOT*3+1]=gModelCol[ai*3+1]; gModelCol[ROTOR_SLOT*3+2]=gModelCol[ai*3+2];
       gMemBound[ROTOR_SLOT] = true; } }
   /* ── the photosystems' light-harvesting antennae ── the same device as the rotor: each LHC of PSII gets its own transform slot and
@@ -5961,7 +5982,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const AA_RES = new Set('ALA ARG ASN ASP CYS GLN GLU GLY HIS ILE LEU LYS MET PHE PRO SER THR TRP TYR VAL MSE'.split(' '));
   const gLhc = [];   // per photosystem: { mi, pieces:[{slot, cx, cz}] }
   const gLhcKey = new Map();   // rounded world position -> slot (an LHC atom) - looked up by mdlBuf
-  const lhcK = (x, y, z) => (Math.round(x) + 4096) * 16777216 + (Math.round(y) + 4096) * 8192 + (Math.round(z) + 4096);
+  const lhcK = (x, y, z) => (Math.round(x) + 4096) * 16777216 + (Math.round(y) + 4096) * 8192 + (Math.round(z) + 4096);   // (a function declaration below hoists the same key for the rotor block above)
+  function lhcKf(x, y, z){ return (Math.round(x) + 4096) * 16777216 + (Math.round(y) + 4096) * 8192 + (Math.round(z) + 4096); }
   { let slotNext = mols.length + 2;   // mols.length is the rotor's slot, +1 the DNA links'
     for(const code of ['3jcu', '9e0j']){ const mi = mols.findIndex(m => m.cfg && m.cfg.match === code); if(mi < 0) continue; const m = mols[mi]; if(!m.subCh || !m.sid) continue;
       const ch = new Map();   // chain -> { aa, chl, atoms:[], sx, sz, n }
@@ -5989,6 +6011,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           _lm.multiplyToRef(_la, _lm); _lm.copyToArray(gModelXform, sl*16); } } }); }
   const inRotor = (x,y,z) => { if(ROTOR_SLOT < 0) return false; const mi = mInfo[gAtpMid];
     if(x<mi.x0 || x>mi.x1 || y<mi.y0 || y>mi.y1 || z<mi.z0 || z>mi.z1) return false;
+    if(gRotorKey.size) return gRotorKey.has(lhcKf(x, y, z));   // by chain (c-ring, gamma, epsilon)
     const r2 = (x-gAtpAxisX)*(x-gAtpAxisX) + (z-gAtpAxisZ)*(z-gAtpAxisZ);
     return (y < MEMBRANE_Y + 30 && r2 < 34*34) || (y < gRotorHeadMid && r2 < 13*13); };
   const mdlBuf = mm => { const n=mm.length/16, a=new Float32Array(n);
@@ -7872,7 +7895,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         for(let k=0;k<N;k++) if(!vis[k]) g[k] = 1;
       }
     };
-    let memWalkSig = '', memWalkSkip = false;   // (the membrane walk's last inputs, see the observer)
+    let memWalkSig = '', memWalkSkip = false, memWalkSettle = false;   // (the membrane walk's last inputs, see the observer; settle: one more walk once the inputs stop changing)
     const xformSig = () => { let t = 0;   // hull models only, quantised to 0.01 - anything else changing must not rebuild the grid
       for(const h of gHulls){ if(!gMemBound[h.mi] || mols[h.mi].shuttle) continue; const o = h.mi*16; for(let i=0;i<16;i++) t += Math.round(gModelXform[o+i]*100)*(1 + i*0.37); } return t; };
     window.__foot = () => ({ footW, footH, footX0, footZ0, cell: FOOT_CELL, grid: footUp, sig: footSig, lipH: LIP_H, memFoot:[gMemFootX, gMemFootZ], cen:[bilayerCen.x, bilayerCen.y, bilayerCen.z], hulls: gHulls.map(h=>({mi:h.mi, c:[h.c.x,h.c.y,h.c.z], maxR:h.maxR})) });   // dev: inspect the footprint from the console
@@ -7882,8 +7905,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const cp = cam.position;
       /* perf (14.9.2026): the walk placed the same lipids again every frame (4.9 ms) - nothing in it changes unless the camera, a model, the
          LoD or the mode did. It runs only when its inputs changed, and while they keep changing (a drag) every other frame at most */
-      { const vm = cam.getViewMatrix().m, sig = vm[0].toFixed(4)+vm[1].toFixed(4)+vm[2].toFixed(4)+vm[4].toFixed(4)+vm[5].toFixed(4)+vm[6].toFixed(4)+vm[12].toFixed(1)+vm[13].toFixed(1)+vm[14].toFixed(1)+'|'+xformSig()+'|'+gGfxMode+'|'+gCrisp+'|'+gSlabLod+'|'+gMemBlend+'|'+gOrbBudget.toFixed(0)+'|'+gViewBox+'|'+gPlaneDim+'|'+gIsoModel+'|'+gXsec+'|'+gMembrane+'|'+gMemCut+'|'+(gCut[2] > 0.5)+'|'+gCut[1];
-        if(sig === memWalkSig) return; if(memWalkSkip){ memWalkSkip = false; return; } memWalkSkip = true; memWalkSig = sig; }
+      { const vm = cam.getViewMatrix().m, sig = vm[0].toFixed(4)+vm[1].toFixed(4)+vm[2].toFixed(4)+vm[4].toFixed(4)+vm[5].toFixed(4)+vm[6].toFixed(4)+vm[12].toFixed(1)+vm[13].toFixed(1)+vm[14].toFixed(1)+'|'+xformSig()+'|'+gGfxMode+'|'+gCrisp+'|'+gSlabLod+'|'+gMemBlend+'|'+gOrbBudget.toFixed(0)+'|'+gViewBox+'|'+gPlaneDim+'|'+gIsoModel+'|'+gXsec+'|'+gMembrane+'|'+gMemCut+'|'+(gCut[2] > 0.5)+'|'+gCut[1]
+          +'|'+gMega+'|'+engine.getRenderWidth()+'x'+engine.getRenderHeight()+'|'+(gPsuLo ? gPsuLo.x.toFixed(0)+','+gPsuLo.y.toFixed(0)+','+gPsuHi.x.toFixed(0)+','+gPsuHi.y.toFixed(0)+','+gPsuHi.z.toFixed(0) : '');   // (the megahalpa slider, the viewport - the frustum - and the box were missing from the inputs: a change in them left the walk stale until the camera moved, 14.9.2026)
+        /* SETTLE (owner 14.9.2026: 'the membrane is not fully rendered each time - when I zoom a little back and forth it renders fully'): while the inputs
+           keep changing the walk runs every other frame, so the last moving frame can go unwalked and the frame it did walk used the frustum of
+           the frame before. Once the inputs stop changing the walk runs ONE more time, with everything settled. */
+        if(sig === memWalkSig){ if(!memWalkSettle) return; memWalkSettle = false; }
+        else { if(memWalkSkip){ memWalkSkip = false; return; } memWalkSkip = true; memWalkSig = sig; memWalkSettle = true; } }
       if(!gMembrane || !(gMemSpanX > 0)){
         if(gSphLive){ gSphLive=false; for(const E of sphTpl){ if(!E) continue; E.nn=E.nf=E.nc=0; E.near.setEnabled(false); E.far.setEnabled(false); E.coarse.setEnabled(false); } }
         if(gOrbLive){ gOrbLive=false; for(let T=0;T<NTPL;T++){ const E=orbTpl[T]; if(!E) continue; E.n=0; E.core.setEnabled(false); E.bond.setEnabled(false); } }
@@ -8933,7 +8961,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(z<pbLz){ z=pbLz; pVel[o+2]=Math.abs(pVel[o+2]); } else if(z>pbHz){ z=pbHz; pVel[o+2]=-Math.abs(pVel[o+2]); }
         const my = memSurfY(x, z), top = my + hT, bot = my - hT;   // the wall is the membrane under this proton (the cap's surface in the cell)
         if(chOn && SOLU && y < bot && !pIn[i]){   // a lumen proton drifts toward ATP synthase's channel (the 2D level's proton.gd: a proton under the membrane heads for ATP synthase), so the pumping does not empty the stroma for good
-          pVel[o] += (axX - x)*0.04*dt; pVel[o+2] += (axZ - z)*0.04*dt; pVel[o+1] += (bot - y)*0.04*dt;
+          pVel[o] += (axX - x)*0.02*dt + (Math.random()-0.5)*160*dt; pVel[o+2] += (axZ - z)*0.02*dt + (Math.random()-0.5)*160*dt; pVel[o+1] += (bot - y)*0.02*dt + (Math.random()-0.5)*160*dt;   // half the pull, and a random kick every frame: they wander on the way instead of streaming straight in (owner 14.9.2026: 'the protons are going to ATP synthase too directly')
           const sp = Math.hypot(pVel[o], pVel[o+1], pVel[o+2]); if(sp > 45){ const k = 45/sp; pVel[o]*=k; pVel[o+1]*=k; pVel[o+2]*=k; } }
         let inCh = false;
         if(chOn){ const dxa=x-axX, dza=z-axZ; inCh = dxa*dxa+dza*dza < CH_R*CH_R; }
@@ -10451,8 +10479,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(x<lo.x+R){ x=lo.x+R; b.vx=Math.abs(b.vx); } else if(x>hi.x-R){ x=hi.x-R; b.vx=-Math.abs(b.vx); }
         if(y<lo.y+R){ y=lo.y+R; b.vy=Math.abs(b.vy); } else if(y>hi.y-R){ y=hi.y-R; b.vy=-Math.abs(b.vy); }
         if(z<lo.z+R){ z=lo.z+R; b.vz=Math.abs(b.vz); } else if(z>hi.z-R){ z=hi.z-R; b.vz=-Math.abs(b.vz); }
-        if(hT > 0 && !(_car && _car.pulled(b.kin))){ const my = memSurfY(x, z), top=my+hT+R, bot=my-hT-R;   // (a HOMING carrier - FNR, RuBisCO - obeys the wall too: it was exempt and FNR ended up in the lumen, owner 14.9.2026)
-          if(b.stromal && y < top){ y = top; b.vy = Math.abs(b.vy); }   // a stromal protein (FNR, ferredoxin, RuBisCO) is always above the membrane - a shell push can throw it across the band in one step, past the wall   // the wall is the membrane UNDER the protein - the cap's surface, not the flat plane (13.9.2026, owner: 'why is ferredoxin floating through the membrane': PSI's stromal dock sits under the flat plane since the pole moved)   // the lipid layer is a wall - except for a carrier PULLED to a dock or a protein steered home (the 2D in-transit layer; PSI's stromal face, and the FNR sink on it, lie under the layer in this sheet)
+        if(hT > 0){ const my = memSurfY(x, z), top=my+hT+R, bot=my-hT-R; const pulledNow = !!(_car && _car.pulled(b.kin));   // (the stromal floor holds even while pulled to a dock - the straight line to a far dock on the curved cap dips under the membrane, owner 14.9.2026: 'the ferredoxins sometimes go through the membrane')   // (a HOMING carrier - FNR, RuBisCO - obeys the wall too: it was exempt and FNR ended up in the lumen, owner 14.9.2026)
+          if(b.stromal && y < top){ y = top; b.vy = Math.abs(b.vy); }   // a stromal protein (FNR, ferredoxin, RuBisCO) is always above the membrane
+            else if(pulledNow){ }   // a pulled carrier (a lumen one) may cross into its dock   // (stromal: a shell push can throw it across the band in one step, past the wall)   // the wall is the membrane UNDER the protein - the cap's surface, not the flat plane (13.9.2026, owner: 'why is ferredoxin floating through the membrane': PSI's stromal dock sits under the flat plane since the pole moved)   // the lipid layer is a wall - except for a carrier PULLED to a dock or a protein steered home (the 2D in-transit layer; PSI's stromal face, and the FNR sink on it, lie under the layer in this sheet)
             else if(y < top && y > bot){ if(y >= my){ y=top; b.vy=Math.abs(b.vy); } else { y=bot; b.vy=-Math.abs(b.vy); } } }
         const _hostMi = _car ? _car.hostMi(b.kin) : -1;   // pulled to a dock, it may enter its host's shell (the dock can sit inside it: a ferredoxin sits on FB)
         for(let sI=0;sI<gHulls.length;sI++){ const h=gHulls[sI]; if(h.mi===mi || h.mi===_hostMi) continue;   // membrane proteins and the other bouncers alike
