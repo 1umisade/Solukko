@@ -120,7 +120,7 @@
       rec.monomers.forEach((u, k) => { const L = 'b' + m + '.' + k, sfx = k ? '2' : '';
         placeSlot(rec.b6f, 'plastoquinone_B_LUMENAL' + sfx, mi, u.qoSite, L);
         placeSlot(rec.b6f, 'plastoquinone_B_STROMAL' + sfx, mi, u.qiSite, L + '.lo');
-        { const f = cen(u.f); placeSlot(rec.b6f, 'plastocyanin' + sfx, mi, [f[0], f[1] - 34, f[2]], L + '.hi'); }   // the dock 34 under heme f (the shell march landed 200 units off; the mover lets a carrier into the complex it heads for)
+        { const f = cen(u.f); placeSlot(rec.b6f, 'plastocyanin' + sfx, mi, [f[0], f[1] - 26, f[2]], L + '.hi'); }   // the dock 26 under heme f (was 34, owner 14.9.2026: 'they dont seem attached'; the mover lets a carrier into the complex it heads for)
         u.rieskeM = cof(u.rieske, 'iron_sulfur_cluster_inside_cytochrome_b6f', { lane: L + '.hi', place: 2 }); u.fM = cof(u.f, 'heme', { lane: L + '.hi', place: 3, nearby: 80 });   // heme f reaches the plastocyanin dock under the complex
         u.bLM = cof(u.bL, 'heme', { lane: L + '.lo', place: 2 }); u.bHM = cof(u.bH, 'heme', { lane: L + '.lo', place: 3 }); u.cnM = cof(u.cn, 'heme', { lane: L + '.lo', place: 4 });
         { const f = cen(u.f); point(rec.b6f, 'target_' + (k + 1), mi, [f[0], f[1] - 34 - 45, f[2]]); } });   // target_1 / target_2: where a released plastocyanin heads - under its dock, outside the hull (inside it the shell walled it off)

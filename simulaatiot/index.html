@@ -1257,6 +1257,9 @@ uniform float outlineK;    // dev slider 'proteiinin atomireuna': the protein at
 #if defined(MACRON) || defined(WATERBOX) || defined(LIPTPL)
 varying vec4 vMacroN;
 #endif
+#if defined(MACRON) || defined(LIPTPL) || (defined(WATERBOX) && defined(PLIGHT))
+#define INKRIM
+#endif
 float keyLight(vec3 nW){ if(dot(keyDir, keyDir) < 0.5) return 1.0;
   return keyFloor + (1.0 - keyFloor) * pow(max(dot(normalize(nW), keyDir), 0.0), 1.1); }   // the shadow side drops to keyFloor (0.5 by default, was 0.6) - with the MACRO normals below the light reads as a shape, so it can afford to be firm
 /* MACRO LIGHTING (12.9.2026). Lighting each atom's own little sphere makes a molecule of a hundred thousand of them look
@@ -1360,8 +1363,8 @@ void main(void){
   float rimKF = smoothstep(2.0, 30.0, pxRF);
   float rimStartF = 1.0 - 0.14 * mix(0.35, 1.0, rimKF);
   float rimF = smoothstep(rimStartF, 1.0, r2) * mix(0.3, 1.0, rimKF);
-#ifdef MACRON
-  /* protein atoms (owner 13.9.2026: 'add the very dark outlines to the vdW spheres on proteins'): the ink band is never thinner
+#ifdef INKRIM
+  /* protein atoms (owner 13.9.2026: 'add the very dark outlines to the vdW spheres on proteins') - and since 14.9.2026 the lipids' and the free molecules' (INKRIM): the ink band is never thinner
      than a pixel (rimStart in r-squared = 1 - 2b/pxR for a band of b pixels), capped at a third of the radius on tiny discs, and
      it keeps at least 65 percent of its strength however small the atom is - the hairline fade-out was what made them vanish */
   rimStartF = max(0.6, min(rimStartF, 1.0 - 2.2 / max(pxRF, 1.0)));
@@ -1372,8 +1375,12 @@ void main(void){
     float shimF = 0.5 + 0.5*sin(uT*2.3 + vWCen.x*0.14 + vWCen.y*0.10 + vWCen.z*0.12);
     colF += vec3(0.10, 0.24, 0.55) * fresF * (0.34 + 0.5*shimF);
   }
-#if defined(MACRON) || (defined(WATERBOX) && defined(PLIGHT))
-  colF = mix(colF, vColor * outlineK, rimF);   // the protein atoms' very dark rim (dev slider) - and the free molecules' (owner 14.9.2026: 'the molecules dont have those crisp black outlines on vdW as the proteins')
+#ifdef INKRIM
+#ifdef WATERBOX
+  colF = mix(colF, vColor * mix(1.0, outlineK, rimKF), rimF);   // a free molecule far away: the rim takes the atom's OWN colour as the disc shrinks, so water reads as blue dots, not black specks (owner 14.9.2026)
+#else
+  colF = mix(colF, vColor * outlineK, rimF);
+#endif   // the protein atoms' very dark rim (dev slider) - and the free molecules' (owner 14.9.2026: 'the molecules dont have those crisp black outlines on vdW as the proteins')
 #else
   colF = mix(colF, vColor * 0.40, rimF);
 #endif
@@ -1502,10 +1509,10 @@ void main(void){
   float pxR = 2.0 / max(fwidth(vUV.x) + fwidth(vUV.y), 1e-5);
   float rimK = smoothstep(2.0, 30.0, pxR);
   rimStart = 1.0 - (1.0 - rimStart) * mix(0.35, 1.0, rimK);
-#ifdef MACRON
+#ifdef INKRIM
   if(isShell < 0.5 || reveal < 0.5) rimStart = max(0.6, min(rimStart, 1.0 - 2.2 / max(pxR, 1.0)));   // protein atoms: at least a pixel of ink (see the far path) - not on a revealed glass shell, whose rim stays thin so the orbitals show
 #endif
-#ifdef MACRON
+#ifdef INKRIM
   float rim = smoothstep(rimStart - min(aa, 0.008), 1.0, r2) * mix((isShell < 0.5 || reveal < 0.5) ? 0.65 : 0.3, 1.0, rimK);
 #else
   float rim = smoothstep(rimStart - min(aa, 0.008), 1.0, r2) * mix(0.3, 1.0, rimK);
@@ -1528,14 +1535,14 @@ void main(void){
     col = mix(col, vec3(0.03), rim);                       // cofactors → a BLACK outline that traces the molecule shape (each atom outlined, interior rims occluded by the atoms in front → the eye reads the outer contour)
 #else
  #ifdef COFHIDE
-  #ifdef MACRON
+  #ifdef INKRIM
     col = mix(col, (cofClear > 0.5) ? vec3(cofOutCol) : vColor * outlineK, rim);   // a see-through atom's outline uses the dev colour, otherwise the protein atom's very dark rim (owner 13.9.2026: the 40 percent shade vanished under the new lighting)
   #else
     col = mix(col, (cofClear > 0.5) ? vec3(cofOutCol) : vColor * 0.40, rim);   // a see-through atom's outline uses the dev colour, otherwise the atom's own 40% shade
   #endif
  #else
-  #if defined(WATERBOX) && defined(PLIGHT)
-    col = mix(col, vColor * outlineK, rim);                // a free molecule's atoms get the protein atoms' ink rim (owner 14.9.2026)
+  #ifdef INKRIM
+    col = mix(col, vColor * mix(1.0, outlineK, rimK), rim);   // a free molecule's atoms get the protein atoms' ink rim - fading to the atom's own colour on tiny discs, so far water is blue dots (owner 14.9.2026)
   #else
     col = mix(col, vColor * 0.40, rim);                    // rim → a FIXED 40% shade of the atom's own UNLIT colour → same darkness whichever way the sphere faces the light (was col *= mix(1.0,0.40,rim), whose 40%-of-LIT-colour went near-black on shadowed edges → the inconsistent thick-black outlines)
   #endif
@@ -10324,6 +10331,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
                   if(tl < 1e-3){ tx=Math.random()-0.5; ty=sh.pq ? 0 : Math.random()-0.5; tz=Math.random()-0.5; const t2=tx*nx+ty*ny+tz*nz; tx-=t2*nx; ty-=t2*ny; tz-=t2*nz; tl=Math.hypot(tx,ty,tz)||1; }
                   hx=tx/tl; hy=ty/tl; hz=tz/tl; } } }
             sh.onShell = onShell;
+            /* no two carriers in one place (owner 14.9.2026: 'two PCs in each binding site - dont allow overlap'): the ones waiting for an occupied dock
+               piled up exactly on the docked one. A moving carrier is pushed clear of every other carrier's sphere - a docked (pinned) one is a wall */
+            for(const o of gShuttles){ if(o === sh) continue; const ox = o.cur[0], oy = o.cur[1], oz = o.cur[2]; const ex = x-ox, ey = y-oy, ez = z-oz, dd = Math.hypot(ex,ey,ez), minD = sh.R + o.R + 2;
+              if(dd >= minD) continue; if(dd < 1e-3){ x += minD; continue; } const k = minD/dd; x = ox + ex*k; if(!sh.pq) y = oy + ey*k; z = oz + ez*k;
+              const hn = (hx*ex + hy*ey + hz*ez)/dd; if(hn < 0){ hx -= hn*ex/dd; hy -= hn*ey/dd; hz -= hn*ez/dd; if(sh.pq) hy = 0; } }
             sh.h[0]=hx; sh.h[1]=hy; sh.h[2]=hz; sh.cur[0]=x; sh.cur[1]=y; sh.cur[2]=z;
             if(!sh.pq){ _q.set(gModelQuat[sh.mi*4], gModelQuat[sh.mi*4+1], gModelQuat[sh.mi*4+2], gModelQuat[sh.mi*4+3]);   // a protein tumbles a little as it goes
               BABYLON.Quaternion.RotationAxisToRef(_axv, 0.25*dt, _dq); _dq.multiplyToRef(_q, _q); _q.normalize();
@@ -12831,7 +12843,7 @@ void main(void){
       const onScreen = (p.z >= 0.0 && p.z <= 1.0);   // electron behind the camera → push the spotlight off-screen (all dark)
       eff.setFloat2('elecUV', onScreen ? p.x / w : -10.0, onScreen ? 1.0 - p.y / h : -10.0);
       let n = 0;   // the light-reaction electrons (gValoElecs, published by the VALOREAKTIOT block): one spotlight each
-      if(window.gValoElecs){ const tm = scene.getTransformMatrix();
+      if(window.gValoElecs && gIsoModel < 0){ const tm = scene.getTransformMatrix();   // (no glows in the isolate view - double-tap F)
         for(const e of window.gValoElecs){ if(!e.on || n >= 64) continue; const q = BABYLON.Vector3.Project(new BABYLON.Vector3(e.x, e.y, e.z), BABYLON.Matrix.Identity(), tm, _lvp);
           if(q.z < 0.0 || q.z > 1.0) continue;
           /* the pool's size is a WORLD size (owner 13.9.2026: 'the glow should scale with the simulation'): about 7 units round an electron or a proton,
