@@ -702,6 +702,16 @@ function markTyrZ(m){
   for(let k=0;k<m.na;k++) if(m.tyr[k] && hit.has(m.sid[k])) m.cof[k] = ETC_TYRZ;
 }
 
+/* Drop every atom of the given cofactor types (ETC_RES codes) from a parsed model, in place: the per-atom arrays are compacted and the
+   bonds remapped (a bond touching a dropped atom goes too). Used on cyt b6f (owner 14.9.2026). */
+function dropCofTypes(m, types){
+  const drop = new Set(types); const keep = []; for(let k=0;k<m.na;k++) if(!drop.has(m.cof[k])) keep.push(k);
+  if(keep.length === m.na) return; const map = new Int32Array(m.na).fill(-1); keep.forEach((k, i) => { map[k] = i; });
+  for(const f of ['x','y','z','el','cat','cof','sid','tyr','lip']){ const a = m[f]; if(!a) continue; const b = new a.constructor(keep.length); for(let i=0;i<keep.length;i++) b[i] = a[keep[i]]; m[f] = b; }
+  const b1=[], b2=[], bo=[]; for(let k=0;k<m.nb;k++){ const a = map[m.b1[k]], b = map[m.b2[k]]; if(a >= 0 && b >= 0){ b1.push(a); b2.push(b); bo.push(m.bo[k]); } }
+  m.na = keep.length; m.ai = m.na; m.nb = b1.length; m.bi = m.nb; m.b1 = Int32Array.from(b1); m.b2 = Int32Array.from(b2); m.bo = Uint8Array.from(bo);
+}
+
 /* Pull one complete chlorophyll (CLA/CHL/PHO residue) out of the model as its own molecule. */
 function extractChlorophyll(m){
   if(!m.sid) return null;
@@ -3399,6 +3409,7 @@ async function run(){
         if(!cfg){ console.log('unmatched molecule "'+m.name+'" in '+fn+' (skipped)'); continue; }
         cfg._used = true; cfg.file = fn; m.cfg = cfg; m.name = cfg.label;
         markTyrZ(m);                                   // tag the OEC-adjacent tyrosine as Tyr Z (needs raw, pre-transform coords)
+        if(cfg.match === '7r0w') dropCofTypes(m, [3, 7, 8]);   // cyt b6f without its bound quinones, chlorophyll and carotenoids (owner 14.9.2026: 'remove quinones and carotenoids from cytb6f - and chl too')
         mols.push(m); }
     }catch(err){ console.warn('failed to load', fn, err); }
     await yield_();
@@ -4368,7 +4379,7 @@ void main(void){
     'STN7':['STN7'], 'PPH1':['PPH1','TAP38'], 'Zeaxanthin epoxidase':['ZEP','ABA1'] };
   // The protein's bound cofactors, as ETC type indices (→ ETC_NAMES / ETC_COL).
   const PROTEIN_COF = {
-    'Photosystem II':[7,2,3,1,9,8,4], 'Cytochrome b6f':[4,5,7], 'Photosystem I':[7,5,8,3],
+    'Photosystem II':[7,2,3,1,9,8,4], 'Cytochrome b6f':[4,5], 'Photosystem I':[7,5,8,3],
     'NDH-1':[5], 'Plastocyanin':[6], 'Ferredoxin':[5] };
   const cofColCss = t => { const c = (typeof ETC_COL!=='undefined' && ETC_COL[t]) || [0.7,0.7,0.7]; return 'rgb('+Math.round(c[0]*255)+','+Math.round(c[1]*255)+','+Math.round(c[2]*255)+')'; };
   // Which substrate name maps to which atom source (a spawn-molecule template, a cofactor type, or a model).
@@ -12422,9 +12433,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const sync = () => { let any=false; for(const el of cards){ const d=el.style.display; if(d && d!=='none'){ any=true; break; } } gInfoRight.style.display = any ? 'flex' : 'none';
       if(!any) return;
       // Taller than the room above the console → slide it down over the console so the whole card shows.
-      requestAnimationFrame(() => { const room = window.innerHeight*0.75 - 28;
-        gInfoRight.style.bottom = (gInfoRight.scrollHeight > room) ? '12px' : 'calc(25vh + 16px)'; }); };
-    const mo = new MutationObserver(sync); for(const el of cards) mo.observe(el, {attributes:true, attributeFilter:['style']}); sync(); }
+      requestAnimationFrame(() => { const room = window.innerHeight*0.75 - 28, tall = gInfoRight.scrollHeight > room;
+        gInfoRight.style.bottom = tall ? '12px' : 'calc(25vh + 16px)';
+        gInfoRight.style.maxHeight = tall ? 'calc(100vh - 24px)' : room + 'px'; }); };   // the cap follows the offset: with the cap at 100vh over a 25vh offset the top ran off the screen (owner 14.9.2026: 'the info card is too high and gets cut off from the top'); a taller card scrolls inside
+    const mo = new MutationObserver(sync); for(const el of cards) mo.observe(el, {attributes:true, attributeFilter:['style'], childList:true, subtree:true}); window.addEventListener('resize', sync); sync(); }   // (content changes too: a taller protein card replacing a shorter one used to keep the old offset)
 
   // 3D image: the cofactor's atoms as vdW spheres, centred at the origin, drawn by the preview camera.
   const cofPrevMat = new BABYLON.ShaderMaterial('cofPrevMat', scene, 'imp', {

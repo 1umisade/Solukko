@@ -294,6 +294,16 @@ function markTyrZ(m){
   for(let k=0;k<m.na;k++) if(m.tyr[k] && hit.has(m.sid[k])) m.cof[k] = ETC_TYRZ;
 }
 
+/* Drop every atom of the given cofactor types (ETC_RES codes) from a parsed model, in place: the per-atom arrays are compacted and the
+   bonds remapped (a bond touching a dropped atom goes too). Used on cyt b6f (owner 14.9.2026). */
+function dropCofTypes(m, types){
+  const drop = new Set(types); const keep = []; for(let k=0;k<m.na;k++) if(!drop.has(m.cof[k])) keep.push(k);
+  if(keep.length === m.na) return; const map = new Int32Array(m.na).fill(-1); keep.forEach((k, i) => { map[k] = i; });
+  for(const f of ['x','y','z','el','cat','cof','sid','tyr','lip']){ const a = m[f]; if(!a) continue; const b = new a.constructor(keep.length); for(let i=0;i<keep.length;i++) b[i] = a[keep[i]]; m[f] = b; }
+  const b1=[], b2=[], bo=[]; for(let k=0;k<m.nb;k++){ const a = map[m.b1[k]], b = map[m.b2[k]]; if(a >= 0 && b >= 0){ b1.push(a); b2.push(b); bo.push(m.bo[k]); } }
+  m.na = keep.length; m.ai = m.na; m.nb = b1.length; m.bi = m.nb; m.b1 = Int32Array.from(b1); m.b2 = Int32Array.from(b2); m.bo = Uint8Array.from(bo);
+}
+
 /* Pull one complete chlorophyll (CLA/CHL/PHO residue) out of the model as its own molecule. */
 function extractChlorophyll(m){
   if(!m.sid) return null;
