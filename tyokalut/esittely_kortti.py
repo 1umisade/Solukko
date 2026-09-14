@@ -17,8 +17,7 @@ ESITTELYT = {   # kurssipakan nimen loppu -> kansiteksti (yksi kappale, kokonais
         'Kemia yhdistää atomien ja molekyylien rakenteen aineen havaittaviin ominaisuuksiin: mistä aine koostuu, '
         'miksi se käyttäytyy niin kuin käyttäytyy ja miten se muuttuu. Kurssilla opitaan kemian työtapa havainnosta '
         'hypoteesin kautta testattavaan malliin, tutustutaan kemian historian käännekohtiin ja yhdisteiden nimeämisen '
-        'sääntöihin sekä perehdytään atomin rakenteeseen, jaksolliseen järjestelmään ja kvanttimekaaniseen atomimalliin. '
-        'Lopuksi opitaan tunnistamaan funktionaaliset ryhmät, jotka määräävät biomolekyylien kemialliset ominaisuudet.',
+        'sääntöihin sekä perehdytään atomin rakenteeseen, jaksolliseen järjestelmään ja kvanttimekaaniseen atomimalliin.',
 }
 
 
