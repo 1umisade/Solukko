@@ -4922,7 +4922,9 @@ void main(void){
       if(e.button === 1){   // MIDDLE = rotate the camera. Driven manually (inertial offsets) so it works in
         rotating = true; dragging = true;                          // every browser, independent of Babylon's button filtering.
         cam.inertialAlphaOffset = cam.inertialBetaOffset = 0; mdYaw = mdPitch = 0; mdUp = cam.getDirection(BABYLON.Axis.Y).normalize(); gZoomVel = 0;   // grabbing the camera ends any zoom still bleeding out
-        if(SOLU && !gLookPivot && !gFHold){ const f = cam.getForwardRay(1).direction; gLookPivot = { r: cam.radius }; scene.stopAnimation(cam);
+        const selC = SOLU && window.gSelCentre ? window.gSelCentre() : null;
+        if(selC){ gLookPivot = null; scene.stopAnimation(cam); cam.setTarget(selC); }   // ALWAYS rotate around the selection (owner 14.9.2026): the pivot goes onto it, the camera stays where it is (setTarget keeps the position, so the zoom does not change)
+        else if(SOLU && !gLookPivot && !gFHold){ const f = cam.getForwardRay(1).direction; gLookPivot = { r: cam.radius }; scene.stopAnimation(cam);
           cam.setTarget(cam.position.add(f.scale(LOOK_R))); }   // the look-around pivot, 20 units ahead (the position stays)
         setCursor(GRABBING_CUR);
         return;
@@ -11133,6 +11135,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const COF_FORMULA_IMG = {};                                          // static all-atoms sprites (unused now that chlorophyll has a MOL)
   const COF_CID = { 7: 156620228 };                                    // 7 = chlorophyll a (PubChem link + skeletal fallback)
   const showEtcSel = gi => {
+    if(gi >= 0 && etcGroups[gi] && etcGroups[gi].n === 1 && etcEl && etcIdx){   // a ONE-ATOM cofactor (plastocyanin's Cu, PSII's non-heme Fe): the atom info card, not a cofactor card with a shell diagram (owner 14.9.2026: 'we already have the atom info card nailed')
+      const a = etcGroups[gi].atoms[0], e = etcEl[a], idx = etcIdx[a], sb = sphBuf[e]; if(sb){ const o = idx*16, bcx = sb[o+12], bcy = sb[o+13], bcz = sb[o+14];
+        BABYLON.Matrix.FromArrayToRef(gModelXform, modelOf(bcx, bcy, bcz)*16, _pkM); const wc = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(bcx, bcy, bcz), _pkM).addInPlace(gPsiiOffset);
+        if(etcSel >= 0){ etcSel = -1; if(updateCofInfo) updateCofInfo(-1); } centerOnAtom({ center: new BABYLON.Vector3(bcx, bcy, bcz), world: wc, e, idx }); return; } }
     etcSel = gi;
     cancelSelFocus();   // a cofactor pick does its own framing (focusAlongMembrane below)
     if(gi >= 0 && (gSel.size || gSelMol.size)){ gSel.clear(); gSelMol.clear(); updateSelectionUI(); }   // picking a cofactor drops any protein/molecule RTS selection, so the thick green silhouette (driven by gSel) stops wrapping the HOST PROTEIN and the cofactor's own green outline is what shows
@@ -13084,9 +13090,9 @@ void main(void){
        autorotating, only keep the camera on it if I rotate'): armed by a double-click selection (atom, cofactor or complex), the target
        rides the selection's centre every frame, so your own rotation circles it - no rotation of its own - until the selection is gone.
        The centring animation the double-click starts runs first. */
-    let gOrbitOn = false;
+    let gOrbitOn = false; window.gSelCentre = selCentreOf;
     window.gOrbitArm = () => { gOrbitOn = true; gLookPivot = null; };
-    scene.onBeforeRenderObservable.add(() => { if(!gOrbitOn) return; const c = selCentreOf(); if(!c){ gOrbitOn = false; return; }
+    scene.onBeforeRenderObservable.add(() => { if(!gOrbitOn && !rotating) return; const c = selCentreOf(); if(!c){ gOrbitOn = false; return; }   // (also while you rotate: a middle-drag always pivots on the selection, following it if it moves)
       if(scene.getAllAnimatablesByTarget(cam).length) return;   // the centring flight first
       cam.target.copyFrom(c); }); }
   window.addEventListener('keydown', e => {
