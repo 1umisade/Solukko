@@ -12963,7 +12963,12 @@ void main(void){
           if(q.z < 0.0 || q.z > 1.0) continue;
           /* the pool's size is a WORLD size (owner 13.9.2026: 'the glow should scale with the simulation'): about 7 units round an electron or a proton,
              5 round a pigment's Mg, projected at the light's distance - a fraction of the screen height. Too small to see from the whole cell, so it is not drawn */
-          const dist = Math.max(1, Math.hypot(e.x - cam.position.x, e.y - cam.position.y, e.z - cam.position.z)), R = ((e.p === 2 ? 5 : 7) / (2*dist*Math.tan(cam.fov/2)));
+          /* the Z scheme (owner 14.9.2026): a freshly excited electron (energy = the photon's 0.292 aJ, from P680 or P700) glows with TWICE the pool,
+             and the pool shrinks back toward the default as the energy is spent step by step down the chain (each transfer keeps 0.9; cubed, so
+             the extra glow is nearly gone by plastocyanin: 0.9^8 = 0.43 -> 0.08) - then it rises again at P700 and fades toward NADPH. Protons and
+             pigments keep their fixed sizes. */
+          const zf = (e.p || e.e == null) ? 1 : 1 + Math.pow(Math.min(1, e.e / 0.292), 3);
+          const dist = Math.max(1, Math.hypot(e.x - cam.position.x, e.y - cam.position.y, e.z - cam.position.z)), R = ((e.p === 2 ? 5 : 7 * zf) / (2*dist*Math.tan(cam.fov/2)));
           if(R < 0.0015) continue;
           _lnUV[n*4] = q.x / w; _lnUV[n*4+1] = 1.0 - q.y / h; _lnUV[n*4+2] = e.p || 0; _lnUV[n*4+3] = Math.min(0.12, R); n++; } }
       /* FREE protons glow too (owner 14.9.2026: 'the spawned H+ dont have the glow ... the protons released into the lumen lose their glow'):
