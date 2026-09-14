@@ -3486,6 +3486,7 @@ async function run(){
     const pq = mols.find(m => m.cfg && m.cfg.match === 'plastoquinone'), pc = mols.find(m => m.cfg && m.cfg.match === '1ag6');
     if(pq) for(let k=0;k<10;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-400 + k*20, y:0, z:-40 + (k%2)*80 }, 'pq', k);
     if(pc){ pc.shuttle = 'pc'; pc.shuttleK = 0; for(let k=1;k<10;k++) clone(pc, { match:'pc-shuttle-'+k, label:'Plastosyaniini', x:-100 + k*30, y:-190, z:-60 + (k%3)*60 }, 'pc', k); }
+    { const fd = mols.find(m => m.cfg && m.cfg.match === '1a70'); if(fd) for(let k=1;k<4;k++) clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + k*70, y:fd.cfg.y, z:fd.cfg.z }, undefined, 0); }   // four ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
     /* Fill the membrane. The complexes sit in one strip along x at z about 0, while the sheet is 1240
        deep - so the whole set (the five membrane complexes and the nine loose proteins) is repeated in
        two more rows at z = -410 and +410. Each copy is a full model of its own (same clone path as the
@@ -3496,7 +3497,7 @@ async function run(){
        with them the second row put the heap at 3.3 GB steady and the owner's browser died 'Out of
        Memory' during the build (2026-09-06). The lighter ten are, which still doubles the membrane's
        b6f and ATP synthase and every loose protein at a fraction of the cost. */
-    { const DUP = ['Cytochrome b6f','ATP synthase','Ferredoxin','FNR'];
+    { const DUP = ['Cytochrome b6f','ATP synthase','FNR'];   // (ferredoxin no longer: the four are made above - a row copy of each made seven, all landing on the plane as loose proteins do; owner 14.9.2026: 'put 4 ferredoxin in the scene')
       /* MEMORY. Every atom instance carries CPU-side buffers (matrices, colours, orbital lobes, nucleons),
          so a full extra set of complexes costs on the order of a gigabyte of JS heap. Two extra rows put
          the heap at 4.6 GB against Chrome's 4 GB limit and the renderer died. DUP_ROWS is therefore what
@@ -10288,7 +10289,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   for(const h of gHulls){ const mi = h.mi, m = mols[mi]; if(gMemBound[mi] || !m || !m.cfg || m.shuttle || m.cfg.dna || gOrganelleModels.has(mi)) continue;
     if(/chlorophyll|plastoquinone|nadph/i.test(m.cfg.label || '')) continue;
     const th=Math.random()*6.283, ph=Math.acos(2*Math.random()-1), sp=10+Math.random()*8;
-    gBouncers.push({ mi, R:h.maxR, vx:sp*Math.sin(ph)*Math.cos(th), vy:sp*Math.cos(ph), vz:sp*Math.sin(ph)*Math.sin(th),
+    gBouncers.push({ mi, R:h.maxR, stromal: /^(FNR|Ferredoxin|RuBisCO)$/.test((m.cfg && m.cfg.label) || ''), vx:sp*Math.sin(ph)*Math.cos(th), vy:sp*Math.cos(ph), vz:sp*Math.sin(ph)*Math.sin(th),
       ax:new BABYLON.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize(), w:0.15+Math.random()*0.2 }); }
   /* PSU BOX (owner 10.9.2026 'put the photosynthetic unit in a box'): the loose proteins bounce inside a box around
      the membrane complexes (their hulls plus a margin), not the whole free-molecule box, so the unit stays together.
@@ -10353,8 +10354,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(x<lo.x+R){ x=lo.x+R; b.vx=Math.abs(b.vx); } else if(x>hi.x-R){ x=hi.x-R; b.vx=-Math.abs(b.vx); }
         if(y<lo.y+R){ y=lo.y+R; b.vy=Math.abs(b.vy); } else if(y>hi.y-R){ y=hi.y-R; b.vy=-Math.abs(b.vy); }
         if(z<lo.z+R){ z=lo.z+R; b.vz=Math.abs(b.vz); } else if(z>hi.z-R){ z=hi.z-R; b.vz=-Math.abs(b.vz); }
-        if(hT > 0 && !(_car && (_car.pulled(b.kin) || _car.homing(b.kin)))){ const my = memSurfY(x, z), top=my+hT+R, bot=my-hT-R;   // the wall is the membrane UNDER the protein - the cap's surface, not the flat plane (13.9.2026, owner: 'why is ferredoxin floating through the membrane': PSI's stromal dock sits under the flat plane since the pole moved)   // the lipid layer is a wall - except for a carrier PULLED to a dock or a protein steered home (the 2D in-transit layer; PSI's stromal face, and the FNR sink on it, lie under the layer in this sheet)
-          if(y < top && y > bot){ if(y >= my){ y=top; b.vy=Math.abs(b.vy); } else { y=bot; b.vy=-Math.abs(b.vy); } } }
+        if(hT > 0 && !(_car && _car.pulled(b.kin))){ const my = memSurfY(x, z), top=my+hT+R, bot=my-hT-R;   // (a HOMING carrier - FNR, RuBisCO - obeys the wall too: it was exempt and FNR ended up in the lumen, owner 14.9.2026)
+          if(b.stromal && y < top){ y = top; b.vy = Math.abs(b.vy); }   // a stromal protein (FNR, ferredoxin, RuBisCO) is always above the membrane - a shell push can throw it across the band in one step, past the wall   // the wall is the membrane UNDER the protein - the cap's surface, not the flat plane (13.9.2026, owner: 'why is ferredoxin floating through the membrane': PSI's stromal dock sits under the flat plane since the pole moved)   // the lipid layer is a wall - except for a carrier PULLED to a dock or a protein steered home (the 2D in-transit layer; PSI's stromal face, and the FNR sink on it, lie under the layer in this sheet)
+            else if(y < top && y > bot){ if(y >= my){ y=top; b.vy=Math.abs(b.vy); } else { y=bot; b.vy=-Math.abs(b.vy); } } }
         const _hostMi = _car ? _car.hostMi(b.kin) : -1;   // pulled to a dock, it may enter its host's shell (the dock can sit inside it: a ferredoxin sits on FB)
         for(let sI=0;sI<gHulls.length;sI++){ const h=gHulls[sI]; if(h.mi===mi || h.mi===_hostMi) continue;   // membrane proteins and the other bouncers alike
           const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2];
@@ -12994,7 +12996,7 @@ void main(void){
   } else {
     c = c * mix(vec3(1.0), lc * 1.5, min(1.0, lit)) + lc * lit * 0.7;   // outside the lantern the same electric glows, no darkening: blue electrons, orange protons, green excited chlorophylls (owner 14.9.2026)
   }
-  c += vec3(1.0, 0.92, 0.55) * heat * 0.9 + vec3(0.4, 1.0, 0.45) * heat * heat * 0.6;   // the wave's warm crest, greenish at the Mg itself
+  c += vec3(0.35, 1.0, 0.40) * heat * 1.1;   // the wave's crest: GREEN (owner 14.9.2026: 'make the mg glow green')
   gl_FragColor = vec4(min(c, vec3(1.0)), 1.0);
 }`;
   const lanternPP = new BABYLON.PostProcess('lantern', 'lantern', ['elecUV','elecUVs','nElecs','lanternOn','aspect','lanternDark','uT'], null, 1.0, cam);
