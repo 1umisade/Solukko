@@ -128,9 +128,9 @@ html.nopills #toplist, html.nopills #scorebox, html.nopills #timerbox{display:no
   font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
 #pills-btn.on{background:var(--sage);color:var(--sageink)}
-#spawn-nadp-btn,#spawn-adp-btn,#spawn-pi-btn,#spawn-h-btn,#follow-btn{touch-action:manipulation;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
+#spawn-nadp-btn,#spawn-adp-btn,#spawn-pi-btn,#spawn-h-btn,#spawn-hl-btn,#follow-btn{touch-action:manipulation;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
-#spawn-nadp-btn:active,#spawn-adp-btn:active,#spawn-pi-btn:active,#spawn-h-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--brown)}
+#spawn-nadp-btn:active,#spawn-adp-btn:active,#spawn-pi-btn:active,#spawn-h-btn:active,#spawn-hl-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--brown)}
 #follow-btn.on{background:var(--sage);color:var(--sageink)}
 #zoomin-btn{position:absolute;left:16px;top:300px;z-index:12;touch-action:manipulation;
   font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
@@ -10422,7 +10422,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             const hostMi = (haveT && V) ? V.hostMi(sh) : -1;
             for(let sI=0;sI<gHulls.length;sI++){ const hh=gHulls[sI]; if(!gMemBound[hh.mi] || mols[hh.mi].shuttle || hh.mi === hostMi || sameKind(hh.mi, hostMi)) continue;   // the row copies sit ON the originals once the RTS floor flattens z, so a copy's shell must not wall off the host's pocket (owner 12.9.2026)
               const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2]; const ex=x-ox, ey=y-oy, ez=z-oz, dd=Math.hypot(ex,ey,ez), minD=sh.R+hh.maxR; if(dd >= minD || dd < 1e-6) continue;
-              const nx=ex/dd, ny=ey/dd, nz=ez/dd; x=ox+nx*minD; if(!sh.pq) y=oy+ny*minD; z=oz+nz*minD;
+              const nx=ex/dd, ny=ey/dd, nz=ez/dd; const push = Math.min(minD - dd, Math.max(step, 1.5)); x+=nx*push; if(!sh.pq) y+=ny*push; z+=nz*push;   // pushed out no faster than it travels: a quinol released at b6f's Qo pocket used to be flung from deep inside the shell to its surface in one frame (owner 14.9.2026: 'it jumps out of the protein')
               onShell = true;
               /* SLIDE round the shell, do not bounce off it: the heading loses its inward part and keeps the rest, so the pull toward the
                  site (added again next frame) walks the carrier round the obstacle. A mirror bounce plus the pull was a standoff - four
@@ -10436,7 +10436,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             /* no two carriers in one place (owner 14.9.2026: 'two PCs in each binding site - dont allow overlap'): the ones waiting for an occupied dock
                piled up exactly on the docked one. A moving carrier is pushed clear of every other carrier's sphere - a docked (pinned) one is a wall */
             for(const o of gShuttles){ if(o === sh) continue; const ox = o.cur[0], oy = o.cur[1], oz = o.cur[2]; const ex = x-ox, ey = y-oy, ez = z-oz, dd = Math.hypot(ex,ey,ez), minD = sh.R + o.R + 2;
-              if(dd >= minD) continue; if(dd < 1e-3){ x += minD; continue; } const k = minD/dd; x = ox + ex*k; if(!sh.pq) y = oy + ey*k; z = oz + ez*k;
+              if(dd >= minD) continue; if(dd < 1e-3){ x += Math.max(step, 1.5); continue; } const push = Math.min(minD - dd, Math.max(step, 1.5)); x += ex/dd*push; if(!sh.pq) y += ey/dd*push; z += ez/dd*push;   // (no faster than it travels - a released carrier beside a docked one was flung clear in one frame, 14.9.2026)
               const hn = (hx*ex + hy*ey + hz*ez)/dd; if(hn < 0){ hx -= hn*ex/dd; hy -= hn*ey/dd; hz -= hn*ez/dd; if(sh.pq) hy = 0; } }
             sh.h[0]=hx; sh.h[1]=hy; sh.h[2]=hz; sh.cur[0]=x; sh.cur[1]=y; sh.cur[2]=z;
             if(!sh.pq){ _q.set(gModelQuat[sh.mi*4], gModelQuat[sh.mi*4+1], gModelQuat[sh.mi*4+2], gModelQuat[sh.mi*4+3]);   // a protein tumbles a little as it goes
@@ -12193,13 +12193,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         ['spawn-nadp-btn', '➕ NADP⁺ ×10', 'Lisää 10 NADP⁺-molekyyliä hiukkastasolle stroomaan (laatikon sisään)', () => window.gSpawnFree && window.gSpawnFree('nadp', 10)],
         ['spawn-adp-btn', '➕ ADP ×10', 'Lisää 10 ADP-molekyyliä hiukkastasolle stroomaan', () => window.gSpawnFree && window.gSpawnFree('adp', 10)],
         ['spawn-pi-btn', '➕ Pᵢ ×10', 'Lisää 10 fosfaattia hiukkastasolle stroomaan', () => window.gSpawnFree && window.gSpawnFree('pi', 10)],
-        ['spawn-h-btn', '➕ H⁺ ×10', 'Lisää 10 protonia hiukkastasolle: 5 stroomaan, 5 luumeniin', () => window.gValoSpawnProtons && window.gValoSpawnProtons(10)]]){
+        ['spawn-h-btn', '➕ H⁺ strooma ×10', 'Lisää 10 protonia hiukkastasolle stroomaan', () => window.gValoSpawnProtons && window.gValoSpawnProtons(10, 1)],
+        ['spawn-hl-btn', '➕ H⁺ luumen ×10', 'Lisää 10 protonia hiukkastasolle luumeniin', () => window.gValoSpawnProtons && window.gValoSpawnProtons(10, -1)]]){   // (owner 14.9.2026: separate H+ buttons for the lumen and the stroma)
       const b = document.createElement('button'); b.id = id; b.textContent = txt; b.title = title; b.addEventListener('click', run); document.body.appendChild(b); }   // owner 14.9.2026: the spawn buttons
     { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 500 hiukkasta joka lajia, muut jätetään piirtämättä (kytkeytyy itsestään päälle laatikon sisällä)';   // in the gear menu for everyone (owner 12.9.2026)
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn',
-                     'memcut-btn','xsec-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','spawn-nadp-btn','spawn-adp-btn','spawn-pi-btn','spawn-h-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
+                     'memcut-btn','xsec-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','spawn-nadp-btn','spawn-adp-btn','spawn-pi-btn','spawn-h-btn','spawn-hl-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
       const b = document.getElementById(id); if(!b) continue;
       b.style.position = 'static'; b.style.left = 'auto'; b.style.top = 'auto'; menu.appendChild(b);   // static → they stack in the menu
     }
