@@ -860,6 +860,7 @@ vec3 shake(vec3 p){ return p + 0.12*vec3(sin(uT*1.3+p.x*0.12+p.y*0.08), sin(uT*1
 attribute vec3 wOrig;
 attribute vec3 wVel;
 uniform float planeDim; uniform float planeZ; uniform vec3 psuLo; uniform vec3 psuHi;   // dev: with planeDim on, a free molecule inside the PSU box that is not on the plane z = planeZ is not drawn
+uniform float planeAll;   // 1 = this species is plane-culled everywhere, not only inside the box (ATP, owner 14.9.2026: 'dont render other ATPs when hiukkastaso is on')
 uniform float viewBox;   // 1 = the camera is inside the box: a free molecule OUTSIDE it is not drawn
 uniform vec3 boxLo;
 uniform vec3 boxHi;
@@ -1049,7 +1050,7 @@ void main(void){
   }
 #endif
   { float inB = step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z);
-    tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * inB, viewBox * (1.0 - inB));
+    tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * max(inB, planeAll), viewBox * (1.0 - inB));
 #ifdef CELLCLIP
     if(placed) tasoDim = viewBox * (1.0 - inB);   // a PLACED molecule (a simulated proton, one held in a slot) is never plane-culled: a proton pushed off the plane by a protein's shell, funnelled into ATP synthase's channel or riding a pocket 28 units off it vanished (owner 14.9.2026: 'protons popping in and out - is the plane too narrow')
 #endif
@@ -3492,7 +3493,8 @@ async function run(){
     if(pq){ for(let k=0;k<10;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-400 + k*20, y:0, z:-40 + (k%2)*80 }, 'pq', k);   // set A (k 0-9): PSII <-> b6f's PSII side
       for(let k=10;k<20;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-60 + (k-10)*20, y:0, z:-40 + (k%2)*80 }, 'pq', k); }   // set B (k 10-19): NDH-1 <-> b6f's other side (owner 14.9.2026: 'two different sets of PQB')
     if(pc){ pc.shuttle = 'pc'; pc.shuttleK = 0; for(let k=1;k<10;k++) clone(pc, { match:'pc-shuttle-'+k, label:'Plastosyaniini', x:-100 + k*30, y:-190, z:-60 + (k%3)*60 }, 'pc', k); }
-    { const fd = mols.find(m => m.cfg && m.cfg.match === '1a70'); if(fd) for(let k=1;k<4;k++) clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + k*70, y:fd.cfg.y, z:fd.cfg.z }, undefined, 0); }   // four ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
+    { const fd = mols.find(m => m.cfg && m.cfg.match === '1a70'); if(fd) for(let k=1;k<10;k++) clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + (k%5)*70 - 140, y:fd.cfg.y + Math.floor(k/5)*60, z:fd.cfg.z }, undefined, 0); }   // TEN ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
+    { const fr = mols.find(m => m.cfg && m.cfg.match === '1gjr'); if(fr) for(let k=1;k<10;k++) clone(fr, { match:'fnr-copy-'+k, label:'FNR', x:(fr.cfg.x || 0) + (k%5)*80 - 160, y:fr.cfg.y + Math.floor(k/5)*70, z:fr.cfg.z }, undefined, 0); }   // TEN FNR (owner 14.9.2026: 'put total 10 FNR and 10 ferredoxin in the stroma')
     /* Fill the membrane. The complexes sit in one strip along x at z about 0, while the sheet is 1240
        deep - so the whole set (the five membrane complexes and the nine loose proteins) is repeated in
        two more rows at z = -410 and +410. Each copy is a full model of its own (same clone path as the
@@ -3503,7 +3505,7 @@ async function run(){
        with them the second row put the heap at 3.3 GB steady and the owner's browser died 'Out of
        Memory' during the build (2026-09-06). The lighter ten are, which still doubles the membrane's
        b6f and ATP synthase and every loose protein at a fraction of the cost. */
-    { const DUP = ['Cytochrome b6f','ATP synthase','FNR'];   // (ferredoxin no longer: the four are made above - a row copy of each made seven, all landing on the plane as loose proteins do; owner 14.9.2026: 'put 4 ferredoxin in the scene')
+    { const DUP = ['Cytochrome b6f','ATP synthase'];   // (FNR no longer either: the ten are made above, a row copy of each made nineteen - 14.9.2026; ferredoxin no longer: the four are made above - a row copy of each made seven, all landing on the plane as loose proteins do; owner 14.9.2026: 'put 4 ferredoxin in the scene')
       /* MEMORY. Every atom instance carries CPU-side buffers (matrices, colours, orbital lobes, nucleons),
          so a full extra set of complexes costs on the order of a gigabyte of JS heap. Two extra rows put
          the heap at 4.6 GB against Chrome's 4 GB limit and the renderer died. DUP_ROWS is therefore what
@@ -8393,7 +8395,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // glow = the proton corona: same stateless positioning, but the fragment draws a soft additive red disc
     const wMat=(rad, solid, glow, bias, outline, haze, perInst)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':'')+(perInst?'i':''),scene,'imp',{
         attributes: perInst ? ['position','instanceColor','wOrig','wVel','molId','instR','world0','world1','world2','world3'] : ['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
-        uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK','depthBias',
+        uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','planeAll','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK','depthBias',
                   'sideOnly','sideClear','cellWrap','wrapScale','fadeNear','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
@@ -8586,6 +8588,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const ATP_SRC = adpFromNadp(true);
     const ADP_SRC = ATP_SRC ? { at: ATP_SRC.at.slice(0, ATP_SRC.at.length - 4), bonds: ATP_SRC.bonds.filter(b => b[0] < ATP_SRC.at.length - 4 && b[1] < ATP_SRC.at.length - 4) } : null;
     const FREE_ATP = mkRigidFree('ATP', 'atp', NATP, 881237, [0.85,0.70,0.29], MOLBASE.atp, ATP_SRC);
+    if(FREE_ATP && FREE_ATP.meshes) for(const m of FREE_ATP.meshes){ const A = glassA(m); if(A && A.setFloat) A.setFloat('planeAll', 1); }   // with the plane on, no ATP off the plane is drawn anywhere (owner 14.9.2026)
     const FREE_ADP = mkRigidFree('ADP', 'adp', NADP2, 913511, [0.62,0.49,0.20], MOLBASE.adp, ADP_SRC);   // clearly darker gold than ATP
     const FREE_PI  = mkRigidFree('Pi',  'pi',  NPI,  947717, [0.88,0.50,0.23], MOLBASE.pi, null);
     if(FREE_NADP){ FREE_NADP.key = 'nadp'; FREE_NADP.base = MOLBASE.nadp; }
@@ -8909,7 +8912,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
            (2L each), so the bounced path lands on the point right now: a single origin cannot reach every point with an arbitrary phase,
            the triangle wave being what it is - and the origin must lie inside the box (the y origin is clamped to it, shader and mirror alike) */
         const fix = (lo, hi, vv) => { const m = 2*(hi - lo); if(m <= 0 || T <= 0) return vv; return m*Math.round(vv*T/m)/T; };
-        c[i*3] = x; c[i*3+1] = y; c[i*3+2] = z; v[i*3] = fix(bLo.x, bHi.x, v[i*3]); v[i*3+1] = fix(bLo.y, bHi.y, v[i*3+1]); v[i*3+2] = fix(bLo.z, bHi.z, v[i*3+2]);
+        c[i*3] = x; c[i*3+1] = y; c[i*3+2] = z; v[i*3] = fix(bLo.x, bHi.x, v[i*3]); v[i*3+1] = fix(bLo.y, bHi.y, v[i*3+1]); v[i*3+2] = Math.abs(z - gTasoZ) < 0.01 ? 0 : fix(bLo.z, bHi.z, v[i*3+2]);   // (a home ON the plane stays on it - the ATP made by the synthase drifted off it, owner 14.9.2026)
         const o = (MOLBASE[key]+i)*4; gMolDisp[o] = gMolDisp[o+1] = gMolDisp[o+2] = gMolDisp[o+3] = 0; },
       homeFlush: key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); if(!sp) return;
         if(key === 'w'){   // water: wO/wOF one instance per molecule, wH/wHF two (the same origin twice)
@@ -9623,6 +9626,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const isoR = pieceRange(gIsoModel), selR = pieceRange(gSelModel), cutW = gXsec ? gXsecPlane : XSEC_OFF, cutV = gXsec ? xsecViewPlane() : XSEC_OFF;
       const sig = gIsoModel + '|' + isoR[0] + '|' + isoR[1] + '|' + gSelModel + '|' + selR[0] + '|' + selR[1] + '|' + gIsoN + '|' + gMemRow + '|' + (gXsec ? cutW.x + ',' + cutW.y + ',' + cutW.z + ',' + cutW.w + ',' + cutV.x + ',' + cutV.y + ',' + cutV.z + ',' + cutV.w : 'off') + '|' + gShaderMats.length;
       const changed = sig !== gShareSig; gShareSig = sig;   // (perf 14.9.2026: nine uniforms on ~300 materials every frame was 1 ms - the rarely-changing ones go out only when they change)
+      if(gGfxMode === 1) gBubbleR = gIsoModel >= 0 ? 1e9 : gCrisp;   // the isolated model's whole vdW is the glass bubble (owner 14.9.2026)
       for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT);
         if(changed){ m.setFloat('isoModel', gIsoModel + 1); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); m.setFloat('memRow', gMemRow); } } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
@@ -9833,7 +9837,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           if(pl.normal.x*wcx + pl.normal.y*wcy + pl.normal.z*wcz + pl.d < -cM){ vis=false; break; }
         }
       }
-      const nr = gCrisp + cR + 8; const near = vis && d2 < nr*nr;   // enable when the cell's NEAR EDGE (not centre) reaches the reveal distance → orbitals are present before those atoms' vdW shells go glass (no see-through gap)
+      const isoCell = gIsoModel >= 0 && cell.mi === gIsoModel;   // ISOLATE (owner 14.9.2026: 'the orbitals have to be visible always and the vdW glass'): the isolated model is crisp at any distance
+      const nr = gCrisp + cR + 8; const near = vis && (isoCell || d2 < nr*nr);   // enable when the cell's NEAR EDGE (not centre) reaches the reveal distance → orbitals are present before those atoms' vdW shells go glass (no see-through gap)
       const wantOrb = vis && gGfxMode === 1 && near;      // orbitals only for NEAR cells in mode 1 (never rendered out of range)
       // DEV "vain lähialue": keep ONLY cells whose NEAR EDGE is within CULL_CLOSE of the camera, i.e. the
       // handful you are practically standing in. Everything else is dropped outright, so the screen shows
@@ -9849,7 +9854,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const mega = ((gSlabLod && d2 > (cell.macro ? MEGA2 : MEMR2) + cR*cR) || offSlab) && !(gIsoModel >= 0 && cell.mi === gIsoModel);   // ISOLATE: the isolated model has no slab to stand in for it, so it never thins to the slab tier
       const wantSph = vis && !!cell.sphere && (!gCullOnly || d2 < closeR*closeR) && !(mega && !cell.macro);
       const nucR = gCrisp + cR + 8;                         // nuclei wherever the orbitals show (they used to stop at half the crisp radius)
-      const wantNuc = vis && gGfxMode === 1 && d2 < nucR*nucR;   // nuclei: mode 1, genuinely up close only
+      const wantNuc = vis && gGfxMode === 1 && (isoCell || d2 < nucR*nucR);   // nuclei: mode 1, genuinely up close only (the isolated model: always)
       if(mega && !cell.macro){ if(cell.visOn !== false){ cell.visOn = false; for(const m of cell.meshes) m.setEnabled(false); }
         if(cell.nucOn !== false){ cell.nucOn = false; if(cell.nuc) cell.nuc.setEnabled(false); } }
       else if(cell.visOn !== wantOrb){ cell.visOn = wantOrb; for(const m of cell.meshes) m.setEnabled(wantOrb); }
@@ -12978,7 +12983,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // Cofactor line-of-sight see-through: on when ETC mode is on or a cofactor is selected.
     // ETC off means OFF: no cofactor see-through at all, not even for a still-selected cofactor. The
     // reveal also drives the cofDepth pass below, so switching ETC off drops that whole pass too.
-    gRevealOn = gEtc && etcGroups.length ? 1 : 0;
+    gRevealOn = gEtc && etcGroups.length && gIsoModel < 0 ? 1 : 0;   // (never in the isolate view - the cones cut holes in the isolated model, owner 14.9.2026)
     const _eng = scene.getEngine();
     gCofTexel.set(1/_eng.getRenderWidth(), 1/_eng.getRenderHeight());   // align depth-buffer sampling (also survives resize)
     /* Keep the offscreen masks in step with the main framebuffer. They are sized from getRenderWidth at

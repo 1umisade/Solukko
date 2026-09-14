@@ -443,6 +443,7 @@ vec3 shake(vec3 p){ return p + 0.12*vec3(sin(uT*1.3+p.x*0.12+p.y*0.08), sin(uT*1
 attribute vec3 wOrig;
 attribute vec3 wVel;
 uniform float planeDim; uniform float planeZ; uniform vec3 psuLo; uniform vec3 psuHi;   // dev: with planeDim on, a free molecule inside the PSU box that is not on the plane z = planeZ is not drawn
+uniform float planeAll;   // 1 = this species is plane-culled everywhere, not only inside the box (ATP, owner 14.9.2026: 'dont render other ATPs when hiukkastaso is on')
 uniform float viewBox;   // 1 = the camera is inside the box: a free molecule OUTSIDE it is not drawn
 uniform vec3 boxLo;
 uniform vec3 boxHi;
@@ -632,7 +633,7 @@ void main(void){
   }
 #endif
   { float inB = step(psuLo.x, wCen.x) * step(wCen.x, psuHi.x) * step(psuLo.y, wCen.y) * step(wCen.y, psuHi.y) * step(psuLo.z, wCen.z) * step(wCen.z, psuHi.z);
-    tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * inB, viewBox * (1.0 - inB));
+    tasoDim = max(planeDim * (1.0 - step(abs(wCen.z - planeZ), 2.0)) * max(inB, planeAll), viewBox * (1.0 - inB));
 #ifdef CELLCLIP
     if(placed) tasoDim = viewBox * (1.0 - inB);   // a PLACED molecule (a simulated proton, one held in a slot) is never plane-culled: a proton pushed off the plane by a protein's shell, funnelled into ATP synthase's channel or riding a pocket 28 units off it vanished (owner 14.9.2026: 'protons popping in and out - is the plane too narrow')
 #endif

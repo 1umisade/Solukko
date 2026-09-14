@@ -617,3 +617,10 @@ Omistaja: 'elektronit eivat siirry PSI:lta ferredoksiineille, ferredoksiinit men
 (6) ATP: kaikki 1000 piilotettu reserviin alussa (gHideAllFree, myos reboxin jalkeen koska home() nollaa siirtyman); Kalvoston FREE-instantiate tuo yhden esiin gSpawnFree:lla kun paa tekee ATP:n (koti tekopaikkaan). gSpawnFree palautti KOKO reservin (while ilman laskuria) -> enintaan n. Lyhtyvalo laji 3 = ATP punainen (cA), nakyvat ATP:t lahimmasta alkaen.
 (7) SIDOTUT HIUKKASET: PLACED-molekyylin spin luetaan piirtopaikasta (wCen + mdisp), joka seisoo slotissa -> ei pyori/tarise; spinAt tekee saman CPU:lla. ADP/P-slotit c.y1-30 (paan sisalla, x +-10); cofDiscX = paljastuskartiot varatuille ADP/P-sloteille (window.gRevealSlots: lepokehyksen p + mi), samassa cofDepthRT:ssa -> edessa olevat atomit piiloon kuten ETC:lla.
 (8) O2 ILMAN vdW:TA: reveal-kuplassa vdW on lasia ja vain orbitaalit nakyvat; OEC:n tekema O2 (placed, koti kaukana) ei koskaan paassyt orbitaalien ehdokkaaksi (halpa x-hylkays kodin mukaan) eika sateen sisaan (etaisyys kodista) -> paljas ydin. Nyt molemmat piirtopaikan mukaan.
+
+## 14.9.2026 - eristysnakyma aina terava ja ilman paljastuskartioita, ATP tasolla, 10 FNR + 10 ferredoksiinia (Claude Opus 5)
+
+(1) ETC-paljastus (cofDepth-kartiot, myos uudet ADP/P-kartiot) leikkasi reikia eristettyyn malliin (kaksois-F): gRevealOn = 0 kun gIsoModel >= 0.
+(2) Eristetty malli on terava AINA: sen solujen orbitaalit ja ytimet etaisyydesta riippumatta (isoCell -> near/wantNuc), ja gBubbleR = 1e9 eristyksessa (koko vdW lasikuplaa) - takaisin gCrisp:iin kun eristys loppuu.
+(3) ATP pysyy hiukkastasolla: home() nollaa z-nopeuden kun koti on tasolla (syntaasin tekema ja nappulasta lisatty); vapautettu 'free'-molekyyli tasolla saa vz 0. Uusi uniform planeAll (imp): ATP-lajin materiaaleissa 1 -> tason ollessa paalla tason ulkopuolista ATP:ta ei piirreta MISSAAN (ei vain laatikossa).
+(4) 10 FNR (1gjr-kloonit fnr-copy-1..9) ja 10 ferredoksiinia (fd-copy-1..9); FNR poistettu DUP-rivilistalta (rivikopio teki 19). FNR:n kodit rivissa PSI:n FB-puolella (k:n mukaan x, joka toinen ylempana). Mitattu 30 s ajettuna: NADPH 19, ATP 38 - ketju kulkee paljon vuolaammin.

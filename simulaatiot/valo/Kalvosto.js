@@ -149,7 +149,7 @@
       placeSlot(fnr, 'electron', mi, fadC, LF).place_in_the_chain = sinkPlace; fnr.get_node('BindSites/electron').nearby_area.radius = 45;
       placeSlot(fnr, 'ferredoxin', mi, [c.cx, c.cy + hullR(mi) + 16 + 2, c.cz], LF).place_in_the_chain = sinkPlace - 1;
       placeSlot(fnr, 'NADP', mi, [fadC[0] + 12, fadC[1] + 6, fadC[2]], LF).place_in_the_chain = sinkPlace + 1;
-      const home = ps ? (() => { const d = ps.fdDir, l = Math.hypot(d[0], d[1], d[2]) || 1, R = hullR(ps.mi) + hullR(mi) - 6, cc = mInfo[ps.mi]; return wpt(ps.mi, [cc.cx + d[0]/l*R, cc.cy + d[1]/l*R, cc.cz + d[2]/l*R], [0,0,0]); })() : [c.cx + gModelOff[mi*3], c.cy + gModelOff[mi*3+1], get.gTasoZ()];
+      const home = ps ? (() => { const d = ps.fdDir, l = Math.hypot(d[0], d[1], d[2]) || 1, R = hullR(ps.mi) + hullR(mi) - 6, cc = mInfo[ps.mi]; return wpt(ps.mi, [cc.cx + d[0]/l*R + (k - (fnrMis.length-1)/2)*(hullR(mi)*2 + 6), cc.cy + d[1]/l*R + (k % 2)*(hullR(mi) + 10), cc.cz + d[2]/l*R], [0,0,0]); })() : [c.cx + gModelOff[mi*3], c.cy + gModelOff[mi*3+1], get.gTasoZ()];   // ten FNR (owner 14.9.2026): a row along the membrane beside PSI's FB face, staggered in y, so they do not pile on one spot
       home[2] = get.gTasoZ(); fnr.namedChildren.set('Node2', new Point(home, 'Node2')); return fnr; });
     /* NDH-1 (cyclic flow): the ferredoxin dock 1 -> its Fe-S clusters 2.. -> the plastoquinone dock last (lane ndh<k>) */
     const ndhs = ndhMis.map((mi, k) => { const L = 'ndh' + k, c = mInfo[mi], fes = ofType(mi, 5), quins = ofType(mi, 3);
@@ -254,7 +254,7 @@
     V.env.dispose = b => { if(b.BindSites){ const P = get.gValoProtons(); for(const sl of b.BindSites) if(sl._proton != null && P){ const q = b._pos; P.release(sl._proton, q[0], q[1], q[2], (Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20); sl._proton = null; } }   // its protons go free where it is
       const kin = b.kin; if(!kin) return; b.kin = null;
       if(kin.kind === 'sprite'){ kin.s.body = null; kin.s.mesh.setEnabled(false); if(kin.s.corona) kin.s.corona.setEnabled(false); }
-      else if(kin.kind === 'free'){ const F = get.gValoFree(); const p = b._pos; released.push({ key: kin.key, i: kin.i, x: p[0], y: p[1], z: p[2], vx: (Math.random()-0.5)*8, vy: 6, vz: (Math.random()-0.5)*8, t: 0, life: 20 }); }
+      else if(kin.kind === 'free'){ const F = get.gValoFree(); const p = b._pos; released.push({ key: kin.key, i: kin.i, x: p[0], y: p[1], z: p[2], vx: (Math.random()-0.5)*8, vy: 6, vz: Math.abs(p[2] - get.gTasoZ()) < 0.5 ? 0 : (Math.random()-0.5)*8, t: 0, life: 20 }); }   // (released ON the plane: it stays on it - the ATP drifted 13 units off, owner 14.9.2026)
       else if(kin.kind === 'proton'){ const P = get.gValoProtons(); const p = b._pos; const d = b.direction; P.release(kin.i, p[0], p[1], p[2], d[0]*9, d[1]*9, d[2]*9); }
       else if(kin.kind === 'sh' || kin.kind === 'bnc'){ kin.body = null; } };
     V.env.slotEmptied = BindSite => { if(BindSite._instance != null){ parkedF.push({ key: BindSite._key, i: BindSite._instance, t: 0 }); BindSite._instance = null; } if(BindSite._proton != null){ const P = get.gValoProtons(), q = BindSite.global_position; if(P) P.release(BindSite._proton, q[0], q[1], q[2], (Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20); BindSite._proton = null; } };
