@@ -4219,7 +4219,9 @@ void main(void){
   let panning = false, panDepth = 1, modelDrag = -1, modelDragDepth = 1, rotating = false;
   let mdYaw = 0, mdPitch = 0;   // middle-drag look-around (Webcyte): pending yaw / pitch in radians, applied each frame and decayed by cam.inertia like Babylon's own inertial offsets   // pan state · which molecule a left-drag is moving (+its depth) · middle-drag rotate
   let joyPan = false, joyOX = 0, joyOY = 0;   // BOTH-buttons directional pan · press-point (screen px) the joystick offset is measured from
-  let rightPan = false, rightMoved = false, rdX = 0, rdY = 0;   // RIGHT-drag grab-pans the floor (owner 12.9.2026); a right TAP is the move order - only with gRightMove on
+  let rightPan = false, rightMoved = false, rdX = 0, rdY = 0, rightMove = false, gSnapMute = false;   // RIGHT button (owner 14.9.2026: 'if something is selected, move it - if nothing, pan'): with a movable selection a right tap or drag MOVES it (rightMove), with none a right drag grab-pans the floor (rightPan)
+  const hasMovableSel = () => !!(gSelFree.size || gSelMol.size || [...gSel].some(mi => !immovable(mi)));
+  const moveSelTo = (px, py, drag) => { if(gSelFree.size) moveFreeTo(px, py); if(gSel.size) moveSelectedTo(px, py, drag); if(gSelMol.size) moveMoleculesTo(px, py); };
   let gRightMove = false;   // the right-tap move order is OFF by default (owner 12.9.2026); the dev button 'oikea napautus siirtaa' turns it on
   // Custom cursors (the grab PNG). setCursor writes the style ONLY when it actually changes — re-assigning a
   // url() cursor every mousemove makes the browser re-fetch the image and FLICKER, so we guard every write.
@@ -4609,8 +4611,8 @@ void main(void){
     for(const m of gSelMol){ m.mtx = wx; m.mty = wy; m.av = 0; }   // steer to the point, no tumble - the physics observer stops it on arrival
   };
   const immovable = mi => !!(gMemBound[mi] && mols[mi] && !mols[mi].shuttle);   // a membrane complex (PSII, b6f, PSI, ATP synthase, NDH-1...) is IMMOVABLE (owner 14.9.2026): no move order, no gizmo - only the loose proteins and the level's carriers move
-  const moveSelectedTo = (px, py) => { const sel = [...gSel].filter(mi => !immovable(mi)); if(!sel.length) return;
-    const tmi = pickModelAtCursor();                                    // right-clicked directly ON a molecule → FOLLOW it
+  const moveSelectedTo = (px, py, drag) => { const sel = [...gSel].filter(mi => !immovable(mi)); if(!sel.length) return;
+    const tmi = drag ? -1 : pickModelAtCursor();                        // right-clicked directly ON a molecule → FOLLOW it (a drag never follows: the cursor crosses molecules on its way)
     if(tmi >= 0 && !gSel.has(tmi)){
       const fx=mInfo[tmi].cx+gModelOff[tmi*3], fy=mInfo[tmi].cy+gModelOff[tmi*3+1];
       for(const mi of sel){ if(mi===tmi) continue; snapshotModel(mi);
@@ -4927,6 +4929,7 @@ void main(void){
       }
       if(e.button === 2){   // RIGHT: while a spawn item/element is armed → end spawning; otherwise a grab-pan (drag) or the SC2 move command (tap, on release)
         if(spawnEl || gArmedItem){ disarmSpawn(); return; }   // left-click keeps spawning; right-click disarms
+        if(hasMovableSel()){ rightMove = true; rightMoved = false; gSnapMute = false; rdX = scene.pointerX; rdY = scene.pointerY; dragging = true; return; }   // a selection: the right button moves it (tap = to the point, drag = along with the cursor)
         rightPan = true; rightMoved = false; rdX = scene.pointerX; rdY = scene.pointerY; dragging = true;
         panDepth = gLookPivot ? gLookPivot.r : Math.abs(cam.radius);   // the floor under the pivot follows the cursor 1:1 (the look-around pivot sits 20 units out - use the real radius)
         return;
@@ -4937,11 +4940,8 @@ void main(void){
       if(joyPan){ if((e.buttons & 3) !== 3){ joyPan = false; setPanCursor(false); }   // a button released → end joystick pan
         return; }                                                                       // swallow the release (no select / move / spawn)
       if(e.button === 1){ rotating = false; return; }   // middle-drag rotate ends (inertia carries on)
-      if(e.button === 2){ if(rightPan){ rightPan = false;
-          if(!rightMoved && gSelFree.size) moveFreeTo(scene.pointerX, scene.pointerY);   // a right TAP with particles selected: they move to the tapped point of the plane (owner 14.9.2026)
-          if(!rightMoved && gRightMove){   // a right TAP (no drag) = the move order (dev switch, off by default)
-            if(gSel.size) moveSelectedTo(scene.pointerX, scene.pointerY);   // sets the glide target + drops the ping
-            if(gSelMol.size) moveMoleculesTo(scene.pointerX, scene.pointerY); } }   // selected molecules → move to the point and stop
+      if(e.button === 2){ if(rightMove){ rightMove = false; moveSelTo(scene.pointerX, scene.pointerY, rightMoved); gSnapMute = false; }   // the selection goes to (or ends up at) the point under the cursor
+        if(rightPan){ rightPan = false; }
         return; }
       if(dragAtom >= 0){ dragAtom = -1; cam.attachControl(canvas, true); cam.inputs.attached.pointers.buttons = []; return; }   // finished moving a spawned atom
       if(e.button === 0 && rtsBoxing){ rtsBoxing = false;
@@ -4970,6 +4970,8 @@ void main(void){
     }
     else if(p.type === BABYLON.PointerEventTypes.POINTERMOVE){
       if(joyPan) return;   // both-buttons joystick pan → the frame observer applies it (offset from the press point)
+      if(rightMove){ if(!rightMoved){ const mdx = scene.pointerX - rdX, mdy = scene.pointerY - rdY; if(mdx*mdx + mdy*mdy > 16) rightMoved = true; }
+        if(rightMoved){ moveSelTo(scene.pointerX, scene.pointerY, true); gSnapMute = true; } return; }   // RIGHT-drag with a selection = it follows the cursor (one undo snapshot, on the first move)
       if(rightPan){ if(!rightMoved){ const mdx = scene.pointerX - rdX, mdy = scene.pointerY - rdY; if(mdx*mdx + mdy*mdy > 16){ rightMoved = true; setCursor(GRABBING_CUR); } }
         if(rightMoved){ panBy(e.movementX || 0, e.movementY || 0); showTips(); } return; }   // RIGHT-drag = grab-pan
       if(rotating && SOLU && gLookPivot){   // MIDDLE-drag in the cell = LOOK AROUND. Drag right → look right, drag down → look down,
@@ -10112,7 +10114,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Ctrl+Z reverts one complete drag. Snapshots are tiny (7 numbers), so we keep a deep stack.
   const UNDO_MAX = 100;
   const undoStack = [];
-  const snapshotModel = mid => { if(mid<0) return;
+  const snapshotModel = mid => { if(mid<0 || gSnapMute) return;   // (gSnapMute: one snapshot per right-drag, not one per pointer move - 14.9.2026)
     undoStack.push({ mid,
       off:[gModelOff[mid*3], gModelOff[mid*3+1], gModelOff[mid*3+2]],
       quat:[gModelQuat[mid*4], gModelQuat[mid*4+1], gModelQuat[mid*4+2], gModelQuat[mid*4+3]] });
