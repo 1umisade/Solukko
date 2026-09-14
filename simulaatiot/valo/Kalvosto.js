@@ -211,6 +211,10 @@
         const y = side > 0 ? Math.min(hi.y - 8, my + hT + 14 + Math.random()*80) : Math.max(lo.y + 8, my - hT - 14 - Math.random()*80);
         P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), sp*Math.sin(th), 0); made++; }
       P.homeFlush(); return made; };   // (parkedP: no longer used for protons - a bound proton rides its slot in plain sight, 13.9.2026)
+    window.gValoRemoveProtons = (n, side) => { const P = get.gValoProtons(), lo = get.gPsuLo(), hi = get.gPsuHi(); if(!P || !lo) return 0; const hT = get.gMemHalfT(), z = get.gTasoZ(); let gone = 0;   // the free proton on that side nearest to where you look goes back to the hidden reserve (owner 14.9.2026: a right click on the button removes one)
+      const tx = Math.max(lo.x + 40, Math.min(hi.x - 40, cam.getTarget().x)), my = P.memY(tx, z);
+      for(let k=0;k<n;k++){ const i = P.nearestFree(tx, side > 0 ? my + hT + 60 : my - hT - 60, z, side, 4000); if(i < 0) break; const o = i*3; P.grab(i); P.place(i, P.pos[o], -30000, P.pos[o+2]); reserveP.push(i); gone++; }
+      return gone; };
     V.env.instantiate = (name, opts) => { const at = opts.position || [0,0,0], slot = opts.from_slot;
       if(name === 'electron'){ const s = sprites.find(s => !s.body); if(!s) return null; const b = new MB('electron', { position: at }); b.kin = { kind:'sprite', s }; s.body = b; s.mesh.setEnabled(true); s.corona.setEnabled(true); return b; }
       if(name === 'O'){ const s = oSprites.find(s => !s.body); if(!s) return null; const b = new MB('O', { position: at }); b.kin = { kind:'sprite', s }; s.body = b; s.mesh.setEnabled(true); b.direction = V.normalize([Math.random()-0.5, -1, 0]); return b; }

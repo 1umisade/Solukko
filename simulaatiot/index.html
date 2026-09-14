@@ -5093,6 +5093,8 @@ void main(void){
     let fly = null;
     window.gFlyToSheet = () => { scene.stopAnimation(cam); gLookPivot = null; gZoomVel = 0;
       fly = { t0: performance.now(), p0: cam.position.clone(), q0: cam.getTarget().clone(), u0: cam.upVector.clone() }; };
+    window.gJumpToSheet = () => { scene.stopAnimation(cam); gLookPivot = null; gZoomVel = 0; fly = null;   // the same pose, no flight (a double tap on the button, owner 14.9.2026)
+      cam.upVector.copyFrom(UP); cam.setMatUp(); cam.setTarget(TGT.clone()); cam.setPosition(POS.clone()); };
     const stop = () => { fly = null; };
     canvas.addEventListener('pointerdown', stop); canvas.addEventListener('wheel', stop, { passive:true }); window.addEventListener('keydown', stop);
     scene.onBeforeRenderObservable.add(() => { if(!fly) return;
@@ -7437,7 +7439,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     let gatherCell = null, cellNearTiles = null;
     if(SOLU_CELL){
       const CEN = SOLU_CELL.CEN, facetR = SOLU_CELL.facetR, cellYc = SOLU_CELL.Yc, MEMS = SOLU_CELL.MEMS;
-      const NE_PORE_R = 280, NE_PORE_PITCH = 0.5;   // pore hole radius (units) and the pore lattice pitch (radians of the cube-face angle)
+      const NE_PORE_R = 35, NE_PORE_PITCH = 0.07;   // pore hole radius (units) and the pore lattice pitch (radians of the cube-face angle) - REAL proportions (owner 14.9.2026): a nuclear pore's opening is ~90 nm on a ~6 um nucleus (1/65 of the radius: 2000/65 = 31, drawn 35) and there are ~15 per um^2, ~2000 on the nucleus - 22x22 cells per cube face, three in four filled (was 280 / 0.5: ~40 holes each a quarter of the radius)
       gWorldReach = Math.max(gWorldReach, cellYc + (SOLU_CELL.R + 210)*1.35 + 200);   // the far clip has to reach the far side of the cell (its wall, its corners)
       const lb32 = x => { x = (x ^ (x >>> 16)) >>> 0; x = Math.imul(x, 0x7feb352d) >>> 0; x = (x ^ (x >>> 15)) >>> 0; x = Math.imul(x, 0x846ca68b) >>> 0; x = (x ^ (x >>> 16)) >>> 0; return (x & 0xffffff) / 16777216; };   // lowbias32, the shell shader's hsh
       /* the cube: face = (axis, U, V), a direction is A + U tan(au) + V tan(av) normalised, au/av in [-pi/4, pi/4] */
@@ -8758,6 +8760,16 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1], x = Math.max(lo.x + 40, Math.min(hi.x - 40, tx + (Math.random()-0.5)*300)), z = gTasoZ, s = memSurfY(x, z) + gMemHalfT + 14;
         const y = Math.min(hi.y - 12, s + Math.random()*Math.min(120, Math.max(20, (hi.y - 12) - s))); gValoFree.home(key, i, x, y, z); made++; }
       gValoFree.homeFlush(key); gValoFree.upload(); return made; };
+    /* REMOVE one (owner 14.9.2026: 'right clicking the spawn buttons should delete them'): the species' drawn instance on the plane nearest to
+       where you look is sent home OUTSIDE the unit box (the free box is wider in x) - the spawn is the same move in reverse */
+    window.gRemoveFree = (key, n) => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); const lo = gPsuLo, hi = gPsuHi; if(!sp || !sp.n || !lo) return 0;
+      const tg = cam.getTarget(), t = [0,0,0], cand = [];
+      for(let i=0;i<sp.n;i++){ if(gMolHold[sp.base+i]) continue; if(!drawnPos(sp.side, sp.c, sp.v, i, gWaveT, t)) continue; if(Math.abs(t[2] - gTasoZ) > 3 || !inPsu(t[0], t[1], t[2])) continue;
+        cand.push([(t[0]-tg.x)**2 + (t[1]-tg.y)**2, i]); }
+      cand.sort((a, b) => a[0] - b[0]); let gone = 0;
+      for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1]; const left = (lo.x - bLo.x) > (bHi.x - hi.x); const x = left ? bLo.x + 40 + Math.random()*Math.max(20, lo.x - bLo.x - 120) : hi.x + 80 + Math.random()*Math.max(20, bHi.x - hi.x - 120);
+        gValoFree.home(key, i, x, (bLo.y + bHi.y)/2 + (Math.random()-0.5)*200, gTasoZ + (Math.random()-0.5)*400); gone++; }
+      if(gone){ gValoFree.homeFlush(key); gValoFree.upload(); } return gone; };
     window.__freeNearest = (key, qx, qy, qz) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return null;
       const T = gWaveT, o = [0,0,0]; let best = null, bd = Infinity;
       for(let i=0;i<sp.n;i++){ let x, y, z;
@@ -12181,6 +12193,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     document.body.appendChild(gear); document.body.appendChild(menu);
     if(SOLU){ const zb = document.createElement('button'); zb.id = 'zoomin-btn'; zb.textContent = '🔭 Kalvostoon'; zb.title = 'Lennä hitaasti yhteyttämiskalvostoon (mikä tahansa ohjaus keskeyttää)';
       zb.addEventListener('click', () => { if(window.gFlyToSheet) window.gFlyToSheet(); });
+      zb.addEventListener('dblclick', e => { e.preventDefault(); if(window.gJumpToSheet) window.gJumpToSheet(); });   // a double tap: there at once (owner 14.9.2026)
       document.body.appendChild(zb); }
     { const pb = document.createElement('button'); pb.id = 'pills-btn'; pb.textContent = '🏷️ Pillit'; pb.title = 'Näytä pillirivi, pisteet ja ajastin';   // off by default (html.nopills)
       document.documentElement.classList.add('nopills');
@@ -12189,13 +12202,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     { const fb = document.createElement('button'); fb.id = 'follow-btn'; fb.textContent = '🎯 Seuraa e⁻'; fb.title = 'Seuraa: kamera seuraa seuraavaa fotonia klorofyllistä P680:n elektroniin ja kantajien kautta FNR:ään (2D-version "followed")';
       let on = false; fb.addEventListener('click', () => { on = !on; fb.classList.toggle('on', on); if(on){ if(window.gValoFollowArm) window.gValoFollowArm(); } else if(window.gValoFollow) window.gValoFollow(false); });
       document.body.appendChild(fb); }
-    for(const [id, txt, title, run] of [
-        ['spawn-nadp-btn', '➕ NADP⁺ ×10', 'Lisää 10 NADP⁺-molekyyliä hiukkastasolle stroomaan (laatikon sisään)', () => window.gSpawnFree && window.gSpawnFree('nadp', 10)],
-        ['spawn-adp-btn', '➕ ADP ×10', 'Lisää 10 ADP-molekyyliä hiukkastasolle stroomaan', () => window.gSpawnFree && window.gSpawnFree('adp', 10)],
-        ['spawn-pi-btn', '➕ Pᵢ ×10', 'Lisää 10 fosfaattia hiukkastasolle stroomaan', () => window.gSpawnFree && window.gSpawnFree('pi', 10)],
-        ['spawn-h-btn', '➕ H⁺ strooma ×10', 'Lisää 10 protonia hiukkastasolle stroomaan', () => window.gValoSpawnProtons && window.gValoSpawnProtons(10, 1)],
-        ['spawn-hl-btn', '➕ H⁺ luumen ×10', 'Lisää 10 protonia hiukkastasolle luumeniin', () => window.gValoSpawnProtons && window.gValoSpawnProtons(10, -1)]]){   // (owner 14.9.2026: separate H+ buttons for the lumen and the stroma)
-      const b = document.createElement('button'); b.id = id; b.textContent = txt; b.title = title; b.addEventListener('click', run); document.body.appendChild(b); }   // owner 14.9.2026: the spawn buttons
+    for(const [id, txt, title, run, del] of [
+        ['spawn-nadp-btn', '± NADP⁺', 'Vasen: lisää yksi NADP⁺ hiukkastasolle stroomaan · oikea: poista yksi', () => window.gSpawnFree && window.gSpawnFree('nadp', 1), () => window.gRemoveFree && window.gRemoveFree('nadp', 1)],
+        ['spawn-adp-btn', '± ADP', 'Vasen: lisää yksi ADP hiukkastasolle stroomaan · oikea: poista yksi', () => window.gSpawnFree && window.gSpawnFree('adp', 1), () => window.gRemoveFree && window.gRemoveFree('adp', 1)],
+        ['spawn-pi-btn', '± Pᵢ', 'Vasen: lisää yksi fosfaatti hiukkastasolle stroomaan · oikea: poista yksi', () => window.gSpawnFree && window.gSpawnFree('pi', 1), () => window.gRemoveFree && window.gRemoveFree('pi', 1)],
+        ['spawn-h-btn', '± H⁺ strooma', 'Vasen: lisää yksi protoni hiukkastasolle stroomaan · oikea: poista yksi', () => window.gValoSpawnProtons && window.gValoSpawnProtons(1, 1), () => window.gValoRemoveProtons && window.gValoRemoveProtons(1, 1)],
+        ['spawn-hl-btn', '± H⁺ luumen', 'Vasen: lisää yksi protoni hiukkastasolle luumeniin · oikea: poista yksi', () => window.gValoSpawnProtons && window.gValoSpawnProtons(1, -1), () => window.gValoRemoveProtons && window.gValoRemoveProtons(1, -1)]]){   // (owner 14.9.2026: one particle per press, a right click removes one)
+      const b = document.createElement('button'); b.id = id; b.textContent = txt; b.title = title; b.addEventListener('click', run); b.addEventListener('contextmenu', e => { e.preventDefault(); del(); }); document.body.appendChild(b); }   // owner 14.9.2026: the spawn buttons
     { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 500 hiukkasta joka lajia, muut jätetään piirtämättä (kytkeytyy itsestään päälle laatikon sisällä)';   // in the gear menu for everyone (owner 12.9.2026)
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
@@ -12726,12 +12739,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     if(spawnEl) return;
     if(!gSelEnabled) return;   // selections switched off (dev panel)
     const a = pickAtom();
-    if(a && BABYLON.Vector3.Distance(cam.position, a.world || a.center) <= BUBBLE_R){ clearEtcSel(); centerOnAtom(a); return; }   // atoms are selectable wherever they RENDER (within the reveal bubble); pickAtom already returns only revealed atoms — farther, fall through to cofactor/complex
+    if(a && BABYLON.Vector3.Distance(cam.position, a.world || a.center) <= BUBBLE_R){ clearEtcSel(); centerOnAtom(a); if(window.gOrbitArm) window.gOrbitArm(); return; }   // atoms are selectable wherever they RENDER (within the reveal bubble); pickAtom already returns only revealed atoms — farther, fall through to cofactor/complex
     const gi = pickEtcGroup();
-    if(gi >= 0){ clearAtomSel(); deselectModel(); showEtcSel(gi); return; }
+    if(gi >= 0){ clearAtomSel(); deselectModel(); showEtcSel(gi); if(window.gOrbitArm) window.gOrbitArm(); return; }
     if(gSel.size){   // double-click centres the camera on the RTS selection AND arms the follow (keeps rotation free)
       let cx=0,cy=0,cz=0; for(const mi of gSel){ cx+=mInfo[mi].cx+gModelOff[mi*3]; cy+=mInfo[mi].cy+gModelOff[mi*3+1]; cz+=mInfo[mi].cz+gModelOff[mi*3+2]; }
-      const n=gSel.size; focusAlongMembrane(new BABYLON.Vector3(cx/n, cy/n, cz/n)); gCamFollow = true; return;   // centre AND level to the membrane-parallel view
+      const n=gSel.size; focusAlongMembrane(new BABYLON.Vector3(cx/n, cy/n, cz/n)); gCamFollow = true; if(window.gOrbitArm) window.gOrbitArm(); return;   // centre AND level to the membrane-parallel view
     }
     // Whole-complex selection (→ move/rotate gizmo) is a DEV-mode tool only.
     if(gDev){ const mid = pickModelAtCursor();
@@ -13052,7 +13065,16 @@ void main(void){
     window.addEventListener('keyup', e => { if(e.key === 'f' || e.key === 'F') gFHold = false; });
     /* F HELD FOLLOWS (owner 13.9.2026: 'if I hold down F it should follow the selection'): while the key is down the target rides on the
        selection's centre every frame - alpha, beta and radius untouched, so the camera keeps its offset and glides after a moving carrier. */
-    scene.onBeforeRenderObservable.add(() => { if(!gFHold) return; const c = selCentreOf(); if(c) cam.target.copyFrom(c); }); }
+    scene.onBeforeRenderObservable.add(() => { if(!gFHold) return; const c = selCentreOf(); if(c) cam.target.copyFrom(c); });
+    /* ORBIT (owner 14.9.2026: 'selecting something with double click should center the camera on it and rotate the camera around it as
+       long as it remains selected'): armed by a double-click selection (atom, cofactor or complex), the target rides the selection's
+       centre every frame and the camera circles it slowly - not while you drag it yourself - until the selection is gone. The centring
+       animation the double-click starts runs first (the orbit waits for it). */
+    let gOrbitOn = false; const ORBIT_RATE = 0.22;   // rad/s
+    window.gOrbitArm = () => { gOrbitOn = true; gLookPivot = null; };
+    scene.onBeforeRenderObservable.add(() => { if(!gOrbitOn) return; const c = selCentreOf(); if(!c){ gOrbitOn = false; return; }
+      if(scene.getAllAnimatablesByTarget(cam).length) return;   // the centring flight first
+      cam.target.copyFrom(c); if(!dragging && !gFHold) cam.alpha += ORBIT_RATE * Math.min(engine.getDeltaTime(), 50) * 0.001; }); }
   window.addEventListener('keydown', e => {
     if(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // don't hijack typing in dev inputs
     const k = e.key;
