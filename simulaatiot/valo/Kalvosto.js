@@ -111,7 +111,7 @@
       for(const g of u.ant){ const m = cof(g, 'chlorophyll_A', { lane: L }); antenna.push(m); }
       for(const g of u.cars){ const m = cof(g, 'xanthophyll', { lane: L }); antenna.push(m); }
       for(const m of antenna) if(m.lane === L){ m.psId = L; m.rcBody = u.p680M; }
-      u.p680M.get_node('BindSites/electron').modulate = 'white';   // the centre starts reduced (it must hold an electron to be excited)
+      // (14.9.2026, owner: 'no electrons in the scene at first load, only after H2O is split in the OEC' - P680 starts oxidised, the OEC's first water gives it its electron)
       orderAntenna(u.p680M, antenna.filter(m => m.psId === L && m !== u.p680M)); });
     /* b6f, per model with two monomers: the 2D scene's six BindSites (LUMENAL / STROMAL / plastocyanin x2). Qo 1 -> Rieske 2 -> f 3 -> the plastocyanin dock 4
        (arm b<m>.<k>.hi); bL 2 -> bH 3 -> cn 4 -> Qi 5 (arm b<m>.<k>.lo). A quinol docked at Qo hands one electron to each arm. */
@@ -137,7 +137,7 @@
       point(u.psi, 'target_1', mi, [c.cx, c.y0 - 60, c.cz]);
       for(const g of u.ant){ const m = cof(g, 'chlorophyll_A', { lane: L }); antenna.push(m); } for(const g of u.cars){ const m = cof(g, 'xanthophyll', { lane: L }); antenna.push(m); }
       for(const m of antenna) if(m.lane === L){ m.psId = L; m.rcBody = u.p700M; }
-      u.p700M.get_node('BindSites/electron').modulate = 'white';
+      // (P700 starts oxidised too - its first electron comes down the chain from water)
       orderAntenna(u.p700M, antenna.filter(m => m.psId === L && m !== u.p700M)); });
     /* FNR: the sink (owner 13.9.2026). It stands against PSI's FB face (Node2), FB hands electrons straight to its 'electron' BindSite (one past FB, no lane - the
        ferredoxin dock is one before it), and FNR.js empties that slot the moment it fills. The NADP+ dock stays and shows the count. */
@@ -209,7 +209,7 @@
       const tx = Math.max(lo.x + 40, Math.min(hi.x - 40, cam.getTarget().x));   // where you are looking, so the new ones are seen (14.9.2026: 'no protons appear when I press it' - they went anywhere along the 3200-unit box)
       for(let k=0;k<n;k++){ if(!reserveP.length) break; const i = reserveP.pop(), side = k % 2 === 0 ? 1 : -1, x = Math.max(lo.x + 40, Math.min(hi.x - 40, tx + (Math.random()-0.5)*300)), my = P.memY(x, z);
         const y = side > 0 ? Math.min(hi.y - 8, my + hT + 14 + Math.random()*80) : Math.max(lo.y + 8, my - hT - 14 - Math.random()*80);
-        P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), (Math.random()-0.5)*sp, sp*Math.sin(th)); made++; }
+        P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), sp*Math.sin(th), 0); made++; }
       P.homeFlush(); return made; };   // (parkedP: no longer used for protons - a bound proton rides its slot in plain sight, 13.9.2026)
     V.env.instantiate = (name, opts) => { const at = opts.position || [0,0,0], slot = opts.from_slot;
       if(name === 'electron'){ const s = sprites.find(s => !s.body); if(!s) return null; const b = new MB('electron', { position: at }); b.kin = { kind:'sprite', s }; s.body = b; s.mesh.setEnabled(true); s.corona.setEnabled(true); return b; }
@@ -343,8 +343,8 @@
           const N0 = Math.min(P.n, P.reserve || P.n);
           for(let i=N0;i<P.n;i++){ const o = i*3; P.grab(i); P.place(i, P.pos[o], -30000, P.pos[o+2]); reserveP.push(i); }   // the reserve: held and far under the cell, unseen, until the OEC makes one
           for(let i=0;i<N0;i++){ const side = i < N0/2 ? 1 : -1; let x, y, z; for(let k=0;k<40;k++){ x = bx[0] + Math.random()*(bx[3]-bx[0]); z = bx[2] + Math.random()*(bx[5]-bx[2]); const my = P.memY(x, z);
-              y = side > 0 ? my + hT + 6 + Math.random()*Math.max(10, bx[4] - my - hT - 12) : bx[1] + Math.random()*Math.max(10, my - hT - 6 - bx[1]); if(y > bx[1] && y < bx[4]) break; }
-            P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283, ph = Math.acos(2*Math.random()-1); P.release(i, x, y, z, sp*Math.sin(ph)*Math.cos(th), sp*Math.cos(ph), sp*Math.sin(ph)*Math.sin(th)); }
+              y = side > 0 ? my + hT + 14 + Math.random()*Math.max(10, bx[4] - my - hT - 20) : bx[1] + Math.random()*Math.max(10, my - hT - 14 - bx[1]); if(y > bx[1] && y < bx[4]) break; }
+            z = get.gTasoZ(); P.home(i, x, y, z); const sp = 20 + Math.random()*25, th = Math.random()*6.283; P.release(i, x, y, z, sp*Math.cos(th), sp*Math.sin(th), 0); }   // on the particle plane (14.9.2026: the plane mode is on inside the box), no drift off it
           P.homeFlush(); }
         for(const sl of V.all){ if(sl.alive && sl.parent_is_BindSites && sl._proton != null){ const q = sl.global_position; P.place(sl._proton, q[0], q[1], q[2]); } } } }   // a bound proton rides its slot
       for(const b of V.all){ if(!b.alive || !b.kin) continue; for(const t of [b.hard_target, b.soft_target]){ if(t instanceof Point && b.distance_to(t) <= t.radius + b.body_radius) t.when_body_enters_me(b); } }   // the target areas fire

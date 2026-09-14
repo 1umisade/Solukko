@@ -3512,14 +3512,18 @@ async function run(){
     add('solukalvo', CEN, R, null, { p:3.2 });
     add('soluseinä', CEN, R + 210, null, { p:3.2, nolat:true, halfH:110, col:[0.32,0.30,0.14] });
     const NEC = V(600, -3300, -1400);
-    const NE = add('tumakotelo', NEC, 2800, null, { pores:true, clip:true }); add('tumakotelo-sisä', NEC, 2500, null, { pores:true, inner:true });
-    const VAC = add('vakuoli', V(900, 3600, 800), 3700, null, { clip:true, hazeOk:true });   // hazeOk: the vacuole is water, so the far haze drifts inside it too (the dense medium stops at its membrane)
+    /* SIZES (owner 14.9.2026: 'make the organelle sizes, proportions and shapes a lot more realistic'): the cell is 40 um across, so 1 um = 400
+       units. Nucleus 10 um across (was 14), the vacuole the biggest thing in the cell, 21 um across and central (was 18, off to a side),
+       chloroplasts lenses 7 x 3.2 x 4.5 um (were 7.5 x 4 x 4), mitochondria 2.5 x 1 um rods (were 4 x 2), Golgi cisternae 2 um wide
+       (were 3.5). The host chloroplast that carries the light-reaction box keeps its size: the box must fit inside it. */
+    const NE = add('tumakotelo', NEC, 2000, null, { pores:true, clip:true }); add('tumakotelo-sisä', NEC, 1800, null, { pores:true, inner:true });
+    const VAC = add('vakuoli', V(2400, 3500, 400), 4300, null, { clip:true, hazeOk:true });   // hazeOk: the vacuole is water, so the far haze drifts inside it too (the dense medium stops at its membrane)
     /* a chloroplast: a lens (long axis along ax), its inner envelope, four thylakoid discs stacked inside */
     const CHL = [], DISCS = []; let LAYOUT_THY = null;
-    const chloro = (x,y,z, ax) => { const c = V(x,y,z), s = ax === 'x' ? [1,0.53,0.53] : [0.53,0.53,1];
-      const o = add('viherhiukkanen', c, 1500, s, { clip:true, ax }); add('viherhiukkanen-sisä', c, 1350, s, { ax });
-      const ds = ax === 'x' ? [1,0.05,0.556] : [0.556,0.05,1], row = [];
-      for(const dy of [-450,-150,150,450]) row.push(add('tylakoidi', V(x, y+dy, z), 900, ds, { ax }));
+    const chloro = (x,y,z, ax) => { const c = V(x,y,z), s = ax === 'x' ? [1,0.45,0.65] : [0.65,0.45,1];   // a lens: long, flat, a little narrower than long
+      const o = add('viherhiukkanen', c, 1400, s, { clip:true, ax }); add('viherhiukkanen-sisä', c, 1260, s, { ax });
+      const ds = ax === 'x' ? [1,0.05,0.62] : [0.62,0.05,1], row = [];
+      for(const dy of [-330,-110,110,330]) row.push(add('tylakoidi', V(x, y+dy, z), 850, ds, { ax }));
       CHL.push(o); DISCS.push(row); return o; };
     /* the host chloroplast: a bigger lens whose top disc carries the sheet (see above) */
     { const c = V(HOST[0], HOST[1], HOST[2]), s = [1, 0.6, 0.5];
@@ -3543,21 +3547,21 @@ async function run(){
     chloro(5000, -1800, -1800, 'z'); chloro(-1500, -800, -5400, 'x');
     /* a mitochondrion: outer and inner envelope, three flat cristae across the long axis */
     const MIT = [], MITIN = [];
-    const mito = (x,y,z, ax) => { const c = V(x,y,z), s = ax === 'x' ? [1,0.525,0.525] : [0.525,0.525,1];
-      const o = add('mitokondrio', c, 800, s, { clip:true, ax }); const inn = add('mitokondrio-sisä', c, 690, s, { ax });
+    const mito = (x,y,z, ax) => { const c = V(x,y,z), s = ax === 'x' ? [1,0.4,0.4] : [0.4,0.4,1];   // a rod, 2.5 x 1 um
+      const o = add('mitokondrio', c, 500, s, { clip:true, ax }); const inn = add('mitokondrio-sisä', c, 420, s, { ax });
       const cs = ax === 'x' ? [0.2,1,1] : [1,1,0.2];
-      for(const [off, r] of [[-300,240],[0,300],[300,240]]) add('krista', ax === 'x' ? V(x+off, y, z) : V(x, y, z+off), r, cs, { ax });
+      for(const [off, r] of [[-190,150],[0,185],[190,150]]) add('krista', ax === 'x' ? V(x+off, y, z) : V(x, y, z+off), r, cs, { ax });
       MIT.push(o); MITIN.push(inn); return o; };
     mito(2600, -5200, 2200, 'x'); mito(-3000, -5200, -2800, 'z'); mito(5200, 1200, 3400, 'z'); mito(-4800, 2600, -3000, 'x');
     /* the Golgi stack: five flat cisternae, the middle one the widest */
     const GOL = [];
-    for(let k=0;k<5;k++) GOL.push(add('golgin laite', V(-1800, 900 + k*150, 3600), 700 - Math.abs(k-2)*60, [1,0.07,0.57], { clip:true }));
+    for(let k=0;k<5;k++) GOL.push(add('golgin laite', V(-1800, 900 + k*90, 3600), 400 - Math.abs(k-2)*35, [1,0.08,0.6], { clip:true }));
     /* endoplasmic reticulum: three flat sheets hugging the nucleus */
-    const ER = [ add('solulimakalvosto', V(600, -400, -1400), 1300, [1,0.04,0.62], { clip:true }),
+    const ER = [ add('solulimakalvosto', V(-1200, -600, -2600), 1200, [1,0.04,0.62], { clip:true }),
                  add('solulimakalvosto', V(600, -3300, 1700), 1500, [1,0.04,0.53], { clip:true }),
                  add('solulimakalvosto', V(600, -3300, -4500), 1500, [1,0.04,0.53], { clip:true }) ];
     /* peroxisomes and vesicles */
-    for(const [x,y,z,r] of [[2000,-6300,-2600,300],[-1200,-6600,1500,260],[4200,5000,-2400,320],[-3300,5200,2600,280],[-5600,-3800,-1200,340],[1000,200,-6600,300]]) add('vesikkeli', V(x,y,z), r, null, { clip:true });
+    for(const [x,y,z,r] of [[2000,-6300,-2600,300],[-1200,-6600,1500,260],[5600,2600,-5000,320],[-3300,5200,2600,280],[-5600,-3800,-1200,340],[1000,200,-6600,300]]) add('vesikkeli', V(x,y,z), r, null, { clip:true });
     /* a rainbow by organelle (owner): the plasma membrane keeps the lipids' own yellow, everything else takes a hue -
        on the near lipids' vdW spheres (a per-instance tint the LIPTPL shader mixes in, the orbitals keep their
        element colours) and on the far shells alike. Inner membranes and sacs share their organelle's hue. */
@@ -5396,7 +5400,7 @@ void main(void){
   let gSimStat = () => '0 sim';   // molecules in the collision simulation, and what that pass costs
   let gDev = false;
   let gDevBox = null;                 // dev: the container box the free molecules and the loose proteins bounce in
-let gDevPlane = null, gPlaneDim = false, gTasoZ = 0, gDevTasoOn = false; const TASO_N = 100;   // gDevTasoOn: the yellow particle-plane sheet is off even in dev mode (owner 13.9.2026), the dev button 'hiukkastason levy' shows it
+let gDevPlane = null, gPlaneDim = false, gViewBoxWas = 0, gTasoZ = 0, gDevTasoOn = false; const TASO_N = 500;   // (owner 14.9.2026: '5x the amount of particles in the hiukkastaso')   // gDevTasoOn: the yellow particle-plane sheet is off even in dev mode (owner 13.9.2026), the dev button 'hiukkastason levy' shows it
 let gDevPsuBox = null, gPsuLo = null, gPsuHi = null, gCbox = null;
 let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block for the DNA links   // the box around the photosynthetic unit that keeps the loose proteins near it (drawn in dev mode)   // dev: the particle plane (100 of every free species live on it) and the 'dim the rest' switch
   let gBoxLo = null, gBoxHi = null;
@@ -9385,7 +9389,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gCut[1] = (cp.z - gCut[0]) >= 0 ? 1 : -1;                        // which side is toward the camera
     if(SOLU && gPsuLo){ gCutLo.copyFrom(gPsuLo); gCutHi.copyFrom(gPsuHi); }   // inside THE box (the unit box - which is now the drawn one, owner 13.9.2026: 'the membrane half is cut off noticeably away from the box')
     else { gCutLo.set(-1e9, -1e9, -1e9); gCutHi.set(1e9, 1e9, 1e9); }
-    gViewBox = (SOLU && gPsuLo && cp.x >= gPsuLo.x && cp.x <= gPsuHi.x && cp.y >= gPsuLo.y && cp.y <= gPsuHi.y && cp.z >= gPsuLo.z && cp.z <= gPsuHi.z) ? 1 : 0;   // inside THE box (the unit box - the drawn one, see gCbox) nothing outside it is drawn (owner 13.9.2026: 'once the camera is inside the bounding box hide the rest of the cell completely')   // inside the light-reaction box NOTHING outside it is drawn (owner 13.9.2026)   // only inside the light-reaction box
+    gViewBox = (SOLU && gPsuLo && cp.x >= gPsuLo.x && cp.x <= gPsuHi.x && cp.y >= gPsuLo.y && cp.y <= gPsuHi.y && cp.z >= gPsuLo.z && cp.z <= gPsuHi.z) ? 1 : 0;
+    if(gViewBox !== gViewBoxWas){ gViewBoxWas = gViewBox; gPlaneDim = !!gViewBox; const tb = document.getElementById('plane-dim-btn'); if(tb) tb.classList.toggle('on', gPlaneDim); }   // the particle plane switches on as the camera enters the box, off as it leaves (owner 14.9.2026); the button still overrides in between   // inside THE box (the unit box - the drawn one, see gCbox) nothing outside it is drawn (owner 13.9.2026: 'once the camera is inside the bounding box hide the rest of the cell completely')   // inside the light-reaction box NOTHING outside it is drawn (owner 13.9.2026)   // only inside the light-reaction box
     /* MEGACHEAP PROTEINS. Decided once per model, not per cell, so a complex is never half hull and
        half atoms. Once it is too small on screen its atoms stop drawing entirely and its hull is filled in
        the model's own colour instead - the third tier for proteins, matching the slab for the membrane.
@@ -12056,7 +12061,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         ['spawn-pi-btn', '➕ Pᵢ ×10', 'Lisää 10 fosfaattia hiukkastasolle stroomaan', () => window.gSpawnFree && window.gSpawnFree('pi', 10)],
         ['spawn-h-btn', '➕ H⁺ ×10', 'Lisää 10 protonia hiukkastasolle: 5 stroomaan, 5 luumeniin', () => window.gValoSpawnProtons && window.gValoSpawnProtons(10)]]){
       const b = document.createElement('button'); b.id = id; b.textContent = txt; b.title = title; b.addEventListener('click', run); document.body.appendChild(b); }   // owner 14.9.2026: the spawn buttons
-    { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 100 hiukkasta joka lajia, muut jätetään piirtämättä';   // in the gear menu for everyone (owner 12.9.2026)
+    { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 500 hiukkasta joka lajia, muut jätetään piirtämättä (kytkeytyy itsestään päälle laatikon sisällä)';   // in the gear menu for everyone (owner 12.9.2026)
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn',
