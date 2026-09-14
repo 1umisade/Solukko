@@ -8277,12 +8277,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        z = gTasoZ through the middle of the box - velocity z = 0 and the origin on the plane, so the shader's
        triangle wave keeps them there. The plane is drawn in dev mode; the Tasohiukkaset button dims the rest. */
     gTasoZ = (z0 + z1) / 2;
-    const tasoita = (c, v, cnt) => { const k = Math.min(TASO_N, cnt); for(let i=0;i<k;i++){ c[i*3+2] = gTasoZ; v[i*3+2] = 0; } };
-    tasoita(wc, wv, NW);
+    const W_TASO = 2500;   // water on the plane (owner 14.9.2026: '5x more water in the box inside the lumen')
+    const tasoita = (c, v, cnt, k0) => { const k = Math.min(k0 || TASO_N, cnt); for(let i=0;i<k;i++){ c[i*3+2] = gTasoZ; v[i*3+2] = 0; } };
+    tasoita(wc, wv, NW, W_TASO);
     /* the plane's water goes into the LUMEN (owner 14.9.2026: 'put 500 H2O in the plane in the lumen'): under the thylakoid cap's surface at its x,
        clear of the bilayer band, down to the box floor - the OEC takes its water from there. (The rest of the water stays on whichever
        side of the cap it landed - sideOnly 2 keeps every water molecule on its starting side.) */
-    if(SOLU_CELL && SOLU_CELL.THY){ for(let i=0;i<Math.min(TASO_N, NW);i++){ const x = SOLU_CELL.THY.pole.x + (rnd(i*7+3) - 0.5)*2400, top = memSurfY(x, gTasoZ) - gMemHalfT - 16, bot = y0 + 12;   // within 1200 of the pole: farther out the cap has dropped below the box floor and there is no lumen left
+    if(SOLU_CELL && SOLU_CELL.THY){ for(let i=0;i<Math.min(W_TASO, NW);i++){ const x = SOLU_CELL.THY.pole.x + (rnd(i*7+3) - 0.5)*2400, top = memSurfY(x, gTasoZ) - gMemHalfT - 16, bot = y0 + 12;   // within 1200 of the pole: farther out the cap has dropped below the box floor and there is no lumen left
         wc[i*3] = x; if(top > bot) wc[i*3+1] = bot + rnd(i*7+5)*(top - bot); } }
     // Global molecule-id space, shared by the molId attribute and the collision texture.
     const MOLBASE = { w:0, p:NW, co2:NW+NP, o2:NW+NP+NCO2, nadp:NW+NP+NCO2+NO2 };   // molecule id ranges, laid end to end from the counts (the id texture below is sized to fit)
@@ -8812,6 +8813,19 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const d=(t[0]-x)*(t[0]-x)+(t[1]-y)*(t[1]-y)+(t[2]-z)*(t[2]-z); if(d < bd){ bd=d; b=i; } } return b; },
       setWorld: (key, i, x, y, z) => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); const t=[0,0,0]; homePos(sp.side, sp.c, sp.v, i, gWaveT, t); const o=(MOLBASE[key]+i)*4; gMolDisp[o]=x-t[0]; gMolDisp[o+1]=y-t[1]; gMolDisp[o+2]=z-t[2]; gMolDisp[o+3]=1; },   // PLACED: against the unwrapped home, flagged - the shader draws it exactly there
       setOff: (key, i, dx, dy, dz) => { const o=(MOLBASE[key]+i)*4; gMolDisp[o]=dx; gMolDisp[o+1]=dy; gMolDisp[o+2]=dz; gMolDisp[o+3]=0; },
+      /* SELF-CONTAINED BOX (owner 14.9.2026: 'make the box a self-contained environment - things bounce back from the walls and cannot travel between
+         the box and the rest of the cell'): the free-molecule box becomes the UNIT box. Every home outside it is moved inside, the analytic paths
+         bounce off the unit box's walls, and outside the box the cell shows the box's periodic images (the wrap), never the molecules themselves. */
+      rebox: (lo, hi) => { const m = 2; bLo.set(lo.x + m, lo.y + m, lo.z + m); bHi.set(hi.x - m, hi.y - m, hi.z - m); let moved = 0;
+        const inside = (c, i) => c[i*3] >= bLo.x && c[i*3] <= bHi.x && c[i*3+1] >= bLo.y && c[i*3+1] <= bHi.y && c[i*3+2] >= bLo.z && c[i*3+2] <= bHi.z;
+        for(const sp of gSpecies){ const key = Object.keys(MOLBASE).find(k => MOLBASE[k] === sp.base); if(!key || key === 'p') continue;
+          for(let i=0;i<sp.n;i++){ if(inside(sp.c, i)) continue; const onPlane = Math.abs(sp.c[i*3+2] - gTasoZ) < 0.01 && sp.v[i*3+2] === 0;
+            gValoFree.home(key, i, bLo.x + rnd(i*11+3)*(bHi.x-bLo.x), bLo.y + rnd(i*11+5)*(bHi.y-bLo.y), onPlane ? gTasoZ : bLo.z + rnd(i*11+7)*(bHi.z-bLo.z)); moved++; }
+          gValoFree.homeFlush(key); }
+        if(gValoProtons){ const P = gValoProtons; for(let i=0;i<P.n;i++){ const o = i*3; if(P.pos[o+1] < -20000) continue; if(P.pos[o] >= bLo.x && P.pos[o] <= bHi.x && P.pos[o+1] >= bLo.y && P.pos[o+1] <= bHi.y && P.pos[o+2] >= bLo.z && P.pos[o+2] <= bHi.z) continue;
+            P.home(i, bLo.x + rnd(i*13+1)*(bHi.x-bLo.x), bLo.y + rnd(i*13+2)*(bHi.y-bLo.y), gTasoZ); moved++; } P.homeFlush(); }
+        sgResize(); const fade = Math.min(bHi.x-bLo.x, bHi.y-bLo.y, bHi.z-bLo.z)*0.5 - 6; gFreeFadeMax = fade; gFreeFade = fade; if(window.__ffSync) window.__ffSync();
+        gValoFree.upload(); return moved; },
       upload: () => gMolTex.update(gMolDisp), orig: key => { const sp = gSpecies.find(q => q.base === MOLBASE[key]); return sp ? sp.c : null; }, keys: ['w','p','co2','o2','nadp','atp','adp','pi'],
       drawn: (key, i, out) => { if(key === 'p') return false; const sp = gSpecies.find(q => q.base === MOLBASE[key]); return sp ? drawnPos(sp.side, sp.c, sp.v, i, gWaveT, out) : false; },   // where it is drawn right now (false = not drawn)
       /* a NEW HOME (14.9.2026, owner: 'buttons to spawn more free molecules'): the origin is moved so the analytic path is at (x, y, z) right now
@@ -8841,6 +8855,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const mx = (lo.x+hi.x)/2, my = (lo.y+hi.y)/2, mz = (lo.z+hi.z)/2, t = [0,0,0], cand = [];
       for(let i=0;i<sp.n;i++){ if(gMolHold[sp.base+i]) continue; gValoFree.pos(key, i, t); cand.push([(t[0]-mx)**2 + (t[1]-my)**2 + (t[2]-mz)**2, i]); }
       cand.sort((a, b) => b[0] - a[0]); let made = 0;
+      while(gGone[key] && gGone[key].length && n > 0){ const i = gGone[key].pop(); gMolHold[sp.base+i] = 0; gValoFree.setOff(key, i, 0, 0, 0); cand.unshift([0, i]); }   // the removed ones come back first
       const tx = Math.max(lo.x + 40, Math.min(hi.x - 40, cam.getTarget().x));   // where you are looking, so the new ones are seen
       for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1], x = Math.max(lo.x + 40, Math.min(hi.x - 40, tx + (Math.random()-0.5)*300)), z = gTasoZ, s = memSurfY(x, z) + gMemHalfT + 14;
         const y = Math.min(hi.y - 12, s + Math.random()*Math.min(120, Math.max(20, (hi.y - 12) - s))); gValoFree.home(key, i, x, y, z); made++; }
@@ -8852,9 +8867,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       for(let i=0;i<sp.n;i++){ if(gMolHold[sp.base+i]) continue; if(!drawnPos(sp.side, sp.c, sp.v, i, gWaveT, t)) continue; if(Math.abs(t[2] - gTasoZ) > 3 || !inPsu(t[0], t[1], t[2])) continue;
         cand.push([(t[0]-tg.x)**2 + (t[1]-tg.y)**2, i]); }
       cand.sort((a, b) => a[0] - b[0]); let gone = 0;
-      for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1]; const left = (lo.x - bLo.x) > (bHi.x - hi.x); const x = left ? bLo.x + 40 + Math.random()*Math.max(20, lo.x - bLo.x - 120) : hi.x + 80 + Math.random()*Math.max(20, bHi.x - hi.x - 120);
-        gValoFree.home(key, i, x, (bLo.y + bHi.y)/2 + (Math.random()-0.5)*200, gTasoZ + (Math.random()-0.5)*400); gone++; }
-      if(gone){ gValoFree.homeFlush(key); gValoFree.upload(); } return gone; };
+      for(let k=0;k<Math.min(n, cand.length);k++){ const i = cand[k][1]; gMolHold[sp.base+i] = 1; gValoFree.setOff(key, i, 0, -30000, 0); (gGone[key] || (gGone[key] = [])).push(i); gone++; }   // hidden under the cell, held (the box has no outside any more - 14.9.2026); the spawn brings it back
+      if(gone) gValoFree.upload(); return gone; };
+    const gGone = {};
     window.__freeNearest = (key, qx, qy, qz) => { const sp = gSpecies.find(z => z.base === MOLBASE[key]); if(!sp || !sp.n) return null;
       const T = gWaveT, o = [0,0,0]; let best = null, bd = Infinity;
       for(let i=0;i<sp.n;i++){ let x, y, z;
@@ -8884,8 +8899,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        64-unit grid over the box lists the shells overlapping each cell, rebuilt each frame (the loose
        proteins move), and a proton tests only the shells in its own cell - usually none. */
     const SG = 64, SG_MAX = 12;
-    const sgNx = Math.ceil((bHi.x-bLo.x)/SG)+1, sgNy = Math.ceil((bHi.y-bLo.y)/SG)+1, sgNz = Math.ceil((bHi.z-bLo.z)/SG)+1;
-    const sgCnt = new Uint8Array(sgNx*sgNy*sgNz), sgList = new Uint8Array(sgNx*sgNy*sgNz*SG_MAX);
+    let sgNx = Math.ceil((bHi.x-bLo.x)/SG)+1, sgNy = Math.ceil((bHi.y-bLo.y)/SG)+1, sgNz = Math.ceil((bHi.z-bLo.z)/SG)+1;
+    let sgCnt = new Uint8Array(sgNx*sgNy*sgNz), sgList = new Uint8Array(sgNx*sgNy*sgNz*SG_MAX);
+    const sgResize = () => { sgNx = Math.ceil((bHi.x-bLo.x)/SG)+1; sgNy = Math.ceil((bHi.y-bLo.y)/SG)+1; sgNz = Math.ceil((bHi.z-bLo.z)/SG)+1; sgCnt = new Uint8Array(sgNx*sgNy*sgNz); sgList = new Uint8Array(sgNx*sgNy*sgNz*SG_MAX); };   // (the box is re-set to the unit box at the first fit)
     const sgBuild = () => { sgCnt.fill(0);
       for(let sI=0;sI<NSH;sI++){ const cx=gShellCen[sI*3], cy=gShellCen[sI*3+1], cz=gShellCen[sI*3+2], R=gHulls[sI].maxR;
         const i0=Math.max(0, Math.floor((cx-R-bLo.x)/SG)), i1=Math.min(sgNx-1, Math.floor((cx+R-bLo.x)/SG));
@@ -10408,9 +10424,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       { const cx=(lx+hx)/2, hw=(hx-lx)/2; lx=cx-2*hw; hx=cx+2*hw; }   // twice as long along the line of complexes (x), both ways (owner 13.9.2026)
       { const cy=(ly+hy)/2, hh=(hy-ly)/2; ly=cy-2*hh; hy=cy+2*hh; }   // and twice as tall (y), both ways (owner 14.9.2026: 'make box 2x taller')
       gPsuLo.set(lx-M, ly-MY, lz); gPsuHi.set(hx+M, hy+MY, hz);
-      if(gValoFree && !gLumenLifted){ gLumenLifted = true;   // the plane's lumen water was laid down to the FREE box's floor, 300 under the unit box's: the part below the unit box is drawn as a wrapped copy elsewhere - lift it into the box (owner 14.9.2026: '500 H2O in the plane in the lumen')
-        const c = gValoFree.orig('w'), n = gValoFree.count('w'); if(c){ const bot = gPsuLo.y + 12; let moved = 0;
-          for(let i=0;i<Math.min(TASO_N, n);i++){ const x = c[i*3], y = c[i*3+1]; if(y >= bot) continue; const top = memSurfY(x, gTasoZ) - gMemHalfT - 16; if(top <= bot) continue;
+      if(gValoFree && !gLumenLifted){ gLumenLifted = true;
+        gValoFree.rebox(gPsuLo, gPsuHi);   // the free box IS the unit box from here on (self-contained, owner 14.9.2026)
+        const c = gValoFree.orig('w'), n = gValoFree.count('w'); if(c){ const bot = gPsuLo.y + 12, W = Math.min(2500, n); let moved = 0;   // the plane's water into the LUMEN inside the box: under the cap's surface, above the box floor (2500, owner 14.9.2026: '5x more')
+          for(let i=0;i<W;i++){ let x = c[i*3]; if(x < gPsuLo.x + 20 || x > gPsuHi.x - 20) x = gPsuLo.x + 20 + ((i*4241) % 1000)/1000*(gPsuHi.x - gPsuLo.x - 40); const top = memSurfY(x, gTasoZ) - gMemHalfT - 16; if(top <= bot) continue;
             gValoFree.home('w', i, x, bot + ((i*7919) % 1000)/1000*(top - bot), gTasoZ); moved++; }
           if(moved){ gValoFree.homeFlush('w'); gValoFree.upload(); } } }   // (z already carries MZ, symmetric about the plane)   // NOT clamped to the free-molecule box any more: the complexes stand partly outside it (PSII at y = -342 against its floor at -256), and a clamped box left them outside the cut and the cull
       if(!gDevPsuBox){ const bx=BABYLON.MeshBuilder.CreateBox('devPsuBox', {size:1}, scene);

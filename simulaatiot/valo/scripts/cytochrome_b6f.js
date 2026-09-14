@@ -6,6 +6,7 @@ V.SCRIPTS['cytochrome_b6f'] = {
   PULLING_special_actions(self, body){ },
   BINDING_special_conditions(self, body, BindSite){
     if(body.is_in_group('plastoquinone_B')){
+      if((/2$/.test(BindSite.name)) !== (V.pqSide(body) === 'ndh')) return null;   // the SIDES (owner 14.9.2026): the second monomer's slots take only NDH-1-side quinones, the first's only PSII-side ones - the complex's own pull used to take a wandering quinol into whichever Qo was free
       if(BindSite.name === 'plastoquinone_B_LUMENAL'){ for(const s of body.BindSites) if(dark(s)) return null; }    // Qo takes a FULL quinol
       if(BindSite.name === 'plastoquinone_B_LUMENAL2'){ for(const s of body.BindSites) if(dark(s)) return null; }
       if(BindSite.name === 'plastoquinone_B_STROMAL'){ for(const s of body.BindSites) if(white(s)) return null; }   // Qi an EMPTY quinone

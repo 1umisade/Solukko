@@ -231,7 +231,7 @@
         if(i < 0){ if(!F.count(key)) return null; i = F.nearest(key, at[0], at[1], at[2], 0); if(i < 0) return null; get.gMolHold()[F.base[key] + i] = 1; }
         F.setWorld(key, i, at[0], at[1], at[2]); const b = new MB(name, { position: at }); b.kin = { kind:'free', key, i }; return b; }
       if(['plastoquinone_B', 'plastocyanin', 'ferredoxin', 'VDE', 'zeaxanthin_epoxidase'].includes(name)){ const kin = slot && slot._dormant; if(!kin) return null; slot._dormant = null; kin.dormantAt = null;
-        const b = new MB(name, { position: at, radius: hullR(kin.sh ? kin.sh.mi : kin.b.mi) }); b.kin = kin; b.mi = kin.sh ? kin.sh.mi : kin.b.mi; kin.body = b; kinOf.set(b, kin); b.src = slot.body_that_I_am_bound_to ? slot.body_that_I_am_bound_to.molecule_name : null;   // where it comes from (a quinol from PSII goes to b6f's first Qo, one from NDH-1 to the second)
+        const b = new MB(name, { position: at, radius: hullR(kin.sh ? kin.sh.mi : kin.b.mi) }); b.kin = kin; b.mi = kin.sh ? kin.sh.mi : kin.b.mi; kin.body = b; kinOf.set(b, kin); b.src = slot.body_that_I_am_bound_to ? slot.body_that_I_am_bound_to.molecule_name : null; b.srcSlot = slot.name;   // where it comes from, and which slot: a quinone's SIDE (V.pqSide) - the PSII side of b6f or the NDH-1 side
         if(kin.b){ const sp = V.Globals.get(name + '_speed') || 30; kin.b.vx = (Math.random()-0.5)*sp; kin.b.vy = (kin.side || 1)*sp*0.7; kin.b.vz = 0; } return b; }
       return null; };
     V.env.consumed = (b, BindSite) => { const kin = b.kin; if(!kin) return;

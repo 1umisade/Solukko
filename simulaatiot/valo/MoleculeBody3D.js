@@ -199,6 +199,10 @@
 
     /* ── _physics_process: steering. Moving is the level's (the sprite bodies fly, the protein carriers ride the sheet's movers) ── */
     _physics_process(delta){
+      /* 3D (14.9.2026): 'exiting' used to be cleared only by the sensors' exit event from the slot the body left - with the sensors running every
+         other frame a fast electron was already outside when first seen, no exit ever fired, and it sat 'exiting' at its target for good
+         (BINDING refuses an exiting body). Cleared here too, once the body is clear of the slot it left. */
+      if(this._exitFrom){ const f = this._exitFrom, t = this.hard_target; if(!V.is_instance_valid(f) || !f.touch_area || this.distance_to(f) > f.touch_area.radius + this.body_radius + 1 || (t && t !== f && V.is_instance_valid(t) && this.distance_to(t) < 3)){ this._exitFrom = null; if(this.get_meta('exiting', false)) this.remove_meta('exiting'); } }   // (...or once it has reached the slot pulling it, even inside the old one's reach - neighbouring cofactors overlap)
       if(this.hard_target != null && V.is_instance_valid(this.hard_target)) this.direction = V.lerpDir(this.direction, V.dirTo(this.global_position, this.hard_target.global_position), 0.5);
       if(this.soft_target != null && this.hard_target == null && V.is_instance_valid(this.soft_target)) this.direction = V.lerpDir(this.direction, V.dirTo(this.global_position, this.soft_target.global_position), 0.025);
       this.velocity = [this.speed*this.direction[0], this.speed*this.direction[1], this.speed*this.direction[2]];
@@ -316,7 +320,7 @@
           const released_body = V.instantiate(BindSite.molecule_name, { position: BindSite.global_position, from_slot: BindSite });
           if(!released_body) continue;
           released_body.set_collision_layer_value(1, false); released_body.set_collision_mask_value(1, false); released_body.set_collision_layer_value(2, true); released_body.set_collision_mask_value(2, true);
-          released_body.set_meta('exiting', true); released_body.body_that_I_am_bound_to = null;
+          released_body.set_meta('exiting', true); released_body.body_that_I_am_bound_to = null; released_body._exitFrom = BindSite;   // (3D: the slot it leaves - see _physics_process, the 'exiting' flag is also cleared by distance)
           if(released_body.BindSites) for(const item of released_body.BindSites){ const source = BindSite.get_node('BindSites/' + item.name); if(!source) continue;
             item.modulate = source.modulate; if(item.ExcitedSprite && source.ExcitedSprite) item.ExcitedSprite.visible = source.ExcitedSprite.visible;
             if(item.is_in_group('electron')) item.EnergyLevel = source.EnergyLevel;
