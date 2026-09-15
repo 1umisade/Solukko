@@ -30,6 +30,7 @@
     mid:   ['H2O', 'CO2', 'O2', 'ADP', 'ATP', 'NADP', 'RuBP', '3PGA', 'plastocyanin', 'plastoquinone_B', 'ferredoxin', 'glucose', 'substrate_X', 'substrate_Y', 'product_P', 'O', 'VDE'],
     small: ['photon', 'proton', 'phosphate', 'electron'],
     get(key){ const name = key.replace(/_speed$/, ''); const v = this.slider_value;
+      if(name === 'electron') return v*this.SMALL_PARTICLE_SPEED*4;   // (3D, owner 15.9.2026: 'make the electron speed 4x faster when transferring')
       if(this.large.includes(name)) return v*this.LARGE_PARTICLE_SPEED; if(this.mid.includes(name)) return v*this.MIDSIZE_PARTICLE_SPEED; if(this.small.includes(name)) return v*this.SMALL_PARTICLE_SPEED; return null; },   // null = no physics (a complex, a cofactor)
     update_body_speeds(v){ this.slider_value = v; for(const b of V.all) b.get_speed_from_globals(); } };
 
@@ -207,7 +208,7 @@
       if(this.soft_target != null && this.hard_target == null && V.is_instance_valid(this.soft_target)) this.direction = V.lerpDir(this.direction, V.dirTo(this.global_position, this.soft_target.global_position), 0.025);
       this.velocity = [this.speed*this.direction[0], this.speed*this.direction[1], this.speed*this.direction[2]];
       let step = 1.0;   // (3D: a frame at 3x is 0.15 s - a pulled electron would jump 9 units past a slot whose touch reaches 4 and oscillate across it for ever; Godot's 60 Hz tick was 0.7 px. Never overshoot the hard target.)
-      if(this.hard_target != null && V.is_instance_valid(this.hard_target)){ const d = this.distance_to(this.hard_target), l = this.speed*delta; if(l > d && d > 0) step = d/l; }
+      if(this.hard_target != null && V.is_instance_valid(this.hard_target)){ const d = this.distance_to(this.hard_target), l = this.speed*delta; if(l > d && d > 0){ step = d/l; this.direction = V.dirTo(this.global_position, this.hard_target.global_position); this.velocity = [this.speed*this.direction[0], this.speed*this.direction[1], this.speed*this.direction[2]]; } }   // (3D 15.9.2026: the LAST step goes straight at the slot - with the heading only half-turned each frame a fast electron flew a chord of length d and orbited its slot at 7.8 units for ever, five frames a lap)
       const collision = V.env.move(this, this.velocity[0]*delta*step, this.velocity[1]*delta*step, this.velocity[2]*delta*step);
       /* (3D) Godot's bodies jostle, so a body sitting on a slot keeps re-entering its areas and the signals keep coming; here a carrier
          glides to the slot and sits dead still, so once a second a body in reach of its target is poked the way the signals would:

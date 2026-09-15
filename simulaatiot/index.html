@@ -10552,6 +10552,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             else if(y < top && y > bot){ if(y >= my){ y=top; b.vy=Math.abs(b.vy); } else { y=bot; b.vy=-Math.abs(b.vy); } } }
         const _hostMi = _car ? _car.hostMi(b.kin) : -1;   // pulled to a dock, it may enter its host's shell (the dock can sit inside it: a ferredoxin sits on FB)
         for(let sI=0;sI<gHulls.length;sI++){ const h=gHulls[sI]; if(h.mi===mi || h.mi===_hostMi) continue;   // membrane proteins and the other bouncers alike
+          if(_car){ const ob = gBouncers.find(q => q.mi === h.mi); if(ob && ob.kin && _car.hostMi(ob.kin) === mi) continue; }   // the OTHER bouncer is a carrier heading for ME (a ferredoxin for this FNR): its shell does not shove me either - it did, I fled, it followed, and we flew off together never binding (owner 15.9.2026)
           const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2];
           const dx=x-ox, dy=y-oy, dz=z-oz, d=Math.hypot(dx,dy,dz), minD=R+h.maxR; if(d >= minD || d < 1e-6) continue;
           const nx=dx/d, ny=dy/d, nz=dz/d; x=ox+nx*minD; y=oy+ny*minD; z=oz+nz*minD;
@@ -10648,6 +10649,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
             if(dSite > 60 && !sh.onShell){ z = gTasoZ + (z - gTasoZ)*Math.max(0, 1 - dt*2); }   // on the particle plane on the way, off it only into the pocket (a site can sit 30 units off the plane). The heading keeps its z part (13.9.2026: with hy = 0 and hz = 0 a quinone's heading was one-dimensional and could never turn round)
             if(gBoxLo){ if(x < gBoxLo.x+sh.R){ x = gBoxLo.x+sh.R; hx = Math.abs(hx); } else if(x > gBoxHi.x-sh.R){ x = gBoxHi.x-sh.R; hx = -Math.abs(hx); }
               if(z < gBoxLo.z+sh.R){ z = gBoxLo.z+sh.R; hz = Math.abs(hz); } else if(z > gBoxHi.z-sh.R){ z = gBoxHi.z-sh.R; hz = -Math.abs(hz); } }
+            if(sh.pq && b6fMi >= 0){ const b6x = mInfo[b6fMi].cx + gModelOff[b6fMi*3];   // the two quinone SETS keep to their own stretch (owner 15.9.2026: 'constrained to the membrane between b6f and PSII or NDH-1, dont permit passing through b6f'): set A (k 0-9) stays on PSII's side of b6f's centre line, set B (k 10-19) on NDH-1's - b6f's own PSII-side sites lie left of it, the NDH-1-side ones right
+              if(sh.k < 10){ if(x > b6x){ x = b6x; hx = -Math.abs(hx); } } else { if(x < b6x){ x = b6x; hx = Math.abs(hx); } } }
             const hostMi = (haveT && V) ? V.hostMi(sh) : -1;
             for(let sI=0;sI<gHulls.length;sI++){ const hh=gHulls[sI]; if(!gMemBound[hh.mi] || mols[hh.mi].shuttle || hh.mi === hostMi || sameKind(hh.mi, hostMi)) continue;   // the row copies sit ON the originals once the RTS floor flattens z, so a copy's shell must not wall off the host's pocket (owner 12.9.2026)
               const ox=gShellCen[sI*3], oy=gShellCen[sI*3+1], oz=gShellCen[sI*3+2]; const ex=x-ox, ey=y-oy, ez=z-oz, dd=Math.hypot(ex,ey,ez), minD=sh.R+hh.maxR; if(dd >= minD || dd < 1e-6) continue;
