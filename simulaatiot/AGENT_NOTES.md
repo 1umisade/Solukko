@@ -769,6 +769,6 @@ Omistaja: 'why this proton not glowing? and why cant i select nadp?'
   source._proton -> item._proton (protoni lahtee kantajan mukana), (b) ruutusilmukka: tumma slotti jolla on _proton -> V.env.slotEmptied (protoni
   vapautetaan slotin kohdalle). Mitattu: orpoja 0 koko 260 s:n ajon (ennen 119).
 - Napautus ei valinnut vapaita molekyyleja (vain laatikkoveto selectFreeBox). Uusi pickFreeAt(px, py): kaikki gValoFree.keys-lajit + protonit, piirretty
-  instanssi jonka ruutupiste on lahimpana (<= 22 px), millа korkeudella tahansa; tyhjan napautuksen haarassa ennen gDeselectAll. Shift lisaa/poistaa.
+  instanssi jonka ruutupiste on lahimpana (<= 22 px), milla korkeudella tahansa; tyhjan napautuksen haarassa ennen gDeselectAll. Shift lisaa/poistaa.
   Testattu synteettisilla pointer-tapahtumilla: 'Valittu: 1 hiukkasta', freeSelMark paalla. Napautus kompleksin paalla valitsee edelleen kompleksin
   (telakoitu NADP+ FNR:n sisalla -> FNR).
