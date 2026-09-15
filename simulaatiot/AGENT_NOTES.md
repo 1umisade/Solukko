@@ -811,3 +811,14 @@ ATP synthase at a time. one plastoquinol drifting to Qi site or Qo site.'
 - Omistaja: 'protons and electron glow drifts independently from the rest of the scene when i move the camera'. Mitattu ajetuilla ruuduilla
   (sc.render kameran hypyn jalkeen) ja elavassa silmukassa (kamera 4 yks/ruutu, readPixels): lyhdyn lampi 1-3 px protonin projektiosta, ei viivetta.
   Lyhty projisoi onApply:ssa scene.getTransformMatrix():lla (sama kuin geometrian). Ei toistettu - kysytty omistajalta lisatietoja (nakyma, liike).
+
+## 15.9.2026 - hohdon ajelehtiminen kameraa liikutettaessa: reusable-liput pois jalkikasittelypasseista (Claude Fable 5.1)
+
+Omistaja: protonit, elektronihohdot ja lyhdyn lammet ajelehtivat kameraa vedettaessa ja 'ottavat kiinni' kun kamera pysahtyy; 'it was not
+yesterday'. A/B omistajan koneella: _ab_prephase1.html (4a97960) ja _ab_phase1.html (d4573b0) EIVAT ajelehdi -> syy on sivun myohemmissa
+tanaan tehdyissa muutoksissa. Niista ainoa kuvaputkeen koskeva: brightPP, painterly, cofsil ja seloutline luotiin reusable=true:lla (poistaakseni
+'You're trying to reuse a post process not defined as reusable' -virheen). Babylonin reusable = kaksi tekstuuria ping-pongina (activate vaihtaa
+indeksin), ja se paastaa saman passin kameralle kahdesti - kuva ketjussa voi olla ruudun vanha, lyhty piirtaa lammet tuoreella kameralla.
+Korjaus: reusable pois kaikista neljasta; virheen aiheuttanut TUPLA-KIINNITYS estetaan kiinnityskohdissa (cam._postProcesses.indexOf(pp) < 0):
+wantPP-haara (cofsil/selOutline), gTogglePainterly (painterly/brightPP), eristysnakyman paluu (painterly).
+Omassa istunnossa (paneeli 3 fps, ajetut ruudut) ajelehtimista ei saatu toistetuksi - omistaja vahvistaa.
