@@ -3558,7 +3558,7 @@ async function run(){
     {match:'6vm1',   x:760,  y:84,   z:0,    rot:[-69,102,33],   label:'ATP synthase'},
     {match:'1ag6',   x:-10,  y:-190, z:0,    label:'Plastocyanin'},
     {match:'ferredoxin (plant', x:230, y:250, z:20, label:'Ferredoxin'},   // 6YEZ chain N WITH its 2Fe-2S cluster (owner 15.9.2026: 'the fdx should have a metal to which the electron is bound' - the 1A70 export had none)
-    {match:'1gjr',   x:400,  y:290,  z:80,   label:'FNR'},
+    {match:'1gjr',   x:400,  y:290,  z:110,  label:'FNR'},   // (z 110, was 80: the FNR boxes must not overlap the ferredoxin rows at z 20 - an atom inside another model's box is attributed to it, 15.9.2026)
     {match:'1rcx',   x:600,  y:380,  z:-80,  label:'RuBisCO'},
     // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - are out: owner 13.9.2026 'remove all the non ETC proteins')
     {match:'chlorophyll', x:-560, y:150, z:130, label:'Chlorophyll'},   // one CLA plucked from PSII → its own file
@@ -3621,8 +3621,10 @@ async function run(){
     if(pq){ for(let k=0;k<10;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-400 + k*20, y:0, z:-40 + (k%2)*80 }, 'pq', k);   // set A (k 0-9): PSII <-> b6f's PSII side
       for(let k=10;k<20;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-60 + (k-10)*20, y:0, z:-40 + (k%2)*80 }, 'pq', k); }   // set B (k 10-19): NDH-1 <-> b6f's other side (owner 14.9.2026: 'two different sets of PQB')
     if(pc){ pc.shuttle = 'pc'; pc.shuttleK = 0; for(let k=1;k<10;k++) clone(pc, { match:'pc-shuttle-'+k, label:'Plastosyaniini', x:-100 + k*30, y:-190, z:-60 + (k%3)*60 }, 'pc', k); }
-    { const fd = mols.find(m => m.cfg && m.cfg.match === 'ferredoxin (plant'); if(fd) for(let k=1;k<10;k++) clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + (k%5)*70 - 140, y:fd.cfg.y + Math.floor(k/5)*60, z:fd.cfg.z }, undefined, 0); }   // TEN ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
-    { const fr = mols.find(m => m.cfg && m.cfg.match === '1gjr'); if(fr) for(let k=1;k<10;k++) clone(fr, { match:'fnr-copy-'+k, label:'FNR', x:(fr.cfg.x || 0) + (k%5)*80 - 160, y:fr.cfg.y + Math.floor(k/5)*70, z:fr.cfg.z }, undefined, 0); }   // TEN FNR (owner 14.9.2026: 'put total 10 FNR and 10 ferredoxin in the stroma')
+    { const fd = mols.find(m => m.cfg && m.cfg.match === 'ferredoxin (plant'); if(fd) for(let k=1;k<10;k++){ const j = k < 3 ? k - 1 : k;   // grid slots 0,1,3..9 - slot 2 is the original's own place (clone #2 sat ON it and lost all its atoms to it, an invisible ghost - 15.9.2026)
+      clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + (j%5)*70 - 140, y:fd.cfg.y + Math.floor(j/5)*60, z:fd.cfg.z }, undefined, 0); } }   // TEN ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
+    { const fr = mols.find(m => m.cfg && m.cfg.match === '1gjr'); if(fr) for(let k=1;k<10;k++){ const j = k < 3 ? k - 1 : k;   // (as the ferredoxins: never on the original's slot; spaced 90, the FNR box is about 80 wide)
+      clone(fr, { match:'fnr-copy-'+k, label:'FNR', x:(fr.cfg.x || 0) + (j%5)*90 - 180, y:fr.cfg.y + Math.floor(j/5)*90, z:fr.cfg.z }, undefined, 0); } }   // TEN FNR (owner 14.9.2026: 'put total 10 FNR and 10 ferredoxin in the stroma')
     /* Fill the membrane. The complexes sit in one strip along x at z about 0, while the sheet is 1240
        deep - so the whole set (the five membrane complexes and the nine loose proteins) is repeated in
        two more rows at z = -410 and +410. Each copy is a full model of its own (same clone path as the
@@ -6130,11 +6132,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const gnx = Math.max(1, Math.ceil((bMaX-bMiX)/CELL)+1);
   const gny = Math.max(1, Math.ceil((bMaY-bMiY)/CELL)+1);
   const gnz = Math.max(1, Math.ceil((bMaZ-bMiZ)/CELL)+1);
+  const CELL_NC = gnx*gny*gnz;   // PER-MODEL CELLS (owner 15.9.2026: 'why fnr not always fully rendering'): a cell straddling two loose proteins was culled and thinned with ONE model's transform, and the other's atoms in it vanished once they drifted apart - the key now carries the atom's model, so every cell holds one model's atoms
   const cellIx = (x,y,z) => {
     let ix=Math.floor((x-bMiX)/CELL), iy=Math.floor((y-bMiY)/CELL), iz=Math.floor((z-bMiZ)/CELL);
     ix=Math.min(Math.max(ix,0),gnx-1); iy=Math.min(Math.max(iy,0),gny-1); iz=Math.min(Math.max(iz,0),gnz-1);
-    return (ix*gny+iy)*gnz+iz;
+    return (modelOf(x,y,z) + 1)*CELL_NC + (ix*gny+iy)*gnz+iz;
   };
+  const cellDecode = k => { const k0 = k % CELL_NC, mi = Math.floor(k/CELL_NC) - 1; return { ix: Math.floor(k0/(gny*gnz)), iy: Math.floor((k0%(gny*gnz))/gnz), iz: k0%gnz, mi }; };
   const cells = new Map();
   const getCell = k => { let c=cells.get(k); if(!c){ c={ sphM:[],sphC:[],sphR:[],sphH:[], nucM:[],nucC:[],nucH:[], orbM:[],orbCol:[],orbCen:[],orbOid:[],orbH:[], boM:[],boT:[],boCen:[],boCol:[],boOid:[],boH:[], lpM:[],lpT:[],lpCen:[],lpCol:[],lpOid:[],lpH:[] }; cells.set(k,c);} return c; };
   const H_OFF16 = new Float32Array(16); H_OFF16[7] = 1; H_OFF16[15] = 1;   // 'no hinge'
@@ -6545,7 +6549,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   const cellList = [];
   const cellHalfDiag = 0.5*Math.hypot(CELL,CELL,CELL);
   for(const [k,c] of cells){
-    const ix=Math.floor(k/(gny*gnz)), iy=Math.floor((k%(gny*gnz))/gnz), iz=k%gnz;
+    const { ix, iy, iz, mi: kMi } = cellDecode(k);
     const cx=bMiX+(ix+0.5)*CELL, cy=bMiY+(iy+0.5)*CELL, cz=bMiZ+(iz+0.5)*CELL;
     let sphere=null;
     if(c.sphM.length){ sphere=BABYLON.MeshBuilder.CreatePlane('cs'+k,{size:2},scene); sphere.material=vdwMat; glassSplit(sphere); sphere.isPickable=false;
@@ -6556,7 +6560,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       sphere.thinInstanceSetBuffer('macroN', macroNorm(c.sphM, c.macroN),4,true); c.macroN = null; setHinge(sphere, c.sphH); c.sphH = null;   // the molecule's surface normal + buriedness per atom (see macroField)
       sphere.renderingGroupId=1; sphere.alwaysSelectAsActiveMesh=true; sphere.setEnabled(false); }
     const sphFull = sphere ? (c.sphM.length/16)|0 : 0;   // full instance count → the distance LOD thins from this
-    const entry = { cx,cy,cz, mi:modelOf(cx,cy,cz), meshes:[], nuc:null, sphere, macro:true, r:cellHalfDiag, visOn:false, nucOn:false, sphOn:false, k, sphFull, sphCount:sphFull };   // mi → which model transforms this cell (cull must match the shaders)
+    const entry = { cx,cy,cz, mi: kMi >= 0 ? kMi : modelOf(cx,cy,cz), meshes:[], nuc:null, sphere, macro:true, r:cellHalfDiag, visOn:false, nucOn:false, sphOn:false, k, sphFull, sphCount:sphFull };   // mi → which model transforms this cell (cull must match the shaders) - the key's model (per-model cells)
     cellList.push(entry); macroCellByKey.set(k, entry);
     await yield_();
   }
@@ -6646,9 +6650,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     for(const [k,c] of cells){
       let entry = macroCellByKey.get(k);
       if(!entry){   // a lobe centre landed in a cell with no atom sphere (rare, at cell borders) → fresh entry
-        const ix=Math.floor(k/(gny*gnz)), iy=Math.floor((k%(gny*gnz))/gnz), iz=k%gnz;
+        const { ix, iy, iz, mi: kMi } = cellDecode(k);
         const cx=bMiX+(ix+0.5)*CELL, cy=bMiY+(iy+0.5)*CELL, cz=bMiZ+(iz+0.5)*CELL;
-        entry = { cx,cy,cz, mi:modelOf(cx,cy,cz), meshes:[], nuc:null, sphere:null, macro:true, r:cellHalfDiag, visOn:false, nucOn:false, sphOn:false, k };
+        entry = { cx,cy,cz, mi: kMi >= 0 ? kMi : modelOf(cx,cy,cz), meshes:[], nuc:null, sphere:null, macro:true, r:cellHalfDiag, visOn:false, nucOn:false, sphOn:false, k };
         macroCellByKey.set(k, entry); cellList.push(entry);
       }
       if(c.nucM.length){ const m=BABYLON.MeshBuilder.CreatePlane('cn'+k,{size:2},scene); m.material=nucMatG; m.isPickable=false; m.doNotSyncBoundingInfo=true;   // the matrices carry the atom centre in their w slots - Babylon must not derive bounds from them
@@ -13383,7 +13387,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
      Running it last graded the finished frame, which reads better, but the grade is one of the things
      being ruled out as the cause of a black screen, so it goes back to the position it had when the
      scene was known good. At neutral slider values this pass is an identity either way. */
-  const brightPP = new BABYLON.PostProcess('bright', 'bright', ['bright','contrast','sat','hi','sh'], null, 1.0, cam);
+  const brightPP = new BABYLON.PostProcess('bright', 'bright', ['bright','contrast','sat','hi','sh'], null, 1.0, cam, undefined, undefined, true);   // reusable: it is detached and attached again as the cartoon look toggles (Babylon refuses to re-attach a non-reusable pass, 15.9.2026)
   brightPP.onApply = eff => { eff.setFloat('bright', gBright);
     eff.setFloat('contrast', 1.0 + Math.max(0.0, 1.0 - gBright) * 1.2);   // dimmer → punchier (no wash-out)
     eff.setFloat('sat', gSat); eff.setFloat('hi', gHi); eff.setFloat('sh', gSh); };
@@ -13393,7 +13397,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   window.gPainterlyOn = () => painterlyOn;
   window.gPainterlyOn = true; window.gTogglePainterly = () => { painterlyOn = !painterlyOn; window.gPainterlyOn = painterlyOn; if(painterlyOn){ cam.detachPostProcess(brightPP); cam.attachPostProcess(painterly, Math.max(0, cam._postProcesses.indexOf(lanternPP))); } else { cam.detachPostProcess(painterly); cam.attachPostProcess(brightPP, Math.max(0, cam._postProcesses.indexOf(lanternPP))); } const b = document.getElementById('cartoon-btn'); if(b) b.classList.toggle('on', painterlyOn); };   // K key and the dev panel's Valaistus button
   const painterly = new BABYLON.PostProcess('painterly', 'painterly',
-    ['texel', 'edgeAmt', 'bands', 'paperAmt', 'bright', 'gradeB', 'gradeC', 'gradeS', 'gradeHi', 'gradeSh'], null, 1.0, cam);
+    ['texel', 'edgeAmt', 'bands', 'paperAmt', 'bright', 'gradeB', 'gradeC', 'gradeS', 'gradeHi', 'gradeSh'], null, 1.0, cam, undefined, undefined, true);   // reusable (the isolate view and the cartoon toggle detach and re-attach it)
   painterly.onApply = eff => {
     eff.setFloat2('texel', 1 / engine.getRenderWidth(), 1 / engine.getRenderHeight());
     eff.setFloat('gradeB', gBright); eff.setFloat('gradeC', 1.0 + Math.max(0.0, 1.0 - gBright) * 1.2); eff.setFloat('gradeS', gSat); eff.setFloat('gradeHi', gHi); eff.setFloat('gradeSh', gSh);   // the brightness grade, folded in (the 'bright' pass runs only while the cartoon is off)

@@ -705,3 +705,43 @@ the electron should wiggle a bit before releasing'.
 - Testi: paneelin rAF kuristettuna ajettiin sc.render()-silmukalla nopeus 3.0x; hyppyjen pituudet <= 53, varinat nakyvat (_wig), 10/10 Fd:n
   slotti metallilla, Fe-S piirtyy ETC-paallysteeseen. Ketjun lapimeno oli sama saannot paalla ja pois (WIGGLE_S 0, HOP_MAX 1e9) - hidas
   virta johtuu muusta kuin naista.
+
+## 15.9.2026 - FNR:n osittainen piirtyminen: haamukloonit ja mallikohtaiset solut (Claude Fable 5.1)
+
+Omistaja: 'why fnr not always fully rendering? and the binding of it with fdx is still clumsy and results in pushing each other and flying away'.
+
+Mittaus (cs-meshien modelId-puskurit): malli 51 (FNR-klooni #2) 0 atomia, malli 6 (alkuperainen FNR) 10684 = 2 x 5342; Fd-klooni #2 (malli 42)
+0 atomia. Syy: kloonien ruudukko (k%5, k/5) antoi kloonille k=2 TASAN alkuperaisen paikan -> modelOf (pienin laatikko, joka sisaltaa pisteen)
+antoi kaikki sen atomit alkuperaiselle. Klooni oli nakymaton haamu, jolla oli silti kappale (FNR-51: ferredoksiinit telakoituivat siihen ja
+kuorikin tyonsi), ja Fd-42 oli myos se kymmenes ferredoksiini ilman metallia.
+- Korjaus: kloonit ruutuihin j = k<3 ? k-1 : k (0,1,3..9 - ruutu 2 on alkuperaisen), FNR:n vali 90 (laatikko ~80 levea), FNR z 110 (ei paallekkain
+  Fd-rivien z 20 kanssa: toisen laatikon sisalla oleva atomi luetaan sille).
+- Solut olivat AVARUUDELLISIA ammeita (yksi mi = solun keskipisteen malli): 75 solua sisalsi useamman mallin atomeja (esim. 6:1748, 49:58, 50:952).
+  Kun irtoproteiinit ajelehtivat erilleen, solu kuvattiin/karsittiin yhden mallin muunnoksella ja toisen atomit siina katosivat -> 'not always fully
+  rendering'. Nyt solun avain kantaa mallin: cellIx = (modelOf(atomi)+1)*CELL_NC + ruutu, cellDecode(k) purkaa mi:n ja ruudun (6548, 6649),
+  entry.mi = avaimen malli. Kaikki cellIx-kutsujat (PASS A/B, lobet, 11704 reveal) saavat sen automaattisesti.
+- Kalvosto: 'jumissa'-testi mittasi etaisyytta kohteeseen, joka itse liikkui (kotiin ajelehtiva FNR laheni jumittunutta Fd:ta 30 s) -> lisaksi:
+  ei liikkunut 4 yksikkoa 2 s:ssa -> kierto (stuckT = 4).
+- brightPP ja painterly luodaan reusable=true: ne irrotetaan/kiinnitetaan (sarjakuvatila, eristysnakyma), Babylon kirjasi 'You're trying to reuse
+  a post process not defined as reusable' eika kiinnittanyt uudelleen.
+- Ferredoksiinin ja FNR:n telakointi (mitattu pakotetulla kokeella, kin.b:n nopeus ja etaisyys joka toinen ruutu):
+  (a) FNR:n ferredoksiinitelakka oli kehyspiste 54 mallin KESKIPISTEEN ylapuolella - FNR pyorii (tumble), joten telakka kiersi sen ympari jopa
+      38 yks/s; vedetty Fd jahtasi sita 60 s eika liukuma (rate kasvaa 0.1/etaisyys) sulkeutunut koskaan. Nyt s.frame = null, s.local_offset =
+      [0, hullR(fnr)+hullR(fd)+4, 0]: maailman y-akselin suuntainen offset kappaleesta, ei pyori.
+  (b) FNR:n koti (Node2) oli 22 yks PSI:n kuoren SISALLA (R = hullR(psi)+hullR(fnr)-6 PSI:n kierretyn paikallisakselin suuntaan) - kuori tyonsi sen
+      ulos joka ruutu, FNR ei koskaan levannyt (fnrv 8 jatkuvasti, 70-170 yks kodista). Kodit lasketaan nyt maailmakoordinaateissa PSI:n KUOREN
+      keskipisteesta (gHulls c, 24 yks mallin laatikon keskipisteesta): y = sqrt(R^2 - dx^2), R = hullR(psi)+hullR(fnr)+10 -> vali >= 10 kaikilla.
+  (c) MoleculeBody3D.try_BINDING: liukumasilmukka paattyy myos kun TOINEN kappale tayttaa slotin ensin - liukuja jai eloon fysiikka ja tormays pois,
+      binding_ongoing paalla: jaatynyt haamu ilmassa ikuisesti (Fd seisoi 24 s nopeudella 29 paikallaan). Havinnyt kisa palauttaa fysiikan,
+      poistaa metan ja hakee uuden kohteen.
+- Selaimen paneeli piiloutuu ~40 s avaamisen jalkeen (JS-kutsut aikakatkeavat); koe ajettiin sivulle injektoidulla setInterval-skriptilla, joka
+  raportoi tulokset GET /__result_<tag>?json -pyyntoina python http.serverin lokiin (preview_logs). engine.getDeltaTime ylikirjoitettu 33 ms:iin,
+  koska piilossa rAF ei kay ja deltaTime on 0.
+  (d) try_BINDING:n liukuma sulki valia nopeudella rate = 0.1/etaisyys (2D: paikallaan seisova slotti) - LIIKKUVAN isannan (FNR ajelehtii 8-17 yks/s)
+      slotti karkasi siita: 21 kantajaa roikkui ilmassa fysiikka pois, liukuen ikuisesti (koe: kaikki kymmenen Fd:ta ja kymmenen FNR:aa paitsi yksi).
+      Liukuma etenee nyt vahintaan kappaleen omalla nopeudella (body.speed, >= 30) ja luovuttaa 10 s:n jalkeen (fysiikka takaisin, uusi kohde).
+  (e) Kotiin ajelehtiva proteiini (FNR, RuBisCO) piti taysinopeuden (8) kotiinsakin ja kiersi sita ikuisesti - nyt nopeus skaalataan min(1, d/30):lla,
+      proteiini pysahtyy kotiinsa.
+- HUOM koeajosta: sc.render()-silmukka yhdessa JS-kutsussa ei paasta korutiineja (await V.process_frame()) etenemaan - mikrotehtavat ajetaan vasta
+  kutsun lopussa, joten liukumat ja varinat etenivat askeleen per 120 ruutua ja NAYTTIVAT jaatyneilta (21 'haamua'). Oikea ajuri: sc.render();
+  await Promise.resolve() (x2) joka ruudun jalkeen. Silla ajettuna Fd telakoitui, antoi elektronin FNR:lle (stats.fnrE 1), haamuja 0.

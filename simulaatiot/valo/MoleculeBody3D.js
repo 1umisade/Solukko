@@ -272,11 +272,15 @@
       if(r instanceof MoleculeBody3D){
         BindSite.set_meta('binding_ongoing', true); body.set_meta('binding_ongoing', true);
         body.has_collision = false; body.set_physics_process(false);
-        let rate = 0.0;
+        let rate = 0.0, glideT = 0;
         while(V.is_instance_valid(body) && BindSite.modulate === 'dark'){
           const bp = body.global_position, sp = BindSite.global_position; const distance = Math.max(Math.hypot(bp[0]-sp[0], bp[1]-sp[1], bp[2]-sp[2]), 1.0);
           rate = rate + (0.5 - rate)*(0.1/distance);
-          body.global_position = [bp[0] + (sp[0]-bp[0])*rate, bp[1] + (sp[1]-bp[1])*rate, bp[2] + (sp[2]-bp[2])*rate];
+          /* 3D (owner 15.9.2026: 'the binding is still clumsy'): the 2D glide closes the gap by a rate that starts at 0.1/distance - fine for a slot that stands
+             still, but a slot on a MOVING host (FNR drifts at 8-17) ran away from it: 21 carriers hung in mid-air, physics off, gliding for ever. The glide
+             now moves at least at the body's own speed, and gives up after 10 s of sim time (the body gets its physics back below). */
+          const spd = Math.max(body.speed || 30, 30) * (V.dt || 0.0167), frac = Math.min(1, Math.max(rate, spd/distance)); glideT += (V.dt || 0.0167); if(glideT > 10) break;
+          body.global_position = [bp[0] + (sp[0]-bp[0])*frac, bp[1] + (sp[1]-bp[1])*frac, bp[2] + (sp[2]-bp[2])*frac];
           const np = body.global_position;
           if(Math.hypot(np[0]-sp[0], np[1]-sp[1], np[2]-sp[2]) < 1 || (rate > 0.45 && Math.hypot(np[0]-sp[0], np[1]-sp[1], np[2]-sp[2]) < 12)){   // (3D 14.9.2026: a slot on a MOVING host - FNR is a loose protein - runs ahead of the glide, which closes half the gap a frame: at 3x speed the gap settled at 5-10 units and the ferredoxin never bound - so once the glide is at full rate, 12 units (under a ferredoxin's radius) is close enough)
             if(body.BindSites) for(const item of body.BindSites){ const dest = BindSite.get_node('BindSites/' + item.name); if(!dest) continue;
@@ -288,6 +292,10 @@
             V.env.consumed(body, BindSite);   // (3D: a protein carrier is not freed but parked in the slot - the level keeps its model there until the slot releases)
             body.queue_free(); BindSite.modulate = 'white'; }
           await V.process_frame(); }
+        /* LOST THE RACE (3D, owner 15.9.2026: 'the binding is still clumsy'): the loop above also ends when ANOTHER body filled the slot first - the glider was
+           left alive with its physics and collision off and 'binding_ongoing' set, a frozen ghost in mid-air for ever (a ferredoxin stood 24 s at one
+           point with velocity 29). It gets its physics back and looks for a new target. */
+        if(V.is_instance_valid(body) && body.alive){ body.has_collision = true; body.set_physics_process(true); body.remove_meta('binding_ongoing'); if(body.hard_target === BindSite) body.hard_target = null; body.check_soft_target(); }
         BindSite.body_that_I_am_bound_to = this;
         for(const pulled_body of BindSite.pulled_bodies) if(V.is_instance_valid(pulled_body)) pulled_body.hard_target = null;
         BindSite.pulled_bodies.length = 0; BindSite.remove_meta('binding_ongoing');
