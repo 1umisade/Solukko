@@ -345,6 +345,7 @@
           released_body.set_meta('exiting', true); released_body.body_that_I_am_bound_to = null; released_body._exitFrom = BindSite; released_body._fromPlace = this.place_in_the_chain; released_body._fromBody = this;   // (3D: where it came from - it may only go forward, see PULLING_conditions)   // (3D: the slot it leaves - see _physics_process, the 'exiting' flag is also cleared by distance)
           if(released_body.BindSites) for(const item of released_body.BindSites){ const source = BindSite.get_node('BindSites/' + item.name); if(!source) continue;
             item.modulate = source.modulate; if(item.ExcitedSprite && source.ExcitedSprite) item.ExcitedSprite.visible = source.ExcitedSprite.visible;
+            if(source._proton != null){ item._proton = source._proton; source._proton = null; }   // 3D (owner 15.9.2026: 'why this proton not glowing'): the proton that RODE the dock's sub-slot leaves with the carrier - it stayed pinned on the dark sub-slot, held, bodiless, unlit: 119 of them piled on the QB pockets
             if(item.is_in_group('electron')) item.EnergyLevel = source.EnergyLevel;
             if(source.is_in_group('followed')){ source.remove_from_group('followed'); item.add_to_group('followed'); } }
           if(released_body.is_in_group('electron')){ released_body.EnergyLevel = BindSite.EnergyLevel;

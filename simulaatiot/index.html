@@ -4769,6 +4769,14 @@ void main(void){
         if(!freeWorld(key, i, _pFree)) continue; if(Math.abs(_pFree[2] - gTasoZ) > 3) continue;   // the plane's particles only
         const q = projPt(_pFree[0], _pFree[1], _pFree[2]); if(q.z < 0 || q.z > 1 || q.x < lx || q.x > hx || q.y < ly || q.y > hy) continue;
         gSelFree.add(key + ':' + i); if(gSelFree.size >= 4000) return; } } };
+  /* a TAP on a free molecule or proton selects it (owner 15.9.2026: 'why cant i select nadp' - only the box-drag reached the free particles): the drawn instance
+     whose screen point is nearest the tap, within 22 px, on any height (a docked NADP+ rides its slot off the plane) */
+  const pickFreeAt = (px, py) => { if(!gValoFree || !gValoFree.keys) return null; let best = null, bd = 22*22;
+    for(const key of gValoFree.keys){ const n = key === 'p' ? (gValoProtons ? gValoProtons.n : 0) : gValoFree.count(key);
+      for(let i=0;i<n;i++){ if(key === 'p' ? (gValoProtons.pos[i*3+1] < -20000) : false) continue;
+        if(!freeWorld(key, i, _pFree)) continue; const q = projPt(_pFree[0], _pFree[1], _pFree[2]); if(q.z < 0 || q.z > 1) continue;
+        const d2 = (q.x-px)*(q.x-px) + (q.y-py)*(q.y-py); if(d2 < bd){ bd = d2; best = key + ':' + i; } } }
+    return best; };
   const moveFreeTo = (px, py) => { if(!gSelFree.size) return;
     const ray = scene.createPickingRay(px, py, BABYLON.Matrix.Identity(), cam); if(Math.abs(ray.direction.z) < 1e-6) return;
     const t = (gTasoZ - ray.origin.z)/ray.direction.z; if(t < 0) return; const tx = ray.origin.x + ray.direction.x*t, ty = ray.origin.y + ray.direction.y*t;
@@ -5145,8 +5153,9 @@ void main(void){
             else { gSel.clear(); gSelMol.clear(); gSel.add(rtsDownModel); focusOnModel(rtsDownModel); }   // a fresh pick centres the camera on it
             if(etcSel >= 0) showEtcSel(-1);   // a selected cofactor would keep the green ring for itself (rebuildSelMask) - the tapped complex gets it
             updateSelectionUI();
-          } else {   // click on empty → deselect EVERYTHING (move order is on RIGHT-click)
-            window.gDeselectAll();   // ...including the atom and cofactor selections (clearing only the RTS set left a selected atom outlined with its info card open)
+          } else { const fid = pickFreeAt(scene.pointerX, scene.pointerY);   // a tap on a free molecule / proton selects it (15.9.2026)
+            if(fid){ if(!e.shiftKey) window.gDeselectAll(); if(e.shiftKey && gSelFree.has(fid)) gSelFree.delete(fid); else gSelFree.add(fid); updateSelectionUI(); }
+            else window.gDeselectAll();   // click on empty → deselect EVERYTHING (move order is on RIGHT-click)   // ...including the atom and cofactor selections (clearing only the RTS set left a selected atom outlined with its info card open)
           } }
         return;
       }

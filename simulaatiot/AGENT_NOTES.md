@@ -758,3 +758,17 @@ kuorikin tyonsi), ja Fd-42 oli myos se kymmenes ferredoksiini ilman metallia.
   valkoinen (varattu) tai toinen kappale on siihen vedettyna (pqIdle), liikuttaja saa null -> kinoni ajelehtii omalla kalvopatkallaan (nopeus 40,
   satunnainen suunta, x-rajat b6f:n keskilinjaan) ja jokainen kuori tyontaa sen ulos. Kappale pitaa kohteensa ja tarkistaa 3 s valein.
   Mitattu: alussa 20/20 kinonia kompleksin kuoren sisalla, 58 s:n jalkeen 0/15 vapaista sisalla, 15 odotti varattua paikkaa kalvossa.
+
+## 15.9.2026 - hohtamaton protoni ja napautusvalinta vapaille molekyyleille (Claude Fable 5.1)
+
+Omistaja: 'why this proton not glowing? and why cant i select nadp?'
+- Protonin hohto tulee lyhdysta: valoreaktioiden kappaleet (gValoElecs, p:1) ja lahimmat VAPAAT simuloidut protonit (P.hold[i] = 0). Mittaus: 119 protonia
+  oli hold = 1 ILMAN kappaletta ja ilman slottia - kasat telakoiden protoni-alislotien kohdalla (PSII:n QB-taskut, b6f:n Qi): kun kinoni lahti taskusta,
+  try_RELEASING kopioi alislottien modulate-tilan uudelle kappaleelle mutta EI _proton-indeksia -> indeksi jai tummalle alislotille, ruutusilmukka
+  (Kalvosto ~389) naulitsi protonin sen kohdalle ikuisesti, lyhty ohitti sen (hold) eika kappaletta ollut. Korjaus: (a) try_RELEASING siirtaa
+  source._proton -> item._proton (protoni lahtee kantajan mukana), (b) ruutusilmukka: tumma slotti jolla on _proton -> V.env.slotEmptied (protoni
+  vapautetaan slotin kohdalle). Mitattu: orpoja 0 koko 260 s:n ajon (ennen 119).
+- Napautus ei valinnut vapaita molekyyleja (vain laatikkoveto selectFreeBox). Uusi pickFreeAt(px, py): kaikki gValoFree.keys-lajit + protonit, piirretty
+  instanssi jonka ruutupiste on lahimpana (<= 22 px), millа korkeudella tahansa; tyhjan napautuksen haarassa ennen gDeselectAll. Shift lisaa/poistaa.
+  Testattu synteettisilla pointer-tapahtumilla: 'Valittu: 1 hiukkasta', freeSelMark paalla. Napautus kompleksin paalla valitsee edelleen kompleksin
+  (telakoitu NADP+ FNR:n sisalla -> FNR).
