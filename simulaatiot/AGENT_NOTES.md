@@ -802,3 +802,7 @@ ATP synthase at a time. one plastoquinol drifting to Qi site or Qo site.'
   soft_target = null (kinoni ajelehtii omalla patkallaan, tarkistus 3 s valein). plastocyanin / ferredoxin: free(list) = tummat telakat, joita kukaan
   muu saman lajin kantaja ei tavoittele (soft/hard_target), muuten null. index.html protonisilmukka: gChanDrifter - vain YKSI vapaa lumenprotoni
   (lahin akselia) saa vedon ATP-syntaasin kanavaa kohti; kun se menee sisaan / jaa kiinni, seuraava valitaan.
+- TODENNETTU (palvelin kaynnissa, ajuri sc.render + await Promise.resolve x2, nopeus 3x): pakotettu tayssi kinoli Qo:hon -> _arms {hi:true, lo:true},
+  bH valkoinen -> Qi:n kinonin electron valkoinen (lo-haara), hi-haaran elektroni Rieske -> f -> Pc -> PSI -> ... -> FNR (stats.fnrE 1), kinolin
+  protonit lumeniin (stats.hplus 2). Kohteiden jako: pq/pc/fd 'shared' 0 koko ajon; kaikki paikat varattuina kantajat ovat joutilaina (idle) -
+  PSII tuotti 270 s:ssa vain yhden O2:n, eli ketju on ylavirrasta hidas, ei Q-syklista.
