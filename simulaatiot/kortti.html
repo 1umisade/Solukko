@@ -449,7 +449,8 @@ uniform mat4 macroXform; uniform vec3 macroCenter;
 #endif
 #ifdef MODELMOVE
 attribute float modelId;         // which loaded model this instance belongs to (index into modelOff)
-uniform mat4 modelXform[80];     // per-model transform (rotate around centre + translate) for repositioning
+uniform sampler2D mxTex;   // the 80 model transforms, four texels (columns) per model (perf 15.9.2026 - was uniform mat4 modelXform[80])
+mat4 mxf(float id){ float v = (id + 0.5)/80.0; return mat4(texture2D(mxTex, vec2(0.125, v)), texture2D(mxTex, vec2(0.375, v)), texture2D(mxTex, vec2(0.625, v)), texture2D(mxTex, vec2(0.875, v))); }     // per-model transform (rotate around centre + translate) for repositioning
 uniform vec3 modelCol[80];       // per-model pastel colour
 uniform float colorMode;         // 1 = colour by model (pastel), 0 = by element
 #endif
@@ -563,8 +564,16 @@ uniform vec3 shellCen[NSHELL];
 uniform mat3 shellRot[NSHELL];
 uniform float shellR2[NSHELL];
 uniform float shellSkip;   // one shell this species is not pushed out of (the protons and the ATP synthase channel) - -1 for none
+/* THE GRID (perf 15.9.2026): with sixty-odd shells (ten FNR, ten ferredoxins, twenty quinones...) every free-molecule vertex tested every shell. The
+   protons' 64-unit shell grid (sgBuild) is uploaded as a 3D texture - two texels per cell, eight shell slots (index + 1, 0 = none) - and a
+   vertex tests only the shells overlapping its own cell. Outside the grid (the box) there are no shells. */
+uniform highp sampler3D shellGrid; uniform vec3 sgLo; uniform vec3 sgN; uniform float sgCell;
 vec3 repelShells(vec3 p){
-  for(int i=0; i<NSHELL; i++){
+  if(sgCell <= 0.0) return p;
+  vec3 cc = (p - sgLo)/sgCell; if(any(lessThan(cc, vec3(0.0))) || any(greaterThanEqual(cc, sgN))) return p;
+  vec3 fc = floor(cc); vec3 uv0 = vec3((2.0*fc.x + 0.5)/(2.0*sgN.x), (fc.y + 0.5)/sgN.y, (fc.z + 0.5)/sgN.z);
+  vec4 g0 = texture(shellGrid, uv0), g1 = texture(shellGrid, uv0 + vec3(1.0/(2.0*sgN.x), 0.0, 0.0));
+  for(int k=0; k<8; k++){ float gi = (k < 4 ? g0[k] : g1[k-4])*255.0; if(gi < 0.5) break; int i = int(gi + 0.5) - 1;
     if(float(i) == shellSkip) continue;
     vec3 d = p - shellCen[i];
     float r2 = dot(d, d);
@@ -788,15 +797,15 @@ void main(void){
     mN = linkRot * mN;
 #endif
 #ifdef MODELMOVE
-    mN = mat3(modelXform[int(modelId + 0.5)]) * mN;
+    mN = mat3(mxf(modelId)) * mN;
 #endif
     vMacroN = vec4(mN, macroN.w); }
 #elif defined(LIPTPL)
   vMacroN = vec4(mat3(W) * vec3(0.0, 1.0, 0.0), clamp(1.0 - atomOff.y / 23.0, 0.0, 1.0));   // a lipid: its own axis (the leaflet's outward normal - flipped toward the key in the fragment, both faces alike), buried by how deep below the head group the atom sits (owner 13.9.2026: 'why is the membrane flat next to the shadowed proteins')
 #endif
 #ifdef MODELMOVE
-  wc   = (modelXform[int(modelId + 0.5)] * vec4(wc,   1.0)).xyz;
-  base = (modelXform[int(modelId + 0.5)] * vec4(base, 1.0)).xyz;
+  wc   = (mxf(modelId) * vec4(wc,   1.0)).xyz;
+  base = (mxf(modelId) * vec4(base, 1.0)).xyz;
 #endif
   vWCen = base;
   vIsoKeep = 1.0;
@@ -1282,7 +1291,8 @@ attribute vec4 world0; attribute vec4 world1; attribute vec4 world2; attribute v
 attribute float dr;                            // this atom's tube radius in WORLD units, Ångström (0 = its type is toggled off)
 attribute float modelId;                       // which loaded model this cofactor atom belongs to
 uniform mat4 view; uniform mat4 projection;
-uniform mat4 modelXform[80];                   // per-model transform so the cone follows a moved molecule
+uniform sampler2D mxTex;   // the 80 model transforms, four texels (columns) per model (perf 15.9.2026 - was uniform mat4 modelXform[80])
+mat4 mxf(float id){ float v = (id + 0.5)/80.0; return mat4(texture2D(mxTex, vec2(0.125, v)), texture2D(mxTex, vec2(0.375, v)), texture2D(mxTex, vec2(0.625, v)), texture2D(mxTex, vec2(0.875, v))); }                   // per-model transform so the cone follows a moved molecule
 uniform float uT;
 #define LOOSE
 ${LOOSE_GLSL}
@@ -1290,7 +1300,7 @@ varying vec2 vq; varying float vz;
 void main(void){
   vec3 center = vec3(world3.x, world3.y, world3.z);   // instance translation = atom centre
   center = (lsMat(hA1, hU1, hA2, hU2, 0.0) * vec4(center, 1.0)).xyz;   // the hinge, like the atom's sphere
-  center = (modelXform[int(modelId + 0.5)] * vec4(center, 1.0)).xyz;   // follow the model drag/rotate
+  center = (mxf(modelId) * vec4(center, 1.0)).xyz;   // follow the model drag/rotate
   vec4 cv = view * vec4(center, 1.0);
   vz = cv.z;                                          // view-space depth (larger = farther)
   vq = position.xy;
@@ -1323,7 +1333,8 @@ attribute vec4 world0; attribute vec4 world1; attribute vec4 world2; attribute v
 attribute float dr;                            // this atom's vdW radius in world units
 attribute float modelId;                       // which loaded model this cofactor atom belongs to
 uniform mat4 view; uniform mat4 projection;
-uniform mat4 modelXform[80];                   // per-model transform so the silhouette follows a moved molecule
+uniform sampler2D mxTex;   // the 80 model transforms, four texels (columns) per model (perf 15.9.2026 - was uniform mat4 modelXform[80])
+mat4 mxf(float id){ float v = (id + 0.5)/80.0; return mat4(texture2D(mxTex, vec2(0.125, v)), texture2D(mxTex, vec2(0.375, v)), texture2D(mxTex, vec2(0.625, v)), texture2D(mxTex, vec2(0.875, v))); }                   // per-model transform so the silhouette follows a moved molecule
 uniform float boilQuad;                        // quad expansion so the boil bulge is not clipped
 uniform float uT;
 uniform float boilHzAdj; uniform float boil; uniform float uTb;
@@ -1333,7 +1344,7 @@ varying vec2 vq; varying vec3 vWC;
 void main(void){
   vec3 base = vec3(world3.x, world3.y, world3.z);
   base = (lsMat(hA1, hU1, hA2, hU2, 0.0) * vec4(base, 1.0)).xyz;   // the hinge, like the atom's sphere
-  base = (modelXform[int(modelId + 0.5)] * vec4(base, 1.0)).xyz;   // follow the model drag/rotate
+  base = (mxf(modelId) * vec4(base, 1.0)).xyz;   // follow the model drag/rotate
   vWC = base;                                   // raw centre → the boil warp's world-locked field (matches the imp shader)
   // SAME per-atom MOTION as the vdW sphere shader: always-on thermal shake + stepped boil drift, so the
   // mask disc rides WITH each wobbling atom (this is what the outline was missing).
@@ -1476,7 +1487,8 @@ ${LOOSE_GLSL}
 uniform mat4 macroXform; uniform vec3 macroCenter;
 #endif
 #ifdef MODELMOVE
-attribute float modelId; uniform mat4 modelXform[80];
+attribute float modelId; uniform sampler2D mxTex;   // the 80 model transforms, four texels (columns) per model (perf 15.9.2026 - was uniform mat4 modelXform[80])
+mat4 mxf(float id){ float v = (id + 0.5)/80.0; return mat4(texture2D(mxTex, vec2(0.125, v)), texture2D(mxTex, vec2(0.375, v)), texture2D(mxTex, vec2(0.625, v)), texture2D(mxTex, vec2(0.875, v))); }
 uniform vec3 modelCol[80]; uniform float colorMode;
 #endif
 varying float vMid;      // this instance's model index (-1 = untagged) -> sage selection rim
@@ -1580,7 +1592,7 @@ void main(void){
 #endif
   vMid = -1.0;
 #ifdef MODELMOVE
-  wp.xyz = (modelXform[int(modelId + 0.5)] * vec4(wp.xyz, 1.0)).xyz;
+  wp.xyz = (mxf(modelId) * vec4(wp.xyz, 1.0)).xyz;
   vMid = modelId;
 #endif
 #ifdef MACROMOVE
@@ -1603,7 +1615,7 @@ void main(void){
 #endif
   { mat3 Am = mat3(W[0].xyz, W[1].xyz, W[2].xyz);   // the lobe's axes (with its scale) - the fragment places each electron on the real ellipsoid surface with them. From W, not world0-2: a DNA link's frame (LINKS) rotates the lobe, and with the unrotated axes every hydrogen 1s ellipsoid failed the impostor test and vanished (owner 11.9.2026)
 #ifdef MODELMOVE
-    Am = mat3(modelXform[int(modelId + 0.5)]) * Am;
+    Am = mat3(mxf(modelId)) * Am;
 #endif
 #ifdef MACROMOVE
     Am = mat3(macroXform) * Am;
@@ -1899,7 +1911,8 @@ ${LOOSE_GLSL}
 uniform mat4 macroXform; uniform vec3 macroCenter;  // whole-macromolecule drag offset (only movable materials define this)
 #endif
 #ifdef MODELMOVE
-attribute float modelId; uniform mat4 modelXform[80];
+attribute float modelId; uniform sampler2D mxTex;   // the 80 model transforms, four texels (columns) per model (perf 15.9.2026 - was uniform mat4 modelXform[80])
+mat4 mxf(float id){ float v = (id + 0.5)/80.0; return mat4(texture2D(mxTex, vec2(0.125, v)), texture2D(mxTex, vec2(0.375, v)), texture2D(mxTex, vec2(0.625, v)), texture2D(mxTex, vec2(0.875, v))); }
 uniform vec3 modelCol[80]; uniform float colorMode;
 #endif
 varying float vMid;      // this instance's model index (-1 = untagged) -> sage selection rim
@@ -1989,7 +2002,7 @@ void main(void){
 #endif
   vMid = -1.0;
 #ifdef MODELMOVE
-  wp.xyz = (modelXform[int(modelId + 0.5)] * vec4(wp.xyz, 1.0)).xyz;
+  wp.xyz = (mxf(modelId) * vec4(wp.xyz, 1.0)).xyz;
   vMid = modelId;
 #endif
 #ifdef MACROMOVE
@@ -2012,7 +2025,7 @@ void main(void){
 #endif
   { mat3 Am = mat3(W[0].xyz, W[1].xyz, W[2].xyz);   // the lobe's axes (with its scale) - the fragment places each electron on the real ellipsoid surface with them. From W, not world0-2: a DNA link's frame (LINKS) rotates the lobe, and with the unrotated axes every hydrogen 1s ellipsoid failed the impostor test and vanished (owner 11.9.2026)
 #ifdef MODELMOVE
-    Am = mat3(modelXform[int(modelId + 0.5)]) * Am;
+    Am = mat3(mxf(modelId)) * Am;
 #endif
 #ifdef MACROMOVE
     Am = mat3(macroXform) * Am;
@@ -2280,7 +2293,7 @@ void main(void){
   vLocalDir = normalize(position);
   { mat3 Am = mat3(W[0].xyz, W[1].xyz, W[2].xyz);   // the lobe's axes (with its scale) - the fragment places each electron on the real ellipsoid surface with them. From W, not world0-2: a DNA link's frame (LINKS) rotates the lobe, and with the unrotated axes every hydrogen 1s ellipsoid failed the impostor test and vanished (owner 11.9.2026)
 #ifdef MODELMOVE
-    Am = mat3(modelXform[int(modelId + 0.5)]) * Am;
+    Am = mat3(mxf(modelId)) * Am;
 #endif
 #ifdef MACROMOVE
     Am = mat3(macroXform) * Am;
@@ -2656,7 +2669,8 @@ attribute vec3 rcol;       // per-ring element colour
 attribute float modelId;   // which model this ring belongs to
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 modelXform[80];   // per-model transform - the tori must follow their molecule exactly as its atoms do
+uniform sampler2D mxTex;   // the 80 model transforms, four texels (columns) per model (perf 15.9.2026 - was uniform mat4 modelXform[80])
+mat4 mxf(float id){ float v = (id + 0.5)/80.0; return mat4(texture2D(mxTex, vec2(0.125, v)), texture2D(mxTex, vec2(0.375, v)), texture2D(mxTex, vec2(0.625, v)), texture2D(mxTex, vec2(0.875, v))); }   // per-model transform - the tori must follow their molecule exactly as its atoms do
 uniform mat4 macroXform;
 uniform vec3 macroCenter;
 uniform float uT;
@@ -2674,7 +2688,7 @@ void main(void){
   // SAME transform chain, in the SAME order, as the orb/imp shaders apply to the atoms. Without it the
   // tori sit at the raw mol2 coordinates while their molecule is flattened onto the floor, so they drift
   // off and float in empty space as lone rings.
-  wp.xyz = (modelXform[int(modelId + 0.5)] * vec4(wp.xyz, 1.0)).xyz;
+  wp.xyz = (mxf(modelId) * vec4(wp.xyz, 1.0)).xyz;
   wp = macroXform * vec4(wp.xyz - macroCenter, 1.0);
   vec4 vp = view * wp;
   vViewPos = vp.xyz;
@@ -2750,15 +2764,17 @@ uniform float bands;     // posterise levels per channel
 uniform float paperAmt;  // paper-grain amount
 uniform float bright;    // overall brightness lift
 float luma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
+uniform float gradeB; uniform float gradeC; uniform float gradeS; uniform float gradeHi; uniform float gradeSh;   // the brightness grade (the old 'bright' pass), applied to every sample here - one full-screen pass fewer (perf 15.9.2026)
+vec3 grade(vec3 c){ c = (c - 0.5) * gradeC + 0.5; c *= gradeB; float l = luma(c); c = mix(vec3(l), c, gradeS); c *= 1.0 + gradeHi * smoothstep(0.5, 1.0, l); c *= 1.0 + gradeSh * (1.0 - smoothstep(0.0, 0.5, l)); return clamp(c, 0.0, 1.0); }
 void main(void){
-  vec3 c = texture2D(textureSampler, vUV).rgb;
+  vec3 c = grade(texture2D(textureSampler, vUV).rgb);
 
   // Watercolour soft fill: weighted cross blur → colour bleeds a little.
   vec3 blur = c * 2.0;
-  blur += texture2D(textureSampler, vUV + texel*vec2( 1.4, 0.0)).rgb;
-  blur += texture2D(textureSampler, vUV + texel*vec2(-1.4, 0.0)).rgb;
-  blur += texture2D(textureSampler, vUV + texel*vec2( 0.0, 1.4)).rgb;
-  blur += texture2D(textureSampler, vUV + texel*vec2( 0.0,-1.4)).rgb;
+  blur += grade(texture2D(textureSampler, vUV + texel*vec2( 1.4, 0.0)).rgb);
+  blur += grade(texture2D(textureSampler, vUV + texel*vec2(-1.4, 0.0)).rgb);
+  blur += grade(texture2D(textureSampler, vUV + texel*vec2( 0.0, 1.4)).rgb);
+  blur += grade(texture2D(textureSampler, vUV + texel*vec2( 0.0,-1.4)).rgb);
   blur /= 6.0;
 
   // Brighten before banding (gamma lift) so more of the tonal range is painted.
@@ -2774,14 +2790,14 @@ void main(void){
   p = clamp((p - 0.5) * 1.03 + 0.5, 0.0, 1.0);
 
   // Ink outline: Sobel on luminance of the sharp (un-blurred) image.
-  float tl=luma(texture2D(textureSampler,vUV+texel*vec2(-1.,-1.)).rgb);
-  float tc=luma(texture2D(textureSampler,vUV+texel*vec2( 0.,-1.)).rgb);
-  float tr=luma(texture2D(textureSampler,vUV+texel*vec2( 1.,-1.)).rgb);
-  float ml=luma(texture2D(textureSampler,vUV+texel*vec2(-1., 0.)).rgb);
-  float mr=luma(texture2D(textureSampler,vUV+texel*vec2( 1., 0.)).rgb);
-  float bl=luma(texture2D(textureSampler,vUV+texel*vec2(-1., 1.)).rgb);
-  float bc=luma(texture2D(textureSampler,vUV+texel*vec2( 0., 1.)).rgb);
-  float br=luma(texture2D(textureSampler,vUV+texel*vec2( 1., 1.)).rgb);
+  float tl=luma(grade(texture2D(textureSampler,vUV+texel*vec2(-1.,-1.)).rgb));
+  float tc=luma(grade(texture2D(textureSampler,vUV+texel*vec2( 0.,-1.)).rgb));
+  float tr=luma(grade(texture2D(textureSampler,vUV+texel*vec2( 1.,-1.)).rgb));
+  float ml=luma(grade(texture2D(textureSampler,vUV+texel*vec2(-1., 0.)).rgb));
+  float mr=luma(grade(texture2D(textureSampler,vUV+texel*vec2( 1., 0.)).rgb));
+  float bl=luma(grade(texture2D(textureSampler,vUV+texel*vec2(-1., 1.)).rgb));
+  float bc=luma(grade(texture2D(textureSampler,vUV+texel*vec2( 0., 1.)).rgb));
+  float br=luma(grade(texture2D(textureSampler,vUV+texel*vec2( 1., 1.)).rgb));
   float gx = -tl - 2.0*ml - bl + tr + 2.0*mr + br;
   float gy = -tl - 2.0*tc - tr + bl + 2.0*bc + br;
   float g  = sqrt(gx*gx + gy*gy) * edgeAmt;
@@ -3308,7 +3324,13 @@ let uT = 0, uTb = 0, uTe = 0, simT = 0, gSpeed = 1.0, gPaused = false; const BOI
    proteins: MODELMOVE (local coordinates, one matrix per model), swaying like in the viewer ──────── */
 const realAlpha = mat => { mat.alpha = 0.999; mat.alphaMode = BABYLON.Constants.ALPHA_COMBINE; mat.forceDepthWrite = true; return mat; };
 const FAR = new BABYLON.Vector3(1e6, 1e6, 1e6), SAGE = new BABYLON.Color3(0.64,0.72,0.51);
-const MAXMODEL = 80; const gModelXform = new Float32Array(MAXMODEL*16), gModelCol = new Float32Array(48*3); for(let i=0;i<MAXMODEL;i++){ gModelXform[i*16]=1; gModelXform[i*16+5]=1; gModelXform[i*16+10]=1; gModelXform[i*16+15]=1; }
+const MAXMODEL = 80; const gModelXform = new Float32Array(MAXMODEL*16), gModelCol = new Float32Array(48*3);
+let gMxTexV = null, gMxDirtyV = true;   // the viewer's own copy of the model-transform texture (the imp shaders read mxf(id) from it - perf 15.9.2026)
+// built through the engine's raw-texture API on a bare Texture (taken from RenderTargetTexture's parent), because the popup's trimmed Babylon bundle (babylon-kortti.js) exports neither RawTexture nor Texture
+const mxTexV = () => { if(!gMxTexV){ const C = BABYLON.Constants, Tex = Object.getPrototypeOf(BABYLON.RenderTargetTexture.prototype).constructor;
+    gMxTexV = new Tex(null, scene, true, false, C.TEXTURE_NEAREST_SAMPLINGMODE); gMxTexV._texture = engine.createRawTexture(gModelXform, 4, MAXMODEL, C.TEXTUREFORMAT_RGBA, false, false, C.TEXTURE_NEAREST_SAMPLINGMODE, null, C.TEXTURETYPE_FLOAT);
+    gMxTexV.wrapU = gMxTexV.wrapV = C.TEXTURE_CLAMP_ADDRESSMODE; }
+  if(gMxDirtyV){ engine.updateRawTexture(gMxTexV._texture, gModelXform, BABYLON.Constants.TEXTUREFORMAT_RGBA, false, null, BABYLON.Constants.TEXTURETYPE_FLOAT); gMxDirtyV = false; } return gMxTexV; }; for(let i=0;i<MAXMODEL;i++){ gModelXform[i*16]=1; gModelXform[i*16+5]=1; gModelXform[i*16+10]=1; gModelXform[i*16+15]=1; }
 const IMP_U = ['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','uTb','boil','boilHzAdj','depthBias','selCenter','coneCos','selModel','selCol'];
 const MM_U = ['modelXform','modelCol','colorMode','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark'];
 const REVEAL = 132;   // glass + orbitals within this camera distance (the viewer's gCrisp), an opaque ball beyond. 70 stacked shells that were already half opaque a few dozen units out into a wall that hid every lobe inside a protein
@@ -3335,9 +3357,10 @@ protCheap.setFloat('radius',1.0); protCheap.setFloat('isShell',0); protCheap.set
 protCheap.setFloat('coneCos',-1.0); protCheap.setVector3('selCenter', FAR); protCheap.setFloat('selModel',-1); protCheap.setColor3('selCol', SAGE); protCheap.setFloat('colorMode',0); protCheap.setFloat('focusAmt',0); protCheap.setFloat('focusMode',0); protCheap.setVector3('focusCenterV', FAR); protCheap.setFloat('focusR',0); protCheap.setFloat('focusGroup',-1); protCheap.setFloat('focusDark',0);
 protCheap.backFaceCulling = false; protCheap.forceDepthWrite = true;
 const ALL_MATS = [dynShell, dynNuc, dynCore, dynBond, protShell, protNuc, protCore, protBond, protCheap];
+for(const m of ALL_MATS) m.setTexture('mxTex', mxTexV());
 for(const m of ALL_MATS) m.onBindObservable.add(() => { const e = m.getEffect(); if(!e) return;
   e.setFloat('uT', uT); e.setFloat('uTb', uTb); e.setFloat('uTe', uTe); e.setColor3('fogColor', scene.fogColor); e.setFloat('fogStart', scene.fogStart); e.setFloat('fogEnd', scene.fogEnd);
-  if(m === protShell || m === protNuc || m === protCore || m === protBond || m === protCheap){ e.setMatrices('modelXform', gModelXform); e.setArray3('modelCol', gModelCol); e.setFloat('colorMode', 0); e.setFloat('selModel', selected && selected.sp.isProt ? selected.slot : -1); } });
+  if(m === protShell || m === protNuc || m === protCore || m === protBond || m === protCheap){ mxTexV(); e.setArray3('modelCol', gModelCol); e.setFloat('colorMode', 0); e.setFloat('selModel', selected && selected.sp.isProt ? selected.slot : -1); } });
 
 /* ── the dynamic meshes for the small molecules (rebuilt every frame) ───────────────────────────── */
 const MAXMOL = 200, MAXATOM = MAXMOL*12, MAXNUC = MAXATOM*16, MAXLOBE = MAXMOL*120;
@@ -3460,7 +3483,7 @@ const draw = () => {
   for(const m of mols){ rotOf(m, simT); const sp = m.sp, px = m.x, py = m.y, pz = m.z, sel = m === selected || selSet.has(m);
     if(sp.isProt){   // one matrix per model (column-major: R in the 3x3, the translation in 12..14), detail only near the camera
       const o = m.slot*16; gModelXform[o]=R9[0]; gModelXform[o+1]=R9[3]; gModelXform[o+2]=R9[6]; gModelXform[o+3]=0; gModelXform[o+4]=R9[1]; gModelXform[o+5]=R9[4]; gModelXform[o+6]=R9[7]; gModelXform[o+7]=0;
-      gModelXform[o+8]=R9[2]; gModelXform[o+9]=R9[5]; gModelXform[o+10]=R9[8]; gModelXform[o+11]=0; gModelXform[o+12]=px; gModelXform[o+13]=py; gModelXform[o+14]=pz; gModelXform[o+15]=1;
+      gModelXform[o+8]=R9[2]; gModelXform[o+9]=R9[5]; gModelXform[o+10]=R9[8]; gModelXform[o+11]=0; gModelXform[o+12]=px; gModelXform[o+13]=py; gModelXform[o+14]=pz; gModelXform[o+15]=1; gMxDirtyV = true;
       if(m.thumb){ for(const c of m.meshes.cells){ c.sh.setEnabled(false); c.nu.setEnabled(false); c.co.setEnabled(false); c.bo.setEnabled(false); c.ch.setEnabled(true); c.ch.thinInstanceCount = c.n; } continue; }   // a thumbnail render: the opaque far look, whole
       for(const c of m.meshes.cells){ const wx = R9[0]*c.cx + R9[1]*c.cy + R9[2]*c.cz + px, wy = R9[3]*c.cx + R9[4]*c.cy + R9[5]*c.cz + py, wz = R9[6]*c.cx + R9[7]*c.cy + R9[8]*c.cz + pz;
         const vx = wx - cp.x, vy = wy - cp.y, vz = wz - cp.z, d2 = vx*vx + vy*vy + vz*vz; let vis = true;

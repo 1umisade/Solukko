@@ -654,3 +654,30 @@ Omistaja toi 'PSI PLANT.mol2' (ensimmainen versio oli PSII:n vienti - 3jcu, 1521
 ## 15.9.2026 - vihrea valintarengas takaisin proteiineille: napautus valitsee aina kompleksin (Claude Fable 5.1)
 
 Omistaja: 'the proteins dont have the green selection outline'. Bisektio (dde5847 vs nykyinen): rengas SYNTYY kun proteiini on valittuna (selMask 33308 atomia, 207489 pikselia) - vika oli valinnassa: RTS-napautus valitsi KOFAKTORIN, jos napautus osui kofaktorin atomiin (12.9.), ja kun ETC-paallyste on oletuksena paalla (piirretaan paalle, syvyys ohitetaan), useimmat napautukset kompleksin keskelle osuvat hemiin tai klorofylliin -> rebuildSelMask antoi renkaan pienelle kofaktorille eika proteiinille. Nyt napautus valitsee aina kompleksin ja nollaa mahdollisen kofaktorivalinnan (showEtcSel(-1)); kofaktori valitaan tuplaklikilla (onDouble, keskietaisyys) kuten ennenkin.
+
+## 15.9.2026 - suorituskyky, vaihe 1: viisi muutosta ilman visuaalisia eroja (Claude Fable 5.1)
+
+Omistaja: 'lets ideate how to increase performance without reducing the visuals' -> 'ok do them all'. Ensin tehty ne, joista oltiin varmoja:
+
+1. Siirtymatekstuurin (gMolTex, 65000 molekyylin poikkeamat) paivitys vain muuttuneille riveille: gDispMark(lo,hi) merkitsee alueen, gMolTexFlush() lataa vain
+   rivit rowLo..rowHi (engine.updateTextureData), ei koko 1 MB tekstuuria joka kerta. Kaikki nelja gMolTex.update-kohtaa vaihdettu flushiin.
+2. Lyhdyn (lantern) ehdokasvalinta: koko taulukon sort -> quickselect lnSelect(cand, k) kahdessa kohdassa.
+3. Kofaktori- ja valintamaskien RTT:t puoliresoluutiolla (fit(..., 0.5)) - reunat piirretaan pehmeana, ero ei nay.
+4. Kirkkaus/savy-jalkikasittely (brightPP) taitettu painterly-shaderiin (grade(): gradeB/C/S/Hi/Sh-uniformit) - yksi fullscreen-passi vahemman.
+   Sarjakuvatilan ollessa pois brightPP kiinnitetaan takaisin (gTogglePainterly vaihtaa ne samaan indeksiin).
+5. Mallien 80 muunnosmatriisia uniform mat4 modelXform[80] -> 4x80 RGBA32F -tekstuuri gMxTex, GLSL mxf(id) kuudessa shaderissa (11 kayttoa);
+   eff.setMatrices poistettu 15 kohdasta, tekstuuri paivitetaan kerran per frame ennen gShaderMats-silmukkaa. Kuorien (shell) tyonto vedessa:
+   NSH-silmukka -> 3D-tekstuuri gShellGrid (RawTexture3D, 2 texelia/solu, 8 kuorta/solu; sgUpload() protonipassin sgBuild():n jalkeen,
+   uniformit shellGrid/sgLo/sgN/sgCell). Ladataan vain kun kuoret ovat liikkuneet (sgSig = keskipisteiden tarkistussumma).
+
+Sudenkuopat (korjattu samalla):
+- kortti.html:n (popup) Babylon on karsittu paketti (babylon-kortti.js, tyokalut/babylon_kortti_entry.js), jossa EI ole BABYLON.RawTexture eika BABYLON.Texture.
+  Katselimen oma muunnostekstuuri (mxTexV) rakennetaan siksi engine.createRawTexture/updateRawTexture:lla paljaan Texture-luokan paalle
+  (Object.getPrototypeOf(BABYLON.RenderTargetTexture.prototype).constructor). Siistimpi tapa olisi lisata RawTexture+Texture entryyn ja
+  rakentaa paketti uudelleen - se on tyokalut/-puolen tiedosto, omistajan paatos.
+- sampler3D ilman sidottua 3D-tekstuuria = GL_INVALID_OPERATION 'Two textures of different types use the same sampler location' JOKA piirrossa.
+  gShellGrid luodaan siksi heti (tyhjana) ja uudelleen jokaisen sgResize():n jalkeen.
+
+Mittaus (sama kamera, sc.render()+gl.finish() x 10, mediaani): HEAD 19.0 ms -> 18.4 ms; CPU-puoli hallitsee (Babylonin oma render ~12 ms,
+observerit ~8 ms: protonipassi 3.5, tormaykset 3.5, vapaiden rakennus 1.2+1.0). Selaimen paneelin rAF on kuristettu (2-3 fps) kun se on piilossa -
+engine.getFps() ei kelpaa mittariksi siella. Kuvat ennen/jalkeen identtiset.
