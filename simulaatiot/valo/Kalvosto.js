@@ -152,9 +152,13 @@
         s.frame = null; s.local_offset = [0, up, 0]; }   // WORLD-up offset from the body, not a point in the model's frame: FNR tumbles, and a frame point whirled around it at up to 38 units/s - the pulled ferredoxin chased the dock for a minute and the glide never closed (owner 15.9.2026: 'the binding of it with fdx is still clumsy')
       placeSlot(fnr, 'NADP', mi, [fadC[0] + 12, fadC[1] + 6, fadC[2]], LF).place_in_the_chain = sinkPlace + 1;
       const home = ps ? (() => { const cc = mInfo[ps.mi], hc = gHulls.find(q => q.mi === ps.mi), pc = hc ? [hc.c.x, hc.c.y, hc.c.z] : wpt(ps.mi, [cc.cx, cc.cy, cc.cz], [0,0,0]), R = hullR(ps.mi) + hullR(mi) + 10, dx = (k - (fnrMis.length-1)/2)*(hullR(mi)*2 + 6);   // a row over PSI in WORLD space, measured from the SHELL's centre (the bouncer loop pushes from it; it sits 24 off the box centre), every home outside PSI's shell (it stood 22 inside it and was shoved out every frame, never at rest - 15.9.2026)
-        const hx = pc[0] + dx, hy = pc[1] + Math.max(Math.sqrt(Math.max(0, R*R - dx*dx)), hullR(mi) + 40) + (k % 2)*(hullR(mi) + 10);
+        let hx = pc[0] + dx, hy = pc[1] + Math.max(Math.sqrt(Math.max(0, R*R - dx*dx)), hullR(mi) + 40) + (k % 2)*(hullR(mi) + 10);
         const wall = V.env.membraneY(hx, pc[2]) + get.gMemHalfT() + hullR(mi) + 12;   // the stromal wall under THIS x (the cap curves: four homes lay below it, the FNR pressed the wall at full speed for ever, 15.9.2026)
-        return [hx, Math.max(hy, wall), pc[2]]; })() : [c.cx + gModelOff[mi*3], c.cy + gModelOff[mi*3+1], get.gTasoZ()];   // ten FNR (owner 14.9.2026): a row along the membrane beside PSI's FB face, staggered in y, so they do not pile on one spot
+        hy = Math.max(hy, wall);
+        for(let pass = 0; pass < 2; pass++) for(const h of gHulls){ if(M[h.mi].shuttle || gBouncers.some(q => q.mi === h.mi)) continue;   // and clear of EVERY membrane complex's shell: FNR 6's home lay on NDH-1's, FNR 57's inside ATP synthase's - both pressed the shell at full speed for ever (15.9.2026)
+          const w = wpt(h.mi, [h.c.x, h.c.y, h.c.z], [0,0,0]), need = h.maxR + hullR(mi) + 8, ddx = hx - w[0], ddy = hy - w[1]; if(ddx*ddx + ddy*ddy >= need*need) continue;
+          hy = w[1] + Math.sqrt(Math.max(0, need*need - ddx*ddx)); }
+        return [hx, hy, pc[2]]; })() : [c.cx + gModelOff[mi*3], c.cy + gModelOff[mi*3+1], get.gTasoZ()];   // ten FNR (owner 14.9.2026): a row along the membrane beside PSI's FB face, staggered in y, so they do not pile on one spot
       home[2] = get.gTasoZ(); fnr.namedChildren.set('Node2', new Point(home, 'Node2')); return fnr; });
     /* NDH-1 (cyclic flow): the ferredoxin dock 1 -> its Fe-S clusters 2.. -> the plastoquinone dock last (lane ndh<k>) */
     const ndhs = ndhMis.map((mi, k) => { const L = 'ndh' + k, c = mInfo[mi], fes = ofType(mi, 5), quins = ofType(mi, 3);
@@ -195,10 +199,16 @@
     for(const b of gBouncers){ const f = fnrs.find(x => x.frame.mi === b.mi) || rubs.find(x => x.frame.mi === b.mi); if(f){ const kin = { kind:'bnc', b, home: true, body: f }; kinOf.set(f, kin); b.kin = kin; } }   // FNR / RuBisCO: their bouncer drifts to their soft target (a fixed node); the body itself stays a frame body (its slots turn with the model)
     /* the mover's view of a carrier (index.html's shuttle mover and bouncer loop read this): where to go, and where to be pinned */
     const carrierTarget = b => { const t = (b.hard_target && b.hard_target.alive) ? b.hard_target : b.soft_target; return (t && t.alive) ? t : null; };
+    const pqIdle = (b, t) => b.molecule_name === 'plastoquinone_B' && !b.hard_target && t.parent_is_BindSites && (t.modulate === 'white' || t.pulled_bodies.some(q => V.is_instance_valid(q) && q !== b));   // its site is occupied or being taken by another: nowhere to go right now
     V.env.carrier = {
-      target: kin => { const b = kin.body; if(!b || !b.alive) return null; const t = carrierTarget(b); return t ? t.global_position : null; },
+      target: kin => { const b = kin.body; if(!b || !b.alive) return null; const t = carrierTarget(b); if(!t) return null;
+        /* a quinone whose site is OCCUPIED, or being taken by another, has nowhere to go right now: the mover lets it idle (wander) in its own membrane
+           stretch instead of crowding into the pocket - the body keeps the target and re-checks every 3 s (owner 15.9.2026: 'why pqbs pool inside the
+           proteins and not in the membrane stretches between') */
+        if(pqIdle(b, t)) return null;
+        return t.global_position; },
       pinned: kin => { const b = kin.body; if(!b) return kin.dormantAt ? kin.dormantAt.global_position : null; if(!b.alive) return kin.dormantAt ? kin.dormantAt.global_position : null; if(!b.physics_processing) return b._pos; return null; },   // binding: the body glides, the model follows; dormant: parked in the slot
-      hostMi: kin => { const b = kin.body; if(!b || !b.alive) return -1; const t = carrierTarget(b); return t && t.body_that_I_am_bound_to && t.body_that_I_am_bound_to.frame ? t.body_that_I_am_bound_to.frame.mi : -1; },   // the complex it heads for: its shell does not wall off its own pocket
+      hostMi: kin => { const b = kin.body; if(!b || !b.alive) return -1; const t = carrierTarget(b); if(t && pqIdle(b, t)) return -1; return t && t.body_that_I_am_bound_to && t.body_that_I_am_bound_to.frame ? t.body_that_I_am_bound_to.frame.mi : -1; },   // (an idling quinone is pushed out of its host too)   // the complex it heads for: its shell does not wall off its own pocket
       pulled: kin => !!(kin.body && kin.body.alive && kin.body.hard_target),
       homing: kin => !!kin.home };
     ctx.set.gValoShuttle({ target: sh => sh.kin ? V.env.carrier.target(sh.kin) : null, pinned: sh => sh.kin ? V.env.carrier.pinned(sh.kin) : null, hostMi: sh => sh.kin ? V.env.carrier.hostMi(sh.kin) : -1 });

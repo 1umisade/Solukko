@@ -745,3 +745,16 @@ kuorikin tyonsi), ja Fd-42 oli myos se kymmenes ferredoksiini ilman metallia.
 - HUOM koeajosta: sc.render()-silmukka yhdessa JS-kutsussa ei paasta korutiineja (await V.process_frame()) etenemaan - mikrotehtavat ajetaan vasta
   kutsun lopussa, joten liukumat ja varinat etenivat askeleen per 120 ruutua ja NAYTTIVAT jaatyneilta (21 'haamua'). Oikea ajuri: sc.render();
   await Promise.resolve() (x2) joka ruudun jalkeen. Silla ajettuna Fd telakoitui, antoi elektronin FNR:lle (stats.fnrE 1), haamuja 0.
+
+## 15.9.2026 - FNR:n kodit kaikkien kalvokompleksien kuorten ulkopuolelle; joutilaat plastokinonit kalvoon, ei proteiinien sisaan (Claude Fable 5.1)
+
+- FNR 6:n koti oli NDH-1:n kuorella ja FNR 57:n ATP-syntaasin kuoren sisalla -> painoivat kuorta taydella nopeudella ikuisesti (v 7.5, etaisyys
+  kotiin vakio). Koti tyonnetaan nyt jokaisen kalvokompleksin (ei shuttle, ei bouncer) kuoren ulkopuolelle: hy = w.y + sqrt(need^2 - dx^2),
+  need = maxR + hullR(fnr) + 8, kaksi kierrosta. Varo: 'const hx, hy' + sijoitus = 'Assignment to constant variable' - Kalvosto ei kaynnistynyt
+  (__valoInt jai puuttumaan), nyt let.
+- Omistaja: 'why pqbs pool inside the proteins and not in the membrane stretches between?' Syy: plastoquinone_B.check_soft_target antaa AINA kohteen
+  (nearestAny-varamenettely, omistajan 14.9. toive 'every carrier should have a target'), ja liikuttaja veti kinonia kohti taskua (pull 9+360/d)
+  isannan kuoren lapi -> kaikki joutilaat kinonit odottivat taskun sisalla. Nyt V.env.carrier.target / hostMi: jos kinonin kohde-slotti on
+  valkoinen (varattu) tai toinen kappale on siihen vedettyna (pqIdle), liikuttaja saa null -> kinoni ajelehtii omalla kalvopatkallaan (nopeus 40,
+  satunnainen suunta, x-rajat b6f:n keskilinjaan) ja jokainen kuori tyontaa sen ulos. Kappale pitaa kohteensa ja tarkistaa 3 s valein.
+  Mitattu: alussa 20/20 kinonia kompleksin kuoren sisalla, 58 s:n jalkeen 0/15 vapaista sisalla, 15 odotti varattua paikkaa kalvossa.
