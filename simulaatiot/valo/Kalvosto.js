@@ -81,7 +81,7 @@
         for(const g of chls){ if(u.p700.includes(g)) continue; const c = cen(g), t = ((c[0]-A[0])*ac[0]+(c[1]-A[1])*ac[1]+(c[2]-A[2])*ac[2])/l2; if(t < 0.15 || t > 0.85) continue; const r = Math.hypot(c[0]-A[0]-ac[0]*t, c[1]-A[1]-ac[1]*t, c[2]-A[2]-ac[2]*t); if(r < bestR){ bestR = r; best = g; } }
         u.a0 = best; }
       u.a1 = (u.a0 >= 0 && quins.length) ? nearest(quins, cen(u.a0)) : (quins.length ? quins[0] : -1); u.rc = new Set([...u.p700, u.a0].filter(g => g >= 0)); for(const g of chls) if(!u.rc.has(g)) u.ant.push(g);
-      u.fdDir = [A[0]-B[0], A[1]-B[1], A[2]-B[2]]; psis.push(u); }
+      u.fdDir = [0, 1, 0]; psis.push(u); }   // the ferredoxin dock and FNR's home lie straight ABOVE FB: every complex stands stroma-up, and the FX -> quinone direction of the plant PSI (6YEZ) pointed sideways (15.9.2026: the dock landed 31 off the plane and 16 over FB, out of the ferredoxins' reach)
     const byLabel = re => { const out = []; for(let mi=0; mi<M.length; mi++) if(M[mi].cfg && !M[mi].shuttle && onSheet(mi) && re.test(labelOf(mi))) out.push(mi); return out; };
     const fdMis = byLabel(/ferredoxin/i), fnrMis = byLabel(/^FNR/i), ndhMis = byLabel(/NDH-1/i), atpMis = byLabel(/ATP synthase/i), rubMis = byLabel(/RuBisCO/i), vdeMis = byLabel(/violaxanthin de-epoxidase/i), zeMis = byLabel(/zeaxanthin epoxidase/i);
     if(!units.length && !psis.length){ console.warn('valoreaktiot: ei reaktiokeskuksia'); return null; }
