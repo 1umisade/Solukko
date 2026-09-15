@@ -10913,7 +10913,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const V = gValoShuttle, pin = V ? V.pinned(sh) : null, T = (!pin && V) ? V.target(sh) : null;
         if(pin){ sh.cur[0]=pin[0]; sh.cur[1]=pin[1]; sh.cur[2]=pin[2]; sh.phase = 'dock'; }
         else { sh.phase = 'to'; const haveT = !!T; if(haveT){ _tw[0]=T[0]; _tw[1]=T[1]; _tw[2]=T[2]; }
-          const step = (sh.pq && !T ? 40 : sh.speed)*dt;   // a quinone with nowhere to go idles at the old pace: at 200 the wander's z kicks outran the plane easing and it drifted 90 units off the plane (14.9.2026)
+          const step = (sh.pq && !T ? 80 : sh.speed)*dt;   // a quinone with nowhere to go idles at 80 (was 40 - 'plastoquinol is sitting statically', owner 15.9.2026: with one carrier per site the waiting ones idle, and at 40 they looked parked); the old note: at 200 the wander's z kicks outran the plane easing and it drifted 90 units off the plane (14.9.2026)
           let dx = haveT ? _tw[0]-sh.cur[0] : 0, dy = haveT ? _tw[1]-sh.cur[1] : 0, dz = haveT ? _tw[2]-sh.cur[2] : 0, d = Math.hypot(dx,dy,dz) || 1e-3; const dSite = haveT ? d : Infinity;
           {
             /* A wandering approach, not a bee-line: the heading is kicked about at random every frame and

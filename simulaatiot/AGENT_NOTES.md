@@ -806,3 +806,8 @@ ATP synthase at a time. one plastoquinol drifting to Qi site or Qo site.'
   bH valkoinen -> Qi:n kinonin electron valkoinen (lo-haara), hi-haaran elektroni Rieske -> f -> Pc -> PSI -> ... -> FNR (stats.fnrE 1), kinolin
   protonit lumeniin (stats.hplus 2). Kohteiden jako: pq/pc/fd 'shared' 0 koko ajon; kaikki paikat varattuina kantajat ovat joutilaina (idle) -
   PSII tuotti 270 s:ssa vain yhden O2:n, eli ketju on ylavirrasta hidas, ei Q-syklista.
+- 'plastoquinol is sitting statically and not moving to cytb6f': kun yksi kinoli varaa Qo:n, muut tayde kinolit ovat joutilaita (kohde null) ja
+  ajelehtivat tahdilla 40 -> nakyivat parkkeeratuilta; tahti 80. Ne eivat lahde b6f:aan ennen kuin Qo vapautuu (Q-sykli: 2 e- + 2 H+ pois).
+- Omistaja: 'protons and electron glow drifts independently from the rest of the scene when i move the camera'. Mitattu ajetuilla ruuduilla
+  (sc.render kameran hypyn jalkeen) ja elavassa silmukassa (kamera 4 yks/ruutu, readPixels): lyhdyn lampi 1-3 px protonin projektiosta, ei viivetta.
+  Lyhty projisoi onApply:ssa scene.getTransformMatrix():lla (sama kuin geometrian). Ei toistettu - kysytty omistajalta lisatietoja (nakyma, liike).
