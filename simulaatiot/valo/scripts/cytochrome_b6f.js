@@ -13,7 +13,7 @@ V.SCRIPTS['cytochrome_b6f'] = {
       if(BindSite.name === 'plastoquinone_B_STROMAL2'){ for(const s of body.BindSites) if(white(s)) return null; } }
     if(body.is_in_group('plastocyanin')){ if(dark(slot(body, 'electron'))){ } else { return null; } }
     return true; },
-  BINDING_special_actions(self, BindSite){ },
+  BINDING_special_actions(self, BindSite){ if(/^plastoquinone_B_LUMENAL2?$/.test(String(BindSite.name))) BindSite._arms = {}; },   // a fresh quinol at Qo: both arms still owed an electron (see plastoquinone_B.RELEASING_choose)
   RELEASING_special_conditions(self, BindSite_name_string, acceptor){
     if(BindSite_name_string === 'plastocyanin'){ for(const s of slot(self, 'plastocyanin').BindSites){ if(white(s)){ } else { return null; } } }
     if(BindSite_name_string === 'plastocyanin2'){ for(const s of slot(self, 'plastocyanin2').BindSites){ if(white(s)){ } else { return null; } } }

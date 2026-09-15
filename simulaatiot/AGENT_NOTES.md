@@ -786,3 +786,19 @@ Omistaja: 'NADP inside an FNR gives you the FNR. not right. and i want green out
 - cofsil ja seloutline luodaan reusable=true (eristysnakyma irrottaa/kiinnittaa ne - 'You're trying to reuse a post process' -virheet).
 - EI viela selaimessa todennettu: sivu jai 'Siirretaan naytonohjaimelle' -vaiheeseen, koska paneeli oli piilossa (document.hidden, rAF ei kay ->
   yield_() ei palaa). Testi: napautus telakoituun NADP+:aan FNR:n sisalla -> selMaskMesh.thinInstanceCount = NADP:n atomimaara, ei tekstia.
+
+## 15.9.2026 - Q-sykli: yksi elektroni per b6f:n haara; yksi kantaja per kohde (Claude Fable 5.1)
+
+Omistaja: 'why the q cycle doesnt work and make so that only one carrier can target its target at a time. example: one proton drifting towards
+ATP synthase at a time. one plastoquinol drifting to Qi site or Qo site.'
+- Q-sykli (staattinen analyysi, EI viela ajettu - kehityspalvelin oli pysaytetty): Qo-telakan kinolin kaksi elektronia lahtevat RELEASING_conditionsin
+  pick_random(nb):lla mille tahansa paikan 2 linkille - Rieske (haara .hi) ja bL (haara .lo) ovat molemmat paikka 2 samassa kaistassa 'b<m>.<k>'.
+  Rieske antaa elektroninsa f:lle sekunnissa ja on taas tumma, joten toinen elektroni meni usein samaan haaraan -> Qi:n kinoni ei koskaan taytynyt.
+  Nyt: MoleculeBody3D kutsuu script.RELEASING_choose(self, slotName, nb) jos on (muuten pick_random); plastoquinone_B.RELEASING_choose suosii haaraa,
+  joka ei ole viela saanut (dock._arms), RELEASING_special_conditions kieltaa jo saaneen haaran (elektroni odottaa toisen haaran vapautumista),
+  RELEASING_special_actions merkitsee haaran (released_body.hard_target.body_that_I_am_bound_to.lane paattyy .hi/.lo), cytochrome_b6f.BINDING_special_actions
+  nollaa _arms uuden kinolin telakoituessa Qo:hon.
+- Yksi kantaja per kohde: plastoquinone_B.check_soft_target: vain nearestFree(list, spare=true) (vapaa paikka, jota kukaan muu ei tavoittele), muuten
+  soft_target = null (kinoni ajelehtii omalla patkallaan, tarkistus 3 s valein). plastocyanin / ferredoxin: free(list) = tummat telakat, joita kukaan
+  muu saman lajin kantaja ei tavoittele (soft/hard_target), muuten null. index.html protonisilmukka: gChanDrifter - vain YKSI vapaa lumenprotoni
+  (lahin akselia) saa vedon ATP-syntaasin kanavaa kohti; kun se menee sisaan / jaa kiinni, seuraava valitaan.

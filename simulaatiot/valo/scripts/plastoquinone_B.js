@@ -12,11 +12,19 @@ V.SCRIPTS['plastoquinone_B'] = {
     if(body.hard_target === BindSite || body.hard_target == null){ } else { return null; }
     return true; },
   BINDING_special_actions(self, BindSite){ this.update_proton_puller(self); },
+  /* the Q CYCLE (owner 15.9.2026: 'why the q cycle doesnt work'): a quinol at Qo gives ONE electron to each arm - hi (Rieske -> f -> plastocyanin) and lo
+     (bL -> bH -> cn -> the Qi quinone). The base class picked the next link at random, and the Rieske arm empties within a second, so both
+     electrons often went up the same arm and the Qi quinone never filled. _arms on the Qo dock remembers which arm has had its electron. */
+  armOf(slotBody){ const ln = (slotBody && slotBody.lane) || ''; return ln.endsWith('.hi') ? 'hi' : 'lo'; },
+  RELEASING_choose(self, BindSite_name_string, nb){ if(!BindSite_name_string.includes('electron') || !/LUMENAL2?$/.test(self.name)) return null;
+    const arms = self._arms || (self._arms = {}); const fresh = nb.filter(s => !arms[this.armOf(s.body_that_I_am_bound_to)]); return fresh.length ? V.pick_random(fresh) : null; },
   RELEASING_special_conditions(self, BindSite_name_string, acceptor){
     if(self.name === 'plastoquinone_B_LUMENAL' || self.name === 'plastoquinone_B_LUMENAL2'){ } else { return null; }   // only at the Qo site does a quinol give anything up
+    if(BindSite_name_string.includes('electron') && acceptor && acceptor.body_that_I_am_bound_to){ const arms = self._arms || (self._arms = {}); if(arms[this.armOf(acceptor.body_that_I_am_bound_to)]) return null; }   // that arm has had its electron - wait for the other
     if(BindSite_name_string.includes('proton')){ if(dark(slot(self, 'electron')) && dark(slot(self, 'electron_2'))){ } else { return null; } }   // protons after the electrons
     return true; },
   RELEASING_special_actions(self, released_body){
+    if(released_body.is_in_group('electron') && released_body.hard_target && /LUMENAL2?$/.test(self.name)){ (self._arms || (self._arms = {}))[this.armOf(released_body.hard_target.body_that_I_am_bound_to)] = true; }   // this arm has had its electron
     if(released_body.is_in_group('proton')){ const cyt = V.pick_random(V.get_nodes_in_group('cytochrome_b6f')); if(cyt) released_body.hard_target = cyt.get_node('target_3'); } },
   check_soft_target(self){
     if(self.body_that_I_am_bound_to != null) return;   // (a docked one is a slot's placeholder)
@@ -30,11 +38,11 @@ V.SCRIPTS['plastoquinone_B'] = {
     const nearestAny = list => { let best = null, bd = Infinity; for(const s of list){ if(!s) continue; const d = self.distance_to(s); if(d < bd){ bd = d; best = s; } } return best; };   // (a carrier ALWAYS has a target - owner 14.9.2026: taken or not, it heads for the nearest site and waits there)
     const b6f = V.get_nodes_in_group('cytochrome_b6f');
     if(filled === 4){ const qo = b6f.map(c => c.get_node('BindSites/' + (ndh ? 'plastoquinone_B_LUMENAL2' : 'plastoquinone_B_LUMENAL')));   // one monomer's Qo for PSII's quinols, the other's for NDH-1's (owner 14.9.2026)
-      self.soft_target = nearestFree(qo, true) || nearestFree(qo, false) || nearestAny(qo); return; }
+      self.soft_target = nearestFree(qo, true) || null; return; }   // ONE quinol per site (owner 15.9.2026: 'only one carrier can target its target at a time') - none free and unclaimed: idle in the stretch, re-check in 3 s
     const qi = b6f.map(c => c.get_node('BindSites/' + (ndh ? 'plastoquinone_B_STROMAL2' : 'plastoquinone_B_STROMAL')));   // ...and the same monomer's Qi for the empty ones
-    if(ndh){ const ndhSlots = V.get_nodes_in_group('NDH-1').map(n => n.get_node('BindSites/plastoquinone_B')); self.soft_target = nearestFree(ndhSlots, true) || nearestFree(qi, true) || nearestFree(ndhSlots, false) || nearestAny(ndhSlots.concat(qi)); return; }
+    if(ndh){ const ndhSlots = V.get_nodes_in_group('NDH-1').map(n => n.get_node('BindSites/plastoquinone_B')); self.soft_target = nearestFree(ndhSlots, true) || nearestFree(qi, true) || null; return; }
     const psiiSlots = V.get_nodes_in_group('photosystem_II').map(p => p.get_node('BindSites/plastoquinone_B'));
-    self.soft_target = nearestFree(psiiSlots, true) || nearestFree(qi, true) || nearestFree(psiiSlots, false) || nearestAny(psiiSlots.concat(qi)); },
+    self.soft_target = nearestFree(psiiSlots, true) || nearestFree(qi, true) || null; },
   update_proton_puller(self){ if(self.nearby_area_2) self.nearby_area_2.enabled = self.body_that_I_am_bound_to != null; },   // the proton puller works only in a pocket
 };
 })();

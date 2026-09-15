@@ -323,7 +323,7 @@
         nb = nb.filter(item => !(this.molecule_name === 'plastocyanin' && item.body_that_I_am_bound_to.molecule_name === 'plastocyanin')); if(!nb.length){ this.debug_info(fn, '3H plastocyanin to plastocyanin'); return null; }
         nb = nb.filter(item => !item.body_that_I_am_bound_to.kin || item.body_that_I_am_bound_to.body_that_I_am_bound_to != null); if(!nb.length){ this.debug_info(fn, '3I the carrier is not docked (3D)'); return null; }   // (a passing ferredoxin 150 units off took FB's electron - only a DOCKED carrier receives)
         nb = nb.filter(item => BindSite.distance_to(item) <= (item.hop_max != null ? item.hop_max : V.HOP_MAX)); if(!nb.length){ this.debug_info(fn, '3J too far for a hop (3D)'); return null; }   // (hop_max: a slot's own allowance - NDH-1's quinone site, see Kalvosto)
-        return V.pick_random(nb); }
+        return (this.script.RELEASING_choose && this.script.RELEASING_choose(this, String(BindSite.name), nb)) || V.pick_random(nb); }   // (3D: a script may choose - the Qo quinol sends one electron up each arm, 15.9.2026)
       return true; }
     async try_RELEASING(){ if(!this.BindSites || !this.alive) return;
       for(const BindSite of this.BindSites){ if(BindSite.has_meta('releasing_ongoing')) continue;

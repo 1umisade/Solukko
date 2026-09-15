@@ -9229,6 +9229,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     /* Shell lookup grid: testing every proton against every shell was 360000 calls a frame (43 ms). A
        64-unit grid over the box lists the shells overlapping each cell, rebuilt each frame (the loose
        proteins move), and a proton tests only the shells in its own cell - usually none. */
+    let gChanDrifter = -1;   // the ONE lumen proton drifting toward ATP synthase's channel right now (owner 15.9.2026: 'one proton drifting towards ATP synthase at a time'); -1 = pick the nearest
     const SG = 64, SG_MAX = 12;
     let sgNx = Math.ceil((bHi.x-bLo.x)/SG)+1, sgNy = Math.ceil((bHi.y-bLo.y)/SG)+1, sgNz = Math.ceil((bHi.z-bLo.z)/SG)+1;
     let sgCnt = new Uint8Array(sgNx*sgNy*sgNz), sgList = new Uint8Array(sgNx*sgNy*sgNz*SG_MAX);
@@ -9267,6 +9268,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
          most of the time, and the bearing math is the expensive part. */
       const cpx = cam.position.x, cpy = cam.position.y, cpz = cam.position.z, nearR2 = (gMega + 60)*(gMega + 60);
       const ringY = chOn ? memSurfY(axX, axZ) : 0;
+      if(chOn && SOLU){ const d = gChanDrifter;   // the drifter: still a free lumen proton? else the free lumen proton nearest the channel axis takes over
+        if(d < 0 || pHold[d] || pIn[d] || pPos[d*3+1] < -20000 || pPos[d*3+1] >= memSurfY(pPos[d*3], pPos[d*3+2]) - hT){ gChanDrifter = -1; let bd = 1e18;
+          for(let i=0;i<P_N;i++){ if(pHold[i] || pIn[i]) continue; const o=i*3, y=pPos[o+1]; if(y < -20000 || y >= memSurfY(pPos[o], pPos[o+2]) - hT) continue; const dx=pPos[o]-axX, dz=pPos[o+2]-axZ, dd=dx*dx+dz*dz; if(dd < bd){ bd = dd; gChanDrifter = i; } } } }
       for(let i=0;i<P_N;i++){ const o=i*3; if(pHold[i]) continue;   // held by the light reactions: placed by them, its displacement already written
         if(pIn[i] === 2){ const ang = pRingA[i] + gRotorTheta;   // a RIDER: it sits in the c-ring and turns with the rotor
           const x = axX + Math.cos(ang)*RIDE_R, y = ringY, z = axZ + Math.sin(ang)*RIDE_R; pVel[o] = pVel[o+1] = pVel[o+2] = 0; pPos[o]=x; pPos[o+1]=y; pPos[o+2]=z;
@@ -9276,7 +9280,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(y<pbLy){ y=pbLy; pVel[o+1]=Math.abs(pVel[o+1]); } else if(y>pbHy){ y=pbHy; pVel[o+1]=-Math.abs(pVel[o+1]); }
         if(z<pbLz){ z=pbLz; pVel[o+2]=Math.abs(pVel[o+2]); } else if(z>pbHz){ z=pbHz; pVel[o+2]=-Math.abs(pVel[o+2]); }
         const my = memSurfY(x, z), top = my + hT, bot = my - hT;   // the wall is the membrane under this proton (the cap's surface in the cell)
-        if(chOn && SOLU && y < bot && !pIn[i]){   // a lumen proton drifts toward ATP synthase's channel (the 2D level's proton.gd: a proton under the membrane heads for ATP synthase), so the pumping does not empty the stroma for good
+        if(chOn && SOLU && y < bot && !pIn[i] && i === gChanDrifter){   // ONE lumen proton at a time drifts toward ATP synthase's channel (owner 15.9.2026); the rest keep bouncing   // a lumen proton drifts toward ATP synthase's channel (the 2D level's proton.gd: a proton under the membrane heads for ATP synthase), so the pumping does not empty the stroma for good
           pVel[o] += (axX - x)*0.02*dt + (Math.random()-0.5)*160*dt; pVel[o+2] += (axZ - z)*0.02*dt + (Math.random()-0.5)*160*dt; pVel[o+1] += (bot - y)*0.02*dt + (Math.random()-0.5)*160*dt;   // half the pull, and a random kick every frame: they wander on the way instead of streaming straight in (owner 14.9.2026: 'the protons are going to ATP synthase too directly')
           const sp = Math.hypot(pVel[o], pVel[o+1], pVel[o+2]); if(sp > 45){ const k = 45/sp; pVel[o]*=k; pVel[o+1]*=k; pVel[o+2]*=k; } }
         let inCh = false;

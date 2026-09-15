@@ -11,10 +11,10 @@ V.SCRIPTS['plastocyanin'] = {
   RELEASING_special_actions(self, released_body){ },
   check_soft_target(self){
     if(self.body_that_I_am_bound_to != null) return;
-    if(white(slot(self, 'electron'))){ const psi = V.pick_random(V.get_nodes_in_group('photosystem_I').filter(p => p.body_that_I_am_bound_to == null)); self.soft_target = psi ? psi.get_node('BindSites/plastocyanin') : null; }
+    /* ONE plastocyanin per dock (owner 15.9.2026: 'only one carrier can target its target at a time'): a free dock no other plastocyanin heads for, else none - idle until the 3 s re-check */
+    const others = V.get_nodes_in_group('plastocyanin').filter(p => p !== self); const free = list => list.filter(s => s && dark(s) && !others.some(o => o.soft_target === s || o.hard_target === s));
+    if(white(slot(self, 'electron'))){ self.soft_target = V.pick_random(free(V.get_nodes_in_group('photosystem_I').map(p => p.get_node('BindSites/plastocyanin')))) || null; }
     else { const all_slots = []; for(const cytochrome of V.get_nodes_in_group('cytochrome_b6f')){ all_slots.push(cytochrome.get_node('BindSites/plastocyanin')); all_slots.push(cytochrome.get_node('BindSites/plastocyanin2')); }
-      const all_plastocyanins = V.get_nodes_in_group('plastocyanin'); let best_slot = null, fewest = Infinity;
-      for(const s of all_slots){ if(!s) continue; const heading_here = all_plastocyanins.filter(item => item !== self && item.soft_target === s).length; if(heading_here < fewest){ fewest = heading_here; best_slot = s; } }
-      self.soft_target = best_slot; } },
+      let best = null, bd = Infinity; for(const s of free(all_slots)){ const d = self.distance_to(s); if(d < bd){ bd = d; best = s; } } self.soft_target = best; } },
 };
 })();
