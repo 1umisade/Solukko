@@ -9876,7 +9876,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       window.gFreeAtoms = (key, i, out) => { out.length = 0; const Fv = gValoFree; if(!Fv || !Fv.drawn(key, i, _p)) return out; const o = (Fv.base[key] + i)*4; _p[0] += Fv.disp[o]; _p[1] += Fv.disp[o+1]; _p[2] += Fv.disp[o+2];
         const F = BYKEY[key]; if(!F || !F.fu){ out.push([_p[0], _p[1], _p[2], key === 'w' ? 1.5 : 2.5]); return out; }
         (frames[key] || (frames[key] = rigidFrame(F)))(i, gWaveT, _R);
-        const loc = F.local ? F.local.map(a => [a.x, a.y, a.z, a.sym ? info(codeOf(a.sym)).vr*FILL_SCALE : 1.6]) : F.atoms.map(a => [0, 0, a.d || 0, a.r || 1.5]);
+        const vrC = info(codeOf('C')).vr*FILL_SCALE, vrO = info(codeOf('O')).vr*FILL_SCALE;   // the linear species (mkFree keeps no atom table): CO2 C at 0, O at +-1.16; O2 at +-0.605 - the offsets mkFree was given
+        const LIN = { co2: [[0, 0, 0, vrC], [0, 0, 1.16, vrO], [0, 0, -1.16, vrO]], o2: [[0, 0, 0.605, vrO], [0, 0, -0.605, vrO]] };
+        const loc = F.local ? F.local.map(a => [a.x, a.y, a.z, a.sym ? info(codeOf(a.sym)).vr*FILL_SCALE : 1.6]) : (LIN[key] || (F.atoms ? F.atoms.map(a => [0, 0, a.d || 0, a.r || 1.5]) : [[0, 0, 0, 2.5]]));   // (F.atoms.map on an undefined table crashed the frame when an O2 was tapped - owner's red banner, 15.9.2026)
         for(const a of loc) out.push([_R[0]*a[0] + _R[1]*a[1] + _R[2]*a[2] + _p[0], _R[3]*a[0] + _R[4]*a[1] + _R[5]*a[2] + _p[1], _R[6]*a[0] + _R[7]*a[1] + _R[8]*a[2] + _p[2], a[3]]);
         return out; }; }
   }
