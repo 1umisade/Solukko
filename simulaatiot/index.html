@@ -5704,7 +5704,7 @@ void main(void){
   // rims). Outside it EVERYTHING drops to the cheap opaque disc material — one radius governs both, so
   // there is exactly one quality boundary in the scene. Set to the real value once CELL is known.
   let gCrisp = 132;
-  let gMega  = 1509;          // megacheap radius (owner's setting 12.9.2026, was 600): past this the membrane is a bare slab and proteins thin hard (1.5x closer than the ~895 half-period it used to hit)
+  let gMega  = 4527;          // megacheap radius (owner 15.9.2026: 'the membrane should be rendered with cheap lod 3x farther away' - 3 x 1509; 1509 was the owner's setting 12.9.2026, before that 600): past this the membrane is a bare slab and proteins thin hard (1.5x closer than the ~895 half-period it used to hit)
   let gMemBlend = 60;         // width of the lipid/slab overlap band at the megacheap edge (the gather thins across it, the slab's hole ends at its start)
   let cofListPanel = null;               // right-side cofactor-type list (built later); shown only in ETC mode
   const gCofOfAtom = new Map();          // element*2^24 + atom index → its cofactor group (a click on that atom selects the cofactor, owner 12.9.2026)
@@ -6636,7 +6636,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       selMaskMesh.thinInstanceSetBuffer('matrix', M,16,true); selMaskMesh.thinInstanceSetBuffer('modelId', ID,1,true); selMaskMesh.thinInstanceSetBuffer('instR', R,1,true);
       selMaskMesh.thinInstanceCount = n;
     };
-    let selSig=''; scene.onBeforeRenderObservable.add(()=>{ const s = etcSel>=0 ? ('cof'+etcSel) : [...gSel].sort((a,b)=>a-b).join(','); if(s!==selSig || gSelFree.size){ selSig=s; rebuildSelMask(); } });   // (a free selection moves: its silhouette is rebuilt every frame)   // rebuild when the protein-selection OR the selected cofactor changes
+    let selSig='', selFreeWas = false; scene.onBeforeRenderObservable.add(()=>{ const s = etcSel>=0 ? ('cof'+etcSel) : [...gSel].sort((a,b)=>a-b).join(','); if(s!==selSig || gSelFree.size || selFreeWas){ selSig=s; selFreeWas = gSelFree.size > 0; rebuildSelMask(); } });   // (a free selection moves: its silhouette is rebuilt every frame - and once more when it empties, or its instances stayed in the mask)   // rebuild when the protein-selection OR the selected cofactor changes
   }
 
   // ── Deferred detail build: nucleons, orbitals, bond + lone-pair lobes ─────────────────────────
@@ -8570,13 +8570,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gSpawnPlaneZ = gcz;
     gSpawnBounds = {x0:gcx-iw, x1:gcx+iw, y0:gcy-ih, y1:gcy+ih};
 
+    const FREE_SPEED = 48;   // every free molecule's speed, units/s at slider 1x (owner 15.9.2026: 'all molecules should move at a constant speed'; 48 was the mean of the old random 28..68)
     const NW=Math.round(20000*FILL), NP=SOLU ? 500 : Math.round(20000*Math.min(2,FILL)) /* cell mode (owner 13.9.2026): 100 protons, 50 in the stroma and 50 in the lumen, inside the box, plus a reserve of 400 hidden ones the OEC makes NEW protons from (two per water) - placed by the light reactions (valo/Kalvosto.js) once the box is known */, NCO2=Math.round(20000*FILL), NO2=Math.round(5000*FILL), NNADP=Math.round(500*FILL), NATP=1000, NADP2=1000, NPI=1000, rnd=x=>{ const v=Math.sin(x*127.1)*43758.5453; return v-Math.floor(v); };   // free-floating water filling the container box
     const wc=new Float32Array(NW*3), wv=new Float32Array(NW*3), wh1=new Float32Array(NW*3), wh2=new Float32Array(NW*3);
     for(let i=0;i<NW;i++){
       // Seed each axis from its OWN stream (i*3+n, not i+n) — with i+n consecutive molecules share draws
       // (molecule i's Y is molecule i+1's X), which reads as diagonal banding once there are thousands.
       wc[i*3]=x0+rnd(i*3+1)*bw; wc[i*3+1]=y0+rnd(i*3+2)*bh; wc[i*3+2]=z0+rnd(i*3+3)*bd;
-      const sp=28+rnd(i*5+7)*40, th=rnd(i*5+4)*6.283, ph=Math.acos(2*rnd(i*5+5)-1);
+      const sp=FREE_SPEED, th=rnd(i*5+4)*6.283, ph=Math.acos(2*rnd(i*5+5)-1);   // (one speed for all, 15.9.2026)
       wv[i*3]=sp*Math.sin(ph)*Math.cos(th); wv[i*3+1]=sp*Math.cos(ph); wv[i*3+2]=sp*Math.sin(ph)*Math.sin(th);
       // two O–H bonds (0.96 Å, 104.5°) in a random orientation
       let ux=rnd(i*7+1)*2-1, uy=rnd(i*7+2)*2-1, uz=rnd(i*7+3)*2-1; const ul=Math.hypot(ux,uy,uz)||1; ux/=ul;uy/=ul;uz/=ul;
@@ -8704,7 +8705,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const yA = (yFrom === undefined) ? y0 : yFrom, yB = y1 - yA;   // yFrom: spawn only above it (a species that lives on one side of the membrane)
       for(let i=0;i<n;i++){
         c[i*3]=x0+rnd(seed+i*3+1)*bw; c[i*3+1]=yA+rnd(seed+i*3+2)*yB; c[i*3+2]=z0+rnd(seed+i*3+3)*bd;
-        const sp=28+rnd(seed+i*5+7)*40, th=rnd(seed+i*5+4)*6.283, ph=Math.acos(2*rnd(seed+i*5+5)-1);
+        const sp=FREE_SPEED, th=rnd(seed+i*5+4)*6.283, ph=Math.acos(2*rnd(seed+i*5+5)-1);   // ONE speed for all (owner 15.9.2026: 'all molecules should move at a constant speed' - each used to draw its own, 28..68)
         v[i*3]=sp*Math.sin(ph)*Math.cos(th); v[i*3+1]=sp*Math.cos(ph); v[i*3+2]=sp*Math.sin(ph)*Math.sin(th);
         // the molecule's own axis (linear species lie along it) — an independent uniform direction
         const th2=rnd(seed+i*9+11)*6.283, ph2=Math.acos(2*rnd(seed+i*9+13)-1);
@@ -13308,7 +13309,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     { const rts = scene.customRenderTargets;
       const setRT = (rt, want) => { if(!rt) return; const i = rts.indexOf(rt);
         if(want && i < 0) rts.push(rt); else if(!want && i >= 0) rts.splice(i, 1); };
-      const wantSel = gOutlines && gIsoModel < 0 && (gSel.size || etcSel >= 0);           // green ring needs its mask (none in the isolate view - owner 14.9.2026: 'show only the selected thing without outline and other distractions')
+      const wantSel = gOutlines && gIsoModel < 0 && (gSel.size || etcSel >= 0 || gSelFree.size);   // green ring needs its mask - a FREE selection too (15.9.2026: selOn lit the pass for it while the mask was not rendered -> the previous complex's STALE ring stayed on screen and fattened when the camera turned) (none in the isolate view - owner 14.9.2026: 'show only the selected thing without outline and other distractions')
       const wantCof = gOutlines && gIsoModel < 0 && gEtc;                                 // black silhouette needs its mask
       setRT(cofDepthRT, gRevealOn > 0.5);
       setRT(cofMaskRT,  wantCof);

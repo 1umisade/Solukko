@@ -849,3 +849,21 @@ Huom. selMaskMesh pitaa vanhat instanssinsa kun vapaa valinta tyhjenee (rebuildS
 koska selOn = 0; testeissa thinInstanceCount ei kelpaa valinnan mittariksi ilman vaihtuvaa perusvalintaa.
 Selainpaneeli jaatyi taas kolmesti (document.hidden = true, rAF seis): ajetut ruudut sc.render() + kaksi await Promise.resolve() ja
 engine.getDeltaTime = () => 33; kuvat readPixels:lla (rivit alhaalta ylos: rivi H-1-y).
+
+## 15.9.2026 - yksi vakionopeus vapaille molekyyleille; halpa LoD 3x kauemmas; vihrea aariviiva ei jaa ruudulle (Claude Fable 5.1)
+
+Omistaja: 'all molecules should move at a constant speed. and the membrane should be rendered with cheap lod 3x farther away. and deselecting
+closes the info card but keeps the green outline and when rotating, the outline gets thick and stays on screen'
+(1) Nopeus: jokainen vapaa molekyyli (mkFree, vesi) arpoi oman nopeutensa 28..68 yks/s syntyessaan, joten osa kiiti ja osa mateli. Nyt yksi
+vakio FREE_SPEED = 48 (vanhan jakauman keskiarvo) kaikille lajeille; suunta arvotaan kuten ennen, nopeusliukuri skaalaa yhteisesti.
+Tulkinta: 'vakionopeus' = sama nopeus kaikilla - kantajarunkojen (MoleculeBody3D) ja pomppijoiden (Fd/FNR/PC: kotiin hidastuva spE) saannot
+jatettiin ennalleen; omistajalta kysytty tarkoittiko han myos niita. Todennus: 300 molekyylia/laji, siirtyma/dT: p90 47.9, O2 max 48.0
+(mediaani alle 48, koska osa kaantyi seinasta tai kalvon taitteesta mittausvalilla).
+(2) gMega 1509 -> 4527 (3 x): halpa levy-LoD ulottuu kolme kertaa kauemmas ennen laattaa; solutilassa laattataso paalla memR = min(gMega,
+patchHalf), joten puolijakso voi rajata. Hinta: levyalue 9x - ei mitattu (paneeli jaassa), omistaja katsoo ruutuajan.
+(3) Aariviiva: valintamaski (gSelMaskRT) renderoitiin vain kompleksi-/kofaktorivalinnalle (wantSel), mutta selOn sytytti seloutline-passin
+myos VAPAALLE valinnalle (aamun muutos). 'Tyhja' klikkaus, joka osui vapaaseen molekyyliin (uusi runkosade), piti passin paalla VANHENTUNEELLA
+maskilla: edellisen kompleksin rengas jai ruudulle, ja leveys (dist = cam.radius ilman valittua kompleksia) osui kattoonsa kameraa
+kaannettaessa -> paksu vihrea nauha. Korjaus: wantSel mukaan gSelFree.size; lisaksi rebuildSelMask ajetaan kerran kun vapaa valinta
+tyhjenee (selFreeWas - instanssit jaivat maskiin). Todennus: napautus NADP+:aan -> selMask customRenderTargets:ssa, maski 75; gDeselectAll ->
+maski 0, selMask pois listasta.
