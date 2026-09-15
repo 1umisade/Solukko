@@ -772,3 +772,17 @@ Omistaja: 'why this proton not glowing? and why cant i select nadp?'
   instanssi jonka ruutupiste on lahimpana (<= 22 px), milla korkeudella tahansa; tyhjan napautuksen haarassa ennen gDeselectAll. Shift lisaa/poistaa.
   Testattu synteettisilla pointer-tapahtumilla: 'Valittu: 1 hiukkasta', freeSelMark paalla. Napautus kompleksin paalla valitsee edelleen kompleksin
   (telakoitu NADP+ FNR:n sisalla -> FNR).
+
+## 15.9.2026 - vapaan molekyylin valinta: napautus voittaa kompleksin, vihrea siluetti, ei tekstia (Claude Fable 5.1)
+
+Omistaja: 'NADP inside an FNR gives you the FNR. not right. and i want green outline and no x hiukkasta selected label'.
+- Napautus: pickFreeAt(px, py, 12, noWater) ajetaan ENNEN kompleksihaaraa - piirretty vapaa molekyyli (ei vesi) 12 px:n sisalla voittaa alla olevan
+  kompleksin (telakoitu NADP+ FNR:n sisalla -> NADP+). Tyhjan napautuksen haara hakee yha 22 px:n sateella vesi mukaan lukien.
+- Valinnan ulkoasu: rts-selinfo-paneeli ei nayta 'Valittu: N hiukkasta' vapaille; torus-rengas (freeSelMark) pois (FREE_RING = false). Vihrea siluetti:
+  rebuildSelMask syottaa valittujen vapaiden molekyylien atomit maskiverkkoon maailmakoordinaateissa rivilla MAX_MODELS-1 (identiteetti, kaytossa vain
+  jos mols.length < 79) - window.gFreeAtoms(key, i, out): lajin paikalliset atomit (F.local / F.atoms d-offsetit) kaannettyna rigidFrame(F):lla
+  (sama kehys + spin kuin orbitaalisijoittimella) piirtopaikkaan; vesi ja kehyksettomat: yksi pallo. Maski rakennetaan joka ruutu kun gSelFree.size > 0
+  (molekyyli liikkuu); selOn myos gSelFree.size:lla.
+- cofsil ja seloutline luodaan reusable=true (eristysnakyma irrottaa/kiinnittaa ne - 'You're trying to reuse a post process' -virheet).
+- EI viela selaimessa todennettu: sivu jai 'Siirretaan naytonohjaimelle' -vaiheeseen, koska paneeli oli piilossa (document.hidden, rAF ei kay ->
+  yield_() ei palaa). Testi: napautus telakoituun NADP+:aan FNR:n sisalla -> selMaskMesh.thinInstanceCount = NADP:n atomimaara, ei tekstia.

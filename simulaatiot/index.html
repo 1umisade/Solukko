@@ -4686,7 +4686,7 @@ void main(void){
     cp.style.display='flex'; };
   const hideCenterProtein = () => { const cp=document.getElementById('center-protein'); if(cp) cp.style.display='none'; };
   const updateSelectionUI = () => {
-    if(!gSel.size){ if(gSelFree.size){ selPanel.innerHTML = '<div style="font-weight:bold;font-size:14px">Valittu: '+gSelFree.size+' hiukkasta</div><div style="font-size:12px;opacity:.8">oikea napautus siirtää ne</div>'; selPanel.style.display='block'; } else selPanel.style.display='none';   // a particle selection (the box grabs the plane's free molecules and protons too, owner 14.9.2026)
+    if(!gSel.size){ selPanel.style.display='none';   // (a free selection shows as the green silhouette only - owner 15.9.2026: 'no x hiukkasta selected label')   // a particle selection (the box grabs the plane's free molecules and protons too, owner 14.9.2026)
       hideCenterProtein(); if(updateCofInfo && etcSel<0) updateCofInfo(-1); return; }
     { const ca=document.getElementById('center-atom'); if(ca) ca.style.display='none'; }   // an RTS selection owns the centre → drop any leftover atom card
     let cof = -1, protein = false;
@@ -4750,7 +4750,8 @@ void main(void){
   { const FM_CAP = 4000; const mk = BABYLON.MeshBuilder.CreateTorus('freeSelMark', { diameter: 1, thickness: 0.09, tessellation: 28 }, scene); const mat = new BABYLON.StandardMaterial('freeSelMarkMat', scene);   // a RING facing the camera - the green selection outline's look, not a bubble (owner 14.9.2026: 'why some molecules show this bright bubble instead of the green selection outline')
     mat.emissiveColor = new BABYLON.Color3(0.16, 0.72, 0.30); mat.disableLighting = true; mat.alpha = 0.95; mat.disableDepthWrite = true; mat.backFaceCulling = false;
     mk.material = mat; mk.isPickable = false; mk.alwaysSelectAsActiveMesh = true; mk.renderingGroupId = 3; const buf = new Float32Array(FM_CAP*16); mk.thinInstanceSetBuffer('matrix', buf, 16, false); mk.thinInstanceCount = 0; mk.setEnabled(false);
-    scene.onBeforeRenderObservable.add(() => { if(!gSelFree.size){ if(mk.isEnabled()) mk.setEnabled(false); return; } let n = 0;
+    const FREE_RING = false;   // the torus ring is retired - a selected free molecule gets the same green silhouette as a protein (rebuildSelMask, 15.9.2026)
+    scene.onBeforeRenderObservable.add(() => { if(!FREE_RING || !gSelFree.size){ if(mk.isEnabled()) mk.setEnabled(false); return; } let n = 0;
       for(const id of gSelFree){ if(n >= FM_CAP) break; const k = id.indexOf(':'), key = id.slice(0, k), i = +id.slice(k+1); if(!freeWorld(key, i, _pFree)) continue;
         const r = key === 'p' ? 3.5 : key === 'w' ? 4.5 : 9; const m = n*16;
         // the ring's axis (the torus's y) points at the camera, so it reads as an outline round the particle
@@ -4771,8 +4772,8 @@ void main(void){
         gSelFree.add(key + ':' + i); if(gSelFree.size >= 4000) return; } } };
   /* a TAP on a free molecule or proton selects it (owner 15.9.2026: 'why cant i select nadp' - only the box-drag reached the free particles): the drawn instance
      whose screen point is nearest the tap, within 22 px, on any height (a docked NADP+ rides its slot off the plane) */
-  const pickFreeAt = (px, py) => { if(!gValoFree || !gValoFree.keys) return null; let best = null, bd = 22*22;
-    for(const key of gValoFree.keys){ const n = key === 'p' ? (gValoProtons ? gValoProtons.n : 0) : gValoFree.count(key);
+  const pickFreeAt = (px, py, rad, noWater) => { if(!gValoFree || !gValoFree.keys) return null; let best = null, bd = (rad || 22)*(rad || 22);
+    for(const key of gValoFree.keys){ if(noWater && key === 'w') continue; const n = key === 'p' ? (gValoProtons ? gValoProtons.n : 0) : gValoFree.count(key);
       for(let i=0;i<n;i++){ if(key === 'p' ? (gValoProtons.pos[i*3+1] < -20000) : false) continue;
         if(!freeWorld(key, i, _pFree)) continue; const q = projPt(_pFree[0], _pFree[1], _pFree[2]); if(q.z < 0 || q.z > 1) continue;
         const d2 = (q.x-px)*(q.x-px) + (q.y-py)*(q.y-py); if(d2 < bd){ bd = d2; best = key + ':' + i; } } }
@@ -5145,8 +5146,10 @@ void main(void){
       if(e.button === 0 && rtsBoxing){ rtsBoxing = false;
         if(rtsBoxMoved){ selectBox(rtsBoxSX, rtsBoxSY, rtsBoxCX, rtsBoxCY, e.shiftKey); }   // a drag → box-select the group
         else { const mol = pickMolecule();   // a TAP on a spawned molecule selects it (then M starts it, S stops it)
+          const fidNear = gSelEnabled && !mol ? pickFreeAt(scene.pointerX, scene.pointerY, 12, true) : null;   // a drawn free molecule (not water) within 12 px of the tap
           if(!gSelEnabled){ }   // selections switched off (dev panel): a click selects nothing
           else if(mol){ selectMolecule(mol, e.shiftKey); }
+          else if(fidNear){ if(!e.shiftKey) window.gDeselectAll(); if(e.shiftKey && gSelFree.has(fidNear)) gSelFree.delete(fidNear); else gSelFree.add(fidNear); updateSelectionUI(); }   // (owner 15.9.2026: 'NADP inside an FNR gives you the FNR. not right' - the molecule under the cursor wins over the complex it sits in)
           /* (15.9.2026, owner: 'the proteins dont have the green selection outline') a TAP always selects the COMPLEX - it used to select a cofactor when the tap landed on a cofactor atom, and with the ETC overlay on by default (drawn on top, depth ignored) most taps on a complex land on one, so the ring went to a small heme instead of the protein. A cofactor is picked by DOUBLE-click (onDouble, medium range), as before. */
           else if(rtsDownModel >= 0 && !camInsideModel(rtsDownModel)){   // a click on a protein complex → select it (Shift adds / toggles) - never the one you are standing inside
             if(e.shiftKey){ if(gSel.has(rtsDownModel)) gSel.delete(rtsDownModel); else gSel.add(rtsDownModel); }
@@ -6612,15 +6615,20 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         selMaskMesh.thinInstanceSetBuffer('matrix', M,16,true); selMaskMesh.thinInstanceSetBuffer('modelId', ID,1,true); selMaskMesh.thinInstanceSetBuffer('instR', R,1,true);
         selMaskMesh.thinInstanceCount = n; return;
       }
-      let n=0; for(let e=0;e<nEl;e++){ const am=atomMid[e]; for(let a=0;a<atomCount[e];a++) if(gSel.has(am[a])) n++; }
+      /* the selected FREE molecules (owner 15.9.2026: 'i want green outline'): their atoms in world space on the last, never-used transform row (identity) */
+      const freeM = [], FREE_MID = MAX_MODELS - 1;
+      if(gSelFree.size && window.gFreeAtoms && mols.length < FREE_MID){ const at = []; for(const id of gSelFree){ const k = id.indexOf(':'), key = id.slice(0, k), i = +id.slice(k+1);
+          if(key === 'p'){ if(freeWorld(key, i, _pFree)) freeM.push([_pFree[0], _pFree[1], _pFree[2], 1.2]); } else { gFreeAtoms(key, i, at); for(const a of at) freeM.push(a); } if(freeM.length > 4000) break; } }
+      let n=freeM.length; for(let e=0;e<nEl;e++){ const am=atomMid[e]; for(let a=0;a<atomCount[e];a++) if(gSel.has(am[a])) n++; }
       if(!n){ selMaskMesh.thinInstanceCount = 0; return; }
       const M=new Float32Array(n*16), ID=new Float32Array(n), R=new Float32Array(n); let w=0;
+      for(const a of freeM){ const o=w*16; M[o]=1; M[o+5]=1; M[o+10]=1; M[o+12]=a[0]; M[o+13]=a[1]; M[o+14]=a[2]; M[o+15]=1; ID[w]=FREE_MID; R[w]=a[3]; w++; }
       for(let e=0;e<nEl;e++){ const sb=sphBuf[e], am=atomMid[e], vr=info(e).vr*FILL_SCALE;
         for(let a=0;a<atomCount[e];a++){ if(gSel.has(am[a])){ const o=a*16; for(let j=0;j<16;j++) M[w*16+j]=sb[o+j]; ID[w]=am[a]; R[w]=vr; w++; } } }
       selMaskMesh.thinInstanceSetBuffer('matrix', M,16,true); selMaskMesh.thinInstanceSetBuffer('modelId', ID,1,true); selMaskMesh.thinInstanceSetBuffer('instR', R,1,true);
       selMaskMesh.thinInstanceCount = n;
     };
-    let selSig=''; scene.onBeforeRenderObservable.add(()=>{ const s = etcSel>=0 ? ('cof'+etcSel) : [...gSel].sort((a,b)=>a-b).join(','); if(s!==selSig){ selSig=s; rebuildSelMask(); } });   // rebuild when the protein-selection OR the selected cofactor changes
+    let selSig=''; scene.onBeforeRenderObservable.add(()=>{ const s = etcSel>=0 ? ('cof'+etcSel) : [...gSel].sort((a,b)=>a-b).join(','); if(s!==selSig || gSelFree.size){ selSig=s; rebuildSelMask(); } });   // (a free selection moves: its silhouette is rebuilt every frame)   // rebuild when the protein-selection OR the selected cofactor changes
   }
 
   // ── Deferred detail build: nucleons, orbitals, bond + lone-pair lobes ─────────────────────────
@@ -9858,6 +9866,15 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       else for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){ const d=Math.hypot(at[i].x-at[j].x, at[i].y-at[j].y, at[i].z-at[j].z);   // the cartoon (Pi): bonds by distance
         if(d < 1.35*bondL(at[i].sym, at[j].sym)){ pm.b1.push(i); pm.b2.push(j); pm.bo.push(1); pm.nb++; } }
       const set = rigidOrbSet(pm); ORB_LIN[F.key] = freeOrb(F.key, F, set.core, set.bond, rigidFrame(F), Math.min(F.n, 160)); }
+    /* the atoms of ONE drawn free molecule in WORLD space (the selection's green silhouette, owner 15.9.2026): the species' local atoms turned by its
+       frame (spin included, the same rigidFrame the orbital placer uses) at its drawn position; water and anything without a frame: one sphere */
+    { const BYKEY = { co2: FREE_CO2, o2: FREE_O2, nadp: FREE_NADP, atp: FREE_ATP, adp: FREE_ADP, pi: FREE_PI }, _R = new Float64Array(9), _p = [0, 0, 0], frames = {};
+      window.gFreeAtoms = (key, i, out) => { out.length = 0; const Fv = gValoFree; if(!Fv || !Fv.drawn(key, i, _p)) return out; const o = (Fv.base[key] + i)*4; _p[0] += Fv.disp[o]; _p[1] += Fv.disp[o+1]; _p[2] += Fv.disp[o+2];
+        const F = BYKEY[key]; if(!F || !F.fu){ out.push([_p[0], _p[1], _p[2], key === 'w' ? 1.5 : 2.5]); return out; }
+        (frames[key] || (frames[key] = rigidFrame(F)))(i, gWaveT, _R);
+        const loc = F.local ? F.local.map(a => [a.x, a.y, a.z, a.sym ? info(codeOf(a.sym)).vr*FILL_SCALE : 1.6]) : F.atoms.map(a => [0, 0, a.d || 0, a.r || 1.5]);
+        for(const a of loc) out.push([_R[0]*a[0] + _R[1]*a[1] + _R[2]*a[2] + _p[0], _R[3]*a[0] + _R[4]*a[1] + _R[5]*a[2] + _p[1], _R[6]*a[0] + _R[7]*a[1] + _R[8]*a[2] + _p[2], a[3]]);
+        return out; }; }
   }
 
   // Headlight follows the camera; fog darkens fragments by distance (front→back)
@@ -13344,7 +13361,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // outline where the frame meets the background (the whole assembly) AND around each cofactor molecule
   // (from the coverage mask). fxaa + the painterly grade then blend it into the comic look.
   const _cofW = new BABYLON.Vector3();
-  const cofsil = new BABYLON.PostProcess('cofsil', 'cofsil', ['texel','cofW'], ['cofMask'], 1.0, cam);
+  const cofsil = new BABYLON.PostProcess('cofsil', 'cofsil', ['texel','cofW'], ['cofMask'], 1.0, cam, undefined, undefined, true);   // reusable: detached / attached as the isolate view toggles (Babylon refuses to re-attach a non-reusable pass - the 'You're trying to reuse a post process' errors, 15.9.2026)
   cofsil.onApply = eff => {
     eff.setFloat2('texel', 1/engine.getRenderWidth(), 1/engine.getRenderHeight());
     // silhouette thickness tracks zoom → always ~5 proton-diameters on screen (thinner zoomed out, thicker in).
@@ -13366,7 +13383,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   let _ppOn = true;   // are the two outline passes currently attached to the camera?
   const _selW = new BABYLON.Vector3();
   // RTS selection → a thick GREEN outline traced around the selected complexes (from the selMask coverage).
-  const selOutline = new BABYLON.PostProcess('seloutline', 'seloutline', ['texel','owidth','selOn','glowT'], ['selMask'], 1.0, cam);
+  const selOutline = new BABYLON.PostProcess('seloutline', 'seloutline', ['texel','owidth','selOn','glowT'], ['selMask'], 1.0, cam, undefined, undefined, true);   // reusable (see cofsil)
   selOutline.onApply = eff => {
     eff.setFloat2('texel', 1/engine.getRenderWidth(), 1/engine.getRenderHeight());
     // Width scales with zoom EXACTLY like the black cofactor/protein outline (a FIXED world size, and the
@@ -13384,7 +13401,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const w = (20.0*NUCLEON_R) * pxPerWorld * (gCofLineW/2.2);   // THICK green ring (was 14) → clearly bolder than the narrow black
     eff.setFloat('owidth', Math.max(1.5, Math.min(22.0, w)));
     eff.setFloat('glowT', performance.now()*0.001);
-    eff.setFloat('selOn', (gOutlines && (gSel.size || etcSel >= 0)) ? 1.0 : 0.0);   // green silhouette shows for a protein selection OR a selected cofactor (the mask is fed the cofactor's atoms in rebuildSelMask)
+    eff.setFloat('selOn', (gOutlines && (gSel.size || etcSel >= 0 || gSelFree.size)) ? 1.0 : 0.0);   // green silhouette shows for a protein selection OR a selected cofactor (the mask is fed the cofactor's atoms in rebuildSelMask)
     if(gSelMaskRT) eff.setTexture('selMask', gSelMaskRT);
   };
   // AO is disabled in the translucent "inside" view — it packs depth into the alpha
