@@ -128,10 +128,10 @@ html.nopills #toplist, html.nopills #scorebox, html.nopills #timerbox{display:no
   font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
 #pills-btn.on{background:var(--sage);color:var(--sageink)}
-#spawn-nadp-btn,#spawn-adp-btn,#spawn-pi-btn,#spawn-h-btn,#spawn-hl-btn,#follow-btn,#cartoon-btn{touch-action:manipulation;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
+#spawn-nadp-btn,#spawn-adp-btn,#spawn-pi-btn,#spawn-h-btn,#spawn-hl-btn,#follow-btn,#cartoon-btn,#loose-btn{touch-action:manipulation;font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
 #spawn-nadp-btn:active,#spawn-adp-btn:active,#spawn-pi-btn:active,#spawn-h-btn:active,#spawn-hl-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--brown)}
-#follow-btn.on,#cartoon-btn.on{background:var(--sage);color:var(--sageink)}
+#follow-btn.on,#cartoon-btn.on,#loose-btn.on{background:var(--sage);color:var(--sageink)}
 #zoomin-btn{position:absolute;left:16px;top:300px;z-index:12;touch-action:manipulation;
   font-family:'Courier New',monospace;font-size:13px;font-weight:bold;letter-spacing:.5px;
   color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:999px;cursor:pointer;padding:8px 14px;box-shadow:0 3px 0 var(--brown)}
@@ -771,6 +771,43 @@ function extractLipid(m, code){
 /* GPU sphere impostors: a camera-facing quad per atom; the fragment shader
    ray-traces a perfect sphere and writes real depth, so spheres are smooth at
    any zoom and cost 2 triangles each. */
+const LOOSE_GLSL = `
+/* ── LOYSAT SIDOKSET (owner 15.9.2026: 'single bond looseness - the single bonds can rotate and flap around') ──
+   Every rotatable single bond (a bridge of the bond graph between two heavy atoms, not in a ring, with a moving side of at most 64
+   atoms) is a HINGE: the moving side twists about the bond axis and its bond angle flaps, slowly, each hinge with its own phase.
+   An atom carries at most two hinges: the OUTER one (nearest the rigid core) and the INNER one (nearest the atom); the inner turns
+   first, the outer carries it along. The same transform is applied to the vdW sphere, the nucleus, the orbital lobes and the
+   cofactor overlay/mask/cones, so nothing comes apart. Two ways in: per-instance attributes (LOOSE: models, free molecules) or a
+   per-template table in a float texture (LOOSETEX: the lipids, whose templates are shared by thousands of instances). */
+uniform float looseOn;   // 1 = on (the button)
+uniform float looseAmp;  // amplitude scale (1 = the default)
+#ifdef LOOSE
+attribute vec4 hA1;      // the OUTER hinge: xyz its anchor atom (the fixed end of the bond), w the phase
+attribute vec4 hU1;      // xyz the bond direction (anchor -> moving side), w 2 = present (1 = none - what an absent attribute reads as)
+attribute vec4 hA2;      // the INNER hinge
+attribute vec4 hU2;
+#endif
+#ifdef LOOSETEX
+attribute float hAt;              // the atom's index in its template (-1 = no hinge data)
+uniform sampler2D hingeTex;       // one row per template, four texels per atom: hA1 hU1 hA2 hU2
+uniform float tplRow; uniform vec2 hingeTexSz;
+void lsFetch(float at, out vec4 a1, out vec4 u1, out vec4 a2, out vec4 u2){
+  if(at < -0.5){ a1 = vec4(0.0); u1 = vec4(0.0, 0.0, 0.0, 1.0); a2 = vec4(0.0); u2 = vec4(0.0, 0.0, 0.0, 1.0); return; }
+  float v = (tplRow + 0.5)/hingeTexSz.y, u0 = at*4.0 + 0.5;
+  a1 = texture2D(hingeTex, vec2(u0/hingeTexSz.x, v)); u1 = texture2D(hingeTex, vec2((u0 + 1.0)/hingeTexSz.x, v));
+  a2 = texture2D(hingeTex, vec2((u0 + 2.0)/hingeTexSz.x, v)); u2 = texture2D(hingeTex, vec2((u0 + 3.0)/hingeTexSz.x, v)); }
+#endif
+mat3 lsAxis(vec3 u, float a){ float c = cos(a), sn = sin(a), t = 1.0 - c;
+  return mat3(t*u.x*u.x + c, t*u.x*u.y + sn*u.z, t*u.x*u.z - sn*u.y,  t*u.x*u.y - sn*u.z, t*u.y*u.y + c, t*u.y*u.z + sn*u.x,  t*u.x*u.z + sn*u.y, t*u.y*u.z - sn*u.x, t*u.z*u.z + c); }
+mat4 lsOne(vec4 hA, vec4 hU, float seed){ if(hU.w < 1.5) return mat4(1.0);
+  vec3 U = normalize(hU.xyz); float ph = hA.w + seed;
+  float tw = looseAmp*0.45*sin(uT*0.9 + ph), fl = looseAmp*0.16*sin(uT*1.3 + ph*1.7 + 1.0);   // the twist about the bond, the flap of its angle (radians)
+  vec3 V = normalize(cross(U, abs(U.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+  mat3 R = lsAxis(V, fl) * lsAxis(U, tw); vec3 t = hA.xyz - R*hA.xyz;
+  return mat4(vec4(R[0], 0.0), vec4(R[1], 0.0), vec4(R[2], 0.0), vec4(t, 1.0)); }
+mat4 lsMat(vec4 a1, vec4 u1, vec4 a2, vec4 u2, float seed){ if(looseOn < 0.5) return mat4(1.0); return lsOne(a1, u1, seed) * lsOne(a2, u2, seed); }   // the inner hinge first, the outer carries it along
+float lsSeedLip(float x, float anc){ return fract(sin(floor(x + 0.5)*12.9898 + floor(anc + 0.5)*78.233) * 43758.5453) * 6.2831853; }   // a lipid's own phase, from its anchor (rounded: the shells, nuclei and lobes must agree to the unit)
+`;
 BABYLON.Effect.ShadersStore['impVertexShader'] = `
 precision highp float;
 attribute vec3 position;
@@ -810,6 +847,7 @@ uniform float uT;
 uniform float boilHzAdj;        // thermal-shake time (0 = still)
 uniform float uTb;              // boil clock - its own slider, independent of uT
 uniform float boil;      // line-boil: STEPPED per-atom jitter of the billboard centre (0 = off)
+${LOOSE_GLSL}
 #if defined(LIPTILE) || defined(LIPWRAP)
 uniform vec3 tileOff;    // per-mesh translation - the nucleon pool shares ONE template buffer with it, and
                          // the membrane cells use it to repeat themselves around the camera
@@ -989,6 +1027,31 @@ void main(void){
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
 #endif
   vec3 base = W[3].xyz;
+  vec3 baseRaw = base, pcRaw = vec3(W[0].w, W[1].w, W[2].w);   // the RESTING atom (before any hinge): the shake and the boil hash come from it, so a loose atom does not tremble
+#if defined(LOOSE) || defined(LOOSETEX)
+  mat4 lsH = mat4(1.0); float lsSeed = 0.0;
+#ifdef LOOSETEX
+  { vec4 hA1, hU1, hA2, hU2; lsFetch(hAt, hA1, hU1, hA2, hU2);
+#ifdef LIPTPL
+    lsSeed = lsSeedLip(W[3].x, memAnc);   // this lipid's own phase
+#elif defined(LIPTILE)
+    lsSeed = lsSeedLip(tileOff.x, tileOff.z);   // the pooled nuclei: the tile IS the lipid
+#endif
+    lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed); }
+#else
+#ifdef WATERBOX
+  { uint sid = uint(molId + 0.5); lsSeed = hsh(sid*7u + 9u)*6.2831853; }   // per molecule - the CPU mirror (the orbital placer) seeds the same way
+#endif
+  lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed);
+#endif
+#ifdef WATERBOX
+  W[3].xyz = (lsH * vec4(W[3].xyz, 1.0)).xyz;   // a free molecule: this atom's offset inside it, hinged before the spin
+#elif defined(LIPTPL)
+#else
+  base = (lsH * vec4(base, 1.0)).xyz;   // a model atom / a pooled nucleon: hinged in the rest frame, before the model's or the tile's own transform
+  if(dot(pcRaw, pcRaw) > 0.0){ vec3 pc = (lsH * vec4(pcRaw, 1.0)).xyz; W[0].w = pc.x; W[1].w = pc.y; W[2].w = pc.z; }   // a nucleon's atom centre rides along
+#endif
+#endif
 #ifdef WATERBOX
   // Repel the molecule CENTRE, then add this atom's rigid offset - so the whole molecule is displaced as
   // one body and is not torn apart at a shell surface.
@@ -1061,7 +1124,11 @@ void main(void){
   base = tileRot * base + tileOff;
 #endif
 #ifdef LIPTPL
-  base += mat3(W) * atomOff;   // this vertex's atom, inside the lipid the instance places (rotated with it - a cell membrane's lipids stand on their local normal)
+  { vec3 offH = atomOff;
+#ifdef LOOSETEX
+    offH = (lsH * vec4(atomOff, 1.0)).xyz;   // the lipid's hinges, in its own frame
+#endif
+    baseRaw += mat3(W) * atomOff; base += mat3(W) * offH; }   // this vertex's atom, inside the lipid the instance places (rotated with it - a cell membrane's lipids stand on their local normal)
 #endif
 #ifdef MEMFADE
   vMemW = base;
@@ -1079,8 +1146,8 @@ void main(void){
      centre of its shell and its orbitals, worst while everything wiggled. A nucleon instance now
      carries its atom's centre in the three unused w slots of its matrix (world0.w, world1.w, world2.w,
      zero on every other instance), and hashes from that. */
-  vec3 hb = base;
-  { vec3 pc = vec3(W[0].w, W[1].w, W[2].w);
+  vec3 hb = baseRaw;
+  { vec3 pc = pcRaw;
     if(dot(pc, pc) > 0.0){ hb = pc;
 #ifdef LIPTILE
       hb = tileRot * pc + tileOff;
@@ -1627,9 +1694,13 @@ attribute float dr;                            // this atom's tube radius in WOR
 attribute float modelId;                       // which loaded model this cofactor atom belongs to
 uniform mat4 view; uniform mat4 projection;
 uniform mat4 modelXform[80];                   // per-model transform so the cone follows a moved molecule
+uniform float uT;
+#define LOOSE
+${LOOSE_GLSL}
 varying vec2 vq; varying float vz;
 void main(void){
   vec3 center = vec3(world3.x, world3.y, world3.z);   // instance translation = atom centre
+  center = (lsMat(hA1, hU1, hA2, hU2, 0.0) * vec4(center, 1.0)).xyz;   // the hinge, like the atom's sphere
   center = (modelXform[int(modelId + 0.5)] * vec4(center, 1.0)).xyz;   // follow the model drag/rotate
   vec4 cv = view * vec4(center, 1.0);
   vz = cv.z;                                          // view-space depth (larger = farther)
@@ -1667,9 +1738,12 @@ uniform mat4 modelXform[80];                   // per-model transform so the sil
 uniform float boilQuad;                        // quad expansion so the boil bulge is not clipped
 uniform float uT;
 uniform float boilHzAdj; uniform float boil; uniform float uTb;
+#define LOOSE
+${LOOSE_GLSL}
 varying vec2 vq; varying vec3 vWC;
 void main(void){
   vec3 base = vec3(world3.x, world3.y, world3.z);
+  base = (lsMat(hA1, hU1, hA2, hU2, 0.0) * vec4(base, 1.0)).xyz;   // the hinge, like the atom's sphere
   base = (modelXform[int(modelId + 0.5)] * vec4(base, 1.0)).xyz;   // follow the model drag/rotate
   vWC = base;                                   // raw centre → the boil warp's world-locked field (matches the imp shader)
   // SAME per-atom MOTION as the vdW sphere shader: always-on thermal shake + stepped boil drift, so the
@@ -1808,6 +1882,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 selCenter;
 uniform float uT;          // thermal-shake time
+${LOOSE_GLSL}
 #ifdef MACROMOVE
 uniform mat4 macroXform; uniform vec3 macroCenter;
 #endif
@@ -1883,6 +1958,20 @@ void main(void){
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
 #endif
+  vec3 lsW3 = W[3].xyz, ocenL = ocen;   // the resting origin and atom centre (the sway and boil phases come from them, hinged or not)
+#if defined(LOOSE) || defined(LOOSETEX)
+  { float lsSeed = 0.0;
+#ifdef LOOSETEX
+    vec4 hA1, hU1, hA2, hU2; lsFetch(hAt, hA1, hU1, hA2, hU2); lsSeed = lsSeedLip(W[3].x, memAnc);
+#endif
+    mat4 lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed);
+#ifdef LIPBAKE
+    W = W * lsH;   // a baked lipid-local lobe: hinged inside the lipid, then placed by the instance (ocen goes through W too)
+#else
+    W = lsH * W; ocenL = (lsH * vec4(ocen, 1.0)).xyz;   // a model's lobe: hinged in the rest frame, before the model transform
+#endif
+  }
+#endif
   float wsc = taper;   // per-lobe overall width multiplier (electronegative atom's lobe is wider → pair forms a cone)
 #ifdef HORNPROF
   if(prof > 0.5){ float hp = 0.5*(position.y + 1.0); wsc *= 0.05 + 0.95*pow(hp, 1.4); }   // 1.4: flares early enough not to read as a needle
@@ -1891,13 +1980,13 @@ void main(void){
   vec3 nrm = normal;
   vec4 wp = W * vec4(pos, 1.0);
 #ifndef SEEDATTR
-  wp.xyz += shakeOff(W[3].xyz);   // not for a free molecule - its shells do not sway either (see the imp shader)
+  wp.xyz += shakeOff(lsW3);   // not for a free molecule - its shells do not sway either (see the imp shader)
 #endif
 #ifdef MEMFADE
 #ifdef LIPBAKE
-  wp.xyz += mat3(W) * memSway(W[3].xyz, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
+  wp.xyz += mat3(W) * memSway(lsW3, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
 #else
-  wp.xyz += memSway(W[3].xyz, memAnc);
+  wp.xyz += memSway(lsW3, memAnc);
 #endif
 #endif
   vMid = -1.0;
@@ -1952,7 +2041,7 @@ void main(void){
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
 #else
-  vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
+  vec3 ocenW = ocenL;            // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
   vIsoKeep = 1.0;
@@ -2216,6 +2305,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 selCenter;    // focused atom centre (or far away = none selected)
 uniform float uT;          // thermal-shake time
+${LOOSE_GLSL}
 #ifdef MACROMOVE
 uniform mat4 macroXform; uniform vec3 macroCenter;  // whole-macromolecule drag offset (only movable materials define this)
 #endif
@@ -2283,15 +2373,29 @@ void main(void){
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
 #endif
+  vec3 lsW3 = W[3].xyz, ocenL = ocen;   // the resting origin and atom centre (the sway and boil phases come from them, hinged or not)
+#if defined(LOOSE) || defined(LOOSETEX)
+  { float lsSeed = 0.0;
+#ifdef LOOSETEX
+    vec4 hA1, hU1, hA2, hU2; lsFetch(hAt, hA1, hU1, hA2, hU2); lsSeed = lsSeedLip(W[3].x, memAnc);
+#endif
+    mat4 lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed);
+#ifdef LIPBAKE
+    W = W * lsH;   // a baked lipid-local lobe: hinged inside the lipid, then placed by the instance (ocen goes through W too)
+#else
+    W = lsH * W; ocenL = (lsH * vec4(ocen, 1.0)).xyz;   // a model's lobe: hinged in the rest frame, before the model transform
+#endif
+  }
+#endif
   vec4 wp = W * vec4(position, 1.0);
 #ifndef SEEDATTR
-  wp.xyz += shakeOff(W[3].xyz);   // not for a free molecule - its shells do not sway either (see the imp shader)
+  wp.xyz += shakeOff(lsW3);   // not for a free molecule - its shells do not sway either (see the imp shader)
 #endif
 #ifdef MEMFADE
 #ifdef LIPBAKE
-  wp.xyz += mat3(W) * memSway(W[3].xyz, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
+  wp.xyz += mat3(W) * memSway(lsW3, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
 #else
-  wp.xyz += memSway(W[3].xyz, memAnc);
+  wp.xyz += memSway(lsW3, memAnc);
 #endif
 #endif
   vMid = -1.0;
@@ -2346,7 +2450,7 @@ void main(void){
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
 #else
-  vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
+  vec3 ocenW = ocenL;            // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
   vIsoKeep = 1.0;
@@ -3768,7 +3872,7 @@ async function run(){
      alone, so a uniform first named after the first compile of that key never binds on ANY material sharing it (the cell shells'
      cutPlane). So the shared uniforms are put on the material right before it compiles: its readiness check is wrapped. */
   const shareUniforms = m => { if(m.__shared) return; m.__shared = true; m.setFloat('boilHzAdj', gBoilHz - 7); m.setFloat('uTb', 0); m.setFloat('uTe', 0); m.setFloat('isoModel', 0);
-    m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); m.setArray3('isoAt', gIsoAt); m.setFloat('isoN', 0); m.setFloat('memRow', 0); gShaderMats.push(m); };
+    m.setFloat('isoLo', -1); m.setFloat('isoHi', -2); m.setFloat('selLo', -1); m.setFloat('selHi', -2); m.setVector4('cutPlane', XSEC_OFF); m.setVector4('cutPlaneV', XSEC_OFF); m.setArray3('isoAt', gIsoAt); m.setFloat('isoN', 0); m.setFloat('memRow', 0); m.setFloat('looseOn', 0); m.setFloat('looseAmp', 1); gShaderMats.push(m); };
   for(const fn of ['isReady', 'isReadyForSubMesh']){ const orig = BABYLON.ShaderMaterial.prototype[fn]; if(!orig) continue;
     BABYLON.ShaderMaterial.prototype[fn] = function(){ shareUniforms(this); return orig.apply(this, arguments); }; }
   scene.skipPointerMovePicking = true;   // perf: we never auto-pick on pointer-move (all picking is done manually in our own handlers)
@@ -5194,10 +5298,10 @@ void main(void){
   const LP = {N:1, O:2, S:2, P:1, CL:3};          // lone pairs per element (non-bonding orbitals)
   const lonePairs = e => LP[EL_LIST[e]] || 0;
   const sphCellIdx = [];   // per element, per atom: its index inside its cell's sphere buffer (see pass A)
-  const sphBuf = [], cylBuf = [], wBuf = [], knobBuf = [], cylAtBuf = [], cylOidBuf = [], cenBuf = [], lpBuf = [], lpCenBuf = [], lpOidBuf = [], colBuf = [], cofBuf = [], resBuf = [],
+  const sphBuf = [], hingeBuf = [], lpAtBuf = [], cylBuf = [], wBuf = [], knobBuf = [], cylAtBuf = [], cylOidBuf = [], cenBuf = [], lpBuf = [], lpCenBuf = [], lpOidBuf = [], colBuf = [], cofBuf = [], resBuf = [],
         sphIdx = new Uint32Array(nEl), cylIdx = new Uint32Array(nEl), lpIdx = new Uint32Array(nEl);
   for(let e=0;e<nEl;e++){
-    sphBuf[e] = new Float32Array(atomCount[e]*16); sphCellIdx[e] = new Int32Array(atomCount[e]);
+    sphBuf[e] = new Float32Array(atomCount[e]*16); sphCellIdx[e] = new Int32Array(atomCount[e]); hingeBuf[e] = new Float32Array(atomCount[e]*16);   // (loose bonds: the atom's two hinges)
     cylBuf[e] = new Float32Array(halfCount[e]*16);             // bonding half-lobes (one per bond half)
     wBuf[e]   = new Float32Array(halfCount[e]);                // per-lobe width (electronegativity)
     knobBuf[e] = new Uint8Array(halfCount[e]);                 // 1 = small back-knob → skipped by the selection outline
@@ -5205,7 +5309,7 @@ void main(void){
     cylOidBuf[e] = new Float32Array(halfCount[e]);             // per-lobe orbital id (hybrid = 1000+i, π = 900) → focus filter
     cenBuf[e] = new Float32Array(halfCount[e]*3);              // bonding lobe's atom centre (selection test)
     lpBuf[e]  = new Float32Array(atomCount[e]*lonePairs(e)*16); // lone-pair lobes (translucent)
-    lpCenBuf[e] = new Float32Array(atomCount[e]*lonePairs(e)*3);
+    lpCenBuf[e] = new Float32Array(atomCount[e]*lonePairs(e)*3); lpAtBuf[e] = new Int32Array(atomCount[e]*lonePairs(e));   // (the lone pair's atom, for its hinge)
     lpOidBuf[e] = new Float32Array(atomCount[e]*lonePairs(e)); // per-lobe orbital id (lone pair = 2000+i)
     colBuf[e] = new Float32Array(atomCount[e]*4);   // per-instance surface colour (by component)
     cofBuf[e] = new Uint8Array(atomCount[e]);       // cofactor type code (feeds the ETC overlay)
@@ -5266,6 +5370,59 @@ void main(void){
     return out;
   }
 
+  /* LOYSAT SIDOKSET (owner 15.9.2026): the hinge table of one molecule - 16 floats per atom, see LOOSE_GLSL. Bridges of the bond graph
+     (Tarjan, iterative) that are single bonds between two heavy atoms are the rotatable bonds; the moving side is the smaller one, at most
+     maxSide atoms (so a protein's backbone bonds - both sides huge - never hinge, its side chains and a lipid's tails do). Each moving atom
+     keeps the outer hinge (largest moving side it belongs to) and the inner one (smallest). P is interleaved xyz in whatever frame the
+     caller draws in. */
+  function hingeTable(N, P, el, b1, b2, bo, nb, maxSide){ maxSide = maxSide || 64;
+    const out = new Float32Array(N*16); for(let k=0;k<N;k++){ out[k*16+7] = 1; out[k*16+15] = 1; }   // flags 1 = no hinge
+    if(!N || !nb || !b1 || !b2) return out;
+    const deg = new Int32Array(N); let M = 0;
+    for(let b=0;b<nb;b++){ const i=b1[b], j=b2[b]; if(i<0||j<0||i>=N||j>=N||i===j) continue; deg[i]++; deg[j]++; M++; }
+    const start = new Int32Array(N+1); for(let k=0;k<N;k++) start[k+1] = start[k] + deg[k];
+    const adj = new Int32Array(M*2), adjB = new Int32Array(M*2), fill = new Int32Array(N);
+    for(let b=0;b<nb;b++){ const i=b1[b], j=b2[b]; if(i<0||j<0||i>=N||j>=N||i===j) continue; adj[start[i]+fill[i]] = j; adjB[start[i]+fill[i]++] = b; adj[start[j]+fill[j]] = i; adjB[start[j]+fill[j]++] = b; }
+    const tin = new Int32Array(N).fill(-1), low = new Int32Array(N), par = new Int32Array(N).fill(-1), parB = new Int32Array(N).fill(-1), sz = new Int32Array(N), pre = new Int32Array(N), it = new Int32Array(N), stack = new Int32Array(N), rootOf = new Int32Array(N); let t = 0;
+    for(let root=0; root<N; root++){ if(tin[root] >= 0) continue; let sp = 0; stack[sp++] = root; tin[root] = low[root] = t; pre[t++] = root; it[root] = start[root]; rootOf[root] = root;
+      while(sp){ const v = stack[sp-1];
+        if(it[v] < start[v+1]){ const q = it[v]++, w = adj[q], bi = adjB[q]; if(bi === parB[v]) continue;
+          if(tin[w] < 0){ par[w] = v; parB[w] = bi; tin[w] = low[w] = t; pre[t++] = w; it[w] = start[w]; rootOf[w] = root; stack[sp++] = w; } else if(tin[w] < low[v]) low[v] = tin[w]; }
+        else { sp--; sz[v] += 1; const pp = par[v]; if(pp >= 0){ if(low[v] < low[pp]) low[pp] = low[v]; sz[pp] += sz[v]; } } } }
+    const outIx = new Int32Array(N).fill(-1), inIx = new Int32Array(N).fill(-1), hA = [], hU = [], hSz = []; let nh = 0;
+    const isH = k => EL_LIST[el[k]] === 'H';
+    for(let v=0; v<N; v++){ const pp = par[v]; if(pp < 0 || low[v] <= tin[pp]) continue;   // a tree edge that is a BRIDGE: in no ring
+      const bi = parB[v]; if(bo && bo[bi] != null && bo[bi] > 1.5) continue; if(isH(v) || isH(pp)) continue;   // single, between two heavy atoms
+      const s1 = sz[v], comp = sz[rootOf[v]], s2 = comp - s1; let anchor, mover, size, subtree;
+      if(s1 <= s2){ if(s1 > maxSide) continue; anchor = pp; mover = v; size = s1; subtree = true; } else { if(s2 > maxSide) continue; anchor = v; mover = pp; size = s2; subtree = false; }
+      const ax = P[anchor*3], ay = P[anchor*3+1], az = P[anchor*3+2]; let ux = P[mover*3]-ax, uy = P[mover*3+1]-ay, uz = P[mover*3+2]-az; const ul = Math.hypot(ux, uy, uz) || 1; ux /= ul; uy /= ul; uz /= ul;
+      const h = nh++; hA.push(ax, ay, az, ((h*0.61803398875) % 1)*6.2831853); hU.push(ux, uy, uz); hSz.push(size);
+      const visit = k => { const o = outIx[k]; if(o < 0 || hSz[o] < size) outIx[k] = h; const q = inIx[k]; if(q < 0 || hSz[q] > size) inIx[k] = h; };
+      const a0 = tin[v], a1 = a0 + s1;
+      if(subtree){ for(let q=a0;q<a1;q++) visit(pre[q]); }
+      else { const r0 = tin[rootOf[v]], r1 = r0 + comp; for(let q=r0;q<r1;q++){ if(q >= a0 && q < a1) continue; visit(pre[q]); } } }
+    for(let k=0;k<N;k++){ const o = outIx[k], q = inIx[k], w = k*16; if(o < 0) continue;
+      out[w] = hA[o*4]; out[w+1] = hA[o*4+1]; out[w+2] = hA[o*4+2]; out[w+3] = hA[o*4+3]; out[w+4] = hU[o*3]; out[w+5] = hU[o*3+1]; out[w+6] = hU[o*3+2]; out[w+7] = 2;
+      if(q >= 0 && q !== o){ out[w+8] = hA[q*4]; out[w+9] = hA[q*4+1]; out[w+10] = hA[q*4+2]; out[w+11] = hA[q*4+3]; out[w+12] = hU[q*3]; out[w+13] = hU[q*3+1]; out[w+14] = hU[q*3+2]; out[w+15] = 2; } }
+    return out; }
+  window.__hingeTable = hingeTable;   // dev: inspect a molecule's hinges from the console
+  /* the CPU mirror of lsMat (the free molecules' orbital lobes are placed on the CPU): R (row-major 3x3) and t for atom a of table H, at time T */
+  const _lsR = new Float64Array(9), _lsT = new Float64Array(3), _lsR2 = new Float64Array(9), _lsT2 = new Float64Array(3);
+  const lsAxisJS = (u, a, R) => { const c = Math.cos(a), sn = Math.sin(a), t = 1 - c, x = u[0], y = u[1], z = u[2];
+    R[0] = t*x*x + c; R[1] = t*x*y - sn*z; R[2] = t*x*z + sn*y; R[3] = t*x*y + sn*z; R[4] = t*y*y + c; R[5] = t*y*z - sn*x; R[6] = t*x*z - sn*y; R[7] = t*y*z + sn*x; R[8] = t*z*z + c; };
+  const lsOneJS = (H, w, T, seed, amp, R, tt) => {   // one hinge (8 floats at H[w..]) -> R, t; identity when absent
+    if(H[w+7] < 1.5){ R[0]=R[4]=R[8]=1; R[1]=R[2]=R[3]=R[5]=R[6]=R[7]=0; tt[0]=tt[1]=tt[2]=0; return; }
+    let ux=H[w+4], uy=H[w+5], uz=H[w+6]; const ul = Math.hypot(ux,uy,uz)||1; ux/=ul; uy/=ul; uz/=ul; const ph = H[w+3] + seed;
+    const tw = amp*0.45*Math.sin(T*0.9 + ph), fl = amp*0.16*Math.sin(T*1.3 + ph*1.7 + 1.0);
+    const a = Math.abs(uy) < 0.9 ? [0,1,0] : [1,0,0]; let vx = uy*a[2]-uz*a[1], vy = uz*a[0]-ux*a[2], vz = ux*a[1]-uy*a[0]; const vl = Math.hypot(vx,vy,vz)||1; vx/=vl; vy/=vl; vz/=vl;
+    const Rt = _lsR2, Rf = new Float64Array(9); lsAxisJS([ux,uy,uz], tw, Rt); lsAxisJS([vx,vy,vz], fl, Rf);
+    for(let r=0;r<3;r++) for(let c=0;c<3;c++) R[r*3+c] = Rf[r*3]*Rt[c] + Rf[r*3+1]*Rt[3+c] + Rf[r*3+2]*Rt[6+c];
+    const ax=H[w], ay=H[w+1], az=H[w+2]; tt[0] = ax - (R[0]*ax + R[1]*ay + R[2]*az); tt[1] = ay - (R[3]*ax + R[4]*ay + R[5]*az); tt[2] = az - (R[6]*ax + R[7]*ay + R[8]*az); };
+  const lsMatJS = (H, a, T, seed, amp, R, tt) => {   // both hinges of atom a: outer o inner
+    const w = a*16; if(H[w+7] < 1.5){ R[0]=R[4]=R[8]=1; R[1]=R[2]=R[3]=R[5]=R[6]=R[7]=0; tt[0]=tt[1]=tt[2]=0; return false; }
+    lsOneJS(H, w+8, T, seed, amp, _lsR, _lsT); lsOneJS(H, w, T, seed, amp, _lsR2, _lsT2);   // inner (R1,t1), outer (R2,t2): p' = R2 (R1 p + t1) + t2
+    for(let r=0;r<3;r++) for(let c=0;c<3;c++) R[r*3+c] = _lsR2[r*3]*_lsR[c] + _lsR2[r*3+1]*_lsR[3+c] + _lsR2[r*3+2]*_lsR[6+c];
+    tt[0] = _lsR2[0]*_lsT[0] + _lsR2[1]*_lsT[1] + _lsR2[2]*_lsT[2] + _lsT2[0]; tt[1] = _lsR2[3]*_lsT[0] + _lsR2[4]*_lsT[1] + _lsR2[5]*_lsT[2] + _lsT2[1]; tt[2] = _lsR2[6]*_lsT[0] + _lsR2[7]*_lsT[1] + _lsR2[8]*_lsT[2] + _lsT2[2]; return true; };
   const bondDirEA = [];   // bondDirEA[element][atomIdx] = list of bond directions → used to drop doubled atomic p/d/f lobes
   for(let e=0;e<nEl;e++) bondDirEA[e] = [];
   const RINGS = [];       // detected aromatic rings → {cx,cy,cz, nx,ny,nz, R} (world) for the delocalised-π tori
@@ -5273,11 +5430,13 @@ void main(void){
     if(m===chl) continue;   // chlorophyll built separately (animated)
     const ox=m.ox, oy=m.oy, oz=m.oz, mi=mols.indexOf(m);
     const kel = new Int32Array(m.na), kci = new Int32Array(m.na);   // molecule atom k → (element, element-atom index)
+    const hgM = hingeTable(m.na, (() => { const P = new Float32Array(m.na*3); for(let k=0;k<m.na;k++){ P[k*3]=m.x[k]; P[k*3+1]=m.y[k]; P[k*3+2]=m.z[k]; } return P; })(), m.el, m.b1, m.b2, m.bo, m.nb, 64);   // loose bonds: this model's hinges (side chains, cofactor tails)
     for(let k=0;k<m.na;k++){
       const e=m.el[k], ci=sphIdx[e]++;
       kel[k]=e; kci[k]=ci;
       BABYLON.Matrix.TranslationToRef(m.x[k]+ox, m.y[k]+oy, m.z[k]+oz, _m);
       _m.copyToArray(sphBuf[e], ci*16);
+      { const H = hingeBuf[e], w = ci*16, sk = k*16; for(let q=0;q<16;q++) H[w+q] = hgM[sk+q]; if(hgM[sk+7] > 1.5){ H[w] += ox; H[w+1] += oy; H[w+2] += oz; } if(hgM[sk+15] > 1.5){ H[w+8] += ox; H[w+9] += oy; H[w+10] += oz; } }   // the hinges into the rest world frame, like the atom
       const col = CAT_COLORS[m.cat[k]];
       colBuf[e][ci*4]=col[0]; colBuf[e][ci*4+1]=col[1]; colBuf[e][ci*4+2]=col[2]; colBuf[e][ci*4+3]=1;
       cofBuf[e][ci] = m.cof ? m.cof[k] : 0;   // cofactor type code (0 = none)
@@ -5394,7 +5553,7 @@ void main(void){
       for(const d of lonePairDirs(bd[k], lp)){
         const li=lpIdx[e]++;
         cylTo(ax,ay,az, ax+d[0]*LP_LEN, ay+d[1]*LP_LEN, az+d[2]*LP_LEN, lpBuf[e], li*16);
-        lpCenBuf[e][li*3]=ax; lpCenBuf[e][li*3+1]=ay; lpCenBuf[e][li*3+2]=az;
+        lpCenBuf[e][li*3]=ax; lpCenBuf[e][li*3+1]=ay; lpCenBuf[e][li*3+2]=az; lpAtBuf[e][li]=kci[k];
         lpOidBuf[e][li] = 2000 + lpi++;   // each lone pair is its own orbital
       }
     }
@@ -5635,6 +5794,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // Membrane half-cut → fade out the CAMERA-SIDE leaflet so it stops occluding the complexes. This used to be
   // permanently on (wantCut hardcoded true); now it is button-controlled and OFF by default, so the full
   // bilayer shows until you choose to cut the near half. gCut[2] eases in/out over MEM_FADE_S when toggled.
+  let gLooseOn = false, gLooseAmp = 1.0;   // LOYSAT SIDOKSET (owner 15.9.2026): the single bonds twist and flap - the button; the amplitude scale
   let gTopDown = false;  // view is (nearly) along the membrane normal: Puolikas shows both halves (owner 14.9.2026)
   let gMemCut = true;    // Puolikas ON by default (owner 12.9.2026): the camera-side half of the membrane inside the light-reaction box is cut away, the button restores it
   // "Membrane only" perf mode: hide the peripheral (soluble) proteins, keep the ones EMBEDDED in the membrane.
@@ -5817,10 +5977,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     mesh.material = glassMM(A); return mesh; };
   const impostorMat = (name, radius, isShell, protonOutline, movable, nucleon) => {
     const opts = {
-      attributes: ['position','instanceColor','world0','world1','world2','world3'].concat(movable ? ['modelId'] : []),
+      attributes: ['position','instanceColor','world0','world1','world2','world3'].concat(movable ? ['modelId','hA1','hU1','hA2','hU2'] : []),
       uniforms: ['view','projection','radius','fogColor','fogStart','fogEnd','isShell','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos'].concat(movable ? ['macroXform','macroCenter','modelXform','modelCol','colorMode'] : [])
     };
-    if(movable){ opts.defines = ['#define MACROMOVE','#define MODELMOVE'].concat(nucleon ? ['#define NUCLEON'] : []);   // follows the PSII gizmo AND its own per-model drag; NUCLEON keeps protons red / neutrons grey (never model-tinted)
+    if(movable){ opts.defines = ['#define MACROMOVE','#define MODELMOVE','#define LOOSE'].concat(nucleon ? ['#define NUCLEON'] : []);   // follows the PSII gizmo AND its own per-model drag; NUCLEON keeps protons red / neutrons grey (never model-tinted)
       opts.uniforms = opts.uniforms.concat(['selModel','selCol','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark']); }
     else opts.uniforms = opts.uniforms.concat(['selModel','selCol']);
     const mat = new BABYLON.ShaderMaterial(name, scene, 'imp', opts);
@@ -5888,10 +6048,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setVector3('selCenter', selCenter);
     eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR); });   // mode 2 → nuclei only inside the close cone (outside atoms show none)
   const orbMatG = new BABYLON.ShaderMaterial('orbG', scene, 'orb', {
-    attributes: ['position','normal','ocol','ocen','oid','modelId','world0','world1','world2','world3'],
+    attributes: ['position','normal','ocol','ocen','oid','modelId','hA1','hU1','hA2','hU2','world0','world1','world2','world3'],
     uniforms: ['view','projection','bubbleR','fogColor','fogStart','fogEnd','uT','nElec','selCenter','focusId','coneCos','drawElec','elecR','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','cofHideOn','cofTexel','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark'],
     samplers: ['cofDepth'],
-    defines: ['#define MACROMOVE','#define ELECGATE','#define MODELMOVE','#define COFHIDE']   // drag offset + per-model move; electrons only up close; COFHIDE → an atom whose vdW is hidden by the cofactor cutaway also drops its orbitals (margin spares the cofactor's own lobes)
+    defines: ['#define MACROMOVE','#define ELECGATE','#define MODELMOVE','#define COFHIDE','#define LOOSE']   // drag offset + per-model move; electrons only up close; COFHIDE → an atom whose vdW is hidden by the cofactor cutaway also drops its orbitals (margin spares the cofactor's own lobes)
   });
   orbMatG.setFloat('bubbleR', 1e9); orbMatG.setFloat('nElec', 2); orbMatG.setFloat('coneCos', -1.0); orbMatG.setFloat('drawElec', 1); realAlpha(orbMatG);   // always fully revealed; blended fades
   orbMatG.backFaceCulling = true;
@@ -5907,9 +6067,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   });
   const bondMatG = (nm) => {   // element colour per instance (bcol); always opaque
     const mat = new BABYLON.ShaderMaterial(nm, scene, 'bond', {
-      attributes: ['position','normal','taper','ocen','bcol','oid','modelId','world0','world1','world2','world3'],
+      attributes: ['position','normal','taper','ocen','bcol','oid','modelId','hA1','hU1','hA2','hU2','world0','world1','world2','world3'],
       uniforms: ['view','projection','bubbleR','opacity','fogColor','fogStart','fogEnd','uT','nElec','selCenter','focusId','coneCos','drawElec','elecR','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark'],
-      defines: ['#define MACROMOVE','#define ELECGATE','#define MODELMOVE']   // drag offset + per-model move; electrons only up close
+      defines: ['#define MACROMOVE','#define ELECGATE','#define MODELMOVE','#define LOOSE']   // drag offset + per-model move; electrons only up close
     });
     mat.setFloat('bubbleR', 1e9); mat.setFloat('nElec', 2); mat.setFloat('coneCos', -1.0); mat.setFloat('drawElec', 1); mat.backFaceCulling = true;   // always fully revealed; electrons inline
     mat.onBindObservable.add(() => {
@@ -5947,9 +6107,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     return (ix*gny+iy)*gnz+iz;
   };
   const cells = new Map();
-  const getCell = k => { let c=cells.get(k); if(!c){ c={ sphM:[],sphC:[],sphR:[], nucM:[],nucC:[], orbM:[],orbCol:[],orbCen:[],orbOid:[], boM:[],boT:[],boCen:[],boCol:[],boOid:[], lpM:[],lpT:[],lpCen:[],lpCol:[],lpOid:[] }; cells.set(k,c);} return c; };
+  const getCell = k => { let c=cells.get(k); if(!c){ c={ sphM:[],sphC:[],sphR:[],sphH:[], nucM:[],nucC:[],nucH:[], orbM:[],orbCol:[],orbCen:[],orbOid:[],orbH:[], boM:[],boT:[],boCen:[],boCol:[],boOid:[],boH:[], lpM:[],lpT:[],lpCen:[],lpCol:[],lpOid:[],lpH:[] }; cells.set(k,c);} return c; };
+  const H_OFF16 = new Float32Array(16); H_OFF16[7] = 1; H_OFF16[15] = 1;   // 'no hinge'
+  const setHinge = (mesh, H) => { const n = (H.length/16)|0; if(!n) return; const a1=new Float32Array(n*4), u1=new Float32Array(n*4), a2=new Float32Array(n*4), u2=new Float32Array(n*4);   // the 16-float table -> the four vec4 attributes
+    for(let i=0;i<n;i++){ const sk=i*16, d=i*4; for(let q=0;q<4;q++){ a1[d+q]=H[sk+q]; u1[d+q]=H[sk+4+q]; a2[d+q]=H[sk+8+q]; u2[d+q]=H[sk+12+q]; } }
+    mesh.thinInstanceSetBuffer('hA1', a1, 4, true); mesh.thinInstanceSetBuffer('hU1', u1, 4, true); mesh.thinInstanceSetBuffer('hA2', a2, 4, true); mesh.thinInstanceSetBuffer('hU2', u2, 4, true); };
   const pushN = (dst, src, off, n) => { for(let i=0;i<n;i++) dst.push(src[off+i]); };
-  const etcM=[], etcC=[], etcR=[], etcT=[], etcS=[], etcEl=[], etcIdx=[];   // ETC cofactor overlay: matrices, colours, radii, type codes, residue ids, element index + per-element atom index (for the info panel's mass + 3D orbital image)
+  const etcM=[], etcC=[], etcR=[], etcT=[], etcS=[], etcEl=[], etcIdx=[], etcH=[];   // ETC cofactor overlay: matrices, colours, radii, type codes, residue ids, element index + per-element atom index (for the info panel's mass + 3D orbital image)
 
   let buildDetail = null;                 // deferred: bins + builds the nucleon/orbital/bond/lone-pair meshes AFTER the first frame
   const macroCellByKey = new Map();       // cell key → its cellList entry, so buildDetail can attach the streamed-in detail meshes
@@ -5962,14 +6126,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     for(let a=0;a<atomCount[e];a++){
       const c=getCell(cellIx(sb[a*16+12],sb[a*16+13],sb[a*16+14]));
       sphCellIdx[e][a] = c.sphM.length/16;   // its slot in the cell's instance buffer: drawn only while below the cell's live thinInstanceCount (the pick checks this, 14.9.2026)
-      pushN(c.sphM, sb, a*16, 16);
+      pushN(c.sphM, sb, a*16, 16); pushN(c.sphH, hingeBuf[e], a*16, 16);
       // A cofactor / bound molecule gets ONE colour of its own, keyed on its residue instance, so every
       // atom of that molecule matches and the neighbouring one differs. Alpha 1 marks it as carrying its
       // own identity, which stops colour-by-model overwriting it in the shader.
       if(cf && cf[a]){ const mc=ETC_COL[cf[a]]||molCol(rs[a]); c.sphC.push(mc[0],mc[1],mc[2],1); }   // one colour per cofactor TYPE - every bound quinone blue, every chlorophyll green
       else c.sphC.push(ec[0],ec[1],ec[2],0);
       c.sphR.push(vr);
-      if(cf && cf[a] && !gHiddenModel[modelOf(sb[a*16+12],sb[a*16+13],sb[a*16+14])]){ const cc=ETC_COL[cf[a]]||ec; pushN(etcM, sb, a*16, 16); etcC.push(cc[0],cc[1],cc[2],0); etcR.push(vr*1.15); etcT.push(cf[a]); etcS.push(rs[a]); etcEl.push(e); etcIdx.push(a); }   // cofactor → overlay, coloured by type, slightly enlarged to pop (etcEl/etcIdx = element + its orbBuf index for the info panel)
+      if(cf && cf[a] && !gHiddenModel[modelOf(sb[a*16+12],sb[a*16+13],sb[a*16+14])]){ const cc=ETC_COL[cf[a]]||ec; pushN(etcM, sb, a*16, 16); pushN(etcH, hingeBuf[e], a*16, 16); etcC.push(cc[0],cc[1],cc[2],0); etcR.push(vr*1.15); etcT.push(cf[a]); etcS.push(rs[a]); etcEl.push(e); etcIdx.push(a); }   // cofactor → overlay, coloured by type, slightly enlarged to pop (etcEl/etcIdx = element + its orbBuf index for the info panel)
     }
     await yield_();
   }
@@ -6071,10 +6235,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // vdW space-filling sphere materials (shown when the graphics toggle is in "vdW" mode). One
   // sphere per atom, per-instance radius via IMPRAD. Movable (per-model drag + PSII gizmo).
   const vdwMat = new BABYLON.ShaderMaterial('vdwLOD', scene, 'imp', {
-    attributes:['position','instanceColor','instR','modelId','macroN','world0','world1','world2','world3'],
+    attributes:['position','instanceColor','instR','modelId','macroN','hA1','hU1','hA2','hU2','world0','world1','world2','world3'],
     uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
     samplers:['cofDepth'],
-    defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define COFHIDE','#define DEPTHSHADE','#define PLIGHT','#define MACRON'] });
+    defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define COFHIDE','#define DEPTHSHADE','#define PLIGHT','#define MACRON','#define LOOSE'] });
   vdwMat.setFloat('radius',1.0); vdwMat.setFloat('isShell',0); vdwMat.setFloat('shellMin',0); vdwMat.setFloat('bubbleR',1e9);
   vdwMat.setFloat('protonOutline',0); vdwMat.setFloat('depthBias',0); vdwMat.setFloat('coneCos',-1.0);
   vdwMat.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); vdwMat.backFaceCulling=false; realAlpha(vdwMat); glassable(vdwMat);
@@ -6084,15 +6248,15 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setMatrix('macroXform', macroGizmoNode.getWorldMatrix()); eff.setVector3('macroCenter', psiiCenter); eff.setFloat('selModel', gSelModel); eff.setColor3('selCol', SAGE); eff.setFloat('boil', gBoil);
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo); eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread); bindFocus(eff); bindCof(eff); bindPLight(eff); });
   const vdwMatStatic = new BABYLON.ShaderMaterial('vdwLODs', scene, 'imp', {
-    attributes:['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
+    attributes:['position','atomOff','instanceColor','instR','memAnc','tint','shade','hAt','world0','world1','world2','world3'],
     uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','memCut','cutLo','cutHi','viewBox','selModel','tileOff','memDrift','cofHideOn','cofTexel','cofAlpha','cofOutAlpha','cofOutCol','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
     samplers:['cofDepth'],
-    defines:['#define IMPRAD','#define MEMFADE','#define COFHIDE','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT'] });   // LIPTPL: one instance per lipid, atoms baked per vertex   // MEMFADE = cross-cut fade, LIPWRAP = the sheet repeats around the camera
+    defines:['#define IMPRAD','#define MEMFADE','#define COFHIDE','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT','#define LOOSETEX'] });   // LIPTPL: one instance per lipid, atoms baked per vertex   // MEMFADE = cross-cut fade, LIPWRAP = the sheet repeats around the camera
   vdwMatStatic.setFloat('radius',1.0); vdwMatStatic.setFloat('isShell',0); vdwMatStatic.setFloat('shellMin',0); vdwMatStatic.setFloat('bubbleR',1e9);
   vdwMatStatic.setFloat('protonOutline',0); vdwMatStatic.setFloat('depthBias',0); vdwMatStatic.setFloat('coneCos',-1.0);
   vdwMatStatic.setVector3('selCenter', new BABYLON.Vector3(1e6,1e6,1e6)); vdwMatStatic.backFaceCulling=false; realAlpha(vdwMatStatic); glassable(vdwMatStatic); vdwMatStatic.setFloat('selModel', -1);
   vdwMatStatic.onBindObservable.add(mesh=>{ const eff=vdwMatStatic.getEffect(); if(!eff)return;
-    eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
+    eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero); eff.setFloat('tplRow', (mesh && mesh.metadata && mesh.metadata.tpl) || 0);
     eff.setFloat('memDrift', gMemDrift);
     eff.setFloat('isShell', gShell); eff.setFloat('shellMin', gShellMin); eff.setFloat('revealFade', gRevealFade); eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 1 → membrane vdW goes 50% transparent where revealed
     eff.setFloat('uT',gWaveT); eff.setFloat('boil', gBoil); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox); eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd);
@@ -6116,9 +6280,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     return m;
   };
   const vdwFarMat = mkFar('vdwLODfar',
-    ['position','instanceColor','instR','modelId','macroN','world0','world1','world2','world3'],
+    ['position','instanceColor','instR','modelId','macroN','hA1','hU1','hA2','hU2','world0','world1','world2','world3'],
     ['macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','selCol','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
-    ['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define CHEAP','#define DEPTHSHADE','#define PLIGHT','#define MACRON']);
+    ['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define CHEAP','#define DEPTHSHADE','#define PLIGHT','#define MACRON','#define LOOSE']);
   vdwFarMat.setFloat('selModel', -1);
   vdwFarMat.onBindObservable.add(()=>{ const eff=vdwFarMat.getEffect(); if(!eff)return;
     eff.setFloat('uT',gWaveT); eff.setMatrices('modelXform', gModelXform); eff.setArray3('modelCol', gModelCol); eff.setFloat('colorMode', gColorMode?1:0);
@@ -6128,11 +6292,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     eff.setFloat('startOff', gDepthStart); eff.setFloat('spread', gDepthSpread);
     eff.setColor3('fogColor',scene.fogColor); eff.setFloat('fogStart',scene.fogStart); eff.setFloat('fogEnd',scene.fogEnd); bindPLight(eff); });
   const vdwStaticFarMat = mkFar('vdwLODsfar',
-    ['position','atomOff','instanceColor','instR','memAnc','tint','shade','world0','world1','world2','world3'],
+    ['position','atomOff','instanceColor','instR','memAnc','tint','shade','hAt','world0','world1','world2','world3'],
     ['memCut','cutLo','cutHi','viewBox','tileOff','memDrift','focalD','depthK','depthLo','startOff','spread','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK'],
-    ['#define IMPRAD','#define MEMFADE','#define CHEAP','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT']);
+    ['#define IMPRAD','#define MEMFADE','#define CHEAP','#define DEPTHSHADE','#define LIPTPL','#define PLIGHT','#define LOOSETEX']);
   vdwStaticFarMat.onBindObservable.add(mesh=>{ const eff=vdwStaticFarMat.getEffect(); if(!eff)return;
-    eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero);
+    eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || gTileZero); eff.setFloat('tplRow', (mesh && mesh.metadata && mesh.metadata.tpl) || 0);
     eff.setFloat('memDrift', gMemDrift); bindPLight(eff);
     eff.setFloat('uT',gWaveT); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', gViewBox);   // (13.9.2026: was 0 - the far lipid tier beyond the box stayed on screen inside the box)
     eff.setFloat('focalD', gShadeD()); eff.setFloat('depthK', gDepthK); eff.setFloat('depthLo', gDepthLo);
@@ -6159,9 +6323,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
   // ON TOP of the whole scene. Follows the per-model gizmo + PSII transform like the normal spheres.
   if(etcM.length){
     const etcMat = new BABYLON.ShaderMaterial('etcTop', scene, 'imp', {
-      attributes:['position','instanceColor','instR','modelId','groupId','world0','world1','world2','world3'], samplers:['slotTex'],
+      attributes:['position','instanceColor','instR','modelId','groupId','hA1','hU1','hA2','hU2','world0','world1','world2','world3'], samplers:['slotTex'],
       uniforms:['slotN','view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','macroXform','macroCenter','modelXform','modelCol','colorMode','selModel','hlGroup','hlBright','focalD','depthK','depthLo','startOff','spread','focusAmt','focusMode','focusCenterV','focusR','focusSet','focusGroup','focusDark'],
-      defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define ETCHL','#define DEPTHSHADE','#define ETCTHIN'] });
+      defines:['#define IMPRAD','#define MACROMOVE','#define MODELMOVE','#define ETCHL','#define DEPTHSHADE','#define ETCTHIN','#define LOOSE'] });
     etcMat.setFloat('radius',1.0); etcMat.setFloat('selModel', -1); etcMat.setFloat('isShell',0); etcMat.setFloat('shellMin',0); etcMat.setFloat('bubbleR',1e9);
     etcMat.setFloat('slotN', 0); etcMat.setTexture('slotTex', new BABYLON.RawTexture(new Uint8Array([128]), 1, 1, BABYLON.Constants.TEXTUREFORMAT_R, scene, false, false, BABYLON.Texture.NEAREST_SAMPLINGMODE, BABYLON.Constants.TEXTURETYPE_UNSIGNED_BYTE));   // the light reactions (valo/Kalvosto.js) fill it: per cofactor group, 0.5 = as is, less = an empty carrier, more = excited
     etcMat.setFloat('protonOutline',0); etcMat.setFloat('depthBias',0); etcMat.setFloat('coneCos',-1.0);
@@ -6178,7 +6342,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     etcOverlay.thinInstanceSetBuffer('matrix', new Float32Array(etcM),16,true);
     etcOverlay.thinInstanceSetBuffer('instanceColor', new Float32Array(etcC),4,true);
     etcOverlay.thinInstanceSetBuffer('instR', new Float32Array(etcR),1,true);
-    etcOverlay.thinInstanceSetBuffer('modelId', mdlBuf(etcM),1,true);
+    etcOverlay.thinInstanceSetBuffer('modelId', mdlBuf(etcM),1,true); setHinge(etcOverlay, etcH);
     etcOverlay.renderingGroupId = 1;                               // depth-tested WITH the protein, so cut-away outlines (atoms that really are in front) draw OVER the cofactor while it still shows through the cut holes (group 3, cleared depth, stays reserved for selection outlines)
     etcOverlay.setEnabled(gEtc);
     {
@@ -6245,15 +6409,16 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       cofCam.getProjectionMatrix = () => cam.getProjectionMatrix();
       cofDepthRT.activeCamera = cofCam;
       const cofdMat = new BABYLON.ShaderMaterial('cofdMat', scene, 'cofd', {
-        attributes:['position','dr','modelId','world0','world1','world2','world3'], uniforms:['view','projection','tipRatio','baseRatio','coneReach','modelXform'] });
+        attributes:['position','dr','modelId','hA1','hU1','hA2','hU2','world0','world1','world2','world3'], uniforms:['view','projection','tipRatio','baseRatio','coneReach','modelXform','uT'] });
       cofdMat.backFaceCulling = false;
       cofdMat.onBindObservable.add(()=>{ const eff=cofdMat.getEffect(); if(!eff)return;
-        eff.setFloat('tipRatio', gConeTip); eff.setFloat('baseRatio', gConeBase); eff.setFloat('coneReach', gConeReach); eff.setMatrices('modelXform', gModelXform); });   // dev sliders: cone width at the atom / at the camera / reach behind · modelXform → follow a moved molecule
+        eff.setFloat('tipRatio', gConeTip); eff.setFloat('baseRatio', gConeBase); eff.setFloat('coneReach', gConeReach); eff.setMatrices('modelXform', gModelXform); eff.setFloat('uT', gWaveT); });   // dev sliders: cone width at the atom / at the camera / reach behind · modelXform → follow a moved molecule
       const disc = BABYLON.MeshBuilder.CreatePlane('cofDisc', {size:2}, scene);
       disc.material = cofdMat; disc.isPickable = false; disc.alwaysSelectAsActiveMesh = true; disc.layerMask = 0x20000000;
       const WORLD_TUBE_R = 14.0, NA = etcT.length;                      // per-ATOM tube radius in Ångström → a FIXED molecular channel width at every zoom, wide enough that the whole line of sight in front of a cofactor clears
       disc.thinInstanceSetBuffer('matrix', new Float32Array(etcM), 16, true);   // one disc per cofactor ATOM (reuse the overlay's atom matrices)
       disc.thinInstanceSetBuffer('modelId', mdlBuf(etcM), 1, true);             // per-atom model index → the cone follows a dragged molecule
+      setHinge(disc, etcH);
       gCofDR = new Float32Array(NA);
       for(let i=0;i<NA;i++) if(etcTypeOn[etcT[i]] === undefined) etcTypeOn[etcT[i]] = !(etcT[i] === 7 || etcT[i] === 8);   // every cofactor type defaults to line-of-sight ON - except the pigments: chlorophylls (7) and carotenoids (8) are antenna, not the electron chain, and stay unrevealed unless toggled on in the list (owner 14.9.2026)
       refreshCofDiscs = () => {   // per-atom tube radius (Å); 0 = that atom's type is toggled off
@@ -6294,7 +6459,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       mcam.getProjectionMatrix = () => cam.getProjectionMatrix();
       cofMaskRT.activeCamera = mcam;
       const maskMat = new BABYLON.ShaderMaterial('cofMaskMat', scene, 'cofmask', {
-        attributes:['position','dr','modelId','world0','world1','world2','world3'], uniforms:['view','projection','boilQuad','boil','uT','camRight','camUp','modelXform'] });
+        attributes:['position','dr','modelId','hA1','hU1','hA2','hU2','world0','world1','world2','world3'], uniforms:['view','projection','boilQuad','boil','uT','camRight','camUp','modelXform'] });
       maskMat.backFaceCulling = false;
       maskMat.setFloat('boilQuad', 1.28);
       maskMat.onBindObservable.add(()=>{ const eff=maskMat.getEffect(); if(!eff)return;
@@ -6305,6 +6470,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       maskMesh.thinInstanceSetBuffer('matrix', new Float32Array(etcM),16,true);       // reuse the cofactor atom matrices
       maskMesh.thinInstanceSetBuffer('dr', new Float32Array(etcR),1,true);            // per-atom vdW radius → the sphere's screen silhouette
       maskMesh.thinInstanceSetBuffer('modelId', mdlBuf(etcM),1,true);                 // per-atom model index → the silhouette follows a dragged molecule
+      setHinge(maskMesh, etcH);
       maskMesh.setEnabled(gEtc);
       cofMaskRT.renderList = [maskMesh];
       scene.customRenderTargets.push(cofMaskRT);
@@ -6358,7 +6524,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       sphere.thinInstanceSetBuffer('instanceColor', new Float32Array(c.sphC),4,true);
       sphere.thinInstanceSetBuffer('instR', new Float32Array(c.sphR),1,true);
       sphere.thinInstanceSetBuffer('modelId', mdlBuf(c.sphM),1,true);
-      sphere.thinInstanceSetBuffer('macroN', macroNorm(c.sphM, c.macroN),4,true); c.macroN = null;   // the molecule's surface normal + buriedness per atom (see macroField)
+      sphere.thinInstanceSetBuffer('macroN', macroNorm(c.sphM, c.macroN),4,true); c.macroN = null; setHinge(sphere, c.sphH); c.sphH = null;   // the molecule's surface normal + buriedness per atom (see macroField)
       sphere.renderingGroupId=1; sphere.alwaysSelectAsActiveMesh=true; sphere.setEnabled(false); }
     const sphFull = sphere ? (c.sphM.length/16)|0 : 0;   // full instance count → the distance LOD thins from this
     const entry = { cx,cy,cz, mi:modelOf(cx,cy,cz), meshes:[], nuc:null, sphere, macro:true, r:cellHalfDiag, visOn:false, nucOn:false, sphOn:false, k, sphFull, sphCount:sphFull };   // mi → which model transforms this cell (cull must match the shaders)
@@ -6423,27 +6589,27 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     await fillNucleons();
     for(let e=0;e<nEl;e++){
       if(atomCount[e]===0) continue;
-      const sb=sphBuf[e], A=info(e).n, ec=info(e).c, nb=nucBuf[e], nc=nucColBuf[e];
+      const sb=sphBuf[e], A=info(e).n, ec=info(e).c, nb=nucBuf[e], nc=nucColBuf[e], hb=hingeBuf[e];
       for(let a=0;a<atomCount[e];a++){
         const c=getCell(cellIx(sb[a*16+12],sb[a*16+13],sb[a*16+14]));
-        for(let j=0;j<A;j++){ pushN(c.nucM, nb, (a*A+j)*16, 16); pushN(c.nucC, nc, (a*A+j)*4, 4); }
+        for(let j=0;j<A;j++){ pushN(c.nucM, nb, (a*A+j)*16, 16); pushN(c.nucC, nc, (a*A+j)*4, 4); pushN(c.nucH, hb, a*16, 16); }
       }
       const oc=orbCount(e);   // Orbitals — bin by orbCenBuf (each lobe's atom centre).
       if(oc>0){ const ob=orbBuf[e], ocol=orbColBuf[e], ocen=orbCenBuf[e], oidb=orbIdBuf[e], tot=atomCount[e]*oc;
         for(let i=0;i<tot;i++){ const o=i*16;
           if(ob[o]*ob[o]+ob[o+1]*ob[o+1]+ob[o+2]*ob[o+2] < 1e-9) continue;   // skipped (bond-doubled) lobe → don't upload it
           const c=getCell(cellIx(ocen[i*3],ocen[i*3+1],ocen[i*3+2]));
-          pushN(c.orbM, ob, o, 16); pushN(c.orbCol, ocol, i*3, 3); pushN(c.orbCen, ocen, i*3, 3); c.orbOid.push(oidb[i]);
+          pushN(c.orbM, ob, o, 16); pushN(c.orbCol, ocol, i*3, 3); pushN(c.orbCen, ocen, i*3, 3); c.orbOid.push(oidb[i]); pushN(c.orbH, hb, Math.floor(i/oc)*16, 16);
         }
       }
       { const cen=cenBuf[e];   // Bonding lobes.
         for(let i=0;i<cylIdx[e];i++){ const c=getCell(cellIx(cen[i*3],cen[i*3+1],cen[i*3+2]));
-          pushN(c.boM, cylBuf[e], i*16, 16); c.boT.push(wBuf[e][i]); pushN(c.boCen, cen, i*3, 3);
+          pushN(c.boM, cylBuf[e], i*16, 16); c.boT.push(wBuf[e][i]); pushN(c.boCen, cen, i*3, 3); { const at = cylAtBuf[e][i]; if(at >= 0) pushN(c.boH, hb, at*16, 16); else pushN(c.boH, H_OFF16, 0, 16); }
           c.boCol.push(ec[0],ec[1],ec[2]); c.boOid.push(cylOidBuf[e][i]);
         } }
       { const cen=lpCenBuf[e];   // Lone-pair lobes.
         for(let i=0;i<lpIdx[e];i++){ const c=getCell(cellIx(cen[i*3],cen[i*3+1],cen[i*3+2]));
-          pushN(c.lpM, lpBuf[e], i*16, 16); c.lpT.push(1.0); pushN(c.lpCen, cen, i*3, 3);
+          pushN(c.lpM, lpBuf[e], i*16, 16); c.lpT.push(1.0); pushN(c.lpCen, cen, i*3, 3); pushN(c.lpH, hb, lpAtBuf[e][i]*16, 16);
           c.lpCol.push(ec[0],ec[1],ec[2]); c.lpOid.push(lpOidBuf[e][i]);
         } }
       await yield_();
@@ -6459,23 +6625,23 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(c.nucM.length){ const m=BABYLON.MeshBuilder.CreatePlane('cn'+k,{size:2},scene); m.material=nucMatG; m.isPickable=false; m.doNotSyncBoundingInfo=true;   // the matrices carry the atom centre in their w slots - Babylon must not derive bounds from them
         m.thinInstanceSetBuffer('matrix', new Float32Array(c.nucM),16,true);
         m.thinInstanceSetBuffer('instanceColor', new Float32Array(c.nucC),4,true);
-        m.thinInstanceSetBuffer('modelId', mdlBuf(c.nucM),1,true);
+        m.thinInstanceSetBuffer('modelId', mdlBuf(c.nucM),1,true); setHinge(m, c.nucH);
         m.renderingGroupId=1;   // nuclei drawn after the orbitals (biased depth) so they sit on top of their own atom
         m.alwaysSelectAsActiveMesh=true; m.setEnabled(false); entry.nuc=m; }
       if(c.orbM.length){ const m=BABYLON.MeshBuilder.CreateSphere('co'+k,{segments:3,diameter:1},scene); m.material=orbMatG; m.isPickable=false;
         m.thinInstanceSetBuffer('matrix', new Float32Array(c.orbM),16,true); m.thinInstanceSetBuffer('ocol', new Float32Array(c.orbCol),3,true);
         m.thinInstanceSetBuffer('ocen', new Float32Array(c.orbCen),3,true); m.thinInstanceSetBuffer('oid', new Float32Array(c.orbOid),1,true);
-        m.thinInstanceSetBuffer('modelId', mdlBuf(c.orbM),1,true);
+        m.thinInstanceSetBuffer('modelId', mdlBuf(c.orbM),1,true); setHinge(m, c.orbH);
         m.alwaysSelectAsActiveMesh=true; m.setEnabled(false); entry.meshes.push(m); }
       if(c.boM.length){ const m=BABYLON.MeshBuilder.CreateSphere('cb'+k,{segments:3,diameter:1},scene); m.material=bondBondingMat; m.isPickable=false;
         m.thinInstanceSetBuffer('matrix', new Float32Array(c.boM),16,true); m.thinInstanceSetBuffer('taper', new Float32Array(c.boT),1,true);
         m.thinInstanceSetBuffer('ocen', new Float32Array(c.boCen),3,true); m.thinInstanceSetBuffer('bcol', new Float32Array(c.boCol),3,true); m.thinInstanceSetBuffer('oid', new Float32Array(c.boOid),1,true);
-        m.thinInstanceSetBuffer('modelId', mdlBuf(c.boM),1,true);
+        m.thinInstanceSetBuffer('modelId', mdlBuf(c.boM),1,true); setHinge(m, c.boH);
         m.alwaysSelectAsActiveMesh=true; m.setEnabled(false); entry.meshes.push(m); }
       if(c.lpM.length){ const m=BABYLON.MeshBuilder.CreateSphere('cl'+k,{segments:3,diameter:1},scene); m.material=bondLPMat; m.isPickable=false;
         m.thinInstanceSetBuffer('matrix', new Float32Array(c.lpM),16,true); m.thinInstanceSetBuffer('taper', new Float32Array(c.lpT),1,true);
         m.thinInstanceSetBuffer('ocen', new Float32Array(c.lpCen),3,true); m.thinInstanceSetBuffer('bcol', new Float32Array(c.lpCol),3,true); m.thinInstanceSetBuffer('oid', new Float32Array(c.lpOid),1,true);
-        m.thinInstanceSetBuffer('modelId', mdlBuf(c.lpM),1,true);
+        m.thinInstanceSetBuffer('modelId', mdlBuf(c.lpM),1,true); setHinge(m, c.lpH);
         m.alwaysSelectAsActiveMesh=true; m.setEnabled(false); entry.meshes.push(m); }
       await yield_();
     }
@@ -7246,18 +7412,18 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         uniforms:['view','projection','bubbleR','fogColor','fogStart','fogEnd','uT','nElec','selCenter','focusId','coneCos','drawElec','elecR','memCut','cutLo','cutHi','viewBox','selModel','memDrift'].concat(extra||[]),
         // LIPBAKE, not LIPWRAP: these draw the shared templates, and the per-frame gather already places
         // each instance on the wrapped copy, so the shader has no wrapping left to do.
-        defines:['#define ELECGATE','#define MEMFADE','#define LIPBAKE'] });   // ELECGATE isolates elecR, MEMFADE = the cross-cut fade
+        defines:['#define ELECGATE','#define MEMFADE','#define LIPBAKE','#define LOOSETEX'] });   // ELECGATE isolates elecR, MEMFADE = the cross-cut fade
       mat.setFloat('bubbleR',1e9); mat.setFloat('nElec',2); mat.setFloat('coneCos',-1.0);
       mat.setFloat('drawElec',1); mat.setFloat('elecR', NEAR_R); mat.backFaceCulling=true; mat.setFloat('selModel', -1);   // orbitals always, electrons only up close
-      mat.onBindObservable.add(()=>{ const eff=mat.getEffect(); if(!eff) return;
-        eff.setFloat('memDrift', gMemDrift);
+      mat.onBindObservable.add(mesh=>{ const eff=mat.getEffect(); if(!eff) return;
+        eff.setFloat('memDrift', gMemDrift); eff.setFloat('tplRow', (mesh && mesh.metadata && mesh.metadata.tpl) || 0);
         eff.setFloat('coneCos', gConeCos); eff.setFloat('bubbleR', gBubbleR);   // mode 2 → membrane orbitals only inside the close forward cone
         eff.setFloat('uT', gWaveT); eff.setVector3('selCenter', selCenter); eff.setFloat('focusId', gFocusId); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', 0);
         eff.setColor3('fogColor', scene.fogColor); eff.setFloat('fogStart', scene.fogStart); eff.setFloat('fogEnd', scene.fogEnd); });
       return realAlpha(mat);
     };
-    const lipCoreMat = mkLipMat('lipCoreMat','orb',['position','normal','localDir','ocol','ocen','oid','memAnc','world0','world1','world2','world3']);
-    const lipBondMat = mkLipMat('lipBondMat','bond',['position','normal','localDir','taper','ocen','bcol','oid','memAnc','world0','world1','world2','world3'],['opacity']); lipBondMat.setFloat('nElec',1);
+    const lipCoreMat = mkLipMat('lipCoreMat','orb',['position','normal','localDir','ocol','ocen','oid','memAnc','hAt','world0','world1','world2','world3']);
+    const lipBondMat = mkLipMat('lipBondMat','bond',['position','normal','localDir','taper','ocen','bcol','oid','memAnc','hAt','world0','world1','world2','world3'],['opacity']); lipBondMat.setFloat('nElec',1);
     /* ── ORBITAL TEMPLATE INSTANCING ────────────────────────────────────────────────────────────────
        The membrane's orbital lobes used to be baked per lipid: every one of the 20000 lipids got its own
        copy of ~100 core lobes and ~200 bond lobes, each a 16-float matrix plus colour, centre, id, taper
@@ -7306,8 +7472,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       /* Bake one lobe set into flat vertex arrays, doing exactly what the vertex shader used to do per
          lobe: the taper scale on the position, its inverse on the normal, and the cofactor of the lobe
          matrix so the normal survives the non-uniform scale. */
-      const bake = (G, L, hasTaper) => {
-        const NL = L.m.length/16, VN = G.p.length/3, IN = G.i.length;
+      const bake = (G, L, hasTaper, atomOf) => {
+        const NL = L.m.length/16, VN = G.p.length/3, IN = G.i.length; const hat = new Float32Array(NL*VN);   // hat: the lobe's atom index (loose bonds)
         const pos = new Float32Array(NL*VN*3), nrm = new Float32Array(NL*VN*3), dir = new Float32Array(NL*VN*3);
         const col = new Float32Array(NL*VN*3), cen = new Float32Array(NL*VN*3);
         const oid = new Float32Array(NL*VN), tap = new Float32Array(NL*VN);
@@ -7324,8 +7490,8 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const n2x=m01*m12-m02*m11, n2y=m02*m10-m00*m12, n2z=m00*m11-m01*m10;
           const wsc = hasTaper ? L.tap[l] : 1.0;
           const cr=L.col[l*3], cg=L.col[l*3+1], cb=L.col[l*3+2];
-          const ex=L.cen[l*3], ey=L.cen[l*3+1], ez=L.cen[l*3+2], od=L.oid[l];
-          for(let vtx=0; vtx<VN; vtx++){
+          const ex=L.cen[l*3], ey=L.cen[l*3+1], ez=L.cen[l*3+2], od=L.oid[l], al = atomOf ? atomOf(ex, ey, ez) : -1;
+          for(let vtx=0; vtx<VN; vtx++){ hat[l*VN+vtx] = al;
             const s=vtx*3, d=(l*VN+vtx)*3;
             const px=G.p[s]*wsc, py=G.p[s+1], pz=G.p[s+2]*wsc;
             pos[d]   = m00*px + m10*py + m20*pz + tx;
@@ -7343,7 +7509,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           }
           for(let q=0;q<IN;q++) idx[l*IN+q] = G.i[q] + l*VN;
         }
-        return {pos, nrm, dir, col, cen, oid, tap, idx};
+        return {pos, nrm, dir, col, cen, oid, tap, idx, hat};
       };
 
       const mk = (name, B, mat, colAttr, withTaper) => {
@@ -7354,7 +7520,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         m.setVerticesData('localDir', B.dir, false, 3);
         m.setVerticesData(colAttr, B.col, false, 3);
         m.setVerticesData('ocen', B.cen, false, 3);
-        m.setVerticesData('oid', B.oid, false, 1);
+        m.setVerticesData('oid', B.oid, false, 1); m.setVerticesData('hAt', B.hat, false, 1);
         if(withTaper) m.setVerticesData('taper', B.tap, false, 1);
         m.material = mat; m.isPickable = false; m.alwaysSelectAsActiveMesh = true; m.setEnabled(false);
         return m;
@@ -7362,11 +7528,12 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
 
       for(let ty=0; ty<NTY; ty++) for(let leaf=0; leaf<2; leaf++) for(let v=0; v<NV; v++){
         const t = TV[ty][leaf][v], T = tplIdx(ty, leaf, v);
-        const cB = bake(CORE_G, t.core, false), bB = bake(BOND_G, t.bond, true);
+        const tp = tPosV[ty][leaf][v], LNt = prep[ty].LN, atomOf = (x, y, z) => { for(let k=0;k<LNt;k++) if(Math.abs(tp[k*3]-x) < 1e-4 && Math.abs(tp[k*3+1]-y) < 1e-4 && Math.abs(tp[k*3+2]-z) < 1e-4) return k; return -1; };   // a lobe's atom: its centre IS the atom's position
+        const cB = bake(CORE_G, t.core, false, atomOf), bB = bake(BOND_G, t.bond, true, atomOf);
         const cM = new Float32Array(ORB_CAP*16), bM = new Float32Array(ORB_CAP*16);
         const cA = new Float32Array(ORB_CAP), bA = new Float32Array(ORB_CAP);
         const core = mk('lipTplC'+T, cB, lipCoreMat, 'ocol', false);
-        const bond = mk('lipTplB'+T, bB, lipBondMat, 'bcol', true);
+        const bond = mk('lipTplB'+T, bB, lipBondMat, 'bcol', true); core.metadata = { tpl: T }; bond.metadata = { tpl: T };
         core.thinInstanceSetBuffer('matrix', cM, 16, false); core.thinInstanceSetBuffer('memAnc', cA, 1, false);
         bond.thinInstanceSetBuffer('matrix', bM, 16, false); bond.thinInstanceSetBuffer('memAnc', bA, 1, false);
         core.thinInstanceCount = 0; bond.thinInstanceCount = 0;
@@ -7483,6 +7650,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // the 64 sphere templates: near (glass-capable) and far (opaque, cheap) twins sharing one geometry.
     // Each stream holds exactly the template's lipid count: a lipid is drawn once per frame, so the
     // count can never exceed it (a fixed 2048 cap used to drop whole swathes when a template was busy).
+    /* LOYSAT SIDOKSET - the lipids: their templates are shared by every instance, so the hinge tables go into a float TEXTURE, one row per
+       template, four texels per atom; a vertex (or a pooled nucleon) carries its atom index (hAt), the material the template's row (tplRow). */
+    const LN_MAX = Math.max(...prep.map(P => P.LN)), HT_W = LN_MAX*4, HT_H = NTPL, hingeTexData = new Float32Array(HT_W*HT_H*4), lipHinge = [];
+    for(let ty=0; ty<NTY; ty++){ const P = prep[ty], L = P.lipid; for(let leaf=0; leaf<2; leaf++) for(let v=0; v<NV; v++){ const T = tplIdx(ty, leaf, v), tp = tPosV[ty][leaf][v];
+      const hg = hingeTable(P.LN, tp, L.el, L.b1, L.b2, L.bo, L.nb, 64); lipHinge[T] = hg; hingeTexData.set(hg, T*HT_W*4); } }
+    const gHingeTex = new BABYLON.RawTexture(hingeTexData, HT_W, HT_H, BABYLON.Constants.TEXTUREFORMAT_RGBA, scene, false, false, BABYLON.Texture.NEAREST_SAMPLINGMODE, BABYLON.Constants.TEXTURETYPE_FLOAT);
+    const hingeTexSz = new BABYLON.Vector2(HT_W, HT_H);
+    for(const mt of [vdwMatStatic, vdwStaticFarMat, lipCoreMat, lipBondMat]){ mt.setTexture('hingeTex', gHingeTex); mt.setVector2('hingeTexSz', hingeTexSz); }
     const sphTpl = [];
     // cell mode: the closed membranes within memR of the camera come on top of the sheet's own count, per template
     const CELL_EXTRA = SOLU ? Math.ceil(2*Math.PI*600*600/(S*S)*4.0/NTPL) + 64 : 0;   // the streams are sized for a 600-unit disc times four whatever gMega is (the owner runs 1509 - the gather simply stops at the cap, which is what the slider gave)   // several organelle membranes can be in reach at once (a Golgi stack, a mitochondrion's cristae)
@@ -7503,9 +7678,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         const near = new BABYLON.Mesh('lipTplS'+T, scene);
         const vd = new BABYLON.VertexData(); vd.positions=pos; vd.indices=idx; vd.applyToMesh(near, false);
         near.setVerticesData('atomOff', off, false, 3); near.setVerticesData('instanceColor', col, false, 4); near.setVerticesData('instR', rad, false, 1);
+        { const hAtV = new Float32Array(LN*4); for(let k=0;k<LN;k++){ hAtV[k*4]=k; hAtV[k*4+1]=k; hAtV[k*4+2]=k; hAtV[k*4+3]=k; } near.setVerticesData('hAt', hAtV, false, 1); }   // loose bonds: which atom's hinges (the texture row is the template's)
         const far = near.clone('lipTplF'+T);
         far.makeGeometryUnique();   // NOT shared: thin-instance buffers (world0..3, memAnc) are stored on the geometry, so twins on one geometry overwrite each other's instances
-        for(const m of [near, far]){ m.isPickable=false; m.alwaysSelectAsActiveMesh=true; m.renderingGroupId=1; m.setEnabled(false); }
+        for(const m of [near, far]){ m.isPickable=false; m.alwaysSelectAsActiveMesh=true; m.renderingGroupId=1; m.setEnabled(false); m.metadata = Object.assign(m.metadata || {}, { tpl: T }); }
         near.material = vdwMatStatic; glassSplit(near); far.material = vdwStaticFarMat;
         /* the COARSE twin (perf, 14.9.2026): beyond gCoarseD a lipid's ~120 atoms are 1-3 px each, and the far tier - 160000 lipids x 120 quads - was
            10.7 of the 15.8 ms the GPU spent on a frame (primitive-bound). Past that distance a lipid is K merged spheres: the atoms sorted along the
@@ -7519,7 +7695,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           for(let c=0;c<4;c++){ const vtx=sl*4+c; cpos[vtx*3]=corner[c*2]; cpos[vtx*3+1]=corner[c*2+1]; cpos[vtx*3+2]=0; coff[vtx*3]=cx; coff[vtx*3+1]=cy; coff[vtx*3+2]=cz; ccol[vtx*4]=cr; ccol[vtx*4+1]=cg; ccol[vtx*4+2]=cb; ccol[vtx*4+3]=0; crad[vtx]=R; }
           const b=sl*4, q=sl*6; cidx[q]=b; cidx[q+1]=b+1; cidx[q+2]=b+2; cidx[q+3]=b; cidx[q+4]=b+2; cidx[q+5]=b+3; }
         const coarse = new BABYLON.Mesh('lipTplC'+T, scene); { const vd2 = new BABYLON.VertexData(); vd2.positions=cpos; vd2.indices=cidx; vd2.applyToMesh(coarse, false); }
-        coarse.setVerticesData('atomOff', coff, false, 3); coarse.setVerticesData('instanceColor', ccol, false, 4); coarse.setVerticesData('instR', crad, false, 1);
+        coarse.setVerticesData('atomOff', coff, false, 3); coarse.setVerticesData('instanceColor', ccol, false, 4); coarse.setVerticesData('instR', crad, false, 1); coarse.setVerticesData('hAt', new Float32Array(K*4).fill(-1), false, 1); coarse.metadata = { tpl: T };   // (the merged spheres have no hinge)
         coarse.isPickable=false; coarse.alwaysSelectAsActiveMesh=true; coarse.renderingGroupId=1; coarse.setEnabled(false); coarse.material = vdwStaticFarMat;
         const cap = Math.max(1, tplN[T]) + CELL_EXTRA;   // cell mode: the plasma membrane and the nuclear envelope write into the same streams
         const nM=new Float32Array(cap*16), fM=new Float32Array(cap*16), nA=new Float32Array(cap), fA=new Float32Array(cap), nT=new Float32Array(cap*4), fT=new Float32Array(cap*4), nS=new Float32Array(cap).fill(1), fS=new Float32Array(cap).fill(1);
@@ -8056,23 +8232,24 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const nucNA = prep.map(P => { let n=0; for(let k=0;k<P.LN;k++) n += info(P.lipid.el[k]).n; return n; });
     const buildNuc = (pos, P) => {
       const {lipid, LN} = P; const nucN = nucNA[prep.indexOf(P)];
-      const mt=new Float32Array(nucN*16), cl=new Float32Array(nucN*4); let ni=0;
+      const mt=new Float32Array(nucN*16), cl=new Float32Array(nucN*4), hat=new Float32Array(nucN); let ni=0;
       for(let k=0;k<LN;k++){ const e=lipid.el[k], A=info(e).n, Z=info(e).z;
         const px=pos[k*3], py=pos[k*3+1], pz=pos[k*3+2];
-        for(let i=0;i<A;i++){ const proton=Math.floor((i+1)*Z/A)>Math.floor(i*Z/A), o=ni*16;
+        for(let i=0;i<A;i++){ const proton=Math.floor((i+1)*Z/A)>Math.floor(i*Z/A), o=ni*16; hat[ni]=k;
           mt[o]=1;mt[o+5]=1;mt[o+10]=1;mt[o+15]=1;
           mt[o+12]=px+fcc[i][0]*SPACING; mt[o+13]=py+fcc[i][1]*SPACING; mt[o+14]=pz+fcc[i][2]*SPACING; mt[o+3]=px; mt[o+7]=py; mt[o+11]=pz;   // atom centre in the w slots
           const c=proton?[1.0,0.5,0.5]:[0.62,0.62,0.62];
           cl[ni*4]=c[0];cl[ni*4+1]=c[1];cl[ni*4+2]=c[2];cl[ni*4+3]=0; ni++; } }
-      return {mt,cl};
+      return {mt,cl,hat};
     };
     const nucTplV = prep.map((P,ty) => [ Array.from({length:NV},(_,v)=>buildNuc(tPosV[ty][0][v], P)),
                                          Array.from({length:NV},(_,v)=>buildNuc(tPosV[ty][1][v], P)) ]);
     const _zeroOff = new BABYLON.Vector3(0,0,0), _ident9 = new Float32Array([1,0,0, 0,1,0, 0,0,1]);
     const nucMatL = new BABYLON.ShaderMaterial('lipNucMat', scene, 'imp', {
-      attributes:['position','instanceColor','world0','world1','world2','world3'],
+      attributes:['position','instanceColor','hAt','world0','world1','world2','world3'],
       uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','bubbleR','protonOutline','uT','boil','depthBias','selCenter','coneCos','tileOff','tileRot','memDrift','memCut','cutLo','cutHi','viewBox'],
-      defines:['#define LIPTILE','#define MEMFADE'] });   // LIPTILE isolates tileOff; MEMFADE = cross-cut fade so lipid nuclei vanish WITH their lipid
+      defines:['#define LIPTILE','#define MEMFADE','#define LOOSETEX'] });
+    nucMatL.setTexture('hingeTex', gHingeTex); nucMatL.setVector2('hingeTexSz', hingeTexSz);   // LIPTILE isolates tileOff; MEMFADE = cross-cut fade so lipid nuclei vanish WITH their lipid
     nucMatL.setFloat('radius',NUCLEON_R); nucMatL.setFloat('isShell',0); nucMatL.setFloat('bubbleR',1e9);
     nucMatL.setFloat('protonOutline',0); nucMatL.setFloat('coneCos',-1.0); nucMatL.backFaceCulling=false;
     realAlpha(nucMatL); nucMatL.setFloat('depthBias', NUC_BIAS); nucMatL.disableDepthWrite = true;   // nuclei keep their own no-depth-write pass
@@ -8083,6 +8260,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       eff.setVector3('selCenter', selCenter); eff.setFloat3('memCut', gCut[0], gCut[1], gCut[2]); eff.setVector3('cutLo', gCutLo); eff.setVector3('cutHi', gCutHi); eff.setFloat('viewBox', 0);
       eff.setVector3('tileOff', (mesh && mesh.metadata && mesh.metadata.off) || _zeroOff);
       eff.setMatrix3x3('tileRot', (mesh && mesh.metadata && mesh.metadata.rot) || _ident9);   // a cell-membrane tile stands on its local normal
+      eff.setFloat('tplRow', (mesh && mesh.metadata && mesh.metadata.tpl) || 0);
       eff.setFloat('memDrift', gMemDrift); });
     const POOL = 10;   // tiles per leaflet that carry nuclei at once
     const nucPool = [];
@@ -8090,9 +8268,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const mesh=BABYLON.MeshBuilder.CreatePlane('lipNuc'+leaf+'_'+p,{size:2},scene); mesh.doNotSyncBoundingInfo=true;   // w slots carry the atom centre
       mesh.material=nucMatL; mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true; mesh.renderingGroupId=1;
       mesh.thinInstanceSetBuffer('instanceColor', nucTplV[0][leaf][0].cl,4,true);
-      mesh.thinInstanceSetBuffer('matrix', nucTplV[0][leaf][0].mt,16,true);
+      mesh.thinInstanceSetBuffer('matrix', nucTplV[0][leaf][0].mt,16,true); mesh.thinInstanceSetBuffer('hAt', nucTplV[0][leaf][0].hat,1,true);
       mesh.thinInstanceCount=nucNA[0]; mesh.setEnabled(false);
-      mesh.metadata={ off:new BABYLON.Vector3(0,0,0), v:0, ty:0 };   // v/ty = which rotamer of which species is loaded
+      mesh.metadata={ off:new BABYLON.Vector3(0,0,0), v:0, ty:0, tpl: tplIdx(0, leaf, 0) };   // v/ty = which rotamer of which species is loaded
       nucPool.push(mesh);
     }
     const nearTiles=[];
@@ -8116,7 +8294,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
         if(t){ const v = sp ? sp.v : tileVar(t.gi,t.gj,leaf), ty = sp ? sp.ty : tileType(t.gi,t.gj,leaf), og = sp ? sp.org : tileOrg(t.gi,t.gj,leaf);   // match this tile's species + rotamer + placement
           mesh.metadata.off.set(og[0], og[1], og[2]); mesh.metadata.rot = sp ? sp.rot : null;
           if(mesh.metadata.v!==v || mesh.metadata.ty!==ty){ mesh.thinInstanceSetBuffer('instanceColor', nucTplV[ty][leaf][v].cl,4,true);
-            mesh.thinInstanceSetBuffer('matrix', nucTplV[ty][leaf][v].mt,16,true); mesh.thinInstanceCount=nucNA[ty]; mesh.metadata.v=v; mesh.metadata.ty=ty; }
+            mesh.thinInstanceSetBuffer('matrix', nucTplV[ty][leaf][v].mt,16,true); mesh.thinInstanceSetBuffer('hAt', nucTplV[ty][leaf][v].hat,1,true); mesh.thinInstanceCount=nucNA[ty]; mesh.metadata.v=v; mesh.metadata.ty=ty; mesh.metadata.tpl = tplIdx(ty, leaf, v); }
           mesh.setEnabled(true); }
         else mesh.setEnabled(false);
       }
@@ -8393,13 +8571,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     // (isShell must stay 1 either way — with isShell 0 the alpha is scaled BY the reveal, so the sphere
     // would be invisible everywhere except inside the crisp zone.)
     // glow = the proton corona: same stateless positioning, but the fragment draws a soft additive red disc
-    const wMat=(rad, solid, glow, bias, outline, haze, perInst)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':'')+(perInst?'i':''),scene,'imp',{
-        attributes: perInst ? ['position','instanceColor','wOrig','wVel','molId','instR','world0','world1','world2','world3'] : ['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3'],
+    const wMat=(rad, solid, glow, bias, outline, haze, perInst, loose)=>{ const m=new BABYLON.ShaderMaterial('wMat'+rad+(glow?'g':'')+(bias?'b':'')+(haze?'h':'')+(perInst?'i':'')+(loose?'L':''),scene,'imp',{
+        attributes: (perInst ? ['position','instanceColor','wOrig','wVel','molId','instR','world0','world1','world2','world3'] : ['position','instanceColor','wOrig','wVel','molId','world0','world1','world2','world3']).concat(loose ? ['hA1','hU1','hA2','hU2'] : []),
         uniforms:['view','projection','radius','fogColor','fogStart','fogEnd','isShell','shellMin','revealFade','bubbleR','protonOutline','uT','coneCos','boxLo','boxHi','memY','memHalf','shellSkip','planeAll','molTexDim','shellCen','shellRot','shellR2','pLight','pLightN','pLightR','keyDir','keyFloor','macroMix','aoAmt','keyCol','specAmt','rimAmt','selfShade','outlineK','depthBias',
                   'sideOnly','sideClear','cellWrap','wrapScale','fadeNear','cellCam','cellCen','cellR','cellFacetY','cellMemT','cellClipAll','orgA','orgB','nOrg','thyA','thyB','thyInvS','cellFade','cellP','focalD','depthK','depthLo','startOff','spread','planeDim','planeZ','psuLo','psuHi','viewBox'],
         samplers:['shellTex','molTex'],
         defines: (NSH ? ['#define WATERBOX', '#define NSHELL '+NSH, '#define SH_LAT '+SH_LAT+'.0', '#define SH_LON '+SH_LON+'.0']
-                      : ['#define WATERBOX']).concat(glow ? ['#define PGLOW'] : ['#define PLIGHT']).concat(SOLU_CELL ? ['#define CELLCLIP', '#define DEPTHSHADE'] : []).concat(haze ? ['#define HAZE'] : []).concat(perInst ? ['#define IMPRAD'] : []) });   // IMPRAD: the radius per instance (a merged species mesh)   // DEPTHSHADE: in cell mode the free molecules and the haze darken with distance like everything else   // CELLCLIP: cell mode wraps the medium around the camera and keeps it to the cytosol - HAZE: the sparse far fill
+                      : ['#define WATERBOX']).concat(glow ? ['#define PGLOW'] : ['#define PLIGHT']).concat(SOLU_CELL ? ['#define CELLCLIP', '#define DEPTHSHADE'] : []).concat(haze ? ['#define HAZE'] : []).concat(perInst ? ['#define IMPRAD'] : []).concat(loose ? ['#define LOOSE'] : []) });   // IMPRAD: the radius per instance (a merged species mesh); LOOSE: its single bonds hinge   // DEPTHSHADE: in cell mode the free molecules and the haze darken with distance like everything else   // CELLCLIP: cell mode wraps the medium around the camera and keeps it to the cytosol - HAZE: the sparse far fill
       // isShell = 1 so the sphere turns to GLASS inside the reveal radius, exactly as the protein vdW does
       // — otherwise the orbitals built below are drawn correctly but sit hidden inside an opaque ball.
       m.setFloat('radius',rad);m.setFloat('isShell',1);m.setFloat('shellMin',0.18);m.setFloat('revealFade',0.95);
@@ -8423,7 +8601,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
        molecules over a box eight times as wide and the shader drops everything nearer than the near set's fade. Only enabled
        while the reach slider is past the box limit (see the slider), so the extra draws cost nothing until asked for. */
     const gFarMeshes = []; window.gFarMeshes = gFarMeshes;
-    const mkFar = (base, rad, bias, outline, perInst) => { const f = base.clone(base.name + 'F'); f.material = wMat(rad, true, false, bias, outline, undefined, perInst); f.material._far = true; f.__atoms = base.__atoms;
+    const mkFar = (base, rad, bias, outline, perInst, loose) => { const f = base.clone(base.name + 'F'); f.material = wMat(rad, true, false, bias, outline, undefined, perInst, loose); f.material._far = true; f.__atoms = base.__atoms;
       f.isPickable = false; f.alwaysSelectAsActiveMesh = true; f.renderingGroupId = 1; f.thinInstanceCount = base.thinInstanceCount; f.setEnabled(false); gFarMeshes.push(f); return f; };
     const mkImp=(nm,rad,col,cnt,off)=>{ const mesh=BABYLON.MeshBuilder.CreatePlane(nm,{size:2},scene); mesh.material=wMat(rad,false); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
       // Group 1, like every other vdW shell in the scene: the ORBITALS live in group 0 and are drawn
@@ -8461,7 +8639,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     const codeC = codeOf('C');
     // One species: `n` molecules, each a rigid set of atoms given as offsets from the molecule centre.
     // `seed` picks an independent random stream so two species never share start points or velocities.
-    const mkFree = (nm, n, seed, atoms, molBase, solid, yFrom) => {
+    const mkFree = (nm, n, seed, atoms, molBase, solid, yFrom, hinge) => {   // hinge: the species' hinge table (16 floats per atom, molecule frame) - its single bonds go loose
       const c=new Float32Array(n*3), v=new Float32Array(n*3), ax=new Float32Array(n*3), fu=new Float32Array(n*3), fv=new Float32Array(n*3);
       const yA = (yFrom === undefined) ? y0 : yFrom, yB = y1 - yA;   // yFrom: spawn only above it (a species that lives on one side of the membrane)
       for(let i=0;i<n;i++){
@@ -8487,7 +8665,7 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const same = atoms.length > 1 && atoms.every(a => !a.glow && (a.solid === undefined ? solid : a.solid) === (atoms[0].solid === undefined ? solid : atoms[0].solid) && (a.bias||0) === (atoms[0].bias||0) && !!a.outline === !!atoms[0].outline);
       if(same){ const NA = atoms.length, a0 = atoms[0], tot = n*NA;
         const mesh=BABYLON.MeshBuilder.CreatePlane(nm+'all',{size:2},scene);
-        mesh.material=wMat(1.0, (a0.solid===undefined ? solid : a0.solid), false, a0.bias, a0.outline, undefined, true); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true; mesh.renderingGroupId=1; mesh.__atoms = NA;
+        mesh.material=wMat(1.0, (a0.solid===undefined ? solid : a0.solid), false, a0.bias, a0.outline, undefined, true, !!hinge); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true; mesh.renderingGroupId=1; mesh.__atoms = NA;
         const cb=new Float32Array(tot*4), mb=new Float32Array(tot*16), og=new Float32Array(tot*3), vl=new Float32Array(tot*3), mid=new Float32Array(tot), ir=new Float32Array(tot);
         for(let k=0;k<NA;k++){ const a = atoms[k]; for(let i=0;i<n;i++){ const j = k*n + i;
           mid[j]=molBase+i; ir[j]=a.r; cb[j*4]=a.col[0]; cb[j*4+1]=a.col[1]; cb[j*4+2]=a.col[2]; cb[j*4+3]=0;
@@ -8496,8 +8674,14 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           else { mb[j*16+12]=ax[i*3]*a.d; mb[j*16+13]=ax[i*3+1]*a.d; mb[j*16+14]=ax[i*3+2]*a.d; }
           og[j*3]=c[i*3]; og[j*3+1]=c[i*3+1]; og[j*3+2]=c[i*3+2]; vl[j*3]=v[i*3]; vl[j*3+1]=v[i*3+1]; vl[j*3+2]=v[i*3+2]; } }
         mesh.thinInstanceSetBuffer('instanceColor',cb,4,true); mesh.thinInstanceSetBuffer('matrix',mb,16,true); mesh.thinInstanceSetBuffer('wOrig',og,3,true); mesh.thinInstanceSetBuffer('wVel',vl,3,true); mesh.thinInstanceSetBuffer('molId',mid,1,true); mesh.thinInstanceSetBuffer('instR',ir,1,true);
-        mesh.thinInstanceCount=tot; gFreeMeshes.push(mesh); meshes.push(mesh); const f = mkFar(mesh, 1.0, a0.bias, a0.outline, true); if(f){ f.thinInstanceSetBuffer('instR', ir, 1, true); meshes.push(f); }
-        return {c, v, ax, fu, fv, n, meshes}; }
+        mesh.thinInstanceCount=tot; gFreeMeshes.push(mesh); meshes.push(mesh); const f = mkFar(mesh, 1.0, a0.bias, a0.outline, true, !!hinge); if(f){ f.thinInstanceSetBuffer('instR', ir, 1, true); meshes.push(f); }
+        if(hinge){ const HH = new Float32Array(tot*16);   // each instance's hinges, turned into its placement frame like the atom offsets (the spin comes in the shader)
+          for(let k=0;k<NA;k++){ const sk = k*16; for(let i=0;i<n;i++){ const j = k*n + i, d = j*16, o = i*3, F0 = fu, F1 = fv, F2 = ax;
+            const rot = (x, y, z, dd) => { HH[dd] = F0[o]*x + F1[o]*y + F2[o]*z; HH[dd+1] = F0[o+1]*x + F1[o+1]*y + F2[o+1]*z; HH[dd+2] = F0[o+2]*x + F1[o+2]*y + F2[o+2]*z; };
+            rot(hinge[sk], hinge[sk+1], hinge[sk+2], d); HH[d+3] = hinge[sk+3]; rot(hinge[sk+4], hinge[sk+5], hinge[sk+6], d+4); HH[d+7] = hinge[sk+7];
+            rot(hinge[sk+8], hinge[sk+9], hinge[sk+10], d+8); HH[d+11] = hinge[sk+11]; rot(hinge[sk+12], hinge[sk+13], hinge[sk+14], d+12); HH[d+15] = hinge[sk+15]; } }
+          setHinge(mesh, HH); if(f) setHinge(f, HH); }
+        return {c, v, ax, fu, fv, n, meshes, hinge}; }
       for(const a of atoms){
         const mesh=BABYLON.MeshBuilder.CreatePlane(nm+a.tag,{size:2},scene);
         mesh.material=wMat(a.r, (a.solid===undefined ? solid : a.solid), !!a.glow, a.bias, a.outline); glassSplit(mesh); mesh.isPickable=false; mesh.alwaysSelectAsActiveMesh=true;
@@ -8555,8 +8739,9 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       if(nm && nm.na){ let cx=0, cy=0, cz=0; for(let k=0;k<nm.na;k++){ cx+=nm.x[k]; cy+=nm.y[k]; cz+=nm.z[k]; } cx/=nm.na; cy/=nm.na; cz/=nm.na;
         const NC = ETC_COL[10];   // NADP's own colour, the same as the displayed model and the bound one in FNR
         const atoms = []; for(let k=0;k<nm.na;k++){ const e = nm.el[k], I = info(e); atoms.push({ tag:'a'+k, r:I.vr*FILL_SCALE, col:[NC[0],NC[1],NC[2]], d:0, p:[nm.x[k]-cx, nm.y[k]-cy, nm.z[k]-cz], el:e }); }
-        FREE_NADP = mkFree('nadp', NNADP, 771231, atoms, MOLBASE.nadp, false, MEMBRANE_Y + gMemHalfT + 12);
-        FREE_NADP.atoms = atoms; } }
+        const hgN = (() => { const P = new Float32Array(nm.na*3); for(let k=0;k<nm.na;k++){ P[k*3]=nm.x[k]-cx; P[k*3+1]=nm.y[k]-cy; P[k*3+2]=nm.z[k]-cz; } return hingeTable(nm.na, P, nm.el, nm.b1, nm.b2, nm.bo, nm.nb, 64); })();   // loose bonds
+        FREE_NADP = mkFree('nadp', NNADP, 771231, atoms, MOLBASE.nadp, false, MEMBRANE_Y + gMemHalfT + 12, hgN);
+        FREE_NADP.atoms = atoms; FREE_NADP.local = atoms.map(a => ({ x:a.p[0], y:a.p[1], z:a.p[2] })); } }
     /* ATP, ADP and Pi: 1000 each in the stroma (owner's request, 2026-09-06). Rigid free species built from
        the spawn tool's cartoon geometry (MOL_BUILD), one colour per species as with NADP. */
     /* ADP and ATP use REAL geometry, not the spawn tool's straight-line cartoon (the owner asked whether ADP
@@ -8582,7 +8767,10 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       return { at, bonds }; };
     const mkRigidFree = (key, nm, n, seed, col, base, src) => { const at = src ? src.at : MOL_BUILD[key](); let cx=0, cy=0, cz=0; for(const a of at){ cx+=a.x; cy+=a.y; cz+=a.z; } cx/=at.length; cy/=at.length; cz/=at.length;
       const atoms = at.map((a,k) => { const e = codeOf(a.sym), I = info(e); return { tag:'a'+k, r:I.vr*FILL_SCALE, col:[col[0],col[1],col[2]], d:0, p:[a.x-cx, a.y-cy, a.z-cz], el:e }; });
-      const F = mkFree(nm, n, seed, atoms, base, false, MEMBRANE_Y + gMemHalfT + 12); F.atoms = atoms; F.base = base; F.key = key.toLowerCase(); F.local = at.map(a => ({ sym:a.sym, x:a.x-cx, y:a.y-cy, z:a.z-cz })); F.bonds = src ? src.bonds : null; return F; };
+      let hg = null; if(src && src.bonds && src.bonds.length){ const P = new Float32Array(at.length*3), els = new Int32Array(at.length), b1 = new Int32Array(src.bonds.length), b2 = new Int32Array(src.bonds.length), bo = new Float32Array(src.bonds.length);   // loose bonds: the species' hinges in the molecule frame
+        for(let k=0;k<at.length;k++){ P[k*3]=at[k].x-cx; P[k*3+1]=at[k].y-cy; P[k*3+2]=at[k].z-cz; els[k]=codeOf(at[k].sym); } src.bonds.forEach((b, q) => { b1[q]=b[0]; b2[q]=b[1]; bo[q]=b[2]||1; });
+        hg = hingeTable(at.length, P, els, b1, b2, bo, src.bonds.length, 64); }
+      const F = mkFree(nm, n, seed, atoms, base, false, MEMBRANE_Y + gMemHalfT + 12, hg); F.atoms = atoms; F.base = base; F.key = key.toLowerCase(); F.local = at.map(a => ({ sym:a.sym, x:a.x-cx, y:a.y-cy, z:a.z-cz })); F.bonds = src ? src.bonds : null; return F; };
     /* ADP is ATP minus its terminal phosphate group (owner's instruction): the gamma P and its three O are
        the last four atoms appended by adpFromNadp(true), so ADP is that list cut before them. */
     const ATP_SRC = adpFromNadp(true);
@@ -9522,6 +9710,18 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       bMesh.thinInstanceSetBuffer('matrix',bM,16,false); bMesh.thinInstanceSetBuffer('ocen',bC,3,false);
       const pick=new Int32Array(CAP), pos=new Float32Array(CAP*3), _lp=[0,0,0];
       const live = { cM, cC, bM, bC, pick, pos, coreN, bondN, core, bond, cMesh, T: 0 };   // live buffers, for the selection outline
+      /* LOYSAT SIDOKSET: the lobes are placed here on the CPU, so the hinge is applied here too - per molecule, per lobe, from the same table
+         (F.hinge, molecule frame) and the same seed as the shader (hsh(molId*7+9)), before the molecule's own frame goes on */
+      const HG = F.hinge || null; let coreAt = null, bondAt = null, hCm = null, hCc = null, hBm = null, hBc = null; const _hR = new Float64Array(9), _hT = new Float64Array(3);
+      if(HG && F.local){ const atomOf = (x, y, z) => { let best = -1, bd = 1e-4; for(let a=0;a<F.local.length;a++){ const L = F.local[a], d = (L.x-x)*(L.x-x) + (L.y-y)*(L.y-y) + (L.z-z)*(L.z-z); if(d < bd){ bd = d; best = a; } } return best; };
+        coreAt = new Int32Array(coreN); for(let q=0;q<coreN;q++) coreAt[q] = atomOf(core.cen[q*3], core.cen[q*3+1], core.cen[q*3+2]);
+        bondAt = new Int32Array(bondN); for(let q=0;q<bondN;q++) bondAt[q] = atomOf(bond.cen[q*3], bond.cen[q*3+1], bond.cen[q*3+2]);
+        hCm = new Float32Array(coreN*16); hCc = new Float32Array(coreN*3); hBm = new Float32Array(bondN*16); hBc = new Float32Array(bondN*3); }
+      const lsLobes = (at, srcM, srcC, N, dstM, dstC, Tt, seed) => { for(let q=0;q<N;q++){ const a = at[q], s0 = q*16, c0 = q*3;
+        if(a < 0 || !lsMatJS(HG, a, Tt, seed, gLooseAmp, _hR, _hT)){ for(let j=0;j<16;j++) dstM[s0+j] = srcM[s0+j]; dstC[c0] = srcC[c0]; dstC[c0+1] = srcC[c0+1]; dstC[c0+2] = srcC[c0+2]; continue; }
+        const R = _hR; for(let cN=0;cN<3;cN++){ const x = srcM[s0+cN*4], y = srcM[s0+cN*4+1], z = srcM[s0+cN*4+2]; dstM[s0+cN*4] = R[0]*x + R[1]*y + R[2]*z; dstM[s0+cN*4+1] = R[3]*x + R[4]*y + R[5]*z; dstM[s0+cN*4+2] = R[6]*x + R[7]*y + R[8]*z; dstM[s0+cN*4+3] = 0; }
+        { const x = srcM[s0+12], y = srcM[s0+13], z = srcM[s0+14]; dstM[s0+12] = R[0]*x + R[1]*y + R[2]*z + _hT[0]; dstM[s0+13] = R[3]*x + R[4]*y + R[5]*z + _hT[1]; dstM[s0+14] = R[6]*x + R[7]*y + R[8]*z + _hT[2]; dstM[s0+15] = 1; }
+        { const x = srcC[c0], y = srcC[c0+1], z = srcC[c0+2]; dstC[c0] = R[0]*x + R[1]*y + R[2]*z + _hT[0]; dstC[c0+1] = R[3]*x + R[4]*y + R[5]*z + _hT[1]; dstC[c0+2] = R[6]*x + R[7]*y + R[8]*z + _hT[2]; } } };
       /* CANDIDATES (perf, 14.9.2026): scanning every instance of the species every frame - drawnPos on 80000 CO2 - cost 8 ms a frame. The
          instances within R + CAND_M are gathered every CAND_F frames, or sooner when the camera has moved more than a third of the margin,
          and only they are re-placed each frame. Molecules move under 40 units/s, so the margin is never crossed between gathers. */
@@ -9547,26 +9747,28 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
           const i=pick[k], px=pos[k*3], py=pos[k*3+1], pz=pos[k*3+2];
           frameOf(i, T, _R9);   // canonical → this molecule (its frame with the spin composed on), no allocation
           const r00=_R9[0], r01=_R9[1], r02=_R9[2], r10=_R9[3], r11=_R9[4], r12=_R9[5], r20=_R9[6], r21=_R9[7], r22=_R9[8];
+          let CM = core.m, CC = core.cen, BM = bond.m, BC = bond.cen;
+          if(HG && gLooseOn && coreAt){ const seed = hsh(((F.base+i)*7 + 9)>>>0)*6.2831853; lsLobes(coreAt, core.m, core.cen, coreN, hCm, hCc, T, seed); lsLobes(bondAt, bond.m, bond.cen, bondN, hBm, hBc, T, seed); CM = hCm; CC = hCc; BM = hBm; BC = hBc; }   // loose bonds: this molecule's lobes hinged, as the shader hinges its atoms
           for(let q=0;q<coreN;q++){ const s0=q*16, d0=(k*coreN+q)*16;
-            for(let cN=0;cN<3;cN++){ const a1=core.m[s0+cN*4], a2=core.m[s0+cN*4+1], a3=core.m[s0+cN*4+2];
+            for(let cN=0;cN<3;cN++){ const a1=CM[s0+cN*4], a2=CM[s0+cN*4+1], a3=CM[s0+cN*4+2];
               cM[d0+cN*4]  =r00*a1+r01*a2+r02*a3;
               cM[d0+cN*4+1]=r10*a1+r11*a2+r12*a3;
               cM[d0+cN*4+2]=r20*a1+r21*a2+r22*a3; cM[d0+cN*4+3]=0; }
-            const mx=core.m[s0+12], my=core.m[s0+13], mz=core.m[s0+14];
+            const mx=CM[s0+12], my=CM[s0+13], mz=CM[s0+14];
             cM[d0+12]=r00*mx+r01*my+r02*mz+px; cM[d0+13]=r10*mx+r11*my+r12*mz+py;
             cM[d0+14]=r20*mx+r21*my+r22*mz+pz; cM[d0+15]=1;
-            const ex=core.cen[q*3], ey=core.cen[q*3+1], ez=core.cen[q*3+2], dc=(k*coreN+q)*3;
+            const ex=CC[q*3], ey=CC[q*3+1], ez=CC[q*3+2], dc=(k*coreN+q)*3;
             cC[dc]  =r00*ex+r01*ey+r02*ez+px; cC[dc+1]=r10*ex+r11*ey+r12*ez+py;
             cC[dc+2]=r20*ex+r21*ey+r22*ez+pz; }
           for(let q=0;q<bondN;q++){ const s0=q*16, d0=(k*bondN+q)*16;
-            for(let cN=0;cN<3;cN++){ const a1=bond.m[s0+cN*4], a2=bond.m[s0+cN*4+1], a3=bond.m[s0+cN*4+2];
+            for(let cN=0;cN<3;cN++){ const a1=BM[s0+cN*4], a2=BM[s0+cN*4+1], a3=BM[s0+cN*4+2];
               bM[d0+cN*4]  =r00*a1+r01*a2+r02*a3;
               bM[d0+cN*4+1]=r10*a1+r11*a2+r12*a3;
               bM[d0+cN*4+2]=r20*a1+r21*a2+r22*a3; bM[d0+cN*4+3]=0; }
-            const mx=bond.m[s0+12], my=bond.m[s0+13], mz=bond.m[s0+14];
+            const mx=BM[s0+12], my=BM[s0+13], mz=BM[s0+14];
             bM[d0+12]=r00*mx+r01*my+r02*mz+px; bM[d0+13]=r10*mx+r11*my+r12*mz+py;
             bM[d0+14]=r20*mx+r21*my+r22*mz+pz; bM[d0+15]=1;
-            const ex=bond.cen[q*3], ey=bond.cen[q*3+1], ez=bond.cen[q*3+2], dc=(k*bondN+q)*3;
+            const ex=BC[q*3], ey=BC[q*3+1], ez=BC[q*3+2], dc=(k*bondN+q)*3;
             bC[dc]  =r00*ex+r01*ey+r02*ez+px; bC[dc+1]=r10*ex+r11*ey+r12*ez+py;
             bC[dc+2]=r20*ex+r21*ey+r22*ez+pz; } }
         if(n){ cMesh.thinInstancePartialBufferUpdate('matrix', cM.subarray(0, n*coreN*16), 0);
@@ -9624,11 +9826,11 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
     gWaveT += Math.min(engine.getDeltaTime(), 50) * 0.001 * gSpeed;   // advance the thermal-shake clock
     { const dtR = Math.min(engine.getDeltaTime(), 50) * 0.001; if(!gPaused){ gBoilT += dtR * gBoilSpeed; gElecT += dtR * gElecSpeed; }   // own clocks (space still pauses them)
       const isoR = pieceRange(gIsoModel), selR = pieceRange(gSelModel), cutW = gXsec ? gXsecPlane : XSEC_OFF, cutV = gXsec ? xsecViewPlane() : XSEC_OFF;
-      const sig = gIsoModel + '|' + isoR[0] + '|' + isoR[1] + '|' + gSelModel + '|' + selR[0] + '|' + selR[1] + '|' + gIsoN + '|' + gMemRow + '|' + (gXsec ? cutW.x + ',' + cutW.y + ',' + cutW.z + ',' + cutW.w + ',' + cutV.x + ',' + cutV.y + ',' + cutV.z + ',' + cutV.w : 'off') + '|' + gShaderMats.length;
+      const sig = gIsoModel + '|' + isoR[0] + '|' + isoR[1] + '|' + gSelModel + '|' + selR[0] + '|' + selR[1] + '|' + gIsoN + '|' + gMemRow + '|' + gLooseOn + '|' + gLooseAmp + '|' + (gXsec ? cutW.x + ',' + cutW.y + ',' + cutW.z + ',' + cutW.w + ',' + cutV.x + ',' + cutV.y + ',' + cutV.z + ',' + cutV.w : 'off') + '|' + gShaderMats.length;
       const changed = sig !== gShareSig; gShareSig = sig;   // (perf 14.9.2026: nine uniforms on ~300 materials every frame was 1 ms - the rarely-changing ones go out only when they change)
       if(gGfxMode === 1) gBubbleR = gIsoModel >= 0 ? 1e9 : gCrisp;   // the isolated model's whole vdW is the glass bubble (owner 14.9.2026)
       for(const m of gShaderMats){ m.setFloat('uTb', gBoilT); m.setFloat('uTe', gElecT);
-        if(changed){ m.setFloat('isoModel', gIsoModel + 1); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); m.setFloat('memRow', gMemRow); } } }
+        if(changed){ m.setFloat('isoModel', gIsoModel + 1); m.setFloat('isoLo', isoR[0]); m.setFloat('isoHi', isoR[1]); m.setFloat('selLo', selR[0]); m.setFloat('selHi', selR[1]); m.setVector4('cutPlane', cutW); m.setVector4('cutPlaneV', cutV); m.setFloat('isoN', gIsoN); m.setFloat('memRow', gMemRow); m.setFloat('looseOn', gLooseOn ? 1 : 0); m.setFloat('looseAmp', gLooseAmp); } } }
     const f = cam.getDirection(BABYLON.Axis.Z);   // view forward
     const u = cam.getDirection(BABYLON.Axis.Y);   // view up
     const r = cam.getDirection(BABYLON.Axis.X);   // view right
@@ -12437,11 +12639,13 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const b = document.createElement('button'); b.id = id; b.textContent = txt; b.title = title; b.addEventListener('click', run); b.addEventListener('contextmenu', e => { e.preventDefault(); del(); }); document.body.appendChild(b); }   // owner 14.9.2026: the spawn buttons
     { const cb = document.createElement('button'); cb.id = 'cartoon-btn'; cb.textContent = '🎨 Sarjakuva'; cb.title = 'Sarjakuvamainen piirtotyyli (musteviivat, väripinnat, paperi) päälle/pois'; cb.classList.add('on');   // owner 14.9.2026: 'a button to disable the cartoon graphics'
       cb.addEventListener('click', () => { if(window.gTogglePainterly) window.gTogglePainterly(); cb.classList.toggle('on', !!window.gPainterlyOn); }); document.body.appendChild(cb); }
+    { const lb = document.createElement('button'); lb.id = 'loose-btn'; lb.textContent = '🪢 Löysät sidokset'; lb.title = 'Yksinkertaiset sidokset kiertyvät ja heilahtelevat: proteiinien sivuketjut, kofaktorien hännät, lipidien hiilivetyketjut ja vapaat molekyylit (ATP, ADP, NADP⁺) päälle/pois';   // owner 15.9.2026: 'single bond looseness'
+      lb.addEventListener('click', () => { gLooseOn = !gLooseOn; lb.classList.toggle('on', gLooseOn); }); document.body.appendChild(lb); window.gLooseToggle = () => lb.click(); }
     { const tb = document.createElement('button'); tb.id = 'plane-dim-btn'; tb.textContent = '🔦 Hiukkastaso'; tb.title = 'Yhteyttämiskalvoston laatikon sisällä piirretään vain hiukkastason 500 hiukkasta joka lajia, muut jätetään piirtämättä (kytkeytyy itsestään päälle laatikon sisällä)';   // in the gear menu for everyone (owner 12.9.2026)
       tb.addEventListener('click', () => { gPlaneDim = !gPlaneDim; tb.classList.toggle('on', gPlaneDim); });
       document.body.appendChild(tb); }
     for(const id of ['darkmode-btn','gfx-btn','color-btn','etc-btn','dev-btn','lantern-btn',
-                     'memcut-btn','xsec-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','spawn-nadp-btn','spawn-adp-btn','spawn-pi-btn','spawn-h-btn','spawn-hl-btn','cartoon-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
+                     'memcut-btn','xsec-btn','slab-btn','pad-btn','outline-btn','particles-btn','pills-btn','plane-dim-btn','follow-btn','spawn-nadp-btn','spawn-adp-btn','spawn-pi-btn','spawn-h-btn','spawn-hl-btn','cartoon-btn','loose-btn','vr-btn']){   // vr-btn too — it stays hidden until a headset is found (zoomin-btn sits in the dock)
       const b = document.getElementById(id); if(!b) continue;
       b.style.position = 'static'; b.style.left = 'auto'; b.style.top = 'auto'; menu.appendChild(b);   // static → they stack in the menu
     }

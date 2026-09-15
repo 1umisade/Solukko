@@ -354,6 +354,43 @@ function extractLipid(m, code){
 /* GPU sphere impostors: a camera-facing quad per atom; the fragment shader
    ray-traces a perfect sphere and writes real depth, so spheres are smooth at
    any zoom and cost 2 triangles each. */
+const LOOSE_GLSL = `
+/* ── LOYSAT SIDOKSET (owner 15.9.2026: 'single bond looseness - the single bonds can rotate and flap around') ──
+   Every rotatable single bond (a bridge of the bond graph between two heavy atoms, not in a ring, with a moving side of at most 64
+   atoms) is a HINGE: the moving side twists about the bond axis and its bond angle flaps, slowly, each hinge with its own phase.
+   An atom carries at most two hinges: the OUTER one (nearest the rigid core) and the INNER one (nearest the atom); the inner turns
+   first, the outer carries it along. The same transform is applied to the vdW sphere, the nucleus, the orbital lobes and the
+   cofactor overlay/mask/cones, so nothing comes apart. Two ways in: per-instance attributes (LOOSE: models, free molecules) or a
+   per-template table in a float texture (LOOSETEX: the lipids, whose templates are shared by thousands of instances). */
+uniform float looseOn;   // 1 = on (the button)
+uniform float looseAmp;  // amplitude scale (1 = the default)
+#ifdef LOOSE
+attribute vec4 hA1;      // the OUTER hinge: xyz its anchor atom (the fixed end of the bond), w the phase
+attribute vec4 hU1;      // xyz the bond direction (anchor -> moving side), w 2 = present (1 = none - what an absent attribute reads as)
+attribute vec4 hA2;      // the INNER hinge
+attribute vec4 hU2;
+#endif
+#ifdef LOOSETEX
+attribute float hAt;              // the atom's index in its template (-1 = no hinge data)
+uniform sampler2D hingeTex;       // one row per template, four texels per atom: hA1 hU1 hA2 hU2
+uniform float tplRow; uniform vec2 hingeTexSz;
+void lsFetch(float at, out vec4 a1, out vec4 u1, out vec4 a2, out vec4 u2){
+  if(at < -0.5){ a1 = vec4(0.0); u1 = vec4(0.0, 0.0, 0.0, 1.0); a2 = vec4(0.0); u2 = vec4(0.0, 0.0, 0.0, 1.0); return; }
+  float v = (tplRow + 0.5)/hingeTexSz.y, u0 = at*4.0 + 0.5;
+  a1 = texture2D(hingeTex, vec2(u0/hingeTexSz.x, v)); u1 = texture2D(hingeTex, vec2((u0 + 1.0)/hingeTexSz.x, v));
+  a2 = texture2D(hingeTex, vec2((u0 + 2.0)/hingeTexSz.x, v)); u2 = texture2D(hingeTex, vec2((u0 + 3.0)/hingeTexSz.x, v)); }
+#endif
+mat3 lsAxis(vec3 u, float a){ float c = cos(a), sn = sin(a), t = 1.0 - c;
+  return mat3(t*u.x*u.x + c, t*u.x*u.y + sn*u.z, t*u.x*u.z - sn*u.y,  t*u.x*u.y - sn*u.z, t*u.y*u.y + c, t*u.y*u.z + sn*u.x,  t*u.x*u.z + sn*u.y, t*u.y*u.z - sn*u.x, t*u.z*u.z + c); }
+mat4 lsOne(vec4 hA, vec4 hU, float seed){ if(hU.w < 1.5) return mat4(1.0);
+  vec3 U = normalize(hU.xyz); float ph = hA.w + seed;
+  float tw = looseAmp*0.45*sin(uT*0.9 + ph), fl = looseAmp*0.16*sin(uT*1.3 + ph*1.7 + 1.0);   // the twist about the bond, the flap of its angle (radians)
+  vec3 V = normalize(cross(U, abs(U.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+  mat3 R = lsAxis(V, fl) * lsAxis(U, tw); vec3 t = hA.xyz - R*hA.xyz;
+  return mat4(vec4(R[0], 0.0), vec4(R[1], 0.0), vec4(R[2], 0.0), vec4(t, 1.0)); }
+mat4 lsMat(vec4 a1, vec4 u1, vec4 a2, vec4 u2, float seed){ if(looseOn < 0.5) return mat4(1.0); return lsOne(a1, u1, seed) * lsOne(a2, u2, seed); }   // the inner hinge first, the outer carries it along
+float lsSeedLip(float x, float anc){ return fract(sin(floor(x + 0.5)*12.9898 + floor(anc + 0.5)*78.233) * 43758.5453) * 6.2831853; }   // a lipid's own phase, from its anchor (rounded: the shells, nuclei and lobes must agree to the unit)
+`;
 BABYLON.Effect.ShadersStore['impVertexShader'] = `
 precision highp float;
 attribute vec3 position;
@@ -393,6 +430,7 @@ uniform float uT;
 uniform float boilHzAdj;        // thermal-shake time (0 = still)
 uniform float uTb;              // boil clock - its own slider, independent of uT
 uniform float boil;      // line-boil: STEPPED per-atom jitter of the billboard centre (0 = off)
+${LOOSE_GLSL}
 #if defined(LIPTILE) || defined(LIPWRAP)
 uniform vec3 tileOff;    // per-mesh translation - the nucleon pool shares ONE template buffer with it, and
                          // the membrane cells use it to repeat themselves around the camera
@@ -572,6 +610,31 @@ void main(void){
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
 #endif
   vec3 base = W[3].xyz;
+  vec3 baseRaw = base, pcRaw = vec3(W[0].w, W[1].w, W[2].w);   // the RESTING atom (before any hinge): the shake and the boil hash come from it, so a loose atom does not tremble
+#if defined(LOOSE) || defined(LOOSETEX)
+  mat4 lsH = mat4(1.0); float lsSeed = 0.0;
+#ifdef LOOSETEX
+  { vec4 hA1, hU1, hA2, hU2; lsFetch(hAt, hA1, hU1, hA2, hU2);
+#ifdef LIPTPL
+    lsSeed = lsSeedLip(W[3].x, memAnc);   // this lipid's own phase
+#elif defined(LIPTILE)
+    lsSeed = lsSeedLip(tileOff.x, tileOff.z);   // the pooled nuclei: the tile IS the lipid
+#endif
+    lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed); }
+#else
+#ifdef WATERBOX
+  { uint sid = uint(molId + 0.5); lsSeed = hsh(sid*7u + 9u)*6.2831853; }   // per molecule - the CPU mirror (the orbital placer) seeds the same way
+#endif
+  lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed);
+#endif
+#ifdef WATERBOX
+  W[3].xyz = (lsH * vec4(W[3].xyz, 1.0)).xyz;   // a free molecule: this atom's offset inside it, hinged before the spin
+#elif defined(LIPTPL)
+#else
+  base = (lsH * vec4(base, 1.0)).xyz;   // a model atom / a pooled nucleon: hinged in the rest frame, before the model's or the tile's own transform
+  if(dot(pcRaw, pcRaw) > 0.0){ vec3 pc = (lsH * vec4(pcRaw, 1.0)).xyz; W[0].w = pc.x; W[1].w = pc.y; W[2].w = pc.z; }   // a nucleon's atom centre rides along
+#endif
+#endif
 #ifdef WATERBOX
   // Repel the molecule CENTRE, then add this atom's rigid offset - so the whole molecule is displaced as
   // one body and is not torn apart at a shell surface.
@@ -644,7 +707,11 @@ void main(void){
   base = tileRot * base + tileOff;
 #endif
 #ifdef LIPTPL
-  base += mat3(W) * atomOff;   // this vertex's atom, inside the lipid the instance places (rotated with it - a cell membrane's lipids stand on their local normal)
+  { vec3 offH = atomOff;
+#ifdef LOOSETEX
+    offH = (lsH * vec4(atomOff, 1.0)).xyz;   // the lipid's hinges, in its own frame
+#endif
+    baseRaw += mat3(W) * atomOff; base += mat3(W) * offH; }   // this vertex's atom, inside the lipid the instance places (rotated with it - a cell membrane's lipids stand on their local normal)
 #endif
 #ifdef MEMFADE
   vMemW = base;
@@ -662,8 +729,8 @@ void main(void){
      centre of its shell and its orbitals, worst while everything wiggled. A nucleon instance now
      carries its atom's centre in the three unused w slots of its matrix (world0.w, world1.w, world2.w,
      zero on every other instance), and hashes from that. */
-  vec3 hb = base;
-  { vec3 pc = vec3(W[0].w, W[1].w, W[2].w);
+  vec3 hb = baseRaw;
+  { vec3 pc = pcRaw;
     if(dot(pc, pc) > 0.0){ hb = pc;
 #ifdef LIPTILE
       hb = tileRot * pc + tileOff;
@@ -1210,9 +1277,13 @@ attribute float dr;                            // this atom's tube radius in WOR
 attribute float modelId;                       // which loaded model this cofactor atom belongs to
 uniform mat4 view; uniform mat4 projection;
 uniform mat4 modelXform[80];                   // per-model transform so the cone follows a moved molecule
+uniform float uT;
+#define LOOSE
+${LOOSE_GLSL}
 varying vec2 vq; varying float vz;
 void main(void){
   vec3 center = vec3(world3.x, world3.y, world3.z);   // instance translation = atom centre
+  center = (lsMat(hA1, hU1, hA2, hU2, 0.0) * vec4(center, 1.0)).xyz;   // the hinge, like the atom's sphere
   center = (modelXform[int(modelId + 0.5)] * vec4(center, 1.0)).xyz;   // follow the model drag/rotate
   vec4 cv = view * vec4(center, 1.0);
   vz = cv.z;                                          // view-space depth (larger = farther)
@@ -1250,9 +1321,12 @@ uniform mat4 modelXform[80];                   // per-model transform so the sil
 uniform float boilQuad;                        // quad expansion so the boil bulge is not clipped
 uniform float uT;
 uniform float boilHzAdj; uniform float boil; uniform float uTb;
+#define LOOSE
+${LOOSE_GLSL}
 varying vec2 vq; varying vec3 vWC;
 void main(void){
   vec3 base = vec3(world3.x, world3.y, world3.z);
+  base = (lsMat(hA1, hU1, hA2, hU2, 0.0) * vec4(base, 1.0)).xyz;   // the hinge, like the atom's sphere
   base = (modelXform[int(modelId + 0.5)] * vec4(base, 1.0)).xyz;   // follow the model drag/rotate
   vWC = base;                                   // raw centre → the boil warp's world-locked field (matches the imp shader)
   // SAME per-atom MOTION as the vdW sphere shader: always-on thermal shake + stepped boil drift, so the
@@ -1391,6 +1465,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 selCenter;
 uniform float uT;          // thermal-shake time
+${LOOSE_GLSL}
 #ifdef MACROMOVE
 uniform mat4 macroXform; uniform vec3 macroCenter;
 #endif
@@ -1466,6 +1541,20 @@ void main(void){
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
 #endif
+  vec3 lsW3 = W[3].xyz, ocenL = ocen;   // the resting origin and atom centre (the sway and boil phases come from them, hinged or not)
+#if defined(LOOSE) || defined(LOOSETEX)
+  { float lsSeed = 0.0;
+#ifdef LOOSETEX
+    vec4 hA1, hU1, hA2, hU2; lsFetch(hAt, hA1, hU1, hA2, hU2); lsSeed = lsSeedLip(W[3].x, memAnc);
+#endif
+    mat4 lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed);
+#ifdef LIPBAKE
+    W = W * lsH;   // a baked lipid-local lobe: hinged inside the lipid, then placed by the instance (ocen goes through W too)
+#else
+    W = lsH * W; ocenL = (lsH * vec4(ocen, 1.0)).xyz;   // a model's lobe: hinged in the rest frame, before the model transform
+#endif
+  }
+#endif
   float wsc = taper;   // per-lobe overall width multiplier (electronegative atom's lobe is wider → pair forms a cone)
 #ifdef HORNPROF
   if(prof > 0.5){ float hp = 0.5*(position.y + 1.0); wsc *= 0.05 + 0.95*pow(hp, 1.4); }   // 1.4: flares early enough not to read as a needle
@@ -1474,13 +1563,13 @@ void main(void){
   vec3 nrm = normal;
   vec4 wp = W * vec4(pos, 1.0);
 #ifndef SEEDATTR
-  wp.xyz += shakeOff(W[3].xyz);   // not for a free molecule - its shells do not sway either (see the imp shader)
+  wp.xyz += shakeOff(lsW3);   // not for a free molecule - its shells do not sway either (see the imp shader)
 #endif
 #ifdef MEMFADE
 #ifdef LIPBAKE
-  wp.xyz += mat3(W) * memSway(W[3].xyz, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
+  wp.xyz += mat3(W) * memSway(lsW3, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
 #else
-  wp.xyz += memSway(W[3].xyz, memAnc);
+  wp.xyz += memSway(lsW3, memAnc);
 #endif
 #endif
   vMid = -1.0;
@@ -1535,7 +1624,7 @@ void main(void){
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
 #else
-  vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
+  vec3 ocenW = ocenL;            // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
   vIsoKeep = 1.0;
@@ -1799,6 +1888,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 selCenter;    // focused atom centre (or far away = none selected)
 uniform float uT;          // thermal-shake time
+${LOOSE_GLSL}
 #ifdef MACROMOVE
 uniform mat4 macroXform; uniform vec3 macroCenter;  // whole-macromolecule drag offset (only movable materials define this)
 #endif
@@ -1866,15 +1956,29 @@ void main(void){
   W[3].xyz += tileOff;   // membrane wrap - this cell is repeated to the copy nearest the camera, and doing
                          // it HERE means every downstream use (centre, shake, sway, reveal cone) follows
 #endif
+  vec3 lsW3 = W[3].xyz, ocenL = ocen;   // the resting origin and atom centre (the sway and boil phases come from them, hinged or not)
+#if defined(LOOSE) || defined(LOOSETEX)
+  { float lsSeed = 0.0;
+#ifdef LOOSETEX
+    vec4 hA1, hU1, hA2, hU2; lsFetch(hAt, hA1, hU1, hA2, hU2); lsSeed = lsSeedLip(W[3].x, memAnc);
+#endif
+    mat4 lsH = lsMat(hA1, hU1, hA2, hU2, lsSeed);
+#ifdef LIPBAKE
+    W = W * lsH;   // a baked lipid-local lobe: hinged inside the lipid, then placed by the instance (ocen goes through W too)
+#else
+    W = lsH * W; ocenL = (lsH * vec4(ocen, 1.0)).xyz;   // a model's lobe: hinged in the rest frame, before the model transform
+#endif
+  }
+#endif
   vec4 wp = W * vec4(position, 1.0);
 #ifndef SEEDATTR
-  wp.xyz += shakeOff(W[3].xyz);   // not for a free molecule - its shells do not sway either (see the imp shader)
+  wp.xyz += shakeOff(lsW3);   // not for a free molecule - its shells do not sway either (see the imp shader)
 #endif
 #ifdef MEMFADE
 #ifdef LIPBAKE
-  wp.xyz += mat3(W) * memSway(W[3].xyz, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
+  wp.xyz += mat3(W) * memSway(lsW3, memAnc);   // a rotated lipid (cell membrane) sways in its own plane - the sheet's matrices are identity
 #else
-  wp.xyz += memSway(W[3].xyz, memAnc);
+  wp.xyz += memSway(lsW3, memAnc);
 #endif
 #endif
   vMid = -1.0;
@@ -1929,7 +2033,7 @@ void main(void){
 #elif defined(LIPWRAP)
   vec3 ocenW = ocen + tileOff;   // ocen is a WORLD attribute, so a wrapped copy has to carry it along -
 #else
-  vec3 ocenW = ocen;             // the reveal cone keys off it, which is what makes orbitals appear
+  vec3 ocenW = ocenL;            // the reveal cone keys off it, which is what makes orbitals appear
 #endif
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
   vIsoKeep = 1.0;
