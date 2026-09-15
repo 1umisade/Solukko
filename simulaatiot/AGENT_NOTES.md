@@ -650,3 +650,7 @@ Omistaja toi 'PSI PLANT.mol2' (ensimmainen versio oli PSII:n vienti - 3jcu, 1521
 (4) LHC-tunnistus: koodilista ['3jcu','6yez'] -> Lhca1-4 loytyvat (paikat 69-72).
 (5) Kalvosto: u.fdDir = [0,1,0] - ferredoksiinitelakka ja FNR:n koti suoraan FB:n ylapuolella. Kasvin PSI:ssa FX->kinoni-suunta osoitti sivulle ja telakka paatyi 31 yksikkoa tason ulkopuolelle, 16 FB:n ylle - ferredoksiinien (stroomalattia, taso z=0) ulottumattomiin.
 (Loysat sidokset -nappi on oletuksena POIS: gLooseOn = false, nappi ilman 'on'-luokkaa - omistajan huomautus 15.9.)
+
+## 15.9.2026 - vihrea valintarengas takaisin proteiineille: napautus valitsee aina kompleksin (Claude Fable 5.1)
+
+Omistaja: 'the proteins dont have the green selection outline'. Bisektio (dde5847 vs nykyinen): rengas SYNTYY kun proteiini on valittuna (selMask 33308 atomia, 207489 pikselia) - vika oli valinnassa: RTS-napautus valitsi KOFAKTORIN, jos napautus osui kofaktorin atomiin (12.9.), ja kun ETC-paallyste on oletuksena paalla (piirretaan paalle, syvyys ohitetaan), useimmat napautukset kompleksin keskelle osuvat hemiin tai klorofylliin -> rebuildSelMask antoi renkaan pienelle kofaktorille eika proteiinille. Nyt napautus valitsee aina kompleksin ja nollaa mahdollisen kofaktorivalinnan (showEtcSel(-1)); kofaktori valitaan tuplaklikilla (onDouble, keskietaisyys) kuten ennenkin.

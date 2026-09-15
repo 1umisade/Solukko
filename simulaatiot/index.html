@@ -5120,10 +5120,11 @@ void main(void){
         else { const mol = pickMolecule();   // a TAP on a spawned molecule selects it (then M starts it, S stops it)
           if(!gSelEnabled){ }   // selections switched off (dev panel): a click selects nothing
           else if(mol){ selectMolecule(mol, e.shiftKey); }
-          else if(rtsDownModel >= 0 && !camInsideModel(rtsDownModel) && (() => { const fa = pickAtomFar(); return fa && fa.cof >= 0 && (gSel.clear(), gSelMol.clear(), updateSelectionUI(), clearAtomSel(), deselectModel(), showEtcSel(fa.cof), true); })()){ }   // the tap landed on a COFACTOR's atom → that cofactor (owner 12.9.2026)
+          /* (15.9.2026, owner: 'the proteins dont have the green selection outline') a TAP always selects the COMPLEX - it used to select a cofactor when the tap landed on a cofactor atom, and with the ETC overlay on by default (drawn on top, depth ignored) most taps on a complex land on one, so the ring went to a small heme instead of the protein. A cofactor is picked by DOUBLE-click (onDouble, medium range), as before. */
           else if(rtsDownModel >= 0 && !camInsideModel(rtsDownModel)){   // a click on a protein complex → select it (Shift adds / toggles) - never the one you are standing inside
             if(e.shiftKey){ if(gSel.has(rtsDownModel)) gSel.delete(rtsDownModel); else gSel.add(rtsDownModel); }
             else { gSel.clear(); gSelMol.clear(); gSel.add(rtsDownModel); focusOnModel(rtsDownModel); }   // a fresh pick centres the camera on it
+            if(etcSel >= 0) showEtcSel(-1);   // a selected cofactor would keep the green ring for itself (rebuildSelMask) - the tapped complex gets it
             updateSelectionUI();
           } else {   // click on empty → deselect EVERYTHING (move order is on RIGHT-click)
             window.gDeselectAll();   // ...including the atom and cofactor selections (clearing only the RTS set left a selected atom outlined with its info card open)
