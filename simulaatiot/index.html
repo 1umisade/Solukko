@@ -3557,7 +3557,7 @@ async function run(){
     {match:'6l7o',   x:97,   y:35,   z:30,   rot:[51,-159,70],   label:'NDH-1'},
     {match:'6vm1',   x:760,  y:84,   z:0,    rot:[-69,102,33],   label:'ATP synthase'},
     {match:'1ag6',   x:-10,  y:-190, z:0,    label:'Plastocyanin'},
-    {match:'1a70',   x:230,  y:250,  z:20,   label:'Ferredoxin'},
+    {match:'ferredoxin (plant', x:230, y:250, z:20, label:'Ferredoxin'},   // 6YEZ chain N WITH its 2Fe-2S cluster (owner 15.9.2026: 'the fdx should have a metal to which the electron is bound' - the 1A70 export had none)
     {match:'1gjr',   x:400,  y:290,  z:80,   label:'FNR'},
     {match:'1rcx',   x:600,  y:380,  z:-80,  label:'RuBisCO'},
     // (PGR5, PGRL1, STN7, PPH1 - the regulatory proteins - are out: owner 13.9.2026 'remove all the non ETC proteins')
@@ -3621,7 +3621,7 @@ async function run(){
     if(pq){ for(let k=0;k<10;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-400 + k*20, y:0, z:-40 + (k%2)*80 }, 'pq', k);   // set A (k 0-9): PSII <-> b6f's PSII side
       for(let k=10;k<20;k++) clone(pq, { match:'pq-shuttle-'+k, label:'Plastokinoni', x:-60 + (k-10)*20, y:0, z:-40 + (k%2)*80 }, 'pq', k); }   // set B (k 10-19): NDH-1 <-> b6f's other side (owner 14.9.2026: 'two different sets of PQB')
     if(pc){ pc.shuttle = 'pc'; pc.shuttleK = 0; for(let k=1;k<10;k++) clone(pc, { match:'pc-shuttle-'+k, label:'Plastosyaniini', x:-100 + k*30, y:-190, z:-60 + (k%3)*60 }, 'pc', k); }
-    { const fd = mols.find(m => m.cfg && m.cfg.match === '1a70'); if(fd) for(let k=1;k<10;k++) clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + (k%5)*70 - 140, y:fd.cfg.y + Math.floor(k/5)*60, z:fd.cfg.z }, undefined, 0); }   // TEN ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
+    { const fd = mols.find(m => m.cfg && m.cfg.match === 'ferredoxin (plant'); if(fd) for(let k=1;k<10;k++) clone(fd, { match:'fd-copy-'+k, label:'Ferredoxin', x:(fd.cfg.x || 0) + (k%5)*70 - 140, y:fd.cfg.y + Math.floor(k/5)*60, z:fd.cfg.z }, undefined, 0); }   // TEN ferredoxins (owner 14.9.2026) - loose proteins like the first, each a carrier body of its own
     { const fr = mols.find(m => m.cfg && m.cfg.match === '1gjr'); if(fr) for(let k=1;k<10;k++) clone(fr, { match:'fnr-copy-'+k, label:'FNR', x:(fr.cfg.x || 0) + (k%5)*80 - 160, y:fr.cfg.y + Math.floor(k/5)*70, z:fr.cfg.z }, undefined, 0); }   // TEN FNR (owner 14.9.2026: 'put total 10 FNR and 10 ferredoxin in the stroma')
     /* Fill the membrane. The complexes sit in one strip along x at z about 0, while the sheet is 1240
        deep - so the whole set (the five membrane complexes and the nine loose proteins) is repeated in

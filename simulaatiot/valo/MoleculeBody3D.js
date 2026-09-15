@@ -234,6 +234,7 @@
          carrier it came from (PSII's two pheophytins, two tyrosines, b6f's hemes) pulled it straight back. A released electron is pulled only by
          the link one past the carrier it left, in its lane. */
       if(body.is_in_group('electron') && body._fromPlace != null && (this.place_in_the_chain !== body._fromPlace + 1 || !V.laneOk(body._fromBody || this, this))){ this.debug_info('PULLING_conditions', 'not the next link of where the electron came from (3D)', body); return null; }
+      { const owner = this.parent_is_BindSites ? this.body_that_I_am_bound_to : this; if(body.is_in_group('electron') && owner && owner.kin && owner.body_that_I_am_bound_to == null){ this.debug_info('PULLING_conditions', 'a free carrier takes no electron (3D)', body); return null; } }   // (owner 15.9.2026: hops only between close, docked bodies)
       return this.BINDING_conditions(body); }
     try_PULLING(body){ const r = this.PULLING_conditions(body);
       if(r instanceof MoleculeBody3D){ const BindSite = r;
@@ -302,6 +303,7 @@
       if(!V.is_instance_valid(BindSite)) return null;
       if(BindSite.modulate !== 'white'){ this.debug_info(fn, 'BindSite empty'); return null; }
       if(String(BindSite.name).includes('electron')){
+        if(this.kin && this.body_that_I_am_bound_to == null){ this.debug_info(fn, '3A2 a free carrier hands nothing over (3D)'); return null; }   // (owner 15.9.2026: 'electron transfer should happen only when the molecules are close by' - a carrier gives only from its dock)
         let nb = this.nearby_area ? this.nearby_area.get_overlapping_bodies() : [];
         nb = nb.filter(item => item.is_in_group('electron'));                                   if(!nb.length){ this.debug_info(fn, '3B no electron slot nearby'); return null; }
         nb = nb.filter(item => item.is_physics_processing() === false);                          if(!nb.length){ this.debug_info(fn, '3C none is a slot'); return null; }
@@ -311,13 +313,19 @@
         nb = nb.filter(item => item.body_that_I_am_bound_to.place_in_the_chain === this.place_in_the_chain + 1); if(!nb.length){ this.debug_info(fn, '3G none is the next link'); return null; }
         nb = nb.filter(item => V.laneOk(this, item.body_that_I_am_bound_to));                    if(!nb.length){ this.debug_info(fn, '3G2 wrong lane (3D)'); return null; }
         nb = nb.filter(item => !(this.molecule_name === 'plastocyanin' && item.body_that_I_am_bound_to.molecule_name === 'plastocyanin')); if(!nb.length){ this.debug_info(fn, '3H plastocyanin to plastocyanin'); return null; }
+        nb = nb.filter(item => !item.body_that_I_am_bound_to.kin || item.body_that_I_am_bound_to.body_that_I_am_bound_to != null); if(!nb.length){ this.debug_info(fn, '3I the carrier is not docked (3D)'); return null; }   // (a passing ferredoxin 150 units off took FB's electron - only a DOCKED carrier receives)
+        nb = nb.filter(item => BindSite.distance_to(item) <= (item.hop_max != null ? item.hop_max : V.HOP_MAX)); if(!nb.length){ this.debug_info(fn, '3J too far for a hop (3D)'); return null; }   // (hop_max: a slot's own allowance - NDH-1's quinone site, see Kalvosto)
         return V.pick_random(nb); }
       return true; }
     async try_RELEASING(){ if(!this.BindSites || !this.alive) return;
       for(const BindSite of this.BindSites){ if(BindSite.has_meta('releasing_ongoing')) continue;
         BindSite.set_meta('releasing_ongoing', true);
         const R = this.RELEASING_conditions(BindSite);
-        const can_release = R != null && (this.script.RELEASING_special_conditions ? (await this.script.RELEASING_special_conditions(this, String(BindSite.name), R)) === true : true);
+        let can_release = R != null && (this.script.RELEASING_special_conditions ? (await this.script.RELEASING_special_conditions(this, String(BindSite.name), R)) === true : true);
+        /* WIGGLE (owner 15.9.2026: 'the electron should wiggle a bit before releasing'): an electron slot about to hand over shivers for V.WIGGLE_S first (the
+           lantern's pool on the atom jitters - Kalvosto reads _wig), and hands over only if the acceptor is still free and in reach when the shiver ends */
+        if(can_release && R instanceof MoleculeBody3D && V.WIGGLE_S > 0){ BindSite._wig = V.time + V.WIGGLE_S; let t = V.WIGGLE_S; while(t > 0 && this.alive && BindSite.alive){ t -= V.dt; await V.process_frame(); }
+          if(!V.is_instance_valid(R) || R.modulate !== 'dark' || !R.body_that_I_am_bound_to || R.body_that_I_am_bound_to.modulate !== 'white' || R.pulled_bodies.some(b => V.is_instance_valid(b)) || BindSite.distance_to(R) > (R.hop_max != null ? R.hop_max : V.HOP_MAX)) can_release = false; }
         BindSite.remove_meta('releasing_ongoing');
         if(!this.alive || !BindSite.alive) return;
         if(can_release && BindSite.modulate === 'white'){
@@ -466,6 +474,8 @@
   V.MoleculeBody3D = MoleculeBody3D;
 
   /* ── tuning (the 2D constants, and what the sheet's size asked for) ── */
+  V.HOP_MAX = 70;        // the longest electron hop, slot to slot (owner 15.9.2026: 'only when the molecules are close by' - FB to a docked ferredoxin's cluster is about 40)
+  V.WIGGLE_S = 0.6;      // s an electron slot shivers before it hands over (owner 15.9.2026)
   V.HOP = 0.15;          // s per excitation hop (2D: 0.8 s over six pigments; PSI's antenna is up to eight hops deep)
   V.HEAT_S = 5.0;        // s until an unforwarded excitation is heat (2D)
   V.HEAT_SHAKE_S = 0.6;  // s of shaking before the glow is gone (2D: 3 s of sprite jitter)

@@ -157,7 +157,7 @@
       const chain = fes.slice().sort((a, b) => d3(cen(a), top) - d3(cen(b), top)).slice(0, 6); ndh.fes = chain.map((g, i) => cof(g, 'iron_sulfur_cluster_inside_photosystem_I', { lane: L, place: 2 + i }));
       const f0 = chain.length ? cen(chain[0]) : top; placeSlot(ndh, 'ferredoxin', mi, [f0[0], f0[1] + 26, f0[2]], L);
       let q = quins.length ? cen(quins[0]) : null; if(chain.length && !q){ const l = cen(chain[chain.length-1]); {   /* the STRUCTURE's quinone site when the model has one (owner 14.9.2026: 'is your spot the real binding site' - the point past the last cluster stood in even when 6L7O carries its own PQ) */ const f = cen(chain[0]), d = [l[0]-f[0], l[1]-f[1], l[2]-f[2]], n = Math.hypot(d[0], d[1], d[2]) || 1; q = [l[0] + d[0]/n*22, l[1] + d[1]/n*22, l[2] + d[2]/n*22]; } } if(!q) q = [c.cx, c.cy, c.cz];
-      placeSlot(ndh, 'plastoquinone_B', mi, q, L).place_in_the_chain = 2 + chain.length;
+      { const qs = placeSlot(ndh, 'plastoquinone_B', mi, q, L); qs.place_in_the_chain = 2 + chain.length; qs.hop_max = 130; }   // hop_max: 6L7O's own quinone site lies 87-121 from the four Fe-S clusters the model carries (the real enzyme bridges that with clusters this model lacks) - the last cluster may reach it, past V.HOP_MAX (15.9.2026)
       point(ndh, 'target_2', mi, [c.cx, c.y1 + 60, c.cz]); return ndh; });
     /* ATP synthase, RuBisCO */
     const atps = atpMis.map(mi => { const c = mInfo[mi]; const a = body('ATP-synthase', mi, [c.cx, c.cy, c.cz], { nearby: 90 }); placeSlot(a, 'ADP', mi, [c.cx - 10, c.y1 - 30, c.cz]); placeSlot(a, 'phosphate', mi, [c.cx + 10, c.y1 - 30, c.cz]); a.passes0 = null; return a; });   // the nucleotide sites a little INSIDE the head (owner 14.9.2026: 'put those slightly inside the ATP synthase'; the reveal below cuts the atoms in front)
@@ -180,6 +180,13 @@
     for(const mi of fdMis){ const b = gBouncers.find(q => q.mi === mi); if(b) carrierBody('ferredoxin', mi, { kind:'bnc', b, side: 1 }); }
     for(const mi of vdeMis){ const b = gBouncers.find(q => q.mi === mi); if(b) carrierBody('VDE', mi, { kind:'bnc', b, side: -1 }); }
     for(const mi of zeMis){ const b = gBouncers.find(q => q.mi === mi); if(b) carrierBody('zeaxanthin_epoxidase', mi, { kind:'bnc', b, side: -1 }); }
+    /* the electron sits on the carrier's METAL (owner 15.9.2026: 'the fdx should have a metal to which the electron is bound'): ferredoxin's 2Fe-2S cluster,
+       plastocyanin's Cu - the 'electron' slot is pinned to that cofactor in the model's frame, so it turns and moves with the protein */
+    const metalIn = mi => { const c = mInfo[mi]; let best = -1, bd = Infinity; if(!c) return -1;   // the metal cluster inside the model's own box (grpMi can hand a small model's group to a neighbour whose box overlaps)
+      for(let gi=0; gi<G.length; gi++){ const g = G[gi]; if(!g.n || (g.type !== 5 && g.type !== 6) || g.cx < c.x0 || g.cx > c.x1 || g.cy < c.y0 || g.cy > c.y1 || g.cz < c.z0 || g.cz > c.z1) continue; const d = d3(cen(gi), [c.cx, c.cy, c.cz]); if(d < bd){ bd = d; best = gi; } } return best; };
+    for(const b of V.all){ if(!b.kin || !b.BindSites || (b.molecule_name !== 'ferredoxin' && b.molecule_name !== 'plastocyanin')) continue; let metal = ofType(b.mi, 5).concat(ofType(b.mi, 6)); if(!metal.length){ const gi = metalIn(b.mi); if(gi >= 0) metal = [gi]; }
+      if(!metal.length){ console.warn('valoreaktiot: ' + b.molecule_name + ' (malli ' + b.mi + ') ilman metallia - elektroni keskipisteessa'); continue; }
+      const s = b.get_node('BindSites/electron'); if(s) s.frame = { mi: b.mi, p: cen(metal[0]) }; }
     for(const b of gBouncers){ const f = fnrs.find(x => x.frame.mi === b.mi) || rubs.find(x => x.frame.mi === b.mi); if(f){ const kin = { kind:'bnc', b, home: true, body: f }; kinOf.set(f, kin); b.kin = kin; } }   // FNR / RuBisCO: their bouncer drifts to their soft target (a fixed node); the body itself stays a frame body (its slots turn with the model)
     /* the mover's view of a carrier (index.html's shuttle mover and bouncer loop read this): where to go, and where to be pinned */
     const carrierTarget = b => { const t = (b.hard_target && b.hard_target.alive) ? b.hard_target : b.soft_target; return (t && t.alive) ? t : null; };
@@ -409,7 +416,9 @@
       // camera.gd: follow whatever valid body is in the 'followed' group
       if(followOn){ const fb = V.get_nodes_in_group('followed')[0]; if(fb){ const p = fb.global_position, t = cam.target, f = 1 - Math.pow(0.1, dt*3); t.x += (p[0]-t.x)*f; t.y += (p[1]-t.y)*f; t.z += (p[2]-t.z)*f; } }
       // the lantern: every free electron and every filled electron slot is a spotlight
-      { const L = lantern; L.length = 0; for(const b of V.get_nodes_in_group('electron')){ if(!b.alive) continue; if(b.parent_is_BindSites ? b.modulate !== 'white' : !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], e: b.EnergyLevel || 0 }); if(L.length >= 64) break; }   // e: the electron's energy (aJ) - the Z scheme: the lantern doubles the pool of a freshly excited electron and lets it shrink step by step down the chain (owner 14.9.2026)
+      { const L = lantern; L.length = 0; for(const b of V.get_nodes_in_group('electron')){ if(!b.alive) continue; if(b.parent_is_BindSites ? b.modulate !== 'white' : !b.kin) continue; const p = b.global_position;
+          if(b._wig > V.time){ const w = 1.6, f = V.time*38 + b.id; p[0] += w*Math.sin(f); p[1] += w*Math.sin(f*1.31 + 1.7); p[2] += w*Math.sin(f*0.77 + 3.1); }   // WIGGLE: the slot is about to hand its electron over (see try_RELEASING)
+          L.push({ on:true, x:p[0], y:p[1], z:p[2], e: b.EnergyLevel || 0 }); if(L.length >= 64) break; }   // e: the electron's energy (aJ) - the Z scheme: the lantern doubles the pool of a freshly excited electron and lets it shrink step by step down the chain (owner 14.9.2026)
         for(const b of V.get_nodes_in_group('proton')){ if(!b.alive || !b.kin) continue; const p = b.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:1 }); if(L.length >= 64) break; }
         for(const m of antenna){ if(!m.alive || !m.ExcitedSprite || !m.ExcitedSprite.visible) continue; const g = m.gi != null ? G[m.gi] : null; const p = (g && g.mg) ? wpt(g.mgSlot >= 0 ? g.mgSlot : grpMi[m.gi], g.mg, [0,0,0]) : m.global_position; L.push({ on:true, x:p[0], y:p[1], z:p[2], p:2 }); if(L.length >= 64) break; } }   // the glow sits on the chlorophyll's Mg (owner 13.9.2026)   // an excited pigment: a green light that hops pigment to pigment to P680 (owner 13.9.2026: 'make the chlorophylls glow like the lanterns with green')   // ...and every free proton, an orange pool (owner 13.9.2026)
       prof.all = performance.now() - t0;

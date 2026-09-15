@@ -681,3 +681,27 @@ Sudenkuopat (korjattu samalla):
 Mittaus (sama kamera, sc.render()+gl.finish() x 10, mediaani): HEAD 19.0 ms -> 18.4 ms; CPU-puoli hallitsee (Babylonin oma render ~12 ms,
 observerit ~8 ms: protonipassi 3.5, tormaykset 3.5, vapaiden rakennus 1.2+1.0). Selaimen paneelin rAF on kuristettu (2-3 fps) kun se on piilossa -
 engine.getFps() ei kelpaa mittariksi siella. Kuvat ennen/jalkeen identtiset.
+
+## 15.9.2026 - ferredoksiinin elektroni metallilla, hypyt vain lahelta, varina ennen luovutusta (Claude Fable 5.1)
+
+Omistaja: 'the fdx should have a metal to which the electron is bound ... electron transfer should happen only when the molecules are close by.
+the electron should wiggle a bit before releasing'.
+
+- ferredoxin.mol2 on nyt 6YEZ:n ketju N (kasvin Fd PSI:hin sitoutuneena) 2Fe-2S-klusterinsa (FES) kanssa: 1404 atomia, 1420 sidosta, 98 tahdetta,
+  keskitetty (tyokalu: scratchpad _fd_build.py). Vanha 1A70-vienti oli ilman klusteria (7 S.3, ei yhtaan Fe). Otsikko 'ferredoxin (plant, ...)',
+  MODELS match 'ferredoxin (plant' (EI '6yez' - PSI:n entry osuisi siihen ensin, koska match on nm.includes()).
+- Kalvosto: kantajan (ferredoksiini, plastosyaniini) 'electron'-slotti kiinnitetaan mallin metallikofaktoriin (tyyppi 5 Fe-S / 6 Cu):
+  s.frame = { mi, p: cen(metal) } - slotti kaantyy ja liikkuu proteiinin mukana, lyhdyn vihrea lampi ja vapautuva elektroni ovat metallilla.
+  ofType(mi) voi antaa pienen mallin ryhman naapurille (grpMi valitsee laatikon) -> varamenettely metalIn(mi): tyypin 5/6 ryhma mallin omassa laatikossa.
+- MoleculeBody3D RELEASING_conditions (elektronislotit): 3A2 vapaa (telakoimaton) kantaja ei luovuta; 3I vastaanottava kantaja vain telakoituna;
+  3J hypyn pituus slotista slottiin <= V.HOP_MAX (70). PULLING: vapaa kantaja ei ota elektronia. Aiemmin FB:n nearby 170 antoi elektronin
+  ohi lentavalle ferredoksiinille 150 yksikon paasta.
+- try_RELEASING: elektronislotti varisee V.WIGGLE_S (0.6 s simulaatioaikaa) ennen luovutusta (BindSite._wig = V.time + WIGGLE_S; Kalvoston lyhty
+  heiluttaa lampea 1.6 yksikkoa sinisekoituksella), ja luovuttaa vain jos vastaanottaja on yha tyhja, valkoisen isannan oma, ei kohteena ja ulottuvilla.
+  releasing_ongoing pysyy paalla varinan ajan (ei tuplavapautusta).
+- Mitatut perakkaisten linkkien valit (slotista slottiin): PSII 9-20, b6f 6-28, PSI 12-26 (Pc-telakka -> P700 50), Fd-telakka -> FNR:n
+  elektronislotti 54, NDH-1: Fd-telakka -> Fe-S 26, klusterit 12-14, MUTTA viimeinen klusteri -> 6L7O:n oma kinonipaikka 87-121 (mallissa vain
+  nelja klusteria). Siksi slotin oma raja qs.hop_max = 130 NDH-1:n plastoquinone_B-slotilla (RELEASING 3J lukee item.hop_max, muuten V.HOP_MAX).
+- Testi: paneelin rAF kuristettuna ajettiin sc.render()-silmukalla nopeus 3.0x; hyppyjen pituudet <= 53, varinat nakyvat (_wig), 10/10 Fd:n
+  slotti metallilla, Fe-S piirtyy ETC-paallysteeseen. Ketjun lapimeno oli sama saannot paalla ja pois (WIGGLE_S 0, HOP_MAX 1e9) - hidas
+  virta johtuu muusta kuin naista.
