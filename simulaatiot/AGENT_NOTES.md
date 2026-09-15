@@ -822,3 +822,30 @@ indeksin), ja se paastaa saman passin kameralle kahdesti - kuva ketjussa voi oll
 Korjaus: reusable pois kaikista neljasta; virheen aiheuttanut TUPLA-KIINNITYS estetaan kiinnityskohdissa (cam._postProcesses.indexOf(pp) < 0):
 wantPP-haara (cofsil/selOutline), gTogglePainterly (painterly/brightPP), eristysnakyman paluu (painterly).
 Omassa istunnossa (paneeli 3 fps, ajetut ruudut) ajelehtimista ei saatu toistetuksi - omistaja vahvistaa.
+
+## 15.9.2026 - vapaan molekyylin napautus koko rungolta; kuoren repel myos CPU-puolelle; tasoleikkaus per molekyyli (Claude Fable 5.1)
+
+Omistaja: 'still cant select NADP and why some nearby atoms dont show orbitals?'
+(1) Napautus: pickFreeAt hyvaksyi napautuksen vain 12 px:n sisalla molekyylin KESKIPISTEEN projektiosta. Lahelta katsottuna (kameran sade 45)
+NADP+ on 380 px levea ja napautus sen atomiin oli 223 px keskipisteesta -> ei valintaa (mitattu: keskipisteen napautus valitsi 75 atomia,
+atomin napautus 0). Nyt sade = lajin runkosade (window.gFreeHullR: kaukaisimman atomin etaisyys + sen vdW-sade, NADP+ 10.0) projisoituna
+molekyylin syvyydelle (px/yksikko = canvas.clientHeight/2 / tan(fov/2) / syvyys) + rad; lahin normalisoituna voittaa; protoni pitaa pelkan
+rad:n; ortokamera putoaa vanhaan sateeseen. Todennettu: napautukset 187/201/217/250 px keskipisteesta valitsevat, 334 px ei.
+(2) freeWorld ja gFreeAtoms lisaavat kuoren repelin (repelShells) piirtopaikkaan kuten varjostin ja orbitaalisijoittaja: FNR:n tai
+ATP-syntaasin kuoren SISAAN telakoitu molekyyli piirretaan kuoren pinnalle (ADP-runko 787,71 -> piirto 789,88, siirtyma 17.7), ja poiminta,
+siluetti, laatikkovalinta ja siirto katsovat nyt sinne. Lajien atomitaulut (locOf) rakennetaan kerran, ei joka kutsulla (siluetti kutsui
+joka ruutu).
+(3) Orbitaalit: seurasin NADP+:aa kameralla ja piilotin sen atomiverkon (nadpall): ~300 lohkosta piirtyi vain yhden fosfaattiryhman lohkot.
+Syy: vapaiden orbitaalien varjostimet ('orb' ja 'bond', wOrbMat) leikkasivat tasotilassa (planeDim, paalla aina kun kamera on laatikossa)
+lohkot PER ATOMI - atomin keskipiste yli 2.5 tasosta -> pois - kun atomivarjostin leikkaa PER MOLEKYYLI (keskipiste 2.0:n sisalla -> kaikki
+atomit piirretaan). NADP+ ulottuu +-6 z-suunnassa, joten suuri osa atomeista jai ilman lohkoja ja levyt nayttivat tyhjilta; se vaihteli
+molekyylin pyorahdyksen mukaan (siksi 'jotkut' atomit). Sijoittaja (drawnPos) hylkaa jo tason ulkopuoliset molekyylit laatikon sisalla
+samoin kuin atomivarjostin, joten varjostimen per-atomi-leikkaus poistettiin (tasoCull = 0.0 molemmissa). Todennus (ajetut ruudut, readPixels,
+atomiverkko piilossa): 75/75 atomilla lohkopikseleita keskipisteensa ymparilla, myos 19 atomilla yli 2.5 tasosta (min 0.19, mediaani 0.39;
+tyhja tausta 0).
+Tarkistettu matkalla, eivat syyna: 160 molekyylin CAP per laji (14 NADP+ gCrisp-sateella), gCrisp 132, revealFade (30 vs 95 ei eroa),
+loysat sidokset (pois), kuoriruudukon 8 paikkaa per solu, piirtojarjestys (lohkot ryhma 0, kuoret ryhma 1, syvyys ei tyhjene valissa).
+Huom. selMaskMesh pitaa vanhat instanssinsa kun vapaa valinta tyhjenee (rebuildSelMask ei aja: selSig ei muutu, gSelFree.size 0) - ei nay,
+koska selOn = 0; testeissa thinInstanceCount ei kelpaa valinnan mittariksi ilman vaihtuvaa perusvalintaa.
+Selainpaneeli jaatyi taas kolmesti (document.hidden = true, rAF seis): ajetut ruudut sc.render() + kaksi await Promise.resolve() ja
+engine.getDeltaTime = () => 33; kuvat readPixels:lla (rivit alhaalta ylos: rivi H-1-y).

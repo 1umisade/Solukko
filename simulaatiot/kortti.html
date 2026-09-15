@@ -1648,7 +1648,7 @@ void main(void){
   vIsoKeep = 1.0;
   if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
   vBcol = bcol;   // bonding lobes ALWAYS keep their element colour
-  float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled — per-model pastel applies to the vdW spheres only
+  float tasoCull = 0.0;   // the plane cull is the PLACER's (drawnPos skips every off-plane molecule inside the box, as the atom shader does PER MOLECULE) - this shader culled PER ATOM at 2.5 from the plane, and an NADP+ spanning +-6 in z lost the lobes of most of its atoms while every disc was drawn (owner 15.9.2026: 'some nearby atoms dont show orbitals')
   vOid = oid;
   vec3 ocv = (view * vec4(ocenW, 1.0)).xyz; vCang = (ocv.z > 0.0) ? length(ocv.xy)/ocv.z : 1e9;   // ⊥ distance from the view axis (reveal tube)
   gl_Position = projection * vp;
@@ -2057,7 +2057,7 @@ void main(void){
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
   vIsoKeep = 1.0;
   if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
-  float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled
+  float tasoCull = 0.0;   // the plane cull is the PLACER's (drawnPos skips every off-plane molecule inside the box, as the atom shader does PER MOLECULE) - this shader culled PER ATOM at 2.5 from the plane, and an NADP+ spanning +-6 in z lost the lobes of most of its atoms while every disc was drawn (owner 15.9.2026: 'some nearby atoms dont show orbitals')
   vOid = oid;
   vec3 ocv = (view * vec4(ocenW, 1.0)).xyz; vCang = (ocv.z > 0.0) ? length(ocv.xy)/ocv.z : 1e9;   // ⊥ distance from the view axis (reveal tube)
   gl_Position = projection * vp;

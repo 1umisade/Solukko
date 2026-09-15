@@ -2065,7 +2065,7 @@ void main(void){
   vIsoKeep = 1.0;
   if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
   vBcol = bcol;   // bonding lobes ALWAYS keep their element colour
-  float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled — per-model pastel applies to the vdW spheres only
+  float tasoCull = 0.0;   // the plane cull is the PLACER's (drawnPos skips every off-plane molecule inside the box, as the atom shader does PER MOLECULE) - this shader culled PER ATOM at 2.5 from the plane, and an NADP+ spanning +-6 in z lost the lobes of most of its atoms while every disc was drawn (owner 15.9.2026: 'some nearby atoms dont show orbitals')
   vOid = oid;
   vec3 ocv = (view * vec4(ocenW, 1.0)).xyz; vCang = (ocv.z > 0.0) ? length(ocv.xy)/ocv.z : 1e9;   // ⊥ distance from the view axis (reveal tube)
   gl_Position = projection * vp;
@@ -2474,7 +2474,7 @@ void main(void){
   vSel = step(distance(ocenW, selCenter), 0.6);   // 1 = belongs to the selected atom
   vIsoKeep = 1.0;
   if(isoN > 0.5){ float best = 1e9; for(int k = 0; k < 96; k++){ if(float(k) >= isoN) break; best = min(best, distance(ocenW, isoAt[k])); } vIsoKeep = step(best, 0.6); }   // ISOLATE a cofactor: only the group's own atoms (owner 14.9.2026)
-  float tasoCull = planeDim * (1.0 - step(abs(ocenW.z - planeZ), 2.5)) * (step(psuLo.x, ocenW.x) * step(ocenW.x, psuHi.x) * step(psuLo.y, ocenW.y) * step(ocenW.y, psuHi.y) * step(psuLo.z, ocenW.z) * step(ocenW.z, psuHi.z));   // dev plane: off the plane and inside the PSU box -> culled
+  float tasoCull = 0.0;   // the plane cull is the PLACER's (drawnPos skips every off-plane molecule inside the box, as the atom shader does PER MOLECULE) - this shader culled PER ATOM at 2.5 from the plane, and an NADP+ spanning +-6 in z lost the lobes of most of its atoms while every disc was drawn (owner 15.9.2026: 'some nearby atoms dont show orbitals')
   vOid = oid;
   vec3 ocv = (view * vec4(ocenW, 1.0)).xyz; vCang = (ocv.z > 0.0) ? length(ocv.xy)/ocv.z : 1e9;   // ⊥ distance from the view axis (reveal tube)
   gl_Position = projection * vp;
@@ -4762,7 +4762,8 @@ void main(void){
       if(n) mk.thinInstancePartialBufferUpdate('matrix', buf.subarray(0, n*16), 0); mk.thinInstanceCount = n; mk.setEnabled(n > 0); }); }
   const _pFree = [0,0,0];
   const freeWorld = (key, i, out) => { if(key === 'p'){ const P = gValoProtons; if(!P) return false; out[0]=P.pos[i*3]; out[1]=P.pos[i*3+1]; out[2]=P.pos[i*3+2]; return true; }
-    const F = gValoFree; if(!F || !F.drawn) return false; if(!F.drawn(key, i, out)) return false; const o = (F.base[key]+i)*4; out[0]+=F.disp[o]; out[1]+=F.disp[o+1]; out[2]+=F.disp[o+2]; return true; };
+    const F = gValoFree; if(!F || !F.drawn) return false; if(!F.drawn(key, i, out)) return false; const o = (F.base[key]+i)*4; out[0]+=F.disp[o]; out[1]+=F.disp[o+1]; out[2]+=F.disp[o+2];
+    repelShells(out); return true; };   // the protein shells push the centre out exactly as the shader (and the orbital placer) do - a molecule held in a slot inside FNR's or ATP synthase's shell is DRAWN on the shell, and the pick, the silhouette and the move must look there (15.9.2026)
   const projPt = (x, y, z) => { _vpSel.width=canvas.clientWidth; _vpSel.height=canvas.clientHeight; return BABYLON.Vector3.Project(new BABYLON.Vector3(x, y, z), BABYLON.Matrix.Identity(), scene.getTransformMatrix(), _vpSel); };
   const selectFreeBox = (lx, ly, hx, hy) => { if(!gValoFree || !gValoFree.keys) return;
     for(const key of gValoFree.keys){ const n = key === 'p' ? (gValoProtons ? gValoProtons.n : 0) : gValoFree.count(key);
@@ -4772,11 +4773,18 @@ void main(void){
         gSelFree.add(key + ':' + i); if(gSelFree.size >= 4000) return; } } };
   /* a TAP on a free molecule or proton selects it (owner 15.9.2026: 'why cant i select nadp' - only the box-drag reached the free particles): the drawn instance
      whose screen point is nearest the tap, within 22 px, on any height (a docked NADP+ rides its slot off the plane) */
-  const pickFreeAt = (px, py, rad, noWater) => { if(!gValoFree || !gValoFree.keys) return null; let best = null, bd = (rad || 22)*(rad || 22);
+  /* the tap radius grows with the molecule's size ON SCREEN (owner 15.9.2026: 'still cant select NADP' - zoomed in, an NADP+ is 380 px across and a
+     tap on one of its atoms lay 223 px from the centre, far outside the fixed 12 px): a tap within the species' hull radius, projected at the
+     molecule's depth, + rad of the centre picks it; the nearest in units of that radius wins (a proton keeps the plain rad) */
+  const pickFreeAt = (px, py, rad, noWater) => { if(!gValoFree || !gValoFree.keys) return null; let best = null, bs = 1; const r0 = rad || 22;
+    const cp = cam.position, fwd = cam.getDirection(BABYLON.Axis.Z), persp = cam.mode !== BABYLON.Camera.ORTHOGRAPHIC_CAMERA, kPx = canvas.clientHeight*0.5/Math.tan(cam.fov*0.5);   // px per world unit at view depth d = kPx/d (the default vertical fov)
     for(const key of gValoFree.keys){ if(noWater && key === 'w') continue; const n = key === 'p' ? (gValoProtons ? gValoProtons.n : 0) : gValoFree.count(key);
+      const hr = (key === 'p' || !persp || !window.gFreeHullR) ? 0 : gFreeHullR(key);
       for(let i=0;i<n;i++){ if(key === 'p' ? (gValoProtons.pos[i*3+1] < -20000) : false) continue;
         if(!freeWorld(key, i, _pFree)) continue; const q = projPt(_pFree[0], _pFree[1], _pFree[2]); if(q.z < 0 || q.z > 1) continue;
-        const d2 = (q.x-px)*(q.x-px) + (q.y-py)*(q.y-py); if(d2 < bd){ bd = d2; best = key + ':' + i; } } }
+        const d2 = (q.x-px)*(q.x-px) + (q.y-py)*(q.y-py); if(d2 > (r0 + 900)*(r0 + 900)) continue;
+        let pr = r0; if(hr > 0){ const dz = (_pFree[0]-cp.x)*fwd.x + (_pFree[1]-cp.y)*fwd.y + (_pFree[2]-cp.z)*fwd.z; if(dz > 1e-3) pr += hr*kPx/dz; }
+        const sc = Math.sqrt(d2)/pr; if(sc < bs){ bs = sc; best = key + ':' + i; } } }
     return best; };
   const moveFreeTo = (px, py) => { if(!gSelFree.size) return;
     const ray = scene.createPickingRay(px, py, BABYLON.Matrix.Identity(), cam); if(Math.abs(ray.direction.z) < 1e-6) return;
@@ -9872,14 +9880,17 @@ let gRigidOrbSet = null;   // the viewer's rigidOrbSet, exposed from its block f
       const set = rigidOrbSet(pm); ORB_LIN[F.key] = freeOrb(F.key, F, set.core, set.bond, rigidFrame(F), Math.min(F.n, 160)); }
     /* the atoms of ONE drawn free molecule in WORLD space (the selection's green silhouette, owner 15.9.2026): the species' local atoms turned by its
        frame (spin included, the same rigidFrame the orbital placer uses) at its drawn position; water and anything without a frame: one sphere */
-    { const BYKEY = { co2: FREE_CO2, o2: FREE_O2, nadp: FREE_NADP, atp: FREE_ATP, adp: FREE_ADP, pi: FREE_PI }, _R = new Float64Array(9), _p = [0, 0, 0], frames = {};
+    { const BYKEY = { co2: FREE_CO2, o2: FREE_O2, nadp: FREE_NADP, atp: FREE_ATP, adp: FREE_ADP, pi: FREE_PI }, _R = new Float64Array(9), _p = [0, 0, 0], frames = {}, LOC = {}, HULL = {};
+      const vrC = info(codeOf('C')).vr*FILL_SCALE, vrO = info(codeOf('O')).vr*FILL_SCALE;   // the linear species (mkFree keeps no atom table): CO2 C at 0, O at +-1.16; O2 at +-0.605 - the offsets mkFree was given
+      const LIN = { co2: [[0, 0, 0, vrC], [0, 0, 1.16, vrO], [0, 0, -1.16, vrO]], o2: [[0, 0, 0.605, vrO], [0, 0, -0.605, vrO]] };
+      const locOf = key => { if(LOC[key]) return LOC[key]; const F = BYKEY[key];   // the species' atoms in its own frame [x, y, z, vdW radius] - built once per species, not per call (it ran every frame for the silhouette)
+        return LOC[key] = (F && F.local) ? F.local.map(a => [a.x, a.y, a.z, a.sym ? info(codeOf(a.sym)).vr*FILL_SCALE : 1.6]) : (LIN[key] || (F && F.atoms ? F.atoms.map(a => [0, 0, a.d || 0, a.r || 1.5]) : [[0, 0, 0, key === 'w' ? 1.5 : 2.5]])); };   // (F.atoms.map on an undefined table crashed the frame when an O2 was tapped - owner's red banner, 15.9.2026)
+      window.gFreeHullR = key => { if(HULL[key] == null){ let r = 0; for(const a of locOf(key)) r = Math.max(r, Math.hypot(a[0], a[1], a[2]) + a[3]); HULL[key] = r; } return HULL[key]; };   // the species' radius from its centre to the far edge of its farthest atom - the tap picks a molecule anywhere on its drawn body (pickFreeAt, 15.9.2026)
       window.gFreeAtoms = (key, i, out) => { out.length = 0; const Fv = gValoFree; if(!Fv || !Fv.drawn(key, i, _p)) return out; const o = (Fv.base[key] + i)*4; _p[0] += Fv.disp[o]; _p[1] += Fv.disp[o+1]; _p[2] += Fv.disp[o+2];
+        repelShells(_p);   // the shells push the centre out as the shader does: the silhouette sits on the DRAWN atoms, also for a molecule held in a slot inside a protein's shell (15.9.2026)
         const F = BYKEY[key]; if(!F || !F.fu){ out.push([_p[0], _p[1], _p[2], key === 'w' ? 1.5 : 2.5]); return out; }
         (frames[key] || (frames[key] = rigidFrame(F)))(i, gWaveT, _R);
-        const vrC = info(codeOf('C')).vr*FILL_SCALE, vrO = info(codeOf('O')).vr*FILL_SCALE;   // the linear species (mkFree keeps no atom table): CO2 C at 0, O at +-1.16; O2 at +-0.605 - the offsets mkFree was given
-        const LIN = { co2: [[0, 0, 0, vrC], [0, 0, 1.16, vrO], [0, 0, -1.16, vrO]], o2: [[0, 0, 0.605, vrO], [0, 0, -0.605, vrO]] };
-        const loc = F.local ? F.local.map(a => [a.x, a.y, a.z, a.sym ? info(codeOf(a.sym)).vr*FILL_SCALE : 1.6]) : (LIN[key] || (F.atoms ? F.atoms.map(a => [0, 0, a.d || 0, a.r || 1.5]) : [[0, 0, 0, 2.5]]));   // (F.atoms.map on an undefined table crashed the frame when an O2 was tapped - owner's red banner, 15.9.2026)
-        for(const a of loc) out.push([_R[0]*a[0] + _R[1]*a[1] + _R[2]*a[2] + _p[0], _R[3]*a[0] + _R[4]*a[1] + _R[5]*a[2] + _p[1], _R[6]*a[0] + _R[7]*a[1] + _R[8]*a[2] + _p[2], a[3]]);
+        for(const a of locOf(key)) out.push([_R[0]*a[0] + _R[1]*a[1] + _R[2]*a[2] + _p[0], _R[3]*a[0] + _R[4]*a[1] + _R[5]*a[2] + _p[1], _R[6]*a[0] + _R[7]*a[1] + _R[8]*a[2] + _p[2], a[3]]);
         return out; }; }
   }
 
